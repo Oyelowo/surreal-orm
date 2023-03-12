@@ -5,11 +5,13 @@ Email: oyelowooyedayo@gmail.com
 
 use std::fmt::{self, Display};
 
+use insta::{assert_debug_snapshot, assert_display_snapshot};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
     db_field::{cond, Binding},
+    query_insert::Buildable,
     query_select::SelectStatement,
     BindingsList, DbField, DbFilter, Parametric,
 };
@@ -29,7 +31,7 @@ impl Into<ExpressionContent> for Expression {
 
 impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let x = match self {
+        let expression = match self {
             Expression::SelectStatement(s) => format!("({s})"),
             // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
             Expression::Value(v) => {
@@ -38,7 +40,7 @@ impl Display for Expression {
                 format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
             }
         };
-        write!(f, "{}", x)
+        write!(f, "{}", expression)
     }
 }
 
@@ -54,7 +56,7 @@ impl Parametric for Expression {
             Expression::Value(sql_value) => {
                 // let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
                 let sql_value: sql::Value = sql_value.to_owned();
-                vec![Binding::new(sql_value)]
+                vec![Binding::new(sql_value.clone()).with_raw(sql_value.to_raw_string())]
             }
         }
     }
@@ -231,8 +233,14 @@ pub struct End {
     bindings: BindingsList,
 }
 
-impl fmt::Display for End {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Parametric for End {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Buildable for End {
+    fn build(&self) -> String {
         let mut output = String::new();
         output.push_str(&format!(
             "IF {} THEN\n\t{}",
@@ -252,46 +260,110 @@ impl fmt::Display for End {
         }
 
         output.push_str("\nEND");
-        write!(f, "{}", output)
+
+        output
     }
 }
 
-#[test]
-fn test() {
-    let name = DbField::new("name");
-    let age = DbField::new("age");
-    let country = DbField::new("country");
+impl fmt::Display for End {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
 
-    let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        .then("Valid".to_string())
-        .end();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(format!("{if_statement1}"), "");
+    #[test]
+    fn test_if_statement1() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+        let country = DbField::new("country");
 
-    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        .then("Valid")
-        .else_("Invalid")
-        .end();
+        let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then("Valid".to_string())
+            .end();
 
-    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        .then("Valid")
-        .else_if(name.like("Oyelowo Oyedayo"))
-        .then("The man!")
-        .end();
+        assert_debug_snapshot!(if_statement1.get_bindings());
+        assert_display_snapshot!(if_statement1);
+        assert_eq!(
+            format!("{if_statement1}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+        );
+    }
 
-    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        .then("Valid")
-        .else_if(name.like("Oyelowo Oyedayo"))
-        .then("The Apple!")
-        .else_("The Mango!")
-        .end();
+    #[test]
+    fn test_if_statement2() {
+        let age = DbField::new("age");
+        let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then("Valid")
+            .else_("Invalid")
+            .end();
+        assert_debug_snapshot!(if_statement2.get_bindings());
+        assert_display_snapshot!(if_statement2);
+        assert_eq!(
+            format!("{if_statement2}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+        );
+    }
 
-    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        .then("Valid")
-        .else_if(name.like("Oyelowo Oyedayo"))
-        .then("The man!")
-        .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-        .then("Cold")
-        .else_("Hot")
-        .end();
+    #[test]
+    fn test_if_statement3() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+
+        let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then("Valid")
+            .else_if(name.like("Oyelowo Oyedayo"))
+            .then("The man!")
+            .end();
+        assert_debug_snapshot!(if_statement.get_bindings());
+        assert_display_snapshot!(if_statement);
+        assert_eq!(
+            format!("{if_statement}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+        );
+    }
+
+    #[test]
+    fn test_if_statement4() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+
+        let if_statement4 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then("Valid")
+            .else_if(name.like("Oyelowo Oyedayo"))
+            .then("The Apple!")
+            .else_("The Mango!")
+            .end();
+        assert_debug_snapshot!(if_statement4.get_bindings());
+        assert_display_snapshot!(if_statement4);
+        assert_eq!(
+            format!("{if_statement4}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+        );
+    }
+
+    #[test]
+    fn test_if_statement5() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+        let country = DbField::new("country");
+
+        let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then("Valid")
+            .else_if(name.like("Oyelowo Oyedayo"))
+            .then("The man!")
+            .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+            .then("Cold")
+            .else_("Hot")
+            .end();
+        assert_debug_snapshot!(if_statement5.get_bindings());
+        assert_display_snapshot!(if_statement5);
+        assert_eq!(
+            format!("{if_statement5}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+        );
+    }
 }

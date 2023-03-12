@@ -417,11 +417,12 @@ impl Binding {
     pub fn new(value: impl Into<sql::Value>) -> Self {
         let value = value.into();
         let param_name = generate_param_name(&"param");
+        let value_string = format!("{}", &value);
         Binding {
             param: param_name.clone(),
             value,
             original_inline_name: param_name.clone(),
-            raw_string: param_name,
+            raw_string: value_string,
         }
     }
 
