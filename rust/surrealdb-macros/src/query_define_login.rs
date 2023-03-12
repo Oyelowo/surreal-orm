@@ -100,11 +100,12 @@ pub fn define_login(name: impl Into<sql::Strand>) -> DefineLoginStatement {
 impl DefineLoginStatement {
     // Set the login name
     fn new(name: impl Into<sql::Strand>) -> Self {
+        let binding = Binding::new(name.into());
         Self {
-            name: name.into().into(),
+            name: binding.get_param_dollarised(),
             login_type: None,
             credential: None,
-            bindings: vec![],
+            bindings: vec![binding],
         }
     }
 
@@ -117,14 +118,22 @@ impl DefineLoginStatement {
     // Set the password credential
     pub fn password(mut self, password: impl Into<Password>) -> Self {
         let password: Password = password.into();
-        self.credential = Some(LoginCredential::Password(password));
+        let binding = Binding::new(password.0.clone());
+        self.bindings.push(binding.clone());
+        self.credential = Some(LoginCredential::Password(
+            binding.get_param_dollarised().into(),
+        ));
         self
     }
 
     // Set the passhash credential
     pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
         let passhash: Passhash = passhash.into();
-        self.credential = Some(LoginCredential::Passhash(passhash));
+        let binding = Binding::new(passhash.0.clone());
+        self.bindings.push(binding.clone());
+        self.credential = Some(LoginCredential::Passhash(
+            binding.get_param_dollarised().into(),
+        ));
         self
     }
 }
@@ -176,7 +185,7 @@ mod tests {
 
         assert_eq!(
             login_with_password.to_string(),
-            "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
     }
 
@@ -188,7 +197,7 @@ mod tests {
 
         assert_eq!(
             login_with_hash.to_string(),
-            "DEFINE LOGIN username ON NAMESPACE PASSWORD oyedayo"
+            "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000"
         );
     }
 }
