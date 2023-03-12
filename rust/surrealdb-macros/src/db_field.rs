@@ -699,7 +699,9 @@ impl std::fmt::Display for DbFilter {
 
 fn generate_param_name(prefix: &str) -> String {
     let nil_id = uuid::Uuid::nil();
-    // #[cfg(test)]
+    #[cfg(test)]
+    let sanitized_uuid = uuid::Uuid::nil();
+
     #[cfg(feature = "mock")]
     let sanitized_uuid = uuid::Uuid::nil();
 

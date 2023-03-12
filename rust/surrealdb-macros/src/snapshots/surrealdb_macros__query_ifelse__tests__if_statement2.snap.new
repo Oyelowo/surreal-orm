@@ -1,0 +1,37 @@
+---
+source: surrealdb-macros/src/query_ifelse.rs
+assertion_line: 308
+expression: if_statement2.get_bindings()
+---
+[
+    Binding {
+        param: "_param_4cffbd8a",
+        value: Number(
+            Int(
+                18,
+            ),
+        ),
+        original_inline_name: "_param_4cffbd8a",
+        raw_string: "18",
+    },
+    Binding {
+        param: "_param_a9fefaf6",
+        value: Number(
+            Int(
+                120,
+            ),
+        ),
+        original_inline_name: "_param_a9fefaf6",
+        raw_string: "120",
+    },
+    Binding {
+        param: "_param_681cce12",
+        value: Strand(
+            Strand(
+                "Valid",
+            ),
+        ),
+        original_inline_name: "_param_681cce12",
+        raw_string: "Valid",
+    },
+]

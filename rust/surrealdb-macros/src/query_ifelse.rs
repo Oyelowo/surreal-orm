@@ -282,9 +282,7 @@ mod tests {
 
     #[test]
     fn test_if_statement1() {
-        let name = DbField::new("name");
         let age = DbField::new("age");
-        let country = DbField::new("country");
 
         let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid".to_string())
