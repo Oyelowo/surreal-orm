@@ -115,15 +115,15 @@ impl QueryTransaction {
     }
 
     pub fn commit_transaction(mut self) -> CommitTransaction {
-        // CommitTransaction {
-        // }
-        todo!()
+        let mut transaction = CommitTransaction { data: self.data };
+        transaction.data.commit_transaction = true;
+        transaction
     }
 
-    pub fn cancel_transaction(mut self) -> CommitTransaction {
-        // CommitTransaction {
-        // }
-        todo!()
+    pub fn cancel_transaction(mut self) -> CancelTransaction {
+        let mut transaction = CancelTransaction { data: self.data };
+        transaction.data.cancel_transaction = true;
+        transaction
     }
 }
 
@@ -167,6 +167,24 @@ impl Buildable for CommitTransaction {
 }
 
 impl fmt::Display for CommitTransaction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for CancelTransaction {
+    fn get_bindings(&self) -> BindingsList {
+        self.data.bindings.to_vec()
+    }
+}
+
+impl Buildable for CancelTransaction {
+    fn build(&self) -> String {
+        todo!()
+    }
+}
+
+impl fmt::Display for CancelTransaction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.build())
     }
