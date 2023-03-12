@@ -34,8 +34,9 @@ use crate::{
 /// let id_field = DbField::new("id");
 /// let order = Order::new(&id_field);
 /// ```
-pub fn order(field: &DbField) -> Order {
-    Order::new(field)
+pub fn order(field: impl Into<DbField>) -> Order {
+    let field: DbField = field.into();
+    Order::new(&field)
 }
 
 /// Represents an ordering field, direction, and options for a database query.
@@ -1049,7 +1050,7 @@ impl Buildable for SelectStatement {
         query.push_str(&self.targets.join(", "));
 
         if let Some(condition) = &self.where_ {
-            query.push_str("  ");
+            query.push_str(" WHERE ");
             query.push_str(&condition);
         }
 

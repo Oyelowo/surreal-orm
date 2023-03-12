@@ -273,6 +273,11 @@ impl fmt::Display for End {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        query_select::{order, select, All},
+        value_type_wrappers::SurrealId,
+    };
+
     use super::*;
 
     #[test]
@@ -316,7 +321,7 @@ mod tests {
         let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then("The man!")
+            .then("The Alien!")
             .end();
 
         assert_debug_snapshot!(if_statement.get_bindings());
@@ -355,7 +360,7 @@ mod tests {
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then("The man!")
+            .then("The Alien!")
             .else_if(cond(country.is("Canada")).or(country.is("Norway")))
             .then("Cold")
             .else_("Hot")
@@ -365,6 +370,51 @@ mod tests {
         assert_eq!(
             format!("{if_statement5}"),
             "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+        );
+    }
+
+    #[test]
+    fn test_if_statement6() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+        let country = DbField::new("country");
+        let city = DbField::new("city");
+        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+
+        let statement1 = select(All)
+            .from(fake_id)
+            .where_(cond(
+                city.is("Prince Edward Island")
+                    .and(city.is("NewFoundland"))
+                    .or(city.like("Toronto")),
+            ))
+            .order_by(order(&age).numeric())
+            .limit(153)
+            .start(10)
+            .parallel();
+
+        let statement2 = select(All)
+            .from(fake_id2)
+            .where_(country.is("INDONESIA"))
+            .order_by(order(&age).numeric())
+            .limit(20)
+            .start(5);
+
+        let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+            .then(statement1)
+            .else_if(name.like("Oyelowo Oyedayo"))
+            .then(statement2)
+            .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+            .then("Cold")
+            .else_("Hot")
+            .end();
+
+        assert_debug_snapshot!(if_statement5.get_bindings());
+        assert_display_snapshot!(if_statement5);
+        assert_eq!(
+            format!("{if_statement5}"),
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;)\nELSE IF name ~ $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;)\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
         );
     }
 }

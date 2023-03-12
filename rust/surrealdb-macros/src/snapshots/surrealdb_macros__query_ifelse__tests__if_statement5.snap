@@ -47,11 +47,11 @@ expression: if_statement5.get_bindings()
         param: "_param_00000000",
         value: Strand(
             Strand(
-                "The man!",
+                "The Alien!",
             ),
         ),
         original_inline_name: "_param_00000000",
-        raw_string: "The man!",
+        raw_string: "The Alien!",
     },
     Binding {
         param: "_param_00000000",

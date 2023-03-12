@@ -40,6 +40,7 @@ pub struct DbField {
     field_name: String,
     bindings: BindingsList,
 }
+
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
