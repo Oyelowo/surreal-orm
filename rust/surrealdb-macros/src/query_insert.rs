@@ -14,7 +14,7 @@ use surrealdb::{
 use crate::{
     db_field::Binding,
     query_select::{self, SelectStatement},
-    BindingsList, DbField, Parametric, SurrealdbModel,
+    BindingsList, DbField, Parametric, Queryable, SurrealdbModel,
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
@@ -33,6 +33,8 @@ where
     let insertables: Insertables<T> = insertables.into();
     builder.insert(insertables)
 }
+
+impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 pub enum Insertables<T>
 where

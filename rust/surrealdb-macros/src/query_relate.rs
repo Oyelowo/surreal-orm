@@ -8,7 +8,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
-    BindingsList, Clause, DbField, Erroneous, Parametric, SurrealdbEdge,
+    BindingsList, Clause, DbField, Erroneous, Parametric, Queryable, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -183,6 +183,8 @@ where
         self
     }
 }
+
+impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 impl<T> std::fmt::Display for RelateStatement<T>
 where
