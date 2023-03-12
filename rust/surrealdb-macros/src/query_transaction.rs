@@ -27,22 +27,6 @@ pub fn begin_transaction() -> QueryTransaction {
     BeginTransaction::new()
 }
 
-fn test_tra() {
-    // begin_transaction()
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .commit_transaction();
-    //
-    // begin_transaction()
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .query(todo!())
-    //     .cancel_transaction();
-}
-
 pub struct QueryTransaction {
     data: TransactionData,
 }
