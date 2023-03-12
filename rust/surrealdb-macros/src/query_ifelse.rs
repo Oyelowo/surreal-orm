@@ -51,8 +51,9 @@ impl Parametric for Expression {
                 // query must have already been built and bound
                 .map(|b| b.with_raw(format!("({s})")))
                 .collect::<_>(),
-            Expression::Value(v) => {
-                let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
+            Expression::Value(sql_value) => {
+                // let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
+                let sql_value: sql::Value = sql_value.to_owned();
                 vec![Binding::new(sql_value)]
             }
         }
@@ -71,8 +72,8 @@ impl<T: Into<sql::Value>> From<T> for Expression {
     }
 }
 
-fn if_(condition: impl Into<DbFilter>) -> IfStatement {
-    todo!()
+pub fn if_(condition: impl Into<DbFilter>) -> IfStatement {
+    IfStatement::new(condition)
 }
 
 pub struct ThenExpression {
@@ -127,9 +128,19 @@ impl ElseStatement {
 #[derive(Default)]
 struct ExpressionContent(String);
 
+impl Display for ExpressionContent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl ExpressionContent {
     fn empty() -> Self {
         Self("".into())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 
@@ -163,11 +174,6 @@ struct Flows {
 struct Flow {
     condition: DbFilter,
     expression: ExpressionContent,
-}
-
-pub struct End {
-    flow_data: FlowStatementData,
-    bindings: BindingsList,
 }
 
 pub struct ElseStatement {
@@ -220,31 +226,34 @@ impl IfStatement {
     }
 }
 
-// impl fmt::Display for IfStatement {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "IF {} THEN\n\t{}", self.condition, self.then_expression)?;
-//         for i in 0..self.else_if_conditions.len() {
-//             write!(
-//                 f,
-//                 "\nELSE IF {} THEN\n\t{}",
-//                 self.else_if_conditions[i], self.else_if_expressions[i]
-//             )?;
-//         }
-//         if let Some(else_expr) = &self.else_expression {
-//             write!(f, "\nELSE\n\t{}", else_expr)?;
-//         }
-//         write!(f, "\nEND")
-//     }
-// }
-fn main() {
-    // let statement = IfElseStatement::new()
-    //     .if_then("$scope = 'admin'", "SELECT * FROM account")
-    //     .else_if("$scope = 'user'", "SELECT * FROM $auth.account")
-    //     .else_expr("[]")
-    //     .build()
-    //     .unwrap();
+pub struct End {
+    flow_data: FlowStatementData,
+    bindings: BindingsList,
+}
 
-    // println!("{}", statement);
+impl fmt::Display for End {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut output = String::new();
+        output.push_str(&format!(
+            "IF {} THEN\n\t{}",
+            self.flow_data.if_data.condition, self.flow_data.if_data.expression
+        ));
+
+        for i in 0..self.flow_data.else_if_data.conditions.len() {
+            output.push_str(&format!(
+                "\nELSE IF {} THEN\n\t{}",
+                self.flow_data.else_if_data.conditions[i],
+                self.flow_data.else_if_data.expressions[i]
+            ));
+        }
+
+        if !&self.flow_data.else_data.is_empty() {
+            output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data));
+        }
+
+        output.push_str("\nEND");
+        write!(f, "{}", output)
+    }
 }
 
 #[test]
