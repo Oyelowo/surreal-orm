@@ -6,43 +6,33 @@ use surrealdb::sql;
 use crate::{db_field::Binding, query_select::SelectStatement, BindingsList, DbFilter, Parametric};
 
 #[derive(Clone)]
-enum Expression {
+pub enum Expression {
     SelectStatement(SelectStatement),
-    // Value(T),
     Value(sql::Value),
 }
 
-//     I: Into<Expression
-// impl<I, T> From<I> for ExpressionContent
-//
-//     I: Into<Expression >,
-//     //
-// {
-//     fn from(value: I) -> Self {
-//         // let expression: Expression  = self.into();
-//         // ExpressionContent(format!("{expression}"))
-//         todo!()
-//     }
-//     // fn into(self) -> ExpressionContent {
-// }
-// }
+impl From<Expression> for ExpressionContent {
+    fn from(expression: Expression) -> Self {
+        ExpressionContent(format!("{expression}"))
+    }
+}
 
 impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let x = match self {
-            Expression::SelectStatement(s) => &format!("({s})"),
+        let expression = match self {
+            Expression::SelectStatement(s) => format!("({s})"),
             // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
             Expression::Value(v) => {
                 let bindings = self.get_bindings();
                 assert_eq!(bindings.len(), 1);
-                &format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
+                format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
             }
         };
-        write!(f, "{}", x)
+        write!(f, "{}", expression)
     }
 }
 
-impl<T: Serialize + DeserializeOwned> Parametric for Expression {
+impl Parametric for Expression {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Expression::SelectStatement(s) => s
@@ -51,22 +41,23 @@ impl<T: Serialize + DeserializeOwned> Parametric for Expression {
                 // query must have already been built and bound
                 .map(|b| b.with_raw(format!("({s})")))
                 .collect::<_>(),
-            Expression::Value(v) => {
-                let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
+            Expression::Value(sql_value) => {
+                let sql_value = sql_value.to_owned();
+                // let sql_value = sql::json(&serde_json::to_string(&sql_value).unwrap()).unwrap();
                 vec![Binding::new(sql_value)]
             }
         }
     }
 }
 
-impl<T: Serialize + DeserializeOwned> From<SelectStatement> for Expression {
+impl From<SelectStatement> for Expression {
     fn from(value: SelectStatement) -> Self {
         Self::SelectStatement(value)
     }
 }
 
-// impl<T: Into<sql::Value>> From  for Expression {
-impl<T: Serialize + DeserializeOwned> From for Expression {
+impl<T: Into<sql::Value>> From<T> for Expression {
+    // impl From<qkk for Expression {
     fn from(value: T) -> Self {
         Self::Value(value.into())
     }
@@ -118,6 +109,12 @@ impl ElseIfStatement {
 }
 
 struct ExpressionContent(String);
+
+// impl<T> From<T> for ExpressionContent where T: Into<Expression> {
+//     fn from(value: T) -> Self {
+//         todo!()
+//     }
+// }
 
 impl ExpressionContent {
     fn empty() -> Self {
@@ -204,6 +201,7 @@ impl IfStatement {
         //     self.bindings.extend(condition.get_bindings());
         //     self.bindings.extend(then_expression.get_bindings());
         // self
+        let expression: Expression = expression.into();
         self.flow_data.if_data.expression = expression.into();
         ThenExpression {
             flow_data: self.flow_data,
