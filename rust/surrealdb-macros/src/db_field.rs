@@ -393,7 +393,7 @@ impl std::fmt::Display for DbField {
 ///
 /// assert_eq!(all_filters.to_string(), "(name = 'John') OR (age > 18) OR (name like '%Doe%')");
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DbFilter {
     query_string: String,
     bindings: BindingsList,
@@ -420,7 +420,7 @@ impl Binding {
         Binding {
             param: param_name.clone(),
             value,
-            original_inline_name: param_name,
+            original_inline_name: param_name.clone(),
             raw_string: param_name,
         }
     }

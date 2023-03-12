@@ -6,7 +6,7 @@ use surrealdb::sql;
 use crate::{db_field::Binding, query_select::SelectStatement, BindingsList, DbFilter, Parametric};
 
 #[derive(Clone)]
-enum Expression<T>
+pub enum Expression<T>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -15,23 +15,33 @@ where
     // Value(sql::Value),
 }
 
-// impl<T> Display for Expression<T>
-// where
-//     T: Serialize + DeserializeOwned,
-// {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let x = match self {
-//             Expression::SelectStatement(s) => &format!("({s})"),
-//             // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
-//             Expression::Value(v) => {
-//                 let bindings = self.get_bindings();
-//                 assert_eq!(bindings.len(), 1);
-//                 &format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
-//             }
-//         };
-//         write!(f, "{}", x)
-//     }
-// }
+impl<T> Into<ExpressionContent> for Expression<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn into(self) -> ExpressionContent {
+        let expression: Expression<T> = self.into();
+        ExpressionContent(format!("{expression}"))
+    }
+}
+
+impl<T> Display for Expression<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let x = match self {
+            Expression::SelectStatement(s) => format!("({s})"),
+            // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
+            Expression::Value(v) => {
+                let bindings = self.get_bindings();
+                assert_eq!(bindings.len(), 1);
+                format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
+            }
+        };
+        write!(f, "{}", x)
+    }
+}
 
 impl<T: Serialize + DeserializeOwned> Parametric for Expression<T> {
     fn get_bindings(&self) -> BindingsList {
@@ -63,19 +73,47 @@ impl<T: Serialize + DeserializeOwned> From<T> for Expression<T> {
     }
 }
 
-fn if_(cond: bool) -> IfStatement {
+fn if_(condition: impl Into<DbFilter>) -> IfStatement {
     todo!()
+}
+fn dfdf() {
+    if_(todo!())
+        .then(5454)
+        .else_if(todo!())
+        .then(todo!())
+        .else_if(todo!())
+        .then(todo!())
+        .else_(todo!())
+        .end();
+
+    let xx = if_(todo!()).then(todo!()).else_(todo!()).end();
+    let xx = if_(todo!()).then(todo!()).end();
+
+    let xx = if_(todo!())
+        .then(todo!())
+        .else_if(todo!())
+        .then(todo!())
+        .end();
+
+    let xx = if_(todo!())
+        .then(todo!())
+        .else_if(todo!())
+        .then(todo!())
+        .else_if(todo!())
+        .then(todo!())
+        .else_(todo!())
+        .end();
 }
 
 fn test() {
-    if_(true)
-        .then(32)
-        .else_if(false)
-        .then(54)
-        .else_if(true)
-        .then(900)
-        .else_(45);
-
+    // if_(true)
+    //     .then(32)
+    //     .else_if(false)
+    //     .then(54)
+    //     .else_if(true)
+    //     .then(900)
+    //     .else_(45);
+    //
     // if_then(true, i32)
     //     .else_if_then(true, 45)
     //     .else_if_then(true, 45)
@@ -83,27 +121,40 @@ fn test() {
 }
 
 pub struct ThenExpression {
-    condition: String,
-    then_expression: String,
-    else_if_conditions: Vec<String>,
-    else_if_expressions: Vec<String>,
-    else_expression: Option<String>,
+    flow_data: FlowStatementData,
     bindings: BindingsList,
 }
 
 impl ThenExpression {
-    fn else_if(&mut self, cond: bool) -> ElseIfStatement {
-        todo!()
+    fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
+        let condition: DbFilter = condition.into();
+        self.bindings.extend(condition.get_bindings());
+        // let bindings = condition.get_bindings();
+        self.flow_data.else_if_data.conditions.push(condition);
+
+        ElseIfStatement {
+            flow_data: self.flow_data,
+            bindings: self.bindings,
+        }
     }
 
-    fn else_(&mut self, expression: i32) -> String {
-        todo!()
+    fn else_<T>(mut self, expression: Expression<T>) -> ElseStatement
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        self.flow_data.else_data = ExpressionContent(format!("{expression}"));
+        ElseStatement {
+            flow_data: self.flow_data,
+            bindings: self.bindings,
+        }
     }
-}
 
-pub struct IfStatement {
-    flow_data: FlowStatementData,
-    bindings: BindingsList,
+    pub fn end(mut self) -> End {
+        End {
+            flow_data: self.flow_data,
+            bindings: self.bindings,
+        }
+    }
 }
 
 pub struct ElseIfStatement {
@@ -111,24 +162,59 @@ pub struct ElseIfStatement {
     bindings: BindingsList,
 }
 
-impl ElseIfStatement {
-    pub fn then(mut self, expression: i32) -> ThenExpression {
-        todo!()
+impl ElseStatement {
+    pub fn end(mut self) -> End {
+        End {
+            flow_data: self.flow_data,
+            bindings: self.bindings,
+        }
     }
 }
 
+#[derive(Default)]
 struct ExpressionContent(String);
 
-enum FlowStatementData {
-    If(Flow),
-    ElseIfs(Vec<Flow>),
-    Else(ExpressionContent),
-    End,
+impl ExpressionContent {
+    fn empty() -> Self {
+        Self("".into())
+    }
 }
 
+#[derive(Default)]
+struct FlowStatementData {
+    if_data: Flow,
+    else_if_data: Flows,
+    else_data: ExpressionContent,
+}
+// enum FlowStatementData {
+//     If(Flow),
+//     ElseIfs(Vec<Flow>),
+//     Else(ExpressionContent),
+//     End,
+// }
+
+impl FlowStatementData {
+    fn update_if(mut self, condition: DbFilter) -> Self {
+        self.if_data.condition = condition;
+        self
+    }
+}
+
+#[derive(Default)]
+struct Flows {
+    conditions: Vec<DbFilter>,
+    expressions: Vec<ExpressionContent>,
+}
+
+#[derive(Default)]
 struct Flow {
     condition: DbFilter,
     expression: ExpressionContent,
+}
+
+pub struct End {
+    flow_data: FlowStatementData,
+    bindings: BindingsList,
 }
 
 pub struct ElseStatement {
@@ -136,24 +222,34 @@ pub struct ElseStatement {
     bindings: BindingsList,
 }
 
-impl Parametric for IfStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
-        todo!()
-    }
-}
-
-impl IfStatement {
-    pub fn new<T>(condition: impl Into<DbFilter>, expression: impl Into<Expression<T>>) -> Self
+impl ElseIfStatement {
+    pub fn then<T>(mut self, expression: Expression<T>) -> ThenExpression
     where
         T: Serialize + DeserializeOwned,
     {
-        let if_data = FlowStatementData::If(Flow {
-            condition,
-            expression: todo!(),
-        });
+        let expression: Expression<T> = expression.into();
+        self.flow_data
+            .else_if_data
+            .expressions
+            .push(ExpressionContent(format!("{expression}")));
+
+        self.bindings.extend(expression.get_bindings());
+
+        ThenExpression {
+            flow_data: self.flow_data,
+            bindings: self.bindings,
+        }
+    }
+}
+
+pub struct IfStatement {
+    condition: DbFilter,
+}
+
+impl IfStatement {
+    pub(crate) fn new(condition: impl Into<DbFilter>) -> Self {
         Self {
-            flow_data: todo!(),
-            bindings: todo!(),
+            condition: condition.into(),
         }
     }
 
@@ -161,86 +257,38 @@ impl IfStatement {
     where
         T: Serialize + DeserializeOwned,
     {
-        //     let condition: DbFilter = condition.into();
-        //     self.condition = format!("{}", condition);
-        //     let then_expression: Expression<T> = then_expression.into();
-        //     let param = match &then_expression {
-        //         Expression::SelectStatement(s) => format!("({s})"),
-        //         Expression::Value(v) => self
-        //             .get_bindings()
-        //             .first()
-        //             .expect("Must have one binding")
-        //             .get_raw()
-        //             .to_string(),
-        //     };
-        //     // self.then_expression = then_expression.to_string();
-        //     self.bindings.extend(condition.get_bindings());
-        //     self.bindings.extend(then_expression.get_bindings());
-        // self
-        todo!()
-    }
+        let if_condition = self.condition;
 
-    // pub fn if_then<T: Serialize + DeserializeOwned>(
-    //     mut self,
-    //     condition: impl Into<DbFilter>,
-    //     then_expression: impl Into<Expression<T>>,
-    // ) -> Self {
-    //     let condition: DbFilter = condition.into();
-    //     self.condition = format!("{}", condition);
-    //     let then_expression: Expression<T> = then_expression.into();
-    //     let param = match &then_expression {
-    //         Expression::SelectStatement(s) => format!("({s})"),
-    //         Expression::Value(v) => self
-    //             .get_bindings()
-    //             .first()
-    //             .expect("Must have one binding")
-    //             .get_raw()
-    //             .to_string(),
-    //     };
-    //     // self.then_expression = then_expression.to_string();
-    //     self.bindings.extend(condition.get_bindings());
-    //     self.bindings.extend(then_expression.get_bindings());
-    //     self
-    // }
-    //
-    // pub fn else_if_then<T: Serialize + DeserializeOwned>(
-    //     self,
-    //     condition: impl Into<DbFilter>,
-    //     then_expression: impl Into<Expression<T>>,
-    // ) -> Self {
-    //     // Self {
-    //     //     condition: condition.into().to_string(),
-    //     //     then_expression: then_expression.to_string(),
-    //     //     ..self
-    //     // }
-    //     todo!()
-    // }
-    //
-    // pub fn else_<E>(mut self, expression: E) -> Self
-    // where
-    //     E: ToString,
-    // {
-    //     self.else_expression = Some(expression.to_string());
-    //     self
-    // }
-}
+        let expression: Expression<T> = expression.into();
+        let bindings = vec![if_condition.get_bindings(), expression.get_bindings()].concat();
 
-impl fmt::Display for IfStatement {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "IF {} THEN\n\t{}", self.condition, self.then_expression)?;
-        for i in 0..self.else_if_conditions.len() {
-            write!(
-                f,
-                "\nELSE IF {} THEN\n\t{}",
-                self.else_if_conditions[i], self.else_if_expressions[i]
-            )?;
+        let mut flow_data = FlowStatementData::default();
+        flow_data.if_data.condition = if_condition;
+        flow_data.if_data.expression = expression.into();
+
+        ThenExpression {
+            flow_data,
+            bindings,
         }
-        if let Some(else_expr) = &self.else_expression {
-            write!(f, "\nELSE\n\t{}", else_expr)?;
-        }
-        write!(f, "\nEND")
     }
 }
+
+// impl fmt::Display for IfStatement {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "IF {} THEN\n\t{}", self.condition, self.then_expression)?;
+//         for i in 0..self.else_if_conditions.len() {
+//             write!(
+//                 f,
+//                 "\nELSE IF {} THEN\n\t{}",
+//                 self.else_if_conditions[i], self.else_if_expressions[i]
+//             )?;
+//         }
+//         if let Some(else_expr) = &self.else_expression {
+//             write!(f, "\nELSE\n\t{}", else_expr)?;
+//         }
+//         write!(f, "\nEND")
+//     }
+// }
 fn main() {
     // let statement = IfElseStatement::new()
     //     .if_then("$scope = 'admin'", "SELECT * FROM account")
