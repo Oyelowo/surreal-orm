@@ -81,27 +81,37 @@ impl From<SelectStatement> for Query {
 //     }
 // }
 
-pub fn begin_transaction() -> BeginTransaction {
+pub fn begin_transaction() -> QueryTransaction {
     // BeginTransaction::new(condition)
     todo!()
 }
 
+fn test_tra() {
+    // begin_transaction()
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .commit_transaction();
+    //
+    // begin_transaction()
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .query(todo!())
+    //     .cancel_transaction();
+}
 #[derive(Default)]
 pub struct QueryTransaction {
     data: TransactionData,
 }
 
 impl QueryTransaction {
-    pub fn query(mut self, condition: impl Into<DbFilter>) -> Self {
-        // let condition: DbFilter = condition.into();
-        // self.bindings.extend(condition.get_bindings());
-        // self.flow_data.else_if_data.conditions.push(condition);
-        //
-        // ElseIfStatement {
-        //     flow_data: self.flow_data,
-        //     bindings: self.bindings,
-        // }
-        todo!()
+    pub fn query(mut self, query: impl Into<Query>) -> Self {
+        let query: Query = query.into();
+        self.data.bindings.extend(query.get_bindings());
+        self.data.queries.push(query);
+        self
     }
 
     pub fn commit_transaction(mut self) -> CommitTransaction {
@@ -121,10 +131,9 @@ pub struct BeginTransaction;
 
 impl BeginTransaction {
     pub(crate) fn new() -> QueryTransaction {
-        // Self {
-        //     begin_transaction: sql::statements::BeginStatement.to_string(),
-        // }
-        todo!()
+        let mut transaction = QueryTransaction::default();
+        transaction.data.begin_transaction = true;
+        transaction
     }
 }
 
