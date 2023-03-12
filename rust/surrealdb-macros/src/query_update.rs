@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
@@ -8,7 +15,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables},
     query_relate::{self, Return},
     value_type_wrappers::SurrealId,
-    BindingsList, DbFilter, Erroneous, Parametric, SurrealdbModel,
+    BindingsList, DbFilter, Erroneous, Parametric, Queryable, SurrealdbModel,
 };
 
 pub fn update<T>(targettables: impl Into<Targettable>) -> UpdateStatement<T>
@@ -49,6 +56,8 @@ where
     parallel: bool,
     __model_return_type: PhantomData<T>,
 }
+
+impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 pub enum Targettable {
     Table(sql::Table),

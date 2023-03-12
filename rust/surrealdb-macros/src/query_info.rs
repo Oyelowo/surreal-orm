@@ -1,6 +1,13 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::fmt;
 
-use crate::{query_insert::Buildable, query_remove::Runnable};
+use crate::{query_insert::Buildable, query_remove::Runnable, Queryable};
 
 pub fn info_for() -> InfoStatement {
     InfoStatement::new()
@@ -47,6 +54,8 @@ impl InfoStatement {
         self
     }
 }
+impl Queryable for InfoStatement {}
+
 impl Buildable for InfoStatement {
     fn build(&self) -> String {
         match &self.level {

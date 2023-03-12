@@ -1,7 +1,9 @@
 /*
-Author: Oyelowo Oyedayo
-Email: oyelowooyedayo@gmail.com
-*/
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 
 #![allow(unused_imports)]
 
@@ -19,6 +21,7 @@ pub mod query_relate;
 pub mod query_remove;
 pub mod query_select;
 pub mod query_sleep;
+pub mod query_transaction;
 pub mod query_update;
 pub mod value_type_wrappers;
 // pub mod querydb;
@@ -42,6 +45,8 @@ use serde::Serialize;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use value_type_wrappers::SurrealId;
+
+pub trait Queryable {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {

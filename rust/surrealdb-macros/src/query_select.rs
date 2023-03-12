@@ -1,7 +1,9 @@
 /*
  * Author: Oyelowo Oyedayo
- * Email: Oyelowo Oyedayo
- * */
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 
 use std::{
     borrow::{Borrow, Cow},
@@ -17,7 +19,7 @@ use crate::{
     db_field::{Binding, BindingsList, DbFilter, Parametric},
     query_insert::Buildable,
     value_type_wrappers::SurrealId,
-    DbField, SurrealdbModel, SurrealdbNode,
+    DbField, Queryable, SurrealdbModel, SurrealdbNode,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -608,6 +610,8 @@ pub struct SelectStatement {
     parallel: bool,
     bindings: BindingsList,
 }
+
+impl Queryable for SelectStatement {}
 
 impl Parametric for SelectStatement {
     fn get_bindings(&self) -> BindingsList {

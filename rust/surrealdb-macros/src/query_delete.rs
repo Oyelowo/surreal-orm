@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::{marker::PhantomData, time::Duration};
 
 use serde::{de::DeserializeOwned, Serialize};
@@ -7,7 +14,7 @@ use crate::{
     query_insert::{Buildable, Runnable},
     query_relate::Return,
     query_update::{self, Targettable},
-    BindingsList, DbFilter, Parametric, SurrealdbModel,
+    BindingsList, DbFilter, Parametric, Queryable, SurrealdbModel,
 };
 
 /*
@@ -55,6 +62,8 @@ where
     bindings: BindingsList,
     __model_return_type: PhantomData<T>,
 }
+
+impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 impl<T> DeleteStatement<T>
 where

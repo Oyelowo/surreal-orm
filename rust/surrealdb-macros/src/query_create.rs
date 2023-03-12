@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
@@ -8,7 +15,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables},
     query_relate::Return,
     query_update::{self, Targettable},
-    BindingsList, Parametric, SurrealdbNode,
+    BindingsList, Parametric, Queryable, SurrealdbNode,
 };
 
 pub fn create<T>(targettables: impl Into<Targettable>) -> CreateStatement<T>
@@ -48,6 +55,8 @@ where
     bindings: BindingsList,
     __model_return_type: PhantomData<T>,
 }
+
+impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 
 impl<T> CreateStatement<T>
 where

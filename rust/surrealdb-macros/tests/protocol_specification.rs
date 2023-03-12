@@ -1,3 +1,9 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 // #![allow(dead_code)]
 // #![allow(non_upper_case_globals)]
 // #![allow(non_snake_case)]

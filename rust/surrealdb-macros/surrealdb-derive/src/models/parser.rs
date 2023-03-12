@@ -1,7 +1,9 @@
 /*
-Author: Oyelowo Oyedayo
-Email: oyelowooyedayo@gmail.com
-*/
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 
 
 use std::{collections::{HashMap, hash_map::Entry, HashSet}, fmt::Display, ops::Deref};

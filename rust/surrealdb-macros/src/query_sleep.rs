@@ -1,6 +1,13 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use surrealdb::sql;
 
-use crate::{query_insert::Buildable, query_remove::Runnable, query_select::Duration};
+use crate::{query_insert::Buildable, query_remove::Runnable, query_select::Duration, Queryable};
 
 pub fn sleep(duration: impl Into<Duration>) -> SleepStatement {
     SleepStatement::new(duration)
@@ -23,3 +30,5 @@ impl Buildable for SleepStatement {
 }
 
 impl Runnable for SleepStatement {}
+
+impl Queryable for SleepStatement {}

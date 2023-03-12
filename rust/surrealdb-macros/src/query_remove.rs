@@ -1,4 +1,12 @@
 /*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+/*
+ *
  *
 REMOVE statement
 
@@ -18,7 +26,7 @@ REMOVE [
 
 use std::fmt::Display;
 
-use crate::{query_insert::Buildable, DbField};
+use crate::{query_insert::Buildable, DbField, Queryable};
 
 pub struct Namespace(String);
 pub struct Database(String);
@@ -200,6 +208,8 @@ impl RemoveScopeStatement {
         }
     }
 }
+
+impl Queryable for RemoveScopeStatement {}
 
 impl Buildable for RemoveScopeStatement {
     fn build(&self) -> String {

@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
@@ -8,7 +15,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
-    BindingsList, Clause, DbField, Erroneous, Parametric, SurrealdbEdge,
+    BindingsList, Clause, DbField, Erroneous, Parametric, Queryable, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -183,6 +190,8 @@ where
         self
     }
 }
+
+impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 impl<T> std::fmt::Display for RelateStatement<T>
 where
