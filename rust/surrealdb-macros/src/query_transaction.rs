@@ -184,4 +184,44 @@ mod tests {
 "BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
         );
     }
+
+    fn test_transaction_cancel() {
+        let name = DbField::new("name");
+        let age = DbField::new("age");
+        let country = DbField::new("country");
+        let city = DbField::new("city");
+        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+
+        let statement1 = select(All)
+            .from(fake_id)
+            .where_(cond(
+                city.is("Prince Edward Island")
+                    .and(city.is("NewFoundland"))
+                    .or(city.like("Toronto")),
+            ))
+            .order_by(order(&age).numeric())
+            .limit(153)
+            .start(10)
+            .parallel();
+
+        let statement2 = select(All)
+            .from(fake_id2)
+            .where_(country.is("INDONESIA"))
+            .order_by(order(&age).numeric())
+            .limit(20)
+            .start(5);
+
+        let transaction = begin_transaction()
+            .query(statement1)
+            .query(statement2)
+            .cancel_transaction();
+
+        assert_debug_snapshot!(transaction.get_bindings());
+        assert_display_snapshot!(transaction);
+        assert_eq!(
+            format!("{transaction:#}"),
+"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
+        );
+    }
 }
