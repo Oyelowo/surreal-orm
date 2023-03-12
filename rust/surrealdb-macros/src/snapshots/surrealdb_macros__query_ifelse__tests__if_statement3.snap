@@ -1,7 +1,6 @@
 ---
 source: surrealdb-macros/src/query_ifelse.rs
-assertion_line: 295
-expression: if_statement2.get_bindings()
+expression: if_statement.get_bindings()
 ---
 [
     Binding {
@@ -33,5 +32,25 @@ expression: if_statement2.get_bindings()
         ),
         original_inline_name: "_param_00000000",
         raw_string: "Valid",
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
+            Strand(
+                "Oyelowo Oyedayo",
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "'Oyelowo Oyedayo'",
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
+            Strand(
+                "The man!",
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "The man!",
     },
 ]

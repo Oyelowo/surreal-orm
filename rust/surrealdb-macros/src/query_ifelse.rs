@@ -304,7 +304,7 @@ mod tests {
         assert_display_snapshot!(if_statement2);
         assert_eq!(
             format!("{if_statement2}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
         );
     }
 
@@ -318,11 +318,12 @@ mod tests {
             .else_if(name.like("Oyelowo Oyedayo"))
             .then("The man!")
             .end();
+
         assert_debug_snapshot!(if_statement.get_bindings());
         assert_display_snapshot!(if_statement);
         assert_eq!(
             format!("{if_statement}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nEND"
         );
     }
 
@@ -341,7 +342,7 @@ mod tests {
         assert_display_snapshot!(if_statement4);
         assert_eq!(
             format!("{if_statement4}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
         );
     }
 
@@ -363,7 +364,7 @@ mod tests {
         assert_display_snapshot!(if_statement5);
         assert_eq!(
             format!("{if_statement5}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
         );
     }
 }
