@@ -185,6 +185,7 @@ mod tests {
         );
     }
 
+    #[test]
     fn test_transaction_cancel() {
         let name = DbField::new("name");
         let age = DbField::new("age");
@@ -221,7 +222,7 @@ mod tests {
         assert_display_snapshot!(transaction);
         assert_eq!(
             format!("{transaction:#}"),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
+"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCANCEL TRANSACTION\n\t"
         );
     }
 }
