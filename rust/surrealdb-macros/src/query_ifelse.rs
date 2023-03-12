@@ -82,7 +82,7 @@ pub struct ThenExpression {
 }
 
 impl ThenExpression {
-    fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
+    pub fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
         let condition: DbFilter = condition.into();
         self.bindings.extend(condition.get_bindings());
         self.flow_data.else_if_data.conditions.push(condition);
@@ -93,7 +93,7 @@ impl ThenExpression {
         }
     }
 
-    fn else_(mut self, expression: impl Into<Expression>) -> ElseStatement {
+    pub fn else_(mut self, expression: impl Into<Expression>) -> ElseStatement {
         let expression: Expression = expression.into();
         self.flow_data.else_data = ExpressionContent(format!("{expression}"));
 
@@ -262,9 +262,11 @@ fn test() {
     let age = DbField::new("age");
     let country = DbField::new("country");
 
-    if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+    let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
         .then("Valid".to_string())
         .end();
+
+    assert_eq!(format!("{if_statement1}"), "");
 
     if_(age.greater_than_or_equal(18).less_than_or_equal(120))
         .then("Valid")
