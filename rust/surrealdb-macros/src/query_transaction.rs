@@ -20,85 +20,85 @@ use crate::{
     query_remove::RemoveScopeStatement,
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric,
+    BindingsList, DbField, DbFilter, Parametric, Querable,
 };
 
-#[derive(Clone)]
-pub enum Query<TModel, TNode, TEdge> {
-    // pub enum Query {
-    RemoveScopeStatement(RemoveScopeStatement),
-    DeleteStatement(DeleteStatement<TModel>),
-    CreateStatement(CreateStatement<TNode>),
-    InsertStatement(InsertStatement<TModel>),
-    UpdateStatement(UpdateStatement<TModel>),
-    RelateStatement(RelateStatement<TEdge>),
-    SelectStatement(SelectStatement),
-    // Value(sql::Value),
-}
-
-impl<TModel, TNode, TEdge> Display for Query<TModel, TNode, TEdge> {
-    // impl Display for Query {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let expression = match self {
-            Query::SelectStatement(s) => format!("({s})"),
-            Query::CreateStatement(_) => todo!(),
-            Query::InsertStatement(_) => todo!(),
-            Query::UpdateStatement(_) => todo!(),
-            Query::RelateStatement(_) => todo!(),
-            Query::RemoveScopeStatement(_) => todo!(),
-            Query::DeleteStatement(_) => todo!(),
-        };
-        write!(f, "{}", expression)
-    }
-}
-
-impl<TModel, TNode, TEdge> Parametric for Query<TModel, TNode, TEdge> {
-    // impl Parametric for Query {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            Query::SelectStatement(s) => s
-                .get_bindings()
-                .into_iter()
-                // query must have already been built and bound
-                .map(|b| b.with_raw(format!("({s})")))
-                .collect::<_>(),
-            Query::CreateStatement(_) => todo!(),
-            Query::InsertStatement(_) => todo!(),
-            Query::UpdateStatement(_) => todo!(),
-            Query::RelateStatement(_) => todo!(),
-            Query::RemoveScopeStatement(_) => todo!(),
-            Query::DeleteStatement(_) => todo!(),
-        }
-    }
-}
-
-impl<TModel, TNode, TEdge> From<SelectStatement> for Query<TModel, TNode, TEdge> {
-    // impl From<SelectStatement> for Query {
-    fn from(value: SelectStatement) -> Self {
-        Self::SelectStatement(value)
-    }
-}
-
-impl<TModel, TNode, TEdge> From<CreateStatement<TNode>> for Query<TModel, TNode, TEdge> {
-    // impl From<CreateStatement> for Query {
-    fn from(value: CreateStatement<TNode>) -> Self {
-        Self::CreateStatement(value)
-    }
-}
-
-impl<TModel, TNode, TEdge> From<InsertStatement<TModel>> for Query<TModel, TNode, TEdge> {
-    // impl From<InsertStatement> for Query {
-    fn from(value: InsertStatement<TModel>) -> Self {
-        Self::InsertStatement(value)
-    }
-}
-
-impl<TModel, TNode, TEdge> From<UpdateStatement<TModel>> for Query<TModel, TNode, TEdge> {
-    // impl From<UpdateStatement> for Query {
-    fn from(value: UpdateStatement<TModel>) -> Self {
-        Self::UpdateStatement(value)
-    }
-}
+// #[derive(Clone)]
+// pub enum Query<TModel, TNode, TEdge> {
+//     // pub enum Query {
+//     RemoveScopeStatement(RemoveScopeStatement),
+//     DeleteStatement(DeleteStatement<TModel>),
+//     CreateStatement(CreateStatement<TNode>),
+//     InsertStatement(InsertStatement<TModel>),
+//     UpdateStatement(UpdateStatement<TModel>),
+//     RelateStatement(RelateStatement<TEdge>),
+//     SelectStatement(SelectStatement),
+//     // Value(sql::Value),
+// }
+//
+// impl<TModel, TNode, TEdge> Display for Query<TModel, TNode, TEdge> {
+//     // impl Display for Query {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let expression = match self {
+//             Query::SelectStatement(s) => format!("({s})"),
+//             Query::CreateStatement(_) => todo!(),
+//             Query::InsertStatement(_) => todo!(),
+//             Query::UpdateStatement(_) => todo!(),
+//             Query::RelateStatement(_) => todo!(),
+//             Query::RemoveScopeStatement(_) => todo!(),
+//             Query::DeleteStatement(_) => todo!(),
+//         };
+//         write!(f, "{}", expression)
+//     }
+// }
+//
+// impl<TModel, TNode, TEdge> Parametric for Query<TModel, TNode, TEdge> {
+//     // impl Parametric for Query {
+//     fn get_bindings(&self) -> BindingsList {
+//         match self {
+//             Query::SelectStatement(s) => s
+//                 .get_bindings()
+//                 .into_iter()
+//                 // query must have already been built and bound
+//                 .map(|b| b.with_raw(format!("({s})")))
+//                 .collect::<_>(),
+//             Query::CreateStatement(_) => todo!(),
+//             Query::InsertStatement(_) => todo!(),
+//             Query::UpdateStatement(_) => todo!(),
+//             Query::RelateStatement(_) => todo!(),
+//             Query::RemoveScopeStatement(_) => todo!(),
+//             Query::DeleteStatement(_) => todo!(),
+//         }
+//     }
+// }
+//
+// impl<TModel, TNode, TEdge> From<SelectStatement> for Query<TModel, TNode, TEdge> {
+//     // impl From<SelectStatement> for Query {
+//     fn from(value: SelectStatement) -> Self {
+//         Self::SelectStatement(value)
+//     }
+// }
+//
+// impl<TModel, TNode, TEdge> From<CreateStatement<TNode>> for Query<TModel, TNode, TEdge> {
+//     // impl From<CreateStatement> for Query {
+//     fn from(value: CreateStatement<TNode>) -> Self {
+//         Self::CreateStatement(value)
+//     }
+// }
+//
+// impl<TModel, TNode, TEdge> From<InsertStatement<TModel>> for Query<TModel, TNode, TEdge> {
+//     // impl From<InsertStatement> for Query {
+//     fn from(value: InsertStatement<TModel>) -> Self {
+//         Self::InsertStatement(value)
+//     }
+// }
+//
+// impl<TModel, TNode, TEdge> From<UpdateStatement<TModel>> for Query<TModel, TNode, TEdge> {
+//     // impl From<UpdateStatement> for Query {
+//     fn from(value: UpdateStatement<TModel>) -> Self {
+//         Self::UpdateStatement(value)
+//     }
+// }
 
 pub fn begin_transaction() -> QueryTransaction {
     BeginTransaction::new()
@@ -125,10 +125,10 @@ pub struct QueryTransaction {
 }
 
 impl QueryTransaction {
-    pub fn query(mut self, query: impl Into<Query>) -> Self {
-        let query: Query = query.into();
+    pub fn query(mut self, query: impl Querable + Parametric + Display) -> Self {
+        // let query: Query = query.into();
         self.data.bindings.extend(query.get_bindings());
-        self.data.queries.push(query);
+        self.data.queries.push(query.to_string());
         self
     }
 
@@ -160,7 +160,7 @@ pub struct TransactionData {
     begin_transaction: bool,
     cancel_transaction: bool,
     commit_transaction: bool,
-    queries: Vec<Query>,
+    queries: Vec<String>,
     bindings: BindingsList,
 }
 
