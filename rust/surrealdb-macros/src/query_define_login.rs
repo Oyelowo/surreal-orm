@@ -41,7 +41,7 @@ impl Display for LoginType {
     }
 }
 
-pub struct Passhash(sql::Strand);
+pub struct Passhash(String);
 
 impl From<String> for Passhash {
     fn from(value: String) -> Self {
@@ -61,7 +61,7 @@ impl Display for Passhash {
     }
 }
 
-pub struct Password(sql::Strand);
+pub struct Password(String);
 impl From<String> for Password {
     fn from(value: String) -> Self {
         Self(value.into())
