@@ -13,6 +13,7 @@ use db_field::Empty;
 pub mod db_field;
 pub mod operators_macros;
 pub mod query_create;
+pub mod query_define_namespace;
 pub mod query_delete;
 pub mod query_ifelse;
 pub mod query_info;
