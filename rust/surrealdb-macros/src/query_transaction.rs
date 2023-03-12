@@ -42,7 +42,7 @@ fn test_tra() {
     //     .query(todo!())
     //     .cancel_transaction();
 }
-#[derive(Default)]
+
 pub struct QueryTransaction {
     data: TransactionData,
 }
@@ -54,15 +54,17 @@ impl QueryTransaction {
         self
     }
 
-    pub fn commit_transaction(mut self) -> CommitTransaction {
-        let mut transaction = CommitTransaction { data: self.data };
-        transaction.data.commit_transaction = true;
+    pub fn commit_transaction(mut self) -> TransactionCompletion {
+        let mut transaction = TransactionCompletion { data: self.data };
+        transaction.data.transaction_completion_type =
+            Some(TranctionCompletionType::CommitTransaction);
         transaction
     }
 
-    pub fn cancel_transaction(mut self) -> CancelTransaction {
-        let mut transaction = CancelTransaction { data: self.data };
-        transaction.data.cancel_transaction = true;
+    pub fn cancel_transaction(mut self) -> TransactionCompletion {
+        let mut transaction = TransactionCompletion { data: self.data };
+        transaction.data.transaction_completion_type =
+            Some(TranctionCompletionType::CancelTransaction);
         transaction
     }
 }
@@ -71,60 +73,63 @@ pub struct BeginTransaction;
 
 impl BeginTransaction {
     pub(crate) fn new() -> QueryTransaction {
-        let mut transaction = QueryTransaction::default();
-        transaction.data.begin_transaction = true;
-        transaction
+        QueryTransaction {
+            data: TransactionData {
+                transaction_completion_type: None,
+                queries: vec![],
+                bindings: vec![],
+            },
+        }
     }
 }
 
-#[derive(Default)]
+enum TranctionCompletionType {
+    CommitTransaction,
+    CancelTransaction,
+}
+
 pub struct TransactionData {
-    begin_transaction: bool,
-    cancel_transaction: bool,
-    commit_transaction: bool,
+    transaction_completion_type: Option<TranctionCompletionType>,
     queries: Vec<String>,
     bindings: BindingsList,
 }
 
-pub struct CancelTransaction {
+pub struct TransactionCompletion {
     data: TransactionData,
 }
 
-pub struct CommitTransaction {
-    data: TransactionData,
-}
-
-impl Parametric for CommitTransaction {
+impl Parametric for TransactionCompletion {
     fn get_bindings(&self) -> BindingsList {
         self.data.bindings.to_vec()
     }
 }
 
-impl Buildable for CommitTransaction {
+impl Buildable for TransactionCompletion {
     fn build(&self) -> String {
-        todo!()
+        let mut output = String::new();
+        output.push_str("BEGIN TRANSACTION\n");
+
+        self.data.queries.iter().for_each(|q| {
+            output.push_str(&format!("\n{}\n", q));
+        });
+
+        if let Some(completion_type) = &self.data.transaction_completion_type {
+            let com_type = match completion_type {
+                TranctionCompletionType::CommitTransaction => {
+                    sql::statements::CommitStatement.to_string()
+                }
+                TranctionCompletionType::CancelTransaction => {
+                    sql::statements::CancelStatement.to_string()
+                }
+            };
+            output.push_str(&format!("\n{}\n\t", com_type));
+        }
+
+        output
     }
 }
 
-impl fmt::Display for CommitTransaction {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-
-impl Parametric for CancelTransaction {
-    fn get_bindings(&self) -> BindingsList {
-        self.data.bindings.to_vec()
-    }
-}
-
-impl Buildable for CancelTransaction {
-    fn build(&self) -> String {
-        todo!()
-    }
-}
-
-impl fmt::Display for CancelTransaction {
+impl fmt::Display for TransactionCompletion {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.build())
     }
