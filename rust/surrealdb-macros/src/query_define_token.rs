@@ -169,6 +169,7 @@ impl DefineTokenStatement {
         self
     }
 }
+
 impl Buildable for DefineTokenStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE TOKEN {}", self.name);
@@ -188,6 +189,13 @@ impl Buildable for DefineTokenStatement {
         query
     }
 }
+
+impl Display for DefineTokenStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
 impl Parametric for DefineTokenStatement {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -206,13 +214,13 @@ mod tests {
         let token_def = define_token("oyelowo_token")
             .on_namespace()
             .type_(TokenType::PS512)
-            .value("abrakradabra")
-            .build();
+            .value("abrakradabra");
 
         assert_eq!(
             token_def.to_string(),
             "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
+        insta::assert_debug_snapshot!(token_def.get_bindings());
     }
 
     #[test]
@@ -220,13 +228,13 @@ mod tests {
         let token_def = define_token("oyelowo_token")
             .on_database()
             .type_(TokenType::HS512)
-            .value("anaksunamun")
-            .build();
+            .value("anaksunamun");
 
         assert_eq!(
             token_def.to_string(),
             "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
+        insta::assert_debug_snapshot!(token_def.get_bindings());
     }
 
     #[test]
@@ -234,12 +242,12 @@ mod tests {
         let token_def = define_token("oyelowo_token")
             .on_scope("planet")
             .type_(TokenType::EDDSA)
-            .value("abcde")
-            .build();
+            .value("abcde");
 
         assert_eq!(
             token_def.to_string(),
             "DEFINE TOKEN $_param_00000000 ON SCOPE planet TYPE EDDSA VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
+        insta::assert_debug_snapshot!(token_def.get_bindings());
     }
 }
