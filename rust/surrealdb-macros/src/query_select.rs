@@ -481,6 +481,12 @@ type Fetchables = Groupables;
 
 pub struct Duration(sql::Duration);
 
+impl From<self::Duration> for sql::Duration {
+    fn from(value: self::Duration) -> Self {
+        value.0
+    }
+}
+
 impl From<Duration> for sql::Value {
     fn from(value: self::Duration) -> Self {
         value.0.into()
