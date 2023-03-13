@@ -57,8 +57,8 @@ pub fn define_scope(scope_name: impl Into<Scope>) -> DefineScopeStatement {
 
 impl DefineScopeStatement {
     // Set the scope name
-    fn new(scope_name: impl Into<Scope>) -> Self {
-        let binding_scope_name = Binding::new(scope_name.into());
+    pub fn new(scope_name: impl Into<Scope>) -> Self {
+        let binding_scope_name = Binding::new(scope_name.into()).with_description("Session scope");
         let name = binding_scope_name.get_param_dollarised();
         Self {
             name,
@@ -70,8 +70,8 @@ impl DefineScopeStatement {
     }
 
     // Set the session duration
-    fn session(mut self, duration: impl Into<Duration>) -> Self {
-        let binding = Binding::new(duration.into());
+    pub fn session(mut self, duration: impl Into<Duration>) -> Self {
+        let binding = Binding::new(duration.into()).with_description("Session durration.");
         let duration_param = format!("{}", binding.get_param_dollarised());
         self.bindings.push(binding);
         self.duration = Some(duration_param);
@@ -79,7 +79,7 @@ impl DefineScopeStatement {
     }
 
     // Set the signup expression
-    fn signup(mut self, expression: impl Into<Expression>) -> Self {
+    pub fn signup(mut self, expression: impl Into<Expression>) -> Self {
         let expression: Expression = expression.into();
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
@@ -88,7 +88,7 @@ impl DefineScopeStatement {
     }
 
     // Set the signin expression
-    fn signin(mut self, expression: impl Into<Expression>) -> Self {
+    pub fn signin(mut self, expression: impl Into<Expression>) -> Self {
         let expression: Expression = expression.into();
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
@@ -145,7 +145,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000"
+            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000;"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }

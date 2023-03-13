@@ -226,7 +226,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000"
+            "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000;"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
@@ -240,7 +240,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000"
+            "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000;"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
@@ -254,7 +254,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON SCOPE $_param_00000000 TYPE EDDSA VALUE $_param_00000000"
+            "DEFINE TOKEN $_param_00000000 ON SCOPE $_param_00000000 TYPE EDDSA VALUE $_param_00000000;"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
