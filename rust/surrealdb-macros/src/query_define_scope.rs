@@ -43,7 +43,7 @@ use crate::{
 // ;
 
 // Define the API for the Scope builder
-struct DefineScopeStatement {
+pub struct DefineScopeStatement {
     name: String,
     duration: Option<String>,
     signup_expression: Option<String>,
@@ -51,9 +51,13 @@ struct DefineScopeStatement {
     bindings: BindingsList,
 }
 
+pub fn define_scope(scope_name: impl Into<Scope>) -> DefineScopeStatement {
+    DefineScopeStatement::new(scope_name)
+}
+
 impl DefineScopeStatement {
     // Set the scope name
-    fn new(mut self, scope_name: impl Into<Scope>) -> Self {
+    fn new(scope_name: impl Into<Scope>) -> Self {
         let binding_scope_name = Binding::new(scope_name.into());
         let name = binding_scope_name.get_param_dollarised();
         Self {
@@ -68,8 +72,9 @@ impl DefineScopeStatement {
     // Set the session duration
     fn session(mut self, duration: impl Into<Duration>) -> Self {
         let binding = Binding::new(duration.into());
+        let duration_param = format!("{}", binding.get_param_dollarised());
         self.bindings.push(binding);
-        self.duration = Some(binding.get_param_dollarised());
+        self.duration = Some(duration_param);
         self
     }
 
@@ -96,15 +101,15 @@ impl Buildable for DefineScopeStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE SCOPE {}", self.name);
 
-        if let Some(session_duration) = self.duration {
+        if let Some(session_duration) = &self.duration {
             query = format!("{query} SESSION {session_duration}");
         }
 
-        if let Some(signup) = self.signup_expression {
+        if let Some(signup) = &self.signup_expression {
             query = format!("\n\t {query} SIGNUP ( {signup} )");
         }
 
-        if let Some(signin) = self.signin_expression {
+        if let Some(signin) = &self.signin_expression {
             query = format!("\n\t {query} SIGNIN ( {signin} )");
         }
 
@@ -126,3 +131,22 @@ impl Parametric for DefineScopeStatement {
 }
 
 impl Runnable for DefineScopeStatement {}
+
+#[cfg(test)]
+mod tests {
+
+    use std::time::Duration;
+
+    use super::*;
+
+    #[test]
+    fn test_define_scope_statement_on_namespace() {
+        let token_def = define_scope("oyelowo_scope").session(Duration::from_secs(45));
+
+        assert_eq!(
+            token_def.to_string(),
+            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000"
+        );
+        insta::assert_debug_snapshot!(token_def.get_bindings());
+    }
+}
