@@ -145,6 +145,7 @@ where
     /// query_builder.parallel();
     /// ```
     pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
+        // TODO: Revisit if this should also be parametized
         let duration: crate::query_select::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
