@@ -49,7 +49,6 @@ use crate::{
 //   VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
 // ;
 
-#[derive(Serialize)]
 pub enum TokenType {
     EDDSA,
     ES256,
