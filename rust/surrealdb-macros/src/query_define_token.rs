@@ -223,7 +223,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
@@ -237,7 +237,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
@@ -251,7 +251,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON SCOPE planet TYPE EDDSA VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            "DEFINE TOKEN $_param_00000000 ON SCOPE planet TYPE EDDSA VALUE $_param_00000000"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }
