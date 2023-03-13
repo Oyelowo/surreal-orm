@@ -42,12 +42,6 @@ use crate::{
 // 	SIGNIN ( SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass) )
 // ;
 
-// Define the types for the possible scope expressions
-enum ScopeExpression {
-    CreateUser(String),
-    SelectUser(String),
-}
-
 // Define the API for the Scope builder
 struct DefineScopeStatement {
     name: String,
