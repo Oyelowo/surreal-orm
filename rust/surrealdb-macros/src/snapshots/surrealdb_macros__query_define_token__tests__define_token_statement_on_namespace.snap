@@ -18,6 +18,7 @@ expression: token_def.get_bindings()
         ),
         original_inline_name: "_param_00000000",
         raw_string: "oyelowo_token",
+        description: None,
     },
     Binding {
         param: "_param_00000000",
@@ -28,5 +29,6 @@ expression: token_def.get_bindings()
         ),
         original_inline_name: "_param_00000000",
         raw_string: "'abrakradabra'",
+        description: None,
     },
 ]
