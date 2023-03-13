@@ -486,6 +486,12 @@ impl From<self::Duration> for sql::Duration {
         value.0
     }
 }
+
+impl From<Duration> for sql::Value {
+    fn from(value: self::Duration) -> Self {
+        value.0.into()
+    }
+}
 impl From<sql::Duration> for self::Duration {
     fn from(value: sql::Duration) -> Self {
         Self(value)
