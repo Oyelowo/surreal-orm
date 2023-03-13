@@ -103,14 +103,20 @@ impl Display for TokenTarget {
     }
 }
 
-pub struct TokenName(String);
+pub struct TokenName(sql::Idiom);
+
+impl From<TokenName> for sql::Value {
+    fn from(value: TokenName) -> Self {
+        value.0.into()
+    }
+}
 
 impl<T> From<T> for TokenName
 where
     T: Into<String>,
 {
     fn from(value: T) -> Self {
-        Self(value.into())
+        Self(value.into().into())
     }
 }
 
@@ -129,8 +135,7 @@ pub fn define_token(token_name: impl Into<TokenName>) -> DefineTokenStatement {
 
 impl DefineTokenStatement {
     pub fn new(token_name: impl Into<TokenName>) -> Self {
-        let name: TokenName = token_name.into();
-        let binding = Binding::new(name.0);
+        let binding = Binding::new(token_name.into());
         Self {
             name: binding.get_param_dollarised().to_owned(),
             scope: None,

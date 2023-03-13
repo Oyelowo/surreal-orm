@@ -5,13 +5,19 @@ expression: token_def.get_bindings()
 [
     Binding {
         param: "_param_00000000",
-        value: Strand(
-            Strand(
-                "oyelowo_token",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "oyelowo_token",
+                        ),
+                    ),
+                ],
             ),
         ),
         original_inline_name: "_param_00000000",
-        raw_string: "'oyelowo_token'",
+        raw_string: "oyelowo_token",
     },
     Binding {
         param: "_param_00000000",
