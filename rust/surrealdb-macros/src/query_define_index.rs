@@ -80,6 +80,23 @@ impl Deref for Table {
     }
 }
 
+pub enum Columns {
+    Column(sql::Idiom),
+    Columns(Vec<sql::Idiom>),
+}
+
+impl Parametric for Columns {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Columns::Column(c) => vec![Binding::new(sql::Value::Idiom(c.to_owned()))],
+            Columns::Columns(cs) => cs
+                .into_iter()
+                .map(|c| Binding::new(sql::Value::Idiom(c.to_owned())))
+                .collect(),
+        }
+    }
+}
+
 pub type Index = Name;
 
 pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
@@ -106,6 +123,15 @@ impl DefineIndexStatement {
 
         self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
         self.bindings.push(binding);
+        self
+    }
+
+    pub fn columns(mut self, columns: impl Into<Columns>) -> Self {
+        // let binding =
+        //     Binding::new(table.into()).with_description("table name which fields are indexed");
+        //
+        // self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
+        // self.bindings.push(binding);
         self
     }
 }
