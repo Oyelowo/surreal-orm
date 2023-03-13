@@ -1,0 +1,33 @@
+---
+source: surrealdb-macros/src/query_define_login.rs
+assertion_line: 204
+expression: login_with_hash.get_bindings()
+---
+[
+    Binding {
+        param: "_param_00000000",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "username",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "username",
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
+            Strand(
+                "oyedayo",
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "'oyedayo'",
+    },
+]
