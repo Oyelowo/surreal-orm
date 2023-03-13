@@ -48,6 +48,8 @@ use crate::{
 //   -- Specify the public key so we can verify the authenticity of the token
 //   VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
 // ;
+
+#[derive(Serialize)]
 pub enum TokenType {
     EDDSA,
     ES256,
@@ -64,75 +66,180 @@ pub enum TokenType {
     RS512,
 }
 
-pub enum DefineTokenTarget {
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TokenType::EDDSA => write!(f, "EDDSA"),
+            TokenType::ES256 => write!(f, "ES256"),
+            TokenType::ES384 => write!(f, "ES384"),
+            TokenType::ES512 => write!(f, "ES512"),
+            TokenType::HS256 => write!(f, "HS256"),
+            TokenType::HS384 => write!(f, "HS384"),
+            TokenType::HS512 => write!(f, "HS512"),
+            TokenType::PS256 => write!(f, "PS256"),
+            TokenType::PS384 => write!(f, "PS384"),
+            TokenType::PS512 => write!(f, "PS512"),
+            TokenType::RS256 => write!(f, "RS256"),
+            TokenType::RS384 => write!(f, "RS384"),
+            TokenType::RS512 => write!(f, "RS512"),
+        }
+    }
+}
+
+pub enum TokenTarget {
     Namespace,
     Database,
     Scope(String),
 }
+
+impl Display for TokenTarget {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let target_str = match self {
+            TokenTarget::Namespace => "NAMESPACE".into(),
+            TokenTarget::Database => "DATABASE".into(),
+            TokenTarget::Scope(scope) => format!("SCOPE {}", scope),
+        };
+        write!(f, "{}", target_str)
+    }
+}
+
+pub struct TokenName(String);
+
+impl<T> From<T> for TokenName
+where
+    T: Into<String>,
+{
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
+
 pub struct DefineTokenStatement {
     name: String,
     scope: Option<String>,
-    token_type: TokenType,
+    token_type: Option<TokenType>,
     value: Option<String>,
-    target: DefineTokenTarget,
+    target: Option<TokenTarget>,
     bindings: BindingsList,
 }
 
+pub fn define_token(token_name: impl Into<TokenName>) -> DefineTokenStatement {
+    DefineTokenStatement::new(token_name.into())
+}
+
 impl DefineTokenStatement {
-    pub fn new(name: &str) -> Self {
+    pub fn new(token_name: impl Into<TokenName>) -> Self {
+        let name: TokenName = token_name.into();
+        let binding = Binding::new(name.0);
         Self {
-            name: name.to_string(),
+            name: binding.get_param_dollarised().to_owned(),
             scope: None,
-            token_type: TokenType::HS512,
-            value: Some("".to_string()),
-            target: DefineTokenTarget::Namespace,
-            bindings: todo!(),
+            token_type: None,
+            value: None,
+            target: None,
+            bindings: vec![binding],
         }
     }
 
     pub fn on_namespace(mut self) -> Self {
-        self.target = DefineTokenTarget::Namespace;
+        self.target = Some(TokenTarget::Namespace);
         self
     }
 
-    pub fn on_database(mut self, database: &str) -> Self {
-        self.target = DefineTokenTarget::Database;
+    pub fn on_database(mut self) -> Self {
+        self.target = Some(TokenTarget::Database);
         self
     }
 
-    pub fn on_scope(mut self, scope: Scope) -> Self {
-        self.target = DefineTokenTarget::Scope(scope.to_string());
+    pub fn on_scope(mut self, scope: impl Into<Scope>) -> Self {
+        self.target = Some(TokenTarget::Scope(scope.into().to_string()));
         self
     }
 
     pub fn type_(mut self, token_type: TokenType) -> Self {
-        self.token_type = token_type;
+        self.token_type = Some(token_type);
         self
     }
 
     pub fn value(mut self, value: impl Into<sql::Strand>) -> Self {
-        self.value = Some(value.into().to_string());
+        let binding = Binding::new(value.into());
+        self.bindings.push(binding.clone());
+        self.value = Some(binding.get_param_dollarised().to_owned());
+
         self
     }
 }
 impl Buildable for DefineTokenStatement {
     fn build(&self) -> String {
-        let target_str = match &self.target {
-            TokenTarget::Namespace => "NAMESPACE",
-            TokenTarget::Database => "DATABASE",
-            TokenTarget::Scope(scope) => &format!("SCOPE {}", scope),
-        };
+        let mut query = format!("DEFINE TOKEN {}", self.name);
 
-        format!(
-            "DEFINE TOKEN {} ON {} TYPE {} VALUE {};\n",
-            self.name, target_str, self.token_type, self.value
-        )
-        todo!()
+        if let Some(target) = &self.target {
+            query = format!("{query} ON {target}");
+        }
+
+        if let Some(ty) = &self.token_type {
+            query = format!("{query} TYPE {ty}");
+        }
+
+        if let Some(value) = &self.value {
+            query = format!("{query} VALUE {value}");
+        }
+
+        query
     }
 }
-// let statement = DefineTokenStatementBuilder::new("token_name")
-//     .on_database("app_vitalsense")
-//     .with_token_type(TokenType::HS512)
-//     .with_value("sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8")
-//     .build();
+impl Parametric for DefineTokenStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
 
+impl Runnable for DefineTokenStatement {}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_define_token_statement_on_namespace() {
+        let token_def = define_token("oyelowo_token")
+            .on_namespace()
+            .type_(TokenType::PS512)
+            .value("abrakradabra")
+            .build();
+
+        assert_eq!(
+            token_def.to_string(),
+            "DEFINE TOKEN $_param_00000000 ON NAMESPACE TYPE PS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+        );
+    }
+
+    #[test]
+    fn test_define_token_statement_on_database() {
+        let token_def = define_token("oyelowo_token")
+            .on_database()
+            .type_(TokenType::HS512)
+            .value("anaksunamun")
+            .build();
+
+        assert_eq!(
+            token_def.to_string(),
+            "DEFINE TOKEN $_param_00000000 ON DATABASE TYPE HS512 VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+        );
+    }
+
+    #[test]
+    fn test_define_token_statement_on_scope() {
+        let token_def = define_token("oyelowo_token")
+            .on_scope("planet")
+            .type_(TokenType::EDDSA)
+            .value("abcde")
+            .build();
+
+        assert_eq!(
+            token_def.to_string(),
+            "DEFINE TOKEN $_param_00000000 ON SCOPE planet TYPE EDDSA VALUE $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+        );
+    }
+}
