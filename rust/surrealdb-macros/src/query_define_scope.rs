@@ -49,7 +49,7 @@ enum ScopeExpression {
 }
 
 // Define the API for the Scope builder
-struct ScopeBuilder {
+struct DefineScopeStatement {
     name: String,
     duration: Option<String>,
     signup_expression: Option<String>,
@@ -57,7 +57,7 @@ struct ScopeBuilder {
     bindings: BindingsList,
 }
 
-impl ScopeBuilder {
+impl DefineScopeStatement {
     // Set the scope name
     fn new(mut self, scope_name: impl Into<Scope>) -> Self {
         let binding_scope_name = Binding::new(scope_name.into());
@@ -98,7 +98,7 @@ impl ScopeBuilder {
     }
 }
 
-impl Buildable for ScopeBuilder {
+impl Buildable for DefineScopeStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE SCOPE {}", self.name);
 
@@ -119,16 +119,16 @@ impl Buildable for ScopeBuilder {
     }
 }
 
-impl Display for ScopeBuilder {
+impl Display for DefineScopeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
-impl Parametric for ScopeBuilder {
+impl Parametric for DefineScopeStatement {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl Runnable for ScopeBuilder {}
+impl Runnable for DefineScopeStatement {}
