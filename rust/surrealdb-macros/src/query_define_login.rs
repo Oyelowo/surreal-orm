@@ -14,6 +14,7 @@ use surrealdb::sql;
 use crate::{
     db_field::{cond, Binding},
     query_create::CreateStatement,
+    query_define_token::Name,
     query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
@@ -94,13 +95,13 @@ pub struct DefineLoginStatement {
     bindings: BindingsList,
 }
 
-pub fn define_login(name: impl Into<sql::Strand>) -> DefineLoginStatement {
+pub fn define_login(name: impl Into<Name>) -> DefineLoginStatement {
     DefineLoginStatement::new(name)
 }
 impl DefineLoginStatement {
     // Set the login name
-    fn new(name: impl Into<sql::Strand>) -> Self {
-        let binding = Binding::new(name.into());
+    fn new(name: impl Into<Name>) -> Self {
+        let binding = Binding::new(name.into()).with_description("login name");
         Self {
             name: binding.get_param_dollarised(),
             login_type: None,
@@ -110,15 +111,19 @@ impl DefineLoginStatement {
     }
 
     // Set the login type
-    pub fn on(mut self, login_type: LoginType) -> Self {
-        self.login_type = Some(login_type);
+    pub fn on_namespace(mut self) -> Self {
+        self.login_type = Some(LoginType::Namespace);
         self
     }
 
+    pub fn on_database(mut self) -> Self {
+        self.login_type = Some(LoginType::Database);
+        self
+    }
     // Set the password credential
     pub fn password(mut self, password: impl Into<Password>) -> Self {
         let password: Password = password.into();
-        let binding = Binding::new(password.0.clone());
+        let binding = Binding::new(password.0.clone()).with_description("login password");
         self.bindings.push(binding.clone());
         self.credential = Some(LoginCredential::Password(
             binding.get_param_dollarised().into(),
@@ -179,25 +184,23 @@ mod tests {
 
     #[test]
     fn test_define_login_statement_with_password() {
-        let login_with_password = define_login("username")
-            .on(LoginType::Database)
-            .password("oyelowo");
+        let login_with_password = define_login("username").on_database().password("oyelowo");
 
         assert_eq!(
             login_with_password.to_string(),
             "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
+        insta::assert_debug_snapshot!(login_with_password.get_bindings());
     }
 
     #[test]
     fn test_define_login_statement_with_passhash() {
-        let login_with_hash = define_login("username")
-            .on(LoginType::Namespace)
-            .password("oyedayo");
+        let login_with_hash = define_login("username").on_namespace().password("oyedayo");
 
         assert_eq!(
             login_with_hash.to_string(),
             "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000"
         );
+        insta::assert_debug_snapshot!(login_with_hash.get_bindings());
     }
 }

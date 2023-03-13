@@ -16,6 +16,7 @@ pub mod query_create;
 pub mod query_define_database;
 pub mod query_define_login;
 pub mod query_define_namespace;
+pub mod query_define_token;
 pub mod query_delete;
 pub mod query_ifelse;
 pub mod query_info;

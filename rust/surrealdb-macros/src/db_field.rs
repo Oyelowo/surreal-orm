@@ -414,6 +414,7 @@ pub struct Binding {
     value: sql::Value,
     original_inline_name: String,
     raw_string: String,
+    description: Option<String>,
 }
 
 impl Binding {
@@ -426,6 +427,7 @@ impl Binding {
             value,
             original_inline_name: param_name.clone(),
             raw_string: value_string,
+            description: None,
         }
     }
 
@@ -436,6 +438,11 @@ impl Binding {
 
     pub fn with_name(mut self, original_name: String) -> Self {
         self.original_inline_name = original_name;
+        self
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
         self
     }
 
@@ -453,6 +460,10 @@ impl Binding {
 
     pub fn get_param_dollarised(&self) -> String {
         format!("${}", &self.param)
+    }
+
+    pub fn get_description(&self) -> String {
+        format!("{}", self.description.as_ref().unwrap_or(&"".into()))
     }
 
     pub fn get_value(&self) -> &sql::Value {
