@@ -124,10 +124,9 @@ impl DefineLoginStatement {
     pub fn password(mut self, password: impl Into<Password>) -> Self {
         let password: Password = password.into();
         let binding = Binding::new(password.0.clone()).with_description("login password");
-        self.bindings.push(binding.clone());
-        self.credential = Some(LoginCredential::Password(
-            binding.get_param_dollarised().into(),
-        ));
+        let password_param = format!("{}", binding.get_param_dollarised());
+        self.bindings.push(binding);
+        self.credential = Some(LoginCredential::Password(password_param.into()));
         self
     }
 
@@ -135,10 +134,9 @@ impl DefineLoginStatement {
     pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
         let passhash: Passhash = passhash.into();
         let binding = Binding::new(passhash.0.clone());
-        self.bindings.push(binding.clone());
-        self.credential = Some(LoginCredential::Passhash(
-            binding.get_param_dollarised().into(),
-        ));
+        let passhash_param = format!("{}", binding.get_param_dollarised());
+        self.bindings.push(binding);
+        self.credential = Some(LoginCredential::Passhash(passhash_param.into()));
         self
     }
 }
@@ -189,7 +187,7 @@ mod tests {
 
         assert_eq!(
             login_with_password.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000;" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
         );
         insta::assert_debug_snapshot!(login_with_password.get_bindings());
     }
@@ -200,7 +198,7 @@ mod tests {
 
         assert_eq!(
             login_with_hash.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000"
+            "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000;"
         );
         insta::assert_debug_snapshot!(login_with_hash.get_bindings());
     }
