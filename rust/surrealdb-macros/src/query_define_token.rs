@@ -17,7 +17,7 @@ use crate::{
     query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable, Scope},
+    query_remove::{RemoveScopeStatement, Runnable},
     query_select::SelectStatement,
     query_update::UpdateStatement,
     BindingsList, DbField, DbFilter, Parametric, Queryable,
@@ -103,6 +103,7 @@ impl Display for TokenTarget {
 }
 
 pub struct Name(sql::Idiom);
+type Scope = Name;
 
 impl From<Name> for sql::Value {
     fn from(value: Name) -> Self {
@@ -156,7 +157,9 @@ impl DefineTokenStatement {
     }
 
     pub fn on_scope(mut self, scope: impl Into<Scope>) -> Self {
-        self.target = Some(TokenTarget::Scope(scope.into().to_string()));
+        let binding = Binding::new(scope.into()).with_description("token definition scope");
+        self.bindings.push(binding.clone());
+        self.target = Some(TokenTarget::Scope(binding.get_param_dollarised()));
         self
     }
 
@@ -250,7 +253,7 @@ mod tests {
 
         assert_eq!(
             token_def.to_string(),
-            "DEFINE TOKEN $_param_00000000 ON SCOPE planet TYPE EDDSA VALUE $_param_00000000"
+            "DEFINE TOKEN $_param_00000000 ON SCOPE $_param_00000000 TYPE EDDSA VALUE $_param_00000000"
         );
         insta::assert_debug_snapshot!(token_def.get_bindings());
     }

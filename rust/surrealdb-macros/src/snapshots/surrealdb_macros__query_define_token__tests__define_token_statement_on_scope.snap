@@ -22,6 +22,25 @@ expression: token_def.get_bindings()
     },
     Binding {
         param: "_param_00000000",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "planet",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "planet",
+        description: Some(
+            "token definition scope",
+        ),
+    },
+    Binding {
+        param: "_param_00000000",
         value: Strand(
             Strand(
                 "abcde",
