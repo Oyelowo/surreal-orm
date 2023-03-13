@@ -160,6 +160,7 @@ impl Buildable for DefineLoginStatement {
                 }
             };
         };
+        query += ";";
         query
     }
 }

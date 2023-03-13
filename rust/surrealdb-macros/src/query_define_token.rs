@@ -103,7 +103,7 @@ impl Display for TokenTarget {
 }
 
 pub struct Name(sql::Idiom);
-type Scope = Name;
+pub type Scope = Name;
 
 impl From<Name> for sql::Value {
     fn from(value: Name) -> Self {
@@ -193,6 +193,7 @@ impl Buildable for DefineTokenStatement {
             query = format!("{query} VALUE {value}");
         }
 
+        query += ";";
         query
     }
 }
