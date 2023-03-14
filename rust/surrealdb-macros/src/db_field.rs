@@ -60,19 +60,6 @@ impl Parametric for DbField {
 //         Self::Table(value.field_name.to_string().into())
 //     }
 // }
-impl From<&mut DbField> for sql::Table {
-    fn from(value: &mut DbField) -> Self {
-        sql::Table(value.condition_query_string.to_string())
-    }
-}
-
-// impl<T> From<&[T]> for sql::Value {}
-
-impl From<DbField> for sql::Table {
-    fn from(value: DbField) -> Self {
-        sql::Table(value.condition_query_string)
-    }
-}
 
 // struct ValueCustom<T: Into<sql::Value>>(T);
 struct ValueCustom(sql::Value);
@@ -91,27 +78,21 @@ impl From<sql::Value> for ValueCustom {
 //     }
 // }
 
-// fn xx(argzz: impl Into<ValueCustom>) {}
-//
-// fn ttt() {
-//     let xx = xx(5);
-// }
-
-impl Into<Value> for &DbField {
+impl Into<sql::Value> for &DbField {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
     }
 }
 
-impl Into<Value> for DbField {
+impl Into<sql::Value> for DbField {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
     }
 }
 
-impl Into<Number> for &DbField {
+impl Into<sql::Number> for &DbField {
     fn into(self) -> Number {
-        Value::Table(self.condition_query_string.to_string().into())
+        sql::Value::Idiom(self.condition_query_string.to_string().into())
             .as_string()
             .into()
     }
@@ -159,7 +140,7 @@ impl From<Value> for GeometryOrField {
     }
 }
 
-impl From<GeometryOrField> for Value {
+impl From<GeometryOrField> for sql::Value {
     fn from(val: GeometryOrField) -> Self {
         match val {
             GeometryOrField::Geometry(g) => g.into(),
@@ -172,7 +153,7 @@ impl From<GeometryOrField> for Value {
 pub enum Ordinal {
     Datetime(sql::Datetime),
     Number(sql::Number),
-    Field(Value),
+    Field(sql::Value),
 }
 impl From<sql::Datetime> for Ordinal {
     fn from(value: sql::Datetime) -> Self {
@@ -211,8 +192,8 @@ impl Into<Ordinal> for &DbField {
         Ordinal::Field(self.into())
     }
 }
-impl Into<Value> for Ordinal {
-    fn into(self) -> Value {
+impl Into<sql::Value> for Ordinal {
+    fn into(self) -> sql::Value {
         match self {
             Ordinal::Datetime(n) => n.into(),
             Ordinal::Number(n) => n.into(),
@@ -237,8 +218,8 @@ impl Into<Ordinal> for sql::Number {
     }
 }
 
-impl Into<Number> for DbField {
-    fn into(self) -> Number {
+impl Into<sql::Number> for DbField {
+    fn into(self) -> sql::Number {
         // sql::Strand::from(self.field_name.into())
         // let xx = sql::Strand::from(self.field_name.into());
         Value::Strand(self.condition_query_string.into())
@@ -813,7 +794,7 @@ impl DbField {
     /// ```
     pub fn equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Equal, value)
     }
@@ -835,7 +816,7 @@ impl DbField {
     /// ```
     pub fn not_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::NotEqual, value)
     }
@@ -856,7 +837,7 @@ impl DbField {
     /// ```
     pub fn exactly_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Exact, value)
     }
@@ -900,7 +881,7 @@ impl DbField {
     /// ```
     pub fn all_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::AllEqual, value)
     }
@@ -921,7 +902,7 @@ impl DbField {
     /// ```
     pub fn like<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Like, value)
     }
@@ -942,7 +923,7 @@ impl DbField {
     /// ```
     pub fn not_like<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::NotLike, value)
     }
@@ -963,7 +944,7 @@ impl DbField {
     /// ```
     pub fn any_like<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::AnyLike, value)
     }
@@ -984,7 +965,7 @@ impl DbField {
     /// ```
     pub fn all_like<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::AllLike, value)
     }
@@ -1095,7 +1076,7 @@ impl DbField {
     /// ```
     pub fn add<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Add, value)
     }
@@ -1118,7 +1099,7 @@ impl DbField {
     /// ```
     pub fn subtract<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Sub, value)
     }
@@ -1141,7 +1122,7 @@ impl DbField {
     /// ```
     pub fn multiply<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Mul, value)
     }
@@ -1164,7 +1145,7 @@ impl DbField {
     /// ```
     pub fn divide<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Div, value)
     }
@@ -1187,7 +1168,7 @@ impl DbField {
     /// ```
     pub fn truthy_and<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query("&&", value)
     }
@@ -1211,7 +1192,7 @@ impl DbField {
     /// ```
     pub fn truthy_or<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query("||", value)
     }
@@ -1234,7 +1215,7 @@ impl DbField {
     /// ```
     pub fn and<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::And, value)
     }
@@ -1257,7 +1238,7 @@ impl DbField {
     /// ```
     pub fn or<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: sql::Value = value.into();
         self.generate_query(sql::Operator::Or, value)
@@ -1281,7 +1262,7 @@ impl DbField {
     /// ```
     pub fn is<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: sql::Value = value.into();
         self.generate_query("IS", value)
@@ -1329,7 +1310,7 @@ impl DbField {
     /// ```
     pub fn contains<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: sql::Value = value.into();
         self.generate_query(sql::Operator::Contain, value)
@@ -1353,7 +1334,7 @@ impl DbField {
     /// ```
     pub fn contains_not<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::NotContain, value)
     }
@@ -1448,7 +1429,7 @@ impl DbField {
     /// ```
     pub fn inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::Inside, value)
     }
@@ -1471,7 +1452,7 @@ impl DbField {
     /// ```
     pub fn not_inside<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         self.generate_query(sql::Operator::NotInside, value)
     }
@@ -1744,7 +1725,7 @@ impl DbField {
     /// ```
     pub fn minus_equal<T>(&self, value: T) -> Self
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: sql::Value = value.into();
         self.generate_query("-=", value)
@@ -1860,7 +1841,7 @@ impl DbField {
 
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: Value = value.into();
         let binding = Binding::new(value);
