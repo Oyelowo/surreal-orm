@@ -155,11 +155,11 @@ mod tests {
             .then(
                 select(All)
                     .from(fake_id)
-                    .where_(cond(
-                        city.is("Prince Edward Island")
+                    .where_(
+                        cond(city.is("Prince Edward Island"))
                             .and(city.is("NewFoundland"))
                             .or(city.like("Toronto")),
-                    ))
+                    )
                     .limit(153)
                     .start(10)
                     .parallel(),
@@ -167,7 +167,7 @@ mod tests {
 
         assert_eq!(
             query.to_string(),
-            "DEFINE EVENT email ON TABLE user WHEN age >= $_param_00000000 THEN SELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 LIMIT 153 START AT 10 PARALLEL;",
+            "DEFINE EVENT email ON TABLE user WHEN age >= $_param_00000000 THEN SELECT * FROM $_param_00000000 WHERE (city IS $_param_00000000) AND (city IS $_param_00000000) OR (city ~ $_param_00000000) LIMIT 153 START AT 10 PARALLEL;",
         );
         insta::assert_debug_snapshot!(query.get_bindings());
     }

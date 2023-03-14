@@ -1,6 +1,5 @@
 ---
 source: surrealdb-macros/src/query_define_event.rs
-assertion_line: 172
 expression: query.get_bindings()
 ---
 [
@@ -42,24 +41,24 @@ expression: query.get_bindings()
     },
     Binding {
         param: "_param_00000000",
-        value: Table(
-            Table(
-                "city IS $_param_00000000",
+        value: Strand(
+            Strand(
+                "NewFoundland",
             ),
         ),
         original_inline_name: "_param_00000000",
-        raw_string: "`city IS $_param_00000000`",
+        raw_string: "'NewFoundland'",
         description: None,
     },
     Binding {
         param: "_param_00000000",
-        value: Table(
-            Table(
-                "city ~ $_param_00000000",
+        value: Strand(
+            Strand(
+                "Toronto",
             ),
         ),
         original_inline_name: "_param_00000000",
-        raw_string: "`city ~ $_param_00000000`",
+        raw_string: "'Toronto'",
         description: None,
     },
 ]
