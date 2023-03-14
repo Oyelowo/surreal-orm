@@ -21,7 +21,10 @@ use std::{
 use proc_macro2::Span;
 use surrealdb::sql::{self, Number, Value};
 
-use crate::{query_select::SelectStatement, value_type_wrappers::SurrealId, SurrealdbModel};
+use crate::{
+    query_define_token::Name, query_select::SelectStatement, value_type_wrappers::SurrealId,
+    SurrealdbModel,
+};
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.
@@ -313,7 +316,7 @@ impl From<&Self> for DbField {
 impl From<&str> for DbField {
     fn from(value: &str) -> Self {
         let value: sql::Idiom = value.to_string().into();
-        Self::new(value)
+        Self::new(Name::new(value))
     }
 }
 
@@ -737,11 +740,12 @@ fn generate_param_name(prefix: &str) -> String {
 }
 
 impl DbField {
-    pub fn new(field_name: impl Into<sql::Idiom>) -> Self {
+    pub fn new(field_name: impl Into<Name>) -> Self {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
+        let field_name: Name = field_name.into();
         let field_name: sql::Idiom = field_name.into();
         let field_name_str = format!("{}", &field_name);
-        let field: sql::Value = field_name.into();
+        // let field: sql::Value = field_name.into();
         // This would be necessary if I decide to parametize and bind field names themselves
         // let binding = Binding::new(field_name.into());
         Self {
@@ -1784,7 +1788,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_params,
-            field_name: self.field_name,
+            field_name: self.field_name.clone(),
         }
     }
 
