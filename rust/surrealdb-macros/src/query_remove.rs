@@ -26,40 +26,58 @@ REMOVE [
 
 use std::fmt::Display;
 
+use surrealdb::sql;
+
 use crate::{query_insert::Buildable, DbField, Queryable};
 
-pub struct Namespace(String);
-pub struct Database(String);
-pub struct Login(String);
-pub struct Token(String);
-pub struct Scope(String);
-pub struct Table(String);
-pub struct Event(String);
-pub struct Index(String);
+pub struct Namespace(sql::Idiom);
+pub struct Database(sql::Idiom);
+pub struct Login(sql::Idiom);
+pub struct Token(sql::Idiom);
+pub struct Scope(sql::Idiom);
+pub struct Table(sql::Table);
+pub struct Event(sql::Idiom);
+pub struct Index(sql::Idiom);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
-        $(impl Display for $types_ {
+        $(
+        impl Display for $types_ {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", self.0)
             }
         }
-        impl From<$types_> for String {
+        // impl From<$types_> for String {
+        //     fn from(value: $types_) -> Self {
+        //         value.0.into()
+        //     }
+        // }
+        // impl From<&str> for $types_ {
+        //     fn from(value: &str) -> Self {
+        //         Self(value.into())
+        //     }
+        // }
+
+        // impl From<String> for $types_ {
+        //     fn from(value: String) -> Self {
+        //         Self(value)
+        //     }
+        // }
+
+        impl From<$types_> for sql::Value {
             fn from(value: $types_) -> Self {
-                value.0
-            }
-        }
-        impl From<&str> for $types_ {
-            fn from(value: &str) -> Self {
-                Self(value.into())
+                value.0.into()
             }
         }
 
-        impl From<String> for $types_ {
-            fn from(value: String) -> Self {
-                Self(value)
+        impl<T> From<T> for $types_
+        where
+            T: Into<String>,
+        {
+            fn from(value: T) -> Self {
+                Self(value.into().into())
             }
-        }
+    }
     )*
     };
 }
