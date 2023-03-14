@@ -111,6 +111,10 @@ impl<const N: usize> From<&[DbField; N]> for Columns {
 //     }
 // }
 
+// TODO: Not doing any parametization or binding in this DefineIndexStatement
+// as that is usually not recceiving input from external sources.
+// I am still contemplating using parametization everywhere and exposing a feature flag
+// to turn it on and off.
 impl Parametric for Columns {
     fn get_bindings(&self) -> BindingsList {
         match self {
