@@ -87,17 +87,17 @@ impl EventBuilder {
 pub struct Then(EventBuilder);
 
 impl Then {
-    pub fn then(mut self, query: impl Queryable + Parametric + Display) -> Final {
+    pub fn then(mut self, query: impl Queryable + Parametric + Display) -> DefineEventStatement {
         self.0.then_string = Some(format!("{}", &query));
         self.0.bindings.extend(query.get_bindings());
-        Final(self.0)
+        DefineEventStatement(self.0)
     }
 }
 
-pub struct Final(EventBuilder);
+pub struct DefineEventStatement(EventBuilder);
 
 // DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
-impl Buildable for Final {
+impl Buildable for DefineEventStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE EVENT {}", &self.0.event);
         if let Some(table_name) = &self.0.on_table {
@@ -117,19 +117,20 @@ impl Buildable for Final {
     }
 }
 
-impl Display for Final {
+impl Display for DefineEventStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
-impl Parametric for Final {
+impl Parametric for DefineEventStatement {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
     }
 }
 
-impl Runnable for Final {}
+impl Runnable for DefineEventStatement {}
+impl Queryable for DefineEventStatement {}
 
 #[cfg(test)]
 mod tests {
