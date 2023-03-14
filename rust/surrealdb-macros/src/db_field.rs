@@ -54,6 +54,12 @@ impl Parametric for DbField {
     }
 }
 
+impl From<&DbField> for Name {
+    fn from(value: &DbField) -> Self {
+        Self::new(value.field_name.clone().into())
+    }
+}
+
 impl From<&mut DbField> for sql::Value {
     fn from(value: &mut DbField) -> Self {
         Self::Idiom(value.field_name.to_string().into())
@@ -870,7 +876,7 @@ impl DbField {
     where
         T: Into<sql::Value>,
     {
-        self.generate_query(sql::Operator::Like, value)
+        self.generate_query(sql::Operator::Like, value.into())
     }
 
     /// Compare two values for inequality using fuzzy matching.

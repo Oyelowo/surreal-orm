@@ -26,40 +26,78 @@ REMOVE [
 
 use std::fmt::Display;
 
-use crate::{query_insert::Buildable, DbField, Queryable};
+use surrealdb::sql;
 
-pub struct Namespace(String);
-pub struct Database(String);
-pub struct Login(String);
-pub struct Token(String);
-pub struct Scope(String);
-pub struct Table(String);
-pub struct Event(String);
-pub struct Index(String);
+use crate::{query_define_token::Name, query_insert::Buildable, DbField, Queryable};
+
+pub struct Namespace(sql::Idiom);
+pub struct Database(sql::Idiom);
+pub struct Login(sql::Idiom);
+pub struct Token(sql::Idiom);
+pub struct Scope(sql::Idiom);
+pub struct Table(sql::Table);
+pub struct Event(sql::Idiom);
+pub struct Index(sql::Idiom);
+
+impl Table {
+    pub fn new(name: impl Into<sql::Table>) -> Self {
+        Self(name.into())
+    }
+}
+macro_rules! impl_new_for_all {
+    ($($types_:ty),*) => {
+        $(
+        impl $types_ {
+            pub fn new(name: impl Into<String>) -> Self {
+                Self(name.into().into())
+            }
+        }
+    )*
+    };
+}
+
+impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, Index);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
-        $(impl Display for $types_ {
+        $(
+        impl Display for $types_ {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", self.0)
             }
         }
         impl From<$types_> for String {
             fn from(value: $types_) -> Self {
-                value.0
+                let value: String = value.0.to_string();
+                value
             }
         }
         impl From<&str> for $types_ {
             fn from(value: &str) -> Self {
-                Self(value.into())
+                Self(value.to_string().into())
             }
         }
 
         impl From<String> for $types_ {
             fn from(value: String) -> Self {
-                Self(value)
+                Self(value.into())
             }
         }
+
+        impl From<$types_> for sql::Value {
+            fn from(value: $types_) -> Self {
+                value.0.into()
+            }
+        }
+
+    //     impl<T> From<T> for $types_
+    //     where
+    //         T: Into<String>,
+    //     {
+    //         fn from(value: T) -> Self {
+    //             Self(value.into().into())
+    //         }
+    // }
     )*
     };
 }
@@ -78,15 +116,6 @@ impl Display for NamespaceOrDatabase {
         };
         write!(f, "{}", stringified)
     }
-}
-
-struct LoginDetails {
-    name: Login,
-    on: NamespaceOrDatabase,
-}
-struct TokenDetails {
-    name: Token,
-    on: NamespaceOrDatabase,
 }
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
@@ -148,12 +177,12 @@ impl RemoveLoginStatement {
         }
     }
 
-    fn on_namespace(mut self) -> Self {
+    pub fn on_namespace(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Namespace);
         self
     }
 
-    fn on_database(mut self) -> Self {
+    pub fn on_database(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Database);
         self
     }
@@ -187,12 +216,12 @@ impl RemoveTokenStatement {
         }
     }
 
-    fn on_namespace(mut self) -> Self {
+    pub fn on_namespace(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Namespace);
         self
     }
 
-    fn on_database(mut self) -> Self {
+    pub fn on_database(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Database);
         self
     }
@@ -338,7 +367,7 @@ impl RemoveIndexStatement {
         }
     }
 
-    fn on_table(mut self, table: impl Into<Table>) -> Self {
+    pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into());
         self
     }
