@@ -12,7 +12,7 @@ use std::{
 
 use insta::{assert_debug_snapshot, assert_display_snapshot};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
+use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     db_field::{cond, Binding},
@@ -50,10 +50,10 @@ use std::collections::HashMap;
 
 // Struct to represent a SurrealDB index definition
 pub struct DefineIndexStatement {
-    index_name_param: String,
-    table_name_param: Option<String>,
-    fields_params: Vec<String>,
-    columns_params: Vec<String>,
+    index_name: String,
+    table_name: Option<String>,
+    fields: Vec<String>,
+    columns: Vec<String>,
     unique: Option<bool>,
     bindings: BindingsList,
 }
@@ -81,18 +81,39 @@ impl Deref for Table {
 }
 
 pub enum Columns {
-    Column(sql::Idiom),
-    Columns(Vec<sql::Idiom>),
+    Field(DbField),
+    Fields(Vec<DbField>),
+}
+pub type Fields = Columns;
+
+impl From<DbField> for Columns {
+    fn from(value: DbField) -> Self {
+        Self::Field(value)
+    }
+}
+
+// impl<T: Into<DbField>> From<T> for Columns {
+//     fn from(value: T) -> Self {
+//         Self::Column(value.into())
+//     }
+// }
+
+impl<T: Into<Vec<DbField>>> From<T> for Columns {
+    fn from(value: T) -> Self {
+        Self::Fields(value.into())
+    }
 }
 
 impl Parametric for Columns {
     fn get_bindings(&self) -> BindingsList {
         match self {
-            Columns::Column(c) => vec![Binding::new(sql::Value::Idiom(c.to_owned()))],
-            Columns::Columns(cs) => cs
-                .into_iter()
-                .map(|c| Binding::new(sql::Value::Idiom(c.to_owned())))
-                .collect(),
+            // Columns::Column(c) => vec![Binding::new(sql::Value::Idiom(c.to_owned()))],
+            Columns::Field(c) => vec![],
+            Columns::Fields(cs) => vec![]
+            // cs
+            //     .into_iter()
+            //     .map(|c| Binding::new(sql::Value::Idiom(c.to_owned())))
+            //     .collect(),
         }
     }
 }
@@ -105,24 +126,28 @@ pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
 
 impl DefineIndexStatement {
     pub fn new(index_name: impl Into<Index>) -> Self {
-        let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
+        // let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
+        let index_name: sql::Idiom = index_name.into().into();
+        let index_name: String = index_name.to_string();
 
         Self {
-            index_name_param: binding_index_name.get_param_dollarised(),
-            table_name_param: None,
-            fields_params: vec![],
-            columns_params: vec![],
+            index_name,
+            table_name: None,
+            fields: vec![],
+            columns: vec![],
             unique: None,
-            bindings: vec![binding_index_name],
+            bindings: vec![],
         }
     }
 
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
-        let binding =
-            Binding::new(table.into()).with_description("table name which fields are indexed");
+        let table: Table = table.into();
 
-        self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
-        self.bindings.push(binding);
+        // let binding = Binding::new(table).with_description("table name which fields are indexed");
+        // self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
+        // self.bindings.push(binding);
+
+        self.table_name = Some(table.to_string());
         self
     }
 
@@ -132,32 +157,68 @@ impl DefineIndexStatement {
         //
         // self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
         // self.bindings.push(binding);
+        let columns: Columns = columns.into();
+        let columns = match columns {
+            Columns::Field(f) => vec![f],
+            Columns::Fields(fs) => fs,
+        };
+        self.columns.extend(
+            columns
+                .into_iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>(),
+        );
+        self
+    }
+
+    pub fn fields(mut self, fields: impl Into<Fields>) -> Self {
+        let fields: Fields = fields.into();
+        let fields = match fields {
+            Columns::Field(f) => vec![f],
+            Columns::Fields(fs) => fs,
+        };
+        self.fields.extend(
+            fields
+                .into_iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>(),
+        );
+        self
+    }
+    pub fn unique(mut self) -> Self {
+        self.unique = Some(true);
         self
     }
 }
 
-// Build the query
-//     fn build(&self) -> String {
-//         let mut query = String::new();
-//
-//         // Define namespace and database
-//         if let Some(namespace) = &self.namespace {
-//             query += &format!("USE NAMESPACE {};", namespace);
-//         }
-//         if let Some(database) = &self.database {
-//             query += &format!("USE DATABASE {};", database);
-//         }
-//
-//         // Define index
-//         if let Some(index) = &self.index {
-//             let fields_str = index.fields_params.join(", ");
-//             let unique_str = if index.unique { "UNIQUE" } else { "" };
-//             query += &format!(
-//                 "DEFINE INDEX {} ON TABLE {} FIELDS {} {};",
-//                 index.index_name_param, index.table_name_param, fields_str, unique_str
-//             );
-//         }
-//
-//         query
-//     }
-// }
+impl Buildable for DefineIndexStatement {
+    fn build(&self) -> String {
+        let mut query = format!("DEFINE INDEX {}", self.index_name);
+
+        if !self.fields.is_empty() {
+            let fields_str = self.fields.join(", ");
+            query = format!("{query} FIELDS {fields_str}");
+        }
+
+        if !self.columns.is_empty() {
+            let columns_str = self.columns.join(", ");
+            query = format!("{query} COLUMNS {columns_str}");
+        }
+        // Define index
+        if self.unique.unwrap_or(false) {
+            query = format!("{query} unique");
+        }
+        query += ";";
+        query
+    }
+}
+
+impl Parametric for DefineIndexStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
+
+impl Queryable for DefineIndexStatement {}
+
+impl Runnable for DefineIndexStatement {}
