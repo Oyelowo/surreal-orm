@@ -44,16 +44,6 @@ pub struct DbField {
     bindings: BindingsList,
 }
 
-impl<T> From<T> for DbField
-where
-    T: Into<String>,
-{
-    fn from(value: T) -> Self {
-        let value: String = value.into();
-        // Self::new(value.into())
-        todo!()
-    }
-}
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
@@ -322,6 +312,7 @@ impl From<&Self> for DbField {
 }
 impl From<&str> for DbField {
     fn from(value: &str) -> Self {
+        let value: sql::Idiom = value.to_string().into();
         Self::new(value)
     }
 }
@@ -750,11 +741,11 @@ impl DbField {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
         let field_name: sql::Idiom = field_name.into();
         let field_name_str = format!("{}", &field_name);
-        // let field: sql::Value = field_name.into();
+        let field: sql::Value = field_name.into();
         // This would be necessary if I decide to parametize and bind field names themselves
         // let binding = Binding::new(field_name.into());
         Self {
-            field_name,
+            field_name: field_name.into(),
             condition_query_string: field_name_str,
             bindings: vec![].into(),
             // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
@@ -1835,7 +1826,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_params,
-            field_name: self.field_name,
+            field_name: self.field_name.clone(),
         }
     }
 
@@ -1851,7 +1842,7 @@ impl DbField {
         Self {
             condition_query_string: self.condition_query_string.to_string(),
             bindings: updated_params,
-            field_name: self.field_name,
+            field_name: self.field_name.clone(),
         }
     }
 
@@ -1881,7 +1872,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_bindings,
-            field_name: self.field_name,
+            field_name: self.field_name.clone(),
         }
     }
 }
