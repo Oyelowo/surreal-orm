@@ -17,13 +17,12 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use crate::{
     db_field::{cond, Binding},
     query_create::CreateStatement,
-    query_define_index::Table,
     query_define_token::{Name, Scope},
     query_delete::DeleteStatement,
     query_ifelse::Expression,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable},
+    query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
     BindingsList, DbField, DbFilter, Parametric, Queryable,
@@ -138,6 +137,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
+        query_remove::Table,
         query_select::{select, All},
         value_type_wrappers::SurrealId,
     };
@@ -149,9 +149,12 @@ mod tests {
         let age = DbField::new("age");
         let city = DbField::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        // TODO: Probably use try_from_converter for String<->Table and for other types
+        let user_table = Table::new("user");
+        let email_event = Event::new("email");
 
-        let query = define_event("email")
-            .on_table("user")
+        let query = define_event(email_event)
+            .on_table(user_table)
             .when(cond(age.greater_than_or_equal(18)))
             .then(
                 select(All)

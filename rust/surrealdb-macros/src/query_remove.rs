@@ -28,7 +28,7 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::{query_insert::Buildable, DbField, Queryable};
+use crate::{query_define_token::Name, query_insert::Buildable, DbField, Queryable};
 
 pub struct Namespace(sql::Idiom);
 pub struct Database(sql::Idiom);
@@ -38,6 +38,25 @@ pub struct Scope(sql::Idiom);
 pub struct Table(sql::Table);
 pub struct Event(sql::Idiom);
 pub struct Index(sql::Idiom);
+
+impl Table {
+    pub fn new(name: impl Into<sql::Table>) -> Self {
+        Self(name.into())
+    }
+}
+macro_rules! impl_new_for_all {
+    ($($types_:ty),*) => {
+        $(
+        impl $types_ {
+            pub fn new(name: impl Into<String>) -> Self {
+                Self(name.into().into())
+            }
+        }
+    )*
+    };
+}
+
+impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, Index);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
