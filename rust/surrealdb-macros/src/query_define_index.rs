@@ -195,6 +195,10 @@ impl Buildable for DefineIndexStatement {
     fn build(&self) -> String {
         let mut query = format!("DEFINE INDEX {}", self.index_name);
 
+        if let Some(table) = &self.table_name {
+            query = format!("{query} ON TABLE {table}");
+        }
+
         if !self.fields.is_empty() {
             let fields_str = self.fields.join(", ");
             query = format!("{query} FIELDS {fields_str}");
@@ -206,10 +210,16 @@ impl Buildable for DefineIndexStatement {
         }
         // Define index
         if self.unique.unwrap_or(false) {
-            query = format!("{query} unique");
+            query = format!("{query} UNIQUE");
         }
         query += ";";
         query
+    }
+}
+
+impl Display for DefineIndexStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 
@@ -222,3 +232,62 @@ impl Parametric for DefineIndexStatement {
 impl Queryable for DefineIndexStatement {}
 
 impl Runnable for DefineIndexStatement {}
+
+#[cfg(test)]
+mod tests {
+
+    use std::time::Duration;
+
+    use super::*;
+
+    #[test]
+    fn test_define_index_statement_single_field() {
+        let email = DbField::new("email");
+
+        let query = define_index("userEmailIndex")
+            .on_table("user")
+            .fields(email)
+            .unique();
+
+        assert_eq!(
+            query.to_string(),
+            "DEFINE INDEX userEmailIndex ON TABLE user FIELDS email UNIQUE;"
+        );
+        insta::assert_debug_snapshot!(query.get_bindings());
+    }
+
+    #[test]
+    fn test_define_index_statement_single_column() {
+        let email = DbField::new("email");
+
+        let query = define_index("userEmailIndex")
+            .on_table("user")
+            .columns(email)
+            .unique();
+
+        assert_eq!(
+            query.to_string(),
+            "DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;"
+        );
+        insta::assert_debug_snapshot!(query.get_bindings());
+    }
+
+    #[test]
+    fn test_define_index_statement_multiple_fields() {
+        let age = DbField::new("age");
+        let name = DbField::new("name");
+        let email = DbField::new("email");
+        let dob = DbField::new("dob");
+
+        let query = define_index("alien_index")
+            .on_table("alien")
+            .fields(&[age, name, email, dob])
+            .unique();
+
+        assert_eq!(
+            query.to_string(),
+            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000;"
+        );
+        insta::assert_debug_snapshot!(query.get_bindings());
+    }
+}
