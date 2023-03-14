@@ -47,22 +47,23 @@ macro_rules! impl_display_for_all {
                 write!(f, "{}", self.0)
             }
         }
-        // impl From<$types_> for String {
-        //     fn from(value: $types_) -> Self {
-        //         value.0.into()
-        //     }
-        // }
-        // impl From<&str> for $types_ {
-        //     fn from(value: &str) -> Self {
-        //         Self(value.into())
-        //     }
-        // }
+        impl From<$types_> for String {
+            fn from(value: $types_) -> Self {
+                let value: String = value.0.to_string();
+                value
+            }
+        }
+        impl From<&str> for $types_ {
+            fn from(value: &str) -> Self {
+                Self(value.to_string().into())
+            }
+        }
 
-        // impl From<String> for $types_ {
-        //     fn from(value: String) -> Self {
-        //         Self(value)
-        //     }
-        // }
+        impl From<String> for $types_ {
+            fn from(value: String) -> Self {
+                Self(value.into())
+            }
+        }
 
         impl From<$types_> for sql::Value {
             fn from(value: $types_) -> Self {
@@ -70,14 +71,14 @@ macro_rules! impl_display_for_all {
             }
         }
 
-        impl<T> From<T> for $types_
-        where
-            T: Into<String>,
-        {
-            fn from(value: T) -> Self {
-                Self(value.into().into())
-            }
-    }
+    //     impl<T> From<T> for $types_
+    //     where
+    //         T: Into<String>,
+    //     {
+    //         fn from(value: T) -> Self {
+    //             Self(value.into().into())
+    //         }
+    // }
     )*
     };
 }
@@ -96,15 +97,6 @@ impl Display for NamespaceOrDatabase {
         };
         write!(f, "{}", stringified)
     }
-}
-
-struct LoginDetails {
-    name: Login,
-    on: NamespaceOrDatabase,
-}
-struct TokenDetails {
-    name: Token,
-    on: NamespaceOrDatabase,
 }
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
@@ -166,12 +158,12 @@ impl RemoveLoginStatement {
         }
     }
 
-    fn on_namespace(mut self) -> Self {
+    pub fn on_namespace(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Namespace);
         self
     }
 
-    fn on_database(mut self) -> Self {
+    pub fn on_database(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Database);
         self
     }
@@ -205,12 +197,12 @@ impl RemoveTokenStatement {
         }
     }
 
-    fn on_namespace(mut self) -> Self {
+    pub fn on_namespace(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Namespace);
         self
     }
 
-    fn on_database(mut self) -> Self {
+    pub fn on_database(mut self) -> Self {
         self.on = Some(NamespaceOrDatabase::Database);
         self
     }
@@ -356,7 +348,7 @@ impl RemoveIndexStatement {
         }
     }
 
-    fn on_table(mut self, table: impl Into<Table>) -> Self {
+    pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into());
         self
     }
