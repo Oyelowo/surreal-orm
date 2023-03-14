@@ -44,16 +44,16 @@ pub struct DbField {
     bindings: BindingsList,
 }
 
-// impl<T> From<T> for DbField
-// where
-//     T: Into<String>,
-// {
-//     fn from(value: T) -> Self {
-//         let value: String = value.into();
-//         // Self::new(value.into())
-//         todo!()
-//     }
-// }
+impl<T> From<T> for DbField
+where
+    T: Into<String>,
+{
+    fn from(value: T) -> Self {
+        let value: String = value.into();
+        // Self::new(value.into())
+        todo!()
+    }
+}
 pub type BindingsList = Vec<Binding>;
 impl Parametric for DbField {
     fn get_bindings(&self) -> BindingsList {
@@ -746,11 +746,16 @@ fn generate_param_name(prefix: &str) -> String {
 }
 
 impl DbField {
-    pub fn new(field_name: impl Display) -> Self {
-        let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
-        let binding = Binding::new(field);
+    pub fn new(field_name: impl Into<sql::Idiom>) -> Self {
+        // let field: sql::Value = sql::Value::Idiom(field_name.into());
+        let field_name: sql::Idiom = field_name.into();
+        let field_name_str = format!("{}", &field_name);
+        // let field: sql::Value = field_name.into();
+        // This would be necessary if I decide to parametize and bind field names themselves
+        // let binding = Binding::new(field_name.into());
         Self {
-            condition_query_string: field_name.to_string(),
+            field_name,
+            condition_query_string: field_name_str,
             bindings: vec![].into(),
             // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
             // below in favour over above. This is more paranoid mode.
@@ -1788,6 +1793,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_params,
+            field_name: self.field_name,
         }
     }
 
@@ -1829,6 +1835,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_params,
+            field_name: self.field_name,
         }
     }
 
@@ -1844,6 +1851,7 @@ impl DbField {
         Self {
             condition_query_string: self.condition_query_string.to_string(),
             bindings: updated_params,
+            field_name: self.field_name,
         }
     }
 
@@ -1873,6 +1881,7 @@ impl DbField {
         Self {
             condition_query_string: condition,
             bindings: updated_bindings,
+            field_name: self.field_name,
         }
     }
 }
