@@ -637,8 +637,8 @@ async fn main() -> surrealdb::Result<()> {
     let xx = sql::Table("Rer".into());
     let xx = DbField::new("oejfiner");
     // sql::Field;
-    let cc: sql::Table = xx.into();
-    println!("xxx {} erere", cc);
+    // let cc: sql::Table = xx.into();
+    // println!("xxx {} erere", cc);
     // println!("xxx {}", serde_json::to_string(&cc).unwrap());
     // println!(
     //     "qqqq {}",

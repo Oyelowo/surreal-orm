@@ -54,14 +54,12 @@ impl Parametric for DbField {
     }
 }
 
-// impl From<&mut DbField> for sql::Value {
-//     fn from(value: &mut DbField) -> Self {
-//         // sql::Value(value.field_name.to_string())
-//         Self::Table(value.field_name.to_string().into())
-//     }
-// }
+impl From<&mut DbField> for sql::Value {
+    fn from(value: &mut DbField) -> Self {
+        Self::Idiom(value.field_name.to_string().into())
+    }
+}
 
-// struct ValueCustom<T: Into<sql::Value>>(T);
 struct ValueCustom(sql::Value);
 
 impl From<sql::Value> for ValueCustom {
@@ -90,13 +88,6 @@ impl Into<sql::Value> for DbField {
     }
 }
 
-impl Into<sql::Number> for &DbField {
-    fn into(self) -> Number {
-        sql::Value::Idiom(self.condition_query_string.to_string().into())
-            .as_string()
-            .into()
-    }
-}
 #[derive(serde::Serialize, Debug, Clone)]
 pub enum GeometryOrField {
     Geometry(sql::Geometry),
@@ -134,7 +125,7 @@ impl Into<GeometryOrField> for &DbField {
     }
 }
 
-impl From<Value> for GeometryOrField {
+impl From<sql::Value> for GeometryOrField {
     fn from(value: Value) -> Self {
         Self::Field(value)
     }
@@ -202,29 +193,9 @@ impl Into<sql::Value> for Ordinal {
     }
 }
 
-// impl std::fmt::Display for NumberOfField {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let num_field: sql::Value = match self {
-//             NumberOfField::Number(n) => n.to_owned().into,
-//             NumberOfField::Field(f) => f.clone().into(),
-//         };
-//         f.write_fmt(format_args!("{}", self.))
-//     }
-// }
-
 impl Into<Ordinal> for sql::Number {
     fn into(self) -> Ordinal {
         Ordinal::Number(self)
-    }
-}
-
-impl Into<sql::Number> for DbField {
-    fn into(self) -> sql::Number {
-        // sql::Strand::from(self.field_name.into())
-        // let xx = sql::Strand::from(self.field_name.into());
-        Value::Strand(self.condition_query_string.into())
-            .as_string()
-            .into()
     }
 }
 
@@ -258,11 +229,6 @@ impl From<DbField> for DbFilter {
         }
     }
 }
-// impl Into<DbFilter> for DbField {
-//     fn into(self) -> DbFilter {
-//         DbFilter::new(self.into())
-//     }
-// }
 
 impl<'a> From<Cow<'a, Self>> for DbField {
     fn from(value: Cow<'a, DbField>) -> Self {
@@ -1843,7 +1809,7 @@ impl DbField {
     where
         T: Into<sql::Value>,
     {
-        let value: Value = value.into();
+        let value: sql::Value = value.into();
         let binding = Binding::new(value);
         let condition = format!(
             "{} {} ${}",
