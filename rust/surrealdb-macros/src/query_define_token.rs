@@ -103,6 +103,25 @@ impl Display for TokenTarget {
 }
 
 pub struct Name(sql::Idiom);
+
+impl Name {
+    pub fn new(name: sql::Idiom) -> Self {
+        Self(name)
+    }
+}
+
+// impl From<sql::Idiom> for Name {
+//     fn from(value: sql::Idiom) -> Self {
+//         todo!()
+//     }
+// }
+
+impl From<Name> for sql::Idiom {
+    fn from(value: Name) -> Self {
+        value.0
+    }
+}
+
 pub type Scope = Name;
 
 impl From<Name> for sql::Value {
