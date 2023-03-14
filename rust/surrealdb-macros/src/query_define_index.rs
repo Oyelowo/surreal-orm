@@ -297,4 +297,23 @@ mod tests {
         );
         insta::assert_debug_snapshot!(query.get_bindings());
     }
+
+    #[test]
+    fn test_define_index_statement_multiple_columns() {
+        let age = DbField::new("age");
+        let name = DbField::new("name");
+        let email = DbField::new("email");
+        let dob = DbField::new("dob");
+
+        let query = define_index("alien_index")
+            .on_table("alien")
+            .columns(&[age, name, email, dob])
+            .unique();
+
+        assert_eq!(
+            query.to_string(),
+            "DEFINE INDEX alien_index ON TABLE alien COLUMNS age, name, email, dob UNIQUE;"
+        );
+        insta::assert_debug_snapshot!(query.get_bindings());
+    }
 }
