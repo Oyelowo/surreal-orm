@@ -98,11 +98,18 @@ impl From<DbField> for Columns {
 //     }
 // }
 
-impl<T: Into<Vec<DbField>>> From<T> for Columns {
-    fn from(value: T) -> Self {
-        Self::Fields(value.into())
+impl<const N: usize> From<&[DbField; N]> for Columns {
+    fn from(value: &[DbField; N]) -> Self {
+        Self::Fields(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
+    // impl<T: Into<[const DbField]>> From<T> for Columns {
 }
+
+// impl<T: Into<Vec<DbField>>> From<T> for Columns {
+//     fn from(value: T) -> Self {
+//         Self::Fields(value.into())
+//     }
+// }
 
 impl Parametric for Columns {
     fn get_bindings(&self) -> BindingsList {
@@ -286,7 +293,7 @@ mod tests {
 
         assert_eq!(
             query.to_string(),
-            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000;"
+            "DEFINE INDEX alien_index ON TABLE alien FIELDS age, name, email, dob UNIQUE;"
         );
         insta::assert_debug_snapshot!(query.get_bindings());
     }
