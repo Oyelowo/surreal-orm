@@ -368,3 +368,64 @@ impl Display for DefineFieldStatement {
 //
 // DEFINE FIELD email ON TABLE user; TYPE string; ASSERT $value != NONE AND is::email($value); VALUE $value OR '';
 // ``
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use std::time::Duration;
+
+    use crate::{
+        db_field::NONE,
+        query_define_table::{for_, ForCrudType},
+        query_select::{order, select, All},
+        value_type_wrappers::SurrealId,
+    };
+
+    use super::*;
+
+    #[test]
+    fn test_define_statement_schemaless_permissions_none() {
+        use ForCrudType::*;
+        let name = DbField::new("name");
+        let user_table = Table::from("user");
+        let age = DbField::new("age");
+        let email = DbField::new("email");
+        use FieldType::*;
+
+        let statement = define_field(email)
+            .on_table(user_table)
+            .type_(String)
+            .value("example@codebreather.com")
+            .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+            .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions_for(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions_for(&[
+                for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+                for_(Update).where_(age.less_than_or_equal(130)),
+            ]);
+
+        assert_eq!(
+            statement.to_string(),
+            "DEFINE TABLE user SCHEMALESS PERMISSIONS NONE;"
+        );
+        insta::assert_display_snapshot!(statement);
+        insta::assert_debug_snapshot!(statement.get_bindings());
+    }
+
+    #[test]
+    fn test_define_statement_schemaless() {
+        use FieldType::*;
+
+        let email = DbField::new("email");
+        let user_table = Table::from("user");
+        let statement = define_field(email).on_table(user_table).type_(String);
+
+        assert_eq!(
+            statement.to_string(),
+            "DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;"
+        );
+        insta::assert_display_snapshot!(statement);
+        insta::assert_debug_snapshot!(statement.get_bindings());
+    }
+}
