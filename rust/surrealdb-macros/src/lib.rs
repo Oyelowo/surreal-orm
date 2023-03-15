@@ -7,6 +7,7 @@
 
 #![allow(unused_imports)]
 
+use std::fmt::Display;
 use std::ops::Deref;
 
 use db_field::Empty;
@@ -47,6 +48,7 @@ pub use db_field::BindingsList;
 pub use db_field::DbField;
 pub use db_field::DbFilter;
 pub use db_field::Parametric;
+use query_insert::Buildable;
 use query_select::SelectStatement;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
@@ -57,7 +59,7 @@ pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use value_type_wrappers::SurrealId;
 
-pub trait Queryable {}
+pub trait Queryable: Parametric + Buildable + Display {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {

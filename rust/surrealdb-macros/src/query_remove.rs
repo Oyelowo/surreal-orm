@@ -24,11 +24,11 @@ REMOVE [
 ]
  * */
 
-use std::fmt::Display;
+use std::fmt::{self, Display};
 
 use surrealdb::sql;
 
-use crate::{query_define_token::Name, query_insert::Buildable, DbField, Queryable};
+use crate::{query_define_token::Name, query_insert::Buildable, DbField, Parametric, Queryable};
 
 pub struct Namespace(sql::Idiom);
 pub struct Database(sql::Idiom);
@@ -256,11 +256,24 @@ impl RemoveScopeStatement {
 
 impl Queryable for RemoveScopeStatement {}
 
+impl Parametric for RemoveScopeStatement {
+    fn get_bindings(&self) -> crate::BindingsList {
+        vec![]
+    }
+}
+
 impl Buildable for RemoveScopeStatement {
     fn build(&self) -> String {
         format!("REMOVE SCOPE {}", self.scope)
     }
 }
+
+impl Display for RemoveScopeStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
 impl Runnable for RemoveScopeStatement {}
 
 pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {

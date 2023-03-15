@@ -9,7 +9,9 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::{query_insert::Buildable, query_remove::Runnable, query_select::Duration, Queryable};
+use crate::{
+    query_insert::Buildable, query_remove::Runnable, query_select::Duration, Parametric, Queryable,
+};
 
 pub fn sleep(duration: impl Into<Duration>) -> SleepStatement {
     SleepStatement::new(duration)
@@ -29,7 +31,14 @@ impl Buildable for SleepStatement {
         format!("SLEEP {};", self.0)
     }
 }
+
 impl Queryable for SleepStatement {}
+
+impl Parametric for SleepStatement {
+    fn get_bindings(&self) -> crate::BindingsList {
+        vec![]
+    }
+}
 
 impl Runnable for SleepStatement {}
 

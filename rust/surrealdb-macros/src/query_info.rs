@@ -7,7 +7,9 @@
 
 use std::fmt;
 
-use crate::{query_insert::Buildable, query_remove::Runnable, Queryable};
+use crate::{
+    query_insert::Buildable, query_remove::Runnable, query_use::UseStatement, Parametric, Queryable,
+};
 
 pub fn info_for() -> InfoStatement {
     InfoStatement::new()
@@ -55,6 +57,12 @@ impl InfoStatement {
     }
 }
 impl Queryable for InfoStatement {}
+
+impl Parametric for InfoStatement {
+    fn get_bindings(&self) -> crate::BindingsList {
+        vec![]
+    }
+}
 
 impl Buildable for InfoStatement {
     fn build(&self) -> String {
