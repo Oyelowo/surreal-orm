@@ -17,12 +17,13 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use crate::{
     db_field::{cond, Binding},
     query_create::CreateStatement,
+    query_define_index::Table,
     query_define_token::{Name, Scope},
     query_delete::DeleteStatement,
     query_ifelse::Expression,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable, Table},
+    query_remove::{Event, RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
     BindingsList, DbField, DbFilter, Parametric, Queryable,
@@ -142,10 +143,6 @@ impl Parametric for ForEnding {
     }
 }
 
-// pub struct For {
-//     for_data: Vec<ForData>,
-// }
-
 #[derive(Clone)]
 pub enum ForArgs {
     ForOption(ForCrudType),
@@ -175,12 +172,6 @@ impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
     fn from(value: &[ForCrudType; N]) -> Self {
         Self::ForOptions(value.to_vec())
     }
-}
-
-fn eerer() {
-    For::new(ForCrudType::Create);
-    For::new(&[ForCrudType::Create]);
-    For::new(vec![ForCrudType::Create]);
 }
 
 impl For {
@@ -245,7 +236,8 @@ impl Display for ForEnding {
         write!(f, "{}", self.build())
     }
 }
-enum PermisisonForables {
+
+pub enum PermisisonForables {
     For(ForEnding),
     Fors(Vec<ForEnding>),
 }
@@ -266,7 +258,7 @@ enum SchemaType {
     Schemafull,
     Schemaless,
 }
-pub struct DefineTable {
+pub struct DefineTableStatement {
     table_name: String,
     drop: Option<bool>,
     schema_type: Option<SchemaType>,
@@ -277,20 +269,21 @@ pub struct DefineTable {
     bindings: BindingsList,
 }
 
-impl DefineTable {
-    // pub fn new(name: &'a str) -> Self {
-    //     DefineTable {
-    //         table_name: name,
-    //         drop: false,
-    //         schema_type: false,
-    //         projections: None,
-    //         tables: None,
-    //         condition: None,
-    //         groups: None,
-    //         permissions: None,
-    //     }
-    // }
+pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
+    let table: Table = table_name.into();
+    DefineTableStatement {
+        table_name: table.to_string(),
+        drop: None,
+        schema_type: None,
+        as_select: None,
+        permissions_none: None,
+        permissions_full: None,
+        permissions_for: vec![],
+        bindings: vec![],
+    }
+}
 
+impl DefineTableStatement {
     pub fn drop(mut self) -> Self {
         self.drop = Some(true);
         self
@@ -339,27 +332,6 @@ impl DefineTable {
     }
 }
 
-impl Buildable for DefineStatement {
-    fn build(&self) -> String {
-        let mut statement = String::new();
-        statement.push_str("DEFINE TABLE ");
-        statement.push_str(self.name);
-
-        if self.drop {
-            statement.push_str(" DROP");
-        }
-
-        if self.schemafull {
-            statement.push_str(" SCHEMAFULL");
-        } else {
-            statement.push_str(" SCHEMALESS");
-        }
-
-        statement
-    }
-}
-//
-//
 // Statement syntax
 // DEFINE TABLE @name
 // 	[ DROP ]
@@ -375,9 +347,55 @@ impl Buildable for DefineStatement {
 // 		| FOR update @expression
 // 		| FOR delete @expression
 // 	] ]
-//
-//
-//
+impl Buildable for DefineTableStatement {
+    fn build(&self) -> String {
+        let mut query = format!("DEFINE TABLE {}", &self.table_name);
+
+        if self.drop.unwrap_or_default() {
+            query = format!("{query} DROP");
+        }
+
+        match self.schema_type {
+            Some(SchemaType::Schemafull) => {
+                query = format!("{query} SCHEMAFULL");
+            }
+            Some(SchemaType::Schemaless) => {
+                query = format!("{query} SCHEMALESS");
+            }
+            None => {}
+        };
+
+        if let Some(true) = self.permissions_none {
+            query = format!("{query} PERMISSIONS NONE");
+        } else if let Some(true) = self.permissions_full {
+            query = format!("{query} PERMISSIONS FULL");
+        } else if !&self.permissions_for.is_empty() {
+            query = format!(
+                "{query} PERMISSIONS\n\t\t{}",
+                self.permissions_for.join("\n")
+            );
+        }
+        query.push_str("\n;");
+
+        query
+    }
+}
+
+impl Display for DefineTableStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Runnable for DefineTableStatement {}
+
+impl Queryable for DefineTableStatement {}
+
+impl Parametric for DefineTableStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
 
 #[cfg(test)]
 mod tests {
