@@ -245,6 +245,22 @@ impl Display for ForEnding {
         write!(f, "{}", self.build())
     }
 }
+enum PermisisonForables {
+    For(ForEnding),
+    Fors(Vec<ForEnding>),
+}
+
+impl From<ForEnding> for PermisisonForables {
+    fn from(value: ForEnding) -> Self {
+        Self::For(value)
+    }
+}
+
+impl From<Vec<ForEnding>> for PermisisonForables {
+    fn from(value: Vec<ForEnding>) -> Self {
+        Self::Fors(value)
+    }
+}
 
 enum SchemaType {
     Schemafull,
@@ -293,6 +309,22 @@ impl DefineTable {
     pub fn as_select(mut self, select_statement: impl Into<SelectStatement>) -> Self {
         let statement: SelectStatement = select_statement.into();
         self.as_select = Some(statement.to_string());
+        self.bindings.extend(statement.get_bindings());
+        self
+    }
+
+    pub fn permissions_none(mut self) -> Self {
+        self.permissions_none = Some(true);
+        self
+    }
+
+    pub fn permissions_full(mut self) -> Self {
+        self.permissions_full = Some(true);
+        self
+    }
+
+    pub fn permissions_for(mut self) -> Self {
+        self.permissions_for = Some(true);
         self
     }
 }
