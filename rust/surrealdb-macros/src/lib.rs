@@ -19,6 +19,7 @@ pub mod query_define_index;
 pub mod query_define_login;
 pub mod query_define_namespace;
 pub mod query_define_scope;
+pub mod query_define_table;
 pub mod query_define_token;
 pub mod query_delete;
 pub mod query_ifelse;
