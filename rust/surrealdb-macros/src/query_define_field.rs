@@ -228,6 +228,7 @@ impl Display for FieldType {
     }
 }
 
+#[derive(Clone)]
 pub struct DefineFieldStatement {
     field_name: String,
     table_name: Option<String>,
@@ -254,7 +255,7 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     }
 }
 
-struct ValueAssert(DbField);
+pub struct ValueAssert(DbField);
 
 impl Deref for ValueAssert {
     type Target = DbField;
@@ -264,7 +265,7 @@ impl Deref for ValueAssert {
     }
 }
 
-fn value() -> ValueAssert {
+pub fn value() -> ValueAssert {
     ValueAssert(DbField::new("$value"))
 }
 
@@ -274,7 +275,7 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn type_(&mut self, field_type: impl Into<FieldType>) -> &mut Self {
+    pub fn type_(mut self, field_type: impl Into<FieldType>) -> Self {
         // let field_type: FieldType = field_type.into();
         self.type_ = Some(field_type.into().into());
         self
