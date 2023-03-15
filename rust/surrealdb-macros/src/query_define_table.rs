@@ -250,138 +250,72 @@ enum SchemaType {
     Schemafull,
     Schemaless,
 }
-pub struct DefineTable<'a> {
-    table_name: &'a str,
+pub struct DefineTable {
+    table_name: String,
     drop: Option<bool>,
     schema_type: Option<SchemaType>,
     as_select: Option<String>,
     permissions_none: Option<bool>,
     permissions_full: Option<bool>,
-    permissions_for: Option<bool>,
-    permissions: Option<Permissions<'a>>,
+    permissions_for: Vec<String>,
+    bindings: BindingsList,
 }
-//
-// impl<'a> DefineTable<'a> {
-//     pub fn new(name: &'a str) -> Self {
-//         DefineTable {
-//             table_name: name,
-//             drop: false,
-//             schema_type: false,
-//             projections: None,
-//             tables: None,
-//             condition: None,
-//             groups: None,
-//             permissions: None,
-//         }
-//     }
-//
-//     pub fn drop(mut self) -> Self {
-//         self.drop = true;
-//         self
-//     }
-//
-//     pub fn schemafull(mut self) -> Self {
-//         self.schema_type = true;
-//         self
-//     }
-//
-//     pub fn projections(mut self, projections: Vec<&'a str>) -> Self {
-//         self.projections = Some(projections);
-//         self
-//     }
-//
-//     pub fn tables(mut self, tables: Vec<&'a str>) -> Self {
-//         self.tables = Some(tables);
-//         self
-//     }
-//
-//     pub fn condition(mut self, condition: &'a str) -> Self {
-//         self.condition = Some(condition);
-//         self
-//     }
-//
-//     pub fn groups(mut self, groups: Vec<&'a str>) -> Self {
-//         self.groups = Some(groups);
-//         self
-//     }
-//
-//     pub fn permissions(mut self, permissions: Permissions<'a>) -> Self {
-//         self.permissions = Some(permissions);
-//         self
-//     }
-// }
-//
-// impl Buildable for DefineStatement {
-//     fn build(&self) -> String {
-//         let mut statement = String::new();
-//         statement.push_str("DEFINE TABLE ");
-//         statement.push_str(self.name);
-//
-//         if self.drop {
-//             statement.push_str(" DROP");
-//         }
-//
-//         if self.schemafull {
-//             statement.push_str(" SCHEMAFULL");
-//         } else {
-//             statement.push_str(" SCHEMALESS");
-//         }
-//
-//         if let Some(projections) = self.projections {
-//             statement.push_str(" AS SELECT ");
-//             statement.push_str(&projections.join(", "));
-//         }
-//
-//         if let Some(tables) = self.tables {
-//             statement.push_str(" FROM ");
-//             statement.push_str(&tables.join(", "));
-//         }
-//
-//         if let Some(condition) = self.condition {
-//             statement.push_str(" WHERE ");
-//             statement.push_str(condition);
-//         }
-//
-//         if let Some(groups) = self.groups {
-//             statement.push_str(" GROUP BY ");
-//             statement.push_str(&groups.join(", "));
-//         }
-//
-//         if let Some(permissions) = self.permissions {
-//             statement.push_str(" PERMISSIONS");
-//
-//             if permissions.none {
-//                 statement.push_str(" NONE");
-//             }
-//
-//             if permissions.full {
-//                 statement.push_str(" FULL");
-//             }
-//
-//             if let Some(select) = permissions.select {
-//                 statement.push_str(" FOR select ");
-//                 statement.push_str(select);
-//             }
-//
-//             if let Some(create) = permissions.create {
-//                 statement.push_str(" FOR create ");
-//                 statement.push_str(create);
-//             }
-//
-//             if let Some(update) = permissions.update {
-//                 statement.push_str(" FOR update ");
-//                 statement.push_str(update);
-//             }
-//
-//             if let Some(delete) = permissions.delete {
-//                 statement.push_str(" FOR delete ");
-//                 statement.push_str(delete);
-//             }
-//         }
-//
-//         statement
-//     }
-// }
+
+impl DefineTable {
+    // pub fn new(name: &'a str) -> Self {
+    //     DefineTable {
+    //         table_name: name,
+    //         drop: false,
+    //         schema_type: false,
+    //         projections: None,
+    //         tables: None,
+    //         condition: None,
+    //         groups: None,
+    //         permissions: None,
+    //     }
+    // }
+
+    pub fn drop(mut self) -> Self {
+        self.drop = Some(true);
+        self
+    }
+
+    pub fn schemafull(mut self) -> Self {
+        self.schema_type = Some(SchemaType::Schemafull);
+        self
+    }
+
+    pub fn schemaless(mut self) -> Self {
+        self.schema_type = Some(SchemaType::Schemaless);
+        self
+    }
+
+    pub fn as_select(mut self, select_statement: impl Into<SelectStatement>) -> Self {
+        let statement: SelectStatement = select_statement.into();
+        self.as_select = Some(statement.to_string());
+        self
+    }
+}
+
+impl Buildable for DefineStatement {
+    fn build(&self) -> String {
+        let mut statement = String::new();
+        statement.push_str("DEFINE TABLE ");
+        statement.push_str(self.name);
+
+        if self.drop {
+            statement.push_str(" DROP");
+        }
+
+        if self.schemafull {
+            statement.push_str(" SCHEMAFULL");
+        } else {
+            statement.push_str(" SCHEMALESS");
+        }
+
+        statement
+    }
+}
 //
 //
 // Statement syntax
