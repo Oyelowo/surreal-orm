@@ -109,8 +109,6 @@ use crate::{
 // ;
 //
 
-//  for([create, update]).where_(user.equal(2));
-//
 #[derive(Clone, Copy)]
 pub enum ForCrudType {
     Create,
@@ -131,13 +129,13 @@ impl Display for ForCrudType {
     }
 }
 
-struct For {
+struct ForData {
     crud_types: Vec<ForCrudType>,
     condition: Option<DbFilter>,
     bindings: BindingsList,
 }
 
-impl Parametric for ForEnding {
+impl Parametric for For {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
     }
@@ -174,38 +172,27 @@ impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
     }
 }
 
-impl For {
-    // fn new<'a, const N: usize>(for_crud_types: impl Into<&'a [ForCrudType; N]>) -> Self {
-    fn new(for_crud_types: impl Into<ForArgs>) -> ForStart {
-        ForStart(For {
-            crud_types: for_crud_types.into().into(),
-            condition: None,
-            bindings: vec![],
-        })
-    }
-}
-
-pub struct ForStart(For);
+pub struct ForStart(ForData);
 
 impl ForStart {
-    pub fn where_(mut self, condition: impl Into<DbFilter>) -> ForEnding {
+    pub fn where_(mut self, condition: impl Into<DbFilter>) -> For {
         let condition: DbFilter = condition.into();
         self.0.condition = Some(condition.clone());
         self.0.bindings.extend(condition.get_bindings());
-        ForEnding(self.0)
+        For(self.0)
     }
 }
 
 pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
-    ForStart(For {
+    ForStart(ForData {
         crud_types: for_crud_types.into().into(),
         condition: None,
         bindings: vec![],
     })
 }
-pub struct ForEnding(For);
+pub struct For(ForData);
 
-impl Buildable for ForEnding {
+impl Buildable for For {
     fn build(&self) -> String {
         let mut query = format!("FOR");
         if !&self.0.crud_types.is_empty() {
@@ -231,25 +218,25 @@ impl Buildable for ForEnding {
     }
 }
 
-impl Display for ForEnding {
+impl Display for For {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
 pub enum PermisisonForables {
-    For(ForEnding),
-    Fors(Vec<ForEnding>),
+    For(For),
+    Fors(Vec<For>),
 }
 
-impl From<ForEnding> for PermisisonForables {
-    fn from(value: ForEnding) -> Self {
+impl From<For> for PermisisonForables {
+    fn from(value: For) -> Self {
         Self::For(value)
     }
 }
 
-impl From<Vec<ForEnding>> for PermisisonForables {
-    fn from(value: Vec<ForEnding>) -> Self {
+impl From<Vec<For>> for PermisisonForables {
+    fn from(value: Vec<For>) -> Self {
         Self::Fors(value)
     }
 }
@@ -319,9 +306,9 @@ impl DefineTableStatement {
     pub fn permissions_for(mut self, fors: impl Into<PermisisonForables>) -> Self {
         let fors: PermisisonForables = fors.into();
         match fors {
-            PermisisonForables::For(f) => {
-                self.permissions_for.push(f.to_string());
-                self.bindings.extend(f.get_bindings());
+            PermisisonForables::For(one) => {
+                self.permissions_for.push(one.to_string());
+                self.bindings.extend(one.get_bindings());
             }
             PermisisonForables::Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
