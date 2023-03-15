@@ -285,7 +285,7 @@ pub struct NONE;
 
 impl From<NONE> for sql::Value {
     fn from(value: NONE) -> Self {
-        sql::Value::Idiom(value.into())
+        sql::Value::Idiom(value.to_string().into())
     }
 }
 
