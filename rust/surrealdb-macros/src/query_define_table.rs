@@ -213,8 +213,8 @@ pub struct ForStart(For);
 impl ForStart {
     pub fn where_(mut self, condition: impl Into<DbFilter>) -> ForEnding {
         let condition: DbFilter = condition.into();
-        self.0.condition = Some(condition);
-        // self.0.bindings.extend(condition.get_bindings());
+        self.0.condition = Some(condition.clone());
+        self.0.bindings.extend(condition.get_bindings());
         ForEnding(self.0)
     }
 }
@@ -234,7 +234,7 @@ pub struct ForEnding(For);
 
 impl Buildable for ForEnding {
     fn build(&self) -> String {
-        let mut query = format!("FOR ");
+        let mut query = format!("FOR");
         if !&self.0.crud_types.is_empty() {
             query = format!(
                 "{query} {}",
@@ -250,7 +250,17 @@ impl Buildable for ForEnding {
                     .join(", ")
             );
         }
+
+        if let Some(cond) = &self.0.condition {
+            query = format!("{query}\n\tWHERE {cond}");
+        }
         query
+    }
+}
+
+impl Display for ForEnding {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 
@@ -423,7 +433,25 @@ mod tests {
         let name = DbField::new("name");
 
         let for_res = for2_(ForCrudType::Create).where_(name.like("Oyelowo"));
-        assert_eq!(for_res, for_res);
+        assert_eq!(
+            for_res.to_string(),
+            "FOR create\n\tWHERE name ~ $_param_00000000".to_string()
+        );
+        insta::assert_display_snapshot!(for_res);
+        insta::assert_debug_snapshot!(for_res.get_bindings());
+    }
+
+    #[test]
+    fn test_define_for_statement_state_machine_multiple() {
+        use ForCrudType::*;
+        let name = DbField::new("name");
+
+        let for_res = for2_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+        assert_eq!(
+            for_res.to_string(),
+            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
+        );
+        insta::assert_display_snapshot!(for_res);
         insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 }
