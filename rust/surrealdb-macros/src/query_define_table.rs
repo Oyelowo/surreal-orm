@@ -323,8 +323,18 @@ impl DefineTable {
         self
     }
 
-    pub fn permissions_for(mut self) -> Self {
-        self.permissions_for = Some(true);
+    pub fn permissions_for(mut self, fors: impl Into<PermisisonForables>) -> Self {
+        let fors: PermisisonForables = fors.into();
+        match fors {
+            PermisisonForables::For(f) => {
+                self.permissions_for.push(f.to_string());
+                self.bindings.extend(f.get_bindings());
+            }
+            PermisisonForables::Fors(many) => many.iter().for_each(|f| {
+                self.permissions_for.push(f.to_string());
+                self.bindings.extend(f.get_bindings());
+            }),
+        }
         self
     }
 }
