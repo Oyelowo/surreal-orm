@@ -388,10 +388,10 @@ enum SchemaType {
 #[cfg(test)]
 mod tests {
 
+    use super::*;
     use std::time::Duration;
 
     use crate::{
-        query_remove::Table,
         query_select::{select, All},
         value_type_wrappers::SurrealId,
     };
@@ -423,5 +423,24 @@ mod tests {
         );
         insta::assert_display_snapshot!(for_res);
         insta::assert_debug_snapshot!(for_res.get_bindings());
+    }
+
+    #[test]
+    fn test_define_statement_state_machine_multiple() {
+        use ForCrudType::*;
+        let name = DbField::new("name");
+        let user_table = Table::from("user");
+
+        let statement = define_table(user_table)
+            .drop()
+            .schemafull()
+            .permissions_for(for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo")));
+
+        assert_eq!(
+            statement.to_string(),
+            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
+        );
+        insta::assert_display_snapshot!(statement);
+        insta::assert_debug_snapshot!(statement.get_bindings());
     }
 }
