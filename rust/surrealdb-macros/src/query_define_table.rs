@@ -107,20 +107,6 @@ use crate::{
 // 			OR $auth.admin = true
 // ;
 //
-enum SchemaType {
-    Schemafull,
-    Schemaless,
-}
-pub struct DefineTable<'a> {
-    table_name: &'a str,
-    drop: Option<bool>,
-    schema_type: Option<SchemaType>,
-    as_select: Option<String>,
-    permissions_none: Option<bool>,
-    permissions_full: Option<bool>,
-    permissions_for: Option<bool>,
-    permissions: Option<Permissions<'a>>,
-}
 
 //  for([create, update]).where_(user.equal(2));
 //
@@ -220,10 +206,6 @@ impl ForStart {
 }
 
 pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
-    For::new(for_crud_types)
-}
-
-pub fn for2_(for_crud_types: impl Into<ForArgs>) -> ForStart {
     ForStart(For {
         crud_types: for_crud_types.into().into(),
         condition: None,
@@ -264,13 +246,19 @@ impl Display for ForEnding {
     }
 }
 
-pub struct Permissions<'a> {
-    none: bool,
-    full: bool,
-    select: Option<&'a str>,
-    create: Option<&'a str>,
-    update: Option<&'a str>,
-    delete: Option<&'a str>,
+enum SchemaType {
+    Schemafull,
+    Schemaless,
+}
+pub struct DefineTable<'a> {
+    table_name: &'a str,
+    drop: Option<bool>,
+    schema_type: Option<SchemaType>,
+    as_select: Option<String>,
+    permissions_none: Option<bool>,
+    permissions_full: Option<bool>,
+    permissions_for: Option<bool>,
+    permissions: Option<Permissions<'a>>,
 }
 //
 // impl<'a> DefineTable<'a> {
@@ -432,7 +420,7 @@ mod tests {
     fn test_define_for_statement_state_machine() {
         let name = DbField::new("name");
 
-        let for_res = for2_(ForCrudType::Create).where_(name.like("Oyelowo"));
+        let for_res = for_(ForCrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
             for_res.to_string(),
             "FOR create\n\tWHERE name ~ $_param_00000000".to_string()
@@ -446,7 +434,7 @@ mod tests {
         use ForCrudType::*;
         let name = DbField::new("name");
 
-        let for_res = for2_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+        let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
             for_res.to_string(),
             "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
