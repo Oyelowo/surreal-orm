@@ -5,7 +5,11 @@
  * Licensed under the MIT license
  */
 
-use std::{collections::HashMap, fmt::format, marker::PhantomData};
+use std::{
+    collections::HashMap,
+    fmt::{format, Display},
+    marker::PhantomData,
+};
 
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -42,6 +46,15 @@ where
 }
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> Display for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
 
 pub enum Insertables<T>
 where
