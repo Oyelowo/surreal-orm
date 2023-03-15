@@ -229,8 +229,8 @@ impl Display for FieldType {
 }
 
 pub struct DefineFieldStatement {
-    field: String,
-    table: Option<String>,
+    field_name: String,
+    table_name: Option<String>,
     type_: Option<String>,
     value: Option<String>,
     assert: Option<String>,
@@ -242,8 +242,8 @@ pub struct DefineFieldStatement {
 pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     let field: DbField = fieldable.into();
     DefineFieldStatement {
-        field: field.to_string(),
-        table: None,
+        field_name: field.to_string(),
+        table_name: None,
         type_: None,
         value: None,
         assert: None,
@@ -254,9 +254,23 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     }
 }
 
+struct ValueAssert(DbField);
+
+impl Deref for ValueAssert {
+    type Target = DbField;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+fn value() -> ValueAssert {
+    ValueAssert(DbField::new("$value"))
+}
+
 impl DefineFieldStatement {
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
-        self.table = Some(table.into().into());
+        self.table_name = Some(table.into().into());
         self
     }
 
@@ -314,7 +328,34 @@ impl Parametric for DefineFieldStatement {
 
 impl Buildable for DefineFieldStatement {
     fn build(&self) -> String {
-        todo!()
+        let mut query = format!("DEFINE FIELD {}", &self.field_name);
+
+        if let Some(table) = &self.table_name {
+            query = format!("{query} ON TABLE {table}");
+        }
+
+        if let Some(field_type) = &self.type_ {
+            query = format!("{query} TYPE {field_type}");
+        }
+
+        if let Some(value) = &self.value {
+            query = format!("{query} VALUE {value}");
+        }
+
+        if let Some(assertion) = &self.assert {
+            query = format!("{query} ASSERT {assertion}");
+        }
+
+        if let Some(true) = self.permissions_none {
+            query = format!("{query} PERMISSIONS NONE");
+        } else if let Some(true) = self.permissions_full {
+            query = format!("{query} PERMISSIONS FULL");
+        } else if !&self.permissions_for.is_empty() {
+            query = format!("{query}\nPERMISSIONS\n{}", self.permissions_for.join("\n"));
+        }
+        query.push_str(";");
+
+        query
     }
 }
 
