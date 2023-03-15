@@ -281,6 +281,20 @@ impl From<DbField> for String {
 
 pub struct ArrayCustom(sql::Array);
 
+pub struct NONE;
+
+impl From<NONE> for sql::Value {
+    fn from(value: NONE) -> Self {
+        sql::Value::Idiom(value.into())
+    }
+}
+
+impl Display for NONE {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "NONE")
+    }
+}
+
 impl<T> From<Vec<T>> for ArrayCustom
 where
     T: Into<sql::Value>,
