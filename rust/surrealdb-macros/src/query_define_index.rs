@@ -60,6 +60,12 @@ pub struct DefineIndexStatement {
 
 pub struct Table(sql::Table);
 
+impl Display for Table {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 impl From<Table> for sql::Value {
     fn from(value: Table) -> Self {
         Self::Table(value.0)

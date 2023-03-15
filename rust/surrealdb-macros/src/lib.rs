@@ -15,6 +15,7 @@ pub mod operators_macros;
 pub mod query_create;
 pub mod query_define_database;
 pub mod query_define_event;
+pub mod query_define_field;
 pub mod query_define_index;
 pub mod query_define_login;
 pub mod query_define_namespace;
