@@ -706,11 +706,15 @@ fn generate_param_name(prefix: &str) -> String {
     param
 }
 
-impl DbField {
-    pub fn new(field_name: impl Into<Name>) -> Self {
+// enum NameOrParam {
+//     Name(Name),
+//     Param(Param),
+// }
+// impl DbField {
+    pub fn new(field_name: impl Into<sql::Value>) -> Self {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
-        let field_name: Name = field_name.into();
-        let field_name: sql::Idiom = field_name.into();
+        // let field_name: Name = field_name.into();
+        let field_name: sql::Value = field_name.into();
         let field_name_str = format!("{}", &field_name);
         // let field: sql::Value = field_name.into();
         // This would be necessary if I decide to parametize and bind field names themselves

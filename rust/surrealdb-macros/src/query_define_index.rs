@@ -62,7 +62,7 @@ pub struct Table(sql::Table);
 
 impl Display for Table {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", self.0.to_string())
     }
 }
 
@@ -144,7 +144,8 @@ pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
 impl DefineIndexStatement {
     pub fn new(index_name: impl Into<Index>) -> Self {
         // let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
-        let index_name: sql::Idiom = index_name.into().into();
+        let index_name: Index = index_name.into();
+        let index_name: sql::Idiom = index_name.into();
         let index_name: String = index_name.to_string();
 
         Self {
