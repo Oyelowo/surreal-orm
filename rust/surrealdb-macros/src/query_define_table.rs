@@ -222,8 +222,8 @@ impl Buildable for DefineTableStatement {
             query = format!("{query} PERMISSIONS FULL");
         } else if !&self.permissions_for.is_empty() {
             query = format!(
-                "{query} PERMISSIONS\n\t\t{}",
-                self.permissions_for.join("\n")
+                "{query}\nPERMISSIONS\n\t{}",
+                self.permissions_for.join("\n\t")
             );
         }
         query.push_str("\n;");
@@ -268,6 +268,7 @@ impl Display for ForCrudType {
     }
 }
 
+#[derive(Clone)]
 struct ForData {
     crud_types: Vec<ForCrudType>,
     condition: Option<DbFilter>,
@@ -329,6 +330,8 @@ pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
         bindings: vec![],
     })
 }
+
+#[derive(Clone)]
 pub struct For(ForData);
 
 impl Buildable for For {
@@ -351,7 +354,7 @@ impl Buildable for For {
         }
 
         if let Some(cond) = &self.0.condition {
-            query = format!("{query}\n\tWHERE {cond}");
+            query = format!("{query}\n\t\tWHERE {cond}");
         }
         query
     }
@@ -363,6 +366,7 @@ impl Display for For {
     }
 }
 
+#[derive(Clone)]
 pub enum PermisisonForables {
     For(For),
     Fors(Vec<For>),
@@ -380,6 +384,11 @@ impl From<Vec<For>> for PermisisonForables {
     }
 }
 
+impl<'a, const N: usize> From<&[For; N]> for PermisisonForables {
+    fn from(value: &[For; N]) -> Self {
+        Self::Fors(value.to_vec())
+    }
+}
 enum SchemaType {
     Schemafull,
     Schemaless,
@@ -392,7 +401,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        query_select::{select, All},
+        query_select::{order, select, All},
         value_type_wrappers::SurrealId,
     };
 
@@ -430,16 +439,32 @@ mod tests {
         use ForCrudType::*;
         let name = DbField::new("name");
         let user_table = Table::from("user");
+        let age = DbField::new("age");
+        let country = DbField::new("country");
+        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 
         let statement = define_table(user_table)
             .drop()
+            .as_select(
+                select(All)
+                    .from(fake_id2)
+                    .where_(country.is("INDONESIA"))
+                    .order_by(order(&age).numeric().desc())
+                    .limit(20)
+                    .start(5),
+            )
             .schemafull()
-            .permissions_for(for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo")));
+            .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions_for(&[
+                for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+                for_(Update).where_(age.less_than_or_equal(130)),
+            ]);
 
-        assert_eq!(
-            statement.to_string(),
-            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
-        );
+        // assert_eq!(
+        //     statement.to_string(),
+        //     "DEFINE TABLE user DROP SCHEMAFULL PERMISSIONS\n\t\tFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000\n;".to_string()
+        // );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());
     }

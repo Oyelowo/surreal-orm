@@ -1,0 +1,16 @@
+---
+source: surrealdb-macros/src/query_define_table.rs
+assertion_line: 468
+expression: statement
+---
+DEFINE TABLE user DROP SCHEMAFULL
+PERMISSIONS
+	FOR select
+		WHERE age >= $_param_00000000
+	FOR create, delete
+		WHERE name IS $_param_00000000
+	FOR create, delete
+		WHERE name IS $_param_00000000
+	FOR update
+		WHERE age <= $_param_00000000
+;
