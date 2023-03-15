@@ -216,6 +216,10 @@ impl Buildable for DefineTableStatement {
             None => {}
         };
 
+        if let Some(select_statement) = &self.as_select {
+            query = format!("{query} AS \n\t{select_statement}");
+        }
+
         if let Some(true) = self.permissions_none {
             query = format!("{query} PERMISSIONS NONE");
         } else if let Some(true) = self.permissions_full {
@@ -223,7 +227,7 @@ impl Buildable for DefineTableStatement {
         } else if !&self.permissions_for.is_empty() {
             query = format!("{query}\nPERMISSIONS\n{}", self.permissions_for.join("\n"));
         }
-        query.push_str("\n;");
+        query.push_str(";");
 
         query
     }
@@ -432,6 +436,32 @@ mod tests {
     }
 
     #[test]
+    fn test_define_statement_schemaless_permissions_none() {
+        let user_table = Table::from("user");
+        let statement = define_table(user_table).schemaless().permissions_none();
+
+        assert_eq!(
+            statement.to_string(),
+            "DEFINE TABLE user SCHEMALESS PERMISSIONS NONE;"
+        );
+        insta::assert_display_snapshot!(statement);
+        insta::assert_debug_snapshot!(statement.get_bindings());
+    }
+
+    #[test]
+    fn test_define_statement_schemaless() {
+        let user_table = Table::from("user");
+        let statement = define_table(user_table).schemaless().permissions_full();
+
+        assert_eq!(
+            statement.to_string(),
+            "DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;"
+        );
+        insta::assert_display_snapshot!(statement);
+        insta::assert_debug_snapshot!(statement.get_bindings());
+    }
+
+    #[test]
     fn test_define_statement_multiple() {
         use ForCrudType::*;
         let name = DbField::new("name");
@@ -460,7 +490,7 @@ mod tests {
 
         assert_eq!(
             statement.to_string(),
-            "DEFINE TABLE user DROP SCHEMAFULL\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000\n;".to_string()
+            "DEFINE TABLE user DROP SCHEMAFULL AS \n\tSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC DESC LIMIT 20 START AT 5;\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;".to_string()
         );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());
