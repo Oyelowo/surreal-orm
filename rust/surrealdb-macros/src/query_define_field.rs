@@ -228,7 +228,7 @@ impl Display for FieldType {
     }
 }
 
-pub struct QueryBuilder {
+pub struct DefineFieldStatement {
     field: String,
     table: Option<String>,
     type_: Option<String>,
@@ -239,9 +239,9 @@ pub struct QueryBuilder {
     permissions_for: Vec<String>,
     bindings: BindingsList,
 }
-pub fn define_field(fieldable: impl Into<DbField>) -> QueryBuilder {
+pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     let field: DbField = fieldable.into();
-    QueryBuilder {
+    DefineFieldStatement {
         field: field.to_string(),
         table: None,
         type_: None,
@@ -254,7 +254,7 @@ pub fn define_field(fieldable: impl Into<DbField>) -> QueryBuilder {
     }
 }
 
-impl QueryBuilder {
+impl DefineFieldStatement {
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into().into());
         self
@@ -301,6 +301,26 @@ impl QueryBuilder {
             }),
         }
         self
+    }
+}
+
+impl Queryable for DefineFieldStatement {}
+
+impl Parametric for DefineFieldStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Buildable for DefineFieldStatement {
+    fn build(&self) -> String {
+        todo!()
+    }
+}
+
+impl Display for DefineFieldStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 
