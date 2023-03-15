@@ -221,39 +221,75 @@ impl Display for DataType {
     }
 }
 
-pub struct QueryBuilder<'a> {
-    db: &'a str,
-    namespace: &'a str,
-    query: String,
+pub struct QueryBuilder {
+    field: String,
+    table: Option<String>,
+    type_: Option<String>,
+    value: Option<String>,
+    assert: Option<String>,
+    permissions_none: Option<bool>,
+    permissions_full: Option<bool>,
+    permissions_for: Vec<String>,
+    bindings: BindingsList,
+}
+pub fn define_field(fieldable: impl Into<DbField>) -> QueryBuilder {
+    let field: DbField = fieldable.into();
+    QueryBuilder {
+        field: field.to_string(),
+        table: None,
+        type_: None,
+        value: None,
+        assert: None,
+        permissions_none: None,
+        permissions_full: None,
+        permissions_for: vec![],
+        bindings: vec![],
+    }
 }
 
-impl<'a> QueryBuilder<'a> {
-    pub fn new(db: &'a str, namespace: &'a str) -> Self {
-        Self {
-            db,
-            namespace,
-            query: String::new(),
-        }
-    }
-
-    pub fn define_field(&mut self, name: &'a str, table: &'a str) -> &mut Self {
-        self.query
-            .push_str(&format!("DEFINE FIELD {} ON TABLE {};", name, table));
+impl QueryBuilder {
+    pub fn on_table(mut self, table: impl Into<Table>) -> Self {
+        self.table = Some(table.into().into());
         self
     }
 
-    pub fn field_type(&mut self, field_type: &'a str) -> &mut Self {
+    pub fn type_(&mut self, field_type: &'a str) -> &mut Self {
         self.query.push_str(&format!(" TYPE {};", field_type));
         self
     }
 
-    pub fn default_value(&mut self, default_value: &'a str) -> &mut Self {
+    pub fn value(&mut self, default_value: &'a str) -> &mut Self {
         self.query.push_str(&format!(" VALUE {};", default_value));
         self
     }
 
-    pub fn assertion(&mut self, assertion: &'a str) -> &mut Self {
+    pub fn assert(&mut self, assertion: &'a str) -> &mut Self {
         self.query.push_str(&format!(" ASSERT {};", assertion));
+        self
+    }
+
+    pub fn permissions_none(mut self) -> Self {
+        self.permissions_none = Some(true);
+        self
+    }
+
+    pub fn permissions_full(mut self) -> Self {
+        self.permissions_full = Some(true);
+        self
+    }
+
+    pub fn permissions_for(mut self, fors: impl Into<PermisisonForables>) -> Self {
+        let fors: PermisisonForables = fors.into();
+        match fors {
+            PermisisonForables::For(one) => {
+                self.permissions_for.push(one.to_string());
+                self.bindings.extend(one.get_bindings());
+            }
+            PermisisonForables::Fors(many) => many.iter().for_each(|f| {
+                self.permissions_for.push(f.to_string());
+                self.bindings.extend(f.get_bindings());
+            }),
+        }
         self
     }
 }
