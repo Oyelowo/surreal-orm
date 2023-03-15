@@ -221,10 +221,7 @@ impl Buildable for DefineTableStatement {
         } else if let Some(true) = self.permissions_full {
             query = format!("{query} PERMISSIONS FULL");
         } else if !&self.permissions_for.is_empty() {
-            query = format!(
-                "{query}\nPERMISSIONS\n\t{}",
-                self.permissions_for.join("\n\t")
-            );
+            query = format!("{query}\nPERMISSIONS\n{}", self.permissions_for.join("\n"));
         }
         query.push_str("\n;");
 
@@ -354,7 +351,7 @@ impl Buildable for For {
         }
 
         if let Some(cond) = &self.0.condition {
-            query = format!("{query}\n\t\tWHERE {cond}");
+            query = format!("{query}\n\tWHERE {cond}");
         }
         query
     }
@@ -435,7 +432,7 @@ mod tests {
     }
 
     #[test]
-    fn test_define_statement_state_machine_multiple() {
+    fn test_define_statement_multiple() {
         use ForCrudType::*;
         let name = DbField::new("name");
         let user_table = Table::from("user");
@@ -461,10 +458,10 @@ mod tests {
                 for_(Update).where_(age.less_than_or_equal(130)),
             ]);
 
-        // assert_eq!(
-        //     statement.to_string(),
-        //     "DEFINE TABLE user DROP SCHEMAFULL PERMISSIONS\n\t\tFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000\n;".to_string()
-        // );
+        assert_eq!(
+            statement.to_string(),
+            "DEFINE TABLE user DROP SCHEMAFULL\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000\n;".to_string()
+        );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());
     }
