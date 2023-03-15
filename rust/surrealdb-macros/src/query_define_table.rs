@@ -109,142 +109,6 @@ use crate::{
 // ;
 //
 
-#[derive(Clone, Copy)]
-pub enum ForCrudType {
-    Create,
-    Select,
-    Update,
-    Delete,
-}
-
-impl Display for ForCrudType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let crud_type = match self {
-            ForCrudType::Create => "create",
-            ForCrudType::Select => "select",
-            ForCrudType::Update => "update",
-            ForCrudType::Delete => "delete",
-        };
-        write!(f, "{}", crud_type)
-    }
-}
-
-struct ForData {
-    crud_types: Vec<ForCrudType>,
-    condition: Option<DbFilter>,
-    bindings: BindingsList,
-}
-
-impl Parametric for For {
-    fn get_bindings(&self) -> BindingsList {
-        self.0.bindings.to_vec()
-    }
-}
-
-#[derive(Clone)]
-pub enum ForArgs {
-    ForOption(ForCrudType),
-    ForOptions(Vec<ForCrudType>),
-}
-impl From<ForCrudType> for ForArgs {
-    fn from(value: ForCrudType) -> Self {
-        Self::ForOption(value)
-    }
-}
-
-impl From<Vec<ForCrudType>> for ForArgs {
-    fn from(value: Vec<ForCrudType>) -> Self {
-        Self::ForOptions(value)
-    }
-}
-impl From<ForArgs> for Vec<ForCrudType> {
-    fn from(value: ForArgs) -> Self {
-        match value {
-            ForArgs::ForOption(one) => vec![one],
-            ForArgs::ForOptions(many) => many,
-        }
-    }
-}
-
-impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
-    fn from(value: &[ForCrudType; N]) -> Self {
-        Self::ForOptions(value.to_vec())
-    }
-}
-
-pub struct ForStart(ForData);
-
-impl ForStart {
-    pub fn where_(mut self, condition: impl Into<DbFilter>) -> For {
-        let condition: DbFilter = condition.into();
-        self.0.condition = Some(condition.clone());
-        self.0.bindings.extend(condition.get_bindings());
-        For(self.0)
-    }
-}
-
-pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
-    ForStart(ForData {
-        crud_types: for_crud_types.into().into(),
-        condition: None,
-        bindings: vec![],
-    })
-}
-pub struct For(ForData);
-
-impl Buildable for For {
-    fn build(&self) -> String {
-        let mut query = format!("FOR");
-        if !&self.0.crud_types.is_empty() {
-            query = format!(
-                "{query} {}",
-                &self
-                    .0
-                    .crud_types
-                    .iter()
-                    .map(|ct| {
-                        let ct = ct.to_string();
-                        ct
-                    })
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            );
-        }
-
-        if let Some(cond) = &self.0.condition {
-            query = format!("{query}\n\tWHERE {cond}");
-        }
-        query
-    }
-}
-
-impl Display for For {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-
-pub enum PermisisonForables {
-    For(For),
-    Fors(Vec<For>),
-}
-
-impl From<For> for PermisisonForables {
-    fn from(value: For) -> Self {
-        Self::For(value)
-    }
-}
-
-impl From<Vec<For>> for PermisisonForables {
-    fn from(value: Vec<For>) -> Self {
-        Self::Fors(value)
-    }
-}
-
-enum SchemaType {
-    Schemafull,
-    Schemaless,
-}
 pub struct DefineTableStatement {
     table_name: String,
     drop: Option<bool>,
@@ -382,6 +246,143 @@ impl Parametric for DefineTableStatement {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
+}
+
+#[derive(Clone, Copy)]
+pub enum ForCrudType {
+    Create,
+    Select,
+    Update,
+    Delete,
+}
+
+impl Display for ForCrudType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let crud_type = match self {
+            ForCrudType::Create => "create",
+            ForCrudType::Select => "select",
+            ForCrudType::Update => "update",
+            ForCrudType::Delete => "delete",
+        };
+        write!(f, "{}", crud_type)
+    }
+}
+
+struct ForData {
+    crud_types: Vec<ForCrudType>,
+    condition: Option<DbFilter>,
+    bindings: BindingsList,
+}
+
+impl Parametric for For {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+#[derive(Clone)]
+pub enum ForArgs {
+    ForOption(ForCrudType),
+    ForOptions(Vec<ForCrudType>),
+}
+impl From<ForCrudType> for ForArgs {
+    fn from(value: ForCrudType) -> Self {
+        Self::ForOption(value)
+    }
+}
+
+impl From<Vec<ForCrudType>> for ForArgs {
+    fn from(value: Vec<ForCrudType>) -> Self {
+        Self::ForOptions(value)
+    }
+}
+impl From<ForArgs> for Vec<ForCrudType> {
+    fn from(value: ForArgs) -> Self {
+        match value {
+            ForArgs::ForOption(one) => vec![one],
+            ForArgs::ForOptions(many) => many,
+        }
+    }
+}
+
+impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
+    fn from(value: &[ForCrudType; N]) -> Self {
+        Self::ForOptions(value.to_vec())
+    }
+}
+
+pub struct ForStart(ForData);
+
+impl ForStart {
+    pub fn where_(mut self, condition: impl Into<DbFilter>) -> For {
+        let condition: DbFilter = condition.into();
+        self.0.condition = Some(condition.clone());
+        self.0.bindings.extend(condition.get_bindings());
+        For(self.0)
+    }
+}
+
+pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
+    ForStart(ForData {
+        crud_types: for_crud_types.into().into(),
+        condition: None,
+        bindings: vec![],
+    })
+}
+pub struct For(ForData);
+
+impl Buildable for For {
+    fn build(&self) -> String {
+        let mut query = format!("FOR");
+        if !&self.0.crud_types.is_empty() {
+            query = format!(
+                "{query} {}",
+                &self
+                    .0
+                    .crud_types
+                    .iter()
+                    .map(|ct| {
+                        let ct = ct.to_string();
+                        ct
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+        }
+
+        if let Some(cond) = &self.0.condition {
+            query = format!("{query}\n\tWHERE {cond}");
+        }
+        query
+    }
+}
+
+impl Display for For {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+pub enum PermisisonForables {
+    For(For),
+    Fors(Vec<For>),
+}
+
+impl From<For> for PermisisonForables {
+    fn from(value: For) -> Self {
+        Self::For(value)
+    }
+}
+
+impl From<Vec<For>> for PermisisonForables {
+    fn from(value: Vec<For>) -> Self {
+        Self::Fors(value)
+    }
+}
+
+enum SchemaType {
+    Schemafull,
+    Schemaless,
 }
 
 #[cfg(test)]
