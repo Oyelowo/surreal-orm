@@ -17,6 +17,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use crate::{
     db_field::{cond, Binding},
     query_create::CreateStatement,
+    query_define_table::PermisisonForables,
     query_define_token::{Name, Scope},
     query_delete::DeleteStatement,
     query_ifelse::Expression,
@@ -179,7 +180,7 @@ impl Display for Geometry {
         write!(f, "{}", geom)
     }
 }
-pub enum DataType {
+pub enum FieldType {
     Any,
     Array,
     Bool,
@@ -195,22 +196,28 @@ pub enum DataType {
     Geometry(Vec<Geometry>),
 }
 
-impl Display for DataType {
+impl From<FieldType> for String {
+    fn from(val: FieldType) -> Self {
+        val.to_string()
+    }
+}
+
+impl Display for FieldType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let data_type = match self {
-            DataType::Any => "any".to_string(),
-            DataType::Array => "array".to_string(),
-            DataType::Bool => "bool".to_string(),
-            DataType::DateTime => "datetime".to_string(),
-            DataType::Decimal => "decimal".to_string(),
-            DataType::Duration => "duration".to_string(),
-            DataType::Float => "float".to_string(),
-            DataType::Int => "int".to_string(),
-            DataType::Number => "number".to_string(),
-            DataType::Object => "object".to_string(),
-            DataType::String => "string".to_string(),
-            DataType::Record(table) => format!("record ({table})"),
-            DataType::Geometry(geometries) => geometries
+            FieldType::Any => "any".to_string(),
+            FieldType::Array => "array".to_string(),
+            FieldType::Bool => "bool".to_string(),
+            FieldType::DateTime => "datetime".to_string(),
+            FieldType::Decimal => "decimal".to_string(),
+            FieldType::Duration => "duration".to_string(),
+            FieldType::Float => "float".to_string(),
+            FieldType::Int => "int".to_string(),
+            FieldType::Number => "number".to_string(),
+            FieldType::Object => "object".to_string(),
+            FieldType::String => "string".to_string(),
+            FieldType::Record(table) => format!("record ({table})"),
+            FieldType::Geometry(geometries) => geometries
                 .iter()
                 .map(ToString::to_string)
                 .collect::<Vec<_>>()
@@ -253,18 +260,21 @@ impl QueryBuilder {
         self
     }
 
-    pub fn type_(&mut self, field_type: &'a str) -> &mut Self {
-        self.query.push_str(&format!(" TYPE {};", field_type));
+    pub fn type_(&mut self, field_type: impl Into<FieldType>) -> &mut Self {
+        // let field_type: FieldType = field_type.into();
+        self.type_ = Some(field_type.into().into());
         self
     }
 
-    pub fn value(&mut self, default_value: &'a str) -> &mut Self {
-        self.query.push_str(&format!(" VALUE {};", default_value));
+    pub fn value(mut self, default_value: impl Into<sql::Value>) -> Self {
+        let value: sql::Value = default_value.into();
+        self.value = Some(value.to_string());
         self
     }
 
-    pub fn assert(&mut self, assertion: &'a str) -> &mut Self {
-        self.query.push_str(&format!(" ASSERT {};", assertion));
+    pub fn assert(mut self, assertion: impl Into<DbFilter>) -> Self {
+        let assertion: DbFilter = assertion.into();
+        self.assert = Some(assertion.to_string());
         self
     }
 
