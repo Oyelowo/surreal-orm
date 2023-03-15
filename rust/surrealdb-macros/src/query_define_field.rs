@@ -271,13 +271,14 @@ pub fn value() -> ValueAssert {
 
 impl DefineFieldStatement {
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
-        self.table_name = Some(table.into().into());
+        let table: Table = table.into();
+        self.table_name = Some(table.to_string());
         self
     }
 
     pub fn type_(mut self, field_type: impl Into<FieldType>) -> Self {
-        // let field_type: FieldType = field_type.into();
-        self.type_ = Some(field_type.into().into());
+        let field_type: FieldType = field_type.into();
+        self.type_ = Some(field_type.to_string());
         self
     }
 
@@ -386,7 +387,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_define_statement_schemaless_permissions_none() {
+    fn test_define_field_statement_full() {
         use ForCrudType::*;
         let name = DbField::new("name");
         let user_table = Table::from("user");
@@ -415,7 +416,7 @@ mod tests {
     }
 
     #[test]
-    fn test_define_statement_schemaless() {
+    fn test_define_field_statement_simple() {
         use FieldType::*;
 
         let email = DbField::new("email");
