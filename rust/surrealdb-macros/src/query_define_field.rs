@@ -257,6 +257,14 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
 
 pub struct ValueAssert(DbField);
 
+impl Display for ValueAssert {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let xx: sql::Idiom = self.0.clone().into();
+        // let mm = sql::Param::from(xx);
+        write!(f, "R{}", self.0)
+    }
+}
+
 impl Deref for ValueAssert {
     type Target = DbField;
 
@@ -266,9 +274,7 @@ impl Deref for ValueAssert {
 }
 
 pub fn value() -> ValueAssert {
-    ValueAssert(DbField::new(sql::Param::from(sql::Idiom::from(
-        "value".to_string(),
-    ))))
+    ValueAssert(DbField::new("value"))
 }
 
 impl DefineFieldStatement {
@@ -343,7 +349,7 @@ impl Buildable for DefineFieldStatement {
         }
 
         if let Some(value) = &self.value {
-            query = format!("{query} VALUE OR {value}");
+            query = format!("{query} VALUE $value OR {value}");
         }
 
         if let Some(assertion) = &self.assert {

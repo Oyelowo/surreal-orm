@@ -88,6 +88,12 @@ impl Into<sql::Value> for &DbField {
     }
 }
 
+impl Into<sql::Idiom> for DbField {
+    fn into(self) -> sql::Idiom {
+        self.field_name
+    }
+}
+
 impl Into<sql::Value> for DbField {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
