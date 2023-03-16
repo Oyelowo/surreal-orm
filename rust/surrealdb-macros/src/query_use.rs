@@ -13,7 +13,7 @@ use crate::{
     query_insert::Buildable,
     query_remove::{Database, Namespace, Runnable},
     query_select::Duration,
-    Queryable,
+    Parametric, Queryable,
 };
 
 pub fn use_() -> UseStatement {
@@ -65,6 +65,12 @@ impl Display for UseStatement {
 impl Runnable for UseStatement {}
 
 impl Queryable for UseStatement {}
+
+impl Parametric for UseStatement {
+    fn get_bindings(&self) -> crate::BindingsList {
+        vec![]
+    }
+}
 
 #[cfg(test)]
 mod tests {

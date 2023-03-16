@@ -88,6 +88,12 @@ impl Into<sql::Value> for &DbField {
     }
 }
 
+impl Into<sql::Idiom> for DbField {
+    fn into(self) -> sql::Idiom {
+        self.field_name
+    }
+}
+
 impl Into<sql::Value> for DbField {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
@@ -280,6 +286,20 @@ impl From<DbField> for String {
 }
 
 pub struct ArrayCustom(sql::Array);
+
+pub struct NONE;
+
+impl From<NONE> for sql::Value {
+    fn from(value: NONE) -> Self {
+        sql::Value::Idiom(value.to_string().into())
+    }
+}
+
+impl Display for NONE {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "NONE")
+    }
+}
 
 impl<T> From<Vec<T>> for ArrayCustom
 where
@@ -691,6 +711,8 @@ fn generate_param_name(prefix: &str) -> String {
     param.truncate(15);
     param
 }
+
+// enum NameOrIdiom{Name(Idiom), Param(sql::Param)}
 
 impl DbField {
     pub fn new(field_name: impl Into<Name>) -> Self {

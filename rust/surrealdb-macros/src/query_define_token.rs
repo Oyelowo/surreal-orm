@@ -104,6 +104,12 @@ impl Display for TokenTarget {
 
 pub struct Name(sql::Idiom);
 
+impl Display for Name {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
+
 impl Name {
     pub fn new(name: sql::Idiom) -> Self {
         Self(name)
