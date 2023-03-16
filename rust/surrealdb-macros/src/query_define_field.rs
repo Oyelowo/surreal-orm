@@ -257,13 +257,13 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
 
 pub struct ValueAssert(DbField);
 
-impl Display for ValueAssert {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let xx: sql::Idiom = self.0.clone().into();
-        // let mm = sql::Param::from(xx);
-        write!(f, "R{}", self.0)
-    }
-}
+// impl Display for ValueAssert {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let xx: sql::Idiom = self.0.clone().into();
+//         // let mm = sql::Param::from(xx);
+//         write!(f, "R{}", self.0)
+//     }
+// }
 
 impl Deref for ValueAssert {
     type Target = DbField;
@@ -274,7 +274,7 @@ impl Deref for ValueAssert {
 }
 
 pub fn value() -> ValueAssert {
-    ValueAssert(DbField::new("value"))
+    ValueAssert(DbField::new("$value"))
 }
 
 impl DefineFieldStatement {
@@ -417,7 +417,7 @@ mod tests {
 
         assert_eq!(
             statement.to_string(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
         );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());

@@ -2,7 +2,7 @@
 source: surrealdb-macros/src/query_define_field.rs
 expression: statement
 ---
-DEFINE FIELD email ON TABLE user TYPE string VALUE OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)
+DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)
 PERMISSIONS
 FOR select
 	WHERE age >= $_param_00000000

@@ -712,6 +712,8 @@ fn generate_param_name(prefix: &str) -> String {
     param
 }
 
+// enum NameOrIdiom{Name(Idiom), Param(sql::Param)}
+
 impl DbField {
     pub fn new(field_name: impl Into<Name>) -> Self {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
