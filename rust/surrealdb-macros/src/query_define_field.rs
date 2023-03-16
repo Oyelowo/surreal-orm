@@ -169,14 +169,6 @@ impl Display for Geometry {
             Geometry::Multipolygon => "multipolygon",
             Geometry::Collection => "collection",
         };
-        //         feature
-        // point
-        // line
-        // polygon
-        // multipoint
-        // multiline
-        // multipolygon
-        // collection
         write!(f, "{}", geom)
     }
 }
