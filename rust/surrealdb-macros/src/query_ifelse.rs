@@ -15,7 +15,7 @@ use crate::{
     db_field::{cond, Binding, Conditional},
     query_insert::Buildable,
     query_select::SelectStatement,
-    BindingsList, DbFilter, Erroneous, Field, Parametric,
+    BindingsList, Filter, Erroneous, Field, Parametric,
 };
 
 #[derive(Clone)]
@@ -87,7 +87,7 @@ pub struct ThenExpression {
 
 impl ThenExpression {
     pub fn else_if(mut self, condition: impl Conditional) -> ElseIfStatement {
-        let condition = DbFilter::new(condition);
+        let condition = Filter::new(condition);
         self.bindings.extend(condition.get_bindings());
         self.flow_data.else_if_data.conditions.push(condition);
 
@@ -162,7 +162,7 @@ struct FlowStatementData {
 // }
 
 impl FlowStatementData {
-    fn update_if(mut self, condition: DbFilter) -> Self {
+    fn update_if(mut self, condition: Filter) -> Self {
         self.if_data.condition = condition;
         self
     }
@@ -170,13 +170,13 @@ impl FlowStatementData {
 
 #[derive(Default)]
 struct Flows {
-    conditions: Vec<DbFilter>,
+    conditions: Vec<Filter>,
     expressions: Vec<ExpressionContent>,
 }
 
 #[derive(Default)]
 struct Flow {
-    condition: DbFilter,
+    condition: Filter,
     expression: ExpressionContent,
 }
 
@@ -203,13 +203,13 @@ impl ElseIfStatement {
 }
 
 pub struct IfStatement {
-    condition: DbFilter,
+    condition: Filter,
 }
 
 impl IfStatement {
     pub(crate) fn new(condition: impl Conditional) -> Self {
         Self {
-            condition: DbFilter::new(condition),
+            condition: Filter::new(condition),
         }
     }
 

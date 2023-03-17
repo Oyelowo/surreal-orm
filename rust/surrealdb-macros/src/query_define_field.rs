@@ -27,7 +27,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbFilter, Field, Parametric, Queryable,
+    BindingsList, Filter, Field, Parametric, Queryable,
 };
 
 // DEFINE FIELD statement
@@ -281,8 +281,8 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn assert(mut self, assertion: impl Into<DbFilter>) -> Self {
-        let assertion: DbFilter = assertion.into();
+    pub fn assert(mut self, assertion: impl Into<Filter>) -> Self {
+        let assertion: Filter = assertion.into();
         self.assert = Some(assertion.to_string());
         self
     }

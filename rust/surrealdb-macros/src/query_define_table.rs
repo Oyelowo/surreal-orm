@@ -26,7 +26,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbFilter, Erroneous, Field, Parametric, Queryable,
+    BindingsList, Filter, Erroneous, Field, Parametric, Queryable,
 };
 
 // DEFINE TABLE statement
@@ -272,7 +272,7 @@ impl Display for ForCrudType {
 #[derive(Clone)]
 struct ForData {
     crud_types: Vec<ForCrudType>,
-    condition: Option<DbFilter>,
+    condition: Option<Filter>,
     bindings: BindingsList,
 }
 
@@ -317,7 +317,7 @@ pub struct ForStart(ForData);
 
 impl ForStart {
     pub fn where_(mut self, condition: impl Conditional) -> For {
-        let condition = DbFilter::new(condition);
+        let condition = Filter::new(condition);
         self.0.condition = Some(condition.clone());
         self.0.bindings.extend(condition.get_bindings());
         For(self.0)

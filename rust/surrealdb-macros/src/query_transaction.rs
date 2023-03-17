@@ -20,7 +20,7 @@ use crate::{
     query_remove::RemoveScopeStatement,
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 pub fn begin_transaction() -> QueryTransaction {

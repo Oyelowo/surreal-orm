@@ -47,7 +47,7 @@ pub mod links;
 pub mod model_id;
 
 pub use db_field::BindingsList;
-pub use db_field::DbFilter;
+pub use db_field::Filter;
 pub use db_field::Field;
 pub use db_field::Operatable;
 pub use db_field::Parametric;
@@ -100,17 +100,17 @@ pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
 }
 
-pub fn where_(condition: impl Conditional) -> DbFilter {
+pub fn where_(condition: impl Conditional) -> Filter {
     if condition.get_errors().is_empty() {
-        // TODO: Maybe pass to DB filter and check and return Result<DbFilter> in relate_query
+        // TODO: Maybe pass to DB filter and check and return Result<Filter> in relate_query
     }
-    DbFilter::new(condition)
+    Filter::new(condition)
 }
 
 #[derive(Debug, Clone)]
 pub enum Clause {
     Empty,
-    Where(DbFilter),
+    Where(Filter),
     Query(SelectStatement),
     Id(SurrealId),
 }
@@ -181,24 +181,24 @@ impl From<&SurrealId> for Clause {
 
 impl From<Field> for Clause {
     fn from(value: Field) -> Self {
-        Self::Where(DbFilter::new(value))
+        Self::Where(Filter::new(value))
     }
 }
 
 impl From<&Field> for Clause {
     fn from(value: &Field) -> Self {
-        Self::Where(DbFilter::new(value.clone()))
+        Self::Where(Filter::new(value.clone()))
     }
 }
 
-impl From<DbFilter> for Clause {
-    fn from(value: DbFilter) -> Self {
+impl From<Filter> for Clause {
+    fn from(value: Filter) -> Self {
         Self::Where(value)
     }
 }
 
-impl From<&DbFilter> for Clause {
-    fn from(value: &DbFilter) -> Self {
+impl From<&Filter> for Clause {
+    fn from(value: &Filter) -> Self {
         Self::Where(value.to_owned())
     }
 }

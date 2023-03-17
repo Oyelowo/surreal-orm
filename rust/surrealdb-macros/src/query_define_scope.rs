@@ -22,7 +22,7 @@ use crate::{
     query_remove::{RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 // DEFINE SCOPE statement

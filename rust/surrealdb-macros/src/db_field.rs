@@ -241,23 +241,23 @@ impl Conditional for SelectStatement {
     }
 }
 
-// impl Into<DbFilter> for SelectStatement {
-//     fn into(self) -> DbFilter {
+// impl Into<Filter> for SelectStatement {
+//     fn into(self) -> Filter {
 //         let query_b: SelectStatement = self;
-//         DbFilter::new(query_b)
+//         Filter::new(query_b)
 //     }
 // }
-// impl From<SurrealId> for DbFilter {
+// impl From<SurrealId> for Filter {
 //     fn from(value: SurrealId) -> Self {
 //         // TODO: Check if to inline the string directly or stick with parametization and
 //         // autobinding
-//         DbFilter::new(value)
-//         // DbFilter::new(vec![value])
-//         // DbFilter::new(value.to_raw())
-//         // DbFilter::new("".into()).___update_bindings(&vec![b])
+//         Filter::new(value)
+//         // Filter::new(vec![value])
+//         // Filter::new(value.to_raw())
+//         // Filter::new("".into()).___update_bindings(&vec![b])
 //     }
 // }
-// impl From<Field> for DbFilter {
+// impl From<Field> for Filter {
 //     fn from(value: Field) -> Self {
 //         Self {
 //             query_string: value.condition_query_string,
@@ -369,23 +369,23 @@ impl std::fmt::Display for Field {
 
 /// This module provides functionality for building complex filters for database queries.
 ///
-/// A `DbFilter` struct represents a filter that can be composed of subfilters using logical
+/// A `Filter` struct represents a filter that can be composed of subfilters using logical
 /// operators like `AND` and `OR`. Filters can be created using the `empty` function or by
-/// converting a string using `DbFilter::new`.
+/// converting a string using `Filter::new`.
 ///
 /// The `cond` function is used to create a new filter from a given `filterable` input, which
-/// can be of type `DbFilter`.
+/// can be of type `Filter`.
 ///
-/// Methods on a `DbFilter` instance are used to combine filters with logical operators or to
+/// Methods on a `Filter` instance are used to combine filters with logical operators or to
 /// modify the filter using methods like `bracketed`.
 ///
 /// # Examples
 ///
 /// ```
-/// use crate::query::filter::{DbFilter, cond};
+/// use crate::query::filter::{Filter, cond};
 ///
-/// let filter1 = DbFilter::new("name = 'John'".to_string());
-/// let filter2 = DbFilter::new("age > 18".to_string());
+/// let filter1 = Filter::new("name = 'John'".to_string());
+/// let filter2 = Filter::new("age > 18".to_string());
 ///
 /// // Combine two filters using the 'AND' operator
 /// let combined_filter = filter1.and(filter2);
@@ -393,7 +393,7 @@ impl std::fmt::Display for Field {
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 ///
 /// // Create a filter from a string
-/// let filter3 = DbFilter::new("name like '%Doe%'".to_string());
+/// let filter3 = Filter::new("name like '%Doe%'".to_string());
 ///
 /// // Combine multiple filters using the 'OR' operator
 /// let all_filters = cond(filter1).or(filter2).or(filter3);
@@ -401,12 +401,12 @@ impl std::fmt::Display for Field {
 /// assert_eq!(all_filters.to_string(), "(name = 'John') OR (age > 18) OR (name like '%Doe%')");
 /// ```
 #[derive(Debug, Clone, Default)]
-pub struct DbFilter {
+pub struct Filter {
     query_string: String,
     bindings: BindingsList,
 }
 
-impl Parametric for DbFilter {
+impl Parametric for Filter {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
@@ -495,21 +495,21 @@ pub trait Parametric {
 ///
 /// # Arguments
 ///
-/// * `filterable` - A value that can be converted into a `DbFilter`.
+/// * `filterable` - A value that can be converted into a `Filter`.
 ///
 /// # Example
 ///
 /// ```
-/// use crate::query::filter::{DbFilter, cond};
+/// use crate::query::filter::{Filter, cond};
 ///
-/// let filter = DbFilter::new("name = 'John'".to_string());
+/// let filter = Filter::new("name = 'John'".to_string());
 ///
 /// let combined_filter = cond(filter).and("age > 18");
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Conditional) -> DbFilter {
-    DbFilter::new(filterable)
+pub fn cond(filterable: impl Conditional) -> Filter {
+    Filter::new(filterable)
 }
 
 /// Creates an empty filter.
@@ -517,14 +517,14 @@ pub fn cond(filterable: impl Conditional) -> DbFilter {
 /// # Example
 ///
 /// ```
-/// use crate::query::filter::DbFilter;
+/// use crate::query::filter::Filter;
 ///
-/// let empty_filter = DbFilter::empty();
+/// let empty_filter = Filter::empty();
 ///
 /// assert_eq!(empty_filter.to_string(), "");
 ///
-pub fn empty() -> DbFilter {
-    DbFilter::new(Empty)
+pub fn empty() -> Filter {
+    Filter::new(Empty)
 }
 
 pub struct Empty;
@@ -553,19 +553,19 @@ impl Parametric for Empty {
     }
 }
 
-impl Conditional for DbFilter {
+impl Conditional for Filter {
     fn get_condition_query_string(&self) -> String {
         format!("{}", self.query_string)
     }
 }
 
-impl Erroneous for DbFilter {
+impl Erroneous for Filter {
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
-impl DbFilter {
-    /// Creates a new `DbFilter` instance.
+impl Filter {
+    /// Creates a new `Filter` instance.
     ///
     /// # Arguments
     ///
@@ -574,9 +574,9 @@ impl DbFilter {
     /// # Example
     ///
     /// ```
-    /// use crate::query::filter::DbFilter;
+    /// use crate::query::filter::Filter;
     ///
-    /// let filter = DbFilter::new("name = 'John'".to_string());
+    /// let filter = Filter::new("name = 'John'".to_string());
     ///
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
@@ -604,10 +604,10 @@ impl DbFilter {
     /// # Example
     ///
     /// ```
-    /// use crate::query::filter::{DbFilter, cond};
+    /// use crate::query::filter::{Filter, cond};
     ///
-    /// let filter = cond(DbFilter::new("name = 'John'".to_string())).or(
-    ///     cond(DbFilter::new("age > 30".to_string()))
+    /// let filter = cond(Filter::new("name = 'John'".to_string())).or(
+    ///     cond(Filter::new("age > 30".to_string()))
     /// );
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
@@ -619,25 +619,25 @@ impl DbFilter {
         let ref filter = filter.get_condition_query_string();
         let query_string = format!("{precendence} OR ({filter})");
 
-        DbFilter {
+        Filter {
             query_string,
             bindings: new_params,
         }
     }
 
-    /// Combines this `DbFilter` instance with another using the `AND` operator.
+    /// Combines this `Filter` instance with another using the `AND` operator.
     ///
     /// # Arguments
     ///
-    /// * `filter` - The `DbFilter` instance to combine with this one.
+    /// * `filter` - The `Filter` instance to combine with this one.
     ///
     /// # Example
     ///
     /// ```
-    /// use crate::query::filter::{DbFilter, cond};
+    /// use crate::query::filter::{Filter, cond};
     ///
-    /// let filter1 = cond(DbFilter::new("name = 'John'"));
-    /// let filter2 = cond(DbFilter::new("age > 30"));
+    /// let filter1 = cond(Filter::new("name = 'John'"));
+    /// let filter2 = cond(Filter::new("age > 30"));
     /// let combined = filter1.and(filter2);
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
@@ -649,7 +649,7 @@ impl DbFilter {
         let ref filter = filter.get_condition_query_string();
         let query_string = format!("{precendence} AND ({filter})");
 
-        DbFilter {
+        Filter {
             query_string,
             bindings: new_params,
         }
@@ -669,26 +669,26 @@ impl DbFilter {
         [self.bindings.as_slice(), filter.get_bindings().as_slice()].concat()
     }
 
-    /// Wraps this `DbFilter` instance in a set of brackets.
+    /// Wraps this `Filter` instance in a set of brackets.
     ///
     /// # Example
     ///
     /// ```
-    /// use crate::query::filter::{DbFilter, cond};
+    /// use crate::query::filter::{Filter, cond};
     ///
-    /// let filter = cond(DbFilter::new("name = 'John'")).or(cond(DbFilter::new("age > 30")));
+    /// let filter = cond(Filter::new("name = 'John'")).or(cond(Filter::new("age > 30")));
     /// let wrapped = filter.bracketed();
     ///
     /// assert_eq!(wrapped.to_string(), "((name = 'John') OR (age > 30))");
     /// ```
     pub fn bracketed(&self) -> Self {
-        DbFilter {
+        Filter {
             query_string: format!("({self})"),
             bindings: self.bindings.to_vec(),
         }
     }
 
-    /// Wraps this `DbFilter` instance in a set of brackets if it isn't already wrapped.
+    /// Wraps this `Filter` instance in a set of brackets if it isn't already wrapped.
     fn _______bracket_if_not_already(&self) -> impl Display {
         let filter = self.to_string();
         match (filter.starts_with('('), filter.ends_with(')')) {
@@ -698,8 +698,8 @@ impl DbFilter {
     }
 }
 
-impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
-    fn from(value: Cow<'a, DbFilter>) -> Self {
+impl<'a> From<Cow<'a, Filter>> for Filter {
+    fn from(value: Cow<'a, Filter>) -> Self {
         match value {
             Cow::Borrowed(v) => v.clone(),
             Cow::Owned(v) => v,
@@ -707,8 +707,8 @@ impl<'a> From<Cow<'a, DbFilter>> for DbFilter {
     }
 }
 
-impl From<Option<Self>> for DbFilter {
-    fn from(value: Option<DbFilter>) -> Self {
+impl From<Option<Self>> for Filter {
+    fn from(value: Option<Filter>) -> Self {
         match value {
             Some(v) => v,
             None => empty(),
@@ -716,7 +716,7 @@ impl From<Option<Self>> for DbFilter {
     }
 }
 
-impl From<String> for DbFilter {
+impl From<String> for Filter {
     fn from(value: String) -> Self {
         Self {
             query_string: value,
@@ -725,7 +725,7 @@ impl From<String> for DbFilter {
     }
 }
 
-impl std::fmt::Display for DbFilter {
+impl std::fmt::Display for Filter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.query_string))
     }
