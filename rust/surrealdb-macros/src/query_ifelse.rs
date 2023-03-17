@@ -12,10 +12,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::{cond, Binding},
+    db_field::{cond, Binding, Conditional},
     query_insert::Buildable,
     query_select::SelectStatement,
-    BindingsList, Field, DbFilter, Parametric,
+    BindingsList, DbFilter, Erroneous, Field, Parametric,
 };
 
 #[derive(Clone)]
@@ -76,7 +76,9 @@ impl<T: Into<sql::Value>> From<T> for Expression {
     }
 }
 
-pub fn if_(condition: impl Into<DbFilter>) -> IfStatement {
+pub fn if_(
+    condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
+) -> IfStatement {
     IfStatement::new(condition)
 }
 
@@ -86,8 +88,11 @@ pub struct ThenExpression {
 }
 
 impl ThenExpression {
-    pub fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
-        let condition: DbFilter = condition.into();
+    pub fn else_if(
+        mut self,
+        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
+    ) -> ElseIfStatement {
+        let condition: DbFilter = DbFilter::new(condition);
         self.bindings.extend(condition.get_bindings());
         self.flow_data.else_if_data.conditions.push(condition);
 
@@ -207,9 +212,11 @@ pub struct IfStatement {
 }
 
 impl IfStatement {
-    pub(crate) fn new(condition: impl Into<DbFilter>) -> Self {
+    pub(crate) fn new(
+        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
+    ) -> Self {
         Self {
-            condition: condition.into(),
+            condition: DbFilter::new(condition),
         }
     }
 

@@ -15,7 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    db_field::{cond, Binding},
+    db_field::{cond, Binding, Conditional},
     query_create::CreateStatement,
     query_define_index::Table,
     query_define_token::{Name, Scope},
@@ -26,7 +26,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, DbFilter, Erroneous, Field, Parametric, Queryable,
 };
 
 // DEFINE TABLE statement
@@ -316,8 +316,8 @@ impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
 pub struct ForStart(ForData);
 
 impl ForStart {
-    pub fn where_(mut self, condition: impl Into<DbFilter>) -> For {
-        let condition: DbFilter = condition.into();
+    pub fn where_(mut self, condition: impl Conditional) -> For {
+        let condition = DbFilter::new(condition);
         self.0.condition = Some(condition.clone());
         self.0.bindings.extend(condition.get_bindings());
         For(self.0)

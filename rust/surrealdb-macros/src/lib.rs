@@ -10,6 +10,7 @@
 use std::fmt::Display;
 use std::ops::Deref;
 
+use db_field::Conditional;
 use db_field::Empty;
 pub mod db_field;
 pub mod operators_macros;
@@ -45,8 +46,8 @@ pub mod links;
 pub mod model_id;
 
 pub use db_field::BindingsList;
-pub use db_field::Field;
 pub use db_field::DbFilter;
+pub use db_field::Field;
 pub use db_field::Operatable;
 pub use db_field::Parametric;
 use query_insert::Buildable;
@@ -98,15 +99,11 @@ pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
 }
 
-pub fn where_(
-    condition: impl Parametric + Into<DbFilter> + std::fmt::Display + Erroneous,
-) -> DbFilter {
-    // let filter = DbFilter::new(format!("{condition}")).___update_bindings(&condition);
-
+pub fn where_(condition: impl Conditional) -> DbFilter {
     if condition.get_errors().is_empty() {
         // TODO: Maybe pass to DB filter and check and return Result<DbFilter> in relate_query
     }
-    condition.into()
+    DbFilter::new(condition)
 }
 
 #[derive(Debug, Clone)]
@@ -183,13 +180,13 @@ impl From<&SurrealId> for Clause {
 
 impl From<Field> for Clause {
     fn from(value: Field) -> Self {
-        Self::Where(value.into())
+        Self::Where(DbFilter::new(value))
     }
 }
 
 impl From<&Field> for Clause {
     fn from(value: &Field) -> Self {
-        Self::Where(value.to_owned().into())
+        Self::Where(DbFilter::new(value.clone()))
     }
 }
 

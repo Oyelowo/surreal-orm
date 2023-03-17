@@ -171,14 +171,6 @@ mod tests {
     use surrealdb_macros::{q, Field};
     use test_case::test_case;
 
-    fn mana(v: impl Into<DbFilter>) {
-        let x: DbFilter = v.into();
-
-        let m = x.bracketed();
-        println!("OFEMR>>>>{m}");
-        // let xx = DbFilter::from(v);
-    }
-
     #[test]
     fn multiplication_tests1() {
         let student::Student {
@@ -209,64 +201,6 @@ mod tests {
             .__as__(st.writtenBooks);
 
         // assert_eq!(written_book_selection, "34".to_string());
-
-        mana(bk.content.contains("Lowo"));
-        mana(None);
-
-        fn where___(xx: impl Into<DbFilter>) {}
-        where___(firstName);
-        where___(
-            cond(
-                age.less_than_or_equal(18)
-                    .greater_than_or_equal(age)
-                    .add(age)
-                    .subtract(18)
-                    .divide(firstName)
-                    .multiply(lastName)
-                    .greater_than_or_equal(course),
-            )
-            .or(lastName.greater_than_or_equal(4)),
-        );
-
-        where___(firstName.like("oyelowo"));
-
-        let x = firstName.like("oeere");
-        where___(x);
-
-        let x = cond(firstName.like("oeere"));
-        where___(x);
-        where___(None);
-
-        where___(
-            cond(age.add(1).multiply(2).equal(course.divide(2).subtract(1)))
-                // TODO: Make it possible to do &[1, 2] or vec![1, 2] without explicitly specifying the
-                // integer type
-                .and(age.all_inside(vec![1, 2]))
-                .and(age.all_inside(&[1, 2]))
-                .and(cond(firstName.like("D")).and(lastName.like("E"))),
-        );
-        where___(
-            cond(firstName.like("oyelowo"))
-                .and(lastName.like("oyedayo"))
-                .or(age
-                    .greater_than_or_equal(age)
-                    .greater_than_or_equal(age)
-                    .add(age)
-                    .add(age)
-                    .subtract(age)
-                    .divide(age)
-                    .multiply(age)
-                    .or(firstName)
-                    .intersects(age))
-                .and(lastName.greater_than_or_equal(45).or(course))
-                .and(
-                    firstName
-                        .any_equal(vec!["asrer"])
-                        .greater_than_or_equal(50)
-                        .subtract(5)
-                        .less_than_or_equal(200),
-                ),
-        );
 
         // Chain::new(age.clone())
         //     .chain(firstName)

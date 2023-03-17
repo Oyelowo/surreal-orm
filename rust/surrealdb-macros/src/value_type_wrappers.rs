@@ -20,10 +20,26 @@ use surrealdb::{
     sql::{self, thing, Geometry},
 };
 
-use crate::{db_field::Binding, model_id::SurrealdbOrmError, Parametric};
+use crate::{
+    db_field::{Binding, Conditional},
+    model_id::SurrealdbOrmError,
+    Erroneous, Parametric,
+};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(RecordId);
+
+impl Conditional for SurrealId {
+    fn get_condition_query_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Erroneous for SurrealId {
+    fn get_errors(&self) -> Vec<String> {
+        vec![]
+    }
+}
 
 impl Parametric for SurrealId {
     fn get_bindings(&self) -> crate::BindingsList {

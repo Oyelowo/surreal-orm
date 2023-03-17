@@ -25,8 +25,10 @@ use surrealdb::{
 };
 
 use crate::{
-    query_define_token::Name, query_select::SelectStatement, value_type_wrappers::SurrealId,
-    SurrealdbModel,
+    query_define_token::Name,
+    query_select::{SelectStatement, Selectables},
+    value_type_wrappers::SurrealId,
+    Erroneous, SurrealdbModel,
 };
 
 /// Represents a field in the database. This type wraps a `String` and
@@ -48,6 +50,21 @@ pub struct Field {
     field_name: sql::Idiom,
     condition_query_string: String,
     bindings: BindingsList,
+}
+
+impl Erroneous for Field {
+    fn get_errors(&self) -> Vec<String> {
+        vec![]
+    }
+}
+
+impl Conditional for Field {
+    fn get_condition_query_string(&self) -> String {
+        format!("{}", self.condition_query_string)
+    }
+}
+pub trait Conditional: Parametric + std::fmt::Display + Erroneous {
+    fn get_condition_query_string(&self) -> String;
 }
 
 pub type BindingsList = Vec<Binding>;
@@ -213,37 +230,41 @@ impl Into<Ordinal> for sql::Number {
         Ordinal::Number(self)
     }
 }
-
-impl Into<DbFilter> for &Field {
-    fn into(self) -> DbFilter {
-        DbFilter::new(self.clone())
+// impl Conditional for Field {
+//     fn get_condition_query_string(&self) -> String {
+//         format!("{}", self)
+//     }
+// }
+impl Conditional for SelectStatement {
+    fn get_condition_query_string(&self) -> String {
+        format!("{}", self)
     }
 }
 
-impl Into<DbFilter> for SelectStatement {
-    fn into(self) -> DbFilter {
-        let query_b: SelectStatement = self;
-        DbFilter::new(query_b)
-    }
-}
-impl From<SurrealId> for DbFilter {
-    fn from(value: SurrealId) -> Self {
-        // TODO: Check if to inline the string directly or stick with parametization and
-        // autobinding
-        DbFilter::new(value)
-        // DbFilter::new(vec![value])
-        // DbFilter::new(value.to_raw())
-        // DbFilter::new("".into()).___update_bindings(&vec![b])
-    }
-}
-impl From<Field> for DbFilter {
-    fn from(value: Field) -> Self {
-        Self {
-            query_string: value.condition_query_string,
-            bindings: value.bindings,
-        }
-    }
-}
+// impl Into<DbFilter> for SelectStatement {
+//     fn into(self) -> DbFilter {
+//         let query_b: SelectStatement = self;
+//         DbFilter::new(query_b)
+//     }
+// }
+// impl From<SurrealId> for DbFilter {
+//     fn from(value: SurrealId) -> Self {
+//         // TODO: Check if to inline the string directly or stick with parametization and
+//         // autobinding
+//         DbFilter::new(value)
+//         // DbFilter::new(vec![value])
+//         // DbFilter::new(value.to_raw())
+//         // DbFilter::new("".into()).___update_bindings(&vec![b])
+//     }
+// }
+// impl From<Field> for DbFilter {
+//     fn from(value: Field) -> Self {
+//         Self {
+//             query_string: value.condition_query_string,
+//             bindings: value.bindings,
+//         }
+//     }
+// }
 
 impl<'a> From<Cow<'a, Self>> for Field {
     fn from(value: Cow<'a, Field>) -> Self {
@@ -487,13 +508,8 @@ pub trait Parametric {
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Into<DbFilter> + Parametric) -> DbFilter {
-    // let filterable: DbFilter = filterable.into();
-    // DbFilter {
-    //     query_string: filterable,
-    //     params: filterable.get_params(),
-    // }
-    filterable.into()
+pub fn cond(filterable: impl Conditional) -> DbFilter {
+    DbFilter::new(filterable)
 }
 
 /// Creates an empty filter.
@@ -513,9 +529,15 @@ pub fn empty() -> DbFilter {
 
 pub struct Empty;
 
-impl From<Empty> for DbFilter {
-    fn from(value: Empty) -> Self {
-        DbFilter::new(value)
+impl Conditional for Empty {
+    fn get_condition_query_string(&self) -> String {
+        "".into()
+    }
+}
+
+impl Erroneous for Empty {
+    fn get_errors(&self) -> Vec<String> {
+        vec![]
     }
 }
 
@@ -527,6 +549,18 @@ impl std::fmt::Display for Empty {
 
 impl Parametric for Empty {
     fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
+
+impl Conditional for DbFilter {
+    fn get_condition_query_string(&self) -> String {
+        format!("{}", self.query_string)
+    }
+}
+
+impl Erroneous for DbFilter {
+    fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
@@ -547,13 +581,13 @@ impl DbFilter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     // pub fn new(query_string: String) -> Self {
-    pub fn new(query: impl Parametric + std::fmt::Display) -> Self {
-        let query_string = format!("{query}");
-        let query_string = if query_string.is_empty() {
-            "".into()
-        } else {
-            format!("({query_string})")
-        };
+    pub fn new(query: impl Conditional) -> Self {
+        let query_string = format!("{}", query.get_condition_query_string());
+        // let query_string = if query_string.is_empty() {
+        //     "".into()
+        // } else {
+        //     format!("({query_string})")
+        // };
 
         Self {
             query_string,
@@ -578,11 +612,11 @@ impl DbFilter {
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
     /// ```
-    pub fn or(self, filter: impl Into<Self> + Parametric) -> Self {
+    pub fn or(self, filter: impl Conditional) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter: Self = filter.into();
+        let ref filter = filter.get_condition_query_string();
         let query_string = format!("{precendence} OR ({filter})");
 
         DbFilter {
@@ -608,11 +642,11 @@ impl DbFilter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(self, filter: impl Into<Self> + Parametric) -> Self {
+    pub fn and(self, filter: impl Conditional) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter: Self = filter.into();
+        let ref filter = filter.get_condition_query_string();
         let query_string = format!("{precendence} AND ({filter})");
 
         DbFilter {

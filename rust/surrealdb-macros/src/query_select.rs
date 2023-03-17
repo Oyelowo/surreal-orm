@@ -16,10 +16,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Table, Value};
 
 use crate::{
-    db_field::{Binding, BindingsList, DbFilter, Parametric},
+    db_field::{Binding, BindingsList, Conditional, DbFilter, Parametric},
     query_insert::Buildable,
     value_type_wrappers::SurrealId,
-    Field, Queryable, SurrealdbModel, SurrealdbNode,
+    Erroneous, Field, Queryable, SurrealdbModel, SurrealdbNode,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -619,6 +619,12 @@ pub struct SelectStatement {
 
 impl Queryable for SelectStatement {}
 
+impl Erroneous for SelectStatement {
+    fn get_errors(&self) -> Vec<String> {
+        vec![]
+    }
+}
+
 impl Parametric for SelectStatement {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -749,9 +755,12 @@ impl SelectStatement {
     ///
     /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
     /// ```
-    pub fn where_(mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> Self {
+    pub fn where_(
+        mut self,
+        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous + Clone,
+    ) -> Self {
         self.update_bindings(condition.get_bindings());
-        let condition: DbFilter = condition.into();
+        let condition = DbFilter::new(condition);
         self.where_ = Some(condition.to_string());
         self
     }
