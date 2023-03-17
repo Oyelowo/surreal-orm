@@ -21,7 +21,7 @@ use surrealdb::{
 };
 
 use crate::{
-    db_field::{Binding, Conditional},
+    field::{Binding, Conditional},
     model_id::SurrealdbOrmError,
     Erroneous, Parametric,
 };

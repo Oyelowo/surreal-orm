@@ -10,9 +10,9 @@
 use std::fmt::Display;
 use std::ops::Deref;
 
-use db_field::Conditional;
-use db_field::Empty;
-pub mod db_field;
+use field::Conditional;
+use field::Empty;
+pub mod field;
 pub mod operators_macros;
 pub mod param;
 pub mod query_create;
@@ -46,18 +46,18 @@ pub mod prelude {
 pub mod links;
 pub mod model_id;
 
-pub use db_field::BindingsList;
-pub use db_field::Filter;
-pub use db_field::Field;
-pub use db_field::Operatable;
-pub use db_field::Parametric;
+pub use field::BindingsList;
+pub use field::Filter;
+pub use field::Field;
+pub use field::Operatable;
+pub use field::Parametric;
 use query_insert::Buildable;
 use query_select::SelectStatement;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
-// pub use db_field::Param;
-// pub use db_field::ParamsExtractor;
+// pub use field::Param;
+// pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use value_type_wrappers::SurrealId;

@@ -12,7 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::{cond, Binding},
+    field::{cond, Binding},
     query_create::CreateStatement,
     query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},

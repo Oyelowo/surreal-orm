@@ -161,7 +161,7 @@ mod tests {
     use super::*;
     use _core::time::Duration;
     use surrealdb::sql;
-    use surrealdb_macros::db_field::{cond, empty, Binding, Empty, Parametric};
+    use surrealdb_macros::field::{cond, empty, Binding, Empty, Parametric};
     use surrealdb_macros::query_insert::Runnable;
     use surrealdb_macros::query_relate::{relate, Return};
     // use surrealdb_macros::prelude::*;

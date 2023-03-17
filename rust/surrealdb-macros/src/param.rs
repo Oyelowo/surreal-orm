@@ -3,7 +3,7 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    db_field::{Binding, Conditional},
+    field::{Binding, Conditional},
     query_define_token::Name,
     BindingsList, Erroneous, Operatable, Parametric,
 };

@@ -15,7 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    db_field::{cond, Binding},
+    field::{cond, Binding},
     param::Param,
     query_create::CreateStatement,
     query_define_table::PermisisonForables,
@@ -371,7 +371,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        db_field::NONE,
+        field::NONE,
         query_define_table::{for_, ForCrudType},
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,

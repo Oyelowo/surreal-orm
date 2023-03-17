@@ -15,7 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    db_field::{cond, Binding, Conditional},
+    field::{cond, Binding, Conditional},
     query_create::CreateStatement,
     query_define_index::Table,
     query_define_token::{Name, Scope},

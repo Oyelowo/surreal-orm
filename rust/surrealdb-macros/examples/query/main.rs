@@ -45,8 +45,8 @@ struct User {
 use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
-use surrealdb_macros::db_field::cond;
-use surrealdb_macros::db_field::Parametric;
+use surrealdb_macros::field::cond;
+use surrealdb_macros::field::Parametric;
 use surrealdb_macros::query_insert;
 use surrealdb_macros::query_insert::updater;
 use surrealdb_macros::query_insert::Updater;
