@@ -76,9 +76,7 @@ impl<T: Into<sql::Value>> From<T> for Expression {
     }
 }
 
-pub fn if_(
-    condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
-) -> IfStatement {
+pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }
 
@@ -88,11 +86,8 @@ pub struct ThenExpression {
 }
 
 impl ThenExpression {
-    pub fn else_if(
-        mut self,
-        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
-    ) -> ElseIfStatement {
-        let condition: DbFilter = DbFilter::new(condition);
+    pub fn else_if(mut self, condition: impl Conditional) -> ElseIfStatement {
+        let condition = DbFilter::new(condition);
         self.bindings.extend(condition.get_bindings());
         self.flow_data.else_if_data.conditions.push(condition);
 
@@ -212,15 +207,13 @@ pub struct IfStatement {
 }
 
 impl IfStatement {
-    pub(crate) fn new(
-        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous,
-    ) -> Self {
+    pub(crate) fn new(condition: impl Conditional) -> Self {
         Self {
             condition: DbFilter::new(condition),
         }
     }
 
-    pub fn then(mut self, expression: impl Into<Expression>) -> ThenExpression {
+    pub fn then(self, expression: impl Into<Expression>) -> ThenExpression {
         let if_condition = self.condition;
 
         let expression: Expression = expression.into();

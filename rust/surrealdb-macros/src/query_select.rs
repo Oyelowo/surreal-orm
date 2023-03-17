@@ -755,10 +755,7 @@ impl SelectStatement {
     ///
     /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
     /// ```
-    pub fn where_(
-        mut self,
-        condition: impl Parametric + Conditional + std::fmt::Display + Erroneous + Clone,
-    ) -> Self {
+    pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = DbFilter::new(condition);
         self.where_ = Some(condition.to_string());
