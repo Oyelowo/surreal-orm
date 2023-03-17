@@ -16,7 +16,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Table, Value};
 
 use crate::{
-    db_field::{Binding, BindingsList, Conditional, DbFilter, Parametric},
+    field::{Binding, BindingsList, Conditional, Filter, Parametric},
     query_insert::Buildable,
     value_type_wrappers::SurrealId,
     Erroneous, Field, Queryable, SurrealdbModel, SurrealdbNode,
@@ -747,17 +747,17 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, Field, DbFilter};
+    /// use query_builder::{QueryBuilder, Field, Filter};
     ///
     /// let mut builder = QueryBuilder::select();
-    /// let condition = DbFilter::from(("age", ">", 18));
+    /// let condition = Filter::from(("age", ">", 18));
     /// builder._(condition);
     ///
     /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
     /// ```
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
-        let condition = DbFilter::new(condition);
+        let condition = Filter::new(condition);
         self.where_ = Some(condition.to_string());
         self
     }

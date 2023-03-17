@@ -11,7 +11,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    db_field::Binding,
+    field::Binding,
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,

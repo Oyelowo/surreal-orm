@@ -69,14 +69,14 @@ struct NodeEdgeMetadata {
   ///
   /// ```
   /// impl Writes__ {
-  ///     fn book(&self, filter: DbFilter) -> Book {
+  ///     fn book(&self, filter: Filter) -> Book {
   ///         Book::__________connect_to_graph_traversal_string(
   ///             &self.___________graph_traversal_string,
   ///             filter,
   ///         )
   ///     }
   ///
-  ///     fn blog(&self, filter: DbFilter) -> Blog {
+  ///     fn blog(&self, filter: Filter) -> Blog {
   ///         Blog::__________connect_to_graph_traversal_string(
   ///             &self.___________graph_traversal_string,
   ///             filter,
@@ -89,7 +89,7 @@ struct NodeEdgeMetadata {
   /// ```
   /// vec![
   ///     quote!(
-  ///        fn book(&self, filter: DbFilter) -> Book {
+  ///        fn book(&self, filter: Filter) -> Book {
   ///            Book::__________connect_to_graph_traversal_string(
   ///                &self.___________graph_traversal_string,
   ///                filter,
@@ -97,7 +97,7 @@ struct NodeEdgeMetadata {
   ///        }
   ///     ),
   ///     quote!(
-  ///        fn blog(&self, filter: DbFilter) -> Blog {
+  ///        fn blog(&self, filter: Filter) -> Blog {
   ///            Blog::__________connect_to_graph_traversal_string(
   ///                &self.___________graph_traversal_string,
   ///                filter,
@@ -207,7 +207,7 @@ pub struct SchemaFieldsProperties {
     /// to be able to access the foreign fields
     /// Generated Example for e.g field with best_student: <Student>
     /// ```
-    /// pub fn best_student(&self, filter: DbFilter) -> Student {
+    /// pub fn best_student(&self, filter: Filter) -> Student {
     ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, filter)
     /// }
     /// ```

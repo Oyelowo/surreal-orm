@@ -15,7 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    db_field::{cond, Binding},
+    field::{cond, Binding},
     query_create::CreateStatement,
     query_define_token::{Name, Scope},
     query_delete::DeleteStatement,
@@ -25,7 +25,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 // DEFINE EVENT statement
@@ -75,8 +75,8 @@ impl EventBuilder {
     }
 
     // Set the event trigger
-    pub fn when(mut self, condition: impl Into<DbFilter>) -> Then {
-        let cond: DbFilter = condition.into();
+    pub fn when(mut self, condition: impl Into<Filter>) -> Then {
+        let cond: Filter = condition.into();
         self.when = Some(format!("{}", &cond));
         self.bindings.extend(cond.get_bindings());
         Then(self)

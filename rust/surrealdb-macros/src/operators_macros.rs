@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::db_field::DbFilter;
+use crate::field::Filter;
 
 // Define the macro in a separate module
 #[macro_export]

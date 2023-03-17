@@ -15,7 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    db_field::{cond, Binding},
+    field::{cond, Binding},
     param::Param,
     query_create::CreateStatement,
     query_define_table::PermisisonForables,
@@ -27,7 +27,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbFilter, Field, Parametric, Queryable,
+    BindingsList, Filter, Field, Parametric, Queryable,
 };
 
 // DEFINE FIELD statement
@@ -281,8 +281,8 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn assert(mut self, assertion: impl Into<DbFilter>) -> Self {
-        let assertion: DbFilter = assertion.into();
+    pub fn assert(mut self, assertion: impl Into<Filter>) -> Self {
+        let assertion: Filter = assertion.into();
         self.assert = Some(assertion.to_string());
         self
     }
@@ -371,7 +371,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        db_field::NONE,
+        field::NONE,
         query_define_table::{for_, ForCrudType},
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,

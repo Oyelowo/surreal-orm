@@ -11,11 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::Binding,
+    field::Binding,
     query_insert::{Buildable, Runnable, Updateables},
     query_relate::{self, Return},
     value_type_wrappers::SurrealId,
-    BindingsList, DbFilter, Erroneous, Parametric, Queryable, SurrealdbModel,
+    BindingsList, Filter, Erroneous, Parametric, Queryable, SurrealdbModel,
 };
 
 pub fn update<T>(targettables: impl Into<Targettable>) -> UpdateStatement<T>
@@ -187,17 +187,17 @@ where
     /// # Example
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, Field, DbFilter};
+    /// use query_builder::{QueryBuilder, Field, Filter};
     ///
     /// let mut builder = QueryBuilder::select();
-    /// let condition = DbFilter::from(("age", ">", 18));
+    /// let condition = Filter::from(("age", ">", 18));
     /// builder._(condition);
     ///
     /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
     /// ```
-    pub fn where_(mut self, condition: impl Into<DbFilter> + Parametric + Clone) -> Self {
+    pub fn where_(mut self, condition: impl Into<Filter> + Parametric + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
-        let condition: DbFilter = condition.into();
+        let condition: Filter = condition.into();
         self.where_ = Some(condition.to_string());
         self
     }

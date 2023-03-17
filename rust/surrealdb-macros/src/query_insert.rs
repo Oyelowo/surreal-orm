@@ -23,7 +23,7 @@ use surrealdb::{
 };
 
 use crate::{
-    db_field::Binding,
+    field::Binding,
     query_select::{self, SelectStatement},
     BindingsList, Field, Parametric, Queryable, SurrealdbModel,
 };
@@ -372,10 +372,10 @@ impl Updater {
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("score = score + 1".to_string());
     /// ```
-    pub fn new(db_field: impl Into<Field>) -> Self {
-        let db_field = db_field.into();
+    pub fn new(field: impl Into<Field>) -> Self {
+        let field = field.into();
         Self {
-            column_updater_string: db_field.to_string(),
+            column_updater_string: field.to_string(),
             ____bindings: vec![],
         }
     }

@@ -10,7 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    db_field::Binding,
+    field::Binding,
     query_ifelse::Expression,
     query_insert::Buildable,
     query_remove::{Database, Namespace, Runnable},

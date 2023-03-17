@@ -12,7 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::{cond, Binding},
+    field::{cond, Binding},
     query_create::CreateStatement,
     query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},
@@ -20,7 +20,7 @@ use crate::{
     query_remove::RemoveScopeStatement,
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 pub fn begin_transaction() -> QueryTransaction {
