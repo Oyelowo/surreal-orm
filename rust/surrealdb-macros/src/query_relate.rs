@@ -15,7 +15,7 @@ use crate::{
     query_insert::{Buildable, Runnable, Updateables, Updater},
     query_select::{self, SelectStatement},
     value_type_wrappers::SurrealId,
-    BindingsList, Clause, DbField, Erroneous, Parametric, Queryable, SurrealdbEdge,
+    BindingsList, Clause, Field, Erroneous, Parametric, Queryable, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -33,7 +33,7 @@ where
 {
     let errors = connection.get_errors();
     let mut builder = RelateStatement::<T>::new();
-    // let connection: DbField = connection.into();
+    // let connection: Field = connection.into();
     builder.relate(connection)
 }
 
@@ -43,29 +43,29 @@ pub enum Return {
     Before,
     After,
     Diff,
-    Projections(Vec<DbField>),
+    Projections(Vec<Field>),
 }
 
-impl From<Vec<&DbField>> for Return {
-    fn from(value: Vec<&DbField>) -> Self {
+impl From<Vec<&Field>> for Return {
+    fn from(value: Vec<&Field>) -> Self {
         Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
 }
 
-impl From<Vec<DbField>> for Return {
-    fn from(value: Vec<DbField>) -> Self {
+impl From<Vec<Field>> for Return {
+    fn from(value: Vec<Field>) -> Self {
         Self::Projections(value)
     }
 }
 
-impl<const N: usize> From<&[DbField; N]> for Return {
-    fn from(value: &[DbField; N]) -> Self {
+impl<const N: usize> From<&[Field; N]> for Return {
+    fn from(value: &[Field; N]) -> Self {
         Self::Projections(value.to_vec())
     }
 }
 
-impl<const N: usize> From<&[&DbField; N]> for Return {
-    fn from(value: &[&DbField; N]) -> Self {
+impl<const N: usize> From<&[&Field; N]> for Return {
+    fn from(value: &[&Field; N]) -> Self {
         Self::Projections(
             value
                 .to_vec()

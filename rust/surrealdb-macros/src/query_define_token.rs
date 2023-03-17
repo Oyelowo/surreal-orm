@@ -20,7 +20,7 @@ use crate::{
     query_remove::{RemoveScopeStatement, Runnable},
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 
 // DEFINE TOKEN statement

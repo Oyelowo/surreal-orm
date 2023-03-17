@@ -104,7 +104,7 @@ impl ToTokens for FieldsGetterOpts {
 
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
-        // let field_names_ident = format_ident!("{struct_name_ident}DbFields");
+        // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         
         

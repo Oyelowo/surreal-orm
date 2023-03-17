@@ -99,7 +99,7 @@ pub struct Blog {
 #[cfg(test)]
 mod tests {
     /*     use super::*;
-    use surrealdb_macros::DbField;
+    use surrealdb_macros::Field;
     use test_case::test_case;
 
     #[test]

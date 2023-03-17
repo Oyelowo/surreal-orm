@@ -12,10 +12,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    db_field::{cond, Binding},
+    db_field::{cond, Binding, Conditional},
     query_insert::Buildable,
     query_select::SelectStatement,
-    BindingsList, DbField, DbFilter, Parametric,
+    BindingsList, DbFilter, Erroneous, Field, Parametric,
 };
 
 #[derive(Clone)]
@@ -76,7 +76,7 @@ impl<T: Into<sql::Value>> From<T> for Expression {
     }
 }
 
-pub fn if_(condition: impl Into<DbFilter>) -> IfStatement {
+pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }
 
@@ -86,8 +86,8 @@ pub struct ThenExpression {
 }
 
 impl ThenExpression {
-    pub fn else_if(mut self, condition: impl Into<DbFilter>) -> ElseIfStatement {
-        let condition: DbFilter = condition.into();
+    pub fn else_if(mut self, condition: impl Conditional) -> ElseIfStatement {
+        let condition = DbFilter::new(condition);
         self.bindings.extend(condition.get_bindings());
         self.flow_data.else_if_data.conditions.push(condition);
 
@@ -207,13 +207,13 @@ pub struct IfStatement {
 }
 
 impl IfStatement {
-    pub(crate) fn new(condition: impl Into<DbFilter>) -> Self {
+    pub(crate) fn new(condition: impl Conditional) -> Self {
         Self {
-            condition: condition.into(),
+            condition: DbFilter::new(condition),
         }
     }
 
-    pub fn then(mut self, expression: impl Into<Expression>) -> ThenExpression {
+    pub fn then(self, expression: impl Into<Expression>) -> ThenExpression {
         let if_condition = self.condition;
 
         let expression: Expression = expression.into();
@@ -278,13 +278,14 @@ mod tests {
     use crate::{
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;
 
     #[test]
     fn test_if_statement1() {
-        let age = DbField::new("age");
+        let age = Field::new("age");
 
         let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid".to_string())
@@ -300,7 +301,7 @@ mod tests {
 
     #[test]
     fn test_if_statement2() {
-        let age = DbField::new("age");
+        let age = Field::new("age");
         let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
             .else_("Invalid")
@@ -315,8 +316,8 @@ mod tests {
 
     #[test]
     fn test_if_statement3() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
+        let name = Field::new("name");
+        let age = Field::new("age");
 
         let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -334,8 +335,8 @@ mod tests {
 
     #[test]
     fn test_if_statement4() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
+        let name = Field::new("name");
+        let age = Field::new("age");
 
         let if_statement4 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -353,9 +354,9 @@ mod tests {
 
     #[test]
     fn test_if_statement5() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
 
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -375,10 +376,10 @@ mod tests {
 
     #[test]
     fn test_if_statement6() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
-        let city = DbField::new("city");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
+        let city = Field::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
         let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 

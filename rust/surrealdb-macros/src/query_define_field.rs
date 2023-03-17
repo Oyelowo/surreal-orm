@@ -16,6 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     db_field::{cond, Binding},
+    param::Param,
     query_create::CreateStatement,
     query_define_table::PermisisonForables,
     query_define_token::{Name, Scope},
@@ -26,7 +27,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, DbFilter, Field, Parametric, Queryable,
 };
 
 // DEFINE FIELD statement
@@ -232,8 +233,8 @@ pub struct DefineFieldStatement {
     permissions_for: Vec<String>,
     bindings: BindingsList,
 }
-pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
-    let field: DbField = fieldable.into();
+pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
+    let field: Field = fieldable.into();
     DefineFieldStatement {
         field_name: field.to_string(),
         table_name: None,
@@ -247,18 +248,10 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     }
 }
 
-pub struct ValueAssert(DbField);
-
-// impl Display for ValueAssert {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let xx: sql::Idiom = self.0.clone().into();
-//         // let mm = sql::Param::from(xx);
-//         write!(f, "R{}", self.0)
-//     }
-// }
+pub struct ValueAssert(Param);
 
 impl Deref for ValueAssert {
-    type Target = DbField;
+    type Target = Param;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -266,7 +259,7 @@ impl Deref for ValueAssert {
 }
 
 pub fn value() -> ValueAssert {
-    ValueAssert(DbField::new("$value"))
+    ValueAssert(Param::new("value"))
 }
 
 impl DefineFieldStatement {
@@ -382,6 +375,7 @@ mod tests {
         query_define_table::{for_, ForCrudType},
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;
@@ -389,10 +383,10 @@ mod tests {
     #[test]
     fn test_define_field_statement_full() {
         use ForCrudType::*;
-        let name = DbField::new("name");
+        let name = Field::new("name");
         let user_table = Table::from("user");
-        let age = DbField::new("age");
-        let email = DbField::new("email");
+        let age = Field::new("age");
+        let email = Field::new("email");
         use FieldType::*;
 
         let statement = define_field(email)
@@ -409,7 +403,7 @@ mod tests {
 
         assert_eq!(
             statement.to_string(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000000) AND ($value ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
         );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());
@@ -419,7 +413,7 @@ mod tests {
     fn test_define_field_statement_simple() {
         use FieldType::*;
 
-        let email = DbField::new("email");
+        let email = Field::new("email");
         let user_table = Table::from("user");
         let statement = define_field(email).on_table(user_table).type_(String);
 

@@ -20,7 +20,7 @@ use crate::{
     query_remove::RemoveScopeStatement,
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 
 pub fn begin_transaction() -> QueryTransaction {
@@ -124,16 +124,17 @@ mod tests {
     use crate::{
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;
 
     #[test]
     fn test_transaction_commit() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
-        let city = DbField::new("city");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
+        let city = Field::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
         let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 
@@ -171,10 +172,10 @@ mod tests {
 
     #[test]
     fn test_transaction_cancel() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
-        let city = DbField::new("city");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
+        let city = Field::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
         let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 

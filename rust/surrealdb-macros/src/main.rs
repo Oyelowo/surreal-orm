@@ -357,7 +357,7 @@ fn main() {
 //
 // pub fn nama() {
 //     // Student::new().book_written().chapters().verse
-//     // DbField("df".into())
+//     // Field("df".into())
 //     // "".contains_not()
 //     // let rela = Student::new()
 //     //     .book_written_cond(Cond("WHERE pages > 5".into()))

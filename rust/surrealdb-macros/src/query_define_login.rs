@@ -21,7 +21,7 @@ use crate::{
     query_remove::{RemoveScopeStatement, Runnable},
     query_select::SelectStatement,
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
 // DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';

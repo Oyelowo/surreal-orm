@@ -28,7 +28,7 @@ use std::fmt::{self, Display};
 
 use surrealdb::sql;
 
-use crate::{query_define_token::Name, query_insert::Buildable, DbField, Parametric, Queryable};
+use crate::{query_define_token::Name, query_insert::Buildable, Field, Parametric, Queryable};
 
 pub struct Namespace(sql::Idiom);
 pub struct Database(sql::Idiom);
@@ -331,16 +331,16 @@ impl Buildable for RemoveEventStatement {
 }
 impl Runnable for RemoveEventStatement {}
 
-pub fn remove_field(field: impl Into<DbField>) -> RemoveFieldStatement {
+pub fn remove_field(field: impl Into<Field>) -> RemoveFieldStatement {
     RemoveFieldStatement::new(field)
 }
 pub struct RemoveFieldStatement {
-    field: DbField,
+    field: Field,
     table: Option<Table>,
 }
 
 impl RemoveFieldStatement {
-    fn new(field: impl Into<DbField>) -> Self {
+    fn new(field: impl Into<Field>) -> Self {
         Self {
             field: field.into(),
             table: None,

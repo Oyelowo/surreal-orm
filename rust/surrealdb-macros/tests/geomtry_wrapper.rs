@@ -71,7 +71,7 @@ mod geometry_tests {
     use surrealdb_macros::{
         query_insert::{insert, Runnable},
         query_select::{select, All, RunnableSelect},
-        Parametric, SurrealdbNode,
+        Operatable, Parametric, SurrealdbNode,
     };
 
     use super::*;
