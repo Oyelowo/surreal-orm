@@ -382,6 +382,7 @@ mod tests {
         query_define_table::{for_, ForCrudType},
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;

@@ -167,7 +167,7 @@ mod tests {
     // use surrealdb_macros::prelude::*;
     use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
-    use surrealdb_macros::{cond, query_select, DbFilter};
+    use surrealdb_macros::{cond, query_select, DbFilter, Operatable};
     use surrealdb_macros::{q, DbField};
     use test_case::test_case;
 

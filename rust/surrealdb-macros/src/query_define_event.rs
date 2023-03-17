@@ -140,6 +140,7 @@ mod tests {
         query_remove::Table,
         query_select::{select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;

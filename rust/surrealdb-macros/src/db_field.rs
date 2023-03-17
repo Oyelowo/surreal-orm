@@ -773,31 +773,145 @@ impl DbField {
     pub fn __as__(&self, alias: impl std::fmt::Display) -> Self {
         Self::new(format!("{} AS {}", self.condition_query_string, alias))
     }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").between(18, 30);
+    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
+    /// ```
+    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
+    where
+        T: Into<Ordinal>,
+    {
+        let lower_bound: Ordinal = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} < {} < {}",
+            lower_bound_binding.get_param(),
+            self.condition_query_string,
+            upper_bound_binding.get_param()
+        );
+
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            condition_query_string: condition,
+            bindings: updated_params,
+            field_name: self.field_name.clone(),
+        }
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").within(18, 30);
+    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
+    /// ```
+    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
+    where
+        T: Into<Ordinal>,
+    {
+        let lower_bound: Ordinal = lower_bound.into();
+        let lower_bound: Value = lower_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
+        let upper_bound: Value = upper_bound.into();
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} <= {} <= {}",
+            lower_bound_binding.get_param(),
+            self.condition_query_string,
+            upper_bound_binding.get_param()
+        );
+
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Self {
+            condition_query_string: condition,
+            bindings: updated_params,
+            field_name: self.field_name.clone(),
+        }
+    }
+
+    pub fn ____________update_many_bindings<'bi>(
+        &self,
+        bindings: impl Into<&'bi [Binding]>,
+    ) -> Self {
+        let bindings: &'bi [Binding] = bindings.into();
+        // println!("bindingszz {bindings:?}");
+        // updated_params.extend_from_slice(&self.bindings[..]);
+        // updated_params.extend_from_slice(&bindings[..]);
+        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
+        Self {
+            condition_query_string: self.condition_query_string.to_string(),
+            bindings: updated_params,
+            field_name: self.field_name.clone(),
+        }
+    }
 }
 
 impl Operatable for DbField {
-    fn ____________get_condition_string(&self) -> String {
-        todo!()
-    }
+    // fn ____________get_condition_string(&self) -> String {
+    //     todo!()
+    // }
+    //
+    // fn ____________update_condition_string(&mut self, condition_string: String) -> Self {
+    //     todo!()
+    // }
+    //
+    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self {
+    //     todo!()
+    // }
 
-    fn ____________update_condition_string(&mut self, condition_string: String) -> Self {
-        todo!()
-    }
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
+    where
+        T: Into<sql::Value>,
+    {
+        let value: sql::Value = value.into();
+        let binding = Binding::new(value);
+        let condition = format!(
+            "{} {} ${}",
+            self.condition_query_string,
+            operator,
+            &binding.get_param()
+        );
+        let updated_bindings = self.__update_bindings(binding);
 
-    fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self {
-        todo!()
-    }
-
-    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
-        todo!()
-    }
-
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Self {
-        todo!()
+        // let updated_bindings = self.__update_bindings(param, value);
+        Self {
+            condition_query_string: condition,
+            bindings: updated_bindings,
+            field_name: self.field_name.clone(),
+        }
     }
 }
 
-pub trait Operatable: Sized {
+pub trait Operatable: Sized + Parametric {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
     ///
     /// # Arguments
@@ -813,12 +927,11 @@ pub trait Operatable: Sized {
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
-    fn equal<T>(mut self, value: T) -> Self
+    fn equal<T>(&self, value: T) -> Self
     where
         T: Into<sql::Value>,
     {
-        self.generate_query(sql::Operator::Equal, value);
-        self
+        self.generate_query(sql::Operator::Equal, value)
     }
 
     /// Return a new `DbQuery` that checks whether the field is not equal to the specified value
@@ -836,12 +949,11 @@ pub trait Operatable: Sized {
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```
-    fn not_equal<T>(&mut self, value: T) -> &Self
+    fn not_equal<T>(&self, value: T) -> Self
     where
         T: Into<sql::Value>,
     {
-        self.generate_query(sql::Operator::NotEqual, value);
-        self
+        self.generate_query(sql::Operator::NotEqual, value)
     }
 
     /// Constructs a query that checks whether the value of the column is exactly equal to the given value.
@@ -1755,92 +1867,11 @@ pub trait Operatable: Sized {
         self.generate_query("-=", value)
     }
 
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").between(18, 30);
-    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
-    /// ```
-    fn between<T>(&mut self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<Ordinal>,
-    {
-        let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} < {} < {}",
-            lower_bound_binding.get_param(),
-            self.____________get_condition_string(),
-            upper_bound_binding.get_param()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        let object = self.____________update_condition_string(condition);
-        let object = object.____________update_many_bindings(updated_params.as_slice());
-        object
-    }
-
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").within(18, 30);
-    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
-    /// ```
-    fn within<T>(mut self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<Ordinal>,
-    {
-        let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} <= {} <= {}",
-            lower_bound_binding.get_param(),
-            self.____________get_condition_string(),
-            upper_bound_binding.get_param()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-
-        let object = self.____________update_condition_string(condition);
-        let object = object.____________update_many_bindings(updated_params.as_slice());
-        object
-    }
-
-    fn ____________get_condition_string(&self) -> String;
-
-    fn ____________update_condition_string(&mut self, condition_string: String) -> Self;
-
-    fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self;
+    // fn ____________get_condition_string(&self) -> String;
+    //
+    // fn ____________update_condition_string(&mut self, condition_string: String) -> Self;
+    //
+    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self;
     // let bindings: &'bi [Binding] = bindings.into();
     // // println!("bindingszz {bindings:?}");
     // // updated_params.extend_from_slice(&self.bindings[..]);
@@ -1853,18 +1884,17 @@ pub trait Operatable: Sized {
     //     }
     // }
 
-    fn __update_bindings(&self, binding: Binding) -> Vec<Binding>;
-    // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
-    // updated_params.extend(self.bindings.to_vec());
-    // updated_params.extend([binding]);
-    // updated_params
-    // [self.bindings.as_slice(), &[binding]].concat()
-    // }
+    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
+        // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
+        // updated_params.extend(self.bindings.to_vec());
+        // updated_params.extend([binding]);
+        // updated_params
+        [self.get_bindings().as_slice(), &[binding]].concat()
+    }
 
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Self;
-    // fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
-    // where
-    //     T: Into<sql::Value>,
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Self
+    where
+        T: Into<sql::Value>;
     // {
     //     let value: sql::Value = value.into();
     //     let binding = Binding::new(value);

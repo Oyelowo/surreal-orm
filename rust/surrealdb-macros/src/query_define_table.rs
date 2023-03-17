@@ -404,6 +404,7 @@ mod tests {
     use crate::{
         query_select::{order, select, All},
         value_type_wrappers::SurrealId,
+        Operatable,
     };
 
     use super::*;
