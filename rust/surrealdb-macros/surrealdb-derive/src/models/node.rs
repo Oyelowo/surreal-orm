@@ -144,6 +144,7 @@ impl ToTokens for FieldsGetterOpts {
                 use #crate_name::Parametric as _;
                 use #crate_name::Erroneous as _;
                 use #crate_name::Schemaful as _;
+                use #crate_name::Operatable as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,

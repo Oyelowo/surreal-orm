@@ -47,6 +47,7 @@ pub mod model_id;
 pub use db_field::BindingsList;
 pub use db_field::DbField;
 pub use db_field::DbFilter;
+pub use db_field::Operatable;
 pub use db_field::Parametric;
 use query_insert::Buildable;
 use query_select::SelectStatement;

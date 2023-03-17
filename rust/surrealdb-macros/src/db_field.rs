@@ -19,7 +19,10 @@ use std::{
 };
 
 use proc_macro2::Span;
-use surrealdb::sql::{self, Number, Value};
+use surrealdb::{
+    engine::local::Db,
+    sql::{self, Number, Value},
+};
 
 use crate::{
     query_define_token::Name, query_select::SelectStatement, value_type_wrappers::SurrealId,
@@ -772,7 +775,29 @@ impl DbField {
     }
 }
 
-trait Operatable: Sized {
+impl Operatable for DbField {
+    fn ____________get_condition_string(&self) -> String {
+        todo!()
+    }
+
+    fn ____________update_condition_string(&mut self, condition_string: String) -> Self {
+        todo!()
+    }
+
+    fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self {
+        todo!()
+    }
+
+    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
+        todo!()
+    }
+
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Self {
+        todo!()
+    }
+}
+
+pub trait Operatable: Sized {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
     ///
     /// # Arguments

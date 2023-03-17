@@ -56,6 +56,7 @@ use surrealdb_macros::query_select::All;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
 use surrealdb_macros::DbField;
+use surrealdb_macros::Operatable;
 use surrealdb_macros::SurrealdbModel;
 use surrealdb_macros::SurrealdbNode;
 fn mana() {
