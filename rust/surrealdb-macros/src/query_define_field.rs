@@ -16,6 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     db_field::{cond, Binding},
+    param::Param,
     query_create::CreateStatement,
     query_define_table::PermisisonForables,
     query_define_token::{Name, Scope},
@@ -26,7 +27,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, Field, DbFilter, Parametric, Queryable,
+    BindingsList, DbFilter, Field, Parametric, Queryable,
 };
 
 // DEFINE FIELD statement
@@ -247,18 +248,10 @@ pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     }
 }
 
-pub struct ValueAssert(Field);
-
-// impl Display for ValueAssert {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let xx: sql::Idiom = self.0.clone().into();
-//         // let mm = sql::Param::from(xx);
-//         write!(f, "R{}", self.0)
-//     }
-// }
+pub struct ValueAssert(Param);
 
 impl Deref for ValueAssert {
-    type Target = Field;
+    type Target = Param;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -266,7 +259,7 @@ impl Deref for ValueAssert {
 }
 
 pub fn value() -> ValueAssert {
-    ValueAssert(Field::new("$value"))
+    ValueAssert(Param::new("value"))
 }
 
 impl DefineFieldStatement {
@@ -410,7 +403,7 @@ mod tests {
 
         assert_eq!(
             statement.to_string(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT (`$value` IS NOT $_param_00000000) AND (`$value` ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000000) AND ($value ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
         );
         insta::assert_display_snapshot!(statement);
         insta::assert_debug_snapshot!(statement.get_bindings());

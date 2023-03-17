@@ -14,6 +14,7 @@ use db_field::Conditional;
 use db_field::Empty;
 pub mod db_field;
 pub mod operators_macros;
+pub mod param;
 pub mod query_create;
 pub mod query_define_database;
 pub mod query_define_event;
