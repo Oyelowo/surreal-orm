@@ -19,32 +19,32 @@ use crate::{
     db_field::{Binding, BindingsList, DbFilter, Parametric},
     query_insert::Buildable,
     value_type_wrappers::SurrealId,
-    DbField, Queryable, SurrealdbModel, SurrealdbNode,
+    Field, Queryable, SurrealdbModel, SurrealdbNode,
 };
 
 /// Creates a new `Order` instance with the specified database field.
 ///
 /// # Arguments
 ///
-/// * `field` - A reference to a `DbField` instance to be used as the ordering field.
+/// * `field` - A reference to a `Field` instance to be used as the ordering field.
 ///
 /// # Example
 ///
 /// ```
-/// use my_crate::{Order, DbField};
+/// use my_crate::{Order, Field};
 ///
-/// let id_field = DbField::new("id");
+/// let id_field = Field::new("id");
 /// let order = Order::new(&id_field);
 /// ```
-pub fn order(field: impl Into<DbField>) -> Order {
-    let field: DbField = field.into();
+pub fn order(field: impl Into<Field>) -> Order {
+    let field: Field = field.into();
     Order::new(&field)
 }
 
 /// Represents an ordering field, direction, and options for a database query.
 #[derive(Debug, Clone)]
 pub struct Order {
-    field: DbField,
+    field: Field,
     direction: Option<OrderDirection>,
     option: Option<OrderOption>,
 }
@@ -117,17 +117,17 @@ impl Order {
     ///
     /// # Arguments
     ///
-    /// * `field` - A reference to a `DbField` instance to be used as the ordering field.
+    /// * `field` - A reference to a `Field` instance to be used as the ordering field.
     ///
     /// # Example
     ///
     /// ```
-    /// use my_crate::{Order, DbField};
+    /// use my_crate::{Order, Field};
     ///
-    /// let id_field = DbField::new("id");
+    /// let id_field = Field::new("id");
     /// let order = Order::new(&id_field);
     /// ```
-    pub fn new(field: &DbField) -> Self {
+    pub fn new(field: &Field) -> Self {
         Order {
             field: field.clone(),
             direction: None,
@@ -140,9 +140,9 @@ impl Order {
     /// # Example
     ///
     /// ```
-    /// use my_crate::{Order, DbField, OrderDirection};
+    /// use my_crate::{Order, Field, OrderDirection};
     ///
-    /// let id_field = DbField::new("id");
+    /// let id_field = Field::new("id");
     /// let order = Order::new(&id_field).asc();
     /// assert_eq!(order.direction, Some(OrderDirection::Asc));
     /// ```
@@ -156,9 +156,9 @@ impl Order {
     /// # Example
     ///
     /// ```
-    /// use my_crate::{Order, DbField, OrderDirection};
+    /// use my_crate::{Order, Field, OrderDirection};
     ///
-    /// let id_field = DbField::new("id");
+    /// let id_field = Field::new("id");
     /// let order = Order::new(&id_field).desc();
     /// assert_eq!(order.direction, Some(OrderDirection::Desc));
     /// ```
@@ -172,9 +172,9 @@ impl Order {
     /// # Example
     ///
     /// ```
-    /// use my_crate::{Order, DbField, OrderOption};
+    /// use my_crate::{Order, Field, OrderOption};
     ///
-    /// let id_field = DbField::new("id");
+    /// let id_field = Field::new("id");
     /// let order = Order::new(&id_field).rand();
     /// assert_eq!(order.option, Some(OrderOption::Rand));
     /// ```
@@ -188,9 +188,9 @@ impl Order {
     /// # Example
     ///
     /// ```
-    /// use my_crate::{Order, DbField, OrderOption};
+    /// use my_crate::{Order, Field, OrderOption};
     ///
-    /// let name_field = DbField::new("name");
+    /// let name_field = Field::new("name");
     /// let order = Order::new(&name_field).collate();
     /// assert_eq!(order.option, Some(OrderOption::Collate));
     /// ```
@@ -204,9 +204,9 @@ impl Order {
     /// # Example
     ///
     /// ```
-    /// use my_cool_database::query::{Order, DbField};
+    /// use my_cool_database::query::{Order, Field};
     ///
-    /// let field = DbField::new("age", "users");
+    /// let field = Field::new("age", "users");
     /// let order = Order::new(&field).numeric();
     ///
     /// assert_eq!(order.field.name(), "age");
@@ -421,42 +421,42 @@ impl Parametric for Targettables {
 
 #[derive(Clone)]
 pub enum Splittables {
-    Field(DbField),
-    Fields(Vec<DbField>),
+    Field(Field),
+    Fields(Vec<Field>),
 }
 
-impl From<DbField> for Splittables {
-    fn from(value: DbField) -> Self {
+impl From<Field> for Splittables {
+    fn from(value: Field) -> Self {
         Self::Field(value.into())
     }
 }
 
-impl From<&DbField> for Splittables {
-    fn from(value: &DbField) -> Self {
+impl From<&Field> for Splittables {
+    fn from(value: &Field) -> Self {
         Self::Field(value.into())
     }
 }
 
-impl<'a, const N: usize> From<&[&DbField; N]> for Splittables {
-    fn from(value: &[&DbField; N]) -> Self {
+impl<'a, const N: usize> From<&[&Field; N]> for Splittables {
+    fn from(value: &[&Field; N]) -> Self {
         Self::Fields(value.map(Into::into).to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[DbField; N]> for Splittables {
-    fn from(value: &[DbField; N]) -> Self {
+impl<'a, const N: usize> From<&[Field; N]> for Splittables {
+    fn from(value: &[Field; N]) -> Self {
         Self::Fields(value.to_vec())
     }
 }
 
-impl From<Vec<DbField>> for Splittables {
-    fn from(value: Vec<DbField>) -> Self {
+impl From<Vec<Field>> for Splittables {
+    fn from(value: Vec<Field>) -> Self {
         Self::Fields(value)
     }
 }
 
-impl From<Vec<&DbField>> for Splittables {
-    fn from(value: Vec<&DbField>) -> Self {
+impl From<Vec<&Field>> for Splittables {
+    fn from(value: Vec<&Field>) -> Self {
         Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
     }
 }
@@ -522,8 +522,8 @@ impl Deref for Duration {
 pub enum Selectables {
     All,
     AllWithRelations,
-    Field(DbField),
-    Fields(Vec<DbField>),
+    Field(Field),
+    Fields(Vec<Field>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -558,31 +558,31 @@ impl From<All> for Selectables {
     }
 }
 
-impl<'a, const N: usize> From<&[&DbField; N]> for Selectables {
-    fn from(value: &[&DbField; N]) -> Self {
+impl<'a, const N: usize> From<&[&Field; N]> for Selectables {
+    fn from(value: &[&Field; N]) -> Self {
         Self::Fields(value.map(Into::into).to_vec())
     }
 }
 
-impl From<Vec<&DbField>> for Selectables {
-    fn from(value: Vec<&DbField>) -> Self {
+impl From<Vec<&Field>> for Selectables {
+    fn from(value: Vec<&Field>) -> Self {
         Self::Fields(value.into_iter().map(ToOwned::to_owned).collect())
     }
 }
-impl From<Vec<DbField>> for Selectables {
-    fn from(value: Vec<DbField>) -> Self {
+impl From<Vec<Field>> for Selectables {
+    fn from(value: Vec<Field>) -> Self {
         Self::Fields(value)
     }
 }
 
-impl From<DbField> for Selectables {
-    fn from(value: DbField) -> Self {
+impl From<Field> for Selectables {
+    fn from(value: Field) -> Self {
         Self::Field(value)
     }
 }
 
-impl From<&DbField> for Selectables {
-    fn from(value: &DbField) -> Self {
+impl From<&Field> for Selectables {
+    fn from(value: &Field) -> Self {
         Self::Field(value.to_owned())
     }
 }
@@ -703,7 +703,7 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, DbField};
+    /// use query_builder::{QueryBuilder, Field};
     ///
     /// let mut builder = QueryBuilder::select();
     /// builder.from("users");
@@ -741,7 +741,7 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, DbField, DbFilter};
+    /// use query_builder::{QueryBuilder, Field, DbFilter};
     ///
     /// let mut builder = QueryBuilder::select();
     /// let condition = DbFilter::from(("age", ">", 18));
@@ -773,10 +773,10 @@ impl SelectStatement {
     /// # Example: For single field
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, DbField};
+    /// use query_builder::{QueryBuilder, Field};
     ///
     /// let mut builder = QueryBuilder::select();
-    /// let country = DbField::new("country");
+    /// let country = Field::new("country");
     /// builder.split(country);
     ///
     /// assert_eq!(builder.to_string(), "SELECT * SPLIT BY country");
@@ -787,8 +787,8 @@ impl SelectStatement {
     ///
     /// ```
     ///
-    /// let age = DbField::new("age");
-    /// let gender = DbField::new("gender");
+    /// let age = Field::new("age");
+    /// let gender = Field::new("gender");
     /// query = query.split(&[age, gender]);
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table SPLIT age, gender");
@@ -819,9 +819,9 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```rust
-    /// # use query_builder::{QueryBuilder, DbField};
+    /// # use query_builder::{QueryBuilder, Field};
     /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.group_by(DbField::new("age"));
+    /// query_builder.group_by(Field::new("age"));
     /// ```
     ///
     ///
@@ -829,8 +829,8 @@ impl SelectStatement {
     ///
     /// ```
     ///
-    /// let age = DbField::new("age");
-    /// let gender = DbField::new("gender");
+    /// let age = Field::new("age");
+    /// let gender = Field::new("gender");
     /// query = query.group_by(&[age, gender]);
     ///
     /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
@@ -862,13 +862,13 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```rust
-    /// # use query_builder::{QueryBuilder, Order, Direction, DbField};
+    /// # use query_builder::{QueryBuilder, Order, Direction, Field};
     /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.order_by(Order::new(DbField::new("age"), Direction::Ascending));
+    /// query_builder.order_by(Order::new(Field::new("age"), Direction::Ascending));
     ///
     /// query_builder.order(&[
-    ///     Order::new(DbField::new("age"), Direction::Ascending),
-    ///     Order::new(DbField::new("name"), Direction::Descending),
+    ///     Order::new(Field::new("age"), Direction::Ascending),
+    ///     Order::new(Field::new("name"), Direction::Descending),
     /// ]);
     /// ```
     pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {

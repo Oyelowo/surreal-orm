@@ -168,7 +168,7 @@ mod tests {
     use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
     use surrealdb_macros::{cond, query_select, DbFilter, Operatable};
-    use surrealdb_macros::{q, DbField};
+    use surrealdb_macros::{q, Field};
     use test_case::test_case;
 
     fn mana(v: impl Into<DbFilter>) {
@@ -407,8 +407,8 @@ mod tests {
             .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
             .group_by(course)
             .group_by(firstName)
-            .group_by(&[lastName, unoBook, &DbField::new("lowo")])
-            .group_by(vec![lastName, unoBook, &DbField::new("lowo")])
+            .group_by(&[lastName, unoBook, &Field::new("lowo")])
+            .group_by(vec![lastName, unoBook, &Field::new("lowo")])
             .start(5)
             .limit(400)
             .fetch(firstName)
@@ -424,7 +424,7 @@ mod tests {
 
         let is_oyelowo = true;
         if is_oyelowo {
-            query = query.group_by(&[age, bestFriend, &DbField::new("dayo")]);
+            query = query.group_by(&[age, bestFriend, &Field::new("dayo")]);
         }
 
         // stringify_tokens!("lowo", "knows", 5);

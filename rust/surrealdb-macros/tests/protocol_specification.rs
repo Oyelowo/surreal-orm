@@ -129,11 +129,11 @@
 //     type Book = <super::Book as surrealdb_macros::SurrealdbNode>::Schema;
 //     #[derive(Debug, Serialize, Default)]
 //     pub struct Student {
-//         pub id: surrealdb_macros::DbField,
-//         pub firstName: surrealdb_macros::DbField,
-//         pub lastName: surrealdb_macros::DbField,
-//         pub lowo_na: surrealdb_macros::DbField,
-//         pub writtenBlogs: surrealdb_macros::DbField,
+//         pub id: surrealdb_macros::Field,
+//         pub firstName: surrealdb_macros::Field,
+//         pub lastName: surrealdb_macros::Field,
+//         pub lowo_na: surrealdb_macros::Field,
+//         pub writtenBlogs: surrealdb_macros::Field,
 //         pub(crate) ___________graph_traversal_string: ::std::string::String,
 //     }
 //     impl ::std::fmt::Display for Student {
@@ -369,10 +369,10 @@
 //     }
 //     #[derive(Debug, ::serde::Serialize, Default)]
 //     pub struct Writes {
-//         pub id: surrealdb_macros::DbField,
-//         pub in_: surrealdb_macros::DbField,
-//         pub out: surrealdb_macros::DbField,
-//         pub timeWritten: surrealdb_macros::DbField,
+//         pub id: surrealdb_macros::Field,
+//         pub in_: surrealdb_macros::Field,
+//         pub out: surrealdb_macros::Field,
+//         pub timeWritten: surrealdb_macros::Field,
 //         pub ___________graph_traversal_string: ::std::string::String,
 //     }
 //     impl Writes {
@@ -461,8 +461,8 @@
 //     use ::serde::Serialize;
 //     #[derive(Debug, Serialize, Default)]
 //     pub struct Book {
-//         pub id: surrealdb_macros::DbField,
-//         pub title: surrealdb_macros::DbField,
+//         pub id: surrealdb_macros::Field,
+//         pub title: surrealdb_macros::Field,
 //         pub(crate) ___________graph_traversal_string: ::std::string::String,
 //     }
 //     impl ::std::fmt::Display for Book {
@@ -542,8 +542,8 @@
 //     use ::serde::Serialize;
 //     #[derive(Debug, Serialize, Default)]
 //     pub struct Blog {
-//         pub id: surrealdb_macros::DbField,
-//         pub content: surrealdb_macros::DbField,
+//         pub id: surrealdb_macros::Field,
+//         pub content: surrealdb_macros::Field,
 //         pub(crate) ___________graph_traversal_string: ::std::string::String,
 //     }
 //     impl ::std::fmt::Display for Blog {

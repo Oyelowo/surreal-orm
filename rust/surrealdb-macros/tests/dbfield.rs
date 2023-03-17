@@ -117,7 +117,7 @@ pub struct Blog {
 #[cfg(test)]
 mod tests {
     /*     use super::*;
-    use surrealdb_macros::{cond, q, DbField};
+    use surrealdb_macros::{cond, q, Field};
     use test_case::test_case;
 
     #[test]

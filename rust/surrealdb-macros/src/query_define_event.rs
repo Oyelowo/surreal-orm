@@ -25,7 +25,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 
 // DEFINE EVENT statement
@@ -147,8 +147,8 @@ mod tests {
 
     #[test]
     fn test_define_event_statement_state_machine() {
-        let age = DbField::new("age");
-        let city = DbField::new("city");
+        let age = Field::new("age");
+        let city = Field::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
         // TODO: Probably use try_from_converter for String<->Table and for other types
         let user_table = Table::new("user");

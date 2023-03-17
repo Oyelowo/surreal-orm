@@ -55,7 +55,7 @@ use surrealdb_macros::query_select::select;
 use surrealdb_macros::query_select::All;
 use surrealdb_macros::value_type_wrappers::GeometryCustom;
 use surrealdb_macros::value_type_wrappers::SurrealId;
-use surrealdb_macros::DbField;
+use surrealdb_macros::Field;
 use surrealdb_macros::Operatable;
 use surrealdb_macros::SurrealdbModel;
 use surrealdb_macros::SurrealdbNode;
@@ -625,7 +625,7 @@ async fn main() -> surrealdb::Result<()> {
     let a = updater("e").decrement_by(923.54);
     println!("a = {a}");
     updater("e").increment_by("crm");
-    DbField::new("d".to_string()).equal(5);
+    Field::new("d".to_string()).equal(5);
     // sql::Value::Param(sql::Param("trt"));
 
     let xx = sql::Field::Alone("dd".into());
@@ -636,7 +636,7 @@ async fn main() -> surrealdb::Result<()> {
 
     let xx = sql::Value::Strand("Rer".into());
     let xx = sql::Table("Rer".into());
-    let xx = DbField::new("oejfiner");
+    let xx = Field::new("oejfiner");
     // sql::Field;
     // let cc: sql::Table = xx.into();
     // println!("xxx {} erere", cc);
@@ -648,7 +648,7 @@ async fn main() -> surrealdb::Result<()> {
 
     let company::Company { id, name, home, .. } = Company::schema();
     println!("xxxxvv {}", name.clone());
-    let ref age = DbField::new("age");
+    let ref age = Field::new("age");
     let firstName = &name;
     let lastName = &name;
     let line = line_string![

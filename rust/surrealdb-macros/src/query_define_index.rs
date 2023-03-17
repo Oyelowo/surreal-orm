@@ -25,7 +25,7 @@ use crate::{
     query_remove::{RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 
 // DEFINE INDEX statement
@@ -87,31 +87,31 @@ impl Deref for Table {
 }
 
 pub enum Columns {
-    Field(DbField),
-    Fields(Vec<DbField>),
+    Field(Field),
+    Fields(Vec<Field>),
 }
 pub type Fields = Columns;
 
-impl From<DbField> for Columns {
-    fn from(value: DbField) -> Self {
+impl From<Field> for Columns {
+    fn from(value: Field) -> Self {
         Self::Field(value)
     }
 }
 
-// impl<T: Into<DbField>> From<T> for Columns {
+// impl<T: Into<Field>> From<T> for Columns {
 //     fn from(value: T) -> Self {
 //         Self::Column(value.into())
 //     }
 // }
 
-impl<const N: usize> From<&[DbField; N]> for Columns {
-    fn from(value: &[DbField; N]) -> Self {
+impl<const N: usize> From<&[Field; N]> for Columns {
+    fn from(value: &[Field; N]) -> Self {
         Self::Fields(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
-    // impl<T: Into<[const DbField]>> From<T> for Columns {
+    // impl<T: Into<[const Field]>> From<T> for Columns {
 }
 
-// impl<T: Into<Vec<DbField>>> From<T> for Columns {
+// impl<T: Into<Vec<Field>>> From<T> for Columns {
 //     fn from(value: T) -> Self {
 //         Self::Fields(value.into())
 //     }
@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_define_index_statement_single_field() {
-        let email = DbField::new("email");
+        let email = Field::new("email");
 
         let query = define_index("userEmailIndex")
             .on_table("user")
@@ -276,7 +276,7 @@ mod tests {
 
     #[test]
     fn test_define_index_statement_single_column() {
-        let email = DbField::new("email");
+        let email = Field::new("email");
 
         let query = define_index("userEmailIndex")
             .on_table("user")
@@ -292,10 +292,10 @@ mod tests {
 
     #[test]
     fn test_define_index_statement_multiple_fields() {
-        let age = DbField::new("age");
-        let name = DbField::new("name");
-        let email = DbField::new("email");
-        let dob = DbField::new("dob");
+        let age = Field::new("age");
+        let name = Field::new("name");
+        let email = Field::new("email");
+        let dob = Field::new("dob");
 
         let query = define_index("alien_index")
             .on_table("alien")
@@ -311,10 +311,10 @@ mod tests {
 
     #[test]
     fn test_define_index_statement_multiple_columns() {
-        let age = DbField::new("age");
-        let name = DbField::new("name");
-        let email = DbField::new("email");
-        let dob = DbField::new("dob");
+        let age = Field::new("age");
+        let name = Field::new("name");
+        let email = Field::new("email");
+        let dob = Field::new("dob");
 
         let query = define_index("alien_index")
             .on_table("alien")

@@ -45,7 +45,7 @@ pub mod links;
 pub mod model_id;
 
 pub use db_field::BindingsList;
-pub use db_field::DbField;
+pub use db_field::Field;
 pub use db_field::DbFilter;
 pub use db_field::Operatable;
 pub use db_field::Parametric;
@@ -181,14 +181,14 @@ impl From<&SurrealId> for Clause {
     }
 }
 
-impl From<DbField> for Clause {
-    fn from(value: DbField) -> Self {
+impl From<Field> for Clause {
+    fn from(value: Field) -> Self {
         Self::Where(value.into())
     }
 }
 
-impl From<&DbField> for Clause {
-    fn from(value: &DbField) -> Self {
+impl From<&Field> for Clause {
+    fn from(value: &Field) -> Self {
         Self::Where(value.to_owned().into())
     }
 }

@@ -116,17 +116,17 @@ struct NodeEdgeMetadata {
 pub struct SchemaFieldsProperties {
     /// list of fields names that are actually serialized and not skipped.
     pub serialized_field_name_no_skip: Vec<String>,
-    /// Generated example: pub timeWritten: DbField,
-    /// key(normalized_field_name)-value(DbField) e.g pub out: DbField, of field name and DbField type
+    /// Generated example: pub timeWritten: Field,
+    /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
     /// The full thing can look like:
     /// ```
     ///     #[derive(Debug, Default)]
     ///     pub struct Writes<Model: ::serde::Serialize + Default> {
-    ///                pub id: Dbfield,
-    ///                pub r#in: Dbfield,
-    ///                pub out: Dbfield,
-    ///                pub timeWritten: Dbfield,
+    ///                pub id: Field,
+    ///                pub r#in: Field,
+    ///                pub out: Field,
+    ///                pub timeWritten: Field,
     ///          }
     /// ```
     pub schema_struct_fields_types_kv: Vec<TokenStream>,
@@ -336,7 +336,7 @@ impl SchemaFieldsProperties {
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
                 store.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::DbField, ));
+                    .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
   
                 store.schema_struct_fields_names_kv
                     .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
@@ -355,7 +355,7 @@ impl SchemaFieldsProperties {
                 store.connection_with_field_appended
                     .push(quote!(
                                 #schema_instance.#field_ident_normalised =
-                                    #crate_name::DbField::new(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
+                                    #crate_name::Field::new(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
                                         .#____________update_many_bindings(#bindings);
                                 ));
 

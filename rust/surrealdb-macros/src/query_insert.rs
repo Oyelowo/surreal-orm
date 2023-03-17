@@ -25,7 +25,7 @@ use surrealdb::{
 use crate::{
     db_field::Binding,
     query_select::{self, SelectStatement},
-    BindingsList, DbField, Parametric, Queryable, SurrealdbModel,
+    BindingsList, Field, Parametric, Queryable, SurrealdbModel,
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
@@ -336,7 +336,7 @@ impl Parametric for Updater {
     }
 }
 
-pub fn updater(field: impl Into<DbField>) -> Updater {
+pub fn updater(field: impl Into<Field>) -> Updater {
     Updater::new(field)
 }
 
@@ -372,7 +372,7 @@ impl Updater {
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("score = score + 1".to_string());
     /// ```
-    pub fn new(db_field: impl Into<DbField>) -> Self {
+    pub fn new(db_field: impl Into<Field>) -> Self {
         let db_field = db_field.into();
         Self {
             column_updater_string: db_field.to_string(),

@@ -34,37 +34,37 @@ use crate::{
 ///
 /// # Examples
 ///
-/// Creating a `DbField`:
+/// Creating a `Field`:
 ///
 /// ```
-/// use crate::query::field::DbField;
+/// use crate::query::field::Field;
 ///
-/// let field = DbField::new("name");
+/// let field = Field::new("name");
 ///
 /// assert_eq!(field.to_string(), "name");
 /// ```
 #[derive(Debug, Clone)]
-pub struct DbField {
+pub struct Field {
     field_name: sql::Idiom,
     condition_query_string: String,
     bindings: BindingsList,
 }
 
 pub type BindingsList = Vec<Binding>;
-impl Parametric for DbField {
+impl Parametric for Field {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl From<&DbField> for Name {
-    fn from(value: &DbField) -> Self {
+impl From<&Field> for Name {
+    fn from(value: &Field) -> Self {
         Self::new(value.field_name.clone().into())
     }
 }
 
-impl From<&mut DbField> for sql::Value {
-    fn from(value: &mut DbField) -> Self {
+impl From<&mut Field> for sql::Value {
+    fn from(value: &mut Field) -> Self {
         Self::Idiom(value.field_name.to_string().into())
     }
 }
@@ -85,19 +85,19 @@ impl From<sql::Value> for ValueCustom {
 //     }
 // }
 
-impl Into<sql::Value> for &DbField {
+impl Into<sql::Value> for &Field {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
     }
 }
 
-impl Into<sql::Idiom> for DbField {
+impl Into<sql::Idiom> for Field {
     fn into(self) -> sql::Idiom {
         self.field_name
     }
 }
 
-impl Into<sql::Value> for DbField {
+impl Into<sql::Value> for Field {
     fn into(self) -> Value {
         sql::Table(self.condition_query_string.to_string()).into()
     }
@@ -128,13 +128,13 @@ impl_geometry_or_field_from!(
     geo::MultiLineString
 );
 
-impl Into<GeometryOrField> for DbField {
+impl Into<GeometryOrField> for Field {
     fn into(self) -> GeometryOrField {
         GeometryOrField::Field(self.into())
     }
 }
 
-impl Into<GeometryOrField> for &DbField {
+impl Into<GeometryOrField> for &Field {
     fn into(self) -> GeometryOrField {
         GeometryOrField::Field(self.into())
     }
@@ -187,13 +187,13 @@ impl_number_or_field_from!(
     i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
 
-impl Into<Ordinal> for DbField {
+impl Into<Ordinal> for Field {
     fn into(self) -> Ordinal {
         Ordinal::Field(self.into())
     }
 }
 
-impl Into<Ordinal> for &DbField {
+impl Into<Ordinal> for &Field {
     fn into(self) -> Ordinal {
         Ordinal::Field(self.into())
     }
@@ -214,7 +214,7 @@ impl Into<Ordinal> for sql::Number {
     }
 }
 
-impl Into<DbFilter> for &DbField {
+impl Into<DbFilter> for &Field {
     fn into(self) -> DbFilter {
         DbFilter::new(self.clone())
     }
@@ -236,8 +236,8 @@ impl From<SurrealId> for DbFilter {
         // DbFilter::new("".into()).___update_bindings(&vec![b])
     }
 }
-impl From<DbField> for DbFilter {
-    fn from(value: DbField) -> Self {
+impl From<Field> for DbFilter {
+    fn from(value: Field) -> Self {
         Self {
             query_string: value.condition_query_string,
             bindings: value.bindings,
@@ -245,45 +245,45 @@ impl From<DbField> for DbFilter {
     }
 }
 
-impl<'a> From<Cow<'a, Self>> for DbField {
-    fn from(value: Cow<'a, DbField>) -> Self {
+impl<'a> From<Cow<'a, Self>> for Field {
+    fn from(value: Cow<'a, Field>) -> Self {
         match value {
             Cow::Borrowed(v) => v.clone(),
             Cow::Owned(v) => v,
         }
     }
 }
-impl<'a> From<&'a DbField> for Cow<'a, DbField> {
-    fn from(value: &'a DbField) -> Self {
+impl<'a> From<&'a Field> for Cow<'a, Field> {
+    fn from(value: &'a Field) -> Self {
         Cow::Borrowed(value)
     }
 }
 
-impl From<DbField> for Cow<'static, DbField> {
-    fn from(value: DbField) -> Self {
+impl From<Field> for Cow<'static, Field> {
+    fn from(value: Field) -> Self {
         Cow::Owned(value)
     }
 }
 
-impl From<String> for DbField {
+impl From<String> for Field {
     fn from(value: String) -> Self {
         Self::new(value)
     }
 }
-impl From<&Self> for DbField {
-    fn from(value: &DbField) -> Self {
+impl From<&Self> for Field {
+    fn from(value: &Field) -> Self {
         value.to_owned()
     }
 }
-impl From<&str> for DbField {
+impl From<&str> for Field {
     fn from(value: &str) -> Self {
         let value: sql::Idiom = value.to_string().into();
         Self::new(Name::new(value))
     }
 }
 
-impl From<DbField> for String {
-    fn from(value: DbField) -> Self {
+impl From<Field> for String {
+    fn from(value: Field) -> Self {
         value.condition_query_string
     }
 }
@@ -340,7 +340,7 @@ impl From<ArrayCustom> for sql::Value {
     }
 }
 
-impl std::fmt::Display for DbField {
+impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.condition_query_string))
     }
@@ -717,7 +717,7 @@ fn generate_param_name(prefix: &str) -> String {
 
 // enum NameOrIdiom{Name(Idiom), Param(sql::Param)}
 
-impl DbField {
+impl Field {
     pub fn new(field_name: impl Into<Name>) -> Self {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
         let field_name: Name = field_name.into();
@@ -745,9 +745,9 @@ impl DbField {
     /// # Example
     ///
     /// ```
-    /// use surrealdb::DbField;
+    /// use surrealdb::Field;
     ///
-    /// let mut field = DbField::new("name");
+    /// let mut field = Field::new("name");
     /// field.push_str("_alias");
     /// ```
     // TODO: replace with long underscore to show it is an internal variable
@@ -764,9 +764,9 @@ impl DbField {
     /// # Example
     ///
     /// ```
-    /// use surrealdb::{DbField, DbQuery};
+    /// use surrealdb::{Field, DbQuery};
     ///
-    /// let field = DbField::new("name");
+    /// let field = Field::new("name");
     /// let query = field.__as__("name_alias");
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
@@ -875,7 +875,7 @@ impl DbField {
     }
 }
 
-impl Operatable for DbField {
+impl Operatable for Field {
     // fn ____________get_condition_string(&self) -> String {
     //     todo!()
     // }
@@ -888,7 +888,7 @@ impl Operatable for DbField {
     //     todo!()
     // }
 
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> DbField
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Field
     where
         T: Into<sql::Value>,
     {
@@ -921,9 +921,9 @@ pub trait Operatable: Sized + Parametric {
     /// # Example
     ///
     /// ```
-    /// use surrealdb::{DbField, DbQuery};
+    /// use surrealdb::{Field, DbQuery};
     ///
-    /// let field = DbField::new("age");
+    /// let field = Field::new("age");
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
@@ -943,9 +943,9 @@ pub trait Operatable: Sized + Parametric {
     /// # Example
     ///
     /// ```
-    /// use surrealdb::{DbField, DbQuery};
+    /// use surrealdb::{Field, DbQuery};
     ///
-    /// let field = DbField::new("age");
+    /// let field = Field::new("age");
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```

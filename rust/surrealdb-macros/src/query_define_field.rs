@@ -26,7 +26,7 @@ use crate::{
     query_remove::{Event, RemoveScopeStatement, Runnable, Table},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
-    BindingsList, DbField, DbFilter, Parametric, Queryable,
+    BindingsList, Field, DbFilter, Parametric, Queryable,
 };
 
 // DEFINE FIELD statement
@@ -232,8 +232,8 @@ pub struct DefineFieldStatement {
     permissions_for: Vec<String>,
     bindings: BindingsList,
 }
-pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
-    let field: DbField = fieldable.into();
+pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
+    let field: Field = fieldable.into();
     DefineFieldStatement {
         field_name: field.to_string(),
         table_name: None,
@@ -247,7 +247,7 @@ pub fn define_field(fieldable: impl Into<DbField>) -> DefineFieldStatement {
     }
 }
 
-pub struct ValueAssert(DbField);
+pub struct ValueAssert(Field);
 
 // impl Display for ValueAssert {
 //     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -258,7 +258,7 @@ pub struct ValueAssert(DbField);
 // }
 
 impl Deref for ValueAssert {
-    type Target = DbField;
+    type Target = Field;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -266,7 +266,7 @@ impl Deref for ValueAssert {
 }
 
 pub fn value() -> ValueAssert {
-    ValueAssert(DbField::new("$value"))
+    ValueAssert(Field::new("$value"))
 }
 
 impl DefineFieldStatement {
@@ -390,10 +390,10 @@ mod tests {
     #[test]
     fn test_define_field_statement_full() {
         use ForCrudType::*;
-        let name = DbField::new("name");
+        let name = Field::new("name");
         let user_table = Table::from("user");
-        let age = DbField::new("age");
-        let email = DbField::new("email");
+        let age = Field::new("age");
+        let email = Field::new("email");
         use FieldType::*;
 
         let statement = define_field(email)
@@ -420,7 +420,7 @@ mod tests {
     fn test_define_field_statement_simple() {
         use FieldType::*;
 
-        let email = DbField::new("email");
+        let email = Field::new("email");
         let user_table = Table::from("user");
         let statement = define_field(email).on_table(user_table).type_(String);
 

@@ -15,7 +15,7 @@ use crate::{
     db_field::{cond, Binding},
     query_insert::Buildable,
     query_select::SelectStatement,
-    BindingsList, DbField, DbFilter, Parametric,
+    BindingsList, Field, DbFilter, Parametric,
 };
 
 #[derive(Clone)]
@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_if_statement1() {
-        let age = DbField::new("age");
+        let age = Field::new("age");
 
         let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid".to_string())
@@ -301,7 +301,7 @@ mod tests {
 
     #[test]
     fn test_if_statement2() {
-        let age = DbField::new("age");
+        let age = Field::new("age");
         let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
             .else_("Invalid")
@@ -316,8 +316,8 @@ mod tests {
 
     #[test]
     fn test_if_statement3() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
+        let name = Field::new("name");
+        let age = Field::new("age");
 
         let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -335,8 +335,8 @@ mod tests {
 
     #[test]
     fn test_if_statement4() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
+        let name = Field::new("name");
+        let age = Field::new("age");
 
         let if_statement4 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -354,9 +354,9 @@ mod tests {
 
     #[test]
     fn test_if_statement5() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
 
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
             .then("Valid")
@@ -376,10 +376,10 @@ mod tests {
 
     #[test]
     fn test_if_statement6() {
-        let name = DbField::new("name");
-        let age = DbField::new("age");
-        let country = DbField::new("country");
-        let city = DbField::new("city");
+        let name = Field::new("name");
+        let age = Field::new("age");
+        let country = Field::new("country");
+        let city = Field::new("city");
         let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
         let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 

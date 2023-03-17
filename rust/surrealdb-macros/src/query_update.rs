@@ -187,7 +187,7 @@ where
     /// # Example
     ///
     /// ```
-    /// use query_builder::{QueryBuilder, DbField, DbFilter};
+    /// use query_builder::{QueryBuilder, Field, DbFilter};
     ///
     /// let mut builder = QueryBuilder::select();
     /// let condition = DbFilter::from(("age", ">", 18));
