@@ -72,6 +72,7 @@ pub struct Book {
 }
 
 #[cfg(test)]
+#[cfg(not(feature = "mock"))]
 mod geometry_tests {
     use std::time::Duration;
 

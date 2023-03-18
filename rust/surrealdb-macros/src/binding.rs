@@ -90,7 +90,6 @@ fn generate_param_name(prefix: &str, value: impl Into<sql::Value>) -> String {
         let param = value.to_string();
         param
     } else {
-        let nil_id = uuid::Uuid::nil();
         // #[cfg(test)]
         // let sanitized_uuid = uuid::Uuid::nil();
 

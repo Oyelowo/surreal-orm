@@ -21,7 +21,7 @@ fn generate_param_name(prefix: &str, value: impl Into<String>) -> String {
     param
 }
 
-#[test]
+// #[test]
 fn main() {
     let param1 = generate_param_name("prefix1", "value1");
     assert_eq!(

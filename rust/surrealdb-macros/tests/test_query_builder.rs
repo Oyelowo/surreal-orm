@@ -162,7 +162,6 @@ mod tests {
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::{
-        filter::empty,
         sql::{All, Empty, Parametric, Return, Runnable},
         statements::{order, relate, select},
         utils::cond,
@@ -536,7 +535,7 @@ mod tests {
     fn multiplication_tests3() {
         let x = Student::schema()
             .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
-            .book(empty())
+            .book(Empty)
             .content;
 
         assert_eq!(
