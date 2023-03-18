@@ -16,16 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    sql::{Event, Table},
+    sql::{Buildable, Event, Runnables, Table},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 
@@ -129,7 +120,7 @@ impl Parametric for DefineEventStatement {
     }
 }
 
-impl Runnable for DefineEventStatement {}
+impl Runnables for DefineEventStatement {}
 impl Queryable for DefineEventStatement {}
 
 #[cfg(test)]

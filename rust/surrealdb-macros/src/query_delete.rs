@@ -11,7 +11,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    statements::TargettablesForUpdate, BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
+    query_update,
+    sql::{Buildable, Return, Runnable},
+    statements::TargettablesForUpdate,
+    BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
 };
 
 /*
@@ -66,7 +69,7 @@ impl<T> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(targettables: impl Into<query_update::Targettable>) -> Self {
+    pub fn new(targettables: impl Into<query_update::TargettablesForUpdate>) -> Self {
         let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
@@ -147,8 +150,8 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.timeout();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
-        let duration: crate::query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
+        let duration: crate::sql::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -167,25 +170,10 @@ where
     fn build(&self) -> String {
         let mut query = format!("DELETE {};", self.target);
         if let Some(condition) = &self.where_ {
-            query = format!("{} WHERE {};", query, condition);
+            query += format!("{} WHERE {};", query, condition).as_str();
         }
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
         if let Some(timeout) = &self.timeout {
             query.push_str(" TIMEOUT ");

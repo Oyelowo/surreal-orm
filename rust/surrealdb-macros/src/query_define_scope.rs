@@ -13,15 +13,7 @@ use surrealdb::sql;
 
 use crate::{
     field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::Scope,
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
+    sql::{Buildable, Duration, Expression, Runnables, Scope},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 
@@ -130,7 +122,7 @@ impl Parametric for DefineScopeStatement {
     }
 }
 
-impl Runnable for DefineScopeStatement {}
+impl Runnables for DefineScopeStatement {}
 
 #[cfg(test)]
 mod tests {

@@ -16,15 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
+    sql::{Buildable, Index, Runnables, Table},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 
@@ -56,34 +48,6 @@ pub struct DefineIndexStatement {
     columns: Vec<String>,
     unique: Option<bool>,
     bindings: BindingsList,
-}
-
-pub struct Table(sql::Table);
-
-impl Display for Table {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.to_string())
-    }
-}
-
-impl From<Table> for sql::Value {
-    fn from(value: Table) -> Self {
-        Self::Table(value.0)
-    }
-}
-
-impl<T: Into<sql::Table>> From<T> for Table {
-    fn from(value: T) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Deref for Table {
-    type Target = sql::Table;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
 }
 
 pub enum Columns {
@@ -134,8 +98,6 @@ impl Parametric for Columns {
         }
     }
 }
-
-pub type Index = Name;
 
 pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
     DefineIndexStatement::new(index_name)
@@ -249,7 +211,7 @@ impl Parametric for DefineIndexStatement {
 
 impl Queryable for DefineIndexStatement {}
 
-impl Runnable for DefineIndexStatement {}
+impl Runnables for DefineIndexStatement {}
 
 #[cfg(test)]
 mod tests {

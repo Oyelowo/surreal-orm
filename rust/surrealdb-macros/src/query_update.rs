@@ -12,8 +12,8 @@ use surrealdb::sql;
 
 use crate::{
     field::Binding,
-    query_insert::{Buildable, Runnable, Updateables},
-    query_relate::{self, Return},
+    field_updater::Updateables,
+    sql::{Buildable, Return, Runnable},
     value_type_wrappers::SurrealId,
     BindingsList, Erroneous, Filter, Parametric, Queryable, SurrealdbModel,
 };
@@ -50,7 +50,7 @@ where
     merge: Option<String>,
     set: Vec<String>,
     where_: Option<String>,
-    return_type: Option<query_relate::Return>,
+    return_type: Option<Return>,
     timeout: Option<String>,
     bindings: BindingsList,
     parallel: bool,
@@ -240,8 +240,8 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
-        let duration: crate::query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
+        let duration: crate::sql::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -293,22 +293,7 @@ where
         }
 
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {

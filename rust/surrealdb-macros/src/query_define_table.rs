@@ -16,17 +16,9 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     field::{cond, Binding, Conditional},
-    query_create::CreateStatement,
-    query_define_index::Table,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    BindingsList, Filter, Erroneous, Field, Parametric, Queryable,
+    sql::{Buildable, Runnables, Table},
+    statements::SelectStatement,
+    BindingsList, Erroneous, Field, Filter, Parametric, Queryable,
 };
 
 // DEFINE TABLE statement
@@ -239,7 +231,7 @@ impl Display for DefineTableStatement {
     }
 }
 
-impl Runnable for DefineTableStatement {}
+impl Runnables for DefineTableStatement {}
 
 impl Queryable for DefineTableStatement {}
 
@@ -402,9 +394,9 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        query_select::{order, select, All},
+        statements::{order, select},
         value_type_wrappers::SurrealId,
-        Operatable,
+        All, Operatable,
     };
 
     use super::*;

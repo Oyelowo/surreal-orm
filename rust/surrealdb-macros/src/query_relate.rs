@@ -11,8 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    field::Binding, sql::Return, value_type_wrappers::SurrealId, BindingsList, Clause, Erroneous,
-    Field, Parametric, Queryable, SurrealdbEdge,
+    field::Binding,
+    query_insert::Updateables,
+    sql::{Buildable, Return, Runnable},
+    value_type_wrappers::SurrealId,
+    BindingsList, Clause, Erroneous, Field, Parametric, Queryable, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -192,22 +195,7 @@ where
         }
 
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {

@@ -21,6 +21,32 @@ impl Table {
         Self(name.into())
     }
 }
+
+impl Display for Table {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
+
+impl From<Table> for sql::Value {
+    fn from(value: Table) -> Self {
+        Self::Table(value.0)
+    }
+}
+
+impl<T: Into<sql::Table>> From<T> for Table {
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
+
+impl Deref for Table {
+    type Target = sql::Table;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 macro_rules! impl_new_for_all {
     ($($types_:ty),*) => {
         $(
@@ -286,6 +312,28 @@ pub enum Return {
     After,
     Diff,
     Projections(Vec<Field>),
+}
+
+impl Display for Return {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let query = "RETURN ";
+        let return_type = match self {
+            Return::None => query += "NONE ",
+            Return::Before => query += "BEFORE ",
+            Return::After => query += "AFTER ",
+            Return::Diff => query += "DIFF ",
+            Return::Projections(projections) => {
+                let projections = projections
+                    .iter()
+                    .map(|p| format!("{}", p))
+                    .collect::<Vec<String>>()
+                    .join(", ");
+                query += &projections;
+                query += " ";
+            }
+        };
+        write!(f, "{return_type}")
+    }
 }
 
 impl From<Vec<&Field>> for Return {

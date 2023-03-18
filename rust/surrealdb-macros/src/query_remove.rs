@@ -28,7 +28,10 @@ use std::fmt::{self, Display};
 
 use surrealdb::sql;
 
-use crate::{sql::Namespace, Field, Parametric, Queryable};
+use crate::{
+    sql::{Buildable, Namespace, Runnables},
+    Field, Parametric, Queryable,
+};
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
     RemoveNamespaceStatement::new(namespace)
