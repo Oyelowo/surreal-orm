@@ -14,12 +14,6 @@ use insta::{assert_debug_snapshot, assert_display_snapshot};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
-use crate::{
-    field::{cond, Binding},
-    sql::{Buildable, Index, Runnables, Table},
-    BindingsList, Field, Filter, Parametric, Queryable,
-};
-
 // DEFINE INDEX statement
 // Just like in other databases, SurrealDB uses indexes to help optimize query performance.
 // An index can consist of one or more fields in a table and can enforce a uniqueness constraint.
@@ -39,6 +33,11 @@ use crate::{
 // DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
 
 use std::collections::HashMap;
+
+use crate::{
+    binding::{BindingsList, Parametric},
+    Field, sql::Index,
+};
 
 // Struct to represent a SurrealDB index definition
 pub struct DefineIndexStatement {
