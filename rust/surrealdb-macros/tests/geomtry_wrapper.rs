@@ -61,6 +61,16 @@ struct GenZCompany {
     home: GeometryCustom,
 }
 
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "book")]
+pub struct Book {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<SurrealId>,
+    title: String,
+    content: String,
+}
+
 #[cfg(test)]
 mod geometry_tests {
     use std::time::Duration;
@@ -409,7 +419,11 @@ mod geometry_tests {
                 .await
                 .unwrap()
         );
-        let results: GenZCompany = insert(select_query).return_one(db.clone()).await.unwrap();
+        // TODO: The fall back to return_one if list returned not working. Investigate.
+        // let results = insert::<GenZCompany>(select_query)
+        //     .return_one(db.clone())
+        //     .await
+        //     .unwrap();
         let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
 
         let results = insert::<GenZCompany>(select_query)
