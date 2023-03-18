@@ -48,7 +48,7 @@ use crate::{
 /// ```
 #[derive(Debug, Clone)]
 pub struct Field {
-    field_name: sql::Idiom,
+    field_name: String,
     condition_query_string: String,
     bindings: BindingsList,
 }
@@ -105,11 +105,11 @@ impl Into<sql::Value> for &Field {
     }
 }
 
-impl Into<sql::Idiom> for Field {
-    fn into(self) -> sql::Idiom {
-        self.field_name
-    }
-}
+// impl Into<sql::Idiom> for Field {
+//     fn into(self) -> sql::Idiom {
+//         self.field_name
+//     }
+// }
 
 impl Into<sql::Value> for Field {
     fn into(self) -> Value {
@@ -278,16 +278,15 @@ impl std::fmt::Display for Field {
 }
 
 impl Field {
-    pub fn new(field_name: impl Into<Name>) -> Self {
-        // let field: sql::Value = sql::Value::Idiom(field_name.into());
-        let field_name: Name = field_name.into();
-        let field_name: sql::Idiom = field_name.into();
+    pub fn new(field_name: impl Display) -> Self {
+        let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
+        let binding = Binding::new(field);
         let field_name_str = format!("{}", &field_name);
         // let field: sql::Value = field_name.into();
         // This would be necessary if I decide to parametize and bind field names themselves
         // let binding = Binding::new(field_name.into());
         Self {
-            field_name: field_name.into(),
+            field_name: field_name.to_string(),
             condition_query_string: field_name_str,
             bindings: vec![].into(),
             // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
