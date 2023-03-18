@@ -355,7 +355,7 @@ impl SchemaFieldsProperties {
                 store.connection_with_field_appended
                     .push(quote!(
                                 #schema_instance.#field_ident_normalised =
-                                    #crate_name::Field::new(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
+                                    #crate_name::Field::new2(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str).as_str())
                                         .#____________update_many_bindings(#bindings);
                                 ));
 

@@ -48,7 +48,7 @@ use crate::{
 /// ```
 #[derive(Debug, Clone)]
 pub struct Field {
-    field_name: String,
+    field_name: sql::Idiom,
     condition_query_string: String,
     bindings: BindingsList,
 }
@@ -105,11 +105,11 @@ impl Into<sql::Value> for &Field {
     }
 }
 
-// impl Into<sql::Idiom> for Field {
-//     fn into(self) -> sql::Idiom {
-//         self.field_name
-//     }
-// }
+impl Into<sql::Idiom> for Field {
+    fn into(self) -> sql::Idiom {
+        self.field_name
+    }
+}
 
 impl Into<sql::Value> for Field {
     fn into(self) -> Value {
@@ -278,21 +278,45 @@ impl std::fmt::Display for Field {
 }
 
 impl Field {
-    pub fn new(field_name: impl Display) -> Self {
+    pub fn new2(field_name: impl Display) -> Self {
         let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
         let binding = Binding::new(field);
+        Self {
+            field_name: sql::Idiom::from("ee".to_string()),
+            bindings: vec![].into(),
+            condition_query_string: field_name.to_string(),
+        }
+    }
+    pub fn new(field_name: impl Into<Name>) -> Self {
+        // let field: sql::Value = sql::Value::Idiom(field_name.into());
+        let field_name: Name = field_name.into();
+        let field_name: sql::Idiom = field_name.into();
         let field_name_str = format!("{}", &field_name);
         // let field: sql::Value = field_name.into();
         // This would be necessary if I decide to parametize and bind field names themselves
         // let binding = Binding::new(field_name.into());
         Self {
-            field_name: field_name.to_string(),
+            field_name: field_name.into(),
             condition_query_string: field_name_str,
             bindings: vec![].into(),
             // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
             // below in favour over above. This is more paranoid mode.
             // field_name: binding.get_param().to_string(),
             // bindings: vec![binding.into()].into(),
+        }
+    }
+    
+    pub fn update_condition(&self, connection_string: String, bindings: BindingsList) -> Self {
+        let condition = format!("{}{}", &self.condition_query_string,connection_string);
+        // self.bindings.extend(bindings);
+        let bindings= self.____________update_many_bindings(bindings.as_slice());
+        // self
+        //     Self{ field_name: self.field_name, condition_query_string: cond, bindings: self.bindings}
+        // self
+        Self {
+            condition_query_string: "Ere".to_string(),
+            bindings: bindings.bindings,
+            field_name: "ss".to_string().into(),
         }
     }
     /// Append the specified string to the field name
