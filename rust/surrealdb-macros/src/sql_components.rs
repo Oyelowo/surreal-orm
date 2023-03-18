@@ -3,10 +3,13 @@ use std::{
     ops::Deref,
 };
 
-use serde::Serialize;
-use surrealdb::sql;
+use serde::{Deserialize, Serialize};
+use surrealdb::sql::{self, thing};
 
-use crate::{field::Binding, statements::SelectStatement, BindingsList, Field, Parametric};
+use crate::{
+    binding::Binding, binding::BindingsList, errors::SurrealdbOrmError, filter::Conditional,
+    statements::SelectStatement, Erroneous, Field, Parametric,
+};
 
 pub struct Namespace(sql::Idiom);
 pub struct Database(sql::Idiom);
@@ -421,6 +424,14 @@ impl<const N: usize> From<&[&Field; N]> for Return {
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(surrealdb::opt::RecordId);
 
+impl Deref for SurrealId {
+    type Target = surrealdb::opt::RecordId;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl Conditional for SurrealId {
     fn get_condition_query_string(&self) -> String {
         self.to_string()
@@ -434,7 +445,7 @@ impl Erroneous for SurrealId {
 }
 
 impl Parametric for SurrealId {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         let val: sql::Thing = self.to_owned().into();
         let val: sql::Value = val.into();
         vec![Binding::new(val)]
@@ -443,7 +454,7 @@ impl Parametric for SurrealId {
 
 impl ::std::fmt::Display for SurrealId {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.to_raw()))
+        f.write_fmt(format_args!("{}", self.to_string()))
     }
 }
 
@@ -492,7 +503,7 @@ impl Into<sql::Value> for SurrealId {
 }
 
 impl Deref for SurrealId {
-    type Target = RecordId;
+    type Target = surrealdb::opt::RecordId;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -507,7 +518,7 @@ enum CoordinateValue {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct GeometryCustom(pub Geometry);
+pub struct GeometryCustom(pub sql::Geometry);
 
 impl<'de> Deserialize<'de> for GeometryCustom {
     fn deserialize<D>(deserializer: D) -> std::result::Result<GeometryCustom, D::Error>
@@ -646,20 +657,20 @@ impl CoordParser for (String, String) {
     }
 }
 
-impl From<Geometry> for GeometryCustom {
-    fn from(value: Geometry) -> Self {
+impl From<sql::Geometry> for GeometryCustom {
+    fn from(value: sql::Geometry) -> Self {
         Self(value)
     }
 }
 
-impl From<GeometryCustom> for Geometry {
+impl From<GeometryCustom> for sql::Geometry {
     fn from(value: GeometryCustom) -> Self {
         value.0
     }
 }
 
 impl Deref for GeometryCustom {
-    type Target = Geometry;
+    type Target = sql::Geometry;
 
     fn deref(&self) -> &Self::Target {
         &self.0

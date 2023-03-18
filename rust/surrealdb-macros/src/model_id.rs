@@ -78,15 +78,6 @@ fn ererr() {
 //     }
 // }
 
-#[derive(Error, Debug)]
-pub enum SurrealdbOrmError {
-    #[error("the id - `{0}` - you have provided is invalid or belongs to another table. Surrealdb Is should be in format: <table_name:column>")]
-    InvalidId(String),
-    // #[error("invalid header (expected {expected:?}, found {found:?})")]
-    // InvalidHeader { expected: String, found: String },
-    // #[error("unknown data store error")]
-    // Unknown,
-}
 // impl TryFrom<&str> for SurId {
 //     type Error = SurrealdbOrmError;
 //

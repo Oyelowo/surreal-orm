@@ -15,8 +15,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    binding::BindingsList,
-    sql::{Buildable, Event, Runnables, Table},
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Event, Queryable, Runnables, Table},
 };
 
 // DEFINE EVENT statement
@@ -127,7 +127,11 @@ mod tests {
 
     use std::time::Duration;
 
-    use crate::{sql::Table, statements::select, value_type_wrappers::SurrealId, All, Operatable};
+    use crate::{
+        sql::{SurrealId, Table},
+        statements::select,
+        Field, Operatable,
+    };
 
     use super::*;
 

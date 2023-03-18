@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -7,6 +9,8 @@ use crate::Parametric;
 pub trait Buildable {
     fn build(&self) -> String;
 }
+
+pub trait Queryable: Parametric + Buildable + Display {}
 
 #[async_trait]
 pub trait Runnable<T>

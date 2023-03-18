@@ -1,6 +1,9 @@
 use surrealdb::sql::{self, Operator};
 
-use crate::{field::Binding, BindingsList, Field, Parametric};
+use crate::{
+    binding::{Binding, BindingsList, Parametric},
+    Field,
+};
 
 /// A helper struct for generating SQL update statements.
 pub struct Updater {

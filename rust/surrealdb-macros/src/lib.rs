@@ -11,6 +11,7 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 pub(crate) mod binding;
+pub(crate) mod errors;
 pub mod field;
 mod field_updater;
 pub(crate) mod filter;
@@ -41,7 +42,6 @@ mod query_update;
 mod query_use;
 mod sql_components;
 pub(crate) mod sql_traits;
-pub mod value_type_wrappers;
 
 pub mod sql {
     pub use super::clause::*;
@@ -96,9 +96,6 @@ use sql::Clause;
 // pub use field::Param;
 // pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
-use value_type_wrappers::SurrealId;
-
-pub trait Queryable: Parametric + sql::Buildable + Display {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {

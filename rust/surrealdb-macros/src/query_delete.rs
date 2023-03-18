@@ -12,6 +12,7 @@ use surrealdb::sql;
 
 use crate::{
     binding::{BindingsList, Parametric},
+    filter::Filter,
     query_update,
     sql::{Buildable, Return, Runnable},
     statements::TargettablesForUpdate,

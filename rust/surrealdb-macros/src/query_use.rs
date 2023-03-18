@@ -10,8 +10,9 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    sql::{Buildable, Database, Namespace, Runnable},
-    Parametric, Queryable,
+    binding::BindingsList,
+    sql::{Buildable, Database, Namespace, Queryable, Runnable},
+    Parametric,
 };
 
 pub fn use_() -> UseStatement {
@@ -65,7 +66,7 @@ impl Runnable for UseStatement {}
 impl Queryable for UseStatement {}
 
 impl Parametric for UseStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         vec![]
     }
 }
