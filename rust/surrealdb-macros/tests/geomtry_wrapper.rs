@@ -24,9 +24,8 @@ use surrealdb::sql::Geometry;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_derive::SurrealdbNode;
-use surrealdb_macros::query_insert;
-use surrealdb_macros::value_type_wrappers::GeometryCustom;
-use surrealdb_macros::value_type_wrappers::SurrealId;
+use surrealdb_macros::sql::GeometryCustom;
+use surrealdb_macros::sql::SurrealId;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Person {
@@ -69,8 +68,8 @@ mod geometry_tests {
     use geo::Coord;
     use surrealdb::sql::statements::CommitStatement;
     use surrealdb_macros::{
-        query_insert::{insert, Runnable},
-        query_select::{select, All, RunnableSelect},
+        sql::{All, Runnable, RunnableSelect},
+        statements::{insert, select},
         Operatable, Parametric, SurrealdbNode,
     };
 

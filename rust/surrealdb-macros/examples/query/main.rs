@@ -45,18 +45,15 @@ struct User {
 use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_derive::SurrealdbNode;
-use surrealdb_macros::field::cond;
-use surrealdb_macros::field::Parametric;
-use surrealdb_macros::query_insert;
-use surrealdb_macros::query_insert::updater;
-use surrealdb_macros::query_insert::Updater;
-use surrealdb_macros::query_select;
-use surrealdb_macros::query_select::select;
-use surrealdb_macros::query_select::All;
-use surrealdb_macros::value_type_wrappers::GeometryCustom;
-use surrealdb_macros::value_type_wrappers::SurrealId;
+use surrealdb_macros::sql::updater;
+use surrealdb_macros::sql::All;
+use surrealdb_macros::sql::GeometryCustom;
+use surrealdb_macros::sql::SurrealId;
+use surrealdb_macros::statements::select;
+use surrealdb_macros::utils::cond;
 use surrealdb_macros::Field;
 use surrealdb_macros::Operatable;
+use surrealdb_macros::Parametric;
 use surrealdb_macros::SurrealdbModel;
 use surrealdb_macros::SurrealdbNode;
 fn mana() {
