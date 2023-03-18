@@ -12,32 +12,64 @@ use std::ops::Deref;
 
 use field::Conditional;
 pub mod field;
-pub mod operators_macros;
-pub mod param;
-pub mod query_create;
-pub mod query_define_database;
-pub mod query_define_event;
-pub mod query_define_field;
-pub mod query_define_index;
-pub mod query_define_login;
-pub mod query_define_namespace;
-pub mod query_define_scope;
-pub mod query_define_table;
-pub mod query_define_token;
-pub mod query_delete;
-pub mod query_ifelse;
-pub mod query_info;
-pub mod query_insert;
-pub mod query_let;
-pub mod query_relate;
-pub mod query_remove;
-pub mod query_select;
-pub mod query_sleep;
-pub mod query_transaction;
-pub mod query_update;
-pub mod query_use;
+mod operators_macros;
+mod param;
+mod query_create;
+mod query_define_database;
+mod query_define_event;
+mod query_define_field;
+mod query_define_index;
+mod query_define_login;
+mod query_define_namespace;
+mod query_define_scope;
+mod query_define_table;
+mod query_define_token;
+mod query_delete;
+mod query_ifelse;
+mod query_info;
+mod query_insert;
+mod query_let;
+mod query_relate;
+mod query_remove;
+mod query_select;
+mod query_sleep;
+mod query_transaction;
+mod query_update;
+mod query_use;
 pub mod value_type_wrappers;
-// pub mod querydb;
+
+pub mod items {
+    pub use super::query_remove::Table;
+}
+pub mod statements {
+    pub use super::query_create::{create, CreateStatement};
+    pub use super::query_define_database::{define_database, DefineDatabaseStatement};
+    pub use super::query_define_event::{define_event, DefineEventStatement};
+    pub use super::query_define_field::{define_field, DefineFieldStatement};
+    pub use super::query_define_index::{define_index, DefineIndexStatement};
+    pub use super::query_define_login::{define_login, DefineLoginStatement};
+    pub use super::query_define_namespace::{define_namespace, DefineNamespaceStatement};
+    pub use super::query_define_scope::{define_scope, DefineScopeStatement};
+    pub use super::query_define_table::{define_table, DefineTableStatement};
+    pub use super::query_define_token::{define_token, DefineTokenStatement};
+    pub use super::query_delete::{delete, DeleteStatement};
+    pub use super::query_ifelse::{if_, IfStatement};
+    pub use super::query_info::{info_for, InfoStatement};
+    pub use super::query_insert::Runnable;
+    pub use super::query_insert::{insert, InsertStatement};
+    pub use super::query_let::{let_, LetStatement};
+    pub use super::query_relate::Return;
+    pub use super::query_relate::{relate, RelateStatement};
+    pub use super::query_remove::{
+        remove_database, remove_event, remove_field, remove_index, remove_login, remove_namespace,
+        remove_scope, remove_table, remove_token,
+    };
+    pub use super::query_select::{order, select, Order, RunnableSelect, SelectStatement};
+    pub use super::query_sleep::{sleep, SleepStatement};
+    pub use super::query_transaction::{begin_transaction, BeginTransactionStatement};
+    pub use super::query_update::{update, UpdateStatement};
+    pub use super::query_use::{use_, UseStatement};
+}
 pub mod prelude {
     use super::query_select;
 }

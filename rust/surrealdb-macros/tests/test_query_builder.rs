@@ -162,12 +162,9 @@ mod tests {
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::field::{cond, empty, Binding, Parametric};
-    use surrealdb_macros::query_insert::Runnable;
-    use surrealdb_macros::query_relate::{relate, Return};
-    // use surrealdb_macros::prelude::*;
-    use surrealdb_macros::query_select::{order, select, All, Order, RunnableSelect};
+    use surrealdb_macros::statements::{order, select, Order, RunnableSelect};
     use surrealdb_macros::value_type_wrappers::SurrealId;
-    use surrealdb_macros::{cond, query_select, Empty, Filter, Operatable};
+    use surrealdb_macros::{cond, All, Empty, Filter, Operatable};
     use surrealdb_macros::{q, Field};
     use test_case::test_case;
 

@@ -19,7 +19,7 @@ use crate::{
     field::{Binding, BindingsList, Conditional, Filter, Parametric},
     query_insert::Buildable,
     value_type_wrappers::SurrealId,
-    Erroneous, Field, Queryable, SurrealdbModel, SurrealdbNode,
+    All, Erroneous, Field, Queryable, SurrealdbModel, SurrealdbNode,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -526,8 +526,8 @@ pub enum Selectables {
     Fields(Vec<Field>),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct All;
+// #[derive(Debug, Clone, Copy)]
+// pub struct All;
 
 impl AsRef<Selectables> for All {
     fn as_ref(&self) -> &Selectables {

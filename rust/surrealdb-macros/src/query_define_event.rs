@@ -137,10 +137,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        query_remove::Table,
-        query_select::{select, All},
-        value_type_wrappers::SurrealId,
-        Operatable,
+        query_remove::Table, statements::select, value_type_wrappers::SurrealId, All, Operatable,
     };
 
     use super::*;

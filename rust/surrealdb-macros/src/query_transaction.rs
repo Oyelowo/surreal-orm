@@ -24,7 +24,7 @@ use crate::{
 };
 
 pub fn begin_transaction() -> QueryTransaction {
-    BeginTransaction::new()
+    BeginTransactionStatement::new()
 }
 
 pub struct QueryTransaction {
@@ -53,9 +53,9 @@ impl QueryTransaction {
     }
 }
 
-pub struct BeginTransaction;
+pub struct BeginTransactionStatement;
 
-impl BeginTransaction {
+impl BeginTransactionStatement {
     pub(crate) fn new() -> QueryTransaction {
         QueryTransaction {
             data: TransactionData {
