@@ -36,7 +36,8 @@ use std::collections::HashMap;
 
 use crate::{
     binding::{BindingsList, Parametric},
-    Field, sql::Index,
+    sql::{Buildable, Index, Queryable, Runnables, Table},
+    Field,
 };
 
 // Struct to represent a SurrealDB index definition

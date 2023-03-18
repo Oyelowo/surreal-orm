@@ -11,7 +11,7 @@ use surrealdb::sql;
 
 use crate::{
     binding::BindingsList,
-    sql::{Buildable, Database, Namespace, Queryable, Runnable},
+    sql::{Buildable, Database, Namespace, Queryable, Runnable, Runnables},
     Parametric,
 };
 
@@ -61,7 +61,7 @@ impl Display for UseStatement {
     }
 }
 
-impl Runnable for UseStatement {}
+impl Runnables for UseStatement {}
 
 impl Queryable for UseStatement {}
 

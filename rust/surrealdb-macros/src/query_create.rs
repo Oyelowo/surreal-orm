@@ -11,11 +11,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::Binding,
-    field_updater::Updateables,
+    binding::{Binding, BindingsList, Parametric},
     query_update::TargettablesForUpdate,
-    sql::{Buildable, Return, Runnable},
-    BindingsList, Parametric, Queryable, SurrealdbNode,
+    sql::{Buildable, Queryable, Return, Runnable, Updateables},
+    SurrealdbNode,
 };
 
 pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
@@ -210,7 +209,7 @@ impl<T> Parametric for CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }

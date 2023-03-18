@@ -31,9 +31,9 @@ use surrealdb::sql;
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{
-        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table, Token,
+        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table,
+        TableIndex, Token,
     },
-    sql_components::Index,
     Field,
 };
 
@@ -298,16 +298,16 @@ impl Buildable for RemoveFieldStatement {
 }
 impl Runnables for RemoveFieldStatement {}
 
-pub fn remove_index(index: impl Into<Index>) -> RemoveIndexStatement {
+pub fn remove_index(index: impl Into<TableIndex>) -> RemoveIndexStatement {
     RemoveIndexStatement::new(index)
 }
 pub struct RemoveIndexStatement {
-    index: Index,
+    index: TableIndex,
     table: Option<Table>,
 }
 
 impl RemoveIndexStatement {
-    fn new(index: impl Into<Index>) -> Self {
+    fn new(index: impl Into<TableIndex>) -> Self {
         Self {
             index: index.into(),
             table: None,

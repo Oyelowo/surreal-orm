@@ -18,29 +18,11 @@ pub struct Token(sql::Idiom);
 pub struct Scope(sql::Idiom);
 pub struct Table(sql::Table);
 pub struct Event(sql::Idiom);
-pub struct Index(sql::Idiom);
+pub struct TableIndex(sql::Idiom);
 
 impl Table {
     pub fn new(name: impl Into<sql::Table>) -> Self {
         Self(name.into())
-    }
-}
-
-impl Display for Table {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.to_string())
-    }
-}
-
-impl From<Table> for sql::Value {
-    fn from(value: Table) -> Self {
-        Self::Table(value.0)
-    }
-}
-
-impl<T: Into<sql::Table>> From<T> for Table {
-    fn from(value: T) -> Self {
-        Self(value.into())
     }
 }
 
@@ -63,7 +45,7 @@ macro_rules! impl_new_for_all {
     };
 }
 
-impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, Index);
+impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, TableIndex);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
@@ -108,7 +90,7 @@ macro_rules! impl_display_for_all {
     )*
     };
 }
-impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, Index);
+impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, TableIndex);
 
 pub enum TokenType {
     EDDSA,
@@ -356,23 +338,21 @@ pub enum Return {
 
 impl Display for Return {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let query = "RETURN ";
         let return_type = match self {
-            Return::None => query += "NONE ",
-            Return::Before => query += "BEFORE ",
-            Return::After => query += "AFTER ",
-            Return::Diff => query += "DIFF ",
+            Return::None => "NONE ",
+            Return::Before => "BEFORE ",
+            Return::After => "AFTER ",
+            Return::Diff => "DIFF ",
             Return::Projections(projections) => {
                 let projections = projections
                     .iter()
                     .map(|p| format!("{}", p))
                     .collect::<Vec<String>>()
                     .join(", ");
-                query += &projections;
-                query += " ";
+                &projections
             }
         };
-        write!(f, "{return_type}")
+        write!(f, "RETURN {return_type} ")
     }
 }
 
@@ -484,14 +464,6 @@ impl From<sql::Thing> for SurrealId {
 impl Into<sql::Value> for SurrealId {
     fn into(self) -> sql::Value {
         self.0.into()
-    }
-}
-
-impl Deref for SurrealId {
-    type Target = surrealdb::opt::RecordId;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

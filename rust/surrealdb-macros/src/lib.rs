@@ -11,10 +11,13 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 pub(crate) mod binding;
+pub(crate) mod clause;
 pub(crate) mod errors;
 pub mod field;
 mod field_updater;
 pub mod filter;
+pub mod links;
+pub mod model_id;
 mod operators_macros;
 mod param;
 mod query_create;
@@ -42,6 +45,14 @@ mod query_update;
 mod query_use;
 mod sql_components;
 pub(crate) mod sql_traits;
+
+use binding::Parametric;
+pub use field::Field;
+pub use field::Operatable;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
+use sql::Clause;
 
 pub mod sql {
     pub use super::clause::*;
@@ -88,17 +99,6 @@ pub mod prelude {
     use super::query_select;
 }
 
-pub(crate) mod clause;
-pub mod links;
-pub mod model_id;
-
-use binding::Parametric;
-pub use field::Field;
-pub use field::Operatable;
-use serde::de::DeserializeOwned;
-use serde::Deserialize;
-use serde::Serialize;
-use sql::Clause;
 // pub use field::Param;
 // pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
