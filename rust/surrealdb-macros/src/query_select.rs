@@ -13,13 +13,13 @@ use std::{
 };
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql::{self, Table, Value};
+use surrealdb::sql::{self, Value};
 
 use crate::{
     binding::{Binding, BindingsList, Parametric},
     filter::{Conditional, Filter},
     sql::{All, Buildable, Duration, Queryable, RunnableSelect, SurrealId},
-    Erroneous, Field,
+    Erroneous, Field, Table,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -287,6 +287,16 @@ impl From<Vec<sql::Thing>> for TargettablesForSelect {
     }
 }
 
+impl From<&Table> for TargettablesForSelect {
+    fn from(value: &Table) -> Self {
+        Self::Table(value.into())
+    }
+}
+impl From<Table> for TargettablesForSelect {
+    fn from(value: Table) -> Self {
+        Self::Table(value.into())
+    }
+}
 impl From<&sql::Table> for TargettablesForSelect {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
@@ -370,7 +380,7 @@ impl From<SurrealId> for TargettablesForSelect {
 }
 
 impl From<sql::Table> for TargettablesForSelect {
-    fn from(value: Table) -> Self {
+    fn from(value: sql::Table) -> Self {
         Self::Table(value)
     }
 }

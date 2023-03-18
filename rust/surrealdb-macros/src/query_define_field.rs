@@ -227,7 +227,7 @@ pub struct DefineFieldStatement {
     bindings: BindingsList,
 }
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
-    let field: sql::Field = fieldable.into();
+    let field: Field = fieldable.into();
     DefineFieldStatement {
         field_name: field.to_string(),
         table_name: None,

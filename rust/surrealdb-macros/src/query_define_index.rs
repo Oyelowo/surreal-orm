@@ -36,7 +36,7 @@ use std::collections::HashMap;
 
 use crate::{
     binding::{BindingsList, Parametric},
-    sql::{Buildable, Index, Queryable, Runnables, Table},
+    sql::{Buildable, Index, Queryable, Runnables, Table, TableIndex},
     Field,
 };
 
@@ -99,15 +99,14 @@ impl Parametric for Columns {
     }
 }
 
-pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
+pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
     DefineIndexStatement::new(index_name)
 }
 
 impl DefineIndexStatement {
-    pub fn new(index_name: impl Into<Index>) -> Self {
+    pub fn new(index_name: impl Into<TableIndex>) -> Self {
         // let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
-        let index_name: Index = index_name.into();
-        let index_name: sql::Idiom = index_name.into();
+        let index_name: TableIndex = index_name.into();
         let index_name: String = index_name.to_string();
 
         Self {

@@ -27,7 +27,7 @@ use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 use std::fmt::{Debug, Display};
 use surrealdb_macros::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    value_type_wrappers::SurrealId,
+    sql::SurrealId,
     RecordId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
@@ -161,11 +161,12 @@ mod tests {
     use super::*;
     use _core::time::Duration;
     use surrealdb::sql;
-    use surrealdb_macros::field::{cond, empty, Binding, Parametric};
-    use surrealdb_macros::statements::{order, select, Order, RunnableSelect};
-    use surrealdb_macros::value_type_wrappers::SurrealId;
-    use surrealdb_macros::{cond, All, Empty, Filter, Operatable};
-    use surrealdb_macros::{q, Field};
+    use surrealdb_macros::{
+        sql::{All, Empty},
+        statements::{order, select},
+        utils::cond,
+        Operatable,
+    };
     use test_case::test_case;
 
     #[test]

@@ -46,13 +46,14 @@ mod query_use;
 mod sql_components;
 pub(crate) mod sql_traits;
 
-use binding::Parametric;
+use binding::{BindingsList, Parametric};
 pub use field::Field;
 pub use field::Operatable;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 use sql::Clause;
+pub use sql::Table;
 
 pub mod sql {
     pub use super::clause::*;

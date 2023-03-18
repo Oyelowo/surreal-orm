@@ -26,6 +26,17 @@ impl Table {
     }
 }
 
+impl From<Table> for sql::Table {
+    fn from(value: Table) -> Self {
+        value.0
+    }
+}
+impl From<&Table> for sql::Table {
+    fn from(value: &Table) -> Self {
+        value.0.clone()
+    }
+}
+
 impl Deref for Table {
     type Target = sql::Table;
 
@@ -39,6 +50,12 @@ macro_rules! impl_new_for_all {
         impl $types_ {
             pub fn new(name: impl Into<String>) -> Self {
                 Self(name.into().into())
+            }
+        }
+
+        impl From<$types_> for sql::Idiom {
+            fn from(value: $types_) -> Self {
+                value.0
             }
         }
     )*
@@ -339,18 +356,15 @@ pub enum Return {
 impl Display for Return {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let return_type = match self {
-            Return::None => "NONE ",
-            Return::Before => "BEFORE ",
-            Return::After => "AFTER ",
-            Return::Diff => "DIFF ",
-            Return::Projections(projections) => {
-                let projections = projections
-                    .iter()
-                    .map(|p| format!("{}", p))
-                    .collect::<Vec<String>>()
-                    .join(", ");
-                &projections
-            }
+            Return::None => "NONE".to_string(),
+            Return::Before => "BEFORE".to_string(),
+            Return::After => "AFTER".to_string(),
+            Return::Diff => "DIFF".to_string(),
+            Return::Projections(projections) => projections
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(", "),
         };
         write!(f, "RETURN {return_type} ")
     }
