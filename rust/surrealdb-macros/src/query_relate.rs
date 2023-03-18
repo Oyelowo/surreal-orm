@@ -13,7 +13,7 @@ use surrealdb::sql::{self, Operator};
 use crate::{
     binding::{Binding, BindingsList},
     sql::{Buildable, Duration, Queryable, Return, Runnable, Updateables},
-    Clause, Erroneous, Field, Parametric, SurrealdbEdge,
+    Clause, Erroneous, ErrorList, Field, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -46,6 +46,7 @@ where
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
+    errors: ErrorList,
     __return_type: PhantomData<T>,
 }
 
@@ -63,11 +64,13 @@ where
             parallel: false,
             __return_type: PhantomData,
             bindings: vec![],
+            errors: vec![],
         }
     }
 
-    pub fn relate(mut self, connection: impl Parametric + Display) -> Self {
+    pub fn relate(mut self, connection: impl Parametric + Display + Erroneous) -> Self {
         self.relation = connection.to_string();
+        self.errors.extend(connection.get_errors());
         self.bindings.extend(connection.get_bindings());
         self
     }
@@ -151,6 +154,15 @@ where
 }
 
 impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
+
+impl<T> Erroneous for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> std::fmt::Display for RelateStatement<T>
 where

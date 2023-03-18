@@ -14,6 +14,7 @@ use surrealdb::sql;
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{Buildable, Queryable},
+    Erroneous,
 };
 
 pub fn begin_transaction() -> QueryTransaction {
@@ -80,6 +81,9 @@ impl Parametric for TransactionCompletion {
         self.data.bindings.to_vec()
     }
 }
+
+impl Queryable for TransactionCompletion {}
+impl Erroneous for TransactionCompletion {}
 
 impl Buildable for TransactionCompletion {
     fn build(&self) -> String {

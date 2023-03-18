@@ -19,6 +19,7 @@ use crate::{
     query_for::PermisisonForables,
     sql::{Buildable, Queryable, Runnables, Table},
     statements::SelectStatement,
+    Erroneous,
 };
 
 // DEFINE TABLE statement
@@ -234,6 +235,7 @@ impl Display for DefineTableStatement {
 impl Runnables for DefineTableStatement {}
 
 impl Queryable for DefineTableStatement {}
+impl Erroneous for DefineTableStatement {}
 
 impl Parametric for DefineTableStatement {
     fn get_bindings(&self) -> BindingsList {

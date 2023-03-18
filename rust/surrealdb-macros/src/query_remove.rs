@@ -34,7 +34,7 @@ use crate::{
         Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table,
         TableIndex, Token,
     },
-    Field,
+    Erroneous, Field,
 };
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
@@ -189,6 +189,7 @@ impl RemoveScopeStatement {
 }
 
 impl Queryable for RemoveScopeStatement {}
+impl Erroneous for RemoveScopeStatement {}
 
 impl Parametric for RemoveScopeStatement {
     fn get_bindings(&self) -> BindingsList {

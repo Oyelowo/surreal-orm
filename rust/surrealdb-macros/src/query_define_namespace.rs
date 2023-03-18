@@ -12,6 +12,7 @@ use surrealdb::sql::{self, Ident};
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{Buildable, Namespace, Queryable, Runnables},
+    Erroneous,
 };
 
 pub fn define_namespace(namespace: impl Into<Namespace>) -> DefineNamespaceStatement {
@@ -55,6 +56,7 @@ impl Parametric for DefineNamespaceStatement {
 }
 
 impl Queryable for DefineNamespaceStatement {}
+impl Erroneous for DefineNamespaceStatement {}
 
 #[cfg(test)]
 mod tests {

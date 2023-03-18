@@ -11,7 +11,7 @@ use crate::{
     binding::BindingsList,
     query_use::UseStatement,
     sql::{Buildable, Queryable, Runnables},
-    Parametric,
+    Erroneous, ErrorList, Parametric,
 };
 
 pub fn info_for() -> InfoStatement {
@@ -30,12 +30,14 @@ enum SurrealLevel {
 // Struct representing the INFO statement
 pub struct InfoStatement {
     level: SurrealLevel,
+    errors: ErrorList,
 }
 
 impl InfoStatement {
     fn new() -> Self {
         InfoStatement {
             level: SurrealLevel::Kv,
+            errors: vec![],
         }
     }
 
@@ -60,6 +62,8 @@ impl InfoStatement {
     }
 }
 impl Queryable for InfoStatement {}
+
+impl Erroneous for InfoStatement {}
 
 impl Parametric for InfoStatement {
     fn get_bindings(&self) -> BindingsList {

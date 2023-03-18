@@ -4,13 +4,13 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::Parametric;
+use crate::{Erroneous, Parametric};
 
 pub trait Buildable {
     fn build(&self) -> String;
 }
 
-pub trait Queryable: Parametric + Buildable + Display {}
+pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
 
 #[async_trait]
 pub trait Runnable<T>

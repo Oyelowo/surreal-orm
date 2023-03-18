@@ -14,7 +14,7 @@ use crate::{
     binding::{Binding, BindingsList, Parametric},
     query_update::TargettablesForUpdate,
     sql::{Buildable, Queryable, Return, Runnable, Updateables},
-    SurrealdbNode,
+    Erroneous, SurrealdbNode,
 };
 
 pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
@@ -214,4 +214,5 @@ where
     }
 }
 
+impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 impl<T> Runnable<T> for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}

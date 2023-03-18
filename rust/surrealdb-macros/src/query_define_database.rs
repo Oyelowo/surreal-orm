@@ -12,7 +12,7 @@ use surrealdb::sql::{self, Ident};
 use crate::{
     binding::BindingsList,
     sql::{Buildable, Database, Queryable, Runnables},
-    Parametric,
+    Erroneous, Parametric,
 };
 
 pub fn define_database(database: impl Into<Database>) -> DefineDatabaseStatement {
@@ -56,6 +56,7 @@ impl Parametric for DefineDatabaseStatement {
 }
 
 impl Queryable for DefineDatabaseStatement {}
+impl Erroneous for DefineDatabaseStatement {}
 
 #[cfg(test)]
 mod tests {
