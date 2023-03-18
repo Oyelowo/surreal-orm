@@ -11,7 +11,6 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 use field::Conditional;
-use field::Empty;
 pub mod field;
 pub mod operators_macros;
 pub mod param;
@@ -43,12 +42,14 @@ pub mod prelude {
     use super::query_select;
 }
 
+pub mod clause;
 pub mod links;
 pub mod model_id;
 
+pub use clause::*;
 pub use field::BindingsList;
-pub use field::Filter;
 pub use field::Field;
+pub use field::Filter;
 pub use field::Operatable;
 pub use field::Parametric;
 use query_insert::Buildable;
@@ -98,125 +99,4 @@ pub trait Schemaful {
 
 pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
-}
-
-pub fn where_(condition: impl Conditional) -> Filter {
-    if condition.get_errors().is_empty() {
-        // TODO: Maybe pass to DB filter and check and return Result<Filter> in relate_query
-    }
-    Filter::new(condition)
-}
-
-#[derive(Debug, Clone)]
-pub enum Clause {
-    Empty,
-    Where(Filter),
-    Query(SelectStatement),
-    Id(SurrealId),
-}
-
-impl From<&Self> for Clause {
-    fn from(value: &Self) -> Self {
-        value.clone()
-    }
-}
-
-impl Parametric for Clause {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            Clause::Empty => vec![],
-            Clause::Where(filter) => filter.get_bindings(),
-            Clause::Query(select_statement) => select_statement.get_bindings(),
-            Clause::Id(id) => id.get_bindings(),
-        }
-    }
-}
-
-impl Clause {
-    pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
-        let mut errors = vec![];
-        if let Clause::Id(id) = self {
-            if !id
-                .to_string()
-                .starts_with(format!("{table_name}:").as_str())
-            {
-                errors.push(format!(
-                    "invalid id {id}. Id does not belong to table {table_name}"
-                ))
-            }
-        }
-        errors
-    }
-}
-
-impl std::fmt::Display for Clause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let clause = match self {
-            Clause::Empty => "".into(),
-            Clause::Where(filter) => {
-                format!("[WHERE {filter}]")
-            }
-            Clause::Id(surreal_id) => {
-                // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
-                format!(":{}", surreal_id.id)
-            }
-            Clause::Query(select_statement) => format!("({select_statement})"),
-        };
-
-        write!(f, "{}", clause)
-    }
-}
-
-impl From<SurrealId> for Clause {
-    fn from(value: SurrealId) -> Self {
-        Self::Id(value)
-    }
-}
-
-impl From<&SurrealId> for Clause {
-    fn from(value: &SurrealId) -> Self {
-        Self::Id(value.to_owned())
-    }
-}
-
-impl From<Field> for Clause {
-    fn from(value: Field) -> Self {
-        Self::Where(Filter::new(value))
-    }
-}
-
-impl From<&Field> for Clause {
-    fn from(value: &Field) -> Self {
-        Self::Where(Filter::new(value.clone()))
-    }
-}
-
-impl From<Filter> for Clause {
-    fn from(value: Filter) -> Self {
-        Self::Where(value)
-    }
-}
-
-impl From<&Filter> for Clause {
-    fn from(value: &Filter) -> Self {
-        Self::Where(value.to_owned())
-    }
-}
-
-impl From<Empty> for Clause {
-    fn from(value: Empty) -> Self {
-        Self::Empty
-    }
-}
-
-impl From<SelectStatement> for Clause {
-    fn from(value: SelectStatement) -> Self {
-        Self::Query(value.into())
-    }
-}
-
-impl From<&SelectStatement> for Clause {
-    fn from(value: &SelectStatement) -> Self {
-        Self::Query(value.to_owned().into())
-    }
 }

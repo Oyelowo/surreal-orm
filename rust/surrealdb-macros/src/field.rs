@@ -25,10 +25,11 @@ use surrealdb::{
 };
 
 use crate::{
+    clause::Empty,
     query_define_token::Name,
     query_select::{SelectStatement, Selectables},
     value_type_wrappers::SurrealId,
-    Erroneous, SurrealdbModel,
+    Clause, Erroneous, SurrealdbModel,
 };
 
 /// Represents a field in the database. This type wraps a `String` and
@@ -525,32 +526,6 @@ pub fn cond(filterable: impl Conditional) -> Filter {
 ///
 pub fn empty() -> Filter {
     Filter::new(Empty)
-}
-
-pub struct Empty;
-
-impl Conditional for Empty {
-    fn get_condition_query_string(&self) -> String {
-        "".into()
-    }
-}
-
-impl Erroneous for Empty {
-    fn get_errors(&self) -> Vec<String> {
-        vec![]
-    }
-}
-
-impl std::fmt::Display for Empty {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(""))
-    }
-}
-
-impl Parametric for Empty {
-    fn get_bindings(&self) -> BindingsList {
-        vec![]
-    }
 }
 
 impl Conditional for Filter {
