@@ -49,7 +49,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Field {
     field_name: sql::Idiom,
-    condition_query_string: String,
+    pub condition_query_string: String,
     bindings: BindingsList,
 }
 
@@ -107,7 +107,7 @@ impl Into<sql::Value> for &Field {
 
 impl Into<sql::Idiom> for Field {
     fn into(self) -> sql::Idiom {
-        self.field_name
+        self.field_name.into()
     }
 }
 
@@ -273,20 +273,24 @@ impl From<Field> for String {
 
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.condition_query_string))
+        f.write_fmt(format_args!(
+            "{}",
+            self.condition_query_string // self.condition_query_string.trim_start_matches("`")
+        ))
     }
 }
 
 impl Field {
-    pub fn new2(field_name: impl Display) -> Self {
-        let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
-        let binding = Binding::new(field);
-        Self {
-            field_name: sql::Idiom::from("ee".to_string()),
-            bindings: vec![].into(),
-            condition_query_string: field_name.to_string(),
-        }
-    }
+    // pub fn new(field_name: impl Display) -> Self {
+    //     let field: sql::Value = sql::Value::Idiom(field_name.to_string().into());
+    //     let binding = Binding::new(field);
+    //     Self {
+    //         field_name: field_name.into(),
+    //         // field_name: sql::Idiom::from("ee".to_string()),
+    //         bindings: vec![].into(),
+    //         condition_query_string: field_name.to_string(),
+    //     }
+    // }
     pub fn new(field_name: impl Into<Name>) -> Self {
         // let field: sql::Value = sql::Value::Idiom(field_name.into());
         let field_name: Name = field_name.into();
@@ -305,11 +309,15 @@ impl Field {
             // bindings: vec![binding.into()].into(),
         }
     }
-    
-    pub fn update_condition(&self, connection_string: String, bindings: BindingsList) -> Self {
-        let condition = format!("{}{}", &self.condition_query_string,connection_string);
+
+    pub fn update_condition(mut self, connection_string: String) -> Self {
+        self.condition_query_string = connection_string;
+        self
+    }
+    pub fn update_conditionx(&self, connection_string: String, bindings: BindingsList) -> Self {
+        let condition = format!("{}{}", &self.condition_query_string, connection_string);
         // self.bindings.extend(bindings);
-        let bindings= self.____________update_many_bindings(bindings.as_slice());
+        let bindings = self.____________update_many_bindings(bindings.as_slice());
         // self
         //     Self{ field_name: self.field_name, condition_query_string: cond, bindings: self.bindings}
         // self
