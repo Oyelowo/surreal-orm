@@ -59,6 +59,7 @@ impl Queryable for DefineDatabaseStatement {}
 impl Erroneous for DefineDatabaseStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

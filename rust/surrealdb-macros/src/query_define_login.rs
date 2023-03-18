@@ -171,6 +171,7 @@ impl Runnables for DefineLoginStatement {}
 impl Erroneous for DefineLoginStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

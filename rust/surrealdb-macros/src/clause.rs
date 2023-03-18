@@ -197,6 +197,7 @@ impl std::fmt::Display for Index {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{filter::cond, query_select::select, Operatable, Table};
 

@@ -333,4 +333,5 @@ impl Buildable for RemoveIndexStatement {
 impl Runnables for RemoveIndexStatement {}
 
 #[test]
+#[cfg(feature = "mock")]
 fn test() {}

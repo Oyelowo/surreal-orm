@@ -378,7 +378,6 @@ mod geometry_tests {
         let select_query = select(All)
             .from(&SurrealId::try_from("company:2").unwrap())
             .where_(c.tags.any_like("foo"))
-            .timeout(Duration::from_secs(20))
             .parallel();
         // .return_one(db.clone())
         // .await
@@ -391,7 +390,7 @@ mod geometry_tests {
         println!(
             "SSSSSSS {:?}",
             select_query
-                .return_many::<Vec<Company>>(db.clone())
+                .return_many::<Company>(db.clone())
                 .await
                 .unwrap()
         );

@@ -225,6 +225,7 @@ where
 impl<T> Runnable<T> for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 #[test]
+#[cfg(feature = "mock")]
 fn test_query_builder() {
     // let query = RelateStatement::new()
     //     // .from("from")

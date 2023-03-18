@@ -153,6 +153,7 @@ impl<'a, const N: usize> From<&[For; N]> for PermisisonForables {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

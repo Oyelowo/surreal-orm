@@ -126,6 +126,7 @@ impl Queryable for DefineEventStatement {}
 impl Erroneous for DefineEventStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

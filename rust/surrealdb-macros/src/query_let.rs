@@ -90,6 +90,7 @@ impl Queryable for LetStatement {}
 impl Erroneous for LetStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

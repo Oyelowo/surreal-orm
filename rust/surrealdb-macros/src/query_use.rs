@@ -74,6 +74,7 @@ impl Parametric for UseStatement {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use crate::sql::Database;

@@ -87,12 +87,12 @@ fn generate_param_name(prefix: &str, value: impl Into<sql::Value>) -> String {
     let param = if cfg!(feature = "raw") {
         let value: sql::Value = value.into();
         // #[cfg(feature = "raw")]
-        let mut param = value.to_string();
+        let param = value.to_string();
         param
     } else {
         let nil_id = uuid::Uuid::nil();
-        #[cfg(test)]
-        let sanitized_uuid = uuid::Uuid::nil();
+        // #[cfg(test)]
+        // let sanitized_uuid = uuid::Uuid::nil();
 
         #[cfg(feature = "mock")]
         let sanitized_uuid = uuid::Uuid::nil();

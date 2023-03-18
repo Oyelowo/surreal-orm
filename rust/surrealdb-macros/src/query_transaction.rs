@@ -117,6 +117,7 @@ impl fmt::Display for TransactionCompletion {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{
         filter::cond,

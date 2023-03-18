@@ -137,6 +137,7 @@ impl Runnables for DefineTokenStatement {}
 impl Erroneous for DefineTokenStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

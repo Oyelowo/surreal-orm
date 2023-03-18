@@ -52,6 +52,7 @@ impl Display for SleepStatement {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

@@ -249,6 +249,7 @@ enum SchemaType {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

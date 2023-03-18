@@ -223,6 +223,7 @@ impl fmt::Display for End {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{
         filter::cond,

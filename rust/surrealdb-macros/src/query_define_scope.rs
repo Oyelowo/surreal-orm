@@ -126,6 +126,7 @@ impl Runnables for DefineScopeStatement {}
 impl Erroneous for DefineScopeStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

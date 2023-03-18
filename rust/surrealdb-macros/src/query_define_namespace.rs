@@ -59,6 +59,7 @@ impl Queryable for DefineNamespaceStatement {}
 impl Erroneous for DefineNamespaceStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

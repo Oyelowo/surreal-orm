@@ -218,6 +218,7 @@ impl Updater {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use super::*;
 
