@@ -41,7 +41,6 @@ pub trait Conditional: Parametric + std::fmt::Display + Erroneous {
     fn get_condition_query_string(&self) -> String;
 }
 
-pub type BindingsList = Vec<Binding>;
 impl Parametric for Filter {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -260,22 +259,4 @@ impl std::fmt::Display for Filter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.query_string))
     }
-}
-
-fn generate_param_name(prefix: &str) -> String {
-    let nil_id = uuid::Uuid::nil();
-    #[cfg(test)]
-    let sanitized_uuid = uuid::Uuid::nil();
-
-    #[cfg(feature = "mock")]
-    let sanitized_uuid = uuid::Uuid::nil();
-
-    // #[cfg(not(test))]
-    #[cfg(not(feature = "mock"))]
-    let sanitized_uuid = uuid::Uuid::new_v4().simple();
-
-    let mut param = format!("_{prefix}_{sanitized_uuid}");
-    // TODO: this is temporary
-    param.truncate(15);
-    param
 }

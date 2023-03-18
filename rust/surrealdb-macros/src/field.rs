@@ -25,10 +25,10 @@ use surrealdb::{
 };
 
 use crate::{
-    binding::{BindingsList, Parametric},
+    binding::{Binding, BindingsList, Parametric},
     clause::Empty,
     filter::Conditional,
-    sql::Name,
+    sql::{ArrayCustom, Name},
     value_type_wrappers::SurrealId,
     Clause, Erroneous, SurrealdbModel,
 };

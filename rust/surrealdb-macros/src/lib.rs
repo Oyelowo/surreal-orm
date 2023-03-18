@@ -10,7 +10,6 @@
 use std::fmt::Display;
 use std::ops::Deref;
 
-use field::Conditional;
 pub(crate) mod binding;
 pub mod field;
 mod field_updater;
@@ -41,10 +40,11 @@ mod query_transaction;
 mod query_update;
 mod query_use;
 mod sql_components;
-mod sql_traits;
+pub(crate) mod sql_traits;
 pub mod value_type_wrappers;
 
 pub mod sql {
+    pub use super::clause::*;
     pub use super::field_updater::*;
     pub use super::sql_components::*;
     pub use super::sql_traits::*;
@@ -82,19 +82,17 @@ pub mod prelude {
     use super::query_select;
 }
 
-pub mod clause;
+pub(crate) mod clause;
 pub mod links;
 pub mod model_id;
 
-pub use clause::*;
-pub use field::BindingsList;
+use binding::Parametric;
 pub use field::Field;
-pub use field::Filter;
 pub use field::Operatable;
-pub use field::Parametric;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
+use sql::Clause;
 // pub use field::Param;
 // pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;

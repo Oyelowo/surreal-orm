@@ -12,9 +12,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding},
+    binding::{Binding, BindingsList, Parametric},
     sql::{Buildable, Duration, Expression, Runnables, Scope},
-    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 // DEFINE SCOPE statement

@@ -1,3 +1,6 @@
+use serde::Serialize;
+use surrealdb::sql;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Binding {
     param: String,
@@ -64,7 +67,7 @@ impl Binding {
 }
 
 impl From<sql::Value> for Binding {
-    fn from(value: Value) -> Self {
+    fn from(value: sql::Value) -> Self {
         Self::new(value)
     }
 }
@@ -78,4 +81,22 @@ impl From<sql::Value> for Binding {
 /// Can have parameters which can be bound
 pub trait Parametric {
     fn get_bindings(&self) -> BindingsList;
+}
+
+fn generate_param_name(prefix: &str) -> String {
+    let nil_id = uuid::Uuid::nil();
+    #[cfg(test)]
+    let sanitized_uuid = uuid::Uuid::nil();
+
+    #[cfg(feature = "mock")]
+    let sanitized_uuid = uuid::Uuid::nil();
+
+    // #[cfg(not(test))]
+    #[cfg(not(feature = "mock"))]
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+
+    let mut param = format!("_{prefix}_{sanitized_uuid}");
+    // TODO: this is temporary
+    param.truncate(15);
+    param
 }

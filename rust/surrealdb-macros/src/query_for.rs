@@ -1,6 +1,9 @@
 use std::fmt::{self, Display};
 
-use crate::{field::Conditional, BindingsList, Filter, Parametric};
+use crate::{
+    binding::{BindingsList, Parametric},
+    filter::Filter,
+};
 
 #[derive(Clone, Copy)]
 pub enum ForCrudType {

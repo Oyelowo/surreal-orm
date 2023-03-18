@@ -11,10 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
+    binding::{BindingsList, Parametric},
     query_update,
     sql::{Buildable, Return, Runnable},
     statements::TargettablesForUpdate,
-    BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
+    SurrealdbModel,
 };
 
 /*
@@ -200,7 +201,7 @@ impl<T> Parametric for DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }

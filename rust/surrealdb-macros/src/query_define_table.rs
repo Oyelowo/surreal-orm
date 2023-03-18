@@ -15,11 +15,11 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    field::{cond, Binding, Conditional},
+    binding::{BindingsList, Parametric},
     query_for::PermisisonForables,
     sql::{Buildable, Runnables, Table},
     statements::SelectStatement,
-    BindingsList, Erroneous, Field, Filter, Parametric, Queryable,
+    Queryable,
 };
 
 // DEFINE TABLE statement
@@ -257,7 +257,7 @@ mod tests {
         query_for::ForCrudType,
         statements::{for_, order, select},
         value_type_wrappers::SurrealId,
-        All, Operatable,
+        All, Field, Operatable,
     };
 
     use super::*;
