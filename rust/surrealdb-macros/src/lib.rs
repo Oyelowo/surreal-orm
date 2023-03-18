@@ -11,7 +11,7 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 pub(crate) mod binding;
-pub(crate) mod clause;
+pub mod clause;
 pub(crate) mod errors;
 pub mod field;
 mod field_updater;
@@ -46,16 +46,17 @@ mod query_use;
 mod sql_components;
 pub(crate) mod sql_traits;
 
-use binding::{BindingsList, Parametric};
+pub use binding::{BindingsList, Parametric};
 pub use field::Field;
 pub use field::Operatable;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
-use sql::Clause;
+pub use sql::Clause;
 pub use sql::Table;
 
 pub mod sql {
+    pub use super::binding::*;
     pub use super::clause::*;
     pub use super::field::*;
     pub use super::field_updater::*;
@@ -106,7 +107,7 @@ pub use surrealdb::opt::RecordId;
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
-    fn table_name() -> sql::Table;
+    fn table_name() -> surrealdb::sql::Table;
     fn get_serializable_field_names() -> Vec<&'static str>;
 }
 
@@ -116,7 +117,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> sql::Table;
+    fn get_table_name() -> surrealdb::sql::Table;
     fn with(clause: impl Into<Clause>) -> Self::Schema;
 }
 
@@ -129,7 +130,7 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> sql::Table;
+    fn get_table_name() -> surrealdb::sql::Table;
 }
 
 pub trait Schemaful {

@@ -162,10 +162,11 @@ mod tests {
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::{
-        sql::{All, Empty},
-        statements::{order, select},
+        filter::empty,
+        sql::{All, Empty, Parametric, Return, Runnable},
+        statements::{order, relate, select},
         utils::cond,
-        Operatable,
+        Field, Operatable,
     };
     use test_case::test_case;
 

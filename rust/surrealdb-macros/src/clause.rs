@@ -2,8 +2,8 @@ use crate::{
     binding::BindingsList,
     filter::{Conditional, Filter},
     query_select::SelectStatement,
-    sql::SurrealId,
-    Erroneous, Field, Parametric,
+    sql::{Parametric, SurrealId},
+    Erroneous, Field,
 };
 
 pub fn where_(condition: impl Conditional) -> Filter {
