@@ -17,7 +17,7 @@ use crate::{
     query_delete::DeleteStatement,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
+    query_remove::{RemoveScopeStatement, Runnables},
     query_select::SelectStatement,
     query_update::UpdateStatement,
     sql::{Name, Scope, TokenTarget, TokenType},
@@ -140,7 +140,7 @@ impl Parametric for DefineTokenStatement {
     }
 }
 
-impl Runnable for DefineTokenStatement {}
+impl Runnables for DefineTokenStatement {}
 
 #[cfg(test)]
 mod tests {

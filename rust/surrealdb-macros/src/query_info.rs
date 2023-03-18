@@ -8,7 +8,7 @@
 use std::fmt;
 
 use crate::{
-    query_insert::Buildable, query_remove::Runnable, query_use::UseStatement, Parametric, Queryable,
+    query_insert::Buildable, query_remove::Runnables, query_use::UseStatement, Parametric, Queryable,
 };
 
 pub fn info_for() -> InfoStatement {
@@ -82,7 +82,7 @@ impl fmt::Display for InfoStatement {
     }
 }
 
-impl Runnable for InfoStatement {}
+impl Runnables for InfoStatement {}
 
 // Example usage
 fn main() {

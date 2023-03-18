@@ -11,8 +11,10 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 use field::Conditional;
+pub(crate) mod binding;
 pub mod field;
 mod field_updater;
+pub(crate) mod filter;
 mod operators_macros;
 mod param;
 mod query_create;
@@ -26,6 +28,7 @@ mod query_define_scope;
 mod query_define_table;
 mod query_define_token;
 mod query_delete;
+pub(crate) mod query_for;
 mod query_ifelse;
 mod query_info;
 mod query_insert;
@@ -59,6 +62,7 @@ pub mod statements {
     pub use super::query_define_table::{define_table, DefineTableStatement};
     pub use super::query_define_token::{define_token, DefineTokenStatement};
     pub use super::query_delete::{delete, DeleteStatement};
+    pub use super::query_for::for_;
     pub use super::query_ifelse::{if_, IfStatement};
     pub use super::query_info::{info_for, InfoStatement};
     pub use super::query_insert::{insert, InsertStatement};

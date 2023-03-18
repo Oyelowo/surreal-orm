@@ -15,9 +15,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    field::{cond, Binding},
+    binding::BindingsList,
     sql::{Buildable, Event, Runnables, Table},
-    BindingsList, Field, Filter, Parametric, Queryable,
 };
 
 // DEFINE EVENT statement

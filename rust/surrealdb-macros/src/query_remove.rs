@@ -29,6 +29,7 @@ use std::fmt::{self, Display};
 use surrealdb::sql;
 
 use crate::{
+    query_define_index::Table,
     sql::{Buildable, Namespace, Runnables},
     Field, Parametric, Queryable,
 };

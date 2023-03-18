@@ -17,6 +17,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use crate::{
     field::{cond, Binding},
     param::Param,
+    query_define_table::PermisisonForables,
     sql::Table,
     BindingsList, Field, Filter, Parametric, Queryable,
 };
