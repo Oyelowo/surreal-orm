@@ -532,6 +532,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "mock")]
     fn multiplication_tests3() {
         let x = Student::schema()
             .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))

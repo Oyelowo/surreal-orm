@@ -54,7 +54,12 @@ impl Binding {
     }
 
     pub fn get_param_dollarised(&self) -> String {
-        format!("${}", &self.param)
+        #[cfg(feature = "raw")]
+        let param = format!("{}", &self.param);
+
+        #[cfg(not(feature = "raw"))]
+        let param = format!("${}", &self.param);
+        param
     }
 
     pub fn get_description(&self) -> String {
