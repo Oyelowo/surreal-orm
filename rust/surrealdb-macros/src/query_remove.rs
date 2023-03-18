@@ -29,9 +29,12 @@ use std::fmt::{self, Display};
 use surrealdb::sql;
 
 use crate::{
-    query_define_index::Table,
-    sql::{Buildable, Namespace, Runnables},
-    Field, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    sql::{
+        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table, Token,
+    },
+    sql_components::Index,
+    Field,
 };
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
@@ -119,6 +122,21 @@ impl Runnables for RemoveLoginStatement {}
 pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatement {
     RemoveTokenStatement::new(token)
 }
+enum NamespaceOrDatabase {
+    Namespace,
+    Database,
+}
+
+impl Display for NamespaceOrDatabase {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let stringified = match self {
+            NamespaceOrDatabase::Namespace => "NAMESPACE",
+            NamespaceOrDatabase::Database => "DATABASE",
+        };
+        write!(f, "{}", stringified)
+    }
+}
+
 pub struct RemoveTokenStatement {
     token: Token,
     on: Option<NamespaceOrDatabase>,
@@ -173,7 +191,7 @@ impl RemoveScopeStatement {
 impl Queryable for RemoveScopeStatement {}
 
 impl Parametric for RemoveScopeStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         vec![]
     }
 }

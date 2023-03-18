@@ -14,7 +14,7 @@ use crate::{
     binding::{BindingsList, Parametric},
     filter::Filter,
     query_update,
-    sql::{Buildable, Return, Runnable},
+    sql::{Buildable, Queryable, Return, Runnable},
     statements::TargettablesForUpdate,
     SurrealdbModel,
 };

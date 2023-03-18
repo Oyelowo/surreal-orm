@@ -11,11 +11,9 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    field::Binding,
-    query_insert::Updateables,
-    sql::{Buildable, Return, Runnable},
-    value_type_wrappers::SurrealId,
-    BindingsList, Clause, Erroneous, Field, Parametric, Queryable, SurrealdbEdge,
+    binding::{Binding, BindingsList},
+    sql::{Buildable, Duration, Queryable, Return, Runnable, Updateables},
+    Clause, Erroneous, Field, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -130,8 +128,8 @@ where
     /// let mut query_builder = SelectStatement::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<query_select::Duration>) -> Self {
-        let duration: query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<Duration>) -> Self {
+        let duration: Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -167,7 +165,7 @@ impl<T> Parametric for RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }

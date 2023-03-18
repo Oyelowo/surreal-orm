@@ -110,21 +110,6 @@ macro_rules! impl_display_for_all {
 }
 impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, Index);
 
-enum NamespaceOrDatabase {
-    Namespace,
-    Database,
-}
-
-impl Display for NamespaceOrDatabase {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let stringified = match self {
-            NamespaceOrDatabase::Namespace => "NAMESPACE",
-            NamespaceOrDatabase::Database => "DATABASE",
-        };
-        write!(f, "{}", stringified)
-    }
-}
-
 pub enum TokenType {
     EDDSA,
     ES256,

@@ -12,9 +12,9 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding, Conditional},
+    binding::{BindingsList, Parametric},
+    filter::{Conditional, Filter},
     sql::{Buildable, Expression},
-    BindingsList, Erroneous, Field, Filter, Parametric,
 };
 
 impl Into<ExpressionContent> for Expression {
@@ -223,9 +223,10 @@ impl fmt::Display for End {
 #[cfg(test)]
 mod tests {
     use crate::{
+        filter::cond,
         query_select::{order, select},
-        value_type_wrappers::SurrealId,
-        All, Operatable,
+        sql::{All, SurrealId},
+        Field, Operatable,
     };
 
     use super::*;

@@ -17,9 +17,8 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use crate::{
     binding::{BindingsList, Parametric},
     query_for::PermisisonForables,
-    sql::{Buildable, Runnables, Table},
+    sql::{Buildable, Queryable, Runnables, Table},
     statements::SelectStatement,
-    Queryable,
 };
 
 // DEFINE TABLE statement
@@ -255,9 +254,9 @@ mod tests {
 
     use crate::{
         query_for::ForCrudType,
+        sql::{All, SurrealId},
         statements::{for_, order, select},
-        value_type_wrappers::SurrealId,
-        All, Field, Operatable,
+        Field, Operatable,
     };
 
     use super::*;

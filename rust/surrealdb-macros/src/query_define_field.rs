@@ -15,11 +15,12 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    field::{cond, Binding},
+    binding::{BindingsList, Parametric},
+    filter::Filter,
     param::Param,
-    query_define_table::PermisisonForables,
-    sql::Table,
-    BindingsList, Field, Filter, Parametric, Queryable,
+    query_for::PermisisonForables,
+    sql::{Buildable, Queryable, Table},
+    Field,
 };
 
 // DEFINE FIELD statement
@@ -226,7 +227,7 @@ pub struct DefineFieldStatement {
     bindings: BindingsList,
 }
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
-    let field: Field = fieldable.into();
+    let field: sql::Field = fieldable.into();
     DefineFieldStatement {
         field_name: field.to_string(),
         table_name: None,
@@ -362,7 +363,12 @@ mod tests {
     use super::*;
     use std::time::Duration;
 
-    use crate::{field::NONE, Operatable};
+    use crate::{
+        query_for::ForCrudType,
+        sql::NONE,
+        utils::{cond, for_},
+        Operatable,
+    };
 
     use super::*;
 

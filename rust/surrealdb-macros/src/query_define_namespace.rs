@@ -10,9 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    field::Binding,
-    sql::{Buildable, Namespace, Runnables},
-    BindingsList, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Namespace, Queryable, Runnables},
 };
 
 pub fn define_namespace(namespace: impl Into<Namespace>) -> DefineNamespaceStatement {

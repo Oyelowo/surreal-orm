@@ -16,6 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     binding::{BindingsList, Parametric},
+    filter::Filter,
     sql::{Buildable, Event, Queryable, Runnables, Table},
 };
 
@@ -128,8 +129,9 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        sql::{SurrealId, Table},
+        sql::{All, SurrealId, Table},
         statements::select,
+        utils::cond,
         Field, Operatable,
     };
 

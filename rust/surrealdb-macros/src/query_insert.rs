@@ -23,9 +23,10 @@ use surrealdb::{
 };
 
 use crate::{
-    field::Binding,
-    query_select::{self, SelectStatement},
-    BindingsList, Field, Parametric, Queryable, SurrealdbModel,
+    binding::{Binding, BindingsList, Parametric},
+    query_select::SelectStatement,
+    sql::{Buildable, Queryable, Runnable, Updateables},
+    SurrealdbModel,
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
@@ -119,7 +120,7 @@ impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
 }
 
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for Insertables<T> {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         match self {
             Insertables::Node(node) => node.get_bindings(),
             Insertables::Nodes(nodes) => nodes

@@ -12,16 +12,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_delete::DeleteStatement,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnables},
-    query_select::SelectStatement,
-    query_update::UpdateStatement,
-    sql::{Name, Scope, TokenTarget, TokenType},
-    BindingsList, Field, Filter, Parametric, Queryable,
+    binding::{Binding, BindingsList, Parametric},
+    sql::{Buildable, Name, Runnables, Scope, TokenTarget, TokenType},
 };
 
 // DEFINE TOKEN statement

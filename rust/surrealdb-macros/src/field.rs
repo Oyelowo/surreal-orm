@@ -29,7 +29,6 @@ use crate::{
     clause::Empty,
     filter::Conditional,
     sql::{ArrayCustom, Name},
-    value_type_wrappers::SurrealId,
     Clause, Erroneous, SurrealdbModel,
 };
 

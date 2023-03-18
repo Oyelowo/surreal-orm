@@ -14,7 +14,7 @@ pub(crate) mod binding;
 pub(crate) mod errors;
 pub mod field;
 mod field_updater;
-pub(crate) mod filter;
+pub mod filter;
 mod operators_macros;
 mod param;
 mod query_create;
@@ -45,11 +45,17 @@ pub(crate) mod sql_traits;
 
 pub mod sql {
     pub use super::clause::*;
+    pub use super::field::*;
     pub use super::field_updater::*;
+    pub use super::param::*;
     pub use super::sql_components::*;
     pub use super::sql_traits::*;
 }
 
+pub mod utils {
+    pub use super::filter::cond;
+    pub use super::query_for::for_;
+}
 pub mod statements {
     pub use super::query_create::{create, CreateStatement};
     pub use super::query_define_database::{define_database, DefineDatabaseStatement};

@@ -2,7 +2,8 @@ use std::fmt::{self, Display};
 
 use crate::{
     binding::{BindingsList, Parametric},
-    filter::Filter,
+    filter::{Conditional, Filter},
+    sql::Buildable,
 };
 
 #[derive(Clone, Copy)]
@@ -155,8 +156,7 @@ mod tests {
 
     use crate::{
         statements::{order, select},
-        value_type_wrappers::SurrealId,
-        All, Operatable,
+        Field, Operatable,
     };
 
     use super::*;

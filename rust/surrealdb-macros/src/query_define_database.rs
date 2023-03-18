@@ -10,9 +10,9 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    field::Binding,
-    sql::{Buildable, Database, Runnables},
-    BindingsList, Parametric, Queryable,
+    binding::BindingsList,
+    sql::{Buildable, Database, Queryable, Runnables},
+    Parametric,
 };
 
 pub fn define_database(database: impl Into<Database>) -> DefineDatabaseStatement {

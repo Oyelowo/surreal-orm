@@ -8,7 +8,10 @@
 use std::fmt;
 
 use crate::{
-    query_insert::Buildable, query_remove::Runnables, query_use::UseStatement, Parametric, Queryable,
+    binding::BindingsList,
+    query_use::UseStatement,
+    sql::{Buildable, Queryable, Runnables},
+    Parametric,
 };
 
 pub fn info_for() -> InfoStatement {
@@ -59,7 +62,7 @@ impl InfoStatement {
 impl Queryable for InfoStatement {}
 
 impl Parametric for InfoStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         vec![]
     }
 }
