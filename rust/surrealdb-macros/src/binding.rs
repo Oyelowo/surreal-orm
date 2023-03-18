@@ -15,8 +15,8 @@ pub type BindingsList = Vec<Binding>;
 impl Binding {
     pub fn new(value: impl Into<sql::Value>) -> Self {
         let value = value.into();
-        let param_name = generate_param_name(&"param");
         let value_string = format!("{}", &value);
+        let param_name = generate_param_name(&"param", value.clone());
         Binding {
             param: param_name.clone(),
             value,
@@ -83,20 +83,31 @@ pub trait Parametric {
     fn get_bindings(&self) -> BindingsList;
 }
 
-fn generate_param_name(prefix: &str) -> String {
-    let nil_id = uuid::Uuid::nil();
-    #[cfg(test)]
-    let sanitized_uuid = uuid::Uuid::nil();
+fn generate_param_name(prefix: &str, value: impl Into<sql::Value>) -> String {
+    let param = if cfg!(feature = "raw") {
+        let value: sql::Value = value.into();
+        // #[cfg(feature = "raw")]
+        let mut param = value.to_string();
+        param
+    } else {
+        let nil_id = uuid::Uuid::nil();
+        #[cfg(test)]
+        let sanitized_uuid = uuid::Uuid::nil();
 
-    #[cfg(feature = "mock")]
-    let sanitized_uuid = uuid::Uuid::nil();
+        #[cfg(feature = "mock")]
+        let sanitized_uuid = uuid::Uuid::nil();
 
-    // #[cfg(not(test))]
-    #[cfg(not(feature = "mock"))]
-    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+        // #[cfg(not(test))]
+        #[cfg(not(feature = "mock"))]
+        let sanitized_uuid = uuid::Uuid::new_v4().simple();
+        // #[cfg(not(feature = "raw"))]
+        let mut param = format!("_{prefix}_{sanitized_uuid}");
 
-    let mut param = format!("_{prefix}_{sanitized_uuid}");
-    // TODO: this is temporary
-    param.truncate(15);
+        // TODO: this is temporary
+        // #[cfg(not(feature = "raw"))]
+        param.truncate(15);
+        param
+    };
+
     param
 }

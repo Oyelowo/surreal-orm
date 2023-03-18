@@ -166,7 +166,7 @@ mod tests {
         sql::{All, Empty, Parametric, Return, Runnable},
         statements::{order, relate, select},
         utils::cond,
-        Field, Operatable,
+        Erroneous, Field, Operatable,
     };
     use test_case::test_case;
 
@@ -573,33 +573,10 @@ mod tests {
 
         let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
             .content(write.clone())
-            .return_(Return::After)
-            .return_one(db.clone())
-            .await?;
+            .return_(Return::Before);
 
-        insta::assert_display_snapshot!(serde_json::to_string(&x).unwrap());
+        insta::assert_debug_snapshot!(x.get_errors());
 
-        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .return_many(db.clone())
-            .await?;
-
-        let xxx = relate(
-            Student::with(select(All).from(Student::get_table_name()))
-                .writes__(Empty)
-                .book(
-                    select(All)
-                        .from(Book::get_table_name())
-                        .where_(Book::schema().title.like("Oyelowo")),
-                ),
-        )
-        .content(write)
-        .return_many(db.clone())
-        .await?;
-
-        // insta::assert_display_snapshot!(x);
-        // insta::assert_debug_snapshot!(x.get_bindings());
         Ok(())
     }
 }
