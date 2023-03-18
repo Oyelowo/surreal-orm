@@ -11,21 +11,20 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::Binding,
-    query_insert::{Buildable, Runnable, Updateables},
-    query_relate::Return,
-    query_update::{self, Targettable},
-    BindingsList, Parametric, Queryable, SurrealdbNode,
+    binding::{Binding, BindingsList, Parametric},
+    query_update::TargettablesForUpdate,
+    sql::{Buildable, Queryable, Return, Runnable, Updateables},
+    SurrealdbNode,
 };
 
-pub fn create<T>(targettables: impl Into<Targettable>) -> CreateStatement<T>
+pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
     // query is run using one of the run methods.
     let table_name = T::table_name();
-    let targettables: Targettable = targettables.into();
+    let targettables: TargettablesForUpdate = targettables.into();
     if !targettables
         .get_bindings()
         .first()
@@ -62,13 +61,13 @@ impl<T> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    pub fn new(targettables: impl Into<query_update::Targettable>) -> Self {
-        let targets: Targettable = targettables.into();
+    pub fn new(targettables: impl Into<TargettablesForUpdate>) -> Self {
+        let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         let mut target_names = match targets {
-            Targettable::Table(table) => vec![table.to_string()],
-            Targettable::SurrealId(_) => targets_bindings
+            TargettablesForUpdate::Table(table) => vec![table.to_string()],
+            TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("${}", b.get_param()))
                 .collect::<Vec<_>>(),
@@ -144,9 +143,9 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
+    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
         // TODO: Revisit if this should also be parametized
-        let duration: crate::query_select::Duration = duration.into();
+        let duration: crate::sql::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -179,21 +178,7 @@ where
         }
 
         if let Some(return_type) = &self.return_type {
-            query.push_str(" RETURN ");
-            match return_type {
-                Return::None => query.push_str("NONE"),
-                Return::Before => query.push_str("BEFORE"),
-                Return::After => query.push_str("AFTER"),
-                Return::Diff => query.push_str("DIFF"),
-                Return::Projections(projections) => {
-                    for (i, projection) in projections.iter().enumerate() {
-                        if i > 0 {
-                            query.push_str(", ");
-                        }
-                        query.push_str(&projection.to_string());
-                    }
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {
@@ -224,7 +209,7 @@ impl<T> Parametric for CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }

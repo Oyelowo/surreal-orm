@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use crate::field::Filter;
-
 // Define the macro in a separate module
 #[macro_export]
 macro_rules! q {

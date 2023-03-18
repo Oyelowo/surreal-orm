@@ -11,21 +11,20 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::Binding,
-    query_insert::{Buildable, Runnable, Updateables},
-    query_relate::{self, Return},
-    value_type_wrappers::SurrealId,
-    BindingsList, Filter, Erroneous, Parametric, Queryable, SurrealdbModel,
+    binding::{Binding, BindingsList, Parametric},
+    filter::Filter,
+    sql::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables},
+    SurrealdbModel,
 };
 
-pub fn update<T>(targettables: impl Into<Targettable>) -> UpdateStatement<T>
+pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
     // query is run using one of the run methods.
     let table_name = T::table_name();
-    let targettables: Targettable = targettables.into();
+    let targettables: TargettablesForUpdate = targettables.into();
     if !targettables
         .get_bindings()
         .first()
@@ -50,7 +49,7 @@ where
     merge: Option<String>,
     set: Vec<String>,
     where_: Option<String>,
-    return_type: Option<query_relate::Return>,
+    return_type: Option<Return>,
     timeout: Option<String>,
     bindings: BindingsList,
     parallel: bool,
@@ -59,55 +58,55 @@ where
 
 impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
-pub enum Targettable {
+pub enum TargettablesForUpdate {
     Table(sql::Table),
     SurrealId(SurrealId),
 }
 
-impl From<&sql::Table> for Targettable {
+impl From<&sql::Table> for TargettablesForUpdate {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
     }
 }
-impl From<&sql::Thing> for Targettable {
+impl From<&sql::Thing> for TargettablesForUpdate {
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
     }
 }
 
-impl From<sql::Thing> for Targettable {
+impl From<sql::Thing> for TargettablesForUpdate {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl From<&SurrealId> for Targettable {
+impl From<&SurrealId> for TargettablesForUpdate {
     fn from(value: &SurrealId) -> Self {
         Self::SurrealId(value.to_owned())
     }
 }
 
-impl From<SurrealId> for Targettable {
+impl From<SurrealId> for TargettablesForUpdate {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl From<sql::Table> for Targettable {
+impl From<sql::Table> for TargettablesForUpdate {
     fn from(value: sql::Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl Parametric for Targettable {
+impl Parametric for TargettablesForUpdate {
     fn get_bindings(&self) -> BindingsList {
         match self {
-            Targettable::Table(table) => {
+            TargettablesForUpdate::Table(table) => {
                 // Table binding does not seem to work right now. skip it first
                 let binding = Binding::new(table.to_owned());
                 vec![binding]
             }
-            Targettable::SurrealId(id) => vec![Binding::new(id.to_owned())],
+            TargettablesForUpdate::SurrealId(id) => vec![Binding::new(id.to_owned())],
         }
     }
 }
@@ -131,13 +130,13 @@ where
         }
     }
 
-    pub fn update(mut self, targettables: impl Into<Targettable>) -> Self {
-        let targets: Targettable = targettables.into();
+    pub fn update(mut self, targettables: impl Into<TargettablesForUpdate>) -> Self {
+        let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         let target_names = match targets {
-            Targettable::Table(table) => vec![table.to_string()],
-            Targettable::SurrealId(_) => targets_bindings
+            TargettablesForUpdate::Table(table) => vec![table.to_string()],
+            TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("${}", b.get_param()))
                 .collect::<Vec<_>>(),
@@ -240,8 +239,8 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
-        let duration: crate::query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
+        let duration: crate::sql::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -293,22 +292,7 @@ where
         }
 
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {
@@ -337,7 +321,7 @@ impl<T> Parametric for UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }

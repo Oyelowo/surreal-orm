@@ -15,17 +15,9 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable, Table},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    BindingsList, Field, Filter, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    filter::Filter,
+    sql::{Buildable, Event, Queryable, Runnables, Table},
 };
 
 // DEFINE EVENT statement
@@ -128,7 +120,7 @@ impl Parametric for DefineEventStatement {
     }
 }
 
-impl Runnable for DefineEventStatement {}
+impl Runnables for DefineEventStatement {}
 impl Queryable for DefineEventStatement {}
 
 #[cfg(test)]
@@ -137,10 +129,10 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        query_remove::Table,
-        query_select::{select, All},
-        value_type_wrappers::SurrealId,
-        Operatable,
+        sql::{All, SurrealId, Table},
+        statements::select,
+        utils::cond,
+        Field, Operatable,
     };
 
     use super::*;

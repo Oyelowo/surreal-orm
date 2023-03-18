@@ -11,11 +11,9 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    field::Binding,
-    query_insert::{Buildable, Runnable, Updateables, Updater},
-    query_select::{self, SelectStatement},
-    value_type_wrappers::SurrealId,
-    BindingsList, Clause, Field, Erroneous, Parametric, Queryable, SurrealdbEdge,
+    binding::{Binding, BindingsList},
+    sql::{Buildable, Duration, Queryable, Return, Runnable, Updateables},
+    Clause, Erroneous, Field, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -35,45 +33,6 @@ where
     let mut builder = RelateStatement::<T>::new();
     // let connection: Field = connection.into();
     builder.relate(connection)
-}
-
-#[derive(Debug)]
-pub enum Return {
-    None,
-    Before,
-    After,
-    Diff,
-    Projections(Vec<Field>),
-}
-
-impl From<Vec<&Field>> for Return {
-    fn from(value: Vec<&Field>) -> Self {
-        Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
-    }
-}
-
-impl From<Vec<Field>> for Return {
-    fn from(value: Vec<Field>) -> Self {
-        Self::Projections(value)
-    }
-}
-
-impl<const N: usize> From<&[Field; N]> for Return {
-    fn from(value: &[Field; N]) -> Self {
-        Self::Projections(value.to_vec())
-    }
-}
-
-impl<const N: usize> From<&[&Field; N]> for Return {
-    fn from(value: &[&Field; N]) -> Self {
-        Self::Projections(
-            value
-                .to_vec()
-                .into_iter()
-                .map(ToOwned::to_owned)
-                .collect::<Vec<_>>(),
-        )
-    }
 }
 
 pub struct RelateStatement<T>
@@ -169,8 +128,8 @@ where
     /// let mut query_builder = SelectStatement::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<query_select::Duration>) -> Self {
-        let duration: query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<Duration>) -> Self {
+        let duration: Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -206,7 +165,7 @@ impl<T> Parametric for RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
@@ -234,22 +193,7 @@ where
         }
 
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {

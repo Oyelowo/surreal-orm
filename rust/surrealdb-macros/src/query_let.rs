@@ -10,11 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    query_ifelse::Expression,
-    query_insert::Buildable,
-    query_remove::{Database, Namespace, Runnable},
-    query_select::Duration,
-    BindingsList, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Expression, Queryable, Runnables},
 };
 
 pub fn let_(parameter: impl Into<Parameter>) -> LetStatement {
@@ -80,7 +77,7 @@ impl Display for LetStatement {
     }
 }
 
-impl Runnable for LetStatement {}
+impl Runnables for LetStatement {}
 
 impl Parametric for LetStatement {
     fn get_bindings(&self) -> BindingsList {

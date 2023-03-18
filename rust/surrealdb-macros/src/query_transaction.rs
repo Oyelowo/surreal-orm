@@ -12,19 +12,12 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_delete::DeleteStatement,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::RemoveScopeStatement,
-    query_select::SelectStatement,
-    query_update::UpdateStatement,
-    BindingsList, Field, Filter, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Queryable},
 };
 
 pub fn begin_transaction() -> QueryTransaction {
-    BeginTransaction::new()
+    BeginTransactionStatement::new()
 }
 
 pub struct QueryTransaction {
@@ -53,9 +46,9 @@ impl QueryTransaction {
     }
 }
 
-pub struct BeginTransaction;
+pub struct BeginTransactionStatement;
 
-impl BeginTransaction {
+impl BeginTransactionStatement {
     pub(crate) fn new() -> QueryTransaction {
         QueryTransaction {
             data: TransactionData {
@@ -122,9 +115,10 @@ impl fmt::Display for TransactionCompletion {
 #[cfg(test)]
 mod tests {
     use crate::{
-        query_select::{order, select, All},
-        value_type_wrappers::SurrealId,
-        Operatable,
+        filter::cond,
+        query_select::{order, select},
+        sql::{All, SurrealId},
+        Field, Operatable,
     };
 
     use super::*;

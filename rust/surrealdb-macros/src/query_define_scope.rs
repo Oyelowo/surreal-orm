@@ -12,17 +12,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::Scope,
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    BindingsList, Field, Filter, Parametric, Queryable,
+    binding::{Binding, BindingsList, Parametric},
+    sql::{Buildable, Duration, Expression, Runnables, Scope},
 };
 
 // DEFINE SCOPE statement
@@ -130,7 +121,7 @@ impl Parametric for DefineScopeStatement {
     }
 }
 
-impl Runnable for DefineScopeStatement {}
+impl Runnables for DefineScopeStatement {}
 
 #[cfg(test)]
 mod tests {

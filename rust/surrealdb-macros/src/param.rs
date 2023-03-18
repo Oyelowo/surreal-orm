@@ -3,9 +3,10 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    field::{Binding, Conditional},
-    query_define_token::Name,
-    BindingsList, Erroneous, Operatable, Parametric,
+    binding::{Binding, BindingsList},
+    filter::Conditional,
+    sql::Name,
+    Erroneous, Operatable, Parametric,
 };
 
 pub struct Param {

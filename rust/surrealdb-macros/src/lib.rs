@@ -10,63 +10,104 @@
 use std::fmt::Display;
 use std::ops::Deref;
 
-use field::Conditional;
-use field::Empty;
+pub(crate) mod binding;
+pub mod clause;
+pub(crate) mod errors;
 pub mod field;
-pub mod operators_macros;
-pub mod param;
-pub mod query_create;
-pub mod query_define_database;
-pub mod query_define_event;
-pub mod query_define_field;
-pub mod query_define_index;
-pub mod query_define_login;
-pub mod query_define_namespace;
-pub mod query_define_scope;
-pub mod query_define_table;
-pub mod query_define_token;
-pub mod query_delete;
-pub mod query_ifelse;
-pub mod query_info;
-pub mod query_insert;
-pub mod query_let;
-pub mod query_relate;
-pub mod query_remove;
-pub mod query_select;
-pub mod query_sleep;
-pub mod query_transaction;
-pub mod query_update;
-pub mod query_use;
-pub mod value_type_wrappers;
-// pub mod querydb;
+mod field_updater;
+pub mod filter;
+pub mod links;
+pub mod model_id;
+mod operators_macros;
+mod param;
+mod query_create;
+mod query_define_database;
+mod query_define_event;
+mod query_define_field;
+mod query_define_index;
+mod query_define_login;
+mod query_define_namespace;
+mod query_define_scope;
+mod query_define_table;
+mod query_define_token;
+mod query_delete;
+pub(crate) mod query_for;
+mod query_ifelse;
+mod query_info;
+mod query_insert;
+mod query_let;
+mod query_relate;
+mod query_remove;
+mod query_select;
+mod query_sleep;
+mod query_transaction;
+mod query_update;
+mod query_use;
+mod sql_components;
+pub(crate) mod sql_traits;
+
+pub use binding::{BindingsList, Parametric};
+pub use field::Field;
+pub use field::Operatable;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use serde::Serialize;
+pub use sql::Clause;
+pub use sql::Table;
+
+pub mod sql {
+    pub use super::binding::*;
+    pub use super::clause::*;
+    pub use super::field::*;
+    pub use super::field_updater::*;
+    pub use super::param::*;
+    pub use super::sql_components::*;
+    pub use super::sql_traits::*;
+}
+
+pub mod utils {
+    pub use super::filter::cond;
+    pub use super::query_for::for_;
+}
+pub mod statements {
+    pub use super::query_create::{create, CreateStatement};
+    pub use super::query_define_database::{define_database, DefineDatabaseStatement};
+    pub use super::query_define_event::{define_event, DefineEventStatement};
+    pub use super::query_define_field::{define_field, DefineFieldStatement};
+    pub use super::query_define_index::{define_index, DefineIndexStatement};
+    pub use super::query_define_login::{define_login, DefineLoginStatement};
+    pub use super::query_define_namespace::{define_namespace, DefineNamespaceStatement};
+    pub use super::query_define_scope::{define_scope, DefineScopeStatement};
+    pub use super::query_define_table::{define_table, DefineTableStatement};
+    pub use super::query_define_token::{define_token, DefineTokenStatement};
+    pub use super::query_delete::{delete, DeleteStatement};
+    pub use super::query_for::for_;
+    pub use super::query_ifelse::{if_, IfStatement};
+    pub use super::query_info::{info_for, InfoStatement};
+    pub use super::query_insert::{insert, InsertStatement};
+    pub use super::query_let::{let_, LetStatement};
+    pub use super::query_relate::{relate, RelateStatement};
+    pub use super::query_remove::{
+        remove_database, remove_event, remove_field, remove_index, remove_login, remove_namespace,
+        remove_scope, remove_table, remove_token,
+    };
+    pub use super::query_select::{order, select, Order, SelectStatement, TargettablesForSelect};
+    pub use super::query_sleep::{sleep, SleepStatement};
+    pub use super::query_transaction::{begin_transaction, BeginTransactionStatement};
+    pub use super::query_update::{update, TargettablesForUpdate, UpdateStatement};
+    pub use super::query_use::{use_, UseStatement};
+}
 pub mod prelude {
     use super::query_select;
 }
 
-pub mod links;
-pub mod model_id;
-
-pub use field::BindingsList;
-pub use field::Filter;
-pub use field::Field;
-pub use field::Operatable;
-pub use field::Parametric;
-use query_insert::Buildable;
-use query_select::SelectStatement;
-use serde::de::DeserializeOwned;
-use serde::Deserialize;
-use serde::Serialize;
 // pub use field::Param;
 // pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
-use surrealdb::sql;
-use value_type_wrappers::SurrealId;
-
-pub trait Queryable: Parametric + Buildable + Display {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
-    fn table_name() -> sql::Table;
+    fn table_name() -> surrealdb::sql::Table;
     fn get_serializable_field_names() -> Vec<&'static str>;
 }
 
@@ -76,7 +117,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> sql::Table;
+    fn get_table_name() -> surrealdb::sql::Table;
     fn with(clause: impl Into<Clause>) -> Self::Schema;
 }
 
@@ -89,7 +130,7 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> sql::Table;
+    fn get_table_name() -> surrealdb::sql::Table;
 }
 
 pub trait Schemaful {
@@ -98,125 +139,4 @@ pub trait Schemaful {
 
 pub trait Erroneous {
     fn get_errors(&self) -> Vec<String>;
-}
-
-pub fn where_(condition: impl Conditional) -> Filter {
-    if condition.get_errors().is_empty() {
-        // TODO: Maybe pass to DB filter and check and return Result<Filter> in relate_query
-    }
-    Filter::new(condition)
-}
-
-#[derive(Debug, Clone)]
-pub enum Clause {
-    Empty,
-    Where(Filter),
-    Query(SelectStatement),
-    Id(SurrealId),
-}
-
-impl From<&Self> for Clause {
-    fn from(value: &Self) -> Self {
-        value.clone()
-    }
-}
-
-impl Parametric for Clause {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            Clause::Empty => vec![],
-            Clause::Where(filter) => filter.get_bindings(),
-            Clause::Query(select_statement) => select_statement.get_bindings(),
-            Clause::Id(id) => id.get_bindings(),
-        }
-    }
-}
-
-impl Clause {
-    pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
-        let mut errors = vec![];
-        if let Clause::Id(id) = self {
-            if !id
-                .to_string()
-                .starts_with(format!("{table_name}:").as_str())
-            {
-                errors.push(format!(
-                    "invalid id {id}. Id does not belong to table {table_name}"
-                ))
-            }
-        }
-        errors
-    }
-}
-
-impl std::fmt::Display for Clause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let clause = match self {
-            Clause::Empty => "".into(),
-            Clause::Where(filter) => {
-                format!("[WHERE {filter}]")
-            }
-            Clause::Id(surreal_id) => {
-                // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
-                format!(":{}", surreal_id.id)
-            }
-            Clause::Query(select_statement) => format!("({select_statement})"),
-        };
-
-        write!(f, "{}", clause)
-    }
-}
-
-impl From<SurrealId> for Clause {
-    fn from(value: SurrealId) -> Self {
-        Self::Id(value)
-    }
-}
-
-impl From<&SurrealId> for Clause {
-    fn from(value: &SurrealId) -> Self {
-        Self::Id(value.to_owned())
-    }
-}
-
-impl From<Field> for Clause {
-    fn from(value: Field) -> Self {
-        Self::Where(Filter::new(value))
-    }
-}
-
-impl From<&Field> for Clause {
-    fn from(value: &Field) -> Self {
-        Self::Where(Filter::new(value.clone()))
-    }
-}
-
-impl From<Filter> for Clause {
-    fn from(value: Filter) -> Self {
-        Self::Where(value)
-    }
-}
-
-impl From<&Filter> for Clause {
-    fn from(value: &Filter) -> Self {
-        Self::Where(value.to_owned())
-    }
-}
-
-impl From<Empty> for Clause {
-    fn from(value: Empty) -> Self {
-        Self::Empty
-    }
-}
-
-impl From<SelectStatement> for Clause {
-    fn from(value: SelectStatement) -> Self {
-        Self::Query(value.into())
-    }
-}
-
-impl From<&SelectStatement> for Clause {
-    fn from(value: &SelectStatement) -> Self {
-        Self::Query(value.to_owned().into())
-    }
 }

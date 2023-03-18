@@ -15,19 +15,12 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    field::{cond, Binding},
+    binding::{BindingsList, Parametric},
+    filter::Filter,
     param::Param,
-    query_create::CreateStatement,
-    query_define_table::PermisisonForables,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable, Table},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    BindingsList, Filter, Field, Parametric, Queryable,
+    query_for::PermisisonForables,
+    sql::{Buildable, Queryable, Table},
+    Field,
 };
 
 // DEFINE FIELD statement
@@ -371,10 +364,9 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        field::NONE,
-        query_define_table::{for_, ForCrudType},
-        query_select::{order, select, All},
-        value_type_wrappers::SurrealId,
+        query_for::ForCrudType,
+        sql::NONE,
+        utils::{cond, for_},
         Operatable,
     };
 

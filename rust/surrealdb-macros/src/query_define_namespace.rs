@@ -10,12 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    field::Binding,
-    query_ifelse::Expression,
-    query_insert::Buildable,
-    query_remove::{Database, Namespace, Runnable},
-    query_select::Duration,
-    BindingsList, Parametric, Queryable,
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Namespace, Queryable, Runnables},
 };
 
 pub fn define_namespace(namespace: impl Into<Namespace>) -> DefineNamespaceStatement {
@@ -50,7 +46,7 @@ impl Display for DefineNamespaceStatement {
     }
 }
 
-impl Runnable for DefineNamespaceStatement {}
+impl Runnables for DefineNamespaceStatement {}
 
 impl Parametric for DefineNamespaceStatement {
     fn get_bindings(&self) -> BindingsList {

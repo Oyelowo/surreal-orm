@@ -28,95 +28,14 @@ use std::fmt::{self, Display};
 
 use surrealdb::sql;
 
-use crate::{query_define_token::Name, query_insert::Buildable, Field, Parametric, Queryable};
-
-pub struct Namespace(sql::Idiom);
-pub struct Database(sql::Idiom);
-pub struct Login(sql::Idiom);
-pub struct Token(sql::Idiom);
-pub struct Scope(sql::Idiom);
-pub struct Table(sql::Table);
-pub struct Event(sql::Idiom);
-pub struct Index(sql::Idiom);
-
-impl Table {
-    pub fn new(name: impl Into<sql::Table>) -> Self {
-        Self(name.into())
-    }
-}
-macro_rules! impl_new_for_all {
-    ($($types_:ty),*) => {
-        $(
-        impl $types_ {
-            pub fn new(name: impl Into<String>) -> Self {
-                Self(name.into().into())
-            }
-        }
-    )*
-    };
-}
-
-impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, Index);
-
-macro_rules! impl_display_for_all {
-    ($($types_:ty),*) => {
-        $(
-        impl Display for $types_ {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "{}", self.0)
-            }
-        }
-        impl From<$types_> for String {
-            fn from(value: $types_) -> Self {
-                let value: String = value.0.to_string();
-                value
-            }
-        }
-        impl From<&str> for $types_ {
-            fn from(value: &str) -> Self {
-                Self(value.to_string().into())
-            }
-        }
-
-        impl From<String> for $types_ {
-            fn from(value: String) -> Self {
-                Self(value.into())
-            }
-        }
-
-        impl From<$types_> for sql::Value {
-            fn from(value: $types_) -> Self {
-                value.0.into()
-            }
-        }
-
-    //     impl<T> From<T> for $types_
-    //     where
-    //         T: Into<String>,
-    //     {
-    //         fn from(value: T) -> Self {
-    //             Self(value.into().into())
-    //         }
-    // }
-    )*
-    };
-}
-impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, Index);
-
-enum NamespaceOrDatabase {
-    Namespace,
-    Database,
-}
-
-impl Display for NamespaceOrDatabase {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let stringified = match self {
-            NamespaceOrDatabase::Namespace => "NAMESPACE",
-            NamespaceOrDatabase::Database => "DATABASE",
-        };
-        write!(f, "{}", stringified)
-    }
-}
+use crate::{
+    binding::{BindingsList, Parametric},
+    sql::{
+        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table,
+        TableIndex, Token,
+    },
+    Field,
+};
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
     RemoveNamespaceStatement::new(namespace)
@@ -137,7 +56,7 @@ impl Buildable for RemoveNamespaceStatement {
         format!("REMOVE NAMESPACE {}", self.namespace)
     }
 }
-impl Runnable for RemoveNamespaceStatement {}
+impl Runnables for RemoveNamespaceStatement {}
 
 pub fn remove_database(database: impl Into<Database>) -> RemoveDatabaseStatement {
     RemoveDatabaseStatement::new(database)
@@ -159,7 +78,7 @@ impl Buildable for RemoveDatabaseStatement {
         format!("REMOVE DATABASE {}", self.database)
     }
 }
-impl Runnable for RemoveDatabaseStatement {}
+impl Runnables for RemoveDatabaseStatement {}
 
 pub fn remove_login(login: impl Into<Login>) -> RemoveLoginStatement {
     RemoveLoginStatement::new(login)
@@ -198,11 +117,26 @@ impl Buildable for RemoveLoginStatement {
         query
     }
 }
-impl Runnable for RemoveLoginStatement {}
+impl Runnables for RemoveLoginStatement {}
 
 pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatement {
     RemoveTokenStatement::new(token)
 }
+enum NamespaceOrDatabase {
+    Namespace,
+    Database,
+}
+
+impl Display for NamespaceOrDatabase {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let stringified = match self {
+            NamespaceOrDatabase::Namespace => "NAMESPACE",
+            NamespaceOrDatabase::Database => "DATABASE",
+        };
+        write!(f, "{}", stringified)
+    }
+}
+
 pub struct RemoveTokenStatement {
     token: Token,
     on: Option<NamespaceOrDatabase>,
@@ -237,7 +171,7 @@ impl Buildable for RemoveTokenStatement {
         query
     }
 }
-impl Runnable for RemoveTokenStatement {}
+impl Runnables for RemoveTokenStatement {}
 
 pub fn remove_scope(scope: impl Into<Scope>) -> RemoveScopeStatement {
     RemoveScopeStatement::new(scope)
@@ -257,7 +191,7 @@ impl RemoveScopeStatement {
 impl Queryable for RemoveScopeStatement {}
 
 impl Parametric for RemoveScopeStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         vec![]
     }
 }
@@ -274,7 +208,7 @@ impl Display for RemoveScopeStatement {
     }
 }
 
-impl Runnable for RemoveScopeStatement {}
+impl Runnables for RemoveScopeStatement {}
 
 pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {
     RemoveTableStatement::new(table)
@@ -296,7 +230,7 @@ impl Buildable for RemoveTableStatement {
         format!("REMOVE TABLE {}", self.table)
     }
 }
-impl Runnable for RemoveTableStatement {}
+impl Runnables for RemoveTableStatement {}
 
 pub fn remove_event(event: impl Into<Event>) -> RemoveEventStatement {
     RemoveEventStatement::new(event)
@@ -329,7 +263,7 @@ impl Buildable for RemoveEventStatement {
         query
     }
 }
-impl Runnable for RemoveEventStatement {}
+impl Runnables for RemoveEventStatement {}
 
 pub fn remove_field(field: impl Into<Field>) -> RemoveFieldStatement {
     RemoveFieldStatement::new(field)
@@ -362,18 +296,18 @@ impl Buildable for RemoveFieldStatement {
         query
     }
 }
-impl Runnable for RemoveFieldStatement {}
+impl Runnables for RemoveFieldStatement {}
 
-pub fn remove_index(index: impl Into<Index>) -> RemoveIndexStatement {
+pub fn remove_index(index: impl Into<TableIndex>) -> RemoveIndexStatement {
     RemoveIndexStatement::new(index)
 }
 pub struct RemoveIndexStatement {
-    index: Index,
+    index: TableIndex,
     table: Option<Table>,
 }
 
 impl RemoveIndexStatement {
-    fn new(index: impl Into<Index>) -> Self {
+    fn new(index: impl Into<TableIndex>) -> Self {
         Self {
             index: index.into(),
             table: None,
@@ -395,21 +329,7 @@ impl Buildable for RemoveIndexStatement {
         query
     }
 }
-impl Runnable for RemoveIndexStatement {}
+impl Runnables for RemoveIndexStatement {}
 
-#[async_trait::async_trait]
-pub trait Runnable
-where
-    Self: Buildable,
-{
-    async fn run(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<()> {
-        let query = self.build();
-        db.query(query).await?;
-        Ok(())
-    }
-}
 #[test]
 fn test() {}

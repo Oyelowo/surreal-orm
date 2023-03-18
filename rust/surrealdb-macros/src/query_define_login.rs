@@ -12,16 +12,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::Name,
-    query_delete::DeleteStatement,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::SelectStatement,
-    query_update::UpdateStatement,
-    BindingsList, Field, Filter, Parametric, Queryable,
+    binding::{Binding, BindingsList, Parametric},
+    sql::{Buildable, Name, Runnables},
 };
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
 // DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';
@@ -174,7 +166,7 @@ impl Parametric for DefineLoginStatement {
         self.bindings.to_vec()
     }
 }
-impl Runnable for DefineLoginStatement {}
+impl Runnables for DefineLoginStatement {}
 
 #[cfg(test)]
 mod tests {

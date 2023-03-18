@@ -135,22 +135,7 @@ impl RelateStatement {
         }
 
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                ReturnType::None => query += "NONE ",
-                ReturnType::Before => query += "BEFORE ",
-                ReturnType::After => query += "AFTER ",
-                ReturnType::Diff => query += "DIFF ",
-                ReturnType::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
 
         if let Some(timeout) = &self.timeout {

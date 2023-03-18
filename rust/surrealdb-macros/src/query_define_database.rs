@@ -10,12 +10,9 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    field::Binding,
-    query_ifelse::Expression,
-    query_insert::Buildable,
-    query_remove::{Database, Runnable},
-    query_select::Duration,
-    BindingsList, Parametric, Queryable,
+    binding::BindingsList,
+    sql::{Buildable, Database, Queryable, Runnables},
+    Parametric,
 };
 
 pub fn define_database(database: impl Into<Database>) -> DefineDatabaseStatement {
@@ -50,7 +47,7 @@ impl Display for DefineDatabaseStatement {
     }
 }
 
-impl Runnable for DefineDatabaseStatement {}
+impl Runnables for DefineDatabaseStatement {}
 
 impl Parametric for DefineDatabaseStatement {
     fn get_bindings(&self) -> BindingsList {

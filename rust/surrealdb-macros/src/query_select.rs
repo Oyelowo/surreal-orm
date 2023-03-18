@@ -13,13 +13,13 @@ use std::{
 };
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql::{self, Table, Value};
+use surrealdb::sql::{self, Value};
 
 use crate::{
-    field::{Binding, BindingsList, Conditional, Filter, Parametric},
-    query_insert::Buildable,
-    value_type_wrappers::SurrealId,
-    Erroneous, Field, Queryable, SurrealdbModel, SurrealdbNode,
+    binding::{Binding, BindingsList, Parametric},
+    filter::{Conditional, Filter},
+    sql::{All, Buildable, Duration, Queryable, RunnableSelect, SurrealId},
+    Erroneous, Field, Table,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -261,7 +261,7 @@ impl Display for OrderOption {
 }
 
 #[derive(Debug, Clone)]
-pub enum Targettables {
+pub enum TargettablesForSelect {
     Table(sql::Table),
     Tables(Vec<sql::Table>),
     SurrealId(SurrealId),
@@ -270,7 +270,7 @@ pub enum Targettables {
     SubQuery(SelectStatement),
 }
 
-impl From<Vec<sql::Table>> for Targettables {
+impl From<Vec<sql::Table>> for TargettablesForSelect {
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
@@ -281,72 +281,82 @@ impl From<Vec<sql::Table>> for Targettables {
 //     }
 // }
 
-impl From<Vec<sql::Thing>> for Targettables {
+impl From<Vec<sql::Thing>> for TargettablesForSelect {
     fn from(value: Vec<sql::Thing>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl From<&sql::Table> for Targettables {
+impl From<&Table> for TargettablesForSelect {
+    fn from(value: &Table) -> Self {
+        Self::Table(value.into())
+    }
+}
+impl From<Table> for TargettablesForSelect {
+    fn from(value: Table) -> Self {
+        Self::Table(value.into())
+    }
+}
+impl From<&sql::Table> for TargettablesForSelect {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
     }
 }
-impl From<&sql::Thing> for Targettables {
+impl From<&sql::Thing> for TargettablesForSelect {
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
     }
 }
 
-impl From<sql::Thing> for Targettables {
+impl From<sql::Thing> for TargettablesForSelect {
     fn from(value: sql::Thing) -> Self {
         Self::SurrealId(value.into())
     }
 }
 
-impl From<Vec<&sql::Table>> for Targettables {
+impl From<Vec<&sql::Table>> for TargettablesForSelect {
     fn from(value: Vec<&sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize> From<&[&sql::Table; N]> for Targettables {
+impl<const N: usize> From<&[&sql::Table; N]> for TargettablesForSelect {
     fn from(value: &[&sql::Table; N]) -> Self {
         Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize> From<&[sql::Table; N]> for Targettables {
+impl<const N: usize> From<&[sql::Table; N]> for TargettablesForSelect {
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
     }
 }
 
-impl From<&SurrealId> for Targettables {
+impl From<&SurrealId> for TargettablesForSelect {
     fn from(value: &SurrealId) -> Self {
         Self::SurrealId(value.to_owned())
     }
 }
 
-impl<const N: usize> From<&[SurrealId; N]> for Targettables {
+impl<const N: usize> From<&[SurrealId; N]> for TargettablesForSelect {
     fn from(value: &[SurrealId; N]) -> Self {
         Self::SurrealIds(value.to_vec())
     }
 }
 
-impl From<Vec<&SurrealId>> for Targettables {
+impl From<Vec<&SurrealId>> for TargettablesForSelect {
     fn from(value: Vec<&SurrealId>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize> From<&[&SurrealId; N]> for Targettables {
+impl<const N: usize> From<&[&SurrealId; N]> for TargettablesForSelect {
     fn from(value: &[&SurrealId; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize> From<&[sql::Thing; N]> for Targettables {
+impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
             value
@@ -357,45 +367,45 @@ impl<const N: usize> From<&[sql::Thing; N]> for Targettables {
     }
 }
 
-impl From<Vec<SurrealId>> for Targettables {
+impl From<Vec<SurrealId>> for TargettablesForSelect {
     fn from(value: Vec<SurrealId>) -> Self {
         Self::SurrealIds(value)
     }
 }
 
-impl From<SurrealId> for Targettables {
+impl From<SurrealId> for TargettablesForSelect {
     fn from(value: SurrealId) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl From<sql::Table> for Targettables {
-    fn from(value: Table) -> Self {
+impl From<sql::Table> for TargettablesForSelect {
+    fn from(value: sql::Table) -> Self {
         Self::Table(value)
     }
 }
 
-impl From<&mut SelectStatement> for Targettables {
+impl From<&mut SelectStatement> for TargettablesForSelect {
     fn from(value: &mut SelectStatement) -> Self {
         Self::SubQuery(value.clone())
     }
 }
 
-impl From<SelectStatement> for Targettables {
+impl From<SelectStatement> for TargettablesForSelect {
     fn from(value: SelectStatement) -> Self {
         Self::SubQuery(value.clone())
     }
 }
 
-impl Parametric for Targettables {
+impl Parametric for TargettablesForSelect {
     fn get_bindings(&self) -> BindingsList {
         match self {
-            Targettables::Table(table) => {
+            TargettablesForSelect::Table(table) => {
                 // Table binding does not seem to work right now. skip it first
                 let binding = Binding::new(table.to_owned());
                 vec![binding]
             }
-            Targettables::Tables(tables) => {
+            TargettablesForSelect::Tables(tables) => {
                 // Table binding does not seem to work right now. skip it first
                 let bindings = tables
                     .to_vec()
@@ -405,10 +415,10 @@ impl Parametric for Targettables {
                 bindings
             }
             // Should already be bound
-            Targettables::SubQuery(query) => query.get_bindings(),
-            Targettables::SurrealId(id) => vec![Binding::new(id.to_owned())],
+            TargettablesForSelect::SubQuery(query) => query.get_bindings(),
+            TargettablesForSelect::SurrealId(id) => vec![Binding::new(id.to_owned())],
 
-            Targettables::SurrealIds(ids) => {
+            TargettablesForSelect::SurrealIds(ids) => {
                 let bindings = ids
                     .into_iter()
                     .map(|id| Binding::new(id.to_owned()))
@@ -479,45 +489,6 @@ impl Parametric for Splittables {
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
-pub struct Duration(sql::Duration);
-
-impl From<self::Duration> for sql::Duration {
-    fn from(value: self::Duration) -> Self {
-        value.0
-    }
-}
-
-impl From<Duration> for sql::Value {
-    fn from(value: self::Duration) -> Self {
-        value.0.into()
-    }
-}
-impl From<sql::Duration> for self::Duration {
-    fn from(value: sql::Duration) -> Self {
-        Self(value)
-    }
-}
-
-impl From<&std::time::Duration> for Duration {
-    fn from(value: &std::time::Duration) -> Self {
-        Self(value.to_owned().into())
-    }
-}
-
-impl From<std::time::Duration> for Duration {
-    fn from(value: std::time::Duration) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Deref for Duration {
-    type Target = sql::Duration;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 #[derive(Debug)]
 pub enum Selectables {
     All,
@@ -526,8 +497,8 @@ pub enum Selectables {
     Fields(Vec<Field>),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct All;
+// #[derive(Debug, Clone, Copy)]
+// pub struct All;
 
 impl AsRef<Selectables> for All {
     fn as_ref(&self) -> &Selectables {
@@ -618,6 +589,12 @@ pub struct SelectStatement {
 }
 
 impl Queryable for SelectStatement {}
+
+impl Conditional for SelectStatement {
+    fn get_condition_query_string(&self) -> String {
+        format!("{}", self)
+    }
+}
 
 impl Erroneous for SelectStatement {
     fn get_errors(&self) -> Vec<String> {
@@ -716,22 +693,26 @@ impl SelectStatement {
     ///
     /// assert_eq!(builder.to_string(), "SELECT * FROM users");
     /// ```
-    pub fn from(mut self, targettables: impl Into<Targettables>) -> Self {
-        let targets: Targettables = targettables.into();
+    pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> Self {
+        let targets: TargettablesForSelect = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         // When we have either one or many table names or record ids, we want to use placeholders
         // as the targets which would be bound later but for a subquery in from, that must have
         // already been done by the Subquery(in this case, select query) builder itself
         let target_names = match targets {
-            Targettables::Table(table) => vec![table.to_string()],
-            Targettables::Tables(tbs) => tbs.iter().map(|t| t.to_string()).collect::<Vec<_>>(),
-            Targettables::SurrealId(_) | Targettables::SurrealIds(_) => targets_bindings
-                .iter()
-                .map(|b| format!("${}", b.get_param()))
-                .collect::<Vec<_>>(),
+            TargettablesForSelect::Table(table) => vec![table.to_string()],
+            TargettablesForSelect::Tables(tbs) => {
+                tbs.iter().map(|t| t.to_string()).collect::<Vec<_>>()
+            }
+            TargettablesForSelect::SurrealId(_) | TargettablesForSelect::SurrealIds(_) => {
+                targets_bindings
+                    .iter()
+                    .map(|b| format!("${}", b.get_param()))
+                    .collect::<Vec<_>>()
+            }
             // Subquery must have be built and interpolated, so no need for rebinding
-            Targettables::SubQuery(subquery) => vec![format!("({subquery})")],
+            TargettablesForSelect::SubQuery(subquery) => vec![format!("({subquery})")],
         };
         self.update_bindings(targets_bindings);
         self.targets.extend(target_names);
@@ -1118,66 +1099,6 @@ impl Buildable for SelectStatement {
 
         query.push(';');
         query
-    }
-}
-
-#[async_trait::async_trait]
-pub trait RunnableSelect
-where
-    Self: Parametric + Buildable,
-{
-    async fn return_one<T: Serialize + DeserializeOwned>(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<T> {
-        let query = self.build();
-        println!("XXXX {query}");
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-        // trying to return Vec  rather than Option , then pick the first of the returned
-        // Ok .
-        let mut returned_val = match response.take::<Option<T>>(0) {
-            Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec<T>>(0)?,
-        };
-
-        // TODO:: Handle error if nothing is returned
-        let only_or_last = returned_val.pop().unwrap();
-        Ok(only_or_last)
-    }
-
-    async fn return_many<T: Serialize + DeserializeOwned>(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        println!("XXXX {query}");
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        println!("mmmmm {response:?}");
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option , then pick the return the only item as Vec .
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Ok(many) => many,
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
     }
 }
 

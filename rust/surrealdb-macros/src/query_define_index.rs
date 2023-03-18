@@ -14,20 +14,6 @@ use insta::{assert_debug_snapshot, assert_display_snapshot};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
-use crate::{
-    field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::{Name, Scope},
-    query_delete::DeleteStatement,
-    query_ifelse::Expression,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::{Duration, SelectStatement},
-    query_update::UpdateStatement,
-    BindingsList, Field, Filter, Parametric, Queryable,
-};
-
 // DEFINE INDEX statement
 // Just like in other databases, SurrealDB uses indexes to help optimize query performance.
 // An index can consist of one or more fields in a table and can enforce a uniqueness constraint.
@@ -48,6 +34,12 @@ use crate::{
 
 use std::collections::HashMap;
 
+use crate::{
+    binding::{BindingsList, Parametric},
+    sql::{Buildable, Index, Queryable, Runnables, Table, TableIndex},
+    Field,
+};
+
 // Struct to represent a SurrealDB index definition
 pub struct DefineIndexStatement {
     index_name: String,
@@ -56,34 +48,6 @@ pub struct DefineIndexStatement {
     columns: Vec<String>,
     unique: Option<bool>,
     bindings: BindingsList,
-}
-
-pub struct Table(sql::Table);
-
-impl Display for Table {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.to_string())
-    }
-}
-
-impl From<Table> for sql::Value {
-    fn from(value: Table) -> Self {
-        Self::Table(value.0)
-    }
-}
-
-impl<T: Into<sql::Table>> From<T> for Table {
-    fn from(value: T) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Deref for Table {
-    type Target = sql::Table;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
 }
 
 pub enum Columns {
@@ -135,17 +99,14 @@ impl Parametric for Columns {
     }
 }
 
-pub type Index = Name;
-
-pub fn define_index(index_name: impl Into<Index>) -> DefineIndexStatement {
+pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
     DefineIndexStatement::new(index_name)
 }
 
 impl DefineIndexStatement {
-    pub fn new(index_name: impl Into<Index>) -> Self {
+    pub fn new(index_name: impl Into<TableIndex>) -> Self {
         // let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
-        let index_name: Index = index_name.into();
-        let index_name: sql::Idiom = index_name.into();
+        let index_name: TableIndex = index_name.into();
         let index_name: String = index_name.to_string();
 
         Self {
@@ -249,7 +210,7 @@ impl Parametric for DefineIndexStatement {
 
 impl Queryable for DefineIndexStatement {}
 
-impl Runnable for DefineIndexStatement {}
+impl Runnables for DefineIndexStatement {}
 
 #[cfg(test)]
 mod tests {

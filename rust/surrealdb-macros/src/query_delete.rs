@@ -11,10 +11,12 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    query_insert::{Buildable, Runnable},
-    query_relate::Return,
-    query_update::{self, Targettable},
-    BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
+    binding::{BindingsList, Parametric},
+    filter::Filter,
+    query_update,
+    sql::{Buildable, Queryable, Return, Runnable},
+    statements::TargettablesForUpdate,
+    SurrealdbModel,
 };
 
 /*
@@ -27,14 +29,14 @@ DELETE @targets
 ;
 */
 
-pub fn delete<T>(targettables: impl Into<Targettable>) -> DeleteStatement<T>
+pub fn delete<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     // TODO: Pass this to DeleteStatement constructor and gather the errors to be handled when
     // query is run using one of the run methods.
     let table_name = T::table_name();
-    let targettables: Targettable = targettables.into();
+    let targettables: TargettablesForUpdate = targettables.into();
     if !targettables
         .get_bindings()
         .first()
@@ -69,13 +71,13 @@ impl<T> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(targettables: impl Into<query_update::Targettable>) -> Self {
-        let targets: Targettable = targettables.into();
+    pub fn new(targettables: impl Into<query_update::TargettablesForUpdate>) -> Self {
+        let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         let mut target_names = match targets {
-            Targettable::Table(table) => vec![table.to_string()],
-            Targettable::SurrealId(_) => targets_bindings
+            TargettablesForUpdate::Table(table) => vec![table.to_string()],
+            TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("${}", b.get_param()))
                 .collect::<Vec<_>>(),
@@ -150,8 +152,8 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.timeout();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::query_select::Duration>) -> Self {
-        let duration: crate::query_select::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
+        let duration: crate::sql::Duration = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
@@ -170,25 +172,10 @@ where
     fn build(&self) -> String {
         let mut query = format!("DELETE {};", self.target);
         if let Some(condition) = &self.where_ {
-            query = format!("{} WHERE {};", query, condition);
+            query += format!("{} WHERE {};", query, condition).as_str();
         }
         if let Some(return_type) = &self.return_type {
-            query += "RETURN ";
-            match return_type {
-                Return::None => query += "NONE ",
-                Return::Before => query += "BEFORE ",
-                Return::After => query += "AFTER ",
-                Return::Diff => query += "DIFF ",
-                Return::Projections(projections) => {
-                    let projections = projections
-                        .iter()
-                        .map(|p| format!("{}", p))
-                        .collect::<Vec<String>>()
-                        .join(", ");
-                    query += &projections;
-                    query += " ";
-                }
-            }
+            query += format!("{return_type}").as_str();
         }
         if let Some(timeout) = &self.timeout {
             query.push_str(" TIMEOUT ");
@@ -215,7 +202,7 @@ impl<T> Parametric for DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    fn get_bindings(&self) -> crate::BindingsList {
+    fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
