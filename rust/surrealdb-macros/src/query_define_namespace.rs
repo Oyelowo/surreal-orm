@@ -11,10 +11,7 @@ use surrealdb::sql::{self, Ident};
 
 use crate::{
     field::Binding,
-    query_ifelse::Expression,
-    query_insert::Buildable,
-    query_remove::{Database, Namespace, Runnable},
-    query_select::Duration,
+    sql::{Buildable, Namespace, Runnables},
     BindingsList, Parametric, Queryable,
 };
 
@@ -50,7 +47,7 @@ impl Display for DefineNamespaceStatement {
     }
 }
 
-impl Runnable for DefineNamespaceStatement {}
+impl Runnables for DefineNamespaceStatement {}
 
 impl Parametric for DefineNamespaceStatement {
     fn get_bindings(&self) -> BindingsList {

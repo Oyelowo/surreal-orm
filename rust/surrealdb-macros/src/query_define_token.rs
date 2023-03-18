@@ -20,6 +20,7 @@ use crate::{
     query_remove::{RemoveScopeStatement, Runnable},
     query_select::SelectStatement,
     query_update::UpdateStatement,
+    sql::{Name, Scope, TokenTarget, TokenType},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 
@@ -48,102 +49,6 @@ use crate::{
 //   -- Specify the public key so we can verify the authenticity of the token
 //   VALUE "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8"
 // ;
-
-pub enum TokenType {
-    EDDSA,
-    ES256,
-    ES384,
-    ES512,
-    HS256,
-    HS384,
-    HS512,
-    PS256,
-    PS384,
-    PS512,
-    RS256,
-    RS384,
-    RS512,
-}
-
-impl fmt::Display for TokenType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            TokenType::EDDSA => write!(f, "EDDSA"),
-            TokenType::ES256 => write!(f, "ES256"),
-            TokenType::ES384 => write!(f, "ES384"),
-            TokenType::ES512 => write!(f, "ES512"),
-            TokenType::HS256 => write!(f, "HS256"),
-            TokenType::HS384 => write!(f, "HS384"),
-            TokenType::HS512 => write!(f, "HS512"),
-            TokenType::PS256 => write!(f, "PS256"),
-            TokenType::PS384 => write!(f, "PS384"),
-            TokenType::PS512 => write!(f, "PS512"),
-            TokenType::RS256 => write!(f, "RS256"),
-            TokenType::RS384 => write!(f, "RS384"),
-            TokenType::RS512 => write!(f, "RS512"),
-        }
-    }
-}
-
-pub enum TokenTarget {
-    Namespace,
-    Database,
-    Scope(String),
-}
-
-impl Display for TokenTarget {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let target_str = match self {
-            TokenTarget::Namespace => "NAMESPACE".into(),
-            TokenTarget::Database => "DATABASE".into(),
-            TokenTarget::Scope(scope) => format!("SCOPE {}", scope),
-        };
-        write!(f, "{}", target_str)
-    }
-}
-
-pub struct Name(sql::Idiom);
-
-impl Display for Name {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.to_string())
-    }
-}
-
-impl Name {
-    pub fn new(name: sql::Idiom) -> Self {
-        Self(name)
-    }
-}
-
-// impl From<sql::Idiom> for Name {
-//     fn from(value: sql::Idiom) -> Self {
-//         todo!()
-//     }
-// }
-
-impl From<Name> for sql::Idiom {
-    fn from(value: Name) -> Self {
-        value.0
-    }
-}
-
-pub type Scope = Name;
-
-impl From<Name> for sql::Value {
-    fn from(value: Name) -> Self {
-        value.0.into()
-    }
-}
-
-impl<T> From<T> for Name
-where
-    T: Into<String>,
-{
-    fn from(value: T) -> Self {
-        Self(value.into().into())
-    }
-}
 
 pub struct DefineTokenStatement {
     name: String,

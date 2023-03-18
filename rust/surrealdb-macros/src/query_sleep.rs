@@ -10,7 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    query_insert::Buildable, query_remove::Runnable, query_select::Duration, Parametric, Queryable,
+    sql::{Buildable, Duration, Runnables},
+    Parametric, Queryable,
 };
 
 pub fn sleep(duration: impl Into<Duration>) -> SleepStatement {
@@ -40,7 +41,7 @@ impl Parametric for SleepStatement {
     }
 }
 
-impl Runnable for SleepStatement {}
+impl Runnables for SleepStatement {}
 
 impl Display for SleepStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

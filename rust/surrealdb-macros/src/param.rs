@@ -4,7 +4,7 @@ use surrealdb::sql;
 
 use crate::{
     field::{Binding, Conditional},
-    query_define_token::Name,
+    sql::Name,
     BindingsList, Erroneous, Operatable, Parametric,
 };
 

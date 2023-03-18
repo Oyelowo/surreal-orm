@@ -11,11 +11,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    field::Binding,
-    query_insert::{Buildable, Runnable, Updateables, Updater},
-    query_select::{self, SelectStatement},
-    value_type_wrappers::SurrealId,
-    BindingsList, Clause, Field, Erroneous, Parametric, Queryable, SurrealdbEdge,
+    field::Binding, sql::Return, value_type_wrappers::SurrealId, BindingsList, Clause, Erroneous,
+    Field, Parametric, Queryable, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -35,45 +32,6 @@ where
     let mut builder = RelateStatement::<T>::new();
     // let connection: Field = connection.into();
     builder.relate(connection)
-}
-
-#[derive(Debug)]
-pub enum Return {
-    None,
-    Before,
-    After,
-    Diff,
-    Projections(Vec<Field>),
-}
-
-impl From<Vec<&Field>> for Return {
-    fn from(value: Vec<&Field>) -> Self {
-        Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
-    }
-}
-
-impl From<Vec<Field>> for Return {
-    fn from(value: Vec<Field>) -> Self {
-        Self::Projections(value)
-    }
-}
-
-impl<const N: usize> From<&[Field; N]> for Return {
-    fn from(value: &[Field; N]) -> Self {
-        Self::Projections(value.to_vec())
-    }
-}
-
-impl<const N: usize> From<&[&Field; N]> for Return {
-    fn from(value: &[&Field; N]) -> Self {
-        Self::Projections(
-            value
-                .to_vec()
-                .into_iter()
-                .map(ToOwned::to_owned)
-                .collect::<Vec<_>>(),
-        )
-    }
 }
 
 pub struct RelateStatement<T>

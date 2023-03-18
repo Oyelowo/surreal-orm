@@ -11,10 +11,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    query_insert::{Buildable, Runnable},
-    query_relate::Return,
-    query_update::{self, Targettable},
-    BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
+    statements::TargettablesForUpdate, BindingsList, Filter, Parametric, Queryable, SurrealdbModel,
 };
 
 /*
@@ -27,14 +24,14 @@ DELETE @targets
 ;
 */
 
-pub fn delete<T>(targettables: impl Into<Targettable>) -> DeleteStatement<T>
+pub fn delete<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     // TODO: Pass this to DeleteStatement constructor and gather the errors to be handled when
     // query is run using one of the run methods.
     let table_name = T::table_name();
-    let targettables: Targettable = targettables.into();
+    let targettables: TargettablesForUpdate = targettables.into();
     if !targettables
         .get_bindings()
         .first()
@@ -70,12 +67,12 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     pub fn new(targettables: impl Into<query_update::Targettable>) -> Self {
-        let targets: Targettable = targettables.into();
+        let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
         let mut target_names = match targets {
-            Targettable::Table(table) => vec![table.to_string()],
-            Targettable::SurrealId(_) => targets_bindings
+            TargettablesForUpdate::Table(table) => vec![table.to_string()],
+            TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("${}", b.get_param()))
                 .collect::<Vec<_>>(),

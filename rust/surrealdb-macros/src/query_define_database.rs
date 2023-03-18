@@ -11,10 +11,7 @@ use surrealdb::sql::{self, Ident};
 
 use crate::{
     field::Binding,
-    query_ifelse::Expression,
-    query_insert::Buildable,
-    query_remove::{Database, Runnable},
-    query_select::Duration,
+    sql::{Buildable, Database, Runnables},
     BindingsList, Parametric, Queryable,
 };
 
@@ -50,7 +47,7 @@ impl Display for DefineDatabaseStatement {
     }
 }
 
-impl Runnable for DefineDatabaseStatement {}
+impl Runnables for DefineDatabaseStatement {}
 
 impl Parametric for DefineDatabaseStatement {
     fn get_bindings(&self) -> BindingsList {

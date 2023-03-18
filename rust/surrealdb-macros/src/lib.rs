@@ -12,6 +12,7 @@ use std::ops::Deref;
 
 use field::Conditional;
 pub mod field;
+mod field_updater;
 mod operators_macros;
 mod param;
 mod query_create;
@@ -36,11 +37,16 @@ mod query_sleep;
 mod query_transaction;
 mod query_update;
 mod query_use;
+mod sql_components;
+mod sql_traits;
 pub mod value_type_wrappers;
 
-pub mod items {
-    pub use super::query_remove::Table;
+pub mod sql {
+    pub use super::field_updater::*;
+    pub use super::sql_components::*;
+    pub use super::sql_traits::*;
 }
+
 pub mod statements {
     pub use super::query_create::{create, CreateStatement};
     pub use super::query_define_database::{define_database, DefineDatabaseStatement};
@@ -55,19 +61,17 @@ pub mod statements {
     pub use super::query_delete::{delete, DeleteStatement};
     pub use super::query_ifelse::{if_, IfStatement};
     pub use super::query_info::{info_for, InfoStatement};
-    pub use super::query_insert::Runnable;
     pub use super::query_insert::{insert, InsertStatement};
     pub use super::query_let::{let_, LetStatement};
-    pub use super::query_relate::Return;
     pub use super::query_relate::{relate, RelateStatement};
     pub use super::query_remove::{
         remove_database, remove_event, remove_field, remove_index, remove_login, remove_namespace,
         remove_scope, remove_table, remove_token,
     };
-    pub use super::query_select::{order, select, Order, RunnableSelect, SelectStatement};
+    pub use super::query_select::{order, select, Order, SelectStatement, TargettablesForSelect};
     pub use super::query_sleep::{sleep, SleepStatement};
     pub use super::query_transaction::{begin_transaction, BeginTransactionStatement};
-    pub use super::query_update::{update, UpdateStatement};
+    pub use super::query_update::{update, TargettablesForUpdate, UpdateStatement};
     pub use super::query_use::{use_, UseStatement};
 }
 pub mod prelude {
@@ -84,18 +88,15 @@ pub use field::Field;
 pub use field::Filter;
 pub use field::Operatable;
 pub use field::Parametric;
-use query_insert::Buildable;
-use query_select::SelectStatement;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 // pub use field::Param;
 // pub use field::ParamsExtractor;
 pub use surrealdb::opt::RecordId;
-use surrealdb::sql;
 use value_type_wrappers::SurrealId;
 
-pub trait Queryable: Parametric + Buildable + Display {}
+pub trait Queryable: Parametric + sql::Buildable + Display {}
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {

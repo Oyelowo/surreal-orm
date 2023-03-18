@@ -13,14 +13,7 @@ use surrealdb::sql;
 
 use crate::{
     field::{cond, Binding},
-    query_create::CreateStatement,
-    query_define_token::Name,
-    query_delete::DeleteStatement,
-    query_insert::{Buildable, InsertStatement},
-    query_relate::RelateStatement,
-    query_remove::{RemoveScopeStatement, Runnable},
-    query_select::SelectStatement,
-    query_update::UpdateStatement,
+    sql::{Buildable, Name, Runnables},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
@@ -174,7 +167,7 @@ impl Parametric for DefineLoginStatement {
         self.bindings.to_vec()
     }
 }
-impl Runnable for DefineLoginStatement {}
+impl Runnables for DefineLoginStatement {}
 
 #[cfg(test)]
 mod tests {

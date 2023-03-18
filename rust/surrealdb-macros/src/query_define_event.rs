@@ -22,9 +22,10 @@ use crate::{
     query_ifelse::Expression,
     query_insert::{Buildable, InsertStatement},
     query_relate::RelateStatement,
-    query_remove::{Event, RemoveScopeStatement, Runnable, Table},
+    query_remove::{RemoveScopeStatement, Runnable},
     query_select::{Duration, SelectStatement},
     query_update::UpdateStatement,
+    sql::{Event, Table},
     BindingsList, Field, Filter, Parametric, Queryable,
 };
 
@@ -136,9 +137,7 @@ mod tests {
 
     use std::time::Duration;
 
-    use crate::{
-        query_remove::Table, statements::select, value_type_wrappers::SurrealId, All, Operatable,
-    };
+    use crate::{sql::Table, statements::select, value_type_wrappers::SurrealId, All, Operatable};
 
     use super::*;
 

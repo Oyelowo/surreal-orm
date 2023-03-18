@@ -25,11 +25,7 @@ use surrealdb::{
 };
 
 use crate::{
-    clause::Empty,
-    query_define_token::Name,
-    query_select::{SelectStatement, Selectables},
-    value_type_wrappers::SurrealId,
-    Clause, Erroneous, SurrealdbModel,
+    clause::Empty, sql::Name, value_type_wrappers::SurrealId, Clause, Erroneous, SurrealdbModel,
 };
 
 /// Represents a field in the database. This type wraps a `String` and
@@ -231,41 +227,6 @@ impl Into<Ordinal> for sql::Number {
         Ordinal::Number(self)
     }
 }
-// impl Conditional for Field {
-//     fn get_condition_query_string(&self) -> String {
-//         format!("{}", self)
-//     }
-// }
-impl Conditional for SelectStatement {
-    fn get_condition_query_string(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-// impl Into<Filter> for SelectStatement {
-//     fn into(self) -> Filter {
-//         let query_b: SelectStatement = self;
-//         Filter::new(query_b)
-//     }
-// }
-// impl From<SurrealId> for Filter {
-//     fn from(value: SurrealId) -> Self {
-//         // TODO: Check if to inline the string directly or stick with parametization and
-//         // autobinding
-//         Filter::new(value)
-//         // Filter::new(vec![value])
-//         // Filter::new(value.to_raw())
-//         // Filter::new("".into()).___update_bindings(&vec![b])
-//     }
-// }
-// impl From<Field> for Filter {
-//     fn from(value: Field) -> Self {
-//         Self {
-//             query_string: value.condition_query_string,
-//             bindings: value.bindings,
-//         }
-//     }
-// }
 
 impl<'a> From<Cow<'a, Self>> for Field {
     fn from(value: Cow<'a, Field>) -> Self {

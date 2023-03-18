@@ -10,9 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    query_insert::Buildable,
-    query_remove::{Database, Namespace, Runnable},
-    query_select::Duration,
+    sql::{Buildable, Database, Namespace, Runnable},
     Parametric, Queryable,
 };
 
@@ -74,6 +72,8 @@ impl Parametric for UseStatement {
 
 #[cfg(test)]
 mod tests {
+
+    use crate::sql::Database;
 
     use super::*;
 
