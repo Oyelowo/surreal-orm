@@ -158,17 +158,39 @@ impl WhiteSpaceRemoval for String {}
 
 use serde_json::{Map, Value};
 
+// fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
+//     let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");
+//
+//     let mut map = match value {
+//         Value::Object(map) => map,
+//         _ => panic!("Expected a JSON object"),
+//     };
+//
+//     map.remove(field_name);
+//
+//     serde_json::to_string(&Value::Object(map)).expect("Failed to serialize JSON value")
+// }
+
 fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
     let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");
 
-    let mut map = match value {
-        Value::Object(map) => map,
-        _ => panic!("Expected a JSON object"),
+    let updated_value = match value {
+        Value::Object(mut map) => {
+            map.remove(field_name);
+            Value::Object(map)
+        }
+        Value::Array(mut vec) => {
+            for element in vec.iter_mut() {
+                if let Value::Object(ref mut map) = *element {
+                    map.remove(field_name);
+                }
+            }
+            Value::Array(vec)
+        }
+        _ => value,
     };
 
-    map.remove(field_name);
-
-    serde_json::to_string(&Value::Object(map)).expect("Failed to serialize JSON value")
+    serde_json::to_string(&updated_value).expect("Failed to serialize JSON value")
 }
 
 #[cfg(test)]
@@ -545,17 +567,40 @@ mod tests {
             ..Default::default()
         };
 
-        let relate_simple = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write)
-            .return_many(db.clone())
-            .await?;
+        let relate_simple =
+            relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
-        let relate_simple = remove_field_from_json_string(
-            serde_json::to_string(&relate_simple).unwrap().as_str(),
+        // You can use return one method and it just returns the single object
+        let relate_simple_object = relate_simple.return_one(db.clone()).await?;
+        // Remove id bcos it is non-deterministic i.e changes on every run
+        let relate_simple_object = remove_field_from_json_string(
+            serde_json::to_string(&relate_simple_object)
+                .unwrap()
+                .as_str(),
             "id",
         );
-        insta::assert_display_snapshot!(relate_simple);
-        insta::assert_debug_snapshot!(relate_simple);
+        insta::assert_display_snapshot!(relate_simple_object);
+
+        // You can also use return many and it just returns the single object as an array
+        let relate_simple_array = relate_simple.return_many(db.clone()).await?;
+        let relate_simple_object = remove_field_from_json_string(
+            serde_json::to_string(&relate_simple_object)
+                .unwrap()
+                .as_str(),
+            "id",
+        );
+        insta::assert_display_snapshot!(relate_simple_object);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(not(feature = "mock"))]
+    async fn relate_query_with_sub_query() -> surrealdb::Result<()> {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
             time_written: Duration::from_secs(52),
@@ -565,68 +610,18 @@ mod tests {
             Student::with(select(All).from(Student::get_table_name()))
                 .writes__(Empty)
                 .book(
-                    select(All)
-                        .from(Book::get_table_name())
-                        .where_(Book::schema().title.like("Oyelowo")),
+                    select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
                 ),
         )
         .content(write)
         .return_many(db.clone())
         .await?;
-        // let relate_more = remove_field_from_json_string(
-        //     serde_json::to_string(&relate_simple).unwrap().as_str(),
-        //     "id",
-        // );
-
-        insta::assert_debug_snapshot!(relate_more);
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn relate_query_run() -> surrealdb::Result<()> {
-        let db = Surreal::new::<Mem>(()).await.unwrap();
-        db.use_ns("test").use_db("test").await?;
-        let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book:2").unwrap();
-
-        let write = StudentWritesBook {
-            time_written: Duration::from_secs(343),
-            ..Default::default()
-        };
-
-        let relation_res = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
-            .content(write.clone())
-            .return_(Return::After)
-            .return_one(db.clone())
-            .await?;
-
-        let relation_res = remove_field_from_json_string(
-            serde_json::to_string(&relation_res).unwrap().as_str(),
+        let relate_more = remove_field_from_json_string(
+            serde_json::to_string(&relate_more).unwrap().as_str(),
             "id",
         );
-        insta::assert_display_snapshot!(serde_json::to_string(&relation_res).unwrap());
 
-        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .return_many(db.clone())
-            .await?;
-
-        let xxx = relate(
-            Student::with(select(All).from(Student::get_table_name()))
-                .writes__(Empty)
-                .book(
-                    select(All)
-                        .from(Book::get_table_name())
-                        .where_(Book::schema().title.like("Oyelowo")),
-                ),
-        )
-        .content(write)
-        .return_many(db.clone())
-        .await?;
-
-        assert!(xxx.len().gt(&0usize));
-        // insta::assert_debug_snapshot!(x.get_bindings());
+        insta::assert_display_snapshot!(relate_more);
         Ok(())
     }
 
