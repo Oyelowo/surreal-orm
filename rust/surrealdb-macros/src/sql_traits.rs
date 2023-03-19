@@ -20,13 +20,15 @@ where
 {
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
+        let query = db.query(query);
+
+        // Binding should only happen if raw
+        #[cfg(not(feature = "raw"))]
+        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
+            acc.bind((val.get_param(), val.get_value()))
+        });
+
+        let mut response = query.await?;
 
         // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
         // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
@@ -43,14 +45,15 @@ where
 
     async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
         let query = self.build();
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
+        let query = db.query(query);
 
+        // Binding should only happen if raw
+        #[cfg(not(feature = "raw"))]
+        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
+            acc.bind((val.get_param(), val.get_value()))
+        });
+
+        let mut response = query.await?;
         // This does the reverse of get_one
         // If it errors, try to check if only single entry has been inputed, hence, suurealdb
         // trying to return Option<T>, then pick the return the only item as Vec<T>.

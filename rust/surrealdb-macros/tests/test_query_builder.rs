@@ -400,13 +400,26 @@ mod tests {
             .return_(Return::Before)
             .parallel();
 
-        if cfg!(feature = "raw") {
-            insta::assert_display_snapshot!(x);
-            insta::assert_debug_snapshot!(x.get_bindings());
-        } else {
-            insta::assert_display_snapshot!(x);
-            insta::assert_debug_snapshot!(x.get_bindings());
-        }
+        #[cfg(feature = "raw")]
+        insta::assert_display_snapshot!(x);
+
+        #[cfg(feature = "raw")]
+        insta::assert_debug_snapshot!(x.get_bindings());
+
+        #[cfg(feature = "mock")]
+        insta::assert_display_snapshot!(x);
+
+        #[cfg(feature = "mock")]
+        insta::assert_debug_snapshot!(x.get_bindings());
+        // if cfg!(feature = "raw") {
+        //     insta::assert_display_snapshot!(x);
+        //     insta::assert_debug_snapshot!(x.get_bindings());
+        // } else {
+        //     if cfg!(feature = "mock") {
+        //         insta::assert_display_snapshot!(x);
+        //         insta::assert_debug_snapshot!(x.get_bindings());
+        //     }
+        // }
 
         let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
             .content(write.clone())
