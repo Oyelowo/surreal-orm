@@ -78,7 +78,7 @@ where
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        self.content_param = Some(binding.get_param().to_owned());
+        self.content_param = Some(binding.get_param_dollarised().to_owned());
         self.bindings.push(binding);
         self
     }
@@ -194,7 +194,7 @@ where
         }
 
         if let Some(param) = &self.content_param {
-            query += &format!("CONTENT ${} ", param);
+            query += &format!("CONTENT {} ", param);
         }
 
         if !&self.set.is_empty() {
