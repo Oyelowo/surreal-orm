@@ -38,7 +38,7 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
 pub struct Student {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<SurrealId>,
 
@@ -69,13 +69,12 @@ pub struct Student {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<SurrealId>,
 
-    #[serde(rename = "in", skip_serializing)]
+    #[serde(rename = "in")]
     in_: LinkOne<In>,
-    #[serde(skip_serializing)]
     out: LinkOne<Out>,
     time_written: Duration,
 }
@@ -86,7 +85,7 @@ type StudentWritesBook = Writes<Student, Book>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     id: Option<SurrealId>,
     title: String,
