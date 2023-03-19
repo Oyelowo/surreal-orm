@@ -12,6 +12,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
+use _core::time::Duration;
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
@@ -76,7 +77,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     in_: LinkOne<In>,
     #[serde(skip_serializing)]
     out: LinkOne<Out>,
-    time_written: String,
+    time_written: Duration,
 }
 
 type StudentWritesBook = Writes<Student, Book>;
@@ -389,7 +390,7 @@ mod tests {
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
@@ -409,7 +410,7 @@ mod tests {
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
@@ -457,7 +458,7 @@ mod tests {
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
@@ -470,25 +471,23 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(not(feature = "mock"))]
     async fn relate_query() -> surrealdb::Result<()> {
+        use surrealdb::sql::Datetime;
+
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
         let student_id = SurrealId::try_from("student:1").unwrap();
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
-        let x = relate(Student::with(&book_id).writes__(Empty).book(&book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .parallel();
-
         let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write.clone())
-            .return_(Return::Before)
+            .content(write)
+            // .return_(Return::After)
             .return_one(db.clone())
             .await?;
 
@@ -518,7 +517,7 @@ mod tests {
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
