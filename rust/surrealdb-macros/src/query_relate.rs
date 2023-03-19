@@ -30,9 +30,17 @@ where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     let errors = connection.get_errors();
-    let mut builder = RelateStatement::<T>::new();
-    // let connection: Field = connection.into();
-    builder.relate(connection)
+    RelateStatement {
+        relation: connection.to_string(),
+        content_param: None,
+        set: vec![],
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        __return_model_type: PhantomData,
+        bindings: connection.get_bindings(),
+        errors,
+    }
 }
 
 pub struct RelateStatement<T>
@@ -47,34 +55,13 @@ where
     parallel: bool,
     bindings: BindingsList,
     errors: ErrorList,
-    __return_type: PhantomData<T>,
+    __return_model_type: PhantomData<T>,
 }
 
 impl<T> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
-    pub fn new() -> Self {
-        RelateStatement {
-            relation: "".into(),
-            content_param: None,
-            set: vec![],
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            __return_type: PhantomData,
-            bindings: vec![],
-            errors: vec![],
-        }
-    }
-
-    pub fn relate(mut self, connection: impl Parametric + Display + Erroneous) -> Self {
-        self.relation = connection.to_string();
-        self.errors.extend(connection.get_errors());
-        self.bindings.extend(connection.get_bindings());
-        self
-    }
-
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
