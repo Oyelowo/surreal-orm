@@ -156,7 +156,7 @@ impl From<RelateAttribute> for ::proc_macro2::TokenStream {
         // ->action->NodeObject
         // <-action<-NodeObject
         // e.g ->manages->Project
-        ::quote::quote!(#edge_direction #edge_name #node_name)
+        ::quote::quote!(#edge_direction #edge_name #edge_direction #node_name)
     }
 }
 
