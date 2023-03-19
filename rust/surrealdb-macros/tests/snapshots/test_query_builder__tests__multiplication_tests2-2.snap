@@ -3,47 +3,51 @@ source: surrealdb-macros/tests/test_query_builder.rs
 expression: x.get_bindings()
 ---
 [
-    Binding(
-        (
-            "_param_00000000",
-            Number(
-                Int(
-                    18,
+    Binding {
+        param: "_param_00000000",
+        value: Number(
+            Int(
+                18,
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "18",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Number(
+            Int(
+                150,
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "150",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Number(
+            Int(
+                3422,
+            ),
+        ),
+        original_inline_name: "_param_00000000",
+        raw_string: "3422",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Thing(
+            Thing {
+                tb: "book",
+                id: String(
+                    "blaze",
                 ),
-            ),
+            },
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
-            Number(
-                Int(
-                    150,
-                ),
-            ),
-        ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
-            Number(
-                Int(
-                    3422,
-                ),
-            ),
-        ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
-            Thing(
-                Thing {
-                    tb: "book",
-                    id: String(
-                        "blaze",
-                    ),
-                },
-            ),
-        ),
-    ),
+        original_inline_name: "_param_00000000",
+        raw_string: "book:blaze",
+        description: None,
+    },
 ]

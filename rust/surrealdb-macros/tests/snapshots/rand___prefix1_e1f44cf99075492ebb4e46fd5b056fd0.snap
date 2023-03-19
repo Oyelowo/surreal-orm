@@ -1,6 +1,5 @@
 ---
 source: surrealdb-macros/tests/rand.rs
-assertion_line: 24
 expression: "3"
 ---
 3
