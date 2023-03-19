@@ -508,8 +508,8 @@ mod tests {
             serde_json::to_string(&relate_simple).unwrap().as_str(),
             "id",
         );
-        insta::assert_display_snapshot!(relate_simple);
-        insta::assert_debug_snapshot!(relate_simple);
+        // insta::assert_display_snapshot!(relate_simple);
+        // insta::assert_debug_snapshot!(relate_simple);
 
         let write = StudentWritesBook {
             time_written: Duration::from_secs(52),

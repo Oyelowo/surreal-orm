@@ -223,7 +223,7 @@ impl ToTokens for FieldsGetterOpts {
                         schema_instance.#___________errors = errors.into();
                         
                         
-                        let connection = format!("{}{}{}", store, #table_name_str, clause);
+                        let connection = format!("{}{}", store, clause.format_with_model(#table_name_str));
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
