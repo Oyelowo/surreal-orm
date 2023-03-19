@@ -621,6 +621,7 @@ mod tests {
             "id",
         );
 
+        // TODO: This returns empty array. Figure out if this is the expected behaviour
         insta::assert_display_snapshot!(relate_more);
         Ok(())
     }
