@@ -1,6 +1,6 @@
 ---
 source: surrealdb-macros/tests/test_query_builder.rs
-expression: x.get_bindings()
+expression: raw.get_bindings()
 ---
 [
     Binding {
@@ -32,23 +32,33 @@ expression: x.get_bindings()
         description: None,
     },
     Binding {
-        param: "{ timeWritten: ⟨12⟩:0 }",
+        param: "{ in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } }",
         value: Object(
             Object(
                 {
-                    "timeWritten": Thing(
-                        Thing {
-                            tb: "12",
-                            id: Number(
-                                0,
-                            ),
-                        },
+                    "in": Null,
+                    "out": Null,
+                    "timeWritten": Object(
+                        Object(
+                            {
+                                "nanos": Number(
+                                    Int(
+                                        0,
+                                    ),
+                                ),
+                                "secs": Number(
+                                    Int(
+                                        343,
+                                    ),
+                                ),
+                            },
+                        ),
                     ),
                 },
             ),
         ),
-        original_inline_name: "{ timeWritten: ⟨12⟩:0 }",
-        raw_string: "{ timeWritten: ⟨12⟩:0 }",
+        original_inline_name: "{ in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } }",
+        raw_string: "{ in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } }",
         description: None,
     },
 ]

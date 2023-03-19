@@ -234,7 +234,7 @@ mod tests {
         let table = Table::new("students");
         let select_statement = select(All).from(table);
         let query_clause = Clause::Query(select_statement);
-        assert_eq!(format!("{}", query_clause), "(SELECT * FROM students;)");
+        assert_eq!(format!("{}", query_clause), "(SELECT * FROM students)");
 
         // test all clause
         let all_clause = Clause::All;

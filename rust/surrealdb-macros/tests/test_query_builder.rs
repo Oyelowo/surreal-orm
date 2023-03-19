@@ -474,7 +474,7 @@ mod tests {
         let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(343),
             ..Default::default()
         };
 
