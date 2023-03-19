@@ -68,9 +68,9 @@ where
         }
     }
 
-    pub fn relate(mut self, connection: impl Parametric + Display) -> Self {
+    pub fn relate(mut self, connection: impl Parametric + Display + Erroneous) -> Self {
         self.relation = connection.to_string();
-        // self.errors.extend(connection.get_errors());
+        self.errors.extend(connection.get_errors());
         self.bindings.extend(connection.get_bindings());
         self
     }

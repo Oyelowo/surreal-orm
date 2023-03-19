@@ -140,7 +140,7 @@ pub struct Empty;
 
 impl Conditional for Empty {
     fn get_condition_query_string(&self) -> String {
-        "".into()
+        "".to_string()
     }
 }
 
@@ -152,7 +152,7 @@ impl Erroneous for Empty {
 
 impl std::fmt::Display for Empty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(""))
+        write!(f, "")
     }
 }
 
