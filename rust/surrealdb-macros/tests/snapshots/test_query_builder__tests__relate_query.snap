@@ -1,5 +1,5 @@
 ---
 source: surrealdb-macros/tests/test_query_builder.rs
-expression: relate_simple
+expression: relate_more.to_string()
 ---
-{"timeWritten":{"secs":343,"nanos":0},"in":"student:1","out":"book:2"}
+"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_43bccd24) CONTENT $_param_b01fd125 ;"

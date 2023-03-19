@@ -485,6 +485,52 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(feature = "mock")]
+    async fn relate_query_building_for_ids() {
+        use surrealdb::sql::Datetime;
+
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        let relate_simple =
+            relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
+
+        insta::assert_display_snapshot!(relate_simple);
+        insta::assert_debug_snapshot!(relate_simple.get_bindings());
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "mock")]
+    async fn relate_query_building_for_subqueries() {
+        use surrealdb::sql::Datetime;
+
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(52),
+            ..Default::default()
+        };
+        let relation = relate(
+            Student::with(select(All).from(Student::get_table_name()))
+                .writes__(Empty)
+                .book(
+                    select(All)
+                        .from(Book::get_table_name())
+                        .where_(Book::schema().title.like("Oyelowo")),
+                ),
+        )
+        .content(write);
+        insta::assert_debug_snapshot!(relation.to_string());
+        insta::assert_debug_snapshot!(relation.get_bindings());
+    }
+
+    #[tokio::test]
     #[cfg(not(feature = "mock"))]
     async fn relate_query() -> surrealdb::Result<()> {
         use surrealdb::sql::Datetime;
@@ -524,13 +570,14 @@ mod tests {
                         .where_(Book::schema().title.like("Oyelowo")),
                 ),
         )
-        .content(write)
-        .return_many(db.clone())
-        .await?;
-        let relate_more = remove_field_from_json_string(
-            serde_json::to_string(&relate_simple).unwrap().as_str(),
-            "id",
-        );
+        .content(write);
+        insta::assert_debug_snapshot!(relate_more.to_string());
+
+        let relate_more = relate_more.return_many(db.clone()).await?;
+        // let relate_more = remove_field_from_json_string(
+        //     serde_json::to_string(&relate_simple).unwrap().as_str(),
+        //     "id",
+        // );
 
         insta::assert_debug_snapshot!(relate_more);
         Ok(())

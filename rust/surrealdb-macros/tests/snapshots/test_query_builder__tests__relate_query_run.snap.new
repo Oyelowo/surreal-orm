@@ -1,6 +1,0 @@
----
-source: surrealdb-macros/tests/test_query_builder.rs
-assertion_line: 561
-expression: "serde_json::to_string(&relation_res).unwrap()"
----
-"{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"in\":\"lowo:1\",\"out\":\"lowo:2\"}"
