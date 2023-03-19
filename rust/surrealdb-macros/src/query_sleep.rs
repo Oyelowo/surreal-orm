@@ -12,7 +12,7 @@ use surrealdb::sql;
 use crate::{
     binding::BindingsList,
     sql::{Buildable, Duration, Queryable, Runnables},
-    Parametric,
+    Erroneous, Parametric,
 };
 
 pub fn sleep(duration: impl Into<Duration>) -> SleepStatement {
@@ -35,6 +35,7 @@ impl Buildable for SleepStatement {
 }
 
 impl Queryable for SleepStatement {}
+impl Erroneous for SleepStatement {}
 
 impl Parametric for SleepStatement {
     fn get_bindings(&self) -> BindingsList {
@@ -51,6 +52,7 @@ impl Display for SleepStatement {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

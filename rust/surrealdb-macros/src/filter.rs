@@ -45,6 +45,12 @@ pub struct Filter {
     bindings: BindingsList,
 }
 
+impl From<Empty> for Filter {
+    fn from(value: Empty) -> Self {
+        Filter::new(Empty)
+    }
+}
+
 pub trait Conditional: Parametric + std::fmt::Display + Erroneous {
     fn get_condition_query_string(&self) -> String;
 }
@@ -76,20 +82,20 @@ pub fn cond(filterable: impl Conditional) -> Filter {
     Filter::new(filterable)
 }
 
-/// Creates an empty filter.
-///
-/// # Example
-///
-/// ```
-/// use crate::query::filter::Filter;
-///
-/// let empty_filter = Filter::empty();
-///
-/// assert_eq!(empty_filter.to_string(), "");
-///
-pub fn empty() -> Filter {
-    Filter::new(Empty)
-}
+// /// Creates an empty filter.
+// ///
+// /// # Example
+// ///
+// /// ```
+// /// use crate::query::filter::Filter;
+// ///
+// /// let empty_filter = Filter::empty();
+// ///
+// /// assert_eq!(empty_filter.to_string(), "");
+// ///
+// pub fn empty() -> Empty {
+//     Empty
+// }
 
 impl Conditional for Filter {
     fn get_condition_query_string(&self) -> String {
@@ -249,7 +255,7 @@ impl From<Option<Self>> for Filter {
     fn from(value: Option<Filter>) -> Self {
         match value {
             Some(v) => v,
-            None => empty(),
+            None => Empty.into(),
         }
     }
 }

@@ -3,64 +3,70 @@ source: surrealdb-macros/tests/test_query_builder.rs
 expression: query1.get_bindings()
 ---
 [
-    Binding(
-        (
-            "_param_00000000",
+    Binding {
+        param: "_param_00000000",
+        value: Table(
             Table(
-                Table(
-                    "book",
-                ),
+                "book",
             ),
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
+        original_inline_name: "_param_00000000",
+        raw_string: "book",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
             Strand(
-                Strand(
-                    "lowo",
-                ),
+                "lowo",
             ),
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
+        original_inline_name: "_param_00000000",
+        raw_string: "'lowo'",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Table(
             Table(
-                Table(
-                    "age",
-                ),
+                "age",
             ),
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
-            Number(
-                Int(
-                    600,
-                ),
+        original_inline_name: "_param_00000000",
+        raw_string: "age",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Number(
+            Int(
+                600,
             ),
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
+        original_inline_name: "_param_00000000",
+        raw_string: "600",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
             Strand(
-                Strand(
-                    "Oyelowo",
-                ),
+                "Oyelowo",
             ),
         ),
-    ),
-    Binding(
-        (
-            "_param_00000000",
+        original_inline_name: "_param_00000000",
+        raw_string: "'Oyelowo'",
+        description: None,
+    },
+    Binding {
+        param: "_param_00000000",
+        value: Strand(
             Strand(
-                Strand(
-                    "Oyedayo",
-                ),
+                "Oyedayo",
             ),
         ),
-    ),
+        original_inline_name: "_param_00000000",
+        raw_string: "'Oyedayo'",
+        description: None,
+    },
 ]

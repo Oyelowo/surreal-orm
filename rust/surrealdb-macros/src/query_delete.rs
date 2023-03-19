@@ -16,7 +16,7 @@ use crate::{
     query_update,
     sql::{Buildable, Queryable, Return, Runnable},
     statements::TargettablesForUpdate,
-    SurrealdbModel,
+    Erroneous, SurrealdbModel,
 };
 
 /*
@@ -66,6 +66,7 @@ where
 }
 
 impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Erroneous for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 impl<T> DeleteStatement<T>
 where

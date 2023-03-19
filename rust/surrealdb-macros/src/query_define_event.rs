@@ -18,6 +18,7 @@ use crate::{
     binding::{BindingsList, Parametric},
     filter::Filter,
     sql::{Buildable, Event, Queryable, Runnables, Table},
+    Erroneous,
 };
 
 // DEFINE EVENT statement
@@ -122,8 +123,10 @@ impl Parametric for DefineEventStatement {
 
 impl Runnables for DefineEventStatement {}
 impl Queryable for DefineEventStatement {}
+impl Erroneous for DefineEventStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

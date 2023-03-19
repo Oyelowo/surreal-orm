@@ -3,7 +3,8 @@ use std::fmt::{self, Display};
 use crate::{
     binding::{BindingsList, Parametric},
     filter::{Conditional, Filter},
-    sql::Buildable,
+    sql::{Buildable, Queryable},
+    Erroneous,
 };
 
 #[derive(Clone, Copy)]
@@ -32,6 +33,9 @@ struct ForData {
     condition: Option<Filter>,
     bindings: BindingsList,
 }
+
+impl Erroneous for For {}
+impl Queryable for For {}
 
 impl Parametric for For {
     fn get_bindings(&self) -> BindingsList {
@@ -149,6 +153,7 @@ impl<'a, const N: usize> From<&[For; N]> for PermisisonForables {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

@@ -121,7 +121,6 @@ slab = "0.4.7"
 typed-builder = "0.10.0"
 url = "2.3.1"
 uuid = "1.2.2"
-ulid = "1.0.0"
 validator = { version = "0.16.0", features = ["derive"] }
 
 # Observability
@@ -156,8 +155,6 @@ geo = { version = "0.23.1", features = ["use-serde"] }
 syn = "1.0"
 quote = "1.0"
 proc-macro2 = "1.0.47"
-# syn = { version = "1.0.85", features = ["full", "extra-traits", "visit-mut", "visit"] }
-Inflector = "0.11.4"
 darling = "0.14.2"
 convert_case = "0.5.0"
 proc-macro-crate = "1.2.1"

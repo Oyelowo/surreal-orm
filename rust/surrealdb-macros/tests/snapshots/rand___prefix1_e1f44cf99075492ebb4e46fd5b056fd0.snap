@@ -1,0 +1,5 @@
+---
+source: surrealdb-macros/tests/rand.rs
+expression: "3"
+---
+3

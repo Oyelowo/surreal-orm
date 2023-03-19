@@ -2,4 +2,4 @@
 source: surrealdb-macros/tests/test_query_builder.rs
 expression: relate_simple
 ---
-{"timeWritten":{"secs":343,"nanos":0},"in":"student:1","out":"book:2"}
+RELATE student:1->writes->book:2 CONTENT $_param_00000000 ;

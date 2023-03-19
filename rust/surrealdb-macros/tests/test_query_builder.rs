@@ -12,6 +12,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
+use _core::time::Duration;
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
@@ -72,11 +73,10 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[builder(default, setter(strip_option))]
     id: Option<SurrealId>,
 
-    #[serde(rename = "in", skip_serializing)]
+    #[serde(rename = "in")]
     in_: LinkOne<In>,
-    #[serde(skip_serializing)]
     out: LinkOne<Out>,
-    time_written: String,
+    time_written: Duration,
 }
 
 type StudentWritesBook = Writes<Student, Book>;
@@ -156,21 +156,58 @@ impl WhiteSpaceRemoval for String {}
 //     }};
 // }
 
+use serde_json::{Map, Value};
+
+// fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
+//     let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");
+//
+//     let mut map = match value {
+//         Value::Object(map) => map,
+//         _ => panic!("Expected a JSON object"),
+//     };
+//
+//     map.remove(field_name);
+//
+//     serde_json::to_string(&Value::Object(map)).expect("Failed to serialize JSON value")
+// }
+
+fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String {
+    let value: Value = serde_json::from_str(json_string).expect("Invalid JSON string");
+
+    let updated_value = match value {
+        Value::Object(mut map) => {
+            map.remove(field_name);
+            Value::Object(map)
+        }
+        Value::Array(mut vec) => {
+            for element in vec.iter_mut() {
+                if let Value::Object(ref mut map) = *element {
+                    map.remove(field_name);
+                }
+            }
+            Value::Array(vec)
+        }
+        _ => value,
+    };
+
+    serde_json::to_string(&updated_value).expect("Failed to serialize JSON value")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use _core::time::Duration;
     use surrealdb::sql;
     use surrealdb_macros::{
-        filter::empty,
         sql::{All, Empty, Parametric, Return, Runnable},
         statements::{order, relate, select},
         utils::cond,
-        Field, Operatable,
+        Erroneous, Field, Operatable,
     };
     use test_case::test_case;
 
     #[test]
+    #[cfg(feature = "mock")]
     fn multiplication_tests1() {
         let student::Student {
             id,
@@ -191,7 +228,6 @@ mod tests {
         let book::Book { content, .. } = Book::schema();
         let xx = Student::with(Empty).writes__(Empty).book(Empty);
         assert_eq!(xx.to_string(), "student->writes->book".to_string());
-        assert_eq!(xx.to_string(), "tudent->writes->book".to_string());
 
         let written_book_selection = st
             .bestFriend(Empty)
@@ -384,10 +420,56 @@ mod tests {
         // )
     }
 
-    #[tokio::test]
-    async fn relate_query() -> surrealdb::Result<()> {
-        let db = Surreal::new::<Mem>(()).await.unwrap();
-        db.use_ns("test").use_db("test").await?;
+    #[test]
+    fn should_not_contain_error_when_invalid_id_use_in_connection() {
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .parallel();
+
+        assert_eq!(x.get_errors().len(), 0);
+        let errors: Vec<String> = vec![];
+        assert_eq!(x.get_errors(), errors);
+    }
+
+    #[test]
+    fn should_contain_error_when_invalid_id_use_in_connection() {
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        // Book id used with student schema, while student_id used for book. This should generate
+        // two errors
+        let x = relate(Student::with(&book_id).writes__(Empty).book(&student_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .parallel();
+
+        assert_eq!(x.get_errors().len(), 2);
+        assert_eq!(
+            x.get_errors(),
+            vec![
+                "invalid id book:2. Id does not belong to table student",
+                "invalid id student:1. Id does not belong to table book"
+            ]
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "raw")]
+    fn should_display_actual_values_in_raw_format() {
         let student_id = SurrealId::try_from("student:1").unwrap();
         let book_id = SurrealId::try_from("book:2").unwrap();
 
@@ -396,20 +478,67 @@ mod tests {
             ..Default::default()
         };
 
-        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+        let raw = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+            .content(write.clone())
+            .return_(Return::Before)
+            .parallel();
+
+        insta::assert_display_snapshot!(raw);
+        insta::assert_debug_snapshot!(raw.get_bindings());
+    }
+
+    #[test]
+    #[cfg(feature = "mock")]
+    fn should_display_params_in_mock() {
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        let mock = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
             .content(write.clone())
             .parallel();
 
-        insta::assert_display_snapshot!(x);
-        insta::assert_debug_snapshot!(x.get_bindings());
+        insta::assert_display_snapshot!(mock);
+        insta::assert_debug_snapshot!(mock.get_bindings());
+    }
 
-        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .return_many(db.clone())
-            .await?;
+    #[tokio::test]
+    #[cfg(feature = "mock")]
+    async fn relate_query_building_for_ids() {
+        use surrealdb::sql::Datetime;
 
-        let xxx = relate(
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        let relate_simple =
+            relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
+
+        insta::assert_display_snapshot!(relate_simple);
+        insta::assert_debug_snapshot!(relate_simple.get_bindings());
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "mock")]
+    async fn relate_query_building_for_subqueries() {
+        use surrealdb::sql::Datetime;
+
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(52),
+            ..Default::default()
+        };
+        let relation = relate(
             Student::with(select(All).from(Student::get_table_name()))
                 .writes__(Empty)
                 .book(
@@ -418,60 +547,87 @@ mod tests {
                         .where_(Book::schema().title.like("Oyelowo")),
                 ),
         )
-        .content(write)
-        .return_many(db.clone())
-        .await?;
+        .content(write);
+        insta::assert_debug_snapshot!(relation.to_string());
+        insta::assert_debug_snapshot!(relation.get_bindings());
+    }
 
-        // insta::assert_display_snapshot!(x);
-        // insta::assert_debug_snapshot!(x.get_bindings());
+    #[tokio::test]
+    #[cfg(not(feature = "mock"))]
+    async fn relate_query() -> surrealdb::Result<()> {
+        use surrealdb::sql::Datetime;
+
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+        let student_id = SurrealId::try_from("student:1").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
+
+        let write = StudentWritesBook {
+            time_written: Duration::from_secs(343),
+            ..Default::default()
+        };
+
+        let relate_simple =
+            relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
+
+        // You can use return one method and it just returns the single object
+        let relate_simple_object = relate_simple.return_one(db.clone()).await?;
+        // Remove id bcos it is non-deterministic i.e changes on every run
+        let relate_simple_object = remove_field_from_json_string(
+            serde_json::to_string(&relate_simple_object)
+                .unwrap()
+                .as_str(),
+            "id",
+        );
+        insta::assert_display_snapshot!(relate_simple_object);
+
+        // You can also use return many and it just returns the single object as an array
+        let relate_simple_array = relate_simple.return_many(db.clone()).await?;
+        let relate_simple_object = remove_field_from_json_string(
+            serde_json::to_string(&relate_simple_object)
+                .unwrap()
+                .as_str(),
+            "id",
+        );
+        insta::assert_display_snapshot!(relate_simple_object);
+
         Ok(())
     }
 
     #[tokio::test]
-    async fn relate_query_run() -> surrealdb::Result<()> {
+    #[cfg(not(feature = "mock"))]
+    async fn relate_query_with_sub_query() -> surrealdb::Result<()> {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await?;
         let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book2").unwrap();
+        let book_id = SurrealId::try_from("book:2").unwrap();
 
         let write = StudentWritesBook {
-            time_written: "12:00".into(),
+            time_written: Duration::from_secs(52),
             ..Default::default()
         };
-
-        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
-            .content(write.clone())
-            .return_(Return::After)
-            .return_one(db.clone())
-            .await?;
-
-        insta::assert_display_snapshot!(serde_json::to_string(&x).unwrap());
-
-        let xx = relate(Student::with(student_id).writes__(Empty).book(book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .return_many(db.clone())
-            .await?;
-
-        let xxx = relate(
+        let relate_more = relate(
             Student::with(select(All).from(Student::get_table_name()))
                 .writes__(Empty)
                 .book(
-                    select(All)
-                        .from(Book::get_table_name())
-                        .where_(Book::schema().title.like("Oyelowo")),
+                    select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
                 ),
         )
         .content(write)
         .return_many(db.clone())
         .await?;
+        let relate_more = remove_field_from_json_string(
+            serde_json::to_string(&relate_more).unwrap().as_str(),
+            "id",
+        );
 
-        // insta::assert_display_snapshot!(x);
-        // insta::assert_debug_snapshot!(x.get_bindings());
+        // TODO: This returns empty array. Figure out if this is the expected behaviour
+        insta::assert_display_snapshot!(relate_more);
         Ok(())
     }
 
     #[test]
+    #[cfg(feature = "mock")]
     fn multiplication_tests2() {
         let x = Student::schema()
             .writes__(Empty)
@@ -485,10 +641,7 @@ mod tests {
         );
 
         let m = x.get_bindings();
-        assert_eq!(
-            serde_json::to_string(&m).unwrap(),
-            "[[\"_param_00000000\",\"book:blaze\"]]".to_string()
-        );
+        insta::assert_debug_snapshot!(m);
 
         let student = Student::schema();
         // Another case
@@ -533,10 +686,11 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "mock")]
     fn multiplication_tests3() {
         let x = Student::schema()
             .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
-            .book(empty())
+            .book(Empty)
             .content;
 
         assert_eq!(

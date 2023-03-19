@@ -13,7 +13,7 @@ use surrealdb::sql::{self, Operator};
 use crate::{
     binding::{Binding, BindingsList},
     sql::{Buildable, Duration, Queryable, Return, Runnable, Updateables},
-    Clause, Erroneous, Field, Parametric, SurrealdbEdge,
+    Clause, Erroneous, ErrorList, Field, Parametric, SurrealdbEdge,
 };
 
 // RELATE @from -> @table -> @with
@@ -30,9 +30,17 @@ where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     let errors = connection.get_errors();
-    let mut builder = RelateStatement::<T>::new();
-    // let connection: Field = connection.into();
-    builder.relate(connection)
+    RelateStatement {
+        relation: connection.to_string(),
+        content_param: None,
+        set: vec![],
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        __return_model_type: PhantomData,
+        bindings: connection.get_bindings(),
+        errors,
+    }
 }
 
 pub struct RelateStatement<T>
@@ -46,36 +54,18 @@ where
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
-    __return_type: PhantomData<T>,
+    errors: ErrorList,
+    __return_model_type: PhantomData<T>,
 }
 
 impl<T> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
-    pub fn new() -> Self {
-        RelateStatement {
-            relation: "".into(),
-            content_param: None,
-            set: vec![],
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            __return_type: PhantomData,
-            bindings: vec![],
-        }
-    }
-
-    pub fn relate(mut self, connection: impl Parametric + Display) -> Self {
-        self.relation = connection.to_string();
-        self.bindings.extend(connection.get_bindings());
-        self
-    }
-
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        self.content_param = Some(binding.get_param().to_owned());
+        self.content_param = Some(binding.get_param_dollarised().to_owned());
         self.bindings.push(binding);
         self
     }
@@ -152,6 +142,15 @@ where
 
 impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
+impl<T> Erroneous for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbEdge,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
+
 impl<T> std::fmt::Display for RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
@@ -182,7 +181,7 @@ where
         }
 
         if let Some(param) = &self.content_param {
-            query += &format!("CONTENT ${} ", param);
+            query += &format!("CONTENT {} ", param);
         }
 
         if !&self.set.is_empty() {
@@ -213,6 +212,7 @@ where
 impl<T> Runnable<T> for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
 
 #[test]
+#[cfg(feature = "mock")]
 fn test_query_builder() {
     // let query = RelateStatement::new()
     //     // .from("from")

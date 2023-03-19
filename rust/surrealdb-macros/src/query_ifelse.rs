@@ -15,6 +15,7 @@ use crate::{
     binding::{BindingsList, Parametric},
     filter::{Conditional, Filter},
     sql::{Buildable, Expression},
+    Erroneous,
 };
 
 impl Into<ExpressionContent> for Expression {
@@ -188,6 +189,7 @@ impl Parametric for End {
     }
 }
 
+impl Erroneous for End {}
 impl Buildable for End {
     fn build(&self) -> String {
         let mut output = String::new();
@@ -221,6 +223,7 @@ impl fmt::Display for End {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{
         filter::cond,

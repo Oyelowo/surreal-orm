@@ -14,6 +14,7 @@ use surrealdb::sql;
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{Buildable, Queryable},
+    Erroneous,
 };
 
 pub fn begin_transaction() -> QueryTransaction {
@@ -81,6 +82,9 @@ impl Parametric for TransactionCompletion {
     }
 }
 
+impl Queryable for TransactionCompletion {}
+impl Erroneous for TransactionCompletion {}
+
 impl Buildable for TransactionCompletion {
     fn build(&self) -> String {
         let mut output = String::new();
@@ -113,6 +117,7 @@ impl fmt::Display for TransactionCompletion {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{
         filter::cond,

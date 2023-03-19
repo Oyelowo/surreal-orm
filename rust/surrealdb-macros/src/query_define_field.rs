@@ -20,7 +20,7 @@ use crate::{
     param::Param,
     query_for::PermisisonForables,
     sql::{Buildable, Queryable, Table},
-    Field,
+    Erroneous, Field,
 };
 
 // DEFINE FIELD statement
@@ -226,6 +226,7 @@ pub struct DefineFieldStatement {
     permissions_for: Vec<String>,
     bindings: BindingsList,
 }
+
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     let field: Field = fieldable.into();
     DefineFieldStatement {
@@ -307,6 +308,7 @@ impl DefineFieldStatement {
 }
 
 impl Queryable for DefineFieldStatement {}
+impl Erroneous for DefineFieldStatement {}
 
 impl Parametric for DefineFieldStatement {
     fn get_bindings(&self) -> BindingsList {
@@ -358,6 +360,7 @@ impl Display for DefineFieldStatement {
 // ``
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

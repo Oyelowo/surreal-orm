@@ -12,6 +12,7 @@ use surrealdb::sql::{self, Ident};
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{Buildable, Expression, Queryable, Runnables},
+    Erroneous,
 };
 
 pub fn let_(parameter: impl Into<Parameter>) -> LetStatement {
@@ -86,8 +87,10 @@ impl Parametric for LetStatement {
 }
 
 impl Queryable for LetStatement {}
+impl Erroneous for LetStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

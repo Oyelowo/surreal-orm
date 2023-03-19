@@ -49,7 +49,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Field {
     field_name: sql::Idiom,
-    condition_query_string: String,
+    pub condition_query_string: String,
     bindings: BindingsList,
 }
 
@@ -107,7 +107,7 @@ impl Into<sql::Value> for &Field {
 
 impl Into<sql::Idiom> for Field {
     fn into(self) -> sql::Idiom {
-        self.field_name
+        self.field_name.into()
     }
 }
 
@@ -273,13 +273,15 @@ impl From<Field> for String {
 
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.condition_query_string))
+        f.write_fmt(format_args!(
+            "{}",
+            self.condition_query_string // self.condition_query_string.trim_start_matches("`")
+        ))
     }
 }
 
 impl Field {
     pub fn new(field_name: impl Into<Name>) -> Self {
-        // let field: sql::Value = sql::Value::Idiom(field_name.into());
         let field_name: Name = field_name.into();
         let field_name: sql::Idiom = field_name.into();
         let field_name_str = format!("{}", &field_name);
@@ -295,6 +297,11 @@ impl Field {
             // field_name: binding.get_param().to_string(),
             // bindings: vec![binding.into()].into(),
         }
+    }
+
+    pub fn set_condition_query_string(mut self, connection_string: String) -> Self {
+        self.condition_query_string = connection_string;
+        self
     }
     /// Append the specified string to the field name
     ///
@@ -455,10 +462,10 @@ impl Operatable for Field {
         let value: sql::Value = value.into();
         let binding = Binding::new(value);
         let condition = format!(
-            "{} {} ${}",
+            "{} {} {}",
             self.condition_query_string,
             operator,
-            &binding.get_param()
+            &binding.get_param_dollarised()
         );
         let updated_bindings = self.__update_bindings(binding);
 

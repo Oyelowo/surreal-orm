@@ -26,7 +26,7 @@ use crate::{
     binding::{Binding, BindingsList, Parametric},
     query_select::SelectStatement,
     sql::{Buildable, Queryable, Runnable, Updateables},
-    SurrealdbModel,
+    Erroneous, SurrealdbModel,
 };
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
@@ -47,6 +47,7 @@ where
 }
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 impl<T> Display for InsertStatement<T>
 where

@@ -14,6 +14,7 @@ use surrealdb::sql;
 use crate::{
     binding::{Binding, BindingsList, Parametric},
     sql::{Buildable, Name, Runnables, Scope, TokenTarget, TokenType},
+    Erroneous,
 };
 
 // DEFINE TOKEN statement
@@ -133,8 +134,10 @@ impl Parametric for DefineTokenStatement {
 }
 
 impl Runnables for DefineTokenStatement {}
+impl Erroneous for DefineTokenStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;

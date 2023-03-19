@@ -137,6 +137,9 @@ pub trait Schemaful {
     fn get_connection(&self) -> String;
 }
 
+pub type ErrorList = Vec<String>;
 pub trait Erroneous {
-    fn get_errors(&self) -> Vec<String>;
+    fn get_errors(&self) -> ErrorList {
+        vec![]
+    }
 }

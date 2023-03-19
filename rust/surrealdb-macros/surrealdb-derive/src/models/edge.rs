@@ -215,13 +215,12 @@ impl ToTokens for FieldsGetterOpts {
                             let errors = [&existing_errors[..], &clause_errors[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
-
+                        
                             let schema_edge_str_with_arrow = format!(
-                                "{}{}{}{}{}",
+                                "{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
-                                #table_name_str,
-                                clause,
+                                clause.format_with_model(#table_name_str),
                                 arrow_direction,
                             );
                             

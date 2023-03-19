@@ -2,7 +2,7 @@ use crate::{
     binding::BindingsList,
     filter::{Conditional, Filter},
     query_select::SelectStatement,
-    sql::{Parametric, SurrealId},
+    sql::{Buildable, Parametric, SurrealId},
     Erroneous, Field,
 };
 
@@ -59,6 +59,13 @@ impl Clause {
         }
         errors
     }
+
+    pub fn format_with_model(&self, table_name: &'static str) -> String {
+        match self {
+            Clause::Query(q) => self.to_string(),
+            _ => format!("{table_name}{self}"),
+        }
+    }
 }
 
 impl std::fmt::Display for Clause {
@@ -72,7 +79,9 @@ impl std::fmt::Display for Clause {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
                 format!(":{}", surreal_id.id)
             }
-            Clause::Query(select_statement) => format!("({select_statement})"),
+            Clause::Query(select_statement) => {
+                format!("({})", select_statement.to_string().trim_end_matches(";"))
+            }
             Clause::All => format!("[*]"),
             Clause::Last => format!("[$]"),
             Clause::Index(i) => format!("[{i}]"),
@@ -140,7 +149,7 @@ pub struct Empty;
 
 impl Conditional for Empty {
     fn get_condition_query_string(&self) -> String {
-        "".into()
+        "".to_string()
     }
 }
 
@@ -152,7 +161,7 @@ impl Erroneous for Empty {
 
 impl std::fmt::Display for Empty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(""))
+        write!(f, "")
     }
 }
 
@@ -197,6 +206,7 @@ impl std::fmt::Display for Index {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
     use crate::{filter::cond, query_select::select, Operatable, Table};
 

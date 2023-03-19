@@ -12,7 +12,7 @@ use surrealdb::sql;
 use crate::{
     binding::BindingsList,
     sql::{Buildable, Database, Namespace, Queryable, Runnable, Runnables},
-    Parametric,
+    Erroneous, Parametric,
 };
 
 pub fn use_() -> UseStatement {
@@ -65,6 +65,8 @@ impl Runnables for UseStatement {}
 
 impl Queryable for UseStatement {}
 
+impl Erroneous for UseStatement {}
+
 impl Parametric for UseStatement {
     fn get_bindings(&self) -> BindingsList {
         vec![]
@@ -72,6 +74,7 @@ impl Parametric for UseStatement {
 }
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use crate::sql::Database;

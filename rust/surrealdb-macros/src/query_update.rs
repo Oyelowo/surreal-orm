@@ -14,7 +14,7 @@ use crate::{
     binding::{Binding, BindingsList, Parametric},
     filter::Filter,
     sql::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables},
-    SurrealdbModel,
+    Erroneous, SurrealdbModel,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
@@ -57,6 +57,7 @@ where
 }
 
 impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Erroneous for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
 pub enum TargettablesForUpdate {
     Table(sql::Table),

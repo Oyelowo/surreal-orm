@@ -37,7 +37,7 @@ use std::collections::HashMap;
 use crate::{
     binding::{BindingsList, Parametric},
     sql::{Buildable, Index, Queryable, Runnables, Table, TableIndex},
-    Field,
+    Erroneous, Field,
 };
 
 // Struct to represent a SurrealDB index definition
@@ -209,10 +209,11 @@ impl Parametric for DefineIndexStatement {
 }
 
 impl Queryable for DefineIndexStatement {}
-
+impl Erroneous for DefineIndexStatement {}
 impl Runnables for DefineIndexStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

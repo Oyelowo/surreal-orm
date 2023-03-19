@@ -14,6 +14,7 @@ use surrealdb::sql;
 use crate::{
     binding::{Binding, BindingsList, Parametric},
     sql::{Buildable, Name, Runnables},
+    Erroneous,
 };
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
 // DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';
@@ -167,8 +168,10 @@ impl Parametric for DefineLoginStatement {
     }
 }
 impl Runnables for DefineLoginStatement {}
+impl Erroneous for DefineLoginStatement {}
 
 #[cfg(test)]
+#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;
