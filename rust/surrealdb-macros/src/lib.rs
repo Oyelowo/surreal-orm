@@ -20,6 +20,7 @@ pub mod links;
 pub mod model_id;
 mod operators_macros;
 mod param;
+mod query_chain;
 mod query_create;
 mod query_define_database;
 mod query_define_event;
@@ -70,6 +71,7 @@ pub mod utils {
     pub use super::query_for::for_;
 }
 pub mod statements {
+    pub use super::query_chain::chain;
     pub use super::query_create::{create, CreateStatement};
     pub use super::query_define_database::{define_database, DefineDatabaseStatement};
     pub use super::query_define_event::{define_event, DefineEventStatement};
