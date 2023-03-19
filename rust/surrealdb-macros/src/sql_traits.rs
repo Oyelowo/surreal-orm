@@ -33,16 +33,14 @@ where
         // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
         // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
         // Ok<T>.
-        // let user: Option<User> = results.take(0)?;
-        let mut returned_val: Option<T> = response.take(0)?;
-        // let mut returned_val = match response.take::<Option<T>>(0) {
-        //     Ok(one) => vec![one.unwrap()],
-        //     Err(err) => response.take::<Vec<T>>(0)?,
-        // };
-        // println!("rerer {:#}", returned_val);
+        let mut returned_val = match response.take::<Option<T>>(0) {
+            Ok(one) => vec![one.unwrap()],
+            Err(err) => response.take::<Vec<T>>(0)?,
+        };
+
         // TODO:: Handle error if nothing is returned
-        // let only_or_last = returned_val.pop().unwrap();
-        Ok(returned_val.unwrap())
+        let only_or_last = returned_val.pop().unwrap();
+        Ok(only_or_last)
     }
 
     async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {

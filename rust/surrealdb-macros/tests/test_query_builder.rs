@@ -547,15 +547,15 @@ mod tests {
 
         let relate_simple = relate(Student::with(student_id).writes__(Empty).book(book_id))
             .content(write)
-            .return_one(db.clone())
+            .return_many(db.clone())
             .await?;
 
         let relate_simple = remove_field_from_json_string(
             serde_json::to_string(&relate_simple).unwrap().as_str(),
             "id",
         );
-        // insta::assert_display_snapshot!(relate_simple);
-        // insta::assert_debug_snapshot!(relate_simple);
+        insta::assert_display_snapshot!(relate_simple);
+        insta::assert_debug_snapshot!(relate_simple);
 
         let write = StudentWritesBook {
             time_written: Duration::from_secs(52),
@@ -570,10 +570,9 @@ mod tests {
                         .where_(Book::schema().title.like("Oyelowo")),
                 ),
         )
-        .content(write);
-        insta::assert_debug_snapshot!(relate_more.to_string());
-
-        let relate_more = relate_more.return_many(db.clone()).await?;
+        .content(write)
+        .return_many(db.clone())
+        .await?;
         // let relate_more = remove_field_from_json_string(
         //     serde_json::to_string(&relate_simple).unwrap().as_str(),
         //     "id",
