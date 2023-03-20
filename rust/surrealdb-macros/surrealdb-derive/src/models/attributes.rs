@@ -130,6 +130,12 @@ pub struct MyFieldReceiver {
     pub(crate) skip_serializing: bool,
 
     #[darling(default)]
+    pub(crate) type_: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) assert: ::std::option::Option<i32>,
+
+    #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]
@@ -157,6 +163,15 @@ pub struct FieldsGetterOpts {
 
     #[darling(default)]
     pub(crate) relax_table_name: ::std::option::Option<bool>,
+
+    #[darling(default)]
+    pub(crate) schemafull: ::std::option::Option<bool>,
+
+    #[darling(default)]
+    pub(crate) drop: ::std::option::Option<bool>,
+
+    #[darling(default)]
+    pub(crate) function: ::std::option::Option<String>,
 }
 
 #[derive(Default, Clone)]

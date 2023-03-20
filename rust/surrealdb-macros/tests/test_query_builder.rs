@@ -44,6 +44,7 @@ pub struct Student {
 
     first_name: String,
     last_name: String,
+    #[surrealdb(assert = "Ere")]
     age: u8,
 
     #[surrealdb(link_self = "Student")]
