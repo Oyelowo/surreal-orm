@@ -1,6 +1,6 @@
 ---
 source: surrealdb-orm-tests/tests/test_query_strings.rs
-assertion_line: 410
+assertion_line: 456
 expression: replace_params(&relation.to_string())
 ---
-"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_123456) CONTENT $_param_123456 ;"
+"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $$_param_00000001) CONTENT $$_param_00000002 ;"

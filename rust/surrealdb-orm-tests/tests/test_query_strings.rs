@@ -125,18 +125,62 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 }
 
 // fn replace_params(input: &str, suffix: u32) -> String {
-fn replace_params(input: &str) -> String {
-    let suffix = 123456;
-    let mut output = String::new();
-    let mut last_end = 0;
-    while let Some(start) = input[last_end..].find("$_param_") {
-        let end = start + 16;
-        output.push_str(&input[last_end..last_end + start]);
-        output.push_str(&format!("$_param_{}", suffix));
-        last_end += end;
+// fn replace_params(input: &str) -> String {
+//     let suffix = 123456;
+//     let mut output = String::new();
+//     let mut last_end = 0;
+//     while let Some(start) = input[last_end..].find("$_param_") {
+//         let end = start + 16;
+//         output.push_str(&input[last_end..last_end + start]);
+//         output.push_str(&format!("$_param_{}", suffix));
+//         last_end += end;
+//     }
+//     output.push_str(&input[last_end..]);
+//     output
+// }
+
+// fn replace_params(query: &str) -> String {
+//     let mut count = 0;
+//     let re = regex::Regex::new(r"\$_param_[[:xdigit:]]+").unwrap();
+//     re.replace_all(query, |caps: &regex::Captures<'_>| {
+//         count += 1;
+//         format!("$_param_{:08}", count)
+//     })
+//     .to_string()
+// }
+use regex::Regex;
+
+fn replace_params(query: &str) -> String {
+    let re = regex::Regex::new(r"_param_[[:xdigit:]]{8}").unwrap();
+    let mut count = 0;
+    let new_str = re.replace_all(query, |captures: &regex::Captures<'_>| {
+        count += 1;
+        format!("$_param_{:08x}", count)
+    });
+
+    new_str.to_string()
+}
+
+fn replace_bindings(input: &str) -> String {
+    let mut bindings: Vec<Value> = serde_json::from_str(input).unwrap();
+    for binding in bindings.iter_mut() {
+        if let Some(value) = binding.get_mut("value") {
+            if let Some(obj) = value.as_object_mut() {
+                for (_, v) in obj.iter_mut() {
+                    if let Some(inner_obj) = v.as_object_mut() {
+                        for (_, inner_v) in inner_obj.iter_mut() {
+                            if let Some(s) = inner_v.as_str() {
+                                *inner_v = Value::String(replace_params(s));
+                            }
+                        }
+                    }
+                }
+            } else if let Some(s) = value.as_str() {
+                *value = Value::String(replace_params(s));
+            }
+        }
     }
-    output.push_str(&input[last_end..]);
-    output
+    serde_json::to_string(&bindings).unwrap()
 }
 
 #[cfg(test)]
@@ -276,8 +320,8 @@ mod tests {
 
         // let xx: Vec<Book> = query1.return_many(db.clone()).await.unwrap();
 
-        insta::assert_debug_snapshot!(query1.to_string());
-        insta::assert_debug_snapshot!(query1.get_bindings());
+        insta::assert_display_snapshot!(replace_params(&query1.to_string()));
+        insta::assert_debug_snapshot!(replace_params(&format!("{:?}", query1.get_bindings())));
 
         let ref student_table = Student::get_table_name();
         let ref book_table = Book::get_table_name();
@@ -354,7 +398,7 @@ mod tests {
         // let result = sql!(SELECT name WHERE age > 5);
         // let result = sql!(SELECT name WHERE age > 5);
 
-        insta::assert_display_snapshot!(replace_params(query));
+        insta::assert_display_snapshot!(replace_params(&query.to_string()));
         insta::assert_debug_snapshot!(replace_params(&format!("{:?}", query.get_bindings())));
         // assert_eq!(
         //     query.to_string().remove_extra_whitespace(),
@@ -381,7 +425,7 @@ mod tests {
         let relate_simple =
             relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
-        insta::assert_display_snapshot!(replace_params(relate_simple));
+        insta::assert_display_snapshot!(replace_params(&relate_simple.to_string()));
         insta::assert_debug_snapshot!(replace_params(&format!(
             "{:?}",
             relate_simple.get_bindings()
@@ -437,7 +481,7 @@ mod tests {
             .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
             .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
 
-        insta::assert_display_snapshot!(replace_params(x));
+        insta::assert_display_snapshot!(replace_params(&x.to_string()));
         insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
         // assert_eq!(
         //     x.to_string(),
