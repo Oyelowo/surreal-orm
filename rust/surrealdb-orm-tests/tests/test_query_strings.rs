@@ -139,27 +139,27 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 //     output
 // }
 
-// fn replace_params(query: &str) -> String {
-//     let mut count = 0;
-//     let re = regex::Regex::new(r"\$_param_[[:xdigit:]]+").unwrap();
-//     re.replace_all(query, |caps: &regex::Captures<'_>| {
-//         count += 1;
-//         format!("$_param_{:08}", count)
-//     })
-//     .to_string()
-// }
 use regex::Regex;
-
 fn replace_params(query: &str) -> String {
-    let re = regex::Regex::new(r"_param_[[:xdigit:]]{8}").unwrap();
     let mut count = 0;
-    let new_str = re.replace_all(query, |captures: &regex::Captures<'_>| {
+    let re = regex::Regex::new(r"_param_[[:xdigit:]]+").unwrap();
+    re.replace_all(query, |caps: &regex::Captures<'_>| {
         count += 1;
-        format!("$_param_{:08x}", count)
-    });
-
-    new_str.to_string()
+        format!("_param_{:08}", count)
+    })
+    .to_string()
 }
+
+// fn replace_params(query: &str) -> String {
+//     let re = regex::Regex::new(r"_param_[[:xdigit:]]{8}").unwrap();
+//     let mut count = 0;
+//     let new_str = re.replace_all(query, |captures: &regex::Captures<'_>| {
+//         count += 1;
+//         format!("$_param_{:08x}", count)
+//     });
+
+//     new_str.to_string()
+// }
 
 fn replace_bindings(input: &str) -> String {
     let mut bindings: Vec<Value> = serde_json::from_str(input).unwrap();
@@ -465,13 +465,12 @@ mod tests {
             .title;
 
         assert_eq!(
-            x.to_string(),
+            replace_params(&x.to_string()),
             // "->writes->book[WHERE id = book:blaze].title".to_string()
-            "->writes->book[WHERE id = $_param_00000000].title".to_string()
+            "->writes->book[WHERE id = $_param_00000001].title".to_string()
         );
 
-        let m = x.get_bindings();
-        insta::assert_debug_snapshot!(m);
+        insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
 
         let student = Student::schema();
         // Another case
@@ -523,9 +522,9 @@ mod tests {
             .content;
 
         assert_eq!(
-            x.to_string(),
+            replace_params(&x.to_string()),
             // "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
-            "->writes[WHERE timeWritten = $_param_00000000]->book.content".to_string()
+            "->writes[WHERE timeWritten = $_param_00000001]->book.content".to_string()
         )
     }
 }
