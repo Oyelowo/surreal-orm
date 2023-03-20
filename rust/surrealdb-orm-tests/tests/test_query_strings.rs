@@ -161,28 +161,6 @@ fn replace_params(query: &str) -> String {
 //     new_str.to_string()
 // }
 
-fn replace_bindings(input: &str) -> String {
-    let mut bindings: Vec<Value> = serde_json::from_str(input).unwrap();
-    for binding in bindings.iter_mut() {
-        if let Some(value) = binding.get_mut("value") {
-            if let Some(obj) = value.as_object_mut() {
-                for (_, v) in obj.iter_mut() {
-                    if let Some(inner_obj) = v.as_object_mut() {
-                        for (_, inner_v) in inner_obj.iter_mut() {
-                            if let Some(s) = inner_v.as_str() {
-                                *inner_v = Value::String(replace_params(s));
-                            }
-                        }
-                    }
-                }
-            } else if let Some(s) = value.as_str() {
-                *value = Value::String(replace_params(s));
-            }
-        }
-    }
-    serde_json::to_string(&bindings).unwrap()
-}
-
 #[cfg(test)]
 // #[cfg(feature = "mock")]
 mod tests {

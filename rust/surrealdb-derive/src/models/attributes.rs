@@ -133,16 +133,24 @@ pub struct MyFieldReceiver {
     pub(crate) type_: ::std::option::Option<String>,
 
     #[darling(default)]
-    pub(crate) assert: ::std::option::Option<i32>,
+    pub(crate) assert: ::std::option::Option<syn::Expr>,
+
+    #[darling(default)]
+    pub(crate) assert_fn: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) define_fn: ::std::option::Option<String>,
+
+    #[darling(default)]
+    default: ::std::option::Option<syn::Expr>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]
     with: ::darling::util::Ignored,
-
-    #[darling(default)]
-    default: ::darling::util::Ignored,
+    // #[darling(default)]
+    // default: ::darling::util::Ignored,
 }
 
 #[derive(Debug, FromDeriveInput)]
@@ -171,7 +179,10 @@ pub struct FieldsGetterOpts {
     pub(crate) drop: ::std::option::Option<bool>,
 
     #[darling(default)]
-    pub(crate) function: ::std::option::Option<String>,
+    pub(crate) permission_fn: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) define_fn: ::std::option::Option<String>,
 }
 
 #[derive(Default, Clone)]

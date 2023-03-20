@@ -32,7 +32,9 @@ use surrealdb_orm::{
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
-
+// fn gama() -> u32 {
+//     3 * 3
+// }
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "student")]
@@ -43,7 +45,7 @@ pub struct Student {
 
     first_name: String,
     last_name: String,
-    #[surrealdb(assert = 34)]
+    #[surrealdb(assert = "45 + 5" )]
     age: u8,
 
     #[surrealdb(link_self = "Student")]
