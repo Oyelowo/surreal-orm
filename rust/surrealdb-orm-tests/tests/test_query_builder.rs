@@ -34,76 +34,6 @@ use surrealdb_orm::{
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "student")]
-pub struct Student {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
-
-    first_name: String,
-    last_name: String,
-    #[surrealdb(assert = 34)]
-    age: u8,
-
-    #[surrealdb(link_self = "Student")]
-    best_friend: LinkSelf<Student>,
-
-    #[surrealdb(link_one = "Book")]
-    #[serde(rename = "unoBook")]
-    fav_book: LinkOne<Book>,
-
-    #[surrealdb(link_one = "Book", skip_serializing)]
-    course: LinkOne<Book>,
-
-    #[surrealdb(link_many = "Book")]
-    #[serde(rename = "semCoures")]
-    all_semester_courses: LinkMany<Book>,
-
-    #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
-    #[serde(skip_serializing)]
-    written_books: Relate<Book>,
-}
-
-#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "writes")]
-pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
-
-    #[serde(rename = "in")]
-    in_: LinkOne<In>,
-    out: LinkOne<Out>,
-    time_written: Duration,
-}
-
-type StudentWritesBook = Writes<Student, Book>;
-
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
-#[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "book")]
-pub struct Book {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
-    title: String,
-    content: String,
-}
-
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "blog")]
-pub struct Blog {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
-    title: String,
-    content: String,
-}
-
 trait WhiteSpaceRemoval {
     fn remove_extra_whitespace(&self) -> String
     where
@@ -199,6 +129,7 @@ mod tests {
     use super::*;
     use _core::time::Duration;
     use surrealdb::sql;
+    use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
     use surrealdb_orm::{
         sql::{All, Empty, Parametric, Return, Runnable},
         statements::{order, relate, select},
