@@ -1,16 +1,17 @@
 [workspace]
 
 members = [
-    "app-graphql-surrealdb",
-    "app-grpc-surrealdb",
-    "lib-scripts",
-    "lib-common",
-    "lib-my-macros",
-    "lib-my-macros/derive",
+    # "app-graphql-surrealdb",
+    # "app-grpc-surrealdb",
+    # "lib-scripts",
+    # "lib-common",
+    # "lib-my-macros",
+    # "lib-my-macros/derive",
     "surrealdb-orm",
     "surrealdb-query-builder",
-    "surrealdb-orm-tests",
     "surrealdb-derive",
+    "surrealdb-models",
+    "surrealdb-orm-tests",
 ]
 
 [workspace.package]
@@ -22,11 +23,12 @@ documentation = "https://codebreather.com/oyelowo"
 
 
 [workspace.dependencies]
-lib-common = { path = "./lib-common" }
-lib-my-macros = { path = "./lib-my-macros" }
+# lib-common = { path = "./lib-common" }
+# lib-my-macros = { path = "./lib-my-macros" }
 surrealdb-derive = { path = "./surrealdb-derive" }
 surrealdb-orm = { path = "./surrealdb-orm" }
 surrealdb-query-builder = { path = "./surrealdb-query-builder" }
+surrealdb-models = { path = "./surrealdb-models" }
 surrealdb-orm-tests = { path = "./surrealdb-orm-tests" }
 
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [

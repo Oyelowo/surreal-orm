@@ -1,0 +1,6 @@
+---
+source: surrealdb-orm-tests/tests/test_query_strings.rs
+assertion_line: 410
+expression: replace_params(&relation.to_string())
+---
+"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_123456) CONTENT $_param_123456 ;"

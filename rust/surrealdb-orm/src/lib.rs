@@ -5,6 +5,5 @@
  * Licensed under the MIT license
  */
 
-
-pub use surrealdb_query_builder::*;
 pub use surrealdb_derive::*;
+pub use surrealdb_query_builder::*;
