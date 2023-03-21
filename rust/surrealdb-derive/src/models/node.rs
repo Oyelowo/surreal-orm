@@ -105,6 +105,16 @@ impl ToTokens for FieldsGetterOpts {
         let sele = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
         let asa = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
         
+        let mut define_table_methods = vec![];
+        if let Some(drop) = drop  {
+            define_table_methods.push(quote!(.drop()))
+                                                
+        }
+        if let Some(select) = as_fn  {
+            let select = generate_as(select).unwrap();
+            define_table_methods.push(quote!(.as_select(#select)))
+            
+        }
         let get_table_def =||{
                      quote!(define_table(user_table)
                         .drop()
@@ -197,6 +207,7 @@ impl ToTokens for FieldsGetterOpts {
                 
                 fn define_table() -> #crate_name::statements::DefineTableStatement {
                      #crate_name::statements::define_table(Self::table_name())
+                        #( # define_table_methods) *
                         .drop()
                         // .as_select(
                         //     #sele

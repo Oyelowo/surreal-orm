@@ -46,7 +46,7 @@ fn gama() -> SelectStatement {
     drop,
     schemafull,
     permissions_fn = "gama",
-    as_fn = "gama()",
+    as_fn = "select(All)",
     define_fn = "define_student"
 )]
 pub struct Student {
@@ -85,7 +85,7 @@ pub struct Student {
 }
 #[test]
 fn xama() {
-    assert_eq!(Student::polo(), "re".to_string());
+    assert_eq!(Student::define_table().to_string(), "re".to_string());
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
