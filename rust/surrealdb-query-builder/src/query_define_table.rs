@@ -210,7 +210,7 @@ impl Buildable for DefineTableStatement {
         };
 
         if let Some(select_statement) = &self.as_select {
-            query = format!("{query} AS \n\t{select_statement}");
+            query = format!("{query} AS \n\t{}", select_statement.trim_end_matches(";"));
         }
 
         if let Some(true) = self.permissions_none {

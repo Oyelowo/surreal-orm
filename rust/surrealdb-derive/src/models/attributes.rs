@@ -10,7 +10,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use syn::{Ident, LitStr};
+use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -150,6 +150,56 @@ pub struct MyFieldReceiver {
     // default: ::darling::util::Ignored,
 }
 
+#[derive(Debug, Clone)]
+pub enum Permissions {
+    Full,
+    None,
+    FnName(LitStr),
+}
+
+impl FromMeta for Permissions {
+    fn from_value(value: &Lit) -> darling::Result<Self> {
+        match value {
+            Lit::Str(str_lit) => {
+                let value_str = str_lit.value();
+
+                if value_str.to_lowercase() == "none" {
+                    Ok(Self::None)
+                } else if value_str.to_lowercase() == "full" {
+                    Ok(Self::Full)
+                } else {
+                    Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
+                }
+                // Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
+            }
+            _ => Err(darling::Error::unexpected_lit_type(value)),
+        }
+    }
+}
+
+// #[derive(Debug, Clone)]
+// pub enum Permissions {
+//     Full,
+//     None,
+//     FnName(Path),
+// }
+//
+// impl FromMeta for Permissions {
+//     fn from_string(value: &str) -> darling::Result<Self> {
+//         match value.to_lowercase().as_str() {
+//             "none" => Ok(Self::None),
+//             "full" => Ok(Self::Full),
+//             _ => Err(darling::Error::unexpected_type(value)),
+//         }
+//     }
+//
+//     fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+//         match value {
+//             Lit::Str(str) => Ok(Self::FnName(syn::parse_str::<Path>(&str.value())?)),
+//             _ => Err(darling::Error::unexpected_lit_type(value)),
+//         }
+//     }
+// }
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct FieldsGetterOpts {
@@ -179,7 +229,7 @@ pub struct FieldsGetterOpts {
     pub(crate) as_select: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
-    pub(crate) permissions: ::std::option::Option<syn::LitStr>,
+    pub(crate) permissions: ::std::option::Option<Permissions>,
 
     #[darling(default)]
     pub(crate) define: ::std::option::Option<syn::LitStr>,

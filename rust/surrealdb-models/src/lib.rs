@@ -28,8 +28,9 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     sql::{All, SurrealId},
-    statements::{select, SelectStatement},
-    RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
+    statements::{select, For, ForCrudType, SelectStatement},
+    utils::for_,
+    Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
 };
 
 use test_case::test_case;
@@ -39,13 +40,26 @@ fn gama() -> SelectStatement {
     // All
     select(All)
 }
+fn full() -> u32 {
+    54
+}
+fn perm() -> Vec<For> {
+    use ForCrudType::*;
+    let name = Field::new("name");
+    let age = Field::new("age");
+    vec![
+        for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+        for_(Update).where_(age.less_than_or_equal(130)),
+    ]
+}
+
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
     table_name = "student",
     drop,
     schemafull,
-    permissions = "full",
+    permissions = "perm()",
     as_select = "select(All)",
     define = "define_student"
 )]

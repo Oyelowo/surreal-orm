@@ -120,14 +120,26 @@ impl ToTokens for FieldsGetterOpts {
         }
         
         if let Some(permissions) = permissions  {
-            let permissions = generate_as(permissions).unwrap();
-            if quote!(permissions).to_string().to_lowercase() == "none".to_string() {
-                define_table_methods.push(quote!(.permissions_none()));
-            }else if quote!(permissions).to_string().to_lowercase() == "full".to_string() {
-                define_table_methods.push(quote!(.permissions_full()));
-            } else {
-                define_table_methods.push(quote!(.permissions_for(#permissions)));
-            }
+            match permissions {
+                super::attributes::Permissions::Full => {
+                    define_table_methods.push(quote!(.permissions_full()));
+                },
+                super::attributes::Permissions::None => {
+                    define_table_methods.push(quote!(.permissions_none()));
+                },
+                super::attributes::Permissions::FnName(permissions) => {
+                let permissions = generate_as(permissions).unwrap();
+                    define_table_methods.push(quote!(.permissions_for(#permissions)));
+                },
+            };
+            // let permissions = generate_as(permissions).unwrap();
+            // if quote!(permissions).to_string().to_lowercase() == "none".to_string() {
+            //     define_table_methods.push(quote!(.permissions_none()));
+            // }else if quote!(permissions).to_string().to_lowercase() == "full".to_string() {
+            //     define_table_methods.push(quote!(.permissions_full()));
+            // } else {
+            //     define_table_methods.push(quote!(.permissions_for(#permissions)));
+            // }
         }
         
         let get_table_def =||{

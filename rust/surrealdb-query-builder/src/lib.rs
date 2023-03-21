@@ -85,7 +85,7 @@ pub mod statements {
     pub use super::query_define_table::{define_table, DefineTableStatement};
     pub use super::query_define_token::{define_token, DefineTokenStatement};
     pub use super::query_delete::{delete, DeleteStatement};
-    pub use super::query_for::for_;
+    pub use super::query_for::{for_, For, ForCrudType};
     pub use super::query_ifelse::{if_, IfStatement};
     pub use super::query_info::{info_for, InfoStatement};
     pub use super::query_insert::{insert, InsertStatement};
