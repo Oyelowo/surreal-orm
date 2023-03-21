@@ -7,8 +7,8 @@
 
 #![allow(dead_code)]
 
-use convert_case::{Casing, Case};
-use darling::{ToTokens, FromDeriveInput};
+use convert_case::{Case, Casing};
+use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
@@ -16,10 +16,11 @@ use std::str::FromStr;
 use syn::{self, parse_macro_input};
 
 use super::{
-    errors,
+    attributes::FieldsGetterOpts,
     casing::CaseString,
-    parser::{ SchemaFieldsProperties, SchemaPropertiesArgs}, attributes::FieldsGetterOpts,
-    variables::VariablesModelMacro
+    errors,
+    parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
+    variables::VariablesModelMacro,
 };
 
 impl ToTokens for FieldsGetterOpts {
@@ -34,52 +35,58 @@ impl ToTokens for FieldsGetterOpts {
         } = *self;
 
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
-    
+        let table_name_str =
+            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
+
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
-        
+
         let binding = struct_name_ident.to_string();
         let struct_name_ident_as_str = binding.as_str();
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        let  VariablesModelMacro { 
-            __________connect_to_graph_traversal_string, 
+        let VariablesModelMacro {
+            __________connect_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________bindings,
             ___________errors,
-            schema_instance, .. 
+            schema_instance,
+            ..
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs{  data, struct_level_casing, struct_name_ident, table_name_ident};
+        let schema_props_args = SchemaPropertiesArgs {
+            data,
+            struct_level_casing,
+            struct_name_ident,
+            table_name_ident,
+        };
 
         let SchemaFieldsProperties {
-                schema_struct_fields_types_kv,
-                schema_struct_fields_names_kv,
-                static_assertions,
-                mut imports_referenced_node_schema,
-                connection_with_field_appended,
-                record_link_fields_methods,
-                node_edge_metadata,
-                schema_struct_fields_names_kv_empty,
-                serialized_field_name_no_skip,
-                
-                ..
-        } = SchemaFieldsProperties::from_receiver_data(
-            schema_props_args,
-        );
-       let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream() ; 
-       // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
-       let imports_referenced_node_schema = imports_referenced_node_schema.into_iter().collect::<Vec<_>>();
+            schema_struct_fields_types_kv,
+            schema_struct_fields_names_kv,
+            static_assertions,
+            mut imports_referenced_node_schema,
+            connection_with_field_appended,
+            record_link_fields_methods,
+            node_edge_metadata,
+            schema_struct_fields_names_kv_empty,
+            serialized_field_name_no_skip,
+            ..
+        } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
+        // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
+        let imports_referenced_node_schema = imports_referenced_node_schema
+            .into_iter()
+            .collect::<Vec<_>>();
 
-       let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions() ; 
+        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions();
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        
+
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // #[surrealdb(table_name = "student", drop, schemafull, permission_fn, define_fn="any_fnc")]
@@ -256,7 +263,6 @@ impl ToTokens for FieldsGetterOpts {
 ));
     }
 }
-
 
 pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Construct a representation of Rust code as a syntax tree

@@ -5,11 +5,9 @@
  * Licensed under the MIT license
  */
 
-
 #![allow(dead_code)]
 
-
-use convert_case::{Casing, Case};
+use convert_case::{Case, Casing};
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -17,7 +15,13 @@ use std::str::FromStr;
 
 use syn::{self, parse_macro_input};
 
-use super::{parser::{SchemaFieldsProperties,  SchemaPropertiesArgs},  casing::CaseString,  attributes::{Rename, MyFieldReceiver}, variables::VariablesModelMacro, errors};
+use super::{
+    attributes::{MyFieldReceiver, Rename},
+    casing::CaseString,
+    errors,
+    parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
+    variables::VariablesModelMacro,
+};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
@@ -52,8 +56,9 @@ impl ToTokens for FieldsGetterOpts {
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        let table_name_str = errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
-        
+        let table_name_str =
+            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
+
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
@@ -63,9 +68,8 @@ impl ToTokens for FieldsGetterOpts {
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
-        
-        let  VariablesModelMacro { 
-            __________connect_to_graph_traversal_string, 
+        let VariablesModelMacro {
+            __________connect_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________model,
             schema_instance_edge_arrow_trimmed,
@@ -75,28 +79,33 @@ impl ToTokens for FieldsGetterOpts {
             ___________bindings,
             ____________update_many_bindings,
             bindings,
-            ___________errors,  
+            ___________errors,
         } = VariablesModelMacro::new();
-        let schema_props_args = SchemaPropertiesArgs {  data, struct_level_casing, struct_name_ident, table_name_ident };
+        let schema_props_args = SchemaPropertiesArgs {
+            data,
+            struct_level_casing,
+            struct_name_ident,
+            table_name_ident,
+        };
 
         let SchemaFieldsProperties {
-                schema_struct_fields_types_kv,
-                schema_struct_fields_names_kv,
-                serialized_field_names_normalised,
-                static_assertions,
-                mut imports_referenced_node_schema,
-                connection_with_field_appended,
-                record_link_fields_methods,
-                schema_struct_fields_names_kv_empty,
-                serialized_field_name_no_skip,
-                ..
-        } = SchemaFieldsProperties::from_receiver_data(
-            schema_props_args,
-        );
+            schema_struct_fields_types_kv,
+            schema_struct_fields_names_kv,
+            serialized_field_names_normalised,
+            static_assertions,
+            mut imports_referenced_node_schema,
+            connection_with_field_appended,
+            record_link_fields_methods,
+            schema_struct_fields_names_kv_empty,
+            serialized_field_name_no_skip,
+            ..
+        } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // if serialized_field_names_normalised.conta("")
-            if !serialized_field_names_normalised.contains(&"in".into()) || !serialized_field_names_normalised.contains(&"out".into()) {
-               panic!("Vector does not contain both 'in' and 'out'");
-            }
+        if !serialized_field_names_normalised.contains(&"in".into())
+            || !serialized_field_names_normalised.contains(&"out".into())
+        {
+            panic!("Vector does not contain both 'in' and 'out'");
+        }
         let imports_referenced_node_schema = Vec::from_iter(imports_referenced_node_schema);
         // imports_referenced_node_schema.dedup_by(|a,
         //                                         b| a.to_string() == b.to_string());
@@ -106,8 +115,7 @@ impl ToTokens for FieldsGetterOpts {
 
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
-        
-        
+
         tokens.extend(quote!( 
                         
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
