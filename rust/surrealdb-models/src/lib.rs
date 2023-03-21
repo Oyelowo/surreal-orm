@@ -63,7 +63,7 @@ fn define_student() -> DefineTableStatement {
     let country = Field::new("country");
     let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 
-    let statement = define_table(user_table)
+    let statement = define_table(Student::table_name())
         .drop()
         .as_select(
             select(All)
