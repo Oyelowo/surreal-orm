@@ -28,10 +28,12 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     sql::SurrealId,
-    RecordId, SurrealdbEdge, SurrealdbNode,
+    RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
 };
+
 use test_case::test_case;
 use typed_builder::TypedBuilder;
+
 // fn gama() -> u32 {
 //     3 * 3
 // }

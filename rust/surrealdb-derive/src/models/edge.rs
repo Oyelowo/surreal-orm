@@ -146,6 +146,14 @@ impl ToTokens for FieldsGetterOpts {
                     fn get_serializable_field_names() -> Vec<&'static str> {
                         return vec![#( #serialized_field_name_no_skip), *]
                     }
+                    
+                    fn define_table() -> #crate_name::statements::DefineTableStatement {
+                        todo!()
+                    }
+                    
+                    fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {
+                        todo!()
+                    }
                 }
                 
                 pub mod #module_name {

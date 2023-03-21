@@ -50,6 +50,8 @@ pub(crate) mod sql_traits;
 pub use binding::{BindingsList, Parametric};
 pub use field::Field;
 pub use field::Operatable;
+use query_define_field::DefineFieldStatement;
+use query_define_table::DefineTableStatement;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
@@ -111,6 +113,8 @@ pub use surrealdb::opt::RecordId;
 pub trait SurrealdbModel {
     fn table_name() -> surrealdb::sql::Table;
     fn get_serializable_field_names() -> Vec<&'static str>;
+    fn define_table() -> DefineTableStatement;
+    fn define_fields() -> Vec<DefineFieldStatement>;
 }
 
 pub trait SurrealdbNode: SurrealdbModel + Serialize {
