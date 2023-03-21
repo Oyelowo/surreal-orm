@@ -26,6 +26,12 @@ impl Table {
     }
 }
 
+impl From<sql::Table> for Table {
+    fn from(value: sql::Table) -> Self {
+        Self(value)
+    }
+}
+
 impl From<Table> for sql::Table {
     fn from(value: Table) -> Self {
         value.0

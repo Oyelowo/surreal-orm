@@ -31,6 +31,12 @@ impl ToTokens for FieldsGetterOpts {
             ref rename_all,
             ref table_name,
             ref relax_table_name,
+            ref drop,
+            ref schemafull,
+            ref as_fn,
+            ref permissions,
+            ref permissions_fn,
+            ref define_fn,
             ..
         } = *self;
 
@@ -86,6 +92,32 @@ impl ToTokens for FieldsGetterOpts {
 
         let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+
+
+
+        let sele = quote!(#as_fn);
+        
+        let get_table_def =||{
+                     quote!(define_table(user_table)
+                        .drop()
+                        .as_select(
+                            select(All)
+                                .from(fake_id2)
+                                .where_(country.is("INDONESIA"))
+                                .order_by(order(&age).numeric().desc())
+                                .limit(20)
+                                .start(5),
+                        )
+                        .schemafull()
+                        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+                        .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+                        .permissions_for(&[
+                            for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+                            for_(Update).where_(age.less_than_or_equal(130)),
+                        ]))
+        };
+
+
 
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -149,7 +181,16 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn define_table() -> #crate_name::statements::DefineTableStatement {
-                    todo!()
+                     // #crate_name::statements::define_table(#crate_name::Table::from("lowo"))
+                     #crate_name::statements::define_table(Self::table_name())
+                        .drop()
+                        .schemafull()
+                        // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+                        // .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+                        // .permissions_for(&[
+                        //     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+                        //     for_(Update).where_(age.less_than_or_equal(130)),
+                        // ])
                 }
                 
                 fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {

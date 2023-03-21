@@ -27,16 +27,18 @@ use surrealdb::{
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    sql::SurrealId,
+    sql::{All, SurrealId},
+    statements::select,
     RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
 };
 
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-// fn gama() -> u32 {
-//     3 * 3
-// }
+fn gama() -> u32 {
+    // All
+    3 * 3
+}
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
@@ -44,6 +46,7 @@ use typed_builder::TypedBuilder;
     drop,
     schemafull,
     permissions_fn = "get_student_perms",
+    as_fn = "select(All)",
     define_fn = "define_student"
 )]
 pub struct Student {

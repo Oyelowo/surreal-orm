@@ -179,6 +179,12 @@ pub struct FieldsGetterOpts {
     pub(crate) drop: ::std::option::Option<bool>,
 
     #[darling(default)]
+    pub(crate) as_fn: ::std::option::Option<syn::Expr>,
+
+    #[darling(default)]
+    pub(crate) permissions: ::std::option::Option<String>,
+
+    #[darling(default)]
     pub(crate) permissions_fn: ::std::option::Option<String>,
 
     #[darling(default)]
