@@ -136,15 +136,10 @@ pub struct MyFieldReceiver {
     pub(crate) type_: ::std::option::Option<String>,
 
     #[darling(default)]
-    pub(crate) assert: ::std::option::Option<syn::Expr>,
+    pub(crate) assert: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
-    // pub(crate) assert_fn: ::std::option::Option<syn::LitStr>,
-    pub(crate) assert_fn: ::std::option::Option<String>,
-
-    #[darling(default)]
-    // pub(crate) define_fn: ::std::option::Option<syn::LitStr>,
-    pub(crate) define_fn: ::std::option::Option<String>,
+    pub(crate) define: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -181,18 +176,13 @@ pub struct FieldsGetterOpts {
     pub(crate) drop: ::std::option::Option<bool>,
 
     #[darling(default)]
-    pub(crate) as_fn: ::std::option::Option<syn::LitStr>,
+    pub(crate) as_select: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
-    pub(crate) permissions: ::std::option::Option<String>,
+    pub(crate) permissions: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
-    // pub(crate) permissions_fn: ::std::option::Option<syn::LitStr>,
-    pub(crate) permissions_fn: ::std::option::Option<String>,
-
-    #[darling(default)]
-    pub(crate) define_fn: ::std::option::Option<String>,
-    // pub(crate) define_fn: ::std::option::Option<syn::LitStr>,
+    pub(crate) define: ::std::option::Option<syn::LitStr>,
 }
 
 #[derive(Default, Clone)]

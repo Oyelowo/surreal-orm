@@ -39,10 +39,9 @@ impl ToTokens for FieldsGetterOpts {
             ref relax_table_name,
             ref drop,
             ref schemafull,
-            ref as_fn,
+            ref as_select,
             ref permissions,
-            ref permissions_fn,
-            ref define_fn,
+            ref define,
             ..
         } = *self;
 
@@ -101,20 +100,36 @@ impl ToTokens for FieldsGetterOpts {
 
 
 
-        // let sele = quote!(#as_fn);
-        let sele = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
-        let asa = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
+        // let sele = quote!(#as_select);
+        let sele = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
+        let asa = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
         
         let mut define_table_methods = vec![];
         if let Some(drop) = drop  {
             define_table_methods.push(quote!(.drop()))
                                                 
         }
-        if let Some(select) = as_fn  {
+        
+        if let Some(select) = as_select  {
             let select = generate_as(select).unwrap();
             define_table_methods.push(quote!(.as_select(#select)))
-            
         }
+        
+        if let Some(schemafull) = schemafull  {
+            define_table_methods.push(quote!(.schemafull()))
+        }
+        
+        if let Some(permissions) = permissions  {
+            let permissions = generate_as(permissions).unwrap();
+            if quote!(permissions).to_string().to_lowercase() == "none".to_string() {
+                define_table_methods.push(quote!(.permissions_none()));
+            }else if quote!(permissions).to_string().to_lowercase() == "full".to_string() {
+                define_table_methods.push(quote!(.permissions_full()));
+            } else {
+                define_table_methods.push(quote!(.permissions_for(#permissions)));
+            }
+        }
+        
         let get_table_def =||{
                      quote!(define_table(user_table)
                         .drop()
@@ -139,7 +154,7 @@ impl ToTokens for FieldsGetterOpts {
 
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surrealdb(table_name = "student", drop, schemafull, permission_fn, define_fn="any_fnc")]
+        // #[surrealdb(table_name = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
         //     #[serde(skip_serializing_if = "Option::is_none")]
         //     #[builder(default, setter(strip_option))]

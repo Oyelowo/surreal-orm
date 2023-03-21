@@ -45,9 +45,9 @@ fn gama() -> SelectStatement {
     table_name = "student",
     drop,
     schemafull,
-    permissions_fn = "gama",
-    as_fn = "select(All)",
-    define_fn = "define_student"
+    permissions = "full",
+    as_select = "select(All)",
+    define = "define_student"
 )]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,8 +60,7 @@ pub struct Student {
         type = "string",
         default = "5",
         assert = "45 + 5",
-        assert_fn = "assert_age",
-        define_fn = "define_age"
+        define = "define_age"
     )]
     age: u8,
 

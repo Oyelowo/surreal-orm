@@ -128,6 +128,8 @@ impl Display for For {
     }
 }
 
+pub struct NONE;
+
 #[derive(Clone)]
 pub enum PermisisonForables {
     For(For),
