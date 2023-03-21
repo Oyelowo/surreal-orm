@@ -13,7 +13,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
 
-use syn::{self, parse_macro_input};
+use syn::{self, parse_macro_input, LitStr, Error};
 
 use super::{
     attributes::FieldsGetterOpts,
@@ -22,6 +22,12 @@ use super::{
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
     variables::VariablesModelMacro,
 };
+
+fn generate_as(lit: &LitStr) -> Result<TokenStream, Error> {
+    let str = lit.value();
+    let tokens: TokenStream = str.parse().map_err(|err| syn::Error::from(err))?;
+    Ok(quote! { (#tokens) })
+}
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -95,7 +101,9 @@ impl ToTokens for FieldsGetterOpts {
 
 
 
-        let sele = quote!(#as_fn);
+        // let sele = quote!(#as_fn);
+        let sele = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
+        let asa = if as_fn.is_some(){ generate_as(as_fn.as_ref().unwrap()).unwrap()} else {quote!(43)};
         
         let get_table_def =||{
                      quote!(define_table(user_table)
@@ -170,6 +178,13 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
             }
+        impl  #struct_name_ident {
+
+        fn polo ()->u32{
+            println!("lowo sabi {}", #sele);
+            #sele
+        }
+        }
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
                 fn table_name() -> ::surrealdb::sql::Table {
@@ -181,9 +196,11 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn define_table() -> #crate_name::statements::DefineTableStatement {
-                     // #crate_name::statements::define_table(#crate_name::Table::from("lowo"))
                      #crate_name::statements::define_table(Self::table_name())
                         .drop()
+                        // .as_select(
+                        //     #sele
+                        // )
                         .schemafull()
                         // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
                         // .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple

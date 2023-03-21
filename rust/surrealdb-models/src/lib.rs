@@ -37,7 +37,7 @@ use typed_builder::TypedBuilder;
 
 fn gama() -> u32 {
     // All
-    3 * 3
+    3 * 3 - 4
 }
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -45,8 +45,8 @@ fn gama() -> u32 {
     table_name = "student",
     drop,
     schemafull,
-    permissions_fn = "get_student_perms",
-    as_fn = "select(All)",
+    permissions_fn = "gama",
+    as_fn = "45 + 3",
     define_fn = "define_student"
 )]
 pub struct Student {
@@ -82,6 +82,10 @@ pub struct Student {
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     #[serde(skip_serializing)]
     written_books: Relate<Book>,
+}
+#[test]
+fn xama() {
+    assert_eq!(Student::polo(), 5);
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]

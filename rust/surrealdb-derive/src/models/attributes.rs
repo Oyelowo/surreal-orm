@@ -10,7 +10,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use syn::Ident;
+use syn::{Ident, LitStr};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -139,9 +139,11 @@ pub struct MyFieldReceiver {
     pub(crate) assert: ::std::option::Option<syn::Expr>,
 
     #[darling(default)]
+    // pub(crate) assert_fn: ::std::option::Option<syn::LitStr>,
     pub(crate) assert_fn: ::std::option::Option<String>,
 
     #[darling(default)]
+    // pub(crate) define_fn: ::std::option::Option<syn::LitStr>,
     pub(crate) define_fn: ::std::option::Option<String>,
 
     #[darling(default)]
@@ -179,16 +181,18 @@ pub struct FieldsGetterOpts {
     pub(crate) drop: ::std::option::Option<bool>,
 
     #[darling(default)]
-    pub(crate) as_fn: ::std::option::Option<syn::Expr>,
+    pub(crate) as_fn: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
     pub(crate) permissions: ::std::option::Option<String>,
 
     #[darling(default)]
+    // pub(crate) permissions_fn: ::std::option::Option<syn::LitStr>,
     pub(crate) permissions_fn: ::std::option::Option<String>,
 
     #[darling(default)]
     pub(crate) define_fn: ::std::option::Option<String>,
+    // pub(crate) define_fn: ::std::option::Option<syn::LitStr>,
 }
 
 #[derive(Default, Clone)]
