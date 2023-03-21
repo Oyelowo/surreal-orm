@@ -104,6 +104,16 @@ impl ToTokens for FieldsGetterOpts {
         let sele = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
         let asa = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
         
+        let xx = if let Some(table_def) = define{
+            
+            let def_token = generate_as(table_def).unwrap();
+            quote!(#def_token)
+            
+        }else{
+
+
+
+
         let mut define_table_methods = vec![];
         if let Some(drop) = drop  {
             define_table_methods.push(quote!(.drop()))
@@ -132,15 +142,11 @@ impl ToTokens for FieldsGetterOpts {
                     define_table_methods.push(quote!(.permissions_for(#permissions)));
                 },
             };
-            // let permissions = generate_as(permissions).unwrap();
-            // if quote!(permissions).to_string().to_lowercase() == "none".to_string() {
-            //     define_table_methods.push(quote!(.permissions_none()));
-            // }else if quote!(permissions).to_string().to_lowercase() == "full".to_string() {
-            //     define_table_methods.push(quote!(.permissions_full()));
-            // } else {
-            //     define_table_methods.push(quote!(.permissions_for(#permissions)));
-            // }
         }
+                        quote!(                     #crate_name::statements::define_table(Self::table_name())
+                        #( # define_table_methods) *
+)
+        };
         
         let get_table_def =||{
                      quote!(define_table(user_table)
@@ -233,19 +239,7 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn define_table() -> #crate_name::statements::DefineTableStatement {
-                     #crate_name::statements::define_table(Self::table_name())
-                        #( # define_table_methods) *
-                        .drop()
-                        // .as_select(
-                        //     #sele
-                        // )
-                        .schemafull()
-                        // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-                        // .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-                        // .permissions_for(&[
-                        //     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
-                        //     for_(Update).where_(age.less_than_or_equal(130)),
-                        // ])
+                    #xx
                 }
                 
                 fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {

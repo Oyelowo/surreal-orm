@@ -28,9 +28,11 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     sql::{All, SurrealId},
-    statements::{select, For, ForCrudType, SelectStatement},
+    statements::{
+        define_table, order, select, DefineTableStatement, For, ForCrudType, SelectStatement,
+    },
     utils::for_,
-    Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
+    Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
 };
 
 use test_case::test_case;
@@ -53,15 +55,43 @@ fn perm() -> Vec<For> {
     ]
 }
 
+fn define_student() -> DefineTableStatement {
+    use ForCrudType::*;
+    let name = Field::new("name");
+    let user_table = Table::from("user");
+    let age = Field::new("age");
+    let country = Field::new("country");
+    let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+
+    let statement = define_table(user_table)
+        .drop()
+        .as_select(
+            select(All)
+                .from(fake_id2)
+                .where_(country.is("INDONESIA"))
+                .order_by(order(&age).numeric().desc())
+                .limit(20)
+                .start(5),
+        )
+        .schemafull()
+        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+        .permissions_for(&[
+            for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ]);
+
+    statement
+}
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
     table_name = "student",
     drop,
     schemafull,
-    permissions = "perm()",
     as_select = "select(All)",
-    define = "define_student"
+    permissions = "perm()",
+    define = "define_student()"
 )]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]

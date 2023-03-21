@@ -169,6 +169,7 @@ impl FromMeta for Permissions {
                     Ok(Self::Full)
                 } else {
                     Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
+                    // Ok(Self::FnName(str_lit.to_owned()))
                 }
                 // Ok(Self::FnName(LitStr::new(&value_str, str_lit.span())))
             }
