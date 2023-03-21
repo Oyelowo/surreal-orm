@@ -10,6 +10,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
+use surrealdb_query_builder::statements::FieldType;
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
@@ -177,6 +178,7 @@ impl FromMeta for Permissions {
         }
     }
 }
+impl FromMeta for FieldType {}
 
 // #[derive(Debug, Clone)]
 // pub enum Permissions {

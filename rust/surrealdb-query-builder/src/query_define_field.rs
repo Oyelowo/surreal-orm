@@ -141,7 +141,8 @@ use crate::{
 // -- Define a field with specific geometric types
 // DEFINE FIELD area ON TABLE restaurant TYPE geometry (polygon, multipolygon, collection);
 
-pub enum Geometry {
+#[derive(Debug, Clone)]
+pub enum GeometryType {
     Feature,
     Point,
     Line,
@@ -151,21 +152,23 @@ pub enum Geometry {
     Multipolygon,
     Collection,
 }
-impl Display for Geometry {
+impl Display for GeometryType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let geom = match self {
-            Geometry::Feature => "feature",
-            Geometry::Point => "point",
-            Geometry::Line => "line",
-            Geometry::Polygon => "polygon",
-            Geometry::Multipoint => "multipoint",
-            Geometry::Multiline => "multiline",
-            Geometry::Multipolygon => "multipolygon",
-            Geometry::Collection => "collection",
+            GeometryType::Feature => "feature",
+            GeometryType::Point => "point",
+            GeometryType::Line => "line",
+            GeometryType::Polygon => "polygon",
+            GeometryType::Multipoint => "multipoint",
+            GeometryType::Multiline => "multiline",
+            GeometryType::Multipolygon => "multipolygon",
+            GeometryType::Collection => "collection",
         };
         write!(f, "{}", geom)
     }
 }
+
+#[derive(Debug, Clone)]
 pub enum FieldType {
     Any,
     Array,
@@ -179,7 +182,7 @@ pub enum FieldType {
     Object,
     String,
     Record(Table),
-    Geometry(Vec<Geometry>),
+    Geometry(Vec<GeometryType>),
 }
 
 impl From<FieldType> for String {

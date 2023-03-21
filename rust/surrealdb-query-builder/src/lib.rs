@@ -77,7 +77,9 @@ pub mod statements {
     pub use super::query_create::{create, CreateStatement};
     pub use super::query_define_database::{define_database, DefineDatabaseStatement};
     pub use super::query_define_event::{define_event, DefineEventStatement};
-    pub use super::query_define_field::{define_field, DefineFieldStatement};
+    pub use super::query_define_field::{
+        define_field, DefineFieldStatement, FieldType, GeometryType,
+    };
     pub use super::query_define_index::{define_index, DefineIndexStatement};
     pub use super::query_define_login::{define_login, DefineLoginStatement};
     pub use super::query_define_namespace::{define_namespace, DefineNamespaceStatement};

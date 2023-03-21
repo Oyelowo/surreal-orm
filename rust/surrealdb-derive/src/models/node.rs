@@ -100,15 +100,10 @@ impl ToTokens for FieldsGetterOpts {
 
         
         let xx = if let Some(table_def) = define{
-            
             let def_token = generate_as(table_def).unwrap();
             quote!(#def_token)
             
         }else{
-
-
-
-
         let mut define_table_methods = vec![];
         if let Some(drop) = drop  {
             define_table_methods.push(quote!(.drop()))
