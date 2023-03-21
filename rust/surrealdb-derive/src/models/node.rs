@@ -82,7 +82,7 @@ impl ToTokens for FieldsGetterOpts {
         
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-// #[surrealdb(table_name = "student")]
+        // #[surrealdb(table_name = "student", drop, schemafull, permission_fn, define_fn="any_fnc")]
         // pub struct Student {
         //     #[serde(skip_serializing_if = "Option::is_none")]
         //     #[builder(default, setter(strip_option))]

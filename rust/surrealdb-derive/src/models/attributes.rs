@@ -129,7 +129,7 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip_serializing: bool,
 
-    #[darling(default)]
+    #[darling(default, rename = "type")]
     pub(crate) type_: ::std::option::Option<String>,
 
     #[darling(default)]
