@@ -98,11 +98,6 @@ impl ToTokens for FieldsGetterOpts {
         let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
 
-
-
-        // let sele = quote!(#as_select);
-        let sele = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
-        let asa = if as_select.is_some(){ generate_as(as_select.as_ref().unwrap()).unwrap()} else {quote!(43)};
         
         let xx = if let Some(table_def) = define{
             
@@ -148,27 +143,6 @@ impl ToTokens for FieldsGetterOpts {
 )
         };
         
-        let get_table_def =||{
-                     quote!(define_table(user_table)
-                        .drop()
-                        .as_select(
-                            select(All)
-                                .from(fake_id2)
-                                .where_(country.is("INDONESIA"))
-                                .order_by(order(&age).numeric().desc())
-                                .limit(20)
-                                .start(5),
-                        )
-                        .schemafull()
-                        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-                        .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-                        .permissions_for(&[
-                            for_(&[Create, Delete]).where_(name.is("Oyedayo")),
-                            for_(Update).where_(age.less_than_or_equal(130)),
-                        ]))
-        };
-
-
 
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -221,13 +195,6 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
             }
-        impl  #struct_name_ident {
-
-        fn polo ()->String{
-            println!("lowo sabi {}", #sele);
-            #sele.to_string()
-        }
-        }
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
                 fn table_name() -> ::surrealdb::sql::Table {
