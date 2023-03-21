@@ -180,9 +180,9 @@ impl ToTokens for FieldsGetterOpts {
             }
         impl  #struct_name_ident {
 
-        fn polo ()->u32{
+        fn polo ()->String{
             println!("lowo sabi {}", #sele);
-            #sele
+            #sele.to_string()
         }
         }
 

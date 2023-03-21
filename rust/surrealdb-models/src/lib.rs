@@ -28,16 +28,16 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     sql::{All, SurrealId},
-    statements::select,
+    statements::{select, SelectStatement},
     RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode,
 };
 
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-fn gama() -> u32 {
+fn gama() -> SelectStatement {
     // All
-    3 * 3 - 4
+    select(All)
 }
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -46,7 +46,7 @@ fn gama() -> u32 {
     drop,
     schemafull,
     permissions_fn = "gama",
-    as_fn = "45 + 3",
+    as_fn = "gama()",
     define_fn = "define_student"
 )]
 pub struct Student {
@@ -85,7 +85,7 @@ pub struct Student {
 }
 #[test]
 fn xama() {
-    assert_eq!(Student::polo(), 5);
+    assert_eq!(Student::polo(), "re".to_string());
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
