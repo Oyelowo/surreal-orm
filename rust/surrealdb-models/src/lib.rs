@@ -37,7 +37,13 @@ use typed_builder::TypedBuilder;
 // }
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "student")]
+#[surrealdb(
+    table_name = "student",
+    drop,
+    schemafull,
+    permissions_fn = "get_student_perms",
+    define_fn = "define_student"
+)]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -45,7 +51,13 @@ pub struct Student {
 
     first_name: String,
     last_name: String,
-    #[surrealdb(assert = "45 + 5" )]
+    #[surrealdb(
+        type = "string",
+        default = "5",
+        assert = "45 + 5",
+        assert_fn = "assert_age",
+        define_fn = "define_age"
+    )]
     age: u8,
 
     #[surrealdb(link_self = "Student")]

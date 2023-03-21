@@ -129,6 +129,9 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip_serializing: bool,
 
+    #[darling(default)]
+    default: ::std::option::Option<syn::Expr>,
+
     #[darling(default, rename = "type")]
     pub(crate) type_: ::std::option::Option<String>,
 
@@ -140,9 +143,6 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     pub(crate) define_fn: ::std::option::Option<String>,
-
-    #[darling(default)]
-    default: ::std::option::Option<syn::Expr>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -179,7 +179,7 @@ pub struct FieldsGetterOpts {
     pub(crate) drop: ::std::option::Option<bool>,
 
     #[darling(default)]
-    pub(crate) permission_fn: ::std::option::Option<String>,
+    pub(crate) permissions_fn: ::std::option::Option<String>,
 
     #[darling(default)]
     pub(crate) define_fn: ::std::option::Option<String>,
