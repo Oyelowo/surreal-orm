@@ -257,9 +257,9 @@ impl FromStr for FieldType {
         // geometry (polygon, multipolygon, collection)
         // geometry
         let type_stringified = s.replace(" ", "");
-        let mut type_stringified = type_stringified.trim_end_matches(")").split("(");
+        let mut type_with_content = type_stringified.trim_end_matches(")").split("(");
 
-        let db_type = match (type_stringified.next(), type_stringified.next()) {
+        let db_type = match (type_with_content.next(), type_with_content.next()) {
             (Some("any"), None) => FieldType::Any,
             (Some("datetime"), None) => FieldType::DateTime,
             (Some("decimal"), None) => FieldType::Decimal,
