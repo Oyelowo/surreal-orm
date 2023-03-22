@@ -299,8 +299,8 @@ impl SchemaFieldsProperties {
                     .. 
                 } = VariablesModelMacro::new();
                 
-//         let xx = if let Some(table_def) = define{
-//             let def_token = generate_as(table_def).unwrap();
+//         let xx = if let Some(field_def) = field_receiver.define{
+//             let def_token = generate_as(field_def).unwrap();
 //             quote!(#def_token)
 //
 //         }else{
@@ -336,7 +336,7 @@ impl SchemaFieldsProperties {
 //                         #( # define_field_methods) *
 // )
 //         };
-        
+//
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);

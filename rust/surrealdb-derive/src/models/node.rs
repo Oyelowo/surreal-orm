@@ -20,14 +20,9 @@ use super::{
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro,
+    variables::VariablesModelMacro, generate_as,
 };
 
-fn generate_as(lit: &LitStr) -> Result<TokenStream, Error> {
-    let str = lit.value();
-    let tokens: TokenStream = str.parse().map_err(|err| syn::Error::from(err))?;
-    Ok(quote! { (#tokens) })
-}
 
 impl ToTokens for FieldsGetterOpts {
     fn to_tokens(&self, tokens: &mut TokenStream) {
