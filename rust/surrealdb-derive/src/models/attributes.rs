@@ -145,6 +145,12 @@ pub struct MyFieldReceiver {
     pub(crate) define: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
+    pub(crate) value: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) permissions: ::std::option::Option<Permissions>,
+
+    #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]

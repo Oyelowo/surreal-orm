@@ -21,7 +21,7 @@ use super::{
     casing::CaseString,
     get_crate_name,
     relations::{EdgeDirection, RelateAttribute, RelationType},
-    variables::VariablesModelMacro,
+    variables::VariablesModelMacro, parse_lit_to_tokenstream,
 };
 
 #[derive(Clone, Debug)]
@@ -299,44 +299,50 @@ impl SchemaFieldsProperties {
                     .. 
                 } = VariablesModelMacro::new();
                 
-//         let xx = if let Some(field_def) = field_receiver.define{
-//             let def_token = generate_as(field_def).unwrap();
-//             quote!(#def_token)
-//
-//         }else{
-//         let mut define_field_methods = vec![];
-//             define_field_methods.push(quote!(define_field(Field::new(field_ident_normalised_as_str))));
-//             define_field_methods.push(quote!(.on_table(#struct_name_ident)));
-//
-//
-//         if let Some(ty) = &field_receiver.type_  {
-//             let ty = generate_as(ty).unwrap();
-//             define_field_methods.push(quote!(.type_(#ty)))
-//         }
-//
-//         if let Some(schemafull) = schemafull  {
-//             define_field_methods.push(quote!(.schemafull()))
-//         }
-//
-//         if let Some(permissions) = permissions  {
-//             match permissions {
-//                 super::attributes::Permissions::Full => {
-//                     define_field_methods.push(quote!(.permissions_full()));
-//                 },
-//                 super::attributes::Permissions::None => {
-//                     define_field_methods.push(quote!(.permissions_none()));
-//                 },
-//                 super::attributes::Permissions::FnName(permissions) => {
-//                 let permissions = generate_as(permissions).unwrap();
-//                     define_field_methods.push(quote!(.permissions_for(#permissions)));
-//                 },
-//             };
-//         }
-//                         quote!(                     #crate_name::statements::define_table(Self::table_name())
-//                         #( # define_field_methods) *
-// )
-//         };
-//
+        let xx = if let Some(field_def) = &field_receiver.define{
+            let def_token = parse_lit_to_tokenstream(field_def).unwrap();
+            quote!(#def_token)
+
+        }else{
+        let mut define_field_methods = vec![];
+            define_field_methods.push(quote!(define_field(Field::new(field_ident_normalised_as_str))));
+            define_field_methods.push(quote!(.on_table(#struct_name_ident)));
+
+
+        if let Some(ty) = &field_receiver.type_  {
+            let ty = parse_lit_to_tokenstream(ty).unwrap();
+            define_field_methods.push(quote!(.type_(#ty)))
+        }
+        
+        if let Some(val) = &field_receiver.value  {
+            let val = parse_lit_to_tokenstream(val).unwrap();
+            define_field_methods.push(quote!(.value(#val)))
+        }
+        
+        if let Some(assert) = &field_receiver.assert  {
+            let assert = parse_lit_to_tokenstream(assert).unwrap();
+            define_field_methods.push(quote!(.value(#assert)))
+        }
+
+        if let Some(permissions) = &field_receiver.permissions  {
+            match permissions {
+                super::attributes::Permissions::Full => {
+                    define_field_methods.push(quote!(.permissions_full()));
+                },
+                super::attributes::Permissions::None => {
+                    define_field_methods.push(quote!(.permissions_none()));
+                },
+                super::attributes::Permissions::FnName(permissions) => {
+                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
+                    define_field_methods.push(quote!(.permissions_for(#permissions)));
+                },
+            };
+        }
+                        quote!(                     #crate_name::statements::define_table(Self::table_name())
+                        #( # define_field_methods) *
+)
+        };
+        
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);

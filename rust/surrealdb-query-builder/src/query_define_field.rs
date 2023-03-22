@@ -276,7 +276,7 @@ impl FromStr for FieldType {
                 let content_type = Self::from_str(content)?;
                 FieldType::ArrayList(Box::new(content_type))
             }
-            (Some("geometry"), Some(geom_types)) => FieldType::Geometry,
+            (Some("geometry"), None) => FieldType::Geometry,
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
                     .split(",")
