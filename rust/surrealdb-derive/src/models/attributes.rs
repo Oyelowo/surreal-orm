@@ -17,7 +17,7 @@ use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
-    get_crate_name,
+    get_crate_name, parse_lit_to_tokenstream,
     relations::{NodeTableName, NodeTypeName},
     variables::VariablesModelMacro,
 };
@@ -137,7 +137,7 @@ pub struct MyFieldReceiver {
 
     #[darling(default, rename = "type")]
     pub(crate) type_: ::std::option::Option<FieldTypeWrapper>,
-
+    // pub(crate) type_: ::std::option::Option<String>,
     #[darling(default)]
     pub(crate) assert: ::std::option::Option<syn::LitStr>,
 
@@ -188,20 +188,20 @@ impl FromMeta for Permissions {
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldTypeWrapper(FieldType);
+pub struct FieldTypeWrapper(pub String);
 
-impl Deref for FieldTypeWrapper {
-    type Target = FieldType;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+// impl Deref for FieldTypeWrapper {
+//     type Target = FieldType;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
 
 impl FromMeta for FieldTypeWrapper {
     fn from_string(value: &str) -> darling::Result<Self> {
         match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(f)),
+            Ok(f) => Ok(Self(value.to_string())),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
     }
@@ -271,9 +271,61 @@ pub(crate) struct ReferencedNodeMeta {
     pub(crate) foreign_node_schema_import: TokenStream,
     pub(crate) record_link_default_alias_as_method: TokenStream,
     pub(crate) foreign_node_type_validator: TokenStream,
+    pub(crate) field_definition: TokenStream,
 }
 
 impl ReferencedNodeMeta {
+    pub fn with_field_definition(
+        mut self,
+        field_receiver: &MyFieldReceiver,
+        struct_name_ident: &::syn::Ident,
+    ) -> Self {
+        let crate_name = get_crate_name(false);
+        let field_definition = if let Some(field_def) = &field_receiver.define {
+            let def_token = parse_lit_to_tokenstream(field_def).unwrap();
+            quote!(#def_token)
+        } else {
+            let mut define_field_methods = vec![];
+
+            if let Some(ty) = &field_receiver.type_ {
+                let ty = ty.0.to_string();
+                define_field_methods.push(quote!(.type_(#ty.parse::<#crate_name::statements::FieldType>().expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
+            }
+
+            if let Some(val) = &field_receiver.value {
+                let val = parse_lit_to_tokenstream(val).unwrap();
+                define_field_methods.push(quote!(.value(#val)))
+            }
+
+            if let Some(assert) = &field_receiver.assert {
+                let assert = parse_lit_to_tokenstream(assert).unwrap();
+                define_field_methods.push(quote!(.value(#assert)))
+            }
+
+            if let Some(permissions) = &field_receiver.permissions {
+                match permissions {
+                    super::attributes::Permissions::Full => {
+                        define_field_methods.push(quote!(.permissions_full()));
+                    }
+                    super::attributes::Permissions::None => {
+                        define_field_methods.push(quote!(.permissions_none()));
+                    }
+                    super::attributes::Permissions::FnName(permissions) => {
+                        let permissions = parse_lit_to_tokenstream(permissions).unwrap();
+                        define_field_methods.push(quote!(.permissions_for(#permissions)));
+                    }
+                };
+            }
+            quote!(
+                    #crate_name::statements::define_field(#crate_name::Field::new(field_ident_normalised_as_str))
+                                            .on_table(#struct_name_ident)
+                                            #( # define_field_methods) *
+            )
+        };
+        self.field_definition = field_definition;
+        self
+    }
+
     pub(crate) fn from_record_link(
         node_type_name: &NodeTypeName,
         normalized_field_name: &::syn::Ident,
@@ -318,6 +370,7 @@ impl ReferencedNodeMeta {
                 }
             ),
             foreign_node_type: quote!(schema_type_ident),
+            field_definition: quote!(),
         }
     }
 }

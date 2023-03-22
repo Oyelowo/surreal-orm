@@ -20,7 +20,7 @@ use super::{
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro, generate_as,
+    variables::VariablesModelMacro, parse_lit_to_tokenstream,
 };
 
 
@@ -78,6 +78,7 @@ impl ToTokens for FieldsGetterOpts {
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
             serialized_field_name_no_skip,
+            field_definitions,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
@@ -95,7 +96,7 @@ impl ToTokens for FieldsGetterOpts {
 
         
         let xx = if let Some(table_def) = define{
-            let def_token = generate_as(table_def).unwrap();
+            let def_token = parse_lit_to_tokenstream(table_def).unwrap();
             quote!(#def_token)
             
         }else{
@@ -106,7 +107,7 @@ impl ToTokens for FieldsGetterOpts {
         }
         
         if let Some(select) = as_select  {
-            let select = generate_as(select).unwrap();
+            let select = parse_lit_to_tokenstream(select).unwrap();
             define_table_methods.push(quote!(.as_select(#select)))
         }
         
@@ -123,7 +124,7 @@ impl ToTokens for FieldsGetterOpts {
                     define_table_methods.push(quote!(.permissions_none()));
                 },
                 super::attributes::Permissions::FnName(permissions) => {
-                let permissions = generate_as(permissions).unwrap();
+                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
                     define_table_methods.push(quote!(.permissions_for(#permissions)));
                 },
             };
@@ -200,7 +201,9 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {
-                    todo!()
+                    vec![
+                   #( #field_definitions), *
+                    ]
                 }
             }
             

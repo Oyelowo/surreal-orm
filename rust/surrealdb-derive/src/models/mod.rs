@@ -15,9 +15,3 @@ pub(crate) mod relations;
 pub(crate) mod utils;
 pub(crate) mod variables;
 pub(crate) use utils::*;
-
-use proc_macro2::{Span, TokenStream, TokenTree};
-use proc_macro_crate::{crate_name, FoundCrate};
-use quote::quote;
-
-use syn::{self, Ident};

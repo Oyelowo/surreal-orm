@@ -4,7 +4,7 @@ use quote::quote;
 
 use syn::{self, Error, Ident, LitStr};
 
-pub fn generate_as(lit: &LitStr) -> Result<TokenStream, Error> {
+pub fn parse_lit_to_tokenstream(lit: &LitStr) -> Result<TokenStream, Error> {
     let str = lit.value();
     let tokens: TokenStream = str.parse().map_err(|err| syn::Error::from(err))?;
     Ok(quote! { (#tokens) })

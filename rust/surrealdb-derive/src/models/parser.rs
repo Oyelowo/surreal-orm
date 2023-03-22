@@ -15,13 +15,14 @@ use convert_case::{Case, Casing};
 use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+use syn::parse_quote;
 
 use super::{
-    attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
+    attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate, FieldTypeWrapper},
     casing::CaseString,
     get_crate_name,
     relations::{EdgeDirection, RelateAttribute, RelationType},
-    variables::VariablesModelMacro, parse_lit_to_tokenstream,
+    variables::VariablesModelMacro, parse_lit_to_tokenstream, 
 };
 
 #[derive(Clone, Debug)]
@@ -214,6 +215,7 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
+    pub field_definitions: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,
 }
 
@@ -299,49 +301,6 @@ impl SchemaFieldsProperties {
                     .. 
                 } = VariablesModelMacro::new();
                 
-        let xx = if let Some(field_def) = &field_receiver.define{
-            let def_token = parse_lit_to_tokenstream(field_def).unwrap();
-            quote!(#def_token)
-
-        }else{
-        let mut define_field_methods = vec![];
-
-
-        if let Some(ty) = &field_receiver.type_  {
-            let ty = parse_lit_to_tokenstream(ty).unwrap();
-            define_field_methods.push(quote!(.type_(#ty)))
-        }
-        
-        if let Some(val) = &field_receiver.value  {
-            let val = parse_lit_to_tokenstream(val).unwrap();
-            define_field_methods.push(quote!(.value(#val)))
-        }
-        
-        if let Some(assert) = &field_receiver.assert  {
-            let assert = parse_lit_to_tokenstream(assert).unwrap();
-            define_field_methods.push(quote!(.value(#assert)))
-        }
-
-        if let Some(permissions) = &field_receiver.permissions  {
-            match permissions {
-                super::attributes::Permissions::Full => {
-                    define_field_methods.push(quote!(.permissions_full()));
-                },
-                super::attributes::Permissions::None => {
-                    define_field_methods.push(quote!(.permissions_none()));
-                },
-                super::attributes::Permissions::FnName(permissions) => {
-                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                    define_field_methods.push(quote!(.permissions_for(#permissions)));
-                },
-            };
-        }
-                        quote!(                     
-                            #crate_name::statements::define_field(#crate_name::Field::new(field_ident_normalised_as_str));
-                                    .on_table(#struct_name_ident);
-                                    #( # define_field_methods) *
-)
-        };
         
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
@@ -352,7 +311,7 @@ impl SchemaFieldsProperties {
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkOne<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, struct_name_ident)
                     }
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
@@ -364,15 +323,17 @@ impl SchemaFieldsProperties {
                         }
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkSelf<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, struct_name_ident)
                     }
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkMany<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, struct_name_ident)
                     }
-                    RelationType::None => ReferencedNodeMeta::default(),
+                    RelationType::None => ReferencedNodeMeta::default().with_field_definition(field_receiver, struct_name_ident),
                 };
+                
+                store.field_definitions.push(referenced_node_meta.field_definition);
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
                 
