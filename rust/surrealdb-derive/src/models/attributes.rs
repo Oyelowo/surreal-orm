@@ -278,7 +278,8 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        struct_name_ident: &::syn::Ident,
+        struct_name_ident_str: &String,
+        field_name_normalized: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
         let field_definition = if let Some(field_def) = &field_receiver.define {
@@ -317,8 +318,8 @@ impl ReferencedNodeMeta {
                 };
             }
             quote!(
-                    #crate_name::statements::define_field(#crate_name::Field::new(field_ident_normalised_as_str))
-                                            .on_table(#struct_name_ident)
+                    #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
+                                            .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                             #( # define_field_methods) *
             )
         };

@@ -102,9 +102,9 @@ pub struct Student {
     last_name: String,
     #[surrealdb(
         type = "string",
-        default = "5",
-        assert = "45 + 5",
-        define = "define_age"
+        // value = "5",
+        // assert = "45 + 5",
+        // define = "define_age"
     )]
     age: u8,
 
@@ -128,6 +128,16 @@ pub struct Student {
 }
 #[test]
 fn xama() {
+    assert_eq!(
+        format!(
+            "zz:{:?}",
+            Student::define_fields()
+                .into_iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+        ),
+        "er".to_string()
+    );
     assert_eq!(Student::define_table().to_string(), "re".to_string());
 }
 

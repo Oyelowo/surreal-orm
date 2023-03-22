@@ -311,7 +311,7 @@ impl SchemaFieldsProperties {
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkOne<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, struct_name_ident)
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)
                     }
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
@@ -323,14 +323,14 @@ impl SchemaFieldsProperties {
                         }
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkSelf<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, struct_name_ident)
-                    }
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkMany<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, struct_name_ident)
-                    }
-                    RelationType::None => ReferencedNodeMeta::default().with_field_definition(field_receiver, struct_name_ident),
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }                    
+                    RelationType::None => ReferencedNodeMeta::default()
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
                 
                 store.field_definitions.push(referenced_node_meta.field_definition);

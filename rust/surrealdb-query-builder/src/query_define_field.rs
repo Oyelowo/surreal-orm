@@ -290,7 +290,7 @@ impl FromStr for FieldType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DefineFieldStatement {
     field_name: String,
     table_name: Option<String>,
