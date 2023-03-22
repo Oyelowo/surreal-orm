@@ -11,13 +11,28 @@ use crate::{
     statements::SelectStatement, Erroneous, Field, Parametric,
 };
 
+#[derive(Debug, Clone)]
 pub struct Namespace(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct Database(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct Login(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct Token(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct Scope(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct Table(sql::Table);
+
+#[derive(Debug, Clone)]
 pub struct Event(sql::Idiom);
+
+#[derive(Debug, Clone)]
 pub struct TableIndex(sql::Idiom);
 
 impl Table {

@@ -9,6 +9,7 @@ use std::{
     fmt::{self, Display},
     ops::Deref,
     str::FromStr,
+    string::ParseError,
 };
 
 use insta::{assert_debug_snapshot, assert_display_snapshot};
@@ -155,7 +156,7 @@ pub enum GeometryType {
 }
 
 impl FromStr for GeometryType {
-    type Err;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -193,8 +194,8 @@ impl Display for GeometryType {
 #[derive(Debug, Clone)]
 pub enum FieldType {
     Any,
-    Array(Box<FieldType>),
     Array,
+    ArrayList(Box<FieldType>),
     Bool,
     DateTime,
     Decimal,
@@ -204,9 +205,10 @@ pub enum FieldType {
     Number,
     Object,
     String,
-    Record(Table),
     Record,
-    Geometry(Vec<GeometryType>),
+    RecordList(Table),
+    Geometry,
+    GeometryList(Vec<GeometryType>),
 }
 
 impl From<FieldType> for String {
@@ -220,7 +222,7 @@ impl Display for FieldType {
         let data_type = match self {
             FieldType::Any => "any".to_string(),
             FieldType::Array => "array".to_string(),
-            FieldType::Array(field_type) => format!("array ({field_type})"),
+            FieldType::ArrayList(field_type) => format!("array ({field_type})"),
             FieldType::Bool => "bool".to_string(),
             FieldType::DateTime => "datetime".to_string(),
             FieldType::Decimal => "decimal".to_string(),
@@ -230,9 +232,10 @@ impl Display for FieldType {
             FieldType::Number => "number".to_string(),
             FieldType::Object => "object".to_string(),
             FieldType::String => "string".to_string(),
+            FieldType::RecordList(table) => format!("record ({table})"),
             FieldType::Record => "record".to_string(),
-            FieldType::Record(table) => format!("record ({table})"),
-            FieldType::Geometry(geometries) => geometries
+            FieldType::Geometry => "geometry".to_string(),
+            FieldType::GeometryList(geometries) => geometries
                 .iter()
                 .map(ToString::to_string)
                 .collect::<Vec<_>>()
@@ -244,11 +247,19 @@ impl Display for FieldType {
 }
 
 impl FromStr for FieldType {
-    type Err;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.replace(" ", "").trim_end_matches(")").split("(");
-        let x = match (s.next(), s.next()) {
+        // Examples:
+        // datetime
+        // record
+        // record (user)
+        // geometry (polygon, multipolygon, collection)
+        // geometry
+        let type_stringified = s.replace(" ", "");
+        let mut type_stringified = type_stringified.trim_end_matches(")").split("(");
+
+        let db_type = match (type_stringified.next(), type_stringified.next()) {
             (Some("any"), None) => FieldType::Any,
             (Some("datetime"), None) => FieldType::DateTime,
             (Some("decimal"), None) => FieldType::Decimal,
@@ -258,191 +269,27 @@ impl FromStr for FieldType {
             (Some("number"), None) => FieldType::Number,
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
-            (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("record"), None) => FieldType::Record,
-            (Some("array"), array_content_type) => FieldType::Array(array_content_type),
+            (Some("record"), Some(record_type)) => FieldType::RecordList(Table::from(record_type)),
             (Some("array"), None) => FieldType::Array,
+            (Some("array"), Some(content)) => {
+                let content_type = Self::from_str(content)?;
+                FieldType::ArrayList(Box::new(content_type))
+            }
+            (Some("geometry"), Some(geom_types)) => FieldType::Geometry,
             (Some("geometry"), Some(geom_types)) => {
-                let g: Result<Vec<_>, _> = geom_types
+                let geoms: Result<Vec<_>, _> = geom_types
                     .split(",")
                     .map(|g| g.parse::<GeometryType>())
                     .collect();
-                match g {
-                    Ok(geoms) => FieldType::Geometry(geoms),
-                    Err(err) => return Err(err),
-                }
+                FieldType::GeometryList(geoms?)
             }
-            (None, None) => todo!(),
-            (None, Some(_)) => todo!(),
-            (Some(_), None) => todo!(),
-            (Some(_), Some(_)) => todo!(),
+            _ => return Err(format!("Invalid/Unsupported database type: {s}")),
         };
-        todo!()
+        Ok(db_type)
     }
 }
 
-// pub enum FieldType {
-//     Any,
-//     Array(Box<FieldType>),
-//     Bool,
-//     DateTime,
-//     Decimal,
-//     Duration,
-//     Float,
-//     Int,
-//     Number,
-//     Object,
-//     String,
-//     Record(String),
-//     Geometry(Vec<Geometry>),
-// }
-//
-// pub enum Geometry {
-//     Feature,
-//     Point,
-//     Line,
-//     Polygon,
-//     Multipoint,
-//     Multiline,
-//     Multipolygon,
-//     Collection,
-// }
-
-// pub enum FieldType {
-//     Any,
-//     Array(Box<FieldType>),
-//     Bool,
-//     DateTime,
-//     Decimal,
-//     Duration,
-//     Float,
-//     Int,
-//     Number,
-//     Object,
-//     String,
-//     Record,
-//     Record(String),
-//     Geometry(Vec<Geometry>),
-// }
-//
-// pub fn from_string(field_type: &str) -> Option<FieldType> {
-//     let mut parts = field_type.split(" (");
-//     let type_name = parts.next()?;
-//     let geo_types = parts
-//         .filter(|p| p.ends_with(")"))
-//         .next()
-//         .map(|p| &p[1..p.len() - 1])
-//         .map(|p| {
-//             p.split(", ")
-//                 .filter_map(|t| match t {
-//                     "Feature" => Some(Geometry::Feature),
-//                     "Point" => Some(Geometry::Point),
-//                     "Line" => Some(Geometry::Line),
-//                     "Polygon" => Some(Geometry::Polygon),
-//                     "Multipoint" => Some(Geometry::Multipoint),
-//                     "Multiline" => Some(Geometry::Multiline),
-//                     "Multipolygon" => Some(Geometry::Multipolygon),
-//                     "Collection" => Some(Geometry::Collection),
-//                     _ => None,
-//                 })
-//                 .collect::<Vec<Geometry>>()
-//         })
-//         .unwrap_or_default();
-//
-//     Some(match type_name {
-//         "any" => FieldType::Any,
-//         "array" => {
-//             let content_type = from_string(parts.next()?.trim_start())?;
-//             FieldType::Array(Box::new(content_type))
-//         }
-//         "bool" => FieldType::Bool,
-//         "datetime" => FieldType::DateTime,
-//         "decimal" => FieldType::Decimal,
-//         "duration" => FieldType::Duration,
-//         "float" => FieldType::Float,
-//         "int" => FieldType::Int,
-//         "number" => FieldType::Number,
-//         "object" => FieldType::Object,
-//         "string" => FieldType::String,
-//         "record" => {
-//             let record_type = parts.next()?.trim_start().to_string();
-//             FieldType::Record(record_type)
-//         }
-//         "geometry" => FieldType::Geometry(geo_types),
-//         _ => return None,
-//     })
-// }
-// impl FieldType {
-//     pub fn from_str(s: &str) -> Option<FieldType> {
-//         match s.replace(" ", ""){
-//             "any" => Some(FieldType::Any),
-//             "bool" => Some(FieldType::Bool),
-//             "datetime" => Some(FieldType::DateTime),
-//             "decimal" => Some(FieldType::Decimal),
-//             "duration" => Some(FieldType::Duration),
-//             "float" => Some(FieldType::Float),
-//             "int" => Some(FieldType::Int),
-//             "number" => Some(FieldType::Number),
-//             "object" => Some(FieldType::Object),
-//             "string" => Some(FieldType::String),
-//             _ if s.starts_with("array<") && s.ends_with(">") => {
-//                 let inner_type_str = &s[6..s.len() - 1];
-//                 let inner_type = FieldType::from_str(inner_type_str)?;
-//                 Some(FieldType::Array(Box::new(inner_type)))
-//             }
-//             _ if s.starts_with("record<") && s.ends_with(">") => {
-//                 let record_type_str = &s[7..s.len() - 1];
-//                 Some(FieldType::Record(record_type_str.to_owned()))
-//             }
-//             _ if s.starts_with("geometry(") && s.ends_with(")") => {
-//                 let geometry_types_str = &s[9..s.len() - 1];
-//                 let geometry_types: Vec<Geometry> = geometry_types_str
-//                     .split(",")
-//                     .map(|s| match s.trim() {
-//                         "Feature" => Geometry::Feature,
-//                         "Point" => Geometry::Point,
-//                         "Line" => Geometry::Line,
-//                         "Polygon" => Geometry::Polygon,
-//                         "Multipoint" => Geometry::Multipoint,
-//                         "Multiline" => Geometry::Multiline,
-//                         "Multipolygon" => Geometry::Multipolygon,
-//                         "Collection" => Geometry::Collection,
-//                         _ => return None,
-//                     })
-//                     .collect();
-//                 Some(FieldType::Geometry
-// impl FromStr for Geometry {
-//     type Err = String;
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         match s {
-//             "Feature" => Ok(Self::Feature),
-//             "Point" => Ok(Self::Point),
-//             "Line" => Ok(Self::Line),
-//             "Polygon" => Ok(Self::Polygon),
-//             "Multipoint" => Ok(Self::Multipoint),
-//             "Multiline" => Ok(Self::Multiline),
-//             "Multipolygon" => Ok(Self::Multipolygon),
-//             "Collection" => Ok(Self::Collection),
-//             _ => {
-//                 let mut types = s.split(',');
-//                 let mut geom_types = Vec::new();
-//                 for t in types {
-//                     let geom_type = t.trim().parse::<Geometry>();
-//                     if let Ok(g) = geom_type {
-//                         geom_types.push(g);
-//                     } else {
-//                         return Err(format!("Invalid geometry type: {}", t));
-//                     }
-//                 }
-//                 if geom_types.is_empty() {
-//                     Err("Empty geometry type list".to_string())
-//                 } else {
-//                     Ok(Self::Collection(geom_types))
-//                 }
-//             }
-//         }
-//     }
-// }
 #[derive(Clone)]
 pub struct DefineFieldStatement {
     field_name: String,

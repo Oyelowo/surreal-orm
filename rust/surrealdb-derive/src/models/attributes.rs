@@ -178,7 +178,7 @@ impl FromMeta for Permissions {
         }
     }
 }
-impl FromMeta for FieldType {}
+// impl FromMeta for FieldType {}
 
 // #[derive(Debug, Clone)]
 // pub enum Permissions {
