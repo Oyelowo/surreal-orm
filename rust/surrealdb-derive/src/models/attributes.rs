@@ -136,7 +136,7 @@ pub struct MyFieldReceiver {
     default: ::std::option::Option<syn::Expr>,
 
     #[darling(default, rename = "type")]
-    pub(crate) type_: ::std::option::Option<String>,
+    pub(crate) type_: ::std::option::Option<FieldTypeWrapper>,
 
     #[darling(default)]
     pub(crate) assert: ::std::option::Option<syn::LitStr>,
@@ -181,7 +181,8 @@ impl FromMeta for Permissions {
     }
 }
 
-struct FieldTypeWrapper(FieldType);
+#[derive(Debug, Clone)]
+pub struct FieldTypeWrapper(FieldType);
 
 impl Deref for FieldTypeWrapper {
     type Target = FieldType;
