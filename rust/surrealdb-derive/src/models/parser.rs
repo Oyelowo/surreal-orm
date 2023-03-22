@@ -305,8 +305,6 @@ impl SchemaFieldsProperties {
 
         }else{
         let mut define_field_methods = vec![];
-            define_field_methods.push(quote!(define_field(Field::new(field_ident_normalised_as_str))));
-            define_field_methods.push(quote!(.on_table(#struct_name_ident)));
 
 
         if let Some(ty) = &field_receiver.type_  {
@@ -338,8 +336,10 @@ impl SchemaFieldsProperties {
                 },
             };
         }
-                        quote!(                     #crate_name::statements::define_table(Self::table_name())
-                        #( # define_field_methods) *
+                        quote!(                     
+                            #crate_name::statements::define_field(#crate_name::Field::new(field_ident_normalised_as_str));
+                                    .on_table(#struct_name_ident);
+                                    #( # define_field_methods) *
 )
         };
         
