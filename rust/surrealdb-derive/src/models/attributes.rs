@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use darling::{
     ast::{self, Data},
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
@@ -178,7 +180,25 @@ impl FromMeta for Permissions {
         }
     }
 }
-// impl FromMeta for FieldType {}
+
+struct FieldTypeWrapper(FieldType);
+
+impl Deref for FieldTypeWrapper {
+    type Target = FieldType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl FromMeta for FieldTypeWrapper {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        match value.parse::<FieldType>() {
+            Ok(f) => Ok(Self(f)),
+            Err(e) => Err(darling::Error::unknown_value(&e)),
+        }
+    }
+}
 
 // #[derive(Debug, Clone)]
 // pub enum Permissions {
