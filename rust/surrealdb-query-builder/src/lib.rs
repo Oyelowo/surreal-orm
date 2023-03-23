@@ -57,6 +57,8 @@ use serde::Deserialize;
 use serde::Serialize;
 pub use sql::Clause;
 pub use sql::Table;
+pub use surrealdb::sql::json;
+pub use surrealdb::sql::Value;
 
 pub mod sql {
     pub use super::binding::*;

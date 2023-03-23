@@ -19,7 +19,7 @@ use static_assertions::*;
 use surrealdb::{
     engine::local::{Db, Mem},
     opt::IntoResource,
-    sql::Id,
+    sql::{self, Id},
     Result, Surreal,
 };
 // use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
@@ -83,6 +83,8 @@ fn define_student() -> DefineTableStatement {
 
     statement
 }
+// use Duration;
+fn we() {}
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
@@ -101,8 +103,9 @@ pub struct Student {
     first_name: String,
     last_name: String,
     #[surrealdb(
-        type = "string",
-        // value = "5",
+        type = "number",
+        value = "surrealdb::sql::Value::Duration(Duration::from_secs(5).into())",
+        // value = "Duration::from_secs(54)",
         // assert = "45 + 5",
         // define = "define_age"
     )]

@@ -159,6 +159,24 @@ pub struct MyFieldReceiver {
     // default: ::darling::util::Ignored,
 }
 
+// #[derive(Debug, Clone)]
+// pub struct ValueWrapper(syn::LitStr);
+//
+// impl FromMeta for ValueWrapper {
+//     fn from_value(value: &Lit) -> darling::Result<Self> {
+//         match value {
+//             Lit::Int(i) => i,
+//             Lit::Float(f) => f,
+//             Lit::Bool(b) => b,
+//             Lit::Str(str_lit) => ,
+//             Lit::ByteStr(_) => todo!(),
+//             Lit::Byte(_) => todo!(),
+//             Lit::Char(_) => todo!(),
+//             Lit::Verbatim(_) => todo!(),
+//         }
+//     }
+// }
+
 #[derive(Debug, Clone)]
 pub enum Permissions {
     Full,
