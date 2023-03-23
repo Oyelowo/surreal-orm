@@ -131,7 +131,7 @@ fn define_age() -> DefineFieldStatement {
     schemafull,
     as = "select(All)",
     permissions = "perm()",
-    permissions_fn = "perm",
+    // permissions_fn = "perm",
     // define = "define_student()"
 )]
 pub struct Student {
@@ -143,15 +143,16 @@ pub struct Student {
     last_name: String,
     #[surrealdb(
         // type="array(int)",
-        type = "geometry(feature, point, collection, polygon)",
-        value = "we()",
+        // type = "geometry(feature, point, collection, polygon)",
+        // value = "we()",
         // value = "Duration::from_secs(54)",
-        assert = "erer()",
+        // assert = "erer()",
         // assert = "cond(value().is_not(NONE))",
         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
         permissions = "perm()",
-        // permissions_fn = "perm",
-        // define = "define_age()"
+        permissions_fn = "perm",
+        // define = "define_age()",
+        // define_fn = "define_age"
     )]
     age: u8,
 

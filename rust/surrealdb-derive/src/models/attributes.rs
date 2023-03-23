@@ -354,73 +354,133 @@ impl ReferencedNodeMeta {
         field_name_normalized: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
-        let MyFieldReceiver {
-            type_,
-            assert,
-            assert_fn,
-            define,
-            define_fn,
-            value,
-            value_fn,
-            permissions,
-            permissions_fn,
-            ..
-        } = field_receiver;
+        let mut define_field: Option<TokenStream> = None;
+        let mut define_field_methods = vec![];
 
-        let field_definition = if let Some(def) = &define {
-            let def_token = parse_lit_to_tokenstream(def).unwrap();
-            quote!(#def_token)
-        } else {
-            let mut define_field_methods = vec![];
-
-            if let Some(type_) = type_ {
-                let type_ = type_.0.to_string();
-                define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>().expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
+        match field_receiver {
+            MyFieldReceiver {
+                define,
+                define_fn,
+                type_,
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                ..
+            } if (define_fn.is_some() || define.is_some())
+                && (type_.is_some()
+                    || assert.is_some()
+                    || assert_fn.is_some()
+                    || value.is_some()
+                    || value_fn.is_some()
+                    || permissions.is_some()
+                    || permissions_fn.is_some()) =>
+            {
+                panic!("Invalid combinationation. When `define` or `define_fn`,
+                           the following attributes cannot be use in combination to prevent confusion:                 
+                            type_,
+                            assert,
+                            assert_fn,
+                            value,
+                            value_fn,
+                            permissions,
+                            permissions_fn");
             }
+            MyFieldReceiver {
+                define: Some(_),
+                define_fn: Some(_),
+                ..
+            } => {
+                panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                define: Some(define),
+                ..
+            } => {
+                let define = parse_lit_to_tokenstream(define).unwrap();
+                define_field = Some(quote!(#define));
+            }
+            MyFieldReceiver {
+                define_fn: Some(define_fn),
+                ..
+            } => {
+                define_field = Some(quote!(#define_fn()));
+            }
+            MyFieldReceiver {
+                type_: Some(type_), ..
+            } => {
+                let type_ = type_.0.to_string();
+                define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
+                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
+            }
+            MyFieldReceiver {
+                value: Some(value),
+                value_fn: Some(value_fn),
+                ..
+            } => {
+                panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                value: Some(value), ..
+            } => {
+                let value = parse_lit_to_tokenstream(value).unwrap();
+                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value))));
+            }
+            MyFieldReceiver {
+                value_fn: Some(value_fn),
+                ..
+            } => {
+                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
+            }
+            MyFieldReceiver {
+                assert: Some(_),
+                assert_fn: Some(_),
+                ..
+            } => {
+                panic!("assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                assert: Some(assert),
+                ..
+            } => {
+                let assert = parse_lit_to_tokenstream(assert).unwrap();
+                define_field_methods.push(quote!(.assert(#assert)));
+            }
+            MyFieldReceiver {
+                assert_fn: Some(assert_fn),
+                ..
+            } => {
+                define_field_methods.push(quote!(.assert(#assert_fn())));
+            }
+            MyFieldReceiver {
+                permissions: Some(_),
+                permissions_fn: Some(_),
+                ..
+            } => {
+                panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                permissions: Some(permissions),
+                ..
+            } => {
+                define_field_methods.push(permissions.get_token_stream());
+            }
+            MyFieldReceiver {
+                permissions_fn: Some(permissions_fn),
+                ..
+            } => {
+                define_field_methods.push(permissions_fn.get_token_stream());
+            }
+            _ => {}
+        };
 
-            match (value, value_fn) {
-                (Some(value), None) => {
-                    let value = parse_lit_to_tokenstream(value).unwrap();
-                    define_field_methods.push(quote!(.value(#crate_name::Value::from(#value))));
-                }
-                (None, Some(value_fn)) => {
-                    define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
-                }
-                (Some(_), Some(_)) =>  panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-                (None, None) => (),
-            };
-
-            match (assert, assert_fn) {
-                (None, None) => (),
-                (Some(assert), None) => {
-                    let assert = parse_lit_to_tokenstream(assert).unwrap();
-                    define_field_methods.push(quote!(.assert(#assert)));
-                }
-                (None, Some(assert_fn)) => {
-                    define_field_methods.push(quote!(.assert(#assert_fn())));
-                }
-                (Some(_), Some(_)) =>  panic!("assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            };
-
-            match (permissions, permissions_fn){
-                (None, Some(p_fn)) => {
-                        define_field_methods.push(p_fn.get_token_stream());
-                },
-                (Some(p), None) => {
-                        define_field_methods.push(p.get_token_stream());
-                },
-                (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-                (None, None) => (),
-            };
-
-            quote!(
+        self.field_definition = define_field.unwrap_or_else(||quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                             #( # define_field_methods) *
-            )
-        };
-
-        self.field_definition = field_definition;
+            ));
         self
     }
 
