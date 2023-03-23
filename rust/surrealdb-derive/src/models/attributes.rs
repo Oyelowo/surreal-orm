@@ -313,7 +313,7 @@ impl ReferencedNodeMeta {
 
             if let Some(val) = &field_receiver.value {
                 let val = parse_lit_to_tokenstream(val).unwrap();
-                define_field_methods.push(quote!(.value(#val)))
+                define_field_methods.push(quote!(.value(#crate_name::Value::from(#val))))
             }
 
             if let Some(assert) = &field_receiver.assert {

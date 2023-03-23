@@ -84,7 +84,10 @@ fn define_student() -> DefineTableStatement {
     statement
 }
 // use Duration;
-fn we() {}
+fn we() -> sql::Value {
+    surrealdb::sql::Value::Duration(Duration::from_secs(60 * 60 * 24 * 7).into())
+}
+
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
@@ -104,9 +107,9 @@ pub struct Student {
     last_name: String,
     #[surrealdb(
         type = "number",
-        value = "surrealdb::sql::Value::Duration(Duration::from_secs(5).into())",
+        value = "we()",
         // value = "Duration::from_secs(54)",
-        // assert = "45 + 5",
+        assert = "45 + 5",
         // define = "define_age"
     )]
     age: u8,
