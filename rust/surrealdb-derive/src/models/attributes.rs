@@ -318,7 +318,7 @@ impl ReferencedNodeMeta {
 
             if let Some(assert) = &field_receiver.assert {
                 let assert = parse_lit_to_tokenstream(assert).unwrap();
-                define_field_methods.push(quote!(.value(#assert)))
+                define_field_methods.push(quote!(.assert(#assert)))
             }
 
             if let Some(permissions) = &field_receiver.permissions {

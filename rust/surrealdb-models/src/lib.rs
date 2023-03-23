@@ -26,12 +26,14 @@ use surrealdb::{
 
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
+    filter::Filter,
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    sql::{All, SurrealId},
+    sql::{All, SurrealId, NONE},
     statements::{
-        define_table, order, select, DefineTableStatement, For, ForCrudType, SelectStatement,
+        define_field, define_table, order, select, value, DefineFieldStatement,
+        DefineTableStatement, FieldType, For, ForCrudType, SelectStatement,
     },
-    utils::for_,
+    utils::{cond, for_},
     Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
 };
 
@@ -88,6 +90,39 @@ fn we() -> sql::Value {
     surrealdb::sql::Value::Duration(Duration::from_secs(60 * 60 * 24 * 7).into())
 }
 
+fn erer() -> Filter {
+    cond(value().is_not(NONE)).and(value().like("email"))
+}
+fn define_age() -> DefineFieldStatement {
+    use surrealdb_orm::{SurrealdbModel, SurrealdbNode};
+    use ForCrudType::*;
+    let student::Student {
+        age,
+        firstName,
+        lastName,
+        ..
+    } = Student::schema();
+
+    let name = Field::new("name");
+    // let user_table = Table::from("user");
+    // let age = Field::new("age");
+    let email = Field::new("email");
+    use FieldType::*;
+
+    let statement = define_field(Student::schema().age)
+        .on_table(Student::table_name())
+        .type_(String)
+        .value("example@codebreather.com")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions_for(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions_for(&[
+            for_(&[Create, Delete]).where_(firstName.is("Oyedayo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ]);
+    statement
+}
+
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
@@ -106,11 +141,15 @@ pub struct Student {
     first_name: String,
     last_name: String,
     #[surrealdb(
-        type = "number",
+        // type="array(int)",
+        type = "geometry(feature, point, collection, polygon)",
         value = "we()",
         // value = "Duration::from_secs(54)",
-        assert = "45 + 5",
-        // define = "define_age"
+        assert = "erer()",
+        // assert = "cond(value().is_not(NONE))",
+        // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
+        permissions = "perm()",
+        define = "define_age()"
     )]
     age: u8,
 

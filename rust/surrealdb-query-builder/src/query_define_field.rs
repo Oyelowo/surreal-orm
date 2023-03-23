@@ -235,12 +235,15 @@ impl Display for FieldType {
             FieldType::RecordList(table) => format!("record ({table})"),
             FieldType::Record => "record".to_string(),
             FieldType::Geometry => "geometry".to_string(),
-            FieldType::GeometryList(geometries) => geometries
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>()
-                .join(",")
-                .to_string(),
+            FieldType::GeometryList(geometries) => format!(
+                "geometry ({})",
+                geometries
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+                    .to_string()
+            ),
         };
         write!(f, "{}", data_type)
     }
