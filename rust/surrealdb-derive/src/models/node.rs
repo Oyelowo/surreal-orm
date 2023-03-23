@@ -36,6 +36,7 @@ impl ToTokens for FieldsGetterOpts {
             ref schemafull,
             ref as_select,
             ref permissions,
+            ref permissions_fn,
             ref define,
             ..
         } = *self;
@@ -129,9 +130,26 @@ impl ToTokens for FieldsGetterOpts {
                 },
             };
         }
-                        quote!(                     #crate_name::statements::define_table(Self::table_name())
-                        #( # define_table_methods) *
-)
+        
+        if let Some(permissions_fn) = permissions_fn {
+            match permissions_fn {
+                super::attributes::PermissionsFn::Full => {
+                    define_table_methods.push(quote!(.permissions_full()));
+                }
+                super::attributes::PermissionsFn::None => {
+                    define_table_methods.push(quote!(.permissions_none()));
+                }
+                super::attributes::PermissionsFn::FnPath(permissions_fn) => {
+                    define_table_methods.push(quote!(.permissions_for(#permissions_fn())));
+                }
+            };
+        }
+        
+        quote!(
+                #crate_name::statements::define_table(Self::table_name())
+                #( # define_table_methods) *
+            )
+            
         };
         
 

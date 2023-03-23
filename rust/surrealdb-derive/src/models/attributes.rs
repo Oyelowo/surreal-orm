@@ -151,6 +151,9 @@ pub struct MyFieldReceiver {
     pub(crate) permissions: ::std::option::Option<Permissions>,
 
     #[darling(default)]
+    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
+
+    #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]
@@ -225,29 +228,30 @@ impl FromMeta for FieldTypeWrapper {
     }
 }
 
-// #[derive(Debug, Clone)]
-// pub enum Permissions {
-//     Full,
-//     None,
-//     FnName(Path),
-// }
-//
-// impl FromMeta for Permissions {
-//     fn from_string(value: &str) -> darling::Result<Self> {
-//         match value.to_lowercase().as_str() {
-//             "none" => Ok(Self::None),
-//             "full" => Ok(Self::Full),
-//             _ => Err(darling::Error::unexpected_type(value)),
-//         }
-//     }
-//
-//     fn from_value(value: &syn::Lit) -> darling::Result<Self> {
-//         match value {
-//             Lit::Str(str) => Ok(Self::FnName(syn::parse_str::<Path>(&str.value())?)),
-//             _ => Err(darling::Error::unexpected_lit_type(value)),
-//         }
-//     }
-// }
+#[derive(Debug, Clone)]
+pub enum PermissionsFn {
+    Full,
+    None,
+    FnPath(Path),
+}
+
+impl FromMeta for PermissionsFn {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        match value.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "full" => Ok(Self::Full),
+            _ => Err(darling::Error::unexpected_type(value)),
+        }
+    }
+
+    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+        match value {
+            Lit::Str(str) => Ok(Self::FnPath(syn::parse_str::<Path>(&str.value())?)),
+            _ => Err(darling::Error::unexpected_lit_type(value)),
+        }
+    }
+}
+
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct FieldsGetterOpts {
@@ -278,6 +282,9 @@ pub struct FieldsGetterOpts {
 
     #[darling(default)]
     pub(crate) permissions: ::std::option::Option<Permissions>,
+
+    #[darling(default)]
+    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
 
     #[darling(default)]
     pub(crate) define: ::std::option::Option<syn::LitStr>,
@@ -335,6 +342,21 @@ impl ReferencedNodeMeta {
                     }
                 };
             }
+
+            if let Some(permissions_fn) = &field_receiver.permissions_fn {
+                match permissions_fn {
+                    super::attributes::PermissionsFn::Full => {
+                        define_field_methods.push(quote!(.permissions_full()));
+                    }
+                    super::attributes::PermissionsFn::None => {
+                        define_field_methods.push(quote!(.permissions_none()));
+                    }
+                    super::attributes::PermissionsFn::FnPath(permissions_fn) => {
+                        define_field_methods.push(quote!(.permissions_for(#permissions_fn())));
+                    }
+                };
+            }
+
             quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(#struct_name_ident_str))

@@ -130,7 +130,8 @@ fn define_age() -> DefineFieldStatement {
     drop,
     schemafull,
     as_select = "select(All)",
-    permissions = "perm()",
+    // permissions = "perm()",
+    permissions_fn = "perm",
     define = "define_student()"
 )]
 pub struct Student {
@@ -149,7 +150,8 @@ pub struct Student {
         // assert = "cond(value().is_not(NONE))",
         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
         permissions = "perm()",
-        define = "define_age()"
+        // permissions_fn = "perm",
+        // define = "define_age()"
     )]
     age: u8,
 
