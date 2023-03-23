@@ -38,21 +38,21 @@ impl Deref for NodeToken {
 impl ToTokens for NodeToken{
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
-            ident: ref struct_name_ident,
-            ref data,
-            ref rename_all,
-            ref table_name,
-            ref relax_table_name,
-            ref drop,
-            ref schemafull,
-            ref as_,
-            ref as_fn,
-            ref permissions,
-            ref permissions_fn,
-            ref define,
-            ref define_fn,
+            ident: struct_name_ident,
+            data,
+            rename_all,
+            table_name,
+            relax_table_name,
+            drop,
+            schemafull,
+            as_,
+            as_fn,
+            permissions,
+            permissions_fn,
+            define,
+            define_fn,
             ..
-        } = self.0;
+        } = &self.0;
 
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
         let table_name_str =

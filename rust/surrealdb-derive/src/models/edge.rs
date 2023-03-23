@@ -58,13 +58,13 @@ impl Deref for EdgeToken {
 impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
-            ident: ref struct_name_ident,
-            ref table_name,
-            ref data,
-            ref rename_all,
-            ref relax_table_name,
+            ident: struct_name_ident,
+            table_name,
+            data,
+            rename_all,
+            relax_table_name,
             ..
-        } = self.0;
+        } = &self.0;
         let table_definitions = self.get_table_definition_token();
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
