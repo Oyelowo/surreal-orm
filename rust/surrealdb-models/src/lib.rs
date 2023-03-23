@@ -129,7 +129,7 @@ fn define_age() -> DefineFieldStatement {
     table_name = "student",
     drop,
     schemafull,
-    as_select = "select(All)",
+    as = "select(All)",
     // permissions = "perm()",
     permissions_fn = "perm",
     define = "define_student()"

@@ -34,7 +34,8 @@ impl ToTokens for FieldsGetterOpts {
             ref relax_table_name,
             ref drop,
             ref schemafull,
-            ref as_select,
+            ref as_,
+            ref as_fn,
             ref permissions,
             ref permissions_fn,
             ref define,
@@ -107,7 +108,7 @@ impl ToTokens for FieldsGetterOpts {
                                                 
         }
         
-        if let Some(select) = as_select  {
+        if let Some(select) = as_  {
             let select = parse_lit_to_tokenstream(select).unwrap();
             define_table_methods.push(quote!(.as_select(#select)))
         }

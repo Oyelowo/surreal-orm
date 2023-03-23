@@ -132,20 +132,28 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip_serializing: bool,
 
-    #[darling(default)]
-    default: ::std::option::Option<syn::Expr>,
-
+    // #[darling(default)]
+    // default: ::std::option::Option<syn::Expr>,
     #[darling(default, rename = "type")]
     pub(crate) type_: ::std::option::Option<FieldTypeWrapper>,
-    // pub(crate) type_: ::std::option::Option<String>,
+
     #[darling(default)]
     pub(crate) assert: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) assert_fn: ::std::option::Option<syn::Path>,
 
     #[darling(default)]
     pub(crate) define: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]
+    pub(crate) define_fn: ::std::option::Option<syn::Path>,
+
+    #[darling(default)]
     pub(crate) value: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) value_fn: ::std::option::Option<syn::Path>,
 
     #[darling(default)]
     pub(crate) permissions: ::std::option::Option<Permissions>,
@@ -277,8 +285,11 @@ pub struct FieldsGetterOpts {
     #[darling(default)]
     pub(crate) drop: ::std::option::Option<bool>,
 
+    #[darling(default, rename = "as")]
+    pub(crate) as_: ::std::option::Option<syn::LitStr>,
+
     #[darling(default)]
-    pub(crate) as_select: ::std::option::Option<syn::LitStr>,
+    pub(crate) as_fn: ::std::option::Option<syn::Path>,
 
     #[darling(default)]
     pub(crate) permissions: ::std::option::Option<Permissions>,
@@ -288,6 +299,9 @@ pub struct FieldsGetterOpts {
 
     #[darling(default)]
     pub(crate) define: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) define_fn: ::std::option::Option<syn::Path>,
 }
 
 #[derive(Default, Clone)]
@@ -323,9 +337,17 @@ impl ReferencedNodeMeta {
                 define_field_methods.push(quote!(.value(#crate_name::Value::from(#val))))
             }
 
+            if let Some(val_fn) = &field_receiver.value_fn {
+                define_field_methods.push(quote!(.value(#crate_name::Value::from(#val_fn()))))
+            }
+
             if let Some(assert) = &field_receiver.assert {
                 let assert = parse_lit_to_tokenstream(assert).unwrap();
                 define_field_methods.push(quote!(.assert(#assert)))
+            }
+
+            if let Some(assert_fn) = &field_receiver.assert_fn {
+                define_field_methods.push(quote!(.assert(#assert_fn())))
             }
 
             if let Some(permissions) = &field_receiver.permissions {
