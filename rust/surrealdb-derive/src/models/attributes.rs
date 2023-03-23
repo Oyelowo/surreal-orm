@@ -337,6 +337,97 @@ pub struct FieldsGetterOpts {
     pub(crate) define_fn: ::std::option::Option<syn::Path>,
 }
 
+impl FieldsGetterOpts {
+    fn get_table_defition_token(&self) -> TokenStream {
+        let FieldsGetterOpts {
+            ident: ref struct_name_ident,
+            ref data,
+            ref rename_all,
+            ref table_name,
+            ref relax_table_name,
+            ref drop,
+            ref schemafull,
+            ref as_,
+            ref as_fn,
+            ref permissions,
+            ref permissions_fn,
+            ref define,
+            ref define_fn,
+            ..
+        } = *self;
+        if ((define_fn.is_some() || define.is_some())
+            && (drop.is_some()
+                || as_.is_some()
+                || as_fn.is_some()
+                || schemafull.is_some()
+                || permissions.is_some()
+                || permissions_fn.is_some()))
+        {
+            panic!("Invalid combinationation. When `define` or `define_fn`,
+                           the following attributes cannot be use in combination to prevent confusion:
+                            drop,
+                            as,
+                            as_fn,
+                            schemafull,
+                            permissions,
+                            permissions_fn");
+        }
+
+        let mut define_table: Option<TokenStream> = None;
+        match (define, define_fn){
+            (Some(define), None) => {
+                let define = parse_lit_to_tokenstream(define).unwrap();
+                define_table = Some(quote!(#define));
+            },
+            (None, Some(define_fn)) => {
+                define_table = Some(quote!(#define_fn()));
+            },
+            (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        let mut define_table_methods = vec![];
+
+        if let Some(drop) = drop {
+            define_table_methods.push(quote!(.drop()))
+        }
+
+        match (as_, as_fn){
+            (Some(as_), None) => {
+                let as_ = parse_lit_to_tokenstream(as_).unwrap();
+                define_table_methods.push(quote!(.as_(#as_)))
+            },
+            (None, Some(as_fn)) => {
+                    define_table_methods.push(quote!(#as_fn()));
+            },
+            (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        if let Some(schemafull) = schemafull {
+            define_table_methods.push(quote!(.schemafull()))
+        }
+
+        match (permissions, permissions_fn){
+            (None, Some(p_fn)) => {
+                    define_table_methods.push(p_fn.get_token_stream());
+            },
+            (Some(p), None) => {
+                    define_table_methods.push(p.get_token_stream());
+            },
+            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        define_table.unwrap_or_else(|| {
+            quote!(
+                #crate_name::statements::define_table(Self::table_name())
+                #( # define_table_methods) *
+            )
+        })
+    }
+}
+
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
     pub(crate) foreign_node_type: TokenStream,
