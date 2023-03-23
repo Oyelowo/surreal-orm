@@ -106,7 +106,7 @@ pub struct DefineTableStatement {
     table_name: String,
     drop: Option<bool>,
     schema_type: Option<SchemaType>,
-    as_select: Option<String>,
+    as_: Option<String>,
     permissions_none: Option<bool>,
     permissions_full: Option<bool>,
     permissions_for: Vec<String>,
@@ -119,7 +119,7 @@ pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
         table_name: table.to_string(),
         drop: None,
         schema_type: None,
-        as_select: None,
+        as_: None,
         permissions_none: None,
         permissions_full: None,
         permissions_for: vec![],
@@ -143,9 +143,9 @@ impl DefineTableStatement {
         self
     }
 
-    pub fn as_select(mut self, select_statement: impl Into<SelectStatement>) -> Self {
+    pub fn as_(mut self, select_statement: impl Into<SelectStatement>) -> Self {
         let statement: SelectStatement = select_statement.into();
-        self.as_select = Some(statement.to_string());
+        self.as_ = Some(statement.to_string());
         self.bindings.extend(statement.get_bindings());
         self
     }
@@ -209,7 +209,7 @@ impl Buildable for DefineTableStatement {
             None => {}
         };
 
-        if let Some(select_statement) = &self.as_select {
+        if let Some(select_statement) = &self.as_ {
             query = format!("{query} AS \n\t{}", select_statement.trim_end_matches(";"));
         }
 
@@ -301,7 +301,7 @@ mod tests {
 
         let statement = define_table(user_table)
             .drop()
-            .as_select(
+            .as_(
                 select(All)
                     .from(fake_id2)
                     .where_(country.is("INDONESIA"))

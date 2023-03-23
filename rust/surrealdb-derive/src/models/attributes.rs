@@ -338,7 +338,7 @@ pub struct FieldsGetterOpts {
 }
 
 impl FieldsGetterOpts {
-    fn get_table_defition_token(&self) -> TokenStream {
+    pub fn get_table_defition_token(&self) -> TokenStream {
         let FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,
@@ -355,6 +355,9 @@ impl FieldsGetterOpts {
             ref define_fn,
             ..
         } = *self;
+
+        let crate_name = super::get_crate_name(false);
+
         if ((define_fn.is_some() || define.is_some())
             && (drop.is_some()
                 || as_.is_some()
@@ -374,6 +377,8 @@ impl FieldsGetterOpts {
         }
 
         let mut define_table: Option<TokenStream> = None;
+        let mut define_table_methods = vec![];
+
         match (define, define_fn){
             (Some(define), None) => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
@@ -385,8 +390,6 @@ impl FieldsGetterOpts {
             (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
         };
-
-        let mut define_table_methods = vec![];
 
         if let Some(drop) = drop {
             define_table_methods.push(quote!(.drop()))
@@ -422,7 +425,7 @@ impl FieldsGetterOpts {
         define_table.unwrap_or_else(|| {
             quote!(
                 #crate_name::statements::define_table(Self::table_name())
-                #( # define_table_methods) *
+                #( #define_table_methods) *
             )
         })
     }

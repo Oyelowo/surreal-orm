@@ -97,78 +97,8 @@ impl ToTokens for FieldsGetterOpts {
         let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
 
-        if ((define_fn.is_some() || define.is_some())
-                && ( drop.is_some()
-                    || as_.is_some()
-                    || as_fn.is_some()
-                    || schemafull.is_some()
-                    || permissions.is_some()
-                    || permissions_fn.is_some()))
-            {
-                panic!("Invalid combinationation. When `define` or `define_fn`,
-                           the following attributes cannot be use in combination to prevent confusion:
-                            drop,
-                            as,
-                            as_fn,
-                            schemafull,
-                            permissions,
-                            permissions_fn");
-            }
-
         
-        let mut define_field: Option<TokenStream> = None;
-        match (define, define_fn){
-            (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).unwrap();
-                define_field = Some(quote!(#define));
-            },
-            (None, Some(define_fn)) => {
-                define_field = Some(quote!(#define_fn()));
-            },
-            (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-            
-        let mut define_table_methods = vec![];
-        
-        if let Some(drop) = drop  {
-            define_table_methods.push(quote!(.drop()))
-                                                
-        }
-        
-        match (as_, as_fn){
-            (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).unwrap();
-                define_table_methods.push(quote!(.as_(#as_)))
-            },
-            (None, Some(as_fn)) => {
-                    define_table_methods.push(quote!(#as_fn()));
-            },
-            (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-        
-        if let Some(schemafull) = schemafull  {
-            define_table_methods.push(quote!(.schemafull()))
-        }
-        
-        match (permissions, permissions_fn){
-            (None, Some(p_fn)) => {
-                    define_table_methods.push(p_fn.get_token_stream());
-            },
-            (Some(p), None) => {
-                    define_table_methods.push(p.get_token_stream());
-            },
-            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-        
-        quote!(
-                #crate_name::statements::define_table(Self::table_name())
-                #( # define_table_methods) *
-            );
-            
-        
+        let table_definitions = self.get_table_defition_token();
 
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -232,7 +162,7 @@ impl ToTokens for FieldsGetterOpts {
                 }
                 
                 fn define_table() -> #crate_name::statements::DefineTableStatement {
-                    #xx
+                    #table_definitions
                 }
                 
                 fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {

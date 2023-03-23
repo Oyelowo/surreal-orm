@@ -67,7 +67,7 @@ fn define_student() -> DefineTableStatement {
 
     let statement = define_table(Student::table_name())
         .drop()
-        .as_select(
+        .as_(
             select(All)
                 .from(fake_id2)
                 .where_(country.is("INDONESIA"))
