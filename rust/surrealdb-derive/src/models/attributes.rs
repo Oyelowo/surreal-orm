@@ -338,7 +338,7 @@ pub struct FieldsGetterOpts {
 }
 
 impl FieldsGetterOpts {
-    pub fn get_table_defition_token(&self) -> TokenStream {
+    pub fn get_table_definition_token(&self) -> TokenStream {
         let FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,

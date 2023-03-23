@@ -11,39 +11,51 @@ use convert_case::{Case, Casing};
 use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::str::FromStr;
+use std::{str::FromStr, ops::Deref};
 
 use syn::{self, parse_macro_input};
 
 use super::{
-    attributes::{MyFieldReceiver, Rename},
+    attributes::{MyFieldReceiver, Rename, FieldsGetterOpts},
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
     variables::VariablesModelMacro,
 };
 
+// #[derive(Debug, FromDeriveInput)]
+// #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
+// pub struct FieldsGetterOpts {
+//     ident: syn::Ident,
+//     attrs: Vec<syn::Attribute>,
+//     generics: syn::Generics,
+//     /// Receives the body of the struct or enum. We don't care about
+//     /// struct fields because we previously told darling we only accept structs.
+//     data: ast::Data<util::Ignored, MyFieldReceiver>,
+//
+//     #[darling(default)]
+//     rename_all: ::std::option::Option<Rename>,
+//
+//     #[darling(default)]
+//     pub(crate) table_name: ::std::option::Option<String>,
+//
+//     #[darling(default)]
+//     pub(crate) relax_table_name: ::std::option::Option<bool>,
+// }
+
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub struct FieldsGetterOpts {
-    ident: syn::Ident,
-    attrs: Vec<syn::Attribute>,
-    generics: syn::Generics,
-    /// Receives the body of the struct or enum. We don't care about
-    /// struct fields because we previously told darling we only accept structs.
-    data: ast::Data<util::Ignored, MyFieldReceiver>,
+struct EdgeToken(FieldsGetterOpts);
 
-    #[darling(default)]
-    rename_all: ::std::option::Option<Rename>,
+impl Deref for EdgeToken {
+    type Target=FieldsGetterOpts;
 
-    #[darling(default)]
-    pub(crate) table_name: ::std::option::Option<String>,
-
-    #[darling(default)]
-    pub(crate) relax_table_name: ::std::option::Option<bool>,
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-impl ToTokens for FieldsGetterOpts {
+impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let FieldsGetterOpts {
             ident: ref struct_name_ident,
@@ -52,7 +64,8 @@ impl ToTokens for FieldsGetterOpts {
             ref rename_all,
             ref relax_table_name,
             ..
-        } = *self;
+        } = self.0;
+        let table_definitions = self.get_table_definition_token();
 
         let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
@@ -98,6 +111,7 @@ impl ToTokens for FieldsGetterOpts {
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
             serialized_field_name_no_skip,
+            field_definitions,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // if serialized_field_names_normalised.conta("")
@@ -115,6 +129,7 @@ impl ToTokens for FieldsGetterOpts {
 
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
+        
 
         tokens.extend(quote!( 
                         
@@ -148,11 +163,13 @@ impl ToTokens for FieldsGetterOpts {
                     }
                     
                     fn define_table() -> #crate_name::statements::DefineTableStatement {
-                        todo!()
+                        #table_definitions
                     }
                     
                     fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {
-                        todo!()
+                        vec![
+                       #( #field_definitions), *
+                        ]
                     }
                 }
                 
@@ -267,7 +284,7 @@ pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macr
     // that we can manipulate
     let input = parse_macro_input!(input);
     // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
-    let output = match FieldsGetterOpts::from_derive_input(&input) {
+    let output = match EdgeToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
     };

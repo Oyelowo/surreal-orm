@@ -23,10 +23,21 @@ use super::{
     variables::VariablesModelMacro, parse_lit_to_tokenstream,
 };
 
+#[derive(Debug, FromDeriveInput)]
+#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
+struct NodeToken(FieldsGetterOpts);
 
-impl ToTokens for FieldsGetterOpts {
+impl Deref for NodeToken {
+    type Target=FieldsGetterOpts;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl ToTokens for NodeToken{
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let FieldsGetterOpts {
+        let NodeToken {
             ident: ref struct_name_ident,
             ref data,
             ref rename_all,
@@ -41,7 +52,7 @@ impl ToTokens for FieldsGetterOpts {
             ref define,
             ref define_fn,
             ..
-        } = *self;
+        } = self.0;
 
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
         let table_name_str =
@@ -98,7 +109,7 @@ impl ToTokens for FieldsGetterOpts {
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
 
         
-        let table_definitions = self.get_table_defition_token();
+        let table_definitions = self.get_table_definition_token();
 
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -293,7 +304,7 @@ pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macr
     // that we can manipulate
     let input = parse_macro_input!(input);
     // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
-    let output = match FieldsGetterOpts::from_derive_input(&input) {
+    let output = match NodeToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
     };
