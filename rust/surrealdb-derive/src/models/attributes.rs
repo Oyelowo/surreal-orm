@@ -354,18 +354,31 @@ impl ReferencedNodeMeta {
         field_name_normalized: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
-        let field_definition = if let Some(field_def) = &field_receiver.define {
-            let def_token = parse_lit_to_tokenstream(field_def).unwrap();
+        let MyFieldReceiver {
+            type_,
+            assert,
+            assert_fn,
+            define,
+            define_fn,
+            value,
+            value_fn,
+            permissions,
+            permissions_fn,
+            ..
+        } = field_receiver;
+
+        let field_definition = if let Some(def) = &define {
+            let def_token = parse_lit_to_tokenstream(def).unwrap();
             quote!(#def_token)
         } else {
             let mut define_field_methods = vec![];
 
-            if let Some(ty) = &field_receiver.type_ {
-                let ty = ty.0.to_string();
-                define_field_methods.push(quote!(.type_(#ty.parse::<#crate_name::statements::FieldType>().expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
+            if let Some(type_) = type_ {
+                let type_ = type_.0.to_string();
+                define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>().expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
             }
 
-            if let Some(val) = &field_receiver.value {
+            if let Some(val) = value {
                 let val = parse_lit_to_tokenstream(val).unwrap();
                 define_field_methods.push(quote!(.value(#crate_name::Value::from(#val))))
             }
@@ -374,18 +387,16 @@ impl ReferencedNodeMeta {
                 define_field_methods.push(quote!(.value(#crate_name::Value::from(#val_fn()))))
             }
 
-            if let Some(assert) = &field_receiver.assert {
+            if let Some(assert) = assert {
                 let assert = parse_lit_to_tokenstream(assert).unwrap();
                 define_field_methods.push(quote!(.assert(#assert)))
             }
 
-            if let Some(assert_fn) = &field_receiver.assert_fn {
+            if let Some(assert_fn) = assert_fn {
                 define_field_methods.push(quote!(.assert(#assert_fn())))
             }
 
-            if let Some(permissions) = &field_receiver.permissions {}
-
-            match (&field_receiver.permissions, &field_receiver.permissions_fn){
+            match (permissions, permissions_fn){
                 (None, Some(p_fn)) => {
                         define_field_methods.push(p_fn.get_token_stream());
                 },
@@ -402,6 +413,7 @@ impl ReferencedNodeMeta {
                                             #( # define_field_methods) *
             )
         };
+
         self.field_definition = field_definition;
         self
     }
