@@ -117,34 +117,16 @@ impl ToTokens for FieldsGetterOpts {
             define_table_methods.push(quote!(.schemafull()))
         }
         
-        if let Some(permissions) = permissions  {
-            match permissions {
-                super::attributes::Permissions::Full => {
-                    define_table_methods.push(quote!(.permissions_full()));
-                },
-                super::attributes::Permissions::None => {
-                    define_table_methods.push(quote!(.permissions_none()));
-                },
-                super::attributes::Permissions::FnName(permissions) => {
-                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                    define_table_methods.push(quote!(.permissions_for(#permissions)));
-                },
-            };
-        }
-        
-        if let Some(permissions_fn) = permissions_fn {
-            match permissions_fn {
-                super::attributes::PermissionsFn::Full => {
-                    define_table_methods.push(quote!(.permissions_full()));
-                }
-                super::attributes::PermissionsFn::None => {
-                    define_table_methods.push(quote!(.permissions_none()));
-                }
-                super::attributes::PermissionsFn::FnPath(permissions_fn) => {
-                    define_table_methods.push(quote!(.permissions_for(#permissions_fn())));
-                }
-            };
-        }
+        match (permissions, permissions_fn){
+            (None, Some(p_fn)) => {
+                    define_table_methods.push(p_fn.get_token_stream());
+            },
+            (Some(p), None) => {
+                    define_table_methods.push(p.get_token_stream());
+            },
+            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
         
         quote!(
                 #crate_name::statements::define_table(Self::table_name())

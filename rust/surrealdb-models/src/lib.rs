@@ -130,9 +130,9 @@ fn define_age() -> DefineFieldStatement {
     drop,
     schemafull,
     as = "select(All)",
-    // permissions = "perm()",
+    permissions = "perm()",
     permissions_fn = "perm",
-    define = "define_student()"
+    // define = "define_student()"
 )]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]

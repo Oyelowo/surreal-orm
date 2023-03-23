@@ -195,6 +195,23 @@ pub enum Permissions {
     FnName(LitStr),
 }
 
+impl Permissions {
+    pub fn get_token_stream(&self) -> TokenStream {
+        match self {
+            Self::Full => {
+                quote!(.permissions_full())
+            }
+            Self::None => {
+                quote!(.permissions_none())
+            }
+            Self::FnName(permissions) => {
+                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
+                quote!(.permissions_for(#permissions))
+            }
+        }
+    }
+}
+
 impl FromMeta for Permissions {
     fn from_value(value: &Lit) -> darling::Result<Self> {
         match value {
@@ -241,6 +258,22 @@ pub enum PermissionsFn {
     Full,
     None,
     FnPath(Path),
+}
+
+impl PermissionsFn {
+    pub fn get_token_stream(&self) -> TokenStream {
+        match self {
+            Self::Full => {
+                quote!(.permissions_full())
+            }
+            Self::None => {
+                quote!(.permissions_none())
+            }
+            Self::FnPath(permissions_fn) => {
+                quote!(.permissions_for(#permissions_fn()))
+            }
+        }
+    }
 }
 
 impl FromMeta for PermissionsFn {
@@ -350,34 +383,18 @@ impl ReferencedNodeMeta {
                 define_field_methods.push(quote!(.assert(#assert_fn())))
             }
 
-            if let Some(permissions) = &field_receiver.permissions {
-                match permissions {
-                    super::attributes::Permissions::Full => {
-                        define_field_methods.push(quote!(.permissions_full()));
-                    }
-                    super::attributes::Permissions::None => {
-                        define_field_methods.push(quote!(.permissions_none()));
-                    }
-                    super::attributes::Permissions::FnName(permissions) => {
-                        let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                        define_field_methods.push(quote!(.permissions_for(#permissions)));
-                    }
-                };
-            }
+            if let Some(permissions) = &field_receiver.permissions {}
 
-            if let Some(permissions_fn) = &field_receiver.permissions_fn {
-                match permissions_fn {
-                    super::attributes::PermissionsFn::Full => {
-                        define_field_methods.push(quote!(.permissions_full()));
-                    }
-                    super::attributes::PermissionsFn::None => {
-                        define_field_methods.push(quote!(.permissions_none()));
-                    }
-                    super::attributes::PermissionsFn::FnPath(permissions_fn) => {
-                        define_field_methods.push(quote!(.permissions_for(#permissions_fn())));
-                    }
-                };
-            }
+            match (&field_receiver.permissions, &field_receiver.permissions_fn){
+                (None, Some(p_fn)) => {
+                        define_field_methods.push(p_fn.get_token_stream());
+                },
+                (Some(p), None) => {
+                        define_field_methods.push(p.get_token_stream());
+                },
+                (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+                (None, None) => (),
+            };
 
             quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
