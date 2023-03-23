@@ -11,7 +11,7 @@ use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::str::FromStr;
+use std::{str::FromStr, ops::Deref};
 
 use syn::{self, parse_macro_input, LitStr, Error};
 
@@ -37,7 +37,7 @@ impl Deref for NodeToken {
 
 impl ToTokens for NodeToken{
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let NodeToken {
+        let FieldsGetterOpts {
             ident: ref struct_name_ident,
             ref data,
             ref rename_all,
