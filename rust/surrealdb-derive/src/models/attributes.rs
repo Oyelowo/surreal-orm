@@ -378,23 +378,29 @@ impl ReferencedNodeMeta {
                 define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>().expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
             }
 
-            if let Some(val) = value {
-                let val = parse_lit_to_tokenstream(val).unwrap();
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#val))))
-            }
+            match (value, value_fn) {
+                (Some(value), None) => {
+                    let value = parse_lit_to_tokenstream(value).unwrap();
+                    define_field_methods.push(quote!(.value(#crate_name::Value::from(#value))));
+                }
+                (None, Some(value_fn)) => {
+                    define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
+                }
+                (Some(_), Some(_)) =>  panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+                (None, None) => (),
+            };
 
-            if let Some(val_fn) = &field_receiver.value_fn {
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#val_fn()))))
-            }
-
-            if let Some(assert) = assert {
-                let assert = parse_lit_to_tokenstream(assert).unwrap();
-                define_field_methods.push(quote!(.assert(#assert)))
-            }
-
-            if let Some(assert_fn) = assert_fn {
-                define_field_methods.push(quote!(.assert(#assert_fn())))
-            }
+            match (assert, assert_fn) {
+                (None, None) => (),
+                (Some(assert), None) => {
+                    let assert = parse_lit_to_tokenstream(assert).unwrap();
+                    define_field_methods.push(quote!(.assert(#assert)));
+                }
+                (None, Some(assert_fn)) => {
+                    define_field_methods.push(quote!(.assert(#assert_fn())));
+                }
+                (Some(_), Some(_)) =>  panic!("assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            };
 
             match (permissions, permissions_fn){
                 (None, Some(p_fn)) => {
