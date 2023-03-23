@@ -408,13 +408,18 @@ impl ReferencedNodeMeta {
             } => {
                 define_field = Some(quote!(#define_fn()));
             }
-            MyFieldReceiver {
-                type_: Some(type_), ..
-            } => {
-                let type_ = type_.0.to_string();
-                define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
-                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))))
-            }
+            _ => {}
+        };
+
+        if let Some(type_) = &field_receiver.type_ {
+            let type_ = type_.0.to_string();
+            define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
+                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
+                                             )
+                                      );
+        };
+
+        match field_receiver {
             MyFieldReceiver {
                 value: Some(value),
                 value_fn: Some(value_fn),
@@ -434,6 +439,10 @@ impl ReferencedNodeMeta {
             } => {
                 define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
             }
+            _ => {}
+        };
+
+        match field_receiver {
             MyFieldReceiver {
                 assert: Some(_),
                 assert_fn: Some(_),
@@ -454,6 +463,9 @@ impl ReferencedNodeMeta {
             } => {
                 define_field_methods.push(quote!(.assert(#assert_fn())));
             }
+            _ => {}
+        };
+        match field_receiver {
             MyFieldReceiver {
                 permissions: Some(_),
                 permissions_fn: Some(_),
