@@ -1,5 +1,0 @@
----
-source: surrealdb-macros/tests/test_query_builder.rs
-expression: raw
----
-RELATE student:1->writes->book:2 CONTENT { in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } } RETURN BEFORE PARALLEL ;
