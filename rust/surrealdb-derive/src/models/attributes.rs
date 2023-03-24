@@ -329,6 +329,7 @@ impl ReferencedNodeMeta {
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
+        let mut define_array_field_content_methods = vec![];
 
         match field_receiver {
             MyFieldReceiver {
@@ -399,6 +400,22 @@ impl ReferencedNodeMeta {
                                       );
         };
 
+        if let Some(content_type) = &field_receiver.content_type {
+            let content_type = content_type.0.to_string();
+            // id: record(student)
+            // in: record
+            // out: record
+            // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+            // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
+            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+            // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
+            // let xx = field_name_normalized
+            define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
+                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
+                                             )
+                                      );
+        };
+
         match field_receiver {
             MyFieldReceiver {
                 value: Some(value),
@@ -445,6 +462,31 @@ impl ReferencedNodeMeta {
             }
             _ => {}
         };
+
+        match field_receiver {
+            MyFieldReceiver {
+                content_assert: Some(_),
+                content_assert_fn: Some(_),
+                ..
+            } => {
+                panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                content_assert: Some(content_assert),
+                ..
+            } => {
+                let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
+                define_array_field_content_methods.push(quote!(.assert(#content_assert)));
+            }
+            MyFieldReceiver {
+                content_assert_fn: Some(content_assert_fn),
+                ..
+            } => {
+                define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
+            }
+            _ => {}
+        };
+
         match field_receiver {
             MyFieldReceiver {
                 permissions: Some(_),
@@ -468,11 +510,30 @@ impl ReferencedNodeMeta {
             _ => {}
         };
 
+        // Helps to define the schema definition of the content
+        let array_field_content_str = format!("{field_name_normalized}.*");
+        // Im puting coma before this to separate from the top field array type definition in case
+        // it is present
+        let array_content_definition = if define_array_field_content_methods.is_empty() {
+            quote!()
+        } else {
+            quote!(
+                ,
+                #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
+                                        .on_table(#crate_name::Table::from(#struct_name_ident_str))
+                                        #( # define_array_field_content_methods) *
+
+            )
+        };
+
         self.field_definition = define_field.unwrap_or_else(||quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                             #( # define_field_methods) *
+
+                    #array_content_definition
             ));
+
         self
     }
 
