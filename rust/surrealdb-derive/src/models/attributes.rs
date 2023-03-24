@@ -100,34 +100,99 @@ impl FromMeta for Relate {
     }
 }
 
+// #[derive(Debug, Clone)]
+// struct Content {
+//     #[darling(default, rename = "type")]
+//     pub(crate) type_: Option<FieldTypeWrapper>,
+// }
+//
+// #[derive(Debug, Clone)]
+// struct FullContent {
+//     #[darling(default, rename = "type")]
+//     pub(crate) type_: Option<FieldTypeWrapper>,
+//
+//     #[darling(default)]
+//     pub(crate) assert: Option<syn::LitStr>,
+//
+//     #[darling(default)]
+//     pub(crate) assert_fn: Option<syn::Path>,
+// }
+// impl FromMeta for Content {
+//     fn from_string(value: &str) -> ::darling::Result<Self> {
+//         let value = match value.parse::<FieldType>() {
+//             Ok(f) => Ok(Self {
+//                 type_: Some(FieldTypeWrapper(value.to_string())),
+//             }),
+//             Err(e) => Err(darling::Error::unknown_value(&e)),
+//         };
+//     }
+//
+//     fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
+//         #[derive(FromMeta)]
+//         struct FullContent {
+//             serialize: String,
+//
+//             #[darling(default)]
+//             deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
+//         }
+//
+//         impl From<FullRename> for Rename {
+//             fn from(v: FullRename) -> Self {
+//                 let FullRename { serialize, .. } = v;
+//                 Self { serialize }
+//             }
+//         }
+//         FullRename::from_list(items).map(Rename::from)
+//     }
+// }
+// struct Oyelowo {
+//     #[orm(type="list")]
+//     names: List<names>,
+//
+//     #[orm(type="list", content="string"))]
+//     names: List<names>,
+//
+//     #[orm(type="list", content=(type="string"))]
+//     names: List<names>,
+//
+//     #[orm(type="list", content=(type="string", assert_fn="my_assert()"))]
+//     names: List<names>,
+//
+//     #[orm(type="list", content_type="string", content_assert="my_assert()")]
+//     names2: List<names>
+// }
+// fn my_assert() {
+//     value > 5
+//
+// }
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
-    pub(crate) ident: ::std::option::Option<syn::Ident>,
+    pub(crate) ident: Option<syn::Ident>,
     /// This magic field name pulls the type from the input.
     pub(crate) ty: syn::Type,
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
-    pub(crate) rename: ::std::option::Option<Rename>,
+    pub(crate) rename: Option<Rename>,
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) relate: ::std::option::Option<Relate>,
+    pub(crate) relate: Option<Relate>,
 
     // reference singular: LinkOne<Account>
     #[darling(default)]
-    pub(crate) link_one: ::std::option::Option<String>,
+    pub(crate) link_one: Option<String>,
 
     // reference singular: LinkSelf<Account>
     #[darling(default)]
-    pub(crate) link_self: ::std::option::Option<String>,
+    pub(crate) link_self: Option<String>,
 
     // reference plural: LinkMany<Account>
     #[darling(default)]
-    pub(crate) link_many: ::std::option::Option<String>,
+    pub(crate) link_many: Option<String>,
 
     #[darling(default)]
     pub(crate) skip_serializing: bool,
@@ -135,31 +200,40 @@ pub struct MyFieldReceiver {
     // #[darling(default)]
     // default: ::std::option::Option<syn::Expr>,
     #[darling(default, rename = "type")]
-    pub(crate) type_: ::std::option::Option<FieldTypeWrapper>,
+    pub(crate) type_: Option<FieldTypeWrapper>,
 
     #[darling(default)]
-    pub(crate) assert: ::std::option::Option<syn::LitStr>,
+    pub(crate) assert: Option<syn::LitStr>,
 
     #[darling(default)]
-    pub(crate) assert_fn: ::std::option::Option<syn::Path>,
+    pub(crate) assert_fn: Option<syn::Path>,
 
     #[darling(default)]
-    pub(crate) define: ::std::option::Option<syn::LitStr>,
+    pub(crate) define: Option<syn::LitStr>,
 
     #[darling(default)]
-    pub(crate) define_fn: ::std::option::Option<syn::Path>,
+    pub(crate) define_fn: Option<syn::Path>,
 
     #[darling(default)]
-    pub(crate) value: ::std::option::Option<syn::LitStr>,
+    pub(crate) value: Option<syn::LitStr>,
 
     #[darling(default)]
-    pub(crate) value_fn: ::std::option::Option<syn::Path>,
+    pub(crate) value_fn: Option<syn::Path>,
 
     #[darling(default)]
-    pub(crate) permissions: ::std::option::Option<Permissions>,
+    pub(crate) permissions: Option<Permissions>,
 
     #[darling(default)]
-    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
+    pub(crate) permissions_fn: Option<PermissionsFn>,
+
+    #[darling(default)]
+    content_type: Option<FieldTypeWrapper>,
+
+    #[darling(default)]
+    content_assert: Option<syn::LitStr>,
+
+    #[darling(default)]
+    content_assert_fn: Option<syn::Path>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -236,200 +310,6 @@ impl FromMeta for Permissions {
 #[derive(Debug, Clone)]
 pub struct FieldTypeWrapper(pub String);
 
-// impl Deref for FieldTypeWrapper {
-//     type Target = FieldType;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-
-impl FromMeta for FieldTypeWrapper {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(value.to_string())),
-            Err(e) => Err(darling::Error::unknown_value(&e)),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum PermissionsFn {
-    Full,
-    None,
-    FnPath(Path),
-}
-
-impl PermissionsFn {
-    pub fn get_token_stream(&self) -> TokenStream {
-        match self {
-            Self::Full => {
-                quote!(.permissions_full())
-            }
-            Self::None => {
-                quote!(.permissions_none())
-            }
-            Self::FnPath(permissions_fn) => {
-                quote!(.permissions_for(#permissions_fn()))
-            }
-        }
-    }
-}
-
-impl FromMeta for PermissionsFn {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        match value.to_lowercase().as_str() {
-            "none" => Ok(Self::None),
-            "full" => Ok(Self::Full),
-            _ => Err(darling::Error::unexpected_type(value)),
-        }
-    }
-
-    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
-        match value {
-            Lit::Str(str) => Ok(Self::FnPath(syn::parse_str::<Path>(&str.value())?)),
-            _ => Err(darling::Error::unexpected_lit_type(value)),
-        }
-    }
-}
-
-#[derive(Debug, FromDeriveInput)]
-#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-pub struct FieldsGetterOpts {
-    pub(crate) ident: syn::Ident,
-    pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
-    /// Receives the body of the struct or enum. We don't care about
-    /// struct fields because we previously told darling we only accept structs.
-    pub data: Data<util::Ignored, self::MyFieldReceiver>,
-
-    #[darling(default)]
-    pub(crate) rename_all: ::std::option::Option<Rename>,
-
-    #[darling(default)]
-    pub(crate) table_name: ::std::option::Option<String>,
-
-    #[darling(default)]
-    pub(crate) relax_table_name: ::std::option::Option<bool>,
-
-    #[darling(default)]
-    pub(crate) schemafull: ::std::option::Option<bool>,
-
-    #[darling(default)]
-    pub(crate) drop: ::std::option::Option<bool>,
-
-    #[darling(default, rename = "as")]
-    pub(crate) as_: ::std::option::Option<syn::LitStr>,
-
-    #[darling(default)]
-    pub(crate) as_fn: ::std::option::Option<syn::Path>,
-
-    #[darling(default)]
-    pub(crate) permissions: ::std::option::Option<Permissions>,
-
-    #[darling(default)]
-    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
-
-    #[darling(default)]
-    pub(crate) define: ::std::option::Option<syn::LitStr>,
-
-    #[darling(default)]
-    pub(crate) define_fn: ::std::option::Option<syn::Path>,
-}
-
-impl FieldsGetterOpts {
-    pub fn get_table_definition_token(&self) -> TokenStream {
-        let FieldsGetterOpts {
-            ident: ref struct_name_ident,
-            ref data,
-            ref rename_all,
-            ref table_name,
-            ref relax_table_name,
-            ref drop,
-            ref schemafull,
-            ref as_,
-            ref as_fn,
-            ref permissions,
-            ref permissions_fn,
-            ref define,
-            ref define_fn,
-            ..
-        } = *self;
-
-        let crate_name = super::get_crate_name(false);
-
-        if ((define_fn.is_some() || define.is_some())
-            && (drop.is_some()
-                || as_.is_some()
-                || as_fn.is_some()
-                || schemafull.is_some()
-                || permissions.is_some()
-                || permissions_fn.is_some()))
-        {
-            panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
-                            drop,
-                            as,
-                            as_fn,
-                            schemafull,
-                            permissions,
-                            permissions_fn");
-        }
-
-        let mut define_table: Option<TokenStream> = None;
-        let mut define_table_methods = vec![];
-
-        match (define, define_fn){
-            (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).unwrap();
-                define_table = Some(quote!(#define));
-            },
-            (None, Some(define_fn)) => {
-                define_table = Some(quote!(#define_fn()));
-            },
-            (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-
-        if let Some(drop) = drop {
-            define_table_methods.push(quote!(.drop()))
-        }
-
-        match (as_, as_fn){
-            (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).unwrap();
-                define_table_methods.push(quote!(.as_(#as_)))
-            },
-            (None, Some(as_fn)) => {
-                    define_table_methods.push(quote!(#as_fn()));
-            },
-            (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-
-        if let Some(schemafull) = schemafull {
-            define_table_methods.push(quote!(.schemafull()))
-        }
-
-        match (permissions, permissions_fn){
-            (None, Some(p_fn)) => {
-                    define_table_methods.push(p_fn.get_token_stream());
-            },
-            (Some(p), None) => {
-                    define_table_methods.push(p.get_token_stream());
-            },
-            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
-            (None, None) => (),
-        };
-
-        define_table.unwrap_or_else(|| {
-            quote!(
-                #crate_name::statements::define_table(Self::table_name())
-                #( #define_table_methods) *
-            )
-        })
-    }
-}
-
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
     pub(crate) foreign_node_type: TokenStream,
@@ -505,6 +385,14 @@ impl ReferencedNodeMeta {
 
         if let Some(type_) = &field_receiver.type_ {
             let type_ = type_.0.to_string();
+            // id: record(student)
+            // in: record
+            // out: record
+            // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+            // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
+            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+            // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
+            // let xx = field_name_normalized
             define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
@@ -679,5 +567,199 @@ impl NormalisedField {
             field_ident_normalised,
             field_ident_normalised_as_str,
         }
+    }
+}
+
+// impl Deref for FieldTypeWrapper {
+//     type Target = FieldType;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+impl FromMeta for FieldTypeWrapper {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        match value.parse::<FieldType>() {
+            Ok(f) => Ok(Self(value.to_string())),
+            Err(e) => Err(darling::Error::unknown_value(&e)),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum PermissionsFn {
+    Full,
+    None,
+    FnPath(Path),
+}
+
+impl PermissionsFn {
+    pub fn get_token_stream(&self) -> TokenStream {
+        match self {
+            Self::Full => {
+                quote!(.permissions_full())
+            }
+            Self::None => {
+                quote!(.permissions_none())
+            }
+            Self::FnPath(permissions_fn) => {
+                quote!(.permissions_for(#permissions_fn()))
+            }
+        }
+    }
+}
+
+impl FromMeta for PermissionsFn {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        match value.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "full" => Ok(Self::Full),
+            _ => Err(darling::Error::unexpected_type(value)),
+        }
+    }
+
+    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+        match value {
+            Lit::Str(str) => Ok(Self::FnPath(syn::parse_str::<Path>(&str.value())?)),
+            _ => Err(darling::Error::unexpected_lit_type(value)),
+        }
+    }
+}
+
+#[derive(Debug, FromDeriveInput)]
+#[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
+pub struct TableDeriveAttributes {
+    pub(crate) ident: syn::Ident,
+    pub(crate) attrs: Vec<syn::Attribute>,
+    pub(crate) generics: syn::Generics,
+    /// Receives the body of the struct or enum. We don't care about
+    /// struct fields because we previously told darling we only accept structs.
+    pub data: Data<util::Ignored, self::MyFieldReceiver>,
+
+    #[darling(default)]
+    pub(crate) rename_all: ::std::option::Option<Rename>,
+
+    #[darling(default)]
+    pub(crate) table_name: ::std::option::Option<String>,
+
+    #[darling(default)]
+    pub(crate) relax_table_name: ::std::option::Option<bool>,
+
+    #[darling(default)]
+    pub(crate) schemafull: ::std::option::Option<bool>,
+
+    #[darling(default)]
+    pub(crate) drop: ::std::option::Option<bool>,
+
+    #[darling(default, rename = "as")]
+    pub(crate) as_: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) as_fn: ::std::option::Option<syn::Path>,
+
+    #[darling(default)]
+    pub(crate) permissions: ::std::option::Option<Permissions>,
+
+    #[darling(default)]
+    pub(crate) permissions_fn: ::std::option::Option<PermissionsFn>,
+
+    #[darling(default)]
+    pub(crate) define: ::std::option::Option<syn::LitStr>,
+
+    #[darling(default)]
+    pub(crate) define_fn: ::std::option::Option<syn::Path>,
+}
+
+impl TableDeriveAttributes {
+    pub fn get_table_definition_token(&self) -> TokenStream {
+        let TableDeriveAttributes {
+            ident: ref struct_name_ident,
+            ref data,
+            ref rename_all,
+            ref table_name,
+            ref relax_table_name,
+            ref drop,
+            ref schemafull,
+            ref as_,
+            ref as_fn,
+            ref permissions,
+            ref permissions_fn,
+            ref define,
+            ref define_fn,
+            ..
+        } = *self;
+
+        let crate_name = super::get_crate_name(false);
+
+        if ((define_fn.is_some() || define.is_some())
+            && (drop.is_some()
+                || as_.is_some()
+                || as_fn.is_some()
+                || schemafull.is_some()
+                || permissions.is_some()
+                || permissions_fn.is_some()))
+        {
+            panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                            drop,
+                            as,
+                            as_fn,
+                            schemafull,
+                            permissions,
+                            permissions_fn");
+        }
+
+        let mut define_table: Option<TokenStream> = None;
+        let mut define_table_methods = vec![];
+
+        match (define, define_fn){
+            (Some(define), None) => {
+                let define = parse_lit_to_tokenstream(define).unwrap();
+                define_table = Some(quote!(#define));
+            },
+            (None, Some(define_fn)) => {
+                define_table = Some(quote!(#define_fn()));
+            },
+            (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        if let Some(drop) = drop {
+            define_table_methods.push(quote!(.drop()))
+        }
+
+        match (as_, as_fn){
+            (Some(as_), None) => {
+                let as_ = parse_lit_to_tokenstream(as_).unwrap();
+                define_table_methods.push(quote!(.as_(#as_)))
+            },
+            (None, Some(as_fn)) => {
+                    define_table_methods.push(quote!(#as_fn()));
+            },
+            (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        if let Some(schemafull) = schemafull {
+            define_table_methods.push(quote!(.schemafull()))
+        }
+
+        match (permissions, permissions_fn){
+            (None, Some(p_fn)) => {
+                    define_table_methods.push(p_fn.get_token_stream());
+            },
+            (Some(p), None) => {
+                    define_table_methods.push(p.get_token_stream());
+            },
+            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (None, None) => (),
+        };
+
+        define_table.unwrap_or_else(|| {
+            quote!(
+                #crate_name::statements::define_table(Self::table_name())
+                #( #define_table_methods) *
+            )
+        })
     }
 }

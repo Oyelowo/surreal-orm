@@ -195,7 +195,7 @@ impl Display for GeometryType {
 pub enum FieldType {
     Any,
     Array,
-    ArrayList(Box<FieldType>),
+    // ArrayList(Box<FieldType>),
     Bool,
     DateTime,
     Decimal,
@@ -222,7 +222,7 @@ impl Display for FieldType {
         let data_type = match self {
             FieldType::Any => "any".to_string(),
             FieldType::Array => "array".to_string(),
-            FieldType::ArrayList(field_type) => format!("array ({field_type})"),
+            // FieldType::ArrayList(field_type) => format!("array ({field_type})"),
             FieldType::Bool => "bool".to_string(),
             FieldType::DateTime => "datetime".to_string(),
             FieldType::Decimal => "decimal".to_string(),
@@ -275,10 +275,10 @@ impl FromStr for FieldType {
             (Some("record"), None) => FieldType::Record,
             (Some("record"), Some(record_type)) => FieldType::RecordList(Table::from(record_type)),
             (Some("array"), None) => FieldType::Array,
-            (Some("array"), Some(content)) => {
-                let content_type = Self::from_str(content)?;
-                FieldType::ArrayList(Box::new(content_type))
-            }
+            // (Some("array"), Some(content)) => {
+            //     let content_type = Self::from_str(content)?;
+            //     FieldType::ArrayList(Box::new(content_type))
+            // }
             (Some("geometry"), None) => FieldType::Geometry,
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
