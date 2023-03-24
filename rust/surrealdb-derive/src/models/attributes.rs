@@ -478,13 +478,13 @@ impl ReferencedNodeMeta {
                     content_type,
                     ..
                 } => {
-                    let linked_node = &link_one.or(link_self);
-                    let field_type = FieldType::from_str(type_.to_string()).expect(
-                            "Field type should have been validated here. If not, report bug",
-                        );
-                    let ref_node_table_name_checker_ident = format_ident!("{field_name_normalized}RefChecker")
-                    if let Some(link_single_ref_node) = linked_node {
+                    let linked_node = link_one.clone().or(link_self.clone());
+                    let field_type = FieldType::from_str(type_.to_string())
+                        .expect("Field type should have been validated here. If not, report bug");
+                    let ref_node_table_name_checker_ident =
+                        format_ident!("{field_name_normalized}RefChecker");
 
+                    if let Some(link_single_ref_node) = linked_node {
                         // Validate that it is a type - record, when link_one or link_self used,
                         // since those attributes are used for record links. When record type
                         // provided, do static assertions validation to check the inner type e.g
@@ -492,6 +492,7 @@ impl ReferencedNodeMeta {
                         match field_type {
                             FieldType::Record => {}
                             FieldType::RecordList(link_table_name) => {
+                                let link_table_name = link_table_name.to_string();
                                 let ref_node = NodeTypeName::from(&link_single_ref_node);
                                 let ref_node_token: TokenStream = ref_node.into();
                                 // Generate validation for the record type content at compile
@@ -520,6 +521,8 @@ impl ReferencedNodeMeta {
                                     match content_type {
                                         FieldType::Record => {}
                                         FieldType::RecordList(array_content_table_name) => {
+                                            let array_content_table_name =
+                                                array_content_table_name.to_string();
                                             let ref_node = NodeTypeName::from(link_many_ref_node);
                                             let ref_node_token: TokenStream = ref_node.into();
 
@@ -587,12 +590,14 @@ impl ReferencedNodeMeta {
                 ..
             } = field_receiver
             {
-                if &field_name_normalized == "id" {
+                let field_name_normalized = field_name_normalized.as_str();
+                if field_name_normalized == "id" {
                     define_field_methods
                             .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#struct_name_ident_str))));
-                } else if &field_name_normalized == "out"
-                    || &field_name_normalized == "in"
-                    || link_one.or(link_self).is_some()
+                } else if field_name_normalized == "out"
+                    || field_name_normalized == "in"
+                    || link_one.is_some()
+                    || link_self.is_some()
                 {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
