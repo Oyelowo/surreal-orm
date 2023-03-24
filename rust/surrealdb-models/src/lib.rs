@@ -147,6 +147,7 @@ pub struct Student {
         // type = "geometry(feature, point, collection, polygon)",
         // value = "we()",
         // value = "Duration::from_secs(54)",
+        // assert_fn = "erer",
         // assert = "erer()",
         // assert = "cond(value().is_not(NONE))",
         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
