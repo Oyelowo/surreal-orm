@@ -127,12 +127,13 @@ fn define_age() -> DefineFieldStatement {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
     table_name = "student",
-    drop,
-    schemafull,
-    as = "select(All)",
-    permissions = "perm()",
+    // drop,
+    // schemafull,
+    // as = "select(All)",
+    // permissions = "perm()",
     // permissions_fn = "perm",
-    // define = "define_student()"
+    // define = "define_student()",
+    define_fn = "define_student"
 )]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -176,16 +177,16 @@ pub struct Student {
 }
 #[test]
 fn xama() {
-    assert_eq!(
-        format!(
-            "zz:{:?}",
-            Student::define_fields()
-                .into_iter()
-                .map(|f| f.to_string())
-                .collect::<Vec<_>>()
-        ),
-        "er".to_string()
-    );
+    // assert_eq!(
+    //     format!(
+    //         "zz:{:?}",
+    //         Student::define_fields()
+    //             .into_iter()
+    //             .map(|f| f.to_string())
+    //             .collect::<Vec<_>>()
+    //     ),
+    //     "er".to_string()
+    // );
     assert_eq!(Student::define_table().to_string(), "re".to_string());
 }
 

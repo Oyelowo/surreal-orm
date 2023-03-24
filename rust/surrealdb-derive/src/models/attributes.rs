@@ -366,8 +366,7 @@ impl FieldsGetterOpts {
                 || permissions.is_some()
                 || permissions_fn.is_some()))
         {
-            panic!("Invalid combinationation. When `define` or `define_fn`,
-                           the following attributes cannot be use in combination to prevent confusion:
+            panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             as,
                             as_fn,
@@ -472,8 +471,7 @@ impl ReferencedNodeMeta {
                     || permissions.is_some()
                     || permissions_fn.is_some()) =>
             {
-                panic!("Invalid combinationation. When `define` or `define_fn`,
-                           the following attributes cannot be use in combination to prevent confusion:                 
+                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
                             type_,
                             assert,
                             assert_fn,
