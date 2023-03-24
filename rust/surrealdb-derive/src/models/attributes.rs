@@ -547,39 +547,8 @@ impl ReferencedNodeMeta {
                         }
                     }
                 }
-                MyFieldReceiver {
-                    content_type: Some(content_type),
-                    ..
-                } => {
-                    let content_type = content_type.0.to_string();
-                    define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
-                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
-                                             )
-                                      );
-                }
-                MyFieldReceiver {
-                    content_assert: Some(_),
-                    content_assert_fn: Some(_),
-                    ..
-                } => {
-                    panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
-                }
-                MyFieldReceiver {
-                    content_assert: Some(content_assert),
-                    ..
-                } => {
-                    let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
-                    define_array_field_content_methods.push(quote!(.assert(#content_assert)));
-                }
-                MyFieldReceiver {
-                    content_assert_fn: Some(content_assert_fn),
-                    ..
-                } => {
-                    define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
-                }
                 _ => {}
             };
-
             define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
@@ -608,15 +577,62 @@ impl ReferencedNodeMeta {
                     define_field_methods
                             .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
                 } else if let Some(ref_node_type) = link_many {
-                    let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Array)));
-                    define_array_field_content_methods
-                        // .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
                 }
             }
         };
+
+        match field_receiver {
+            MyFieldReceiver {
+                content_assert: Some(_),
+                content_assert_fn: Some(_),
+                ..
+            } => {
+                panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+            }
+            MyFieldReceiver {
+                content_assert: Some(content_assert),
+                ..
+            } => {
+                let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
+                define_array_field_content_methods.push(quote!(.assert(#content_assert)));
+            }
+            MyFieldReceiver {
+                content_assert_fn: Some(content_assert_fn),
+                ..
+            } => {
+                define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
+            }
+            _ => {}
+        };
+
+        match field_receiver {
+            MyFieldReceiver {
+                content_type: Some(content_type),
+                ..
+            } => {
+                // This may not be necessary since we can reliably auto generate the record type
+                // but I want to give users the option to not set the record reference Node type
+                // i.e record instead of e.g record(book)
+                let content_type = content_type.0.to_string();
+                define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
+                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
+                                             )
+                                      );
+            }
+            MyFieldReceiver {
+                content_type: None,
+                link_many: Some(ref_node_type),
+                ..
+            } => {
+                let ref_node_type = format_ident!("{ref_node_type}");
+                define_array_field_content_methods
+                        // .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
+                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
+            }
+            _ => {}
+        }
 
         // Gather default values
         match field_receiver {
