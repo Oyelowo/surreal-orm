@@ -359,7 +359,50 @@ impl ReferencedNodeMeta {
                     || content_assert_fn.is_some()) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
-                            type_,
+                            type,
+                            assert,
+                            assert_fn,
+                            value,
+                            value_fn,
+                            permissions,
+                            permissions_fn,
+                            content_type,
+                            content_assert,
+                            content_assert_fn");
+            }
+            MyFieldReceiver {
+                define,
+                define_fn,
+                type_,
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                content_type,
+                content_assert,
+                content_assert_fn,
+                relate,
+                ..
+            } if (relate.is_some())
+                && (type_.is_some()
+                    || define.is_some()
+                    || define_fn.is_some()
+                    || assert.is_some()
+                    || assert_fn.is_some()
+                    || value.is_some()
+                    || value_fn.is_some()
+                    || permissions.is_some()
+                    || permissions_fn.is_some()
+                    || content_type.is_some()
+                    || content_assert.is_some()
+                    || content_assert_fn.is_some()) =>
+            {
+                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                            type,
+                            define,
+                            define_fn,
                             assert,
                             assert_fn,
                             value,
