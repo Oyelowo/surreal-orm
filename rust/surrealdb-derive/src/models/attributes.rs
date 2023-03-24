@@ -596,13 +596,13 @@ impl ReferencedNodeMeta {
                 if field_name_normalized == "id" {
                     define_field_methods
                             .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(Self::table_name()))));
-                } else if field_name_normalized == "out"
-                    || field_name_normalized == "in"
-                    || link_one.is_some()
-                    || link_self.is_some()
-                {
+                } else if field_name_normalized == "out" || field_name_normalized == "in" {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
+                } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
+                    let ref_node_type = format_ident!("{ref_node_type}");
+                    define_field_methods
+                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
                 } else if let Some(ref_node_type) = link_many {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
