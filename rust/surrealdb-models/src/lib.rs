@@ -133,7 +133,7 @@ fn define_age() -> DefineFieldStatement {
     // permissions = "perm()",
     // permissions_fn = "perm",
     // define = "define_student()",
-    define_fn = "define_student"
+    // define_fn = "define_student"
 )]
 pub struct Student {
     #[serde(skip_serializing_if = "Option::is_none")]
