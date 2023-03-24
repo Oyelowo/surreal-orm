@@ -603,11 +603,13 @@ impl ReferencedNodeMeta {
                 {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
-                } else if let Some(links) = link_many {
+                } else if let Some(ref_node_type) = link_many {
+                    let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Array)));
                     define_array_field_content_methods
-                        .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
+                        // .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
+                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
                 }
             }
         };
