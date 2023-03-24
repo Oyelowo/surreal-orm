@@ -16,7 +16,7 @@ use std::{str::FromStr, ops::Deref};
 use syn::{self, parse_macro_input};
 
 use super::{
-    attributes::{MyFieldReceiver, Rename, FieldsGetterOpts},
+    attributes::{MyFieldReceiver, Rename, TableDeriveAttributes},
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
@@ -45,10 +45,10 @@ use super::{
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-struct EdgeToken(FieldsGetterOpts);
+struct EdgeToken(TableDeriveAttributes);
 
 impl Deref for EdgeToken {
-    type Target=FieldsGetterOpts;
+    type Target=TableDeriveAttributes;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -57,7 +57,7 @@ impl Deref for EdgeToken {
 
 impl ToTokens for EdgeToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let FieldsGetterOpts {
+        let TableDeriveAttributes {
             ident: struct_name_ident,
             table_name,
             data,
