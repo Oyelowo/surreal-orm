@@ -310,6 +310,12 @@ impl FromMeta for Permissions {
 #[derive(Debug, Clone)]
 pub struct FieldTypeWrapper(pub String);
 
+impl FieldTypeWrapper {
+    fn to_string(&self) -> &String {
+        &self.0
+    }
+}
+
 #[derive(Default, Clone)]
 pub(crate) struct ReferencedNodeMeta {
     pub(crate) foreign_node_type: TokenStream,
@@ -330,6 +336,7 @@ impl ReferencedNodeMeta {
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
         let mut define_array_field_content_methods = vec![];
+        let mut static_assertions = vec![];
 
         match field_receiver {
             MyFieldReceiver {
@@ -436,6 +443,8 @@ impl ReferencedNodeMeta {
             _ => {}
         };
 
+        // Generate schema type. If type attribute not provided, set some defaults that can be
+        // derived at compile time.
         if let Some(type_) = &field_receiver.type_ {
             let type_ = type_.0.to_string();
             // id: record(student)
@@ -454,7 +463,7 @@ impl ReferencedNodeMeta {
                     content_assert,
                     content_assert_fn,
                     ..
-                } if !type_.0.to_string().starts_with("array")
+                } if !type_.0.trim().to_string().starts_with("array")
                     & (content_type.is_some()
                         || content_assert.is_some()
                         || content_assert_fn.is_some()) =>
@@ -470,60 +479,58 @@ impl ReferencedNodeMeta {
                     ..
                 } => {
                     let linked_node = link_one.or(link_self);
-                    if let Some(ref_node) = linked_node {
-                        let field_type = FieldType::from_str(&type_.0.to_string()).expect(
+                    if let Some(link_single_ref_node) = linked_node {
+                        let field_type = FieldType::from_str(type_.to_string()).expect(
                             "Field type should have been validated here. If not, report bug",
                         );
 
+                        // Validate that it is a type - record, when link_one or link_self used,
+                        // since those attributes are used for record links. When record type
+                        // provided, do static assertions validation to check the inner type e.g
+                        // record(book)
                         match field_type {
                             FieldType::Record => {}
                             FieldType::RecordList(link_table_name) => {
-                                let ref_node = NodeTypeName::from(ref_node);
+                                let ref_node = NodeTypeName::from(link_single_ref_node);
                                 let ref_node_token: TokenStream = ref_node.into();
                                 // Generate validation for the record type content at compile
                                 // time
                                 // Check that the link name in the type is same used lin
                                 // link_one attribute e.g record(book), when link_one="Book",
                                 // which gives <Book as SurrealdbNode>::TableNameChecker
-                                quote!(
+                                static_assertions.push(quote!(
                                 type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealdbNode>::TableNameChecker;
                                 ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
-                                           );
+                                           ));
                             }
                             _ => {
                                 panic!("when link_one or link_self attribute is used, type must be record or record(<ref_node_table_name>)");
                             }
                         }
-                    } else if let Some(link_many) = link_many {
+                    } else if let Some(link_many_ref_node) = link_many {
                         match field_type {
                             FieldType::Array => {
                                 if let Some(content_type) = content_type {
+                                    // Check content type if of array type. link_many is used for
+                                    // array types. e.g link_many = "Blog"
                                     let content_type =
                                         FieldType::from_str(&content_type.0.to_string()).unwrap();
+
                                     match content_type {
                                         FieldType::Record => {}
-                                        FieldType::RecordList(link_table_name) => {
-                                            let ref_node = NodeTypeName::from(ref_node);
+                                        FieldType::RecordList(array_content_table_name) => {
+                                            let ref_node = NodeTypeName::from(link_many_ref_node);
                                             let ref_node_token: TokenStream = ref_node.into();
-                                            // Generate validation for the record type content at compile
-                                            // time
-                                            // Check that the link name in the type is same used lin
-                                            // link_one attribute e.g record(book), when link_one="Book",
-                                            // which gives <Book as SurrealdbNode>::TableNameChecker
-                                            quote!(
+
+                                            static_assertions.push(quote!(
                                             type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealdbNode>::TableNameChecker;
-                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
-                                                       );
+                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_content_table_name);
+                                                       ));
                                         }
                                         _ => {
-                                            panic!("when link_many attribute is provided and content_type must be of type record or record(<ref_node_table_name>)");
+                                            panic!("when link_many attribute is provided, content_type must be of type record or record(<ref_node_table_name>)");
                                         }
                                     }
-                                } else {
-                                    // Automatically provide a default
-                                    define_array_field_content_methods.push(
-                                        quote!(.type_(#crate_name::statements::FieldType::Record)),
-                                    );
                                 }
                             }
                             _ => {
@@ -537,14 +544,6 @@ impl ReferencedNodeMeta {
                     ..
                 } => {
                     let content_type = content_type.0.to_string();
-                    // id: record(student)
-                    // in: record
-                    // out: record
-                    // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
-                    // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
-                    // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
-                    // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
-                    // let xx = field_name_normalized
                     define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
@@ -599,10 +598,13 @@ impl ReferencedNodeMeta {
                 } else if let Some(links) = link_many {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Array)));
+                    define_array_field_content_methods
+                        .push(quote!(#crate_name::statements::FieldType::Record));
                 }
             }
         };
 
+        // Gather default values
         match field_receiver {
             MyFieldReceiver {
                 value: Some(value),
@@ -626,6 +628,7 @@ impl ReferencedNodeMeta {
             _ => {}
         };
 
+        // Gather assertions
         match field_receiver {
             MyFieldReceiver {
                 assert: Some(_),
@@ -650,6 +653,7 @@ impl ReferencedNodeMeta {
             _ => {}
         };
 
+        // Gather permissions
         match field_receiver {
             MyFieldReceiver {
                 permissions: Some(_),
