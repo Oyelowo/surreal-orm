@@ -407,22 +407,62 @@ impl ReferencedNodeMeta {
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
                                       );
-        };
 
-        if let Some(content_type) = &field_receiver.content_type {
-            let content_type = content_type.0.to_string();
-            // id: record(student)
-            // in: record
-            // out: record
-            // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
-            // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
-            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
-            // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
-            // let xx = field_name_normalized
-            define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
+            match field_receiver {
+                MyFieldReceiver {
+                    type_: Some(type_),
+                    content_type,
+                    content_assert,
+                    content_assert_fn,
+                    ..
+                } if !type_.0.to_string().starts_with("array")
+                    & (content_type.is_some()
+                        || content_assert.is_some()
+                        || content_assert_fn.is_some()) =>
+                {
+                    panic!("attributes `content_type`, `content_assert`, or `content_assert_fn` can only be used when type is array.")
+                }
+                MyFieldReceiver {
+                    type_: Some(type_),
+                    content_type: Some(content_type),
+                    content_assert: Some(content_assert),
+                    content_assert_fn: Some(content_assert_fn),
+                    ..
+                } if type_.0.starts_with("array") => {
+                    let content_type = content_type.0.to_string();
+                    // id: record(student)
+                    // in: record
+                    // out: record
+                    // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+                    // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
+                    // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+                    // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
+                    // let xx = field_name_normalized
+                    define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
                                       );
+                }
+                _ => {}
+            };
+
+            if type_.starts_with("array") {
+                if let Some(content_type) = &field_receiver.content_type {
+                    let content_type = content_type.0.to_string();
+                    // id: record(student)
+                    // in: record
+                    // out: record
+                    // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+                    // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
+                    // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
+                    // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
+                    // let xx = field_name_normalized
+                    define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
+                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
+                                             )
+                                      );
+                };
+            }
         };
 
         match field_receiver {
