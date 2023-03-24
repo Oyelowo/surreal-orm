@@ -423,12 +423,9 @@ impl ReferencedNodeMeta {
                     panic!("attributes `content_type`, `content_assert`, or `content_assert_fn` can only be used when type is array.")
                 }
                 MyFieldReceiver {
-                    type_: Some(type_),
                     content_type: Some(content_type),
-                    content_assert: Some(content_assert),
-                    content_assert_fn: Some(content_assert_fn),
                     ..
-                } if type_.0.starts_with("array") => {
+                } => {
                     let content_type = content_type.0.to_string();
                     // id: record(student)
                     // in: record
@@ -442,6 +439,26 @@ impl ReferencedNodeMeta {
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
                                       );
+                }
+                MyFieldReceiver {
+                    content_assert: Some(_),
+                    content_assert_fn: Some(_),
+                    ..
+                } => {
+                    panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                }
+                MyFieldReceiver {
+                    content_assert: Some(content_assert),
+                    ..
+                } => {
+                    let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
+                    define_array_field_content_methods.push(quote!(.assert(#content_assert)));
+                }
+                MyFieldReceiver {
+                    content_assert_fn: Some(content_assert_fn),
+                    ..
+                } => {
+                    define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
                 }
                 _ => {}
             };
@@ -508,30 +525,6 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 define_field_methods.push(quote!(.assert(#assert_fn())));
-            }
-            _ => {}
-        };
-
-        match field_receiver {
-            MyFieldReceiver {
-                content_assert: Some(_),
-                content_assert_fn: Some(_),
-                ..
-            } => {
-                panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
-            }
-            MyFieldReceiver {
-                content_assert: Some(content_assert),
-                ..
-            } => {
-                let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
-                define_array_field_content_methods.push(quote!(.assert(#content_assert)));
-            }
-            MyFieldReceiver {
-                content_assert_fn: Some(content_assert_fn),
-                ..
-            } => {
-                define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
             }
             _ => {}
         };
