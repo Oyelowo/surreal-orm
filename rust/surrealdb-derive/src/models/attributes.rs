@@ -342,6 +342,9 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
+                content_type,
+                content_assert,
+                content_assert_fn,
                 ..
             } if (define_fn.is_some() || define.is_some())
                 && (type_.is_some()
@@ -350,7 +353,10 @@ impl ReferencedNodeMeta {
                     || value.is_some()
                     || value_fn.is_some()
                     || permissions.is_some()
-                    || permissions_fn.is_some()) =>
+                    || permissions_fn.is_some()
+                    || content_type.is_some()
+                    || content_assert.is_some()
+                    || content_assert_fn.is_some()) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
                             type_,
@@ -359,7 +365,10 @@ impl ReferencedNodeMeta {
                             value,
                             value_fn,
                             permissions,
-                            permissions_fn");
+                            permissions_fn,
+                            content_type,
+                            content_assert,
+                            content_assert_fn");
             }
             MyFieldReceiver {
                 define: Some(_),
