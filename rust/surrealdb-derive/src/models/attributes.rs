@@ -323,6 +323,7 @@ pub(crate) struct ReferencedNodeMeta {
     pub(crate) record_link_default_alias_as_method: TokenStream,
     pub(crate) foreign_node_type_validator: TokenStream,
     pub(crate) field_definition: TokenStream,
+    pub(crate) field_type_validation_asserts: Vec<TokenStream>,
 }
 
 impl ReferencedNodeMeta {
@@ -482,7 +483,7 @@ impl ReferencedNodeMeta {
                     let field_type = FieldType::from_str(type_.to_string())
                         .expect("Field type should have been validated here. If not, report bug");
                     let ref_node_table_name_checker_ident =
-                        format_ident!("{field_name_normalized}RefChecker");
+                        format_ident!("I{field_name_normalized}RefChecker");
 
                     if let Some(link_single_ref_node) = linked_node {
                         // Validate that it is a type - record, when link_one or link_self used,
@@ -492,7 +493,8 @@ impl ReferencedNodeMeta {
                         match field_type {
                             FieldType::Record => {}
                             FieldType::RecordList(link_table_name) => {
-                                let link_table_name = link_table_name.to_string();
+                                let link_table_name =
+                                    format_ident!("{}", link_table_name.to_string());
                                 let ref_node = NodeTypeName::from(&link_single_ref_node);
                                 let ref_node_token: TokenStream = ref_node.into();
                                 // Generate validation for the record type content at compile
@@ -521,8 +523,10 @@ impl ReferencedNodeMeta {
                                     match content_type {
                                         FieldType::Record => {}
                                         FieldType::RecordList(array_content_table_name) => {
-                                            let array_content_table_name =
-                                                array_content_table_name.to_string();
+                                            let array_content_table_name = format_ident!(
+                                                "{}",
+                                                array_content_table_name.to_string()
+                                            );
                                             let ref_node = NodeTypeName::from(link_many_ref_node);
                                             let ref_node_token: TokenStream = ref_node.into();
 
@@ -711,6 +715,8 @@ impl ReferencedNodeMeta {
                     #array_content_definition
             ));
 
+        self.field_type_validation_asserts.extend(static_assertions);
+
         self
     }
 
@@ -759,6 +765,7 @@ impl ReferencedNodeMeta {
             ),
             foreign_node_type: quote!(schema_type_ident),
             field_definition: quote!(),
+            field_type_validation_asserts: vec![],
         }
     }
 }

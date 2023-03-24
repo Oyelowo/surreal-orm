@@ -336,6 +336,7 @@ impl SchemaFieldsProperties {
                 store.field_definitions.push(referenced_node_meta.field_definition);
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
+                store.static_assertions.extend(referenced_node_meta.field_type_validation_asserts);
                 
                 store.imports_referenced_node_schema
                     .insert(referenced_node_meta.foreign_node_schema_import.into());
