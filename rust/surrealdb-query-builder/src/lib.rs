@@ -115,7 +115,8 @@ pub use surrealdb::opt::RecordId;
 
 // SurrealdbModel is a market trait signifying superset of SurrealdbNode and SurrealdbEdge. IOW, both are
 pub trait SurrealdbModel {
-    fn table_name() -> surrealdb::sql::Table;
+    // fn table_name() -> surrealdb::sql::Table;
+    fn table_name() -> Table;
     fn get_serializable_field_names() -> Vec<&'static str>;
     fn define_table() -> DefineTableStatement;
     fn define_fields() -> Vec<DefineFieldStatement>;
@@ -127,7 +128,8 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> surrealdb::sql::Table;
+    // fn get_table_name() -> surrealdb::sql::Table;
+    fn get_table_name() -> Table;
     fn with(clause: impl Into<Clause>) -> Self::Schema;
 }
 
@@ -140,7 +142,8 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn schema() -> Self::Schema;
     // fn get_key(&self) -> ::std::option::Option<&SurId>;
     fn get_key<T: From<RecordId>>(self) -> ::std::option::Option<T>;
-    fn get_table_name() -> surrealdb::sql::Table;
+    // fn get_table_name() -> surrealdb::sql::Table;
+    fn get_table_name() -> Table;
 }
 
 pub trait Schemaful {

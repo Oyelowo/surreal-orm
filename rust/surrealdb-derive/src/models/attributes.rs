@@ -591,9 +591,11 @@ impl ReferencedNodeMeta {
             } = field_receiver
             {
                 let field_name_normalized = field_name_normalized.as_str();
+                let struct_ident = format_ident!("{struct_name_ident_str}");
+
                 if field_name_normalized == "id" {
                     define_field_methods
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#struct_name_ident_str.into()))));
+                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(Self::table_name()))));
                 } else if field_name_normalized == "out"
                     || field_name_normalized == "in"
                     || link_one.is_some()

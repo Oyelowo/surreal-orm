@@ -157,14 +157,14 @@ impl ToTokens for NodeToken{
                     record_id
                 }
                 
-                fn get_table_name() -> ::surrealdb::sql::Table {
+                fn get_table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }
                 
             }
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
-                fn table_name() -> ::surrealdb::sql::Table {
+                fn table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }
                 

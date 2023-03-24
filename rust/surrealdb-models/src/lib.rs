@@ -178,16 +178,16 @@ pub struct Student {
 }
 #[test]
 fn xama() {
-    // assert_eq!(
-    //     format!(
-    //         "zz:{:?}",
-    //         Student::define_fields()
-    //             .into_iter()
-    //             .map(|f| f.to_string())
-    //             .collect::<Vec<_>>()
-    //     ),
-    //     "er".to_string()
-    // );
+    assert_eq!(
+        format!(
+            "zz:{:?}",
+            Student::define_fields()
+                .into_iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+        ),
+        "er".to_string()
+    );
     assert_eq!(Student::define_table().to_string(), "re".to_string());
 }
 

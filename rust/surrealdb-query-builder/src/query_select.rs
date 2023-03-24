@@ -297,6 +297,18 @@ impl From<Table> for TargettablesForSelect {
         Self::Table(value.into())
     }
 }
+
+impl From<Vec<&Table>> for TargettablesForSelect {
+    fn from(value: Vec<&Table>) -> Self {
+        Self::Tables(
+            value
+                .into_iter()
+                .map(|t| t.clone().into())
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
 impl From<&sql::Table> for TargettablesForSelect {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
@@ -323,6 +335,12 @@ impl From<Vec<&sql::Table>> for TargettablesForSelect {
 impl<const N: usize> From<&[&sql::Table; N]> for TargettablesForSelect {
     fn from(value: &[&sql::Table; N]) -> Self {
         Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize> From<&[&Table; N]> for TargettablesForSelect {
+    fn from(value: &[&Table; N]) -> Self {
+        Self::Tables(value.to_vec().into_iter().map(|v| v.into()).collect())
     }
 }
 
