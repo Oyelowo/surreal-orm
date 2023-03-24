@@ -808,13 +808,13 @@ impl NormalisedField {
     }
 }
 
-// impl Deref for FieldTypeWrapper {
-//     type Target = FieldType;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
+impl Deref for FieldTypeWrapper {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl FromMeta for FieldTypeWrapper {
     fn from_string(value: &str) -> darling::Result<Self> {
