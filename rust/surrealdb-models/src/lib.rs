@@ -171,7 +171,12 @@ pub struct Student {
     #[surrealdb(link_one = "Book", skip_serializing)]
     course: LinkOne<Book>,
 
-    #[surrealdb(link_many = "Book", content_assert_fn = "erer")]
+    #[surrealdb(
+        link_many = "Book",
+        type = "array",
+        content_type = "record(book)",
+        content_assert_fn = "erer"
+    )]
     #[serde(rename = "semCoures")]
     all_semester_courses: LinkMany<Book>,
 
