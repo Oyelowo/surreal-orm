@@ -16,7 +16,7 @@ use std::{str::FromStr, ops::Deref};
 use syn::{self, parse_macro_input, LitStr, Error};
 
 use super::{
-    attributes::FieldsGetterOpts,
+    attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
@@ -25,10 +25,10 @@ use super::{
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-struct NodeToken(FieldsGetterOpts);
+struct NodeToken(TableDeriveAttributes);
 
 impl Deref for NodeToken {
-    type Target=FieldsGetterOpts;
+    type Target=TableDeriveAttributes;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -37,7 +37,7 @@ impl Deref for NodeToken {
 
 impl ToTokens for NodeToken{
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let FieldsGetterOpts {
+        let TableDeriveAttributes {
             ident: struct_name_ident,
             data,
             rename_all,
