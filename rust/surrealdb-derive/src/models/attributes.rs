@@ -605,7 +605,7 @@ impl ReferencedNodeMeta {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::statements::FieldType::Array)));
                     define_array_field_content_methods
-                        .push(quote!(#crate_name::statements::FieldType::Record));
+                        .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
                 }
             }
         };

@@ -126,7 +126,7 @@ fn define_age() -> DefineFieldStatement {
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
-    table_name = "student",
+    table_name = "student"
     // drop,
     // schemafull,
     // as = "select(All)",
