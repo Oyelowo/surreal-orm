@@ -70,6 +70,7 @@ impl Buildable for RemoveIndexStatement {
 }
 impl Runnables for RemoveIndexStatement {}
 
+impl Queryable for RemoveIndexStatement {}
 #[test]
 #[cfg(feature = "mock")]
 fn test() {}
