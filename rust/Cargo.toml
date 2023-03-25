@@ -28,6 +28,9 @@ documentation = "https://codebreather.com/oyelowo"
 surrealdb-derive = { path = "./surrealdb-derive" }
 surrealdb-orm = { path = "./surrealdb-orm" }
 surrealdb-query-builder = { path = "./surrealdb-query-builder" }
+surrealdb-query-builder-raw = { package = "surrealdb-query-builder", path = "./surrealdb-query-builder", features = [
+    "raw",
+] }
 surrealdb-models = { path = "./surrealdb-models" }
 surrealdb-orm-tests = { path = "./surrealdb-orm-tests" }
 
