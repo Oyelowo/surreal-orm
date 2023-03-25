@@ -9,6 +9,7 @@ members = [
     # "lib-my-macros/derive",
     "surrealdb-orm",
     "surrealdb-query-builder",
+    "surrealdb-query-builder-raw",
     "surrealdb-derive",
     "surrealdb-models",
     "surrealdb-orm-tests",
@@ -28,9 +29,7 @@ documentation = "https://codebreather.com/oyelowo"
 surrealdb-derive = { path = "./surrealdb-derive" }
 surrealdb-orm = { path = "./surrealdb-orm" }
 surrealdb-query-builder = { path = "./surrealdb-query-builder" }
-surrealdb-query-builder-raw = { package = "surrealdb-query-builder", path = "./surrealdb-query-builder", features = [
-    "raw",
-] }
+surrealdb-query-builder-raw = { path = "./surrealdb-query-builder-raw" }
 surrealdb-models = { path = "./surrealdb-models" }
 surrealdb-orm-tests = { path = "./surrealdb-orm-tests" }
 
