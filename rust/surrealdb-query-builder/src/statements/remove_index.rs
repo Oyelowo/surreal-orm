@@ -68,6 +68,17 @@ impl Buildable for RemoveIndexStatement {
         query
     }
 }
+
+impl Display for RemoveIndexStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveIndexStatement {}
+
+impl Erroneous for RemoveIndexStatement {}
+
 impl Runnables for RemoveIndexStatement {}
 
 impl Queryable for RemoveIndexStatement {}

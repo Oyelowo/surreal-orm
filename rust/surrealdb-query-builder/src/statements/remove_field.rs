@@ -68,6 +68,17 @@ impl Buildable for RemoveFieldStatement {
         query
     }
 }
+
+impl Display for RemoveFieldStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveFieldStatement {}
+
+impl Erroneous for RemoveFieldStatement {}
+
 impl Runnables for RemoveFieldStatement {}
 
 impl Queryable for RemoveFieldStatement {}

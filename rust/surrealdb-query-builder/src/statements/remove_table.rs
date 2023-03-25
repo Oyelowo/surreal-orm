@@ -58,6 +58,16 @@ impl Buildable for RemoveTableStatement {
     }
 }
 
+impl Display for RemoveTableStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveTableStatement {}
+
+impl Erroneous for RemoveTableStatement {}
+
 impl Runnables for RemoveTableStatement {}
 
 impl Queryable for RemoveTableStatement {}

@@ -73,4 +73,10 @@ impl Display for RemoveScopeStatement {
     }
 }
 
+impl Parametric for RemoveScopeStatement {}
+
+impl Erroneous for RemoveScopeStatement {}
+
+impl Runnables for RemoveScopeStatement {}
+
 impl Runnables for RemoveScopeStatement {}

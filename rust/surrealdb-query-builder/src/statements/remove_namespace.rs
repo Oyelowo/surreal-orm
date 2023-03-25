@@ -56,6 +56,17 @@ impl Buildable for RemoveNamespaceStatement {
         format!("REMOVE NAMESPACE {}", self.namespace)
     }
 }
+
+impl Display for RemoveNamespaceStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveNamespaceStatement {}
+
+impl Erroneous for RemoveNamespaceStatement {}
+
 impl Runnables for RemoveNamespaceStatement {}
 
 impl Queryable for RemoveNamespaceStatement {}

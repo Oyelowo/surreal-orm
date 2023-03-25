@@ -57,6 +57,17 @@ impl Buildable for RemoveDatabaseStatement {
         format!("REMOVE DATABASE {}", self.database)
     }
 }
+
+impl Display for RemoveDatabaseStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveDatabaseStatement {}
+
+impl Erroneous for RemoveDatabaseStatement {}
+
 impl Runnables for RemoveDatabaseStatement {}
 
 impl Queryable for RemoveDatabaseStatement {}

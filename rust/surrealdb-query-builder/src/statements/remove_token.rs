@@ -76,6 +76,15 @@ impl Buildable for RemoveTokenStatement {
         query
     }
 }
+impl Display for RemoveTokenStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveTokenStatement {}
+
+impl Erroneous for RemoveTokenStatement {}
 
 impl Runnables for RemoveTokenStatement {}
 

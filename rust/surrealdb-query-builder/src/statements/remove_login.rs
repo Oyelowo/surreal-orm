@@ -76,6 +76,17 @@ impl Buildable for RemoveLoginStatement {
         query
     }
 }
+
+impl Display for RemoveLoginStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveLoginStatement {}
+
+impl Erroneous for RemoveLoginStatement {}
+
 impl Runnables for RemoveLoginStatement {}
 
 impl Queryable for RemoveLoginStatement {}

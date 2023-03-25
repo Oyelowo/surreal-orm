@@ -40,4 +40,3 @@ fn mananana() {
         .parallel();
     assert_eq!(xx.to_string(), "poe".to_string());
 }
-

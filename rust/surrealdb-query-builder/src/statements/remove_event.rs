@@ -68,6 +68,16 @@ impl Buildable for RemoveEventStatement {
         query
     }
 }
+impl Display for RemoveEventStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Parametric for RemoveEventStatement {}
+
+impl Erroneous for RemoveEventStatement {}
+
 impl Runnables for RemoveEventStatement {}
 
 impl Queryable for RemoveEventStatement {}
