@@ -13,11 +13,11 @@ use surrealdb::sql;
 use crate::{
     binding::{BindingsList, Parametric},
     filter::Filter,
-    query_update,
     sql::{Buildable, Queryable, Return, Runnable},
-    statements::TargettablesForUpdate,
     Erroneous, SurrealdbModel,
 };
+
+use super::update::TargettablesForUpdate;
 
 /*
 Statement syntax

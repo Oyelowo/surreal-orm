@@ -37,6 +37,8 @@ use crate::{
     Erroneous, Field,
 };
 
+use super::NamespaceOrDatabase;
+
 pub fn remove_login(login: impl Into<Login>) -> RemoveLoginStatement {
     RemoveLoginStatement::new(login)
 }

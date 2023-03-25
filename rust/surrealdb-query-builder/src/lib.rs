@@ -27,13 +27,13 @@ pub mod statements;
 pub use binding::{BindingsList, Parametric};
 pub use field::Field;
 pub use field::Operatable;
-use query_define_field::DefineFieldStatement;
-use query_define_table::DefineTableStatement;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 pub use sql::Clause;
 pub use sql::Table;
+use statements::define_field::DefineFieldStatement;
+use statements::define_table::DefineTableStatement;
 pub use surrealdb::sql::json;
 pub use surrealdb::sql::Value;
 

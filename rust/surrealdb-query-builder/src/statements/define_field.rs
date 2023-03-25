@@ -20,7 +20,6 @@ use crate::{
     binding::{BindingsList, Parametric},
     filter::Filter,
     param::Param,
-    query_for::PermisisonForables,
     sql::{Buildable, Queryable, Table},
     Erroneous, Field,
 };

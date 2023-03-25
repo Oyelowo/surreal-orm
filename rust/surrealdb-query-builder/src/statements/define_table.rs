@@ -16,11 +16,12 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     binding::{BindingsList, Parametric},
-    query_for::PermisisonForables,
     sql::{Buildable, Queryable, Runnables, Table},
     statements::SelectStatement,
     Erroneous,
 };
+
+use super::select::SelectStatement;
 
 // DEFINE TABLE statement
 // The DEFINE TABLE statement allows you to declare your table by name, enabling you to apply strict controls to a table's schema by making it SCHEMAFULL, create a foreign table view, and set permissions specifying what operations can be performed on the field.

@@ -9,7 +9,6 @@ use std::fmt;
 
 use crate::{
     binding::BindingsList,
-    query_use::UseStatement,
     sql::{Buildable, Queryable, Runnables},
     Erroneous, ErrorList, Parametric,
 };

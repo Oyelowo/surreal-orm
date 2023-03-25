@@ -37,24 +37,11 @@ use crate::{
     Erroneous, Field,
 };
 
+use super::NamespaceOrDatabase;
+
 pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatement {
     RemoveTokenStatement::new(token)
 }
-enum NamespaceOrDatabase {
-    Namespace,
-    Database,
-}
-
-impl Display for NamespaceOrDatabase {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let stringified = match self {
-            NamespaceOrDatabase::Namespace => "NAMESPACE",
-            NamespaceOrDatabase::Database => "DATABASE",
-        };
-        write!(f, "{}", stringified)
-    }
-}
-
 pub struct RemoveTokenStatement {
     token: Token,
     on: Option<NamespaceOrDatabase>,

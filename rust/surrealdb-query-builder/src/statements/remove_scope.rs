@@ -74,5 +74,3 @@ impl Display for RemoveScopeStatement {
 }
 
 impl Runnables for RemoveScopeStatement {}
-
-impl Queryable for RemoveScopeStatement {}
