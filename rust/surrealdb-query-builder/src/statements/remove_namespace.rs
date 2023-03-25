@@ -63,7 +63,11 @@ impl Display for RemoveNamespaceStatement {
     }
 }
 
-impl Parametric for RemoveNamespaceStatement {}
+impl Parametric for RemoveNamespaceStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveNamespaceStatement {}
 

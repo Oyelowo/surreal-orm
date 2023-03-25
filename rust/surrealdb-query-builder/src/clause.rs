@@ -1,8 +1,8 @@
 use crate::{
     binding::BindingsList,
     filter::{Conditional, Filter},
-    query_select::SelectStatement,
     sql::{Buildable, Parametric, SurrealId},
+    statements::select::SelectStatement,
     Erroneous, Field,
 };
 

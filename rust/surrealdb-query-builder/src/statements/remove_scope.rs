@@ -54,6 +54,7 @@ impl RemoveScopeStatement {
 
 impl Queryable for RemoveScopeStatement {}
 impl Erroneous for RemoveScopeStatement {}
+impl Runnables for RemoveScopeStatement {}
 
 impl Parametric for RemoveScopeStatement {
     fn get_bindings(&self) -> BindingsList {
@@ -72,11 +73,3 @@ impl Display for RemoveScopeStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Parametric for RemoveScopeStatement {}
-
-impl Erroneous for RemoveScopeStatement {}
-
-impl Runnables for RemoveScopeStatement {}
-
-impl Runnables for RemoveScopeStatement {}

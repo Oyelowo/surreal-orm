@@ -8,7 +8,7 @@ use surrealdb::sql::{self, thing};
 
 use crate::{
     binding::Binding, binding::BindingsList, errors::SurrealdbOrmError, filter::Conditional,
-    statements::SelectStatement, Erroneous, Field, Parametric,
+    statements::select::SelectStatement, Erroneous, Field, Parametric,
 };
 
 #[derive(Debug, Clone)]

@@ -83,7 +83,11 @@ impl Display for RemoveLoginStatement {
     }
 }
 
-impl Parametric for RemoveLoginStatement {}
+impl Parametric for RemoveLoginStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveLoginStatement {}
 

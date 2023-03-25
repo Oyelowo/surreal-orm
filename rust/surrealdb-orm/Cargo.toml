@@ -9,8 +9,9 @@ documentation = { workspace = true }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-surrealdb-derive = { workspace = true }
+# surrealdb-derive = { workspace = true }
 surrealdb-query-builder = { workspace = true }
+surrealdb-query-builder-raw = { workspace = true }
 surrealdb = { workspace = true }
 tokio = { workspace = true }
 

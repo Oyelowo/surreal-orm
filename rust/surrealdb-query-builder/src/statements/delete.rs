@@ -72,7 +72,7 @@ impl<T> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(targettables: impl Into<query_update::TargettablesForUpdate>) -> Self {
+    pub fn new(targettables: impl Into<TargettablesForUpdate>) -> Self {
         let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 

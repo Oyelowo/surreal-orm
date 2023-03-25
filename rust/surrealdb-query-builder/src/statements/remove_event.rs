@@ -74,7 +74,11 @@ impl Display for RemoveEventStatement {
     }
 }
 
-impl Parametric for RemoveEventStatement {}
+impl Parametric for RemoveEventStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveEventStatement {}
 

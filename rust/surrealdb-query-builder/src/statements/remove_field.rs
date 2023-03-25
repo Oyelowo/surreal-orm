@@ -75,7 +75,11 @@ impl Display for RemoveFieldStatement {
     }
 }
 
-impl Parametric for RemoveFieldStatement {}
+impl Parametric for RemoveFieldStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveFieldStatement {}
 

@@ -12,10 +12,11 @@ use surrealdb::sql;
 
 use crate::{
     binding::{Binding, BindingsList, Parametric},
-    query_update::TargettablesForUpdate,
     sql::{Buildable, Queryable, Return, Runnable, Updateables},
     Erroneous, SurrealdbNode,
 };
+
+use super::update::TargettablesForUpdate;
 
 pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
 where

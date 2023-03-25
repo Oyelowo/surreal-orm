@@ -75,7 +75,11 @@ impl Display for RemoveIndexStatement {
     }
 }
 
-impl Parametric for RemoveIndexStatement {}
+impl Parametric for RemoveIndexStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveIndexStatement {}
 

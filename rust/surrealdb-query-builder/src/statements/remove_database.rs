@@ -64,7 +64,11 @@ impl Display for RemoveDatabaseStatement {
     }
 }
 
-impl Parametric for RemoveDatabaseStatement {}
+impl Parametric for RemoveDatabaseStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveDatabaseStatement {}
 

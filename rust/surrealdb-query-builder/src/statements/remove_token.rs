@@ -82,7 +82,11 @@ impl Display for RemoveTokenStatement {
     }
 }
 
-impl Parametric for RemoveTokenStatement {}
+impl Parametric for RemoveTokenStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveTokenStatement {}
 

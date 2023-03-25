@@ -64,7 +64,11 @@ impl Display for RemoveTableStatement {
     }
 }
 
-impl Parametric for RemoveTableStatement {}
+impl Parametric for RemoveTableStatement {
+    fn get_bindings(&self) -> BindingsList {
+        vec![]
+    }
+}
 
 impl Erroneous for RemoveTableStatement {}
 
