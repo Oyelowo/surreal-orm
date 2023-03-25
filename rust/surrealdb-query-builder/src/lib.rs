@@ -20,9 +20,9 @@ pub mod links;
 pub mod model_id;
 mod operators_macros;
 mod param;
-mod statements;
 mod sql_components;
 pub(crate) mod sql_traits;
+pub mod statements;
 
 pub use binding::{BindingsList, Parametric};
 pub use field::Field;
@@ -49,41 +49,9 @@ pub mod sql {
 
 pub mod utils {
     pub use super::filter::cond;
-    pub use super::query_for::for_;
-}
-pub mod statements {
-    pub use super::query_chain::chain;
-    pub use super::query_create::{create, CreateStatement};
-    pub use super::query_define_database::{define_database, DefineDatabaseStatement};
-    pub use super::query_define_event::{define_event, DefineEventStatement};
-    pub use super::query_define_field::{
-        define_field, value, DefineFieldStatement, FieldType, GeometryType,
-    };
-    pub use super::query_define_index::{define_index, DefineIndexStatement};
-    pub use super::query_define_login::{define_login, DefineLoginStatement};
-    pub use super::query_define_namespace::{define_namespace, DefineNamespaceStatement};
-    pub use super::query_define_scope::{define_scope, DefineScopeStatement};
-    pub use super::query_define_table::{define_table, DefineTableStatement};
-    pub use super::query_define_token::{define_token, DefineTokenStatement};
-    pub use super::query_delete::{delete, DeleteStatement};
-    pub use super::query_for::{for_, For, ForCrudType};
-    pub use super::query_ifelse::{if_, IfStatement};
-    pub use super::query_info::{info_for, InfoStatement};
-    pub use super::query_insert::{insert, InsertStatement};
-    pub use super::query_let::{let_, LetStatement};
-    pub use super::query_relate::{relate, RelateStatement};
-    pub use super::query_remove::{
-        remove_database, remove_event, remove_field, remove_index, remove_login, remove_namespace,
-        remove_scope, remove_table, remove_token,
-    };
-    pub use super::query_select::{order, select, Order, SelectStatement, TargettablesForSelect};
-    pub use super::query_sleep::{sleep, SleepStatement};
-    pub use super::query_transaction::{begin_transaction, BeginTransactionStatement};
-    pub use super::query_update::{update, TargettablesForUpdate, UpdateStatement};
-    pub use super::query_use::{use_, UseStatement};
 }
 pub mod prelude {
-    use super::query_select;
+    use super::statements;
 }
 
 // pub use field::Param;

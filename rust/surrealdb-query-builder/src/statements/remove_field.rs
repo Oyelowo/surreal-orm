@@ -1,0 +1,73 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+/*
+ *
+ *
+REMOVE statement
+
+Statement syntax
+REMOVE [
+    NAMESPACE @name
+    | DATABASE @name
+    | LOGIN @name ON [ NAMESPACE | DATABASE ]
+    | TOKEN @name ON [ NAMESPACE | DATABASE ]
+    | SCOPE @name
+    | TABLE @name
+    | EVENT @name ON [ TABLE ] @table
+    | FIELD @name ON [ TABLE ] @table
+    | INDEX @name ON [ TABLE ] @table
+]
+ * */
+
+use std::fmt::{self, Display};
+
+use surrealdb::sql;
+
+use crate::{
+    binding::{BindingsList, Parametric},
+    sql::{
+        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table,
+        TableIndex, Token,
+    },
+    Erroneous, Field,
+};
+
+pub fn remove_field(field: impl Into<Field>) -> RemoveFieldStatement {
+    RemoveFieldStatement::new(field)
+}
+pub struct RemoveFieldStatement {
+    field: Field,
+    table: Option<Table>,
+}
+
+impl RemoveFieldStatement {
+    fn new(field: impl Into<Field>) -> Self {
+        Self {
+            field: field.into(),
+            table: None,
+        }
+    }
+
+    fn on_table(mut self, table: impl Into<Table>) -> Self {
+        self.table = Some(table.into());
+        self
+    }
+}
+
+impl Buildable for RemoveFieldStatement {
+    fn build(&self) -> String {
+        let query = format!("REMOVE FIELD {}", self.field);
+        if let Some(table) = &self.table {
+            let query = format!("{} ON TABLE {}", query, table);
+        }
+        query
+    }
+}
+impl Runnables for RemoveFieldStatement {}
+
+impl Queryable for RemoveFieldStatement {}
