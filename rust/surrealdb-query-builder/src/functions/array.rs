@@ -77,7 +77,7 @@ impl<U: Into<sql::Array>> From<U> for ArrayOrField {
 
 #[derive(Debug, Clone)]
 pub struct Operatee {
-    pub query_string: Vec<String>,
+    pub query_string: String,
     pub bindings: BindingsList,
 }
 
@@ -97,10 +97,7 @@ impl Display for Operatee {
 
 impl Buildable for Operatee {
     fn build(&self) -> String {
-        format!(
-            "array::combine({}, {})",
-            self.query_string[0], self.query_string[1]
-        )
+        self.query_string.clone()
     }
 }
 
@@ -111,7 +108,11 @@ pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Op
     let arr2: sql::Value = arr2.into().into();
     let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
     let xx = Operatee {
-        query_string: vec![arr1.get_param_dollarised(), arr2.get_param_dollarised()],
+        query_string: format!(
+            "array::combine({}, {})",
+            arr1.get_param_dollarised(),
+            arr2.get_param_dollarised()
+        ),
         bindings: vec![arr1, arr2],
     };
     xx
