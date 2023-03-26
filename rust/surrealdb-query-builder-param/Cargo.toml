@@ -1,5 +1,5 @@
 [package]
-name = "surrealdb-query-builder-raw"
+name = "surrealdb-query-builder-param"
 version = "0.1.0"
 # version = { workspace = true }
 edition = { workspace = true }
@@ -10,7 +10,7 @@ documentation = { workspace = true }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-surrealdb-query-builder = { workspace = true, features = ["raw"] }
+surrealdb-query-builder = { workspace = true, features = ["param"]}
 
 [lib]
 doctest = false

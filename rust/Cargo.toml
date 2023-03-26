@@ -10,6 +10,7 @@ members = [
     "surrealdb-orm",
     "surrealdb-query-builder",
     "surrealdb-query-builder-raw",
+    "surrealdb-query-builder-param",
     "surrealdb-derive",
     "surrealdb-models",
     "surrealdb-orm-tests",
@@ -30,6 +31,7 @@ surrealdb-derive = { path = "./surrealdb-derive" }
 surrealdb-orm = { path = "./surrealdb-orm" }
 surrealdb-query-builder = { path = "./surrealdb-query-builder" }
 surrealdb-query-builder-raw = { path = "./surrealdb-query-builder-raw" }
+surrealdb-query-builder-param = { path = "./surrealdb-query-builder-param" }
 surrealdb-models = { path = "./surrealdb-models" }
 surrealdb-orm-tests = { path = "./surrealdb-orm-tests" }
 
