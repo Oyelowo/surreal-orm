@@ -111,9 +111,11 @@ impl Into<sql::Idiom> for Field {
     }
 }
 
-impl Into<sql::Value> for Field {
-    fn into(self) -> Value {
-        sql::Table(self.condition_query_string.to_string()).into()
+impl From<Field> for sql::Value {
+    fn from(val: Field) -> Self {
+        let mk = sql::Idiom::from(val.condition_query_string.to_string());
+        // assert_eq!(sql::Value::from(mk).to_string(), "nawa".to_string());
+        sql::Value::from(mk)
     }
 }
 
