@@ -5,13 +5,16 @@
  * Licensed under the MIT license
  */
 
-use surrealdb_query_builder_param::{statements::statements::select, sql::All, utils::cond};
+#[cfg(all(feature = "param", feature = "raw"))]
+compile_error!("feature \"param\" and feature \"raw\" cannot be enabled at the same time");
+use surrealdb_query_builder_param::{statements::statements::{select, select_raw_raw}, sql::All, utils::cond};
 // pub use surrealdb_derive::*;
 pub use surrealdb_query_builder_param::{
     field, filter, json, links, model_id, sql, utils, BindingsList, Clause, Erroneous, ErrorList,
     Field, Operatable, Parametric, RecordId, Schemaful, SurrealdbEdge, SurrealdbModel,
     SurrealdbNode, Table, Value
 };
+// use  surrealdb_query_builder_raw::select_raw;
 
 // use surrealdb_query_builder
 // pub mod statements {

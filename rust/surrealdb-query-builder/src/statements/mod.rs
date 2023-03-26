@@ -61,7 +61,7 @@ pub mod statements {
     pub use super::remove_scope::{remove_scope, RemoveScopeStatement};
     pub use super::remove_table::{remove_table, RemoveTableStatement};
     pub use super::remove_token::{remove_token, RemoveTokenStatement};
-    pub use super::select::{select, SelectStatement};
+    pub use super::select::{select, select_raw_raw, SelectStatement};
     pub use super::sleep::{sleep, SleepStatement};
     pub use super::transaction::{begin_transaction, BeginTransactionStatement};
     pub use super::update::{update, UpdateStatement};

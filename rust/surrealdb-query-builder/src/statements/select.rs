@@ -7,6 +7,7 @@
 
 use std::{
     borrow::{Borrow, Cow},
+    env,
     fmt::{Display, Formatter, Result as FmtResult},
     marker::PhantomData,
     ops::Deref,
@@ -633,6 +634,15 @@ impl From<Selectables> for SelectStatement {
 }
 
 pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
+    env::remove_var("MY_ENV_VAR");
+    let builder = SelectStatement::new();
+    let selectables: Selectables = selectables.into();
+    builder.select(selectables)
+}
+
+pub fn select_raw_raw(selectables: impl Into<Selectables>) -> SelectStatement {
+    env::set_var("MY_ENV_VAR", "true");
+
     let builder = SelectStatement::new();
     let selectables: Selectables = selectables.into();
     builder.select(selectables)

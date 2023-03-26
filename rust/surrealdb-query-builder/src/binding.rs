@@ -1,3 +1,5 @@
+use std::env;
+
 use serde::Serialize;
 use surrealdb::sql;
 
@@ -54,12 +56,11 @@ impl Binding {
     }
 
     pub fn get_param_dollarised(&self) -> String {
-        #[cfg(feature = "raw")]
-        let param = self.get_raw_value().to_string();
+        let mut param = format!("${}", &self.param);
 
-        // #[cfg(not(feature = "mock"))]
-        #[cfg(feature = "param")]
-        let param = format!("${}", &self.param);
+        if env::var("MY_ENV_VAR").is_ok() {
+            param = self.get_raw_value().to_string();
+        }
 
         param
     }

@@ -1,6 +1,6 @@
 [package]
 name = "surrealdb-query-builder-raw"
-version = "0.1.0"
+version = "0.1.2"
 # version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }

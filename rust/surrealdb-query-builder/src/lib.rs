@@ -22,6 +22,7 @@ mod operators_macros;
 mod param;
 mod sql_components;
 pub(crate) mod sql_traits;
+
 pub mod statements;
 
 pub use binding::{BindingsList, Parametric};
