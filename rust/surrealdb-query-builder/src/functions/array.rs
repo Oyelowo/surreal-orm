@@ -18,6 +18,10 @@ use surrealdb::sql::Value;
 use crate::sql::ArrayCustom;
 use crate::Field;
 
+pub fn val(val: impl Into<Value>) -> sql::Value {
+    val.into()
+}
+
 #[macro_use]
 macro_rules! array {
     ($( $val:expr ),*) => {{
@@ -79,10 +83,6 @@ impl<U: Into<sql::Array>> From<U> for ArrayOrField {
     }
 }
 
-fn val(val: impl Into<Value>) -> sql::Value {
-    val.into()
-}
-
 pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
     // let arr1: ArrayOrField = arr1.into();
     // let arr1: Mana = arr1.into();
@@ -127,7 +127,7 @@ pub fn len(arr1: impl Into<ArrayCustom>) -> String {
     format!("array::len({})", arr1)
 }
 
-enum Ordering {
+pub enum Ordering {
     Asc,
     Desc,
     False,
@@ -152,4 +152,19 @@ impl Display for Ordering {
 pub fn sort(arr1: impl Into<ArrayCustom>, ordering: Ordering) -> String {
     let arr1: sql::Value = arr1.into().into();
     format!("array::sort({arr1}), {ordering}")
+}
+
+pub mod sort {
+    use crate::sql::ArrayCustom;
+    use surrealdb::sql;
+
+    pub fn asc(arr1: impl Into<ArrayCustom>) -> String {
+        let arr1: sql::Value = arr1.into().into();
+        format!("array::sort::asc({arr1})")
+    }
+
+    pub fn desc(arr1: impl Into<ArrayCustom>) -> String {
+        let arr1: sql::Value = arr1.into().into();
+        format!("array::sort::asc({arr1})")
+    }
 }
