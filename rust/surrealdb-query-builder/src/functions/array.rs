@@ -22,8 +22,9 @@ use std::fmt::Display;
 use surrealdb::sql;
 use surrealdb::sql::Value;
 
-use crate::sql::ArrayCustom;
-use crate::Field;
+use crate::internal::replace_params;
+use crate::sql::{ArrayCustom, Binding, Buildable, ToRawStatement};
+use crate::{BindingsList, Field, Parametric};
 
 pub fn val(val: impl Into<Value>) -> sql::Value {
     val.into()
@@ -74,48 +75,92 @@ impl<U: Into<sql::Array>> From<U> for ArrayOrField {
     }
 }
 
-pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    // let arr1: ArrayOrField = arr1.into();
-    // let arr1: Mana = arr1.into();
-    // let arr1 = arr1.to_array();
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::combine({}, {})", arr1, arr2)
+#[derive(Debug, Clone)]
+pub struct Operatee {
+    pub query_string: String,
+    pub bindings: BindingsList,
 }
 
-pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::concat({}, {})", arr1, arr2)
+// impl ToRawStatement for Operatee {}
+
+impl Parametric for Operatee {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
 }
 
-pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::union({}, {})", arr1, arr2)
+impl Display for Operatee {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
+    }
 }
 
-pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::difference({}, {})", arr1, arr2)
+impl Buildable for Operatee {
+    fn build(&self) -> String {
+        self.query_string.clone()
+    }
 }
 
-pub fn distinct(arr1: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    format!("array::distinct({})", arr1)
+pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "combine")
 }
 
-pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
+fn create_array_helper(
+    arr1: impl Into<ArrayCustom>,
+    arr2: impl Into<ArrayCustom>,
+    func_name: &str,
+) -> Operatee {
     let arr1: sql::Value = arr1.into().into();
+    let arr1 = Binding::new(arr1).with_description("array 1 to be combined");
+
     let arr2: sql::Value = arr2.into().into();
-    format!("array::intersect({}, {})", arr1, arr2)
+    let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
+    Operatee {
+        query_string: format!(
+            "array::{func_name}({}, {})",
+            arr1.get_param_dollarised(),
+            arr2.get_param_dollarised()
+        ),
+        bindings: vec![arr1, arr2],
+    }
+}
+
+pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "concat")
+}
+
+pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "union")
+}
+
+pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "difference")
+}
+
+pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "intersect")
+}
+
+pub fn distinct(arr: impl Into<ArrayCustom>) -> Operatee {
+    let arr: sql::Value = arr.into().into();
+    let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+    Operatee {
+        query_string: format!("array::distinct({})", arr.get_param_dollarised()),
+        bindings: vec![arr],
+    }
 }
 
 // pub fn len(arr1: Vec<impl Into<sql::Value>>) -> String {
-pub fn len(arr1: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    format!("array::len({})", arr1)
+pub fn len(arr1: impl Into<ArrayCustom>) -> Operatee {
+    let arr: sql::Value = arr1.into().into();
+    let arr =
+        Binding::new(arr).with_description("Length of array to be checked. Also checks falsies");
+
+    Operatee {
+        query_string: format!("array::len({})", arr.get_param_dollarised()),
+        bindings: vec![arr],
+    }
 }
 
 pub enum Ordering {
@@ -140,26 +185,43 @@ impl Display for Ordering {
     }
 }
 
-pub fn sort(arr1: impl Into<ArrayCustom>, ordering: Ordering) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    match ordering {
-        Ordering::Empty => format!("array::sort({arr1})"),
-        _ => format!("array::sort({arr1}, {ordering})"),
+pub fn sort(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Operatee {
+    let arr: sql::Value = arr.into().into();
+    let arr = Binding::new(arr);
+    let query_string = match ordering {
+        Ordering::Empty => format!("array::sort({})", arr.get_param_dollarised()),
+        _ => format!("array::sort({}, {ordering})", arr.get_param_dollarised()),
+    };
+    Operatee {
+        query_string,
+        bindings: vec![arr],
     }
 }
 
 pub mod sort {
-    use crate::sql::ArrayCustom;
+    use crate::sql::{ArrayCustom, Binding};
     use surrealdb::sql;
 
-    pub fn asc(arr1: impl Into<ArrayCustom>) -> String {
-        let arr1: sql::Value = arr1.into().into();
-        format!("array::sort::asc({arr1})")
+    use super::Operatee;
+
+    pub fn asc(arr: impl Into<ArrayCustom>) -> Operatee {
+        let arr: sql::Value = arr.into().into();
+        let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+        Operatee {
+            query_string: format!("array::sort::asc({})", arr.get_param_dollarised()),
+            bindings: vec![arr],
+        }
     }
 
-    pub fn desc(arr1: impl Into<ArrayCustom>) -> String {
-        let arr1: sql::Value = arr1.into().into();
-        format!("array::sort::desc({arr1})")
+    pub fn desc(arr: impl Into<ArrayCustom>) -> Operatee {
+        let arr: sql::Value = arr.into().into();
+        let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+        Operatee {
+            query_string: format!("array::sort::desc({})", arr.get_param_dollarised()),
+            bindings: vec![arr],
+        }
     }
 }
 
@@ -170,33 +232,61 @@ fn test_array_macro_on_diverse_array() {
     let arr2 = array![4, "dayo", 6];
     let result = combine(arr1, arr2);
     assert_eq!(
-        result,
-        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
+        replace_params(&result.to_string()),
+        "array::combine($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])".to_string()
     );
 }
 
 #[test]
 fn test_combine() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = combine(arr1, arr2);
-    assert_eq!(result, "array::combine([1, 2, 3], [4, 5, 6])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::combine($_param_00000001, $_param_00000002)".to_string()
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 2, 3], [4, 5, 6])".to_string()
+    );
 }
 
 #[test]
 fn test_concat() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = concat(arr1, arr2);
-    assert_eq!(result, "array::concat([1, 2, 3], [4, 5, 6])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::concat($_param_00000001, $_param_00000002)".to_string()
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::concat([1, 2, 3], [4, 5, 6])"
+    );
 }
 
 #[test]
 fn test_union() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = union(arr1, arr2);
-    assert_eq!(result, "array::union([1, 2, 3], [4, 5, 6])");
+
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::union($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::union([1, 2, 3], [4, 5, 6])"
+    );
 }
 
 #[test]
@@ -204,22 +294,43 @@ fn test_difference() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![2, 3, 4];
     let result = difference(arr1, arr2);
-    assert_eq!(result, "array::difference([1, 2, 3], [2, 3, 4])");
-}
-
-#[test]
-fn test_distinct() {
-    let arr = vec![1, 2, 3, 3, 2, 1];
-    let result = distinct(arr);
-    assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::difference($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::difference([1, 2, 3], [2, 3, 4])"
+    );
 }
 
 #[test]
 fn test_intersect() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![2, 3, 4];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![2, 3, 4];
     let result = intersect(arr1, arr2);
-    assert_eq!(result, "array::intersect([1, 2, 3], [2, 3, 4])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::intersect($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::intersect([1, 2, 3], [2, 3, 4])"
+    );
+}
+
+#[test]
+fn test_distinct() {
+    let arr = array![1, 2, 3, 3, 2, 1];
+    let result = distinct(arr);
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::distinct($_param_00000001)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::distinct([1, 2, 3, 3, 2, 1])"
+    );
 }
 
 #[test]
@@ -228,37 +339,68 @@ fn test_len_on_diverse_array_custom_array_function() {
     let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
     let result = len(arr);
     assert_eq!(
-        result,
-        "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
+        replace_params(&result.to_string()),
+        "array::len($_param_00000001)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])".to_string()
     );
 }
 
 #[test]
 fn test_sort() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort(arr.clone(), Ordering::Asc);
-    assert_eq!(result, "array::sort([3, 2, 1], 'asc')");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, 'asc')".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
 
     let result = sort(arr.clone(), Ordering::Desc);
-    assert_eq!(result, "array::sort([3, 2, 1], 'desc')");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, 'desc')".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::sort([3, 2, 1], 'desc')"
+    );
 
     let result = sort(arr.clone(), Ordering::Empty);
-    assert_eq!(result, "array::sort([3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
 
     let result = sort(arr.clone(), Ordering::False);
-    assert_eq!(result, "array::sort([3, 2, 1], false)");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, false)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
 }
 
 #[test]
 fn test_sort_asc() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort::asc(arr);
-    assert_eq!(result, "array::sort::asc([3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort::asc($_param_00000001)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::asc([3, 2, 1])");
 }
 
 #[test]
 fn test_sort_desc() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort::desc(arr);
-    assert_eq!(result, "array::sort::desc([3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort::desc($_param_00000001)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::desc([3, 2, 1])");
 }

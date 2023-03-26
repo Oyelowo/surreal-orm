@@ -52,7 +52,7 @@ where
 
 impl<T> ToRawStatement for T
 where
-    T: Queryable,
+    T: Parametric + Buildable,
 {
     fn to_raw(self) -> RawStatement {
         let query_raw =
