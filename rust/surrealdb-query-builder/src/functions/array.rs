@@ -185,11 +185,16 @@ impl Display for Ordering {
     }
 }
 
-pub fn sort(arr1: impl Into<ArrayCustom>, ordering: Ordering) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    match ordering {
-        Ordering::Empty => format!("array::sort({arr1})"),
-        _ => format!("array::sort({arr1}, {ordering})"),
+pub fn sort(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Operatee {
+    let arr: sql::Value = arr.into().into();
+    let arr = Binding::new(arr);
+    let query_string = match ordering {
+        Ordering::Empty => format!("array::sort({})", arr.get_param_dollarised()),
+        _ => format!("array::sort({}, {ordering})", arr.get_param_dollarised()),
+    };
+    Operatee {
+        query_string,
+        bindings: vec![arr],
     }
 }
 
@@ -335,16 +340,19 @@ fn test_len_on_diverse_array_custom_array_function() {
 fn test_sort() {
     let arr = array![3, 2, 1];
     let result = sort(arr.clone(), Ordering::Asc);
-    assert_eq!(result, "array::sort([3, 2, 1], 'asc')");
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
 
     let result = sort(arr.clone(), Ordering::Desc);
-    assert_eq!(result, "array::sort([3, 2, 1], 'desc')");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::sort([3, 2, 1], 'desc')"
+    );
 
     let result = sort(arr.clone(), Ordering::Empty);
-    assert_eq!(result, "array::sort([3, 2, 1])");
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
 
     let result = sort(arr.clone(), Ordering::False);
-    assert_eq!(result, "array::sort([3, 2, 1], false)");
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
 }
 
 #[test]
