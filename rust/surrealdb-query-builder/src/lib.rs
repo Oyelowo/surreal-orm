@@ -16,6 +16,7 @@ pub(crate) mod errors;
 pub mod field;
 mod field_updater;
 pub mod filter;
+pub(crate) mod internal;
 pub mod links;
 pub mod model_id;
 mod operators_macros;

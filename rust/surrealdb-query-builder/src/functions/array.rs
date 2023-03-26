@@ -22,8 +22,9 @@ use std::fmt::Display;
 use surrealdb::sql;
 use surrealdb::sql::Value;
 
-use crate::sql::ArrayCustom;
-use crate::Field;
+use crate::internal::replace_params;
+use crate::sql::{ArrayCustom, Binding, Buildable, ToRawStatement};
+use crate::{BindingsList, Field, Parametric};
 
 pub fn val(val: impl Into<Value>) -> sql::Value {
     val.into()
@@ -74,13 +75,46 @@ impl<U: Into<sql::Array>> From<U> for ArrayOrField {
     }
 }
 
-pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    // let arr1: ArrayOrField = arr1.into();
-    // let arr1: Mana = arr1.into();
-    // let arr1 = arr1.to_array();
+#[derive(Debug, Clone)]
+pub struct Operatee {
+    pub query_string: Vec<String>,
+    pub bindings: BindingsList,
+}
+
+// impl ToRawStatement for Operatee {}
+
+impl Parametric for Operatee {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Display for Operatee {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Buildable for Operatee {
+    fn build(&self) -> String {
+        format!(
+            "array::combine({}, {})",
+            self.query_string[0], self.query_string[1]
+        )
+    }
+}
+
+pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
     let arr1: sql::Value = arr1.into().into();
+    let arr1 = Binding::new(arr1).with_description("array 1 to be combined");
+
     let arr2: sql::Value = arr2.into().into();
-    format!("array::combine({}, {})", arr1, arr2)
+    let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
+    let xx = Operatee {
+        query_string: vec![arr1.get_param_dollarised(), arr2.get_param_dollarised()],
+        bindings: vec![arr1, arr2],
+    };
+    xx
 }
 
 pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
@@ -170,8 +204,12 @@ fn test_array_macro_on_diverse_array() {
     let arr2 = array![4, "dayo", 6];
     let result = combine(arr1, arr2);
     assert_eq!(
-        result,
-        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
+        replace_params(&result.to_string()),
+        "array::combine($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])".to_string()
     );
 }
 
@@ -180,7 +218,15 @@ fn test_combine() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![4, 5, 6];
     let result = combine(arr1, arr2);
-    assert_eq!(result, "array::combine([1, 2, 3], [4, 5, 6])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::combine($_param_00000001, $_param_00000002)".to_string()
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 2, 3], [4, 5, 6])".to_string()
+    );
 }
 
 #[test]
