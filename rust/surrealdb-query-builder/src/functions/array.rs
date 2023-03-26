@@ -37,22 +37,6 @@ macro_rules! array {
         ]
     }};
 }
-#[test]
-fn erer() {
-    let arr1 = &[434, 54];
-    // let arr1 = vec![434, 54];
-    let arr2 = vec!["ksd", "dayo"];
-    // let arr2 = vec![434, 54];
-    let arr1 = Field::new("lowo");
-    // let arr2 = Field::new("dayo");
-    // let xx = combine(arr1, arr2);
-    // assert_eq!(xx, "nawa".to_string());
-
-    // let xx = len(vec![val(34), val("34"), val(arr1)]);
-    // let xx = len(vec![54, 65]);
-    let xx = len(array![34, "34", arr1]);
-    assert_eq!(xx, "nawa".to_string());
-}
 
 pub enum ArrayOrField {
     Field(Field),
@@ -158,7 +142,10 @@ impl Display for Ordering {
 
 pub fn sort(arr1: impl Into<ArrayCustom>, ordering: Ordering) -> String {
     let arr1: sql::Value = arr1.into().into();
-    format!("array::sort({arr1}), {ordering}")
+    match ordering {
+        Ordering::Empty => format!("array::sort({arr1})"),
+        _ => format!("array::sort({arr1}, {ordering})"),
+    }
 }
 
 pub mod sort {
@@ -174,4 +161,90 @@ pub mod sort {
         let arr1: sql::Value = arr1.into().into();
         format!("array::sort::asc({arr1})")
     }
+}
+
+#[test]
+fn test_array_macro_on_diverse_array() {
+    let age = Field::new("age");
+    let arr1 = array![1, "Oyelowo", age];
+    let arr2 = array![4, "dayo", 6];
+    let result = combine(arr1, arr2);
+    assert_eq!(
+        result,
+        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
+    );
+}
+
+#[test]
+fn test_combine() {
+    let arr1 = vec![1, 2, 3];
+    let arr2 = vec![4, 5, 6];
+    let result = combine(arr1, arr2);
+    assert_eq!(result, "array::combine([1, 2, 3], [4, 5, 6])");
+}
+
+#[test]
+fn test_concat() {
+    let arr1 = vec![1, 2, 3];
+    let arr2 = vec![4, 5, 6];
+    let result = concat(arr1.clone(), arr2.clone());
+    assert_eq!(result, "array::concat([1, 2, 3], [4, 5, 6])");
+}
+
+#[test]
+fn test_union() {
+    let arr1 = vec![1, 2, 3];
+    let arr2 = vec![4, 5, 6];
+    let result = union(arr1.clone(), arr2.clone());
+    assert_eq!(result, "array::union([1, 2, 3], [4, 5, 6])");
+}
+
+#[test]
+fn test_difference() {
+    let arr1 = vec![1, 2, 3];
+    let arr2 = vec![2, 3, 4];
+    let result = difference(arr1.clone(), arr2.clone());
+    assert_eq!(result, "array::difference([1, 2, 3], [2, 3, 4])");
+}
+
+#[test]
+fn test_distinct() {
+    let arr = vec![1, 2, 3, 3, 2, 1];
+    let result = distinct(arr.clone());
+    assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
+}
+
+#[test]
+fn test_intersect() {
+    let arr1 = vec![1, 2, 3];
+    let arr2 = vec![2, 3, 4];
+    let result = intersect(arr1.clone(), arr2.clone());
+    assert_eq!(result, "array::intersect([1, 2, 3], [2, 3, 4])");
+}
+
+#[test]
+fn test_len_on_diverse_array_custom_array_function() {
+    let email = Field::new("email");
+    let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
+    let result = len(arr.clone());
+    assert_eq!(
+        result,
+        "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
+    );
+}
+
+#[test]
+fn test_sort() {
+    let arr = vec![3, 2, 1];
+    let result = sort(arr.clone(), Ordering::Asc);
+    assert_eq!(result, "array::sort([3, 2, 1], 'asc')");
+
+    let result = sort(arr.clone(), Ordering::Desc);
+    assert_eq!(result, "array::sort([3, 2, 1], 'desc')");
+
+    let result = sort(arr.clone(), Ordering::Empty);
+    assert_eq!(result, "array::sort([3, 2, 1])");
+
+    let result = sort(arr.clone(), Ordering::False);
+    assert_eq!(result, "array::sort([3, 2, 1], false)");
 }
