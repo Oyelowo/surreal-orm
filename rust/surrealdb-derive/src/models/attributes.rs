@@ -280,7 +280,7 @@ impl Permissions {
             }
             Self::FnName(permissions) => {
                 let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                quote!(.permissions_for(#permissions))
+                quote!(.permissions_for(#permissions.to_raw()))
             }
         }
     }
@@ -433,13 +433,13 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_field = Some(quote!(#define));
+                define_field = Some(quote!(#define.to_raw()));
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
                 ..
             } => {
-                define_field = Some(quote!(#define_fn()));
+                define_field = Some(quote!(#define_fn().to_raw()));
             }
             _ => {}
         };
@@ -866,7 +866,7 @@ impl PermissionsFn {
                 quote!(.permissions_none())
             }
             Self::FnPath(permissions_fn) => {
-                quote!(.permissions_for(#permissions_fn()))
+                quote!(.permissions_for(#permissions_fn().to_raw()))
             }
         }
     }
@@ -977,10 +977,10 @@ impl TableDeriveAttributes {
         match (define, define_fn){
             (Some(define), None) => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_table = Some(quote!(#define));
+                define_table = Some(quote!(#define.to_raw()));
             },
             (None, Some(define_fn)) => {
-                define_table = Some(quote!(#define_fn()));
+                define_table = Some(quote!(#define_fn().to_raw()));
             },
             (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),

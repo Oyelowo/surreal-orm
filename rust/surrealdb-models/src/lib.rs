@@ -31,7 +31,7 @@ use surrealdb_orm::{
     sql::{All, SurrealId, NONE},
     statements::{
         define_field, define_table, for_, order, select, value, DefineFieldStatement,
-        DefineTableStatement, FieldType, For, ForCrudType, SelectStatement,
+        DefineTableStatement, FieldType, For, ForCrudType, PermissionForables, SelectStatement,
     },
     utils::cond,
     Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
@@ -47,14 +47,23 @@ fn gama() -> SelectStatement {
 fn full() -> u32 {
     54
 }
-fn perm() -> Vec<For> {
+fn perm() -> RawStatement {
     use ForCrudType::*;
     let name = Field::new("name");
     let age = Field::new("age");
-    vec![
-        for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+    // vec![
+    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+    //     for_(Update).where_(age.less_than_or_equal(130)),
+    // ]
+    // .into_iter()
+    // .map(|e| e.to_raw())
+    // .collect::<Vec<_>>()
+    // .to_vec()
+    PermissionForables::from(vec![
+        for_(&[Create, Delete]).where_(name.is("Oyelowo")),
         for_(Update).where_(age.less_than_or_equal(130)),
-    ]
+    ])
+    .to_raw()
 }
 
 fn define_student() -> DefineTableStatement {
@@ -109,6 +118,24 @@ fn define_age() -> DefineFieldStatement {
     let email = Field::new("email");
     use FieldType::*;
 
+    // let statement = define_field(Student::schema().age)
+    //     .on_table(Student::table_name())
+    //     .type_(String)
+    //     .value("example@codebreather.com")
+    //     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+    //     // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+    //     .permissions_for(PermissionForables::from(
+    //         for_(&[Create, Update])
+    //             .where_(firstName.is("Oyedayo"))
+    //             .to_raw(),
+    //     )) //Multiple
+    //     .permissions_for(
+    //         PermissionForables::from(&[
+    //             for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
+    //             for_(Update).where_(age.less_than_or_equal(130)),
+    //         ])
+    //         .to_raw(),
+    //     );
     let statement = define_field(Student::schema().age)
         .on_table(Student::table_name())
         .type_(String)
@@ -118,13 +145,12 @@ fn define_age() -> DefineFieldStatement {
         .permissions_for(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
         .permissions_for(
             &[
-                for_(&[Create, Delete]).where_(firstName.is("Oyedayo")),
+                for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
-            ]
-            .into_iter()
-            .map(|e| e.to_raw())
-            .collect::<Vec<_>>()
-            .to_vec(),
+            ], // .into_iter()
+               // .map(|e| e.to_raw())
+               // .collect::<Vec<_>>()
+               // .to_vec(),
         );
     statement
 }
@@ -150,18 +176,18 @@ pub struct Student {
     last_name: String,
     #[surrealdb(
         // type="array(int)",
-        type = "geometry(feature, point, collection, polygon)",
-        value = "we()",
+        // type = "geometry(feature, point, collection, polygon)",
+        // value = "we()",
         // value = "Duration::from_secs(54)",
         // assert_fn = "erer",
         // assert = "erer()",
-        assert_fn = "erer",
+        // assert_fn = "erer",
         // assert = "cond(value().is_not(NONE))",
         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
         // permissions = "perm()",
-        permissions_fn = "perm",
+        // permissions_fn = "perm",
         // define = "define_age()",
-        // define_fn = "define_age"
+        define_fn = "define_age"
     )]
     age: u8,
 
