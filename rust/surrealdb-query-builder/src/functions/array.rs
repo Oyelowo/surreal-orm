@@ -102,6 +102,14 @@ impl Buildable for Operatee {
 }
 
 pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "combine")
+}
+
+fn create_array_helper(
+    arr1: impl Into<ArrayCustom>,
+    arr2: impl Into<ArrayCustom>,
+    func_name: &str,
+) -> Operatee {
     let arr1: sql::Value = arr1.into().into();
     let arr1 = Binding::new(arr1).with_description("array 1 to be combined");
 
@@ -109,7 +117,7 @@ pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Op
     let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
     let xx = Operatee {
         query_string: format!(
-            "array::combine({}, {})",
+            "array::{func_name}({}, {})",
             arr1.get_param_dollarised(),
             arr2.get_param_dollarised()
         ),
@@ -118,10 +126,8 @@ pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Op
     xx
 }
 
-pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::concat({}, {})", arr1, arr2)
+pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "concat")
 }
 
 pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
@@ -235,7 +241,15 @@ fn test_concat() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![4, 5, 6];
     let result = concat(arr1, arr2);
-    assert_eq!(result, "array::concat([1, 2, 3], [4, 5, 6])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::concat($_param_00000001, $_param_00000002)".to_string()
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::concat([1, 2, 3], [4, 5, 6])"
+    );
 }
 
 #[test]
