@@ -715,10 +715,11 @@ impl ReferencedNodeMeta {
             quote!()
         } else {
             quote!(
-                ,
+                    ,
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
                                         .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                         #( # define_array_field_content_methods) *
+                                        .to_raw()
 
             )
         };
@@ -727,7 +728,7 @@ impl ReferencedNodeMeta {
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                             #( # define_field_methods) *
-
+                                            .to_raw()
                     #array_content_definition
             ));
 
@@ -1020,6 +1021,7 @@ impl TableDeriveAttributes {
             quote!(
                 #crate_name::statements::define_table(Self::table_name())
                 #( #define_table_methods) *
+                .to_raw()
             )
         })
     }

@@ -26,6 +26,7 @@ pub(crate) mod sql_traits;
 mod statements;
 
 pub mod query {
+    pub use super::raw_statements::{RawStatement, ToRawStatement};
     pub use super::statements::statements::*;
 }
 
@@ -36,6 +37,7 @@ use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
 pub use sql::Clause;
+use sql::RawStatement;
 pub use sql::Table;
 use statements::define_field::DefineFieldStatement;
 use statements::define_table::DefineTableStatement;
@@ -69,8 +71,8 @@ pub trait SurrealdbModel {
     // fn table_name() -> surrealdb::sql::Table;
     fn table_name() -> Table;
     fn get_serializable_field_names() -> Vec<&'static str>;
-    fn define_table() -> DefineTableStatement;
-    fn define_fields() -> Vec<DefineFieldStatement>;
+    fn define_table() -> RawStatement;
+    fn define_fields() -> Vec<RawStatement>;
 }
 
 pub trait SurrealdbNode: SurrealdbModel + Serialize {

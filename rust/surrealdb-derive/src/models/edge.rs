@@ -132,6 +132,7 @@ impl ToTokens for EdgeToken {
         
 
         tokens.extend(quote!( 
+                use #crate_name::statements::{ToRawStatement as _, RawStatement};
                         
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
@@ -162,11 +163,11 @@ impl ToTokens for EdgeToken {
                         return vec![#( #serialized_field_name_no_skip), *]
                     }
                     
-                    fn define_table() -> #crate_name::statements::DefineTableStatement {
+                    fn define_table() -> #crate_name::statements::RawStatement {
                         #table_definitions
                     }
                     
-                    fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {
+                    fn define_fields() -> Vec<#crate_name::statements::RawStatement> {
                         vec![
                        #( #field_definitions), *
                         ]
