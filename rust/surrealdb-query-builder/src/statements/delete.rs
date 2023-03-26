@@ -13,11 +13,11 @@ use surrealdb::sql;
 use crate::{
     binding::{BindingsList, Parametric},
     filter::Filter,
-    query_update,
     sql::{Buildable, Queryable, Return, Runnable},
-    statements::TargettablesForUpdate,
     Erroneous, SurrealdbModel,
 };
+
+use super::update::TargettablesForUpdate;
 
 /*
 Statement syntax
@@ -72,7 +72,7 @@ impl<T> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(targettables: impl Into<query_update::TargettablesForUpdate>) -> Self {
+    pub fn new(targettables: impl Into<TargettablesForUpdate>) -> Self {
         let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 

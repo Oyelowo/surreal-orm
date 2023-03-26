@@ -12,7 +12,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{links::LinkOne, statements::FieldType};
+use surrealdb_query_builder::{links::LinkOne, query::FieldType};
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
@@ -280,7 +280,7 @@ impl Permissions {
             }
             Self::FnName(permissions) => {
                 let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                quote!(.permissions_for(#permissions))
+                quote!(.permissions_for(#permissions.to_raw()))
             }
         }
     }
@@ -433,13 +433,13 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_field = Some(quote!(#define));
+                define_field = Some(quote!(#define.to_raw()));
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
                 ..
             } => {
-                define_field = Some(quote!(#define_fn()));
+                define_field = Some(quote!(#define_fn().to_raw()));
             }
             _ => {}
         };
@@ -715,10 +715,11 @@ impl ReferencedNodeMeta {
             quote!()
         } else {
             quote!(
-                ,
+                    ,
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
                                         .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                         #( # define_array_field_content_methods) *
+                                        .to_raw()
 
             )
         };
@@ -727,7 +728,7 @@ impl ReferencedNodeMeta {
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
                                             .on_table(#crate_name::Table::from(#struct_name_ident_str))
                                             #( # define_field_methods) *
-
+                                            .to_raw()
                     #array_content_definition
             ));
 
@@ -865,7 +866,7 @@ impl PermissionsFn {
                 quote!(.permissions_none())
             }
             Self::FnPath(permissions_fn) => {
-                quote!(.permissions_for(#permissions_fn()))
+                quote!(.permissions_for(#permissions_fn().to_raw()))
             }
         }
     }
@@ -976,10 +977,10 @@ impl TableDeriveAttributes {
         match (define, define_fn){
             (Some(define), None) => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_table = Some(quote!(#define));
+                define_table = Some(quote!(#define.to_raw()));
             },
             (None, Some(define_fn)) => {
-                define_table = Some(quote!(#define_fn()));
+                define_table = Some(quote!(#define_fn().to_raw()));
             },
             (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
@@ -1020,6 +1021,7 @@ impl TableDeriveAttributes {
             quote!(
                 #crate_name::statements::define_table(Self::table_name())
                 #( #define_table_methods) *
+                .to_raw()
             )
         })
     }

@@ -131,6 +131,8 @@ impl ToTokens for NodeToken{
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!( 
+            use #crate_name::statements::ToRawStatement as _;
+            
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
@@ -172,11 +174,11 @@ impl ToTokens for NodeToken{
                     return vec![#( #serialized_field_name_no_skip), *]
                 }
                 
-                fn define_table() -> #crate_name::statements::DefineTableStatement {
+                fn define_table() -> #crate_name::statements::RawStatement {
                     #table_definitions
                 }
                 
-                fn define_fields() -> Vec<#crate_name::statements::DefineFieldStatement> {
+                fn define_fields() -> Vec<#crate_name::statements::RawStatement> {
                     vec![
                    #( #field_definitions), *
                     ]

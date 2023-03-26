@@ -6,9 +6,6 @@ authors = { workspace = true }
 description = { workspace = true }
 documentation = { workspace = true }
 
-[features]
-mock = []
-raw = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -37,7 +34,7 @@ thiserror = { workspace = true }
 
 test-case = { workspace = true }
 regex = "1.7.1"
-insta = "1.28.0"
+insta = { workspace = true }
 chrono.workspace = true
 geo = { workspace = true }
 derive_builder = "0.12.0"

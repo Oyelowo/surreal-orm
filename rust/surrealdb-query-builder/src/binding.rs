@@ -1,3 +1,5 @@
+use std::env;
+
 use serde::Serialize;
 use surrealdb::sql;
 
@@ -41,7 +43,7 @@ impl Binding {
         self
     }
 
-    pub fn get_raw(&self) -> &String {
+    pub fn get_raw_value(&self) -> &String {
         &self.raw_string
     }
 
@@ -54,12 +56,7 @@ impl Binding {
     }
 
     pub fn get_param_dollarised(&self) -> String {
-        #[cfg(feature = "raw")]
-        let param = format!("{}", &self.value);
-
-        #[cfg(not(feature = "raw"))]
-        let param = format!("${}", &self.param);
-        param
+        format!("${}", &self.param)
     }
 
     pub fn get_description(&self) -> String {
@@ -89,29 +86,10 @@ pub trait Parametric {
 }
 
 fn generate_param_name(prefix: &str, value: impl Into<sql::Value>) -> String {
-    let param = if cfg!(feature = "raw") {
-        let value: sql::Value = value.into();
-        // #[cfg(feature = "raw")]
-        let param = value.to_string();
-        param
-    } else {
-        // #[cfg(test)]
-        // let sanitized_uuid = uuid::Uuid::nil();
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+    let mut param = format!("_{prefix}_{sanitized_uuid}");
 
-        #[cfg(feature = "mock")]
-        let sanitized_uuid = uuid::Uuid::nil();
-
-        // #[cfg(not(test))]
-        #[cfg(not(feature = "mock"))]
-        let sanitized_uuid = uuid::Uuid::new_v4().simple();
-        // #[cfg(not(feature = "raw"))]
-        let mut param = format!("_{prefix}_{sanitized_uuid}");
-
-        // TODO: this is temporary
-        // #[cfg(not(feature = "raw"))]
-        param.truncate(15);
-        param
-    };
+    param.truncate(15);
 
     param
 }
