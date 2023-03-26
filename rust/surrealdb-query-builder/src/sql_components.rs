@@ -263,7 +263,30 @@ impl Deref for Duration {
     }
 }
 
-pub struct ArrayCustom(sql::Array);
+pub struct ArrayCustom(sql::Value);
+
+// impl Into<sql::Value> for ArrayCustom {
+//     fn into(self) -> sql::Value {
+//         self.0
+//     }
+// }
+// impl From<sql::Value> for ArrayCustom {
+//     fn from(value: sql::Value) -> Self {
+//         Self(value)
+//     }
+// }
+
+impl<T: Into<sql::Array>> From<T> for ArrayCustom {
+    fn from(value: T) -> Self {
+        Self(value.into().into())
+    }
+}
+
+impl From<Field> for ArrayCustom {
+    fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
 
 pub struct NONE;
 
@@ -279,39 +302,33 @@ impl Display for NONE {
     }
 }
 
-impl<T> From<Vec<T>> for ArrayCustom
-where
-    T: Into<sql::Value>,
-{
-    fn from(value: Vec<T>) -> Self {
-        Self(
-            value
-                .into_iter()
-                .map(|v| v.into())
-                .collect::<Vec<sql::Value>>()
-                .into(),
-        )
-    }
-}
+// impl<T> From<T> for ArrayCustom
+// where
+//     T: Into<sql::Value>,
+// {
+//     fn from(value: T) -> Self {
+//         Self(sql::Value::from(value.into()))
+//     }
+// }
 
-impl<T, const N: usize> From<&[T; N]> for ArrayCustom
-where
-    T: Into<sql::Value> + Clone,
-{
-    fn from(value: &[T; N]) -> Self {
-        Self(
-            value
-                .into_iter()
-                .map(|v| v.clone().into())
-                .collect::<Vec<sql::Value>>()
-                .into(),
-        )
-    }
-}
+// impl<T, const N: usize> From<&[T; N]> for ArrayCustom
+// where
+//     T: Into<sql::Value> + Clone,
+// {
+//     fn from(value: &[T; N]) -> Self {
+//         Self(
+//             value
+//                 .into_iter()
+//                 .map(|v| v.clone().into())
+//                 .collect::<Vec<sql::Value>>()
+//                 .into(),
+//         )
+//     }
+// }
 
 impl From<ArrayCustom> for sql::Value {
     fn from(value: ArrayCustom) -> Self {
-        Self::Array(value.0.into())
+        value.0
     }
 }
 #[derive(Clone)]

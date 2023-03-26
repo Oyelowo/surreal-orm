@@ -25,6 +25,8 @@ mod sql_components;
 pub(crate) mod sql_traits;
 mod statements;
 
+pub mod functions;
+
 pub mod query {
     pub use super::raw_statements::{RawStatement, ToRawStatement};
     pub use super::statements::statements::*;
