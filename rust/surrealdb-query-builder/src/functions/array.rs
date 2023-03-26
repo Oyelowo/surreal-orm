@@ -19,7 +19,8 @@ use crate::Field;
 fn erer() {
     let arr1 = &[434, 54];
     let arr1 = vec![434, 54];
-    let arr2 = vec!["ksd"];
+    let arr2 = vec!["ksd", "dayo"];
+    // let arr2 = vec![434, 54];
     let field = Field::new("lowo");
     let arr2 = Field::new("dayo");
     let xx = combine(field, arr2);

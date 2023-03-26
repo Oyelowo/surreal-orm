@@ -310,7 +310,7 @@ impl Display for NONE {
 //         Self(sql::Value::from(value.into()))
 //     }
 // }
-
+//
 // impl<T, const N: usize> From<&[T; N]> for ArrayCustom
 // where
 //     T: Into<sql::Value> + Clone,
