@@ -199,17 +199,29 @@ pub fn sort(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Operatee {
 }
 
 pub mod sort {
-    use crate::sql::ArrayCustom;
+    use crate::sql::{ArrayCustom, Binding};
     use surrealdb::sql;
 
-    pub fn asc(arr1: impl Into<ArrayCustom>) -> String {
-        let arr1: sql::Value = arr1.into().into();
-        format!("array::sort::asc({arr1})")
+    use super::Operatee;
+
+    pub fn asc(arr: impl Into<ArrayCustom>) -> Operatee {
+        let arr: sql::Value = arr.into().into();
+        let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+        Operatee {
+            query_string: format!("array::sort::asc({})", arr.get_param_dollarised()),
+            bindings: vec![arr],
+        }
     }
 
-    pub fn desc(arr1: impl Into<ArrayCustom>) -> String {
-        let arr1: sql::Value = arr1.into().into();
-        format!("array::sort::desc({arr1})")
+    pub fn desc(arr: impl Into<ArrayCustom>) -> Operatee {
+        let arr: sql::Value = arr.into().into();
+        let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+        Operatee {
+            query_string: format!("array::sort::desc({})", arr.get_param_dollarised()),
+            bindings: vec![arr],
+        }
     }
 }
 
@@ -340,18 +352,34 @@ fn test_len_on_diverse_array_custom_array_function() {
 fn test_sort() {
     let arr = array![3, 2, 1];
     let result = sort(arr.clone(), Ordering::Asc);
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, 'asc')".to_string()
+    );
     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
 
     let result = sort(arr.clone(), Ordering::Desc);
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, 'desc')".to_string()
+    );
     assert_eq!(
         result.to_raw().to_string(),
         "array::sort([3, 2, 1], 'desc')"
     );
 
     let result = sort(arr.clone(), Ordering::Empty);
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001)".to_string()
+    );
     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
 
     let result = sort(arr.clone(), Ordering::False);
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort($_param_00000001, false)".to_string()
+    );
     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
 }
 
@@ -359,12 +387,20 @@ fn test_sort() {
 fn test_sort_asc() {
     let arr = array![3, 2, 1];
     let result = sort::asc(arr);
-    assert_eq!(result, "array::sort::asc([3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort::asc($_param_00000001)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::asc([3, 2, 1])");
 }
 
 #[test]
 fn test_sort_desc() {
     let arr = array![3, 2, 1];
     let result = sort::desc(arr);
-    assert_eq!(result, "array::sort::desc([3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::sort::desc($_param_00000001)".to_string()
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::desc([3, 2, 1])");
 }
