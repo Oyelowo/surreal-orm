@@ -46,7 +46,7 @@ pub mod statements {
     pub use super::define_table::{define_table, DefineTableStatement};
     pub use super::define_token::{define_token, DefineTokenStatement};
     pub use super::delete::{delete, DeleteStatement};
-    pub use super::for_::{for_, For};
+    pub use super::for_::{for_, For, ForCrudType};
     pub use super::ifelse::{if_, IfStatement};
     pub use super::info::{info_for, InfoStatement};
     pub use super::insert::{insert, InsertStatement, Insertables};

@@ -28,12 +28,12 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     filter::Filter,
     links::{LinkMany, LinkOne, LinkSelf, Relate},
-    sql::{All, SurrealId, NONE},
-    statements::{
-        define_field, define_table, order, select, value, DefineFieldStatement,
+    query::{
+        define_field, define_table, for_, order, select, value, DefineFieldStatement,
         DefineTableStatement, FieldType, For, ForCrudType, SelectStatement,
     },
-    utils::{cond, for_},
+    sql::{All, SurrealId, NONE},
+    utils::cond,
     Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
 };
 
