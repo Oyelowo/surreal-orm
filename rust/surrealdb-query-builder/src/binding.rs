@@ -87,11 +87,8 @@ pub trait Parametric {
 
 fn generate_param_name(prefix: &str, value: impl Into<sql::Value>) -> String {
     let sanitized_uuid = uuid::Uuid::new_v4().simple();
-    // #[cfg(not(feature = "raw"))]
     let mut param = format!("_{prefix}_{sanitized_uuid}");
 
-    // TODO: this is temporary
-    // #[cfg(not(feature = "raw"))]
     param.truncate(15);
 
     param

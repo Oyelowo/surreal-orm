@@ -69,7 +69,6 @@ impl fmt::Display for QueryChain {
 mod tests {
     use crate::{
         filter::cond,
-        query_select::{order, select},
         sql::{All, SurrealId},
         Field, Operatable,
     };
@@ -79,6 +78,8 @@ mod tests {
     #[test]
     #[cfg(feature = "mock")]
     fn test_transaction_commit() {
+        use crate::statements::select;
+
         let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
@@ -117,6 +118,8 @@ mod tests {
     #[test]
     #[cfg(feature = "raw")]
     fn test_transaction_cancel() {
+        use crate::statements::select::order;
+
         let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
