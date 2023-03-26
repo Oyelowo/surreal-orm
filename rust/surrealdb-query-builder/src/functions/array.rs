@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 // array::combine()	Combines all values from two arrays together
 // array::concat()	Returns the merged values from two arrays
 // array::difference()	Returns the difference between two arrays
