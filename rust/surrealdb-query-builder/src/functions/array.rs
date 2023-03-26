@@ -130,10 +130,8 @@ pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Ope
     create_array_helper(arr1, arr2, "concat")
 }
 
-pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::union({}, {})", arr1, arr2)
+pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "union")
 }
 
 pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
@@ -222,8 +220,8 @@ fn test_array_macro_on_diverse_array() {
 
 #[test]
 fn test_combine() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = combine(arr1, arr2);
     assert_eq!(
         replace_params(&result.to_string()),
@@ -238,8 +236,8 @@ fn test_combine() {
 
 #[test]
 fn test_concat() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = concat(arr1, arr2);
     assert_eq!(
         replace_params(&result.to_string()),
@@ -254,10 +252,18 @@ fn test_concat() {
 
 #[test]
 fn test_union() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![4, 5, 6];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
     let result = union(arr1, arr2);
-    assert_eq!(result, "array::union([1, 2, 3], [4, 5, 6])");
+
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::union($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::union([1, 2, 3], [4, 5, 6])"
+    );
 }
 
 #[test]
