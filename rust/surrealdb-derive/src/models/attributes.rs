@@ -12,7 +12,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{links::LinkOne, statements::FieldType};
+use surrealdb_query_builder::{links::LinkOne, query::FieldType};
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{

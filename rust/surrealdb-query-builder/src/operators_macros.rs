@@ -148,18 +148,18 @@ macro_rules! q {
     };
 }
 
-#[macro_export]
-macro_rules! cond {
-    ($($expr:expr)*) => {
-        {
-            let mut v = Vec::new();
-            $(
-                v.push($expr.to_string());
-            )*
-            v.join(" ")
-        }
-    };
-}
+// #[macro_export]
+// macro_rules! cond {
+//     ($($expr:expr)*) => {
+//         {
+//             let mut v = Vec::new();
+//             $(
+//                 v.push($expr.to_string());
+//             )*
+//             v.join(" ")
+//         }
+//     };
+// }
 
 // macro_rules! wher_ {
 //     ($left: expr op!($op: tt) $right: expr) => {

@@ -20,10 +20,14 @@ pub mod links;
 pub mod model_id;
 mod operators_macros;
 mod param;
+pub(crate) mod raw_statements;
 mod sql_components;
 pub(crate) mod sql_traits;
+mod statements;
 
-pub mod statements;
+pub mod query {
+    pub use super::statements::statements::*;
+}
 
 pub use binding::{BindingsList, Parametric};
 pub use field::Field;
@@ -44,6 +48,7 @@ pub mod sql {
     pub use super::field::*;
     pub use super::field_updater::*;
     pub use super::param::*;
+    pub use super::raw_statements::*;
     pub use super::sql_components::*;
     pub use super::sql_traits::*;
 }

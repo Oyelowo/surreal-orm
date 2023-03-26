@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
 pub(crate) mod chain;
 pub(crate) mod create;
@@ -38,7 +38,7 @@ pub mod statements {
     pub use super::create::{create, CreateStatement};
     pub use super::define_database::{define_database, DefineDatabaseStatement};
     pub use super::define_event::{define_event, DefineEventStatement};
-    pub use super::define_field::{define_field, DefineFieldStatement};
+    pub use super::define_field::{define_field, DefineFieldStatement, FieldType};
     pub use super::define_index::{define_index, DefineIndexStatement};
     pub use super::define_login::{define_login, DefineLoginStatement};
     pub use super::define_namespace::{define_namespace, DefineNamespaceStatement};
@@ -61,7 +61,7 @@ pub mod statements {
     pub use super::remove_scope::{remove_scope, RemoveScopeStatement};
     pub use super::remove_table::{remove_table, RemoveTableStatement};
     pub use super::remove_token::{remove_token, RemoveTokenStatement};
-    pub use super::select::{select, select_raw_raw, SelectStatement};
+    pub use super::select::{select, SelectStatement};
     pub use super::sleep::{sleep, SleepStatement};
     pub use super::transaction::{begin_transaction, BeginTransactionStatement};
     pub use super::update::{update, UpdateStatement};

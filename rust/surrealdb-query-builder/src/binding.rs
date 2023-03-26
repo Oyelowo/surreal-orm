@@ -56,13 +56,7 @@ impl Binding {
     }
 
     pub fn get_param_dollarised(&self) -> String {
-        let mut param = format!("${}", &self.param);
-
-        if env::var("MY_ENV_VAR").is_ok() {
-            param = self.get_raw_value().to_string();
-        }
-
-        param
+        format!("${}", &self.param)
     }
 
     pub fn get_description(&self) -> String {
