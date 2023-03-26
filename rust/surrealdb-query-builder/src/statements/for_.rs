@@ -3,11 +3,11 @@ use std::fmt::{self, Display};
 use crate::{
     binding::{BindingsList, Parametric},
     filter::{Conditional, Filter},
-    sql::{Buildable, Queryable},
+    sql::{Buildable, Queryable, RawStatement, ToRawStatement},
     Erroneous,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum ForCrudType {
     Create,
     Select,
@@ -27,7 +27,7 @@ impl Display for ForCrudType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct ForData {
     crud_types: Vec<ForCrudType>,
     condition: Option<Filter>,
@@ -43,7 +43,7 @@ impl Parametric for For {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ForArgs {
     ForOption(ForCrudType),
     ForOptions(Vec<ForCrudType>),
@@ -93,7 +93,7 @@ pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
     })
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct For(ForData);
 
 impl Buildable for For {
@@ -131,26 +131,75 @@ impl Display for For {
 pub struct NONE;
 
 #[derive(Clone)]
-pub enum PermisisonForables {
+pub enum PermissionForables {
     For(For),
     Fors(Vec<For>),
+    RawStatement(RawStatement),
+    RawStatementList(Vec<RawStatement>),
 }
 
-impl From<For> for PermisisonForables {
+impl ToRawStatement for PermissionForables {
+    fn to_raw(self) -> RawStatement {
+        match self {
+            PermissionForables::For(for_one) => for_one.to_raw(),
+            PermissionForables::Fors(for_many) => RawStatement::new(
+                for_many
+                    .into_iter()
+                    .map(|f| f.to_raw().to_string())
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            ),
+            PermissionForables::RawStatement(r) => r,
+            PermissionForables::RawStatementList(raw_list) => RawStatement::new(
+                raw_list
+                    .into_iter()
+                    .map(|f| f.to_raw().to_string())
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            ),
+        }
+    }
+}
+
+impl From<For> for PermissionForables {
     fn from(value: For) -> Self {
         Self::For(value)
     }
 }
 
-impl From<Vec<For>> for PermisisonForables {
+impl From<Vec<For>> for PermissionForables {
     fn from(value: Vec<For>) -> Self {
         Self::Fors(value)
     }
 }
 
-impl<'a, const N: usize> From<&[For; N]> for PermisisonForables {
+impl<'a, const N: usize> From<&[For; N]> for PermissionForables {
     fn from(value: &[For; N]) -> Self {
         Self::Fors(value.to_vec())
+    }
+}
+
+impl From<RawStatement> for PermissionForables {
+    fn from(value: RawStatement) -> Self {
+        Self::RawStatement(value)
+    }
+}
+
+impl From<Vec<RawStatement>> for PermissionForables {
+    fn from(value: Vec<RawStatement>) -> Self {
+        Self::RawStatementList(value)
+    }
+}
+
+impl From<&Vec<RawStatement>> for PermissionForables {
+    fn from(value: &Vec<RawStatement>) -> Self {
+        Self::RawStatementList(value.to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[RawStatement; N]> for PermissionForables {
+    fn from(value: &[RawStatement; N]) -> Self {
+        Self::RawStatementList(value.to_vec())
     }
 }
 

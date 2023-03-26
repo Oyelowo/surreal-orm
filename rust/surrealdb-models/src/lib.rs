@@ -116,10 +116,16 @@ fn define_age() -> DefineFieldStatement {
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
         .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
         .permissions_for(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
-        .permissions_for(&[
-            for_(&[Create, Delete]).where_(firstName.is("Oyedayo")),
-            for_(Update).where_(age.less_than_or_equal(130)),
-        ]);
+        .permissions_for(
+            &[
+                for_(&[Create, Delete]).where_(firstName.is("Oyedayo")),
+                for_(Update).where_(age.less_than_or_equal(130)),
+            ]
+            .into_iter()
+            .map(|e| e.to_raw())
+            .collect::<Vec<_>>()
+            .to_vec(),
+        );
     statement
 }
 

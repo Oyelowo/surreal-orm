@@ -20,7 +20,7 @@ use crate::{
     Erroneous,
 };
 
-use super::{for_::PermisisonForables, select::SelectStatement};
+use super::{for_::PermissionForables, select::SelectStatement};
 
 // DEFINE TABLE statement
 // The DEFINE TABLE statement allows you to declare your table by name, enabling you to apply strict controls to a table's schema by making it SCHEMAFULL, create a foreign table view, and set permissions specifying what operations can be performed on the field.
@@ -160,17 +160,28 @@ impl DefineTableStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermisisonForables>) -> Self {
-        let fors: PermisisonForables = fors.into();
+    pub fn permissions_for(mut self, fors: impl Into<PermissionForables>) -> Self {
+        let fors: PermissionForables = fors.into();
         match fors {
-            PermisisonForables::For(one) => {
+            PermissionForables::For(one) => {
                 self.permissions_for.push(one.to_string());
                 self.bindings.extend(one.get_bindings());
             }
-            PermisisonForables::Fors(many) => many.iter().for_each(|f| {
+            PermissionForables::Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
                 self.bindings.extend(f.get_bindings());
             }),
+            PermissionForables::RawStatement(raw) => {
+                self.permissions_for.push(raw.to_string());
+            }
+            PermissionForables::RawStatementList(raw_list) => {
+                self.permissions_for.extend(
+                    raw_list
+                        .into_iter()
+                        .map(|r| r.to_string())
+                        .collect::<Vec<_>>(),
+                );
+            }
         }
         self
     }

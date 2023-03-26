@@ -24,7 +24,7 @@ use crate::{
     Erroneous, Field,
 };
 
-use super::for_::PermisisonForables;
+use super::for_::PermissionForables;
 
 // DEFINE FIELD statement
 // The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
@@ -371,17 +371,28 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermisisonForables>) -> Self {
-        let fors: PermisisonForables = fors.into();
+    pub fn permissions_for(mut self, fors: impl Into<PermissionForables>) -> Self {
+        let fors: PermissionForables = fors.into();
         match fors {
-            PermisisonForables::For(one) => {
+            PermissionForables::For(one) => {
                 self.permissions_for.push(one.to_string());
                 self.bindings.extend(one.get_bindings());
             }
-            PermisisonForables::Fors(many) => many.iter().for_each(|f| {
+            PermissionForables::Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
                 self.bindings.extend(f.get_bindings());
             }),
+            PermissionForables::RawStatement(raw) => {
+                self.permissions_for.push(raw.to_string());
+            }
+            PermissionForables::RawStatementList(raw_list) => {
+                self.permissions_for.extend(
+                    raw_list
+                        .into_iter()
+                        .map(|r| r.to_string())
+                        .collect::<Vec<_>>(),
+                );
+            }
         }
         self
     }

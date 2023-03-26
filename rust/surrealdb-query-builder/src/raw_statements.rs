@@ -1,8 +1,28 @@
 use std::fmt::{Display, Formatter};
 
-use crate::sql::{Buildable, Queryable};
+use crate::{
+    sql::{Buildable, Queryable},
+    Erroneous, Parametric,
+};
 
+#[derive(Debug, Clone)]
 pub struct RawStatement(String);
+
+impl RawStatement {
+    pub fn new(query: String) -> Self {
+        Self(query)
+    }
+}
+
+impl Parametric for RawStatement {
+    fn get_bindings(&self) -> crate::BindingsList {
+        vec![]
+    }
+}
+
+impl Erroneous for RawStatement {}
+
+impl Queryable for RawStatement {}
 
 impl Display for RawStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
