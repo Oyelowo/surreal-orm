@@ -115,15 +115,14 @@ fn create_array_helper(
 
     let arr2: sql::Value = arr2.into().into();
     let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
-    let xx = Operatee {
+    Operatee {
         query_string: format!(
             "array::{func_name}({}, {})",
             arr1.get_param_dollarised(),
             arr2.get_param_dollarised()
         ),
         bindings: vec![arr1, arr2],
-    };
-    xx
+    }
 }
 
 pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
@@ -142,15 +141,26 @@ pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> 
     create_array_helper(arr1, arr2, "intersect")
 }
 
-pub fn distinct(arr1: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    format!("array::distinct({})", arr1)
+pub fn distinct(arr: impl Into<ArrayCustom>) -> Operatee {
+    let arr: sql::Value = arr.into().into();
+    let arr = Binding::new(arr).with_description("Array to be made distinct");
+
+    Operatee {
+        query_string: format!("array::distinct({})", arr.get_param_dollarised()),
+        bindings: vec![arr],
+    }
 }
 
 // pub fn len(arr1: Vec<impl Into<sql::Value>>) -> String {
-pub fn len(arr1: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    format!("array::len({})", arr1)
+pub fn len(arr1: impl Into<ArrayCustom>) -> Operatee {
+    let arr: sql::Value = arr1.into().into();
+    let arr =
+        Binding::new(arr).with_description("Length of array to be checked. Also checks falsies");
+
+    Operatee {
+        query_string: format!("array::len({})", arr.get_param_dollarised()),
+        bindings: vec![arr],
+    }
 }
 
 pub enum Ordering {
@@ -279,8 +289,8 @@ fn test_difference() {
 
 #[test]
 fn test_intersect() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![2, 3, 4];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![2, 3, 4];
     let result = intersect(arr1, arr2);
     assert_eq!(
         replace_params(&result.to_string()),
@@ -294,9 +304,16 @@ fn test_intersect() {
 
 #[test]
 fn test_distinct() {
-    let arr = vec![1, 2, 3, 3, 2, 1];
+    let arr = array![1, 2, 3, 3, 2, 1];
     let result = distinct(arr);
-    assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::distinct($_param_00000001)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::distinct([1, 2, 3, 3, 2, 1])"
+    );
 }
 
 #[test]
@@ -305,14 +322,18 @@ fn test_len_on_diverse_array_custom_array_function() {
     let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
     let result = len(arr);
     assert_eq!(
-        result,
-        "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
+        replace_params(&result.to_string()),
+        "array::len($_param_00000001)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])".to_string()
     );
 }
 
 #[test]
 fn test_sort() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort(arr.clone(), Ordering::Asc);
     assert_eq!(result, "array::sort([3, 2, 1], 'asc')");
 
@@ -328,14 +349,14 @@ fn test_sort() {
 
 #[test]
 fn test_sort_asc() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort::asc(arr);
     assert_eq!(result, "array::sort::asc([3, 2, 1])");
 }
 
 #[test]
 fn test_sort_desc() {
-    let arr = vec![3, 2, 1];
+    let arr = array![3, 2, 1];
     let result = sort::desc(arr);
     assert_eq!(result, "array::sort::desc([3, 2, 1])");
 }
