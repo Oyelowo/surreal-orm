@@ -134,21 +134,17 @@ pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Oper
     create_array_helper(arr1, arr2, "union")
 }
 
-pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::difference({}, {})", arr1, arr2)
+pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "difference")
+}
+
+pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+    create_array_helper(arr1, arr2, "intersect")
 }
 
 pub fn distinct(arr1: impl Into<ArrayCustom>) -> String {
     let arr1: sql::Value = arr1.into().into();
     format!("array::distinct({})", arr1)
-}
-
-pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> String {
-    let arr1: sql::Value = arr1.into().into();
-    let arr2: sql::Value = arr2.into().into();
-    format!("array::intersect({}, {})", arr1, arr2)
 }
 
 // pub fn len(arr1: Vec<impl Into<sql::Value>>) -> String {
@@ -271,14 +267,14 @@ fn test_difference() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![2, 3, 4];
     let result = difference(arr1, arr2);
-    assert_eq!(result, "array::difference([1, 2, 3], [2, 3, 4])");
-}
-
-#[test]
-fn test_distinct() {
-    let arr = vec![1, 2, 3, 3, 2, 1];
-    let result = distinct(arr);
-    assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::difference($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::difference([1, 2, 3], [2, 3, 4])"
+    );
 }
 
 #[test]
@@ -286,7 +282,21 @@ fn test_intersect() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![2, 3, 4];
     let result = intersect(arr1, arr2);
-    assert_eq!(result, "array::intersect([1, 2, 3], [2, 3, 4])");
+    assert_eq!(
+        replace_params(&result.to_string()),
+        "array::intersect($_param_00000001, $_param_00000002)".to_string()
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::intersect([1, 2, 3], [2, 3, 4])"
+    );
+}
+
+#[test]
+fn test_distinct() {
+    let arr = vec![1, 2, 3, 3, 2, 1];
+    let result = distinct(arr);
+    assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
 }
 
 #[test]
