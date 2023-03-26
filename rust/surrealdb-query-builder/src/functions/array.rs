@@ -159,7 +159,7 @@ pub mod sort {
 
     pub fn desc(arr1: impl Into<ArrayCustom>) -> String {
         let arr1: sql::Value = arr1.into().into();
-        format!("array::sort::asc({arr1})")
+        format!("array::sort::desc({arr1})")
     }
 }
 
@@ -187,7 +187,7 @@ fn test_combine() {
 fn test_concat() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![4, 5, 6];
-    let result = concat(arr1.clone(), arr2.clone());
+    let result = concat(arr1, arr2);
     assert_eq!(result, "array::concat([1, 2, 3], [4, 5, 6])");
 }
 
@@ -195,7 +195,7 @@ fn test_concat() {
 fn test_union() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![4, 5, 6];
-    let result = union(arr1.clone(), arr2.clone());
+    let result = union(arr1, arr2);
     assert_eq!(result, "array::union([1, 2, 3], [4, 5, 6])");
 }
 
@@ -203,14 +203,14 @@ fn test_union() {
 fn test_difference() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![2, 3, 4];
-    let result = difference(arr1.clone(), arr2.clone());
+    let result = difference(arr1, arr2);
     assert_eq!(result, "array::difference([1, 2, 3], [2, 3, 4])");
 }
 
 #[test]
 fn test_distinct() {
     let arr = vec![1, 2, 3, 3, 2, 1];
-    let result = distinct(arr.clone());
+    let result = distinct(arr);
     assert_eq!(result, "array::distinct([1, 2, 3, 3, 2, 1])");
 }
 
@@ -218,7 +218,7 @@ fn test_distinct() {
 fn test_intersect() {
     let arr1 = vec![1, 2, 3];
     let arr2 = vec![2, 3, 4];
-    let result = intersect(arr1.clone(), arr2.clone());
+    let result = intersect(arr1, arr2);
     assert_eq!(result, "array::intersect([1, 2, 3], [2, 3, 4])");
 }
 
@@ -226,7 +226,7 @@ fn test_intersect() {
 fn test_len_on_diverse_array_custom_array_function() {
     let email = Field::new("email");
     let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
-    let result = len(arr.clone());
+    let result = len(arr);
     assert_eq!(
         result,
         "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
@@ -247,4 +247,18 @@ fn test_sort() {
 
     let result = sort(arr.clone(), Ordering::False);
     assert_eq!(result, "array::sort([3, 2, 1], false)");
+}
+
+#[test]
+fn test_sort_asc() {
+    let arr = vec![3, 2, 1];
+    let result = sort::asc(arr);
+    assert_eq!(result, "array::sort::asc([3, 2, 1])");
+}
+
+#[test]
+fn test_sort_desc() {
+    let arr = vec![3, 2, 1];
+    let result = sort::desc(arr);
+    assert_eq!(result, "array::sort::desc([3, 2, 1])");
 }
