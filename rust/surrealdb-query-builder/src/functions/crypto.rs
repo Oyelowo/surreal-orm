@@ -130,3 +130,13 @@ fn test_sha1() {
     assert_eq!(result.fine_tune_params(), "crypto::sha1($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "crypto::sha1('Oyelowo')");
 }
+
+#[test]
+fn test_sha256() {
+    let result = sha256("Oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::sha256($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "crypto::sha256('Oyelowo')");
+}
