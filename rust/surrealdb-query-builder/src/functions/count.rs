@@ -94,8 +94,15 @@ use super::*;
 
 #[test]
 fn test_count_withoout_arguments() {
-    // Test count() without arguments
     let result = count(Empty);
     assert_eq!(result.fine_tune_params(), "count()");
     assert_eq!(result.to_raw().to_string(), "count()");
+}
+
+#[test]
+fn test_count_with_db_field() {
+    let email = Field::new("email");
+    let result = count(email);
+    assert_eq!(result.fine_tune_params(), "count(email)");
+    assert_eq!(result.to_raw().to_string(), "count(email)");
 }
