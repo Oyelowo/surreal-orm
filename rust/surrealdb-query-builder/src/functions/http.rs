@@ -80,10 +80,6 @@ impl<T: Into<sql::Object>> From<T> for Object {
     }
 }
 
-pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
-    create_fn_with_two_args(url, custom_headers, "head")
-}
-
 fn create_fn_with_two_args(
     url: impl Into<Url>,
     custom_headers: impl Into<Object>,
@@ -116,6 +112,18 @@ fn create_fn_with_two_args(
         query_string: string,
         bindings: all_bindings,
     }
+}
+
+pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+    create_fn_with_two_args(url, custom_headers, "head")
+}
+
+pub fn get(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+    create_fn_with_two_args(url, custom_headers, "get")
+}
+
+pub fn delete(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+    create_fn_with_two_args(url, custom_headers, "delete")
 }
 
 #[test]
@@ -162,4 +170,50 @@ fn test_head_method_with_field_custom_header() {
         "http::head($_param_00000001, $_param_00000002)"
     );
     assert_eq!(result.to_raw().to_string(), "http::head(homepage, headers)");
+}
+
+#[test]
+fn test_get_method_with_empty_header() {
+    let result = get("https://codebreather.com", Empty);
+    assert_eq!(result.fine_tune_params(), "http::get($_param_00000001)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::get('https://codebreather.com')"
+    );
+}
+
+#[test]
+fn test_field_get_method_with_empty_header() {
+    let homepage = Field::new("homepage");
+
+    let result = get(homepage, Empty);
+    assert_eq!(result.fine_tune_params(), "http::get($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "http::get(homepage)");
+}
+
+#[test]
+fn test_get_method_with_plain_custom_header() {
+    let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
+    let result = get("https://codebreather.com", headers);
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::get($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::get('https://codebreather.com', { \"x-my-header\": 'some unique string' })"
+    );
+}
+
+#[test]
+fn test_get_method_with_field_custom_header() {
+    let homepage = Field::new("homepage");
+    let headers = Field::new("headers");
+
+    let result = get(homepage, headers);
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::get($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "http::get(homepage, headers)");
 }
