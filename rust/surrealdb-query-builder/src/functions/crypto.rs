@@ -13,19 +13,17 @@
 // crypto::scrypt::compare()	Compares an scrypt hash to a password
 // crypto::scrypt::generate()	Generates a new scrypt hashed password
 
-use crate::sql::{self, Binding};
+use surrealdb::sql;
+
+use crate::sql::{Binding, Buildable, ToRawStatement};
 
 use super::array::Function;
 
-fn md5(value: impl Into<sql::value>) -> Function {
-    create_fn_with_single_value(value, "md5")
-}
-
-pub fn create_fn_with_single_value(
-    value: impl Into<sql::value>,
+pub(crate) fn create_fn_with_single_value(
+    value: impl Into<sql::Value>,
     function_suffix: &str,
 ) -> Function {
-    let value = sql::Value::from(value);
+    let value: sql::Value = value.into();
     let binding = Binding::new(value);
 
     Function {
@@ -37,13 +35,13 @@ pub fn create_fn_with_single_value(
     }
 }
 
-pub fn create_fn_with_two_values(
-    value1: impl Into<sql::value>,
-    value2: impl Into<sql::value>,
+pub(crate) fn create_fn_with_two_values(
+    value1: impl Into<sql::Value>,
+    value2: impl Into<sql::Value>,
     function_suffix: &str,
 ) -> Function {
-    let value1 = sql::Value::from(value1);
-    let value2 = sql::Value::from(value2);
+    let value1: sql::Value = value1.into();
+    let value2: sql::Value = value2.into();
     let binding1 = Binding::new(value1);
     let binding2 = Binding::new(value2);
 
@@ -56,44 +54,72 @@ pub fn create_fn_with_two_values(
         bindings: vec![binding1, binding2],
     }
 }
-pub fn sha1(value: impl Into<sql::value>) -> Function {
+
+fn md5(value: impl Into<sql::Value>) -> Function {
+    create_fn_with_single_value(value, "md5")
+}
+
+pub fn sha1(value: impl Into<sql::Value>) -> Function {
     create_fn_with_single_value(value, "sha1")
 }
 
-pub fn sha256(value: impl Into<sql::value>) -> Function {
+pub fn sha256(value: impl Into<sql::Value>) -> Function {
     create_fn_with_single_value(value, "sha256")
 }
 
-pub fn sha512(value: impl Into<sql::value>) -> Function {
+pub fn sha512(value: impl Into<sql::Value>) -> Function {
     create_fn_with_single_value(value, "sha512")
 }
 
 pub mod argon2 {
-    pub fn compare(value1: impl Into<sql::value>, value2: impl Into<sql::value>) -> Function {
-        create_fn_with_single_value(value1, value2, "argon2::compare")
+    use surrealdb::sql;
+
+    use super::{create_fn_with_single_value, create_fn_with_two_values};
+    use crate::functions::array::Function;
+
+    pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+        create_fn_with_two_values(value1, value2, "argon2::compare")
     }
 
-    pub fn generate(value: impl Into<sql::value>) -> Function {
+    pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "argon2::generate")
     }
 }
 
 pub mod pbkdf2 {
-    pub fn compare(value1: impl Into<sql::value>, value2: impl Into<sql::value>) -> Function {
-        create_fn_with_single_value(value1, value2, "pbkdf2::compare")
+    use surrealdb::sql;
+
+    use crate::functions::array::Function;
+
+    use super::{create_fn_with_single_value, create_fn_with_two_values};
+    pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+        create_fn_with_two_values(value1, value2, "pbkdf2::compare")
     }
 
-    pub fn generate(value: impl Into<sql::value>) -> Function {
+    pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "pbkdf2::generate")
     }
 }
 
 pub mod scrypt {
-    pub fn compare(value1: impl Into<sql::value>, value2: impl Into<sql::value>) -> Function {
-        create_fn_with_single_value(value1, value2, "scrypt::compare")
+    use surrealdb::sql;
+
+    use crate::functions::array::Function;
+
+    use super::{create_fn_with_single_value, create_fn_with_two_values};
+
+    pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+        create_fn_with_two_values(value1, value2, "scrypt::compare")
     }
 
-    pub fn generate(value: impl Into<sql::value>) -> Function {
+    pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "scrypt::generate")
     }
+}
+
+#[test]
+fn test_md5() {
+    let result = md5("Oyelowo");
+    assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "crypto::md5('Oyelowo')");
 }
