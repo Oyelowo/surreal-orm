@@ -93,7 +93,7 @@ use crate::sql::ToRawStatement;
 use super::*;
 
 #[test]
-fn test_count() {
+fn test_count_withoout_arguments() {
     // Test count() without arguments
     let result = count(Empty);
     assert_eq!(result.fine_tune_params(), "count()");
