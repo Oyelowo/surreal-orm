@@ -31,13 +31,17 @@ use crate::{
 
 use super::array::Function;
 
-pub fn alphanum(value: impl Into<sql::Value>) -> Function {
+fn fun_name(value: impl Into<sql::Value>, function_name: &str) -> Function {
     let binding = Binding::new(value);
 
     Function {
-        query_string: format!("is::alphanum({})", binding.get_param_dollarised()),
+        query_string: format!("is::{function_name}({})", binding.get_param_dollarised()),
         bindings: vec![binding],
     }
+}
+
+pub fn alphanum(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "alphanum")
 }
 
 #[test]
