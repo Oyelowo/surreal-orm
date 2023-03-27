@@ -23,7 +23,7 @@ use surrealdb::sql;
 
 use crate::{
     field::GeometryOrField,
-    sql::{Binding, Buildable, ToRawStatement},
+    sql::{Binding, Buildable, Empty, ToRawStatement},
     Field,
 };
 
@@ -192,8 +192,9 @@ pub mod hash {
         }
     }
 
-    pub fn encode(geometry: impl Into<GeometryOrField>, accuracy: Accuracy) -> Function {
+    pub fn encode(geometry: impl Into<GeometryOrField>, accuracy: impl Into<Accuracy>) -> Function {
         let binding = Binding::new(geometry.into());
+        let accuracy: Accuracy = accuracy.into();
         let geometry_param = binding.get_param_dollarised();
 
         let mut bindings = vec![binding];
@@ -417,5 +418,63 @@ fn test_hash_decode_with_string() {
     assert_eq!(
         result.to_raw().to_string(),
         "geo::hash::decode('mpuxk4s24f51')"
+    );
+}
+
+#[test]
+fn test_hash_encode_with_field_and_empty_accuracy() {
+    let city = Field::new("city");
+    let result = hash::encode(city, Empty);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::encode($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city)");
+}
+
+#[test]
+fn test_hash_encode_with_field_and_field_accuracy() {
+    let city = Field::new("city");
+    let accuracy = Field::new("accuracy");
+    let result = hash::encode(city, accuracy);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::encode($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::hash::encode(city, accuracy)"
+    );
+}
+
+#[test]
+fn test_hash_encode_with_field_and_number_accuracy() {
+    let city = Field::new("city");
+    let result = hash::encode(city, 5);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::encode($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city, 5)");
+}
+
+#[test]
+fn test_hash_encode_with_point() {
+    let point = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let result = hash::encode(point, 5);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::encode($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::hash::encode((40.02, 116.34), 5)"
     );
 }
