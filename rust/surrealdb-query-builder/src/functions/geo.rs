@@ -257,3 +257,41 @@ fn test_bearing_with_raw_point_with_field() {
         "geo::bearing(hometown, (80.02, 103.19))"
     );
 }
+
+#[test]
+fn test_centroid_with_field() {
+    let city = Field::new("city");
+    let result = centroid(city);
+
+    assert_eq!(result.fine_tune_params(), "geo::centroid($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "geo::centroid(city)");
+}
+
+#[test]
+fn test_centroid_with_raw_polygon() {
+    let poly = polygon!(
+            exterior: [
+                (x: -111., y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],
+        );
+    let result = centroid(poly);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::centroid($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
+    );
+}
