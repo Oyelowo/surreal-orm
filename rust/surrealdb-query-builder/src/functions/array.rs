@@ -15,7 +15,7 @@
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
 // array::union()
-struct Function(String);
+// struct Function(String);
 
 use std::fmt::Display;
 
@@ -76,32 +76,32 @@ impl<U: Into<sql::Array>> From<U> for ArrayOrField {
 }
 
 #[derive(Debug, Clone)]
-pub struct Operatee {
+pub struct Function {
     pub query_string: String,
     pub bindings: BindingsList,
 }
 
 // impl ToRawStatement for Operatee {}
 
-impl Parametric for Operatee {
+impl Parametric for Function {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl Display for Operatee {
+impl Display for Function {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
-impl Buildable for Operatee {
+impl Buildable for Function {
     fn build(&self) -> String {
         self.query_string.clone()
     }
 }
 
-pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "combine")
 }
 
@@ -109,13 +109,13 @@ fn create_array_helper(
     arr1: impl Into<ArrayCustom>,
     arr2: impl Into<ArrayCustom>,
     func_name: &str,
-) -> Operatee {
+) -> Function {
     let arr1: sql::Value = arr1.into().into();
     let arr1 = Binding::new(arr1).with_description("array 1 to be combined");
 
     let arr2: sql::Value = arr2.into().into();
     let arr2 = Binding::new(arr2).with_description("array 2 to be combined");
-    Operatee {
+    Function {
         query_string: format!(
             "array::{func_name}({}, {})",
             arr1.get_param_dollarised(),
@@ -125,39 +125,39 @@ fn create_array_helper(
     }
 }
 
-pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "concat")
 }
 
-pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "union")
 }
 
-pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "difference")
 }
 
-pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Operatee {
+pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "intersect")
 }
 
-pub fn distinct(arr: impl Into<ArrayCustom>) -> Operatee {
+pub fn distinct(arr: impl Into<ArrayCustom>) -> Function {
     let arr: sql::Value = arr.into().into();
     let arr = Binding::new(arr).with_description("Array to be made distinct");
 
-    Operatee {
+    Function {
         query_string: format!("array::distinct({})", arr.get_param_dollarised()),
         bindings: vec![arr],
     }
 }
 
 // pub fn len(arr1: Vec<impl Into<sql::Value>>) -> String {
-pub fn len(arr1: impl Into<ArrayCustom>) -> Operatee {
+pub fn len(arr1: impl Into<ArrayCustom>) -> Function {
     let arr: sql::Value = arr1.into().into();
     let arr =
         Binding::new(arr).with_description("Length of array to be checked. Also checks falsies");
 
-    Operatee {
+    Function {
         query_string: format!("array::len({})", arr.get_param_dollarised()),
         bindings: vec![arr],
     }
@@ -185,14 +185,14 @@ impl Display for Ordering {
     }
 }
 
-pub fn sort(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Operatee {
+pub fn sort(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Function {
     let arr: sql::Value = arr.into().into();
     let arr = Binding::new(arr);
     let query_string = match ordering {
         Ordering::Empty => format!("array::sort({})", arr.get_param_dollarised()),
         _ => format!("array::sort({}, {ordering})", arr.get_param_dollarised()),
     };
-    Operatee {
+    Function {
         query_string,
         bindings: vec![arr],
     }
@@ -202,23 +202,23 @@ pub mod sort {
     use crate::sql::{ArrayCustom, Binding};
     use surrealdb::sql;
 
-    use super::Operatee;
+    use super::Function;
 
-    pub fn asc(arr: impl Into<ArrayCustom>) -> Operatee {
+    pub fn asc(arr: impl Into<ArrayCustom>) -> Function {
         let arr: sql::Value = arr.into().into();
         let arr = Binding::new(arr).with_description("Array to be made distinct");
 
-        Operatee {
+        Function {
             query_string: format!("array::sort::asc({})", arr.get_param_dollarised()),
             bindings: vec![arr],
         }
     }
 
-    pub fn desc(arr: impl Into<ArrayCustom>) -> Operatee {
+    pub fn desc(arr: impl Into<ArrayCustom>) -> Function {
         let arr: sql::Value = arr.into().into();
         let arr = Binding::new(arr).with_description("Array to be made distinct");
 
-        Operatee {
+        Function {
             query_string: format!("array::sort::desc({})", arr.get_param_dollarised()),
             bindings: vec![arr],
         }
