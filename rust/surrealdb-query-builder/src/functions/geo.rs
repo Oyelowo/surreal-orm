@@ -72,8 +72,8 @@ pub(crate) fn create_geo_with_single_arg(
 }
 
 fn create_geo_fn_with_two_args(
-    point1: impl Into<sql::Geometry>,
-    point2: impl Into<sql::Geometry>,
+    point1: impl Into<GeometryOrField>,
+    point2: impl Into<GeometryOrField>,
     fn_suffix: &str,
 ) -> Function {
     let binding1 = Binding::new(point1.into());
@@ -92,7 +92,7 @@ pub fn area(geometry: impl Into<GeometryOrField>) -> Function {
     create_geo_with_single_arg(geometry, "area")
 }
 
-pub fn bearing(point1: impl Into<sql::Geometry>, point2: impl Into<sql::Geometry>) -> Function {
+pub fn bearing(point1: impl Into<GeometryOrField>, point2: impl Into<GeometryOrField>) -> Function {
     create_geo_fn_with_two_args(point1, point2, "bearing")
 }
 
@@ -100,7 +100,10 @@ pub fn centroid(geometry: impl Into<GeometryOrField>) -> Function {
     create_geo_with_single_arg(geometry, "centroid")
 }
 
-pub fn distance(point1: impl Into<sql::Geometry>, point2: impl Into<sql::Geometry>) -> Function {
+pub fn distance(
+    point1: impl Into<GeometryOrField>,
+    point2: impl Into<GeometryOrField>,
+) -> Function {
     create_geo_fn_with_two_args(point1, point2, "distance")
 }
 
@@ -108,6 +111,7 @@ pub mod hash {
     pub enum Accuracy {
         Empty,
         Number(surrealdb::sql::Number),
+        Field(Field),
     }
 
     impl<T> From<T> for Accuracy
@@ -117,6 +121,12 @@ pub mod hash {
         fn from(value: T) -> Self {
             let value: sql::Number = value.into();
             Self::Number(value)
+        }
+    }
+
+    impl From<Field> for Accuracy {
+        fn from(value: Field) -> Self {
+            Self::Field(value)
         }
     }
 
@@ -133,6 +143,7 @@ pub mod hash {
         field::GeometryOrField,
         functions::array::Function,
         sql::{Binding, Empty},
+        Field,
     };
 
     pub fn decode(geometry: impl Into<GeometryOrField>) -> Function {
@@ -149,6 +160,13 @@ pub mod hash {
             Accuracy::Empty => format!("geo::hash::encode({geometry_param})",),
             Accuracy::Number(num) => {
                 let binding = Binding::new(num);
+                let accuracy_param = binding.get_param_dollarised();
+                bindings.push(binding);
+
+                format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
+            }
+            Accuracy::Field(field) => {
+                let binding = Binding::new(field);
                 let accuracy_param = binding.get_param_dollarised();
                 bindings.push(binding);
 
