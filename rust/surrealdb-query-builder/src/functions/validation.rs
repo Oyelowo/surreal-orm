@@ -44,6 +44,46 @@ pub fn alphanum(value: impl Into<sql::Value>) -> Function {
     fun_name(value, "alphanum")
 }
 
+pub fn alpha(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "alpha")
+}
+
+pub fn ascii(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "ascii")
+}
+
+pub fn domain(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "domain")
+}
+
+pub fn email(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "email")
+}
+
+pub fn hexadecimal(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "hexadecimal")
+}
+
+pub fn latitude(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "latitude")
+}
+
+pub fn longitude(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "longitude")
+}
+
+pub fn numeric(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "numeric")
+}
+
+pub fn semver(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "semver")
+}
+
+pub fn uuid(value: impl Into<sql::Value>) -> Function {
+    fun_name(value, "uuid")
+}
+
 #[test]
 fn test_alphanum_with_field() {
     let username = Field::new("username");
