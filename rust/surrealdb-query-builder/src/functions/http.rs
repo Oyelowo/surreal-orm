@@ -114,6 +114,56 @@ fn create_fn_with_two_args(
     }
 }
 
+fn create_fn_with_three_args(
+    url: impl Into<Url>,
+    request_body: impl Into<Object>,
+    custom_headers: impl Into<Object>,
+    method: &str,
+) -> Function {
+    let url: sql::Value = url.into().into();
+    let request_body: Object = request_body.into();
+    let custom_headers: Object = custom_headers.into();
+    let url_binding = Binding::new(url);
+    let url_parametized = url_binding.get_param_dollarised();
+
+    let mut all_bindings = vec![url_binding];
+
+    let string = match request_body {
+        Object::Empty => {
+            format!(
+                "http::{method}({}, {}",
+                &url_parametized,
+                sql::Object::default()
+            )
+        }
+        Object::Object(body) => {
+            let header_binding = Binding::new(body);
+            let header_parametized = header_binding.get_param_dollarised();
+            all_bindings.push(header_binding);
+
+            format!("http::{method}({}, {}", url_parametized, header_parametized)
+        }
+    };
+
+    let string = match custom_headers {
+        Object::Empty => {
+            format!("{string}, {})", sql::Object::default())
+        }
+        Object::Object(headers) => {
+            let header_binding = Binding::new(headers);
+            let header_parametized = header_binding.get_param_dollarised();
+            all_bindings.push(header_binding);
+
+            format!("{string}, {})", header_parametized)
+        }
+    };
+
+    Function {
+        query_string: string,
+        bindings: all_bindings,
+    }
+}
+
 pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
     create_fn_with_two_args(url, custom_headers, "head")
 }
@@ -124,6 +174,14 @@ pub fn get(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
 
 pub fn delete(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
     create_fn_with_two_args(url, custom_headers, "delete")
+}
+
+pub fn post(
+    url: impl Into<Url>,
+    request_body: impl Into<Object>,
+    custom_headers: impl Into<Object>,
+) -> Function {
+    create_fn_with_three_args(url, request_body, custom_headers, "post")
 }
 
 #[test]
@@ -266,3 +324,50 @@ fn test_delete_method_with_field_custom_header() {
         "http::delete(homepage, headers)"
     );
 }
+
+#[test]
+fn test_field_post_method_with_fields_as_args() {
+    let homepage = Field::new("homepage");
+    let request_body = Field::new("request_body");
+    let headers = Field::new("headers");
+
+    let result = post(homepage, request_body, headers);
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::post($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::post(homepage, request_body, headers)"
+    );
+}
+
+// #[test]
+// fn test_delete_method_with_plain_custom_header() {
+//     let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
+//     let result = delete("https://codebreather.com", headers);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "http::delete($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "http::delete('https://codebreather.com', { \"x-my-header\": 'some unique string' })"
+//     );
+// }
+//
+// #[test]
+// fn test_delete_method_with_field_custom_header() {
+//     let homepage = Field::new("homepage");
+//     let headers = Field::new("headers");
+//
+//     let result = delete(homepage, headers);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "http::delete($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "http::delete(homepage, headers)"
+//     );
+// }
