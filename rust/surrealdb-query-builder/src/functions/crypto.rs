@@ -123,3 +123,10 @@ fn test_md5() {
     assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "crypto::md5('Oyelowo')");
 }
+
+#[test]
+fn test_sha1() {
+    let result = sha1("Oyelowo");
+    assert_eq!(result.fine_tune_params(), "crypto::sha1($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "crypto::sha1('Oyelowo')");
+}
