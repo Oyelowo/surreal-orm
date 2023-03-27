@@ -502,20 +502,3 @@ fn test_patch_method_with_body_and_custom_headers_as_plain_values() {
         "http::patch('https://codebreather.com', { body: 'This is some awesome thinking!', id: 1, postId: 100 }, { \"x-my-header\": 'some unique string' })"
     );
 }
-
-//
-// #[test]
-// fn test_delete_method_with_field_custom_header() {
-//     let homepage = Field::new("homepage");
-//     let headers = Field::new("headers");
-//
-//     let result = delete(homepage, headers);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "http::delete($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "http::delete(homepage, headers)"
-//     );
-// }
