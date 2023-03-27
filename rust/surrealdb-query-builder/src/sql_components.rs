@@ -272,6 +272,18 @@ impl Deref for Duration {
 
 pub struct ArrayCustom(sql::Value);
 
+impl Display for ArrayCustom {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Parametric for ArrayCustom {
+    fn get_bindings(&self) -> BindingsList {
+        vec![Binding::new(self.0.clone())]
+    }
+}
+
 // impl Into<sql::Value> for ArrayCustom {
 //     fn into(self) -> sql::Value {
 //         self.0
