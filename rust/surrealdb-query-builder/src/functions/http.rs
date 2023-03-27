@@ -16,7 +16,7 @@
 // http::patch()	Perform a remote HTTP PATCH request
 // http::delete()	Perform a remote HTTP DELETE request
 
-use std::collections::hash_map;
+use std::collections::{hash_map, HashMap};
 
 use surrealdb::sql;
 
@@ -363,19 +363,25 @@ fn test_field_post_method_with_fields_as_args() {
     );
 }
 
-// #[test]
-// fn test_delete_method_with_plain_custom_header() {
-//     let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
-//     let result = delete("https://codebreather.com", headers);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "http::delete($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "http::delete('https://codebreather.com', { \"x-my-header\": 'some unique string' })"
-//     );
-// }
+#[test]
+fn test_post_method_with_body_and_custom_headers_as_plain_values() {
+    let body = HashMap::from([
+        ("id".into(), 1.into()),
+        ("body".into(), "This is some awesome thinking!".into()),
+        ("postId".into(), 100.into()),
+    ]);
+    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+    let result = post("https://codebreather.com", body, headers);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::post($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::post('https://codebreather.com', { body: 'This is some awesome thinking!', id: 1, postId: 100 }, { \"x-my-header\": 'some unique string' })"
+    );
+}
 //
 // #[test]
 // fn test_delete_method_with_field_custom_header() {
