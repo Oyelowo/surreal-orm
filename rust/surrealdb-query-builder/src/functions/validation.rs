@@ -92,34 +92,34 @@ macro_rules! test_validator {
             #[test]
             fn [<test_ $function_name _with_field>] ()  {
                 let username = Field::new("username");
-                let result = alphanum(username);
+                let result = $function_ident(username);
 
-                assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
-                assert_eq!(result.to_raw().to_string(), "is::alphanum(username)");
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
                 }
 
             #[test]
             fn [<test_ $function_name _string_username>] ()  {
-                let result = alphanum("oyelowo1234");
+                let result = $function_ident("oyelowo1234");
 
-                assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
-                assert_eq!(result.to_raw().to_string(), "is::alphanum('oyelowo1234')");
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _with_number>] ()  {
-                let result = alphanum(123456423);
+                let result = $function_ident(123456423);
 
-                assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
-                assert_eq!(result.to_raw().to_string(), "is::alphanum(123456423)");
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _with_fraction>] ()  {
-                let result = alphanum(12.3456423);
+                let result = $function_ident(12.3456423);
 
-                assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
-                assert_eq!(result.to_raw().to_string(), "is::alphanum(12.3456423)");
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
             }
         }
     };
