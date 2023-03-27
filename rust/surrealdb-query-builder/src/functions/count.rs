@@ -84,6 +84,18 @@ pub fn count(countable: impl Into<CountArg>) -> Function {
 
     Function {
         bindings: countable.get_bindings(),
-        query_string: countable.to_string(),
+        query_string: format!("count({})", &countable),
     }
+}
+
+use crate::sql::ToRawStatement;
+
+use super::*;
+
+#[test]
+fn test_count() {
+    // Test count() without arguments
+    let result = count(Empty);
+    assert_eq!(result.fine_tune_params(), "count()");
+    assert_eq!(result.to_raw().to_string(), "count()");
 }
