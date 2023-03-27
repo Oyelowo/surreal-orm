@@ -15,7 +15,10 @@
 
 use surrealdb::sql;
 
-use crate::sql::{Binding, Buildable, ToRawStatement};
+use crate::{
+    sql::{Binding, Buildable, Param, ToRawStatement},
+    statements::let_::let_,
+};
 
 use super::array::Function;
 
@@ -149,4 +152,37 @@ fn test_sha512() {
         "crypto::sha512($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "crypto::sha512('Oyelowo')");
+}
+
+#[test]
+fn test_argon2_compare() {
+    // LET $hash = "";
+    let hash = Param::new("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    let pass = Param::new("the strongest password");
+    let result = argon2::compare("Oyelowo", "Oyedayo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::argon2::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::argon2::compare('Oyelowo', 'Oyedayo')"
+    );
+}
+
+#[test]
+fn test_argon2_compare_with_param() {
+    // LET $hash = "";
+    let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    let pass = let_("pass").equal("the strongest password");
+
+    let result = argon2::compare(hash.get_param(), pass.get_param());
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::argon2::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::argon2::compare($hash, $pass)"
+    );
 }
