@@ -190,6 +190,22 @@ pub fn post(
     create_fn_with_three_args(url, request_body, custom_headers, "post")
 }
 
+pub fn put(
+    url: impl Into<Url>,
+    request_body: impl Into<Object>,
+    custom_headers: impl Into<Object>,
+) -> Function {
+    create_fn_with_three_args(url, request_body, custom_headers, "put")
+}
+
+pub fn patch(
+    url: impl Into<Url>,
+    request_body: impl Into<Object>,
+    custom_headers: impl Into<Object>,
+) -> Function {
+    create_fn_with_three_args(url, request_body, custom_headers, "patch")
+}
+
 #[test]
 fn test_head_method_with_empty_header() {
     let result = head("https://codebreather.com", Empty);
@@ -382,6 +398,7 @@ fn test_post_method_with_body_and_custom_headers_as_plain_values() {
         "http::post('https://codebreather.com', { body: 'This is some awesome thinking!', id: 1, postId: 100 }, { \"x-my-header\": 'some unique string' })"
     );
 }
+
 //
 // #[test]
 // fn test_delete_method_with_field_custom_header() {
