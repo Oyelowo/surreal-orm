@@ -1,0 +1,7 @@
+---
+source: surrealdb-query-builder/src/functions/count.rs
+expression: result.clone().to_raw()
+---
+RawStatement(
+    "count([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])",
+)

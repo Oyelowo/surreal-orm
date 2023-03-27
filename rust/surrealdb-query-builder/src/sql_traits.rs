@@ -11,10 +11,14 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{Erroneous, Parametric};
+use crate::{internal::replace_params, Erroneous, Parametric};
 
 pub trait Buildable {
     fn build(&self) -> String;
+
+    fn fine_tune_params(&self) -> String {
+        replace_params(&self.build())
+    }
 }
 
 pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
