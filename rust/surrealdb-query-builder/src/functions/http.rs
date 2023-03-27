@@ -348,6 +348,21 @@ fn test_delete_method_with_field_custom_header() {
 }
 
 #[test]
+fn test_field_post_method_with_empty_body() {
+    let homepage = Field::new("homepage");
+    let headers = Field::new("headers");
+    let result = post("https://codebreather.com", Empty, headers);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::post($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::post('https://codebreather.com', {  }, headers)"
+    );
+}
+#[test]
 fn test_field_post_method_with_empty_body_and_headers() {
     let homepage = Field::new("homepage");
     let result = post("https://codebreather.com", Empty, Empty);
