@@ -238,3 +238,22 @@ fn test_bearing_with_raw_points() {
         "geo::bearing((40.02, 116.34), (80.02, 103.19))"
     );
 }
+
+#[test]
+fn test_bearing_with_raw_point_with_field() {
+    let hometown = Field::new("hometown");
+
+    let point2 = point! {
+        x: 80.02f64,
+        y: 103.19,
+    };
+    let result = bearing(hometown, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::bearing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::bearing(hometown, (80.02, 103.19))"
+    );
+}
