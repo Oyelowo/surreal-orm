@@ -11,3 +11,4 @@ pub(crate) mod array;
 pub(crate) mod count;
 pub(crate) mod crypto;
 pub(crate) mod geo;
+pub(crate) mod http;
