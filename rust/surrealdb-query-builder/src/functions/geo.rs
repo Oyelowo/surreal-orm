@@ -146,8 +146,50 @@ pub mod hash {
         Field,
     };
 
-    pub fn decode(geometry: impl Into<GeometryOrField>) -> Function {
-        create_geo_with_single_arg(geometry, "hash::decode")
+    pub struct GeoHash(sql::Value);
+
+    impl From<&str> for GeoHash {
+        fn from(value: &str) -> Self {
+            Self(value.into())
+        }
+    }
+    impl From<String> for GeoHash {
+        fn from(value: String) -> Self {
+            Self(value.into())
+        }
+    }
+
+    impl From<Field> for GeoHash {
+        fn from(value: Field) -> Self {
+            Self(value.into())
+        }
+    }
+
+    impl From<GeoHash> for sql::Value {
+        fn from(value: GeoHash) -> Self {
+            value.0
+        }
+    }
+
+    // impl GeoHash {
+    //     fn new(hash: String) -> Self {
+    //         Self(hash)
+    //     }
+    // }
+    //
+    // enum GeoHashDecodeArg {
+    //     Field(Field),
+    //     GeoHash(GeoHash),
+    // }
+
+    pub fn decode(geometry: impl Into<GeoHash>) -> Function {
+        let binding = Binding::new(geometry.into());
+        let string = binding.get_param_dollarised();
+
+        Function {
+            query_string: format!("geo::hash::decode({})", string),
+            bindings: vec![binding],
+        }
     }
 
     pub fn encode(geometry: impl Into<GeometryOrField>, accuracy: Accuracy) -> Function {
@@ -350,5 +392,30 @@ fn test_distance_with_only_fields() {
     assert_eq!(
         result.to_raw().to_string(),
         "geo::distance(hometown, yukon)"
+    );
+}
+
+#[test]
+fn test_hash_decode_with_field() {
+    let city = Field::new("city");
+    let result = hash::decode(city);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::decode($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "geo::hash::decode(city)");
+}
+
+#[test]
+fn test_hash_decode_with_string() {
+    let result = hash::decode("mpuxk4s24f51");
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::decode($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::hash::decode('mpuxk4s24f51')"
     );
 }
