@@ -130,10 +130,13 @@ fn create_fn_with_three_args(
 
     let string = match request_body {
         Object::Empty => {
+            let header_binding = Binding::new(sql::Object::default());
+            let header_parametized = header_binding.get_param_dollarised();
+            all_bindings.push(header_binding);
+
             format!(
                 "http::{method}({}, {}",
-                &url_parametized,
-                sql::Object::default()
+                &url_parametized, header_parametized
             )
         }
         Object::Object(body) => {
@@ -147,7 +150,10 @@ fn create_fn_with_three_args(
 
     let string = match custom_headers {
         Object::Empty => {
-            format!("{string}, {})", sql::Object::default())
+            let header_binding = Binding::new(sql::Object::default());
+            let header_parametized = header_binding.get_param_dollarised();
+            all_bindings.push(header_binding);
+            format!("{string}, {})", header_parametized)
         }
         Object::Object(headers) => {
             let header_binding = Binding::new(headers);
@@ -322,6 +328,21 @@ fn test_delete_method_with_field_custom_header() {
     assert_eq!(
         result.to_raw().to_string(),
         "http::delete(homepage, headers)"
+    );
+}
+
+#[test]
+fn test_field_post_method_with_empty_body_and_headers() {
+    let homepage = Field::new("homepage");
+    let result = post("https://codebreather.com", Empty, Empty);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::post($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::post('https://codebreather.com', {  }, {  })"
     );
 }
 
