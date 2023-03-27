@@ -24,20 +24,20 @@ use surrealdb::sql::Value;
 
 use crate::internal::replace_params;
 use crate::sql::{ArrayCustom, Binding, Buildable, ToRawStatement};
-use crate::{BindingsList, Field, Parametric};
+use crate::{array, BindingsList, Field, Parametric};
 
-pub fn val(val: impl Into<Value>) -> sql::Value {
-    val.into()
-}
-
-#[macro_use]
-macro_rules! array {
-    ($( $val:expr ),*) => {{
-        vec![
-            $( val($val) ),*
-        ]
-    }};
-}
+// pub fn val(val: impl Into<Value>) -> sql::Value {
+//     val.into()
+// }
+//
+// #[macro_export]
+// macro_rules! array {
+//     ($( $val:expr ),*) => {{
+//         vec![
+//             $( val($val) ),*
+//         ]
+//     }};
+// }
 
 pub enum ArrayOrField {
     Field(Field),
@@ -291,8 +291,8 @@ fn test_union() {
 
 #[test]
 fn test_difference() {
-    let arr1 = vec![1, 2, 3];
-    let arr2 = vec![2, 3, 4];
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![2, 3, 4];
     let result = difference(arr1, arr2);
     assert_eq!(
         result.fine_tune_params(),

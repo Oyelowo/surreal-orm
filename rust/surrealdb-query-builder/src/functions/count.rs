@@ -1,31 +1,23 @@
 use std::fmt::{self, Display};
 
+use crate::array;
+use crate::sql::ToRawStatement;
 use surrealdb::sql;
 
 use crate::{
-    filter::Filter,
+    filter::{cond, Filter},
     sql::{ArrayCustom, Binding, Buildable, Empty},
-    Field, Parametric,
+    Field, Operatable, Parametric,
 };
 
 use super::array::Function;
 
+#[derive(Debug, Clone)]
 pub enum CountArg {
     Empty,
     Field(Field),
     Filter(Filter),
     Array(ArrayCustom),
-}
-
-impl Parametric for CountArg {
-    fn get_bindings(&self) -> crate::BindingsList {
-        match self {
-            CountArg::Empty => vec![],
-            CountArg::Field(field) => field.get_bindings(),
-            CountArg::Filter(filter) => filter.get_bindings(),
-            CountArg::Array(array) => array.get_bindings(),
-        }
-    }
 }
 
 impl From<Empty> for CountArg {
@@ -34,11 +26,11 @@ impl From<Empty> for CountArg {
     }
 }
 
-// impl From<Field> for CountArg {
-//     fn from(value: Field) -> Self {
-//         CountArg::Field(value)
-//     }
-// }
+impl From<Field> for CountArg {
+    fn from(value: Field) -> Self {
+        CountArg::Field(value)
+    }
+}
 
 impl From<Filter> for CountArg {
     fn from(value: Filter) -> Self {
@@ -52,45 +44,33 @@ impl<T: Into<ArrayCustom>> From<T> for CountArg {
     }
 }
 
-impl Buildable for CountArg {
-    fn build(&self) -> String {
-        match self {
-            CountArg::Empty => format!(""),
-            CountArg::Field(field) => field.to_string(),
-            CountArg::Filter(filter) => filter.to_string(),
-            CountArg::Array(array) => array.to_string(),
-        }
-    }
-}
-
-impl Display for CountArg {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-// impl From<CountArg> for sql::Value {
-//     fn from(value: CountArg) -> Self {
-//         match value {
-//             CountArg::Empty => sql::Value::from(""),
-//             CountArg::Field(field) => field.into(),
-//             CountArg::Filter(filter) => filter.to_string().into(),
-//             CountArg::Array(array) => array.into(),
-//         }
-//     }
-// }
-
 pub fn count(countable: impl Into<CountArg>) -> Function {
     let countable: CountArg = countable.into();
+    let mut bindings = vec![];
 
+    let string = match countable {
+        CountArg::Empty => format!(""),
+        CountArg::Field(field) => {
+            bindings = field.get_bindings();
+            format!("{}", field)
+        }
+        CountArg::Filter(filter) => {
+            bindings = filter.get_bindings();
+            format!("{}", filter)
+        }
+        CountArg::Array(array) => {
+            let array: sql::Value = sql::Value::from(array);
+            let array_binding = Binding::new(array);
+            let param = format!("{}", array_binding.get_param_dollarised());
+            bindings = vec![array_binding];
+            param
+        }
+    };
     Function {
-        bindings: countable.get_bindings(),
-        query_string: format!("count({})", &countable),
+        query_string: format!("count({})", &string),
+        bindings,
     }
 }
-
-use crate::sql::ToRawStatement;
-
-use super::*;
 
 #[test]
 fn test_count_withoout_arguments() {
@@ -105,4 +85,48 @@ fn test_count_with_db_field() {
     let result = count(email);
     assert_eq!(result.fine_tune_params(), "count(email)");
     assert_eq!(result.to_raw().to_string(), "count(email)");
+}
+
+#[test]
+fn test_count_with_simple_field_filter_operation() {
+    let email = Field::new("email");
+    let result = count(email.greater_than(15));
+    assert_eq!(result.fine_tune_params(), "count(email > $_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "count(email > 15)");
+
+    let email = Field::new("email");
+    let result = count(email.greater_than(15).or(true));
+    assert_eq!(
+        result.fine_tune_params(),
+        "count(email > $_param_00000001 OR $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "count(email > 15 OR true)");
+}
+
+#[test]
+fn test_count_with_complex_field_filter_operation() {
+    let email = Field::new("email");
+    let age = Field::new("age");
+    let result = count(cond(age.greater_than(15)).and(email.like("oyelowo@example.com")));
+    assert_eq!(
+        result.fine_tune_params(),
+        "count((age > $_param_00000001) AND (email ~ $_param_00000002))"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "count((age > 15) AND (email ~ 'oyelowo@example.com'))"
+    );
+}
+
+#[test]
+fn test_count_with_array() {
+    let email = Field::new("email");
+    let result = count(array![1, 2, 3, 4, 5, "4334", "Oyelowo", email]);
+    println!("namamama {:?}", result.clone().to_raw());
+    insta::assert_debug_snapshot!(result.clone().to_raw());
+    assert_eq!(result.fine_tune_params(), "count($_param_00000001)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "count([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
+    );
 }

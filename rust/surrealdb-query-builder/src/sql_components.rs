@@ -270,7 +270,14 @@ impl Deref for Duration {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ArrayCustom(sql::Value);
+
+// impl From<ArrayCustom> for sql::Value {
+//     fn from(value: ArrayCustom) -> Self {
+//         todo!()
+//     }
+// }
 
 impl Display for ArrayCustom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -278,11 +285,11 @@ impl Display for ArrayCustom {
     }
 }
 
-impl Parametric for ArrayCustom {
-    fn get_bindings(&self) -> BindingsList {
-        vec![Binding::new(self.0.clone())]
-    }
-}
+// impl Parametric for ArrayCustom {
+//     fn get_bindings(&self) -> BindingsList {
+//         vec![Binding::new(self.0.clone())]
+//     }
+// }
 
 // impl Into<sql::Value> for ArrayCustom {
 //     fn into(self) -> sql::Value {
@@ -301,11 +308,12 @@ impl<T: Into<sql::Array>> From<T> for ArrayCustom {
     }
 }
 
-impl From<Field> for ArrayCustom {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
+// Should probably delete
+// impl From<Field> for ArrayCustom {
+//     fn from(value: Field) -> Self {
+//         Self(value.into())
+//     }
+// }
 
 pub struct NONE;
 
