@@ -140,3 +140,13 @@ fn test_sha256() {
     );
     assert_eq!(result.to_raw().to_string(), "crypto::sha256('Oyelowo')");
 }
+
+#[test]
+fn test_sha512() {
+    let result = sha512("Oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::sha512($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "crypto::sha512('Oyelowo')");
+}
