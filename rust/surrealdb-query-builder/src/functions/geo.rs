@@ -295,3 +295,60 @@ fn test_centroid_with_raw_polygon() {
         "geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
     );
 }
+
+#[test]
+fn test_distance_with_raw_points() {
+    let point1 = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let point2 = point! {
+        x: 80.02f64,
+        y: 103.19,
+    };
+    let result = distance(point1, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::distance($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::distance((40.02, 116.34), (80.02, 103.19))"
+    );
+}
+
+#[test]
+fn test_distance_with_raw_point_with_field() {
+    let hometown = Field::new("hometown");
+
+    let point2 = point! {
+        x: 80.02f64,
+        y: 103.19,
+    };
+    let result = distance(hometown, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::distance($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::distance(hometown, (80.02, 103.19))"
+    );
+}
+
+#[test]
+fn test_distance_with_only_fields() {
+    let hometown = Field::new("hometown");
+    let yukon = Field::new("yukon");
+
+    let result = distance(hometown, yukon);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::distance($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::distance(hometown, yukon)"
+    );
+}
