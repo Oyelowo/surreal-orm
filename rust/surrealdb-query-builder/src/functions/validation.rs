@@ -48,3 +48,11 @@ fn test_alphanum_with_field() {
     assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "is::alphanum(username)");
 }
+
+#[test]
+fn test_alphanum_with_string_username() {
+    let result = alphanum("oyelowo1234");
+
+    assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "is::alphanum('oyelowo1234')");
+}
