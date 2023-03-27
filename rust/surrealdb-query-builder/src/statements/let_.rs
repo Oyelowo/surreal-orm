@@ -55,8 +55,8 @@ impl LetStatement {
         self
     }
 
-    pub fn get_param(&self) -> String {
-        format!("${}", self.parameter)
+    pub fn get_param(&self) -> sql::Param {
+        sql::Param::from(sql::Idiom::from(format!("{}", self.parameter)))
     }
 }
 
