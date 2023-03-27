@@ -399,6 +399,58 @@ fn test_post_method_with_body_and_custom_headers_as_plain_values() {
     );
 }
 
+#[test]
+fn test_field_put_method_with_empty_body_and_headers() {
+    let homepage = Field::new("homepage");
+    let result = put("https://codebreather.com", Empty, Empty);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::put($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::put('https://codebreather.com', {  }, {  })"
+    );
+}
+
+#[test]
+fn test_field_put_method_with_fields_as_args() {
+    let homepage = Field::new("homepage");
+    let request_body = Field::new("request_body");
+    let headers = Field::new("headers");
+
+    let result = put(homepage, request_body, headers);
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::put($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::put(homepage, request_body, headers)"
+    );
+}
+
+#[test]
+fn test_put_method_with_body_and_custom_headers_as_plain_values() {
+    let body = HashMap::from([
+        ("id".into(), 1.into()),
+        ("body".into(), "This is some awesome thinking!".into()),
+        ("postId".into(), 100.into()),
+    ]);
+    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+    let result = put("https://codebreather.com", body, headers);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "http::put($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "http::put('https://codebreather.com', { body: 'This is some awesome thinking!', id: 1, postId: 100 }, { \"x-my-header\": 'some unique string' })"
+    );
+}
+
 //
 // #[test]
 // fn test_delete_method_with_field_custom_header() {
