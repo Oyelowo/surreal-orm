@@ -56,3 +56,19 @@ fn test_alphanum_with_string_username() {
     assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "is::alphanum('oyelowo1234')");
 }
+
+#[test]
+fn test_alphanum_with_number() {
+    let result = alphanum(123456423);
+
+    assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "is::alphanum(123456423)");
+}
+
+#[test]
+fn test_alphanum_with_fraction() {
+    let result = alphanum(12.3456423);
+
+    assert_eq!(result.fine_tune_params(), "is::alphanum($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "is::alphanum(12.3456423)");
+}
