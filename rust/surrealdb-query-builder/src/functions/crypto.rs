@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 // Crypto functions
 // These functions can be used when hashing data, encrypting data, and for securely authenticating users into the database.
 //
@@ -18,6 +25,7 @@ use surrealdb::sql;
 use crate::{
     sql::{Binding, Buildable, Param, ToRawStatement},
     statements::let_::let_,
+    Field,
 };
 
 use super::array::Function;
@@ -125,6 +133,14 @@ fn test_md5() {
     let result = md5("Oyelowo");
     assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "crypto::md5('Oyelowo')");
+}
+
+#[test]
+fn test_md5_with_field() {
+    let title = Field::new("title");
+    let result = md5(title);
+    assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "crypto::md5(title)");
 }
 
 #[test]
