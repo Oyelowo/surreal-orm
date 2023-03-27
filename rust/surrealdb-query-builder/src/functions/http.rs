@@ -81,6 +81,14 @@ impl<T: Into<sql::Object>> From<T> for Object {
 }
 
 pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+    create_fn_with_two_args(url, custom_headers, "head")
+}
+
+fn create_fn_with_two_args(
+    url: impl Into<Url>,
+    custom_headers: impl Into<Object>,
+    method: &str,
+) -> Function {
     let url: sql::Value = url.into().into();
     let custom_headers: Object = custom_headers.into();
     let url_binding = Binding::new(url);
@@ -90,14 +98,17 @@ pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function 
 
     let string = match custom_headers {
         Object::Empty => {
-            format!("http::head({})", &url_parametized)
+            format!("http::{method}({})", &url_parametized)
         }
         Object::Object(headers) => {
             let header_binding = Binding::new(headers);
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
-            format!("http::head({}, {})", url_parametized, header_parametized)
+            format!(
+                "http::{method}({}, {})",
+                url_parametized, header_parametized
+            )
         }
     };
 
