@@ -45,18 +45,22 @@ impl From<Field> for Number {
     }
 }
 
-// Although, surrealdb technically accept stringified number also,
-// I dont see why that should be allowed at the app layer in rust
-// Obviously, if a field has stringified number that would work
-// during query execution
-fn abs(number: impl Into<Number>) -> Function {
+fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
-    let query_string = format!("math::abs({})", binding.get_param_dollarised());
+    let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
 
     Function {
         query_string,
         bindings: vec![binding],
     }
+}
+
+// Although, surrealdb technically accept stringified number also,
+// I dont see why that should be allowed at the app layer in rust
+// Obviously, if a field has stringified number that would work
+// during query execution
+fn abs(number: impl Into<Number>) -> Function {
+    create_fn_with_single_num_arg(number, "abs")
 }
 
 #[test]
