@@ -107,34 +107,36 @@ pub fn distance(
     create_geo_fn_with_two_args(point1, point2, "distance")
 }
 
+pub enum NumberOrEmpty {
+    Empty,
+    Number(surrealdb::sql::Number),
+    Field(Field),
+}
+impl<T> From<T> for NumberOrEmpty
+where
+    T: Into<sql::Number>,
+{
+    fn from(value: T) -> Self {
+        let value: sql::Number = value.into();
+        Self::Number(value)
+    }
+}
+
+impl From<Field> for NumberOrEmpty {
+    fn from(value: Field) -> Self {
+        Self::Field(value)
+    }
+}
+
+impl From<Empty> for NumberOrEmpty {
+    fn from(value: Empty) -> Self {
+        Self::Empty
+    }
+}
+
 pub mod hash {
-    pub enum Accuracy {
-        Empty,
-        Number(surrealdb::sql::Number),
-        Field(Field),
-    }
 
-    impl<T> From<T> for Accuracy
-    where
-        T: Into<sql::Number>,
-    {
-        fn from(value: T) -> Self {
-            let value: sql::Number = value.into();
-            Self::Number(value)
-        }
-    }
-
-    impl From<Field> for Accuracy {
-        fn from(value: Field) -> Self {
-            Self::Field(value)
-        }
-    }
-
-    impl From<Empty> for Accuracy {
-        fn from(value: Empty) -> Self {
-            Self::Empty
-        }
-    }
+    type Accuracy = super::NumberOrEmpty;
 
     use surrealdb::sql;
 
