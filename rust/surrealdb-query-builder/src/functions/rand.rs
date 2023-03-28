@@ -238,7 +238,7 @@ pub mod rand {
             crate::functions::rand::rand::string_fn(crate::sql::Empty, crate::sql::Empty)
         };
         ( $length:expr) => {
-            crate::functions::rand::rand::string_fn($from, crate::sql::Empty)
+            crate::functions::rand::rand::string_fn($length, crate::sql::Empty)
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::string_fn($from, $to)
@@ -368,6 +368,13 @@ macro_rules! create_test_for_fn_with_two_args {
 create_test_for_fn_with_two_args!("float");
 create_test_for_fn_with_two_args!("int");
 create_test_for_fn_with_two_args!("string");
+
+#[test]
+fn test_rand_string_macro_with_one_arg_length() {
+    let result = rand::string!(34);
+    assert_eq!(result.fine_tune_params(), "rand::string($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::string(34)");
+}
 
 // Test Guid
 #[test]
