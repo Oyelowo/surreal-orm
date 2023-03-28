@@ -190,6 +190,31 @@ macro_rules! ends_with {
 
 pub use ends_with;
 
+pub fn split_fn(string: impl Into<String>, by: impl Into<String>) -> Function {
+    let string_binding = Binding::new(string.into());
+    let by_binding = Binding::new(by.into());
+
+    let query_string = format!(
+        "string::split({}, {})",
+        string_binding.get_param_dollarised(),
+        by_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, by_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! split {
+    ( $string:expr, $by: expr ) => {
+        crate::functions::string::split_fn($string, $by)
+    };
+}
+
+pub use split;
+
 pub fn repeat_fn(string: impl Into<String>, ending: impl Into<Number>) -> Function {
     let string_binding = Binding::new(string.into());
     let ending_binding = Binding::new(ending.into());
@@ -330,6 +355,30 @@ fn test_ends_with_macro_with_field_and_string() {
     assert_eq!(
         result.to_raw().to_string(),
         "string::ends_with(name, 'lowo')"
+    );
+}
+
+#[test]
+fn test_split_macro_with_field_and_string() {
+    let phrase = Field::new("phrase");
+    let result = split!(phrase, ", ");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::split($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::split(phrase, ', ')");
+}
+
+#[test]
+fn test_split_macro_with_plain_strings() {
+    let result = split!("With great power, comes great responsibility", ", ");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::split($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::split('With great power, comes great responsibility', ', ')"
     );
 }
 
