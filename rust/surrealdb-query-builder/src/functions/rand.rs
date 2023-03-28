@@ -83,6 +83,23 @@ pub mod rand {
 
     pub use bool;
 
+    pub fn uuid_fn() -> Function {
+        let query_string = format!("rand::uuid()");
+
+        Function {
+            query_string,
+            bindings: vec![],
+        }
+    }
+
+    macro_rules! uuid {
+        () => {
+            crate::functions::rand::rand::uuid_fn()
+        };
+    }
+
+    pub use uuid;
+
     pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
         let mut bindings = vec![];
 
@@ -325,10 +342,31 @@ fn test_rand() {
 }
 
 #[test]
+fn test_rand_bool_fn() {
+    let result = rand::bool_fn();
+    assert_eq!(result.fine_tune_params(), "rand::bool()");
+    assert_eq!(result.to_raw().to_string(), "rand::bool()");
+}
+
+#[test]
 fn test_rand_bool() {
     let result = rand::bool!();
     assert_eq!(result.fine_tune_params(), "rand::bool()");
     assert_eq!(result.to_raw().to_string(), "rand::bool()");
+}
+
+#[test]
+fn test_rand_uuid_fn() {
+    let result = rand::uuid_fn();
+    assert_eq!(result.fine_tune_params(), "rand::uuid()");
+    assert_eq!(result.to_raw().to_string(), "rand::uuid()");
+}
+
+#[test]
+fn test_rand_uuid() {
+    let result = rand::uuid!();
+    assert_eq!(result.fine_tune_params(), "rand::uuid()");
+    assert_eq!(result.to_raw().to_string(), "rand::uuid()");
 }
 
 #[test]
