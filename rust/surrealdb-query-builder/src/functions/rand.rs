@@ -38,13 +38,20 @@ fn rand() -> Function {
 
 struct NumEmpty(sql::Value);
 
+#[macro_export]
+macro_rules! lowo {
+    () => {
+        bool()
+    };
+}
 pub mod rand {
     use crate::{
         functions::{array::Function, geo::NumberOrEmpty, math::Array},
         sql::Binding,
     };
+    use surrealdb::sql;
 
-    pub fn bool() -> Function {
+    pub fn bool_fn() -> Function {
         let query_string = format!("rand::bool()");
 
         Function {
@@ -52,20 +59,47 @@ pub mod rand {
             bindings: vec![],
         }
     }
-    
 
-    
+    #[macro_export]
+    macro_rules! bool {
+        () => {
+            crate::functions::rand::rand::bool_fn()
+        };
+    }
 
-    pub fn enum_(values: impl Into<Array>) -> Function {
+    pub(crate) use bool;
+
+    pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
         // let values: sql::Value = values.into().into();
-        let binding = Binding::new(values.into());
-        let query_string = format!("rand::enum({})", binding.get_param_dollarised());
+        let mut bindings = vec![];
+
+        let values = values
+            .into_iter()
+            .map(|v| {
+                let binding = Binding::new(v.into());
+                let string = binding.get_param_dollarised();
+                bindings.push(binding);
+                string
+            })
+            .collect::<Vec<_>>();
+
+        // let binding = Binding::new(values.into());
+        let query_string = format!("rand::enum({})", values.join(", "));
 
         Function {
             query_string,
-            bindings: vec![binding],
+            bindings,
         }
     }
+
+    #[macro_export]
+    macro_rules! enum_ {
+        () => {
+            crate::functions::rand::rand::enum_fn()
+        };
+    }
+
+    pub(crate) use enum_;
 
     pub fn float(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -105,14 +139,19 @@ fn test_rand() {
 
 #[test]
 fn test_rand_bool() {
-    let result = rand::bool();
+    // crate::functions::rand::rand::
+
+    let result = rand::bool!();
     assert_eq!(result.fine_tune_params(), "rand::bool()");
     assert_eq!(result.to_raw().to_string(), "rand::bool()");
 }
 
 #[test]
 fn test_rand_enum() {
-    let result = rand::enum_(array!["one", "two", 3, 4.15385, "five", true]);
-    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "rand::enum(['one', 'two', 3, 4.15385, 'five', true])");
+    let result = rand::enum_fn(array!["one", "two", 3, 4.15385, "five", true]);
+    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+    );
 }
