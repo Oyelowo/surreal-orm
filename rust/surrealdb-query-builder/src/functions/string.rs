@@ -190,6 +190,30 @@ macro_rules! ends_with {
 
 pub use ends_with;
 
+pub fn starts_with_fn(string: impl Into<String>, starting: impl Into<String>) -> Function {
+    let string_binding = Binding::new(string.into());
+    let starting_binding = Binding::new(starting.into());
+
+    let query_string = format!(
+        "string::starts_with({}, {})",
+        string_binding.get_param_dollarised(),
+        starting_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, starting_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! starts_with {
+    ( $string:expr, $ending: expr ) => {
+        crate::functions::string::starts_with_fn($string, $ending)
+    };
+}
+pub use starts_with;
+
 pub fn split_fn(string: impl Into<String>, by: impl Into<String>) -> Function {
     let string_binding = Binding::new(string.into());
     let by_binding = Binding::new(by.into());
@@ -358,6 +382,45 @@ fn test_ends_with_macro_with_field_and_string() {
     );
 }
 
+#[test]
+fn test_ends_with_macro_with_plain_strings() {
+    let result = ends_with!("Oyelowo", "lowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::ends_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::ends_with('Oyelowo', 'lowo')"
+    );
+}
+
+#[test]
+fn test_starts_with_macro_with_field_and_string() {
+    let name = Field::new("name");
+    let result = starts_with!(name, "lowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::starts_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::starts_with(name, 'lowo')"
+    );
+}
+
+#[test]
+fn test_starts_with_macro_with_plain_strings() {
+    let result = starts_with!("Oyelowo", "Oye");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::starts_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::starts_with('Oyelowo', 'Oye')"
+    );
+}
 #[test]
 fn test_split_macro_with_field_and_string() {
     let phrase = Field::new("phrase");
