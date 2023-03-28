@@ -73,6 +73,18 @@ macro_rules! lowercase {
 
 pub use lowercase;
 
+pub fn uppercase_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "uppercase")
+}
+
+#[macro_export]
+macro_rules! uppercase {
+    ( $string:expr ) => {
+        crate::functions::string::uppercase_fn($string)
+    };
+}
+pub use uppercase;
+
 pub fn reverse_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "reverse")
 }
@@ -551,6 +563,27 @@ fn test_lowercase_with_macro_with_plain_string() {
         "string::lowercase($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::lowercase('OYELOWO')");
+}
+
+#[test]
+fn test_uppercase_with_macro_with_field() {
+    let name = Field::new("name");
+    let result = uppercase!(name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::uppercase($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::uppercase(name)");
+}
+
+#[test]
+fn test_uppercase_with_macro_with_plain_string() {
+    let result = uppercase!("oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::uppercase($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::uppercase('oyelowo')");
 }
 
 #[test]
