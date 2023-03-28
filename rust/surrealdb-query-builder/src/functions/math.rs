@@ -22,7 +22,7 @@ use crate::{
     Field,
 };
 
-use super::array::Function;
+use super::{array::Function, geo::NumberOrEmpty};
 
 pub struct Number(sql::Value);
 
@@ -65,6 +65,22 @@ fn abs(number: impl Into<Number>) -> Function {
 
 fn ceil(number: impl Into<Number>) -> Function {
     create_fn_with_single_num_arg(number, "ceil")
+}
+
+fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
+    let num_binding = Binding::new(number.into());
+    let decimal_place_binding = Binding::new(decimal_number.into());
+
+    let query_string = format!(
+        "math::fixed({}, {})",
+        num_binding.get_param_dollarised(),
+        decimal_place_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![num_binding, decimal_place_binding],
+    }
 }
 
 use paste::paste;
