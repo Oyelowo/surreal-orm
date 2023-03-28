@@ -19,6 +19,10 @@
 // rand::uuid()	Generates and returns a random UUID
 //
 
+use surrealdb::sql;
+
+use crate::sql::{Buildable, ToRawStatement};
+
 use super::array::Function;
 
 fn rand() -> Function {
@@ -30,9 +34,11 @@ fn rand() -> Function {
     }
 }
 
+struct NumEmpty(sql::Value);
+
 pub mod rand {
     use crate::{
-        functions::{array::Function, math::Array},
+        functions::{array::Function, geo::NumberOrEmpty, math::Array},
         sql::Binding,
     };
 
@@ -45,8 +51,8 @@ pub mod rand {
         }
     }
 
-    fn enum_(values: Array) -> Function {
-        let binding = Binding::new(value.into());
+    pub fn enum_(values: impl Into<Array>) -> Function {
+        let binding = Binding::new(values.into());
         let query_string = format!("rand::enum({})", binding.get_param_dollarised());
 
         Function {
@@ -54,4 +60,39 @@ pub mod rand {
             bindings: vec![binding],
         }
     }
+
+    pub fn float(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
+        let mut bindings = vec![];
+        let from: NumberOrEmpty = from.into();
+        let to: NumberOrEmpty = to.into();
+
+        let query_string = match (from, to) {
+            (NumberOrEmpty::Number(from), NumberOrEmpty::Number(to)) => {
+                let from_binding = Binding::new(from);
+                let to_binding = Binding::new(to);
+
+                let query_string = format!(
+                    "rand::float({}, {})",
+                    from_binding.get_param_dollarised(),
+                    to_binding.get_param_dollarised()
+                );
+
+                bindings = vec![from_binding, to_binding];
+                query_string
+            }
+            _ => format!("rand::float()"),
+        };
+
+        Function {
+            query_string,
+            bindings,
+        }
+    }
+}
+
+#[test]
+fn test_rand() {
+    let result = rand();
+    assert_eq!(result.fine_tune_params(), "rand()");
+    assert_eq!(result.to_raw().to_string(), "rand()");
 }
