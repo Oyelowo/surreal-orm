@@ -317,30 +317,29 @@ macro_rules! create_test_for_fn_with_two_args {
         paste::paste! {
                 #[test]
                 fn [<test_rand_ $function_ident _function_empty>]() {
-                    let result = rand::float_fn(Empty, Empty);
+                    let result = rand::[< $function_ident _fn>](Empty, Empty);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}()", $function_ident));
                 }
 
                 #[test]
-                fn test_rand_float_macro_empty() {
-                fn [<test_rand_ $function_ident _function_empty>]() {
-                    let result = rand::float!();
-                    assert_eq!(result.fine_tune_params(), "rand::float()");
-                    assert_eq!(result.to_raw().to_string(), "rand::float()");
+                fn [<test_rand_ $function_ident _macro_empty>]() {
+                    let result = rand::[< $function_ident>]!();
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
+                    assert_eq!(result.to_raw().to_string(), format!("rand::{}()", $function_ident));
                 }
 
                 #[test]
                 fn [<test_rand_ $function_ident _macro_with_range>]() {
-                    let result = rand::float!(34, 65);
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
+                    let result = rand::[< $function_ident>]!(34, 65);
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}(34, 65)", $function_ident));
                 }
 
                 #[test]
                 fn [<test_rand_ $function_ident macro_with_invalid_input>]() {
-                    let result = rand::float!(34, "ere");
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
+                    let result = rand::[< $function_ident>]!(34, "ere");
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}(34, 0)", $function_ident));
                 }
 
@@ -349,8 +348,8 @@ macro_rules! create_test_for_fn_with_two_args {
                     let start = Field::new("start");
                     let end = Field::new("end");
 
-                    let result = rand::float_fn(start, end);
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
+                    let result = rand::[< $function_ident _fn>](start, end);
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}(start, end)", $function_ident));
                 }
 
@@ -359,76 +358,16 @@ macro_rules! create_test_for_fn_with_two_args {
                     let start = Field::new("start");
                     let end = Field::new("end");
 
-                    let result = rand::float!(start, end);
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
+                    let result = rand::[< $function_ident>]!(start, end);
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}(start, end)", $function_ident));
                 }
             }
-        }
     };
 }
 create_test_for_fn_with_two_args!("float");
-
-// Test Int
-#[test]
-fn test_rand_int_function_empty() {
-    let result = rand::int_fn(Empty, Empty);
-    assert_eq!(result.fine_tune_params(), "rand::int()");
-    assert_eq!(result.to_raw().to_string(), "rand::int()");
-}
-
-#[test]
-fn test_rand_int_macro_empty() {
-    let result = rand::int!();
-    assert_eq!(result.fine_tune_params(), "rand::int()");
-    assert_eq!(result.to_raw().to_string(), "rand::int()");
-}
-
-#[test]
-fn test_rand_int_macro_with_range() {
-    let result = rand::int!(34, 65);
-    assert_eq!(
-        result.fine_tune_params(),
-        "rand::int($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().to_string(), "rand::int(34, 65)");
-}
-
-#[test]
-fn test_rand_int_macro_with_invalid_input() {
-    let result = rand::int!(34, "ere");
-    assert_eq!(
-        result.fine_tune_params(),
-        "rand::int($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().to_string(), "rand::int(34, 0)");
-}
-
-#[test]
-fn test_rand_int_fn_with_field_inputs() {
-    let start = Field::new("start");
-    let end = Field::new("end");
-
-    let result = rand::int_fn(start, end);
-    assert_eq!(
-        result.fine_tune_params(),
-        "rand::int($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().to_string(), "rand::int(start, end)");
-}
-
-#[test]
-fn test_rand_int_macro_with_field_inputs() {
-    let start = Field::new("start");
-    let end = Field::new("end");
-
-    let result = rand::int!(start, end);
-    assert_eq!(
-        result.fine_tune_params(),
-        "rand::int($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().to_string(), "rand::int(start, end)");
-}
+create_test_for_fn_with_two_args!("int");
+create_test_for_fn_with_two_args!("string");
 
 // Test Guid
 #[test]
