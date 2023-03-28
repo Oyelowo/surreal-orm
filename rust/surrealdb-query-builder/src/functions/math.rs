@@ -117,3 +117,34 @@ macro_rules! create_test_for_fn_with_single_arg {
 create_test_for_fn_with_single_arg!(abs, "abs");
 
 create_test_for_fn_with_single_arg!(ceil, "ceil");
+
+#[test]
+fn test_fixed_fn_with_field_data() {
+    let land_size = Field::new("land_size");
+    let decimal_place = Field::new("decimal_place");
+    let result = fixed(land_size, decimal_place);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(land_size, decimal_place)"
+    );
+}
+
+// #[test]
+// fn test_sleep_fn() {
+//     let result = sleep(time::Duration::from_secs(55));
+//     assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
+//     assert_eq!(result.to_raw().to_string(), "sleep(55s)");
+// }
+//
+// #[test]
+// fn test_sleep_fn_over_long_period() {
+//     let result = sleep(time::Duration::from_secs(55340223));
+//     assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
+//     assert_eq!(result.to_raw().to_string(), "sleep(1y39w2d12h17m3s)");
+// }
