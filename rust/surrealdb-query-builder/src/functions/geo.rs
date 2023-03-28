@@ -109,22 +109,32 @@ pub fn distance(
 
 pub enum NumberOrEmpty {
     Empty,
-    Number(surrealdb::sql::Number),
-    Field(Field),
+    Number(surrealdb::sql::Value),
+    // Field(Field),
 }
+
+// impl From<NumberOrEmpty> for sql::Value {
+//     fn from(value: NumberOrEmpty) -> Self {
+//         match value {
+//             NumberOrEmpty::Empty => sql::Idiom::from("".to_string()).into(),
+//             NumberOrEmpty::Number(n) => n.into(),
+//             // NumberOrEmpty::Field(f) => f.into(),
+//         }
+//     }
+// }
 impl<T> From<T> for NumberOrEmpty
 where
     T: Into<sql::Number>,
 {
     fn from(value: T) -> Self {
         let value: sql::Number = value.into();
-        Self::Number(value)
+        Self::Number(value.into())
     }
 }
 
 impl From<Field> for NumberOrEmpty {
     fn from(value: Field) -> Self {
-        Self::Field(value)
+        Self::Number(value.into())
     }
 }
 
@@ -209,14 +219,13 @@ pub mod hash {
                 bindings.push(binding);
 
                 format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
-            }
-            Accuracy::Field(field) => {
-                let binding = Binding::new(field);
-                let accuracy_param = binding.get_param_dollarised();
-                bindings.push(binding);
-
-                format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
-            }
+            } // Accuracy::Field(field) => {
+              //     let binding = Binding::new(field);
+              //     let accuracy_param = binding.get_param_dollarised();
+              //     bindings.push(binding);
+              //
+              //     format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
+              // }
         };
         Function {
             query_string: str,
