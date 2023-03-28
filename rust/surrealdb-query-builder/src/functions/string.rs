@@ -202,6 +202,37 @@ macro_rules! repeat {
 
 pub use repeat;
 
+pub fn slice_fn(
+    string: impl Into<String>,
+    from: impl Into<Number>,
+    to: impl Into<Number>,
+) -> Function {
+    let string_binding = Binding::new(string.into());
+    let from_binding = Binding::new(from.into());
+    let to_binding = Binding::new(to.into());
+
+    let query_string = format!(
+        "string::slice({}, {}, {})",
+        string_binding.get_param_dollarised(),
+        from_binding.get_param_dollarised(),
+        to_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, from_binding, to_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! slice {
+    ( $string:expr, $from: expr, $to: expr ) => {
+        crate::functions::string::slice_fn($string, $from, $to)
+    };
+}
+
+pub use slice;
+
 pub fn replace_fn(
     string: impl Into<String>,
     to_match: impl Into<String>,
@@ -388,6 +419,36 @@ fn test_replace_with_macro_with_fields() {
     assert_eq!(
         result.to_raw().to_string(),
         "string::replace(name, last_name, first_name)"
+    );
+}
+
+#[test]
+fn test_slice_with_macro_with_plain_string() {
+    let result = slice!("Oyelowo", 3, 5);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::slice($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::slice('Oyelowo', 3, 5)"
+    );
+}
+
+#[test]
+fn test_slice_with_macro_with_fields() {
+    let name = Field::new("name");
+    let last_name = Field::new("last_name");
+    let first_name = Field::new("first_name");
+
+    let result = slice!(name, last_name, first_name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::slice($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::slice(name, last_name, first_name)"
     );
 }
 
