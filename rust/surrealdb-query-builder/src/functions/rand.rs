@@ -376,6 +376,14 @@ fn test_rand_string_macro_with_one_arg_length() {
     assert_eq!(result.to_raw().to_string(), "rand::string(34)");
 }
 
+#[test]
+fn test_rand_string_macro_with_one_arg_field() {
+    let length_of_name = Field::new("length_of_name");
+    let result = rand::string!(length_of_name);
+    assert_eq!(result.fine_tune_params(), "rand::string($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::string(length_of_name)");
+}
+
 // Test Guid
 #[test]
 fn test_rand_guid_function_empty() {
