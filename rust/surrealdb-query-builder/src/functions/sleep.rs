@@ -24,13 +24,26 @@ use super::array::Function;
 
 struct Duration(sql::Value);
 
+impl From<Duration> for sql::Value {
+    fn from(value: Duration) -> Self {
+        value.0
+    }
+}
+
+impl<T: Into<sql::Duration>> From<T> for self::Duration {
+    fn from(value: T) -> Self {
+        let value: sql::Duration = value.into();
+        Self(value.into())
+    }
+}
+
 impl From<Field> for self::Duration {
     fn from(value: Field) -> Self {
         Self(value.into())
     }
 }
 
-fn sleep(duration: impl Into<sql::Duration>) -> Function {
+fn sleep(duration: impl Into<Duration>) -> Function {
     let value: sql::Value = duration.into().into();
     let binding = Binding::new(value);
 
@@ -38,6 +51,15 @@ fn sleep(duration: impl Into<sql::Duration>) -> Function {
         query_string: format!("sleep({})", binding.get_param_dollarised()),
         bindings: vec![binding],
     }
+}
+
+#[test]
+fn test_sleep_fn_with_field_data() {
+    let waiting_time = Field::new("waiting_time");
+    let result = sleep(waiting_time);
+
+    assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "sleep(waiting_time)");
 }
 
 #[test]
