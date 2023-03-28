@@ -113,6 +113,10 @@ fn mean(number: impl Into<Array>) -> Function {
     create_fn_with_single_array_arg(number, "mean")
 }
 
+fn median(number: impl Into<Array>) -> Function {
+    create_fn_with_single_array_arg(number, "median")
+}
+
 fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
     let num_binding = Binding::new(number.into());
     let decimal_place_binding = Binding::new(decimal_number.into());
@@ -200,6 +204,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
 
 create_test_for_fn_with_single_array_arg!(max, "max");
 create_test_for_fn_with_single_array_arg!(mean, "mean");
+create_test_for_fn_with_single_array_arg!(median, "median");
 
 #[test]
 fn test_fixed_fn_with_field_data() {
