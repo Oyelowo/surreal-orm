@@ -29,3 +29,29 @@ fn rand() -> Function {
         bindings: vec![],
     }
 }
+
+pub mod rand {
+    use crate::{
+        functions::{array::Function, math::Array},
+        sql::Binding,
+    };
+
+    fn bool() -> Function {
+        let query_string = format!("rand::bool()");
+
+        Function {
+            query_string,
+            bindings: vec![],
+        }
+    }
+
+    fn enum_(values: Array) -> Function {
+        let binding = Binding::new(value.into());
+        let query_string = format!("rand::enum({})", binding.get_param_dollarised());
+
+        Function {
+            query_string,
+            bindings: vec![binding],
+        }
+    }
+}
