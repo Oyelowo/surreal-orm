@@ -133,6 +133,10 @@ fn product(number: impl Into<Array>) -> Function {
     create_fn_with_single_array_arg(number, "product")
 }
 
+fn sum(number: impl Into<Array>) -> Function {
+    create_fn_with_single_array_arg(number, "sum")
+}
+
 fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
     let num_binding = Binding::new(number.into());
     let decimal_place_binding = Binding::new(decimal_number.into());
@@ -223,6 +227,7 @@ create_test_for_fn_with_single_array_arg!(mean, "mean");
 create_test_for_fn_with_single_array_arg!(median, "median");
 create_test_for_fn_with_single_array_arg!(min, "min");
 create_test_for_fn_with_single_array_arg!(product, "product");
+create_test_for_fn_with_single_array_arg!(sum, "sum");
 
 #[test]
 fn test_fixed_fn_with_field_data() {
