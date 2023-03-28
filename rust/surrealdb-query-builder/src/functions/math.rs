@@ -89,7 +89,7 @@ fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str)
     }
 }
 
-// Although, surrealdb technically accept stringified number also,
+// Although, surrealdb technically accepts stringified number also,
 // I dont see why that should be allowed at the app layer in rust
 // Obviously, if a field has stringified number that would work
 // during query execution
