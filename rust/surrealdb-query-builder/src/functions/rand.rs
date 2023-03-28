@@ -156,8 +156,23 @@ pub mod rand {
 
     pub use float;
 
-    pub fn guid_fn(number: impl Into<Number>) -> Function {
-        create_fn_with_single_num_arg(number, "guid")
+    pub fn guid_fn(length: impl Into<NumberOrEmpty>) -> Function {
+        let length: NumberOrEmpty = length.into();
+        match length {
+            NumberOrEmpty::Empty => Function {
+                query_string: "rand::guid()".to_string(),
+                bindings: vec![],
+            },
+            NumberOrEmpty::Number(length) => {
+                let binding = Binding::new(length);
+                let query_string = format!("rand::guid({})", binding.get_param_dollarised());
+
+                Function {
+                    query_string,
+                    bindings: vec![binding],
+                }
+            }
+        }
     }
 
     #[macro_export]
@@ -266,3 +281,63 @@ fn test_rand_float_macro_with_field_inputs() {
     );
     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
 }
+
+#[test]
+fn test_rand_guid_function_empty() {
+    let result = rand::guid_fn(Empty);
+    assert_eq!(result.fine_tune_params(), "rand::guid()");
+    assert_eq!(result.to_raw().to_string(), "rand::guid()");
+}
+
+#[test]
+fn test_rand_guid_macro_empty() {
+    let result = rand::guid!();
+    assert_eq!(result.fine_tune_params(), "rand::guid()");
+    assert_eq!(result.to_raw().to_string(), "rand::guid()");
+}
+//
+// #[test]
+// fn test_rand_float_macro_with_range() {
+//     let result = rand::float!(34, 65);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "rand::float($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(result.to_raw().to_string(), "rand::float(34, 65)");
+// }
+//
+// #[test]
+// fn test_rand_float_macro_with_invalid_input() {
+//     let result = rand::float!(34, "ere");
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "rand::float($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(result.to_raw().to_string(), "rand::float(34, 0)");
+// }
+//
+// #[test]
+// fn test_rand_float_fn_with_field_inputs() {
+//     let start = Field::new("start");
+//     let end = Field::new("end");
+//
+//     let result = rand::float_fn(start, end);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "rand::float($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
+// }
+//
+// #[test]
+// fn test_rand_float_macro_with_field_inputs() {
+//     let start = Field::new("start");
+//     let end = Field::new("end");
+//
+//     let result = rand::float!(start, end);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "rand::float($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
+// }
