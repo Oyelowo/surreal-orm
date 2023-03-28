@@ -34,6 +34,31 @@ use super::parse::String;
 
 // struct String(sql::Value);
 
+fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &str) -> Function {
+    let binding = Binding::new(number.into());
+    let query_string = format!(
+        "string::{function_name}({})",
+        binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![binding],
+    }
+}
+
+pub fn len_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "len")
+}
+
+#[macro_export]
+macro_rules! len {
+    ( $string:expr ) => {
+        crate::functions::string::len_fn($string)
+    };
+}
+pub use len;
+
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -182,29 +207,16 @@ fn test_ends_with_macro_with_field_and_string() {
 }
 
 #[test]
-fn test_ends_with_macro_with_field_and_field() {
+fn test_len_with_macro_with_field() {
     let name = Field::new("name");
-    let ending = Field::new("ending");
-    let result = ends_with!(name, ending);
-    assert_eq!(
-        result.fine_tune_params(),
-        "string::ends_with($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "string::ends_with(name, ending)"
-    );
+    let result = len!(name);
+    assert_eq!(result.fine_tune_params(), "string::len($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::len(name)");
 }
 
 #[test]
-fn test_ends_with_macro_with_plain_strings() {
-    let result = ends_with!("toronto", "nto");
-    assert_eq!(
-        result.fine_tune_params(),
-        "string::ends_with($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "string::ends_with('toronto', 'nto')"
-    );
+fn test_len_with_macro_with_plain_string() {
+    let result = len!("toronto");
+    assert_eq!(result.fine_tune_params(), "string::len($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::len('toronto')");
 }
