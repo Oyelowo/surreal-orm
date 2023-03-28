@@ -21,9 +21,12 @@
 
 use surrealdb::sql;
 
-use crate::sql::{Buildable, Empty, ToRawStatement};
+use crate::{
+    sql::{Binding, Buildable, Empty, ToRawStatement},
+    Field,
+};
 
-use super::array::Function;
+use super::{array::Function, math::Number};
 
 use crate::array;
 
@@ -38,15 +41,27 @@ fn rand() -> Function {
 
 struct NumEmpty(sql::Value);
 
-#[macro_export]
-macro_rules! lowo {
-    () => {
-        bool()
-    };
+pub(crate) fn create_fn_with_single_num_arg(
+    number: impl Into<Number>,
+    function_name: &str,
+) -> Function {
+    let binding = Binding::new(number.into());
+    let query_string = format!("rand::{function_name}({})", binding.get_param_dollarised());
+
+    Function {
+        query_string,
+        bindings: vec![binding],
+    }
 }
+
 pub mod rand {
+    use super::create_fn_with_single_num_arg;
     use crate::{
-        functions::{array::Function, geo::NumberOrEmpty, math::Array},
+        functions::{
+            array::Function,
+            geo::NumberOrEmpty,
+            math::{Array, Number},
+        },
         sql::Binding,
     };
     use surrealdb::sql;
@@ -69,7 +84,6 @@ pub mod rand {
     pub use bool;
 
     pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
-        // let values: sql::Value = values.into().into();
         let mut bindings = vec![];
 
         let values = values
@@ -82,7 +96,6 @@ pub mod rand {
             })
             .collect::<Vec<_>>();
 
-        // let binding = Binding::new(values.into());
         let query_string = format!("rand::enum({})", values.join(", "));
 
         Function {
@@ -142,6 +155,22 @@ pub mod rand {
     }
 
     pub use float;
+
+    pub fn guid_fn(number: impl Into<Number>) -> Function {
+        create_fn_with_single_num_arg(number, "guid")
+    }
+
+    #[macro_export]
+    macro_rules! guid {
+        () => {
+            crate::functions::rand::rand::guid_fn(crate::sql::Empty)
+        };
+        ( $length:expr ) => {
+            crate::functions::rand::rand::guid_fn($length)
+        };
+    }
+
+    pub use guid;
 }
 
 #[test]
@@ -210,4 +239,30 @@ fn test_rand_float_macro_with_invalid_input() {
         "rand::float($_param_00000001, $_param_00000002)"
     );
     assert_eq!(result.to_raw().to_string(), "rand::float(34, 0)");
+}
+
+#[test]
+fn test_rand_float_fn_with_field_inputs() {
+    let start = Field::new("start");
+    let end = Field::new("end");
+
+    let result = rand::float_fn(start, end);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::float($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
+}
+
+#[test]
+fn test_rand_float_macro_with_field_inputs() {
+    let start = Field::new("start");
+    let end = Field::new("end");
+
+    let result = rand::float!(start, end);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::float($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
 }
