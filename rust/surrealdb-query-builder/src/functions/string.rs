@@ -25,8 +25,8 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::array;
 use crate::sql::{Binding, Buildable, ToRawStatement};
+use crate::{array, Field};
 use surrealdb::sql;
 
 use super::array::Function;
@@ -68,11 +68,12 @@ pub use concat_;
 
 #[test]
 fn test_concat_macro() {
-    let result = concat_!("one", "two", 3, 4.15385, "five", true);
+    let title = Field::new("title");
+    let result = concat_!(title, "one", 3, 4.15385, "five", true);
     assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().to_string(),
-        "string::concat('one', 'two', 3, 4.15385, 'five', true)"
+        "string::concat(title, 'one', 3, 4.15385, 'five', true)"
     );
 }
 
