@@ -85,6 +85,18 @@ macro_rules! uppercase {
 }
 pub use uppercase;
 
+pub fn words_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "words")
+}
+
+#[macro_export]
+macro_rules! words {
+    ( $string:expr ) => {
+        crate::functions::string::words_fn($string)
+    };
+}
+pub use words;
+
 pub fn reverse_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "reverse")
 }
@@ -584,6 +596,23 @@ fn test_uppercase_with_macro_with_plain_string() {
         "string::uppercase($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::uppercase('oyelowo')");
+}
+
+#[test]
+fn test_words_with_macro_with_field() {
+    let sentence = Field::new("sentence");
+    let result = words!(sentence);
+    assert_eq!(result.fine_tune_params(), "string::words($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::words(sentence)");
+}
+
+#[test]
+fn test_words_with_macro_with_plain_string() {
+    let result = words!(
+        "This is the first day of the rest of my life. I will make every single moment count!"
+    );
+    assert_eq!(result.fine_tune_params(), "string::words($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::words('This is the first day of the rest of my life. I will make every single moment count!')");
 }
 
 #[test]
