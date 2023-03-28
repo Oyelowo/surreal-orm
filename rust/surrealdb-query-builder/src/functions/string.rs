@@ -73,6 +73,19 @@ macro_rules! lowercase {
 
 pub use lowercase;
 
+pub fn reverse_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "reverse")
+}
+
+#[macro_export]
+macro_rules! reverse {
+    ( $string:expr ) => {
+        crate::functions::string::reverse_fn($string)
+    };
+}
+
+pub use reverse;
+
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -295,6 +308,27 @@ fn test_length_with_macro_with_plain_string() {
         "string::length($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::length('toronto')");
+}
+
+#[test]
+fn test_reverse_with_macro_with_field() {
+    let name = Field::new("name");
+    let result = reverse!(name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::reverse($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::reverse(name)");
+}
+
+#[test]
+fn test_reverse_with_macro_with_plain_string() {
+    let result = reverse!("oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::reverse($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::reverse('oyelowo')");
 }
 
 #[test]
