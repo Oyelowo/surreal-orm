@@ -114,6 +114,22 @@ pub mod url {
         create_fn_with_single_string_arg(value, "url::fragment")
     }
 
+    pub fn host(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::host")
+    }
+
+    pub fn path(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::path")
+    }
+
+    pub fn port(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::port")
+    }
+
+    pub fn query(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::query")
+    }
+
     create_test_for_fn_with_single_arg!(
         domain,
         "url::domain",
@@ -122,6 +138,26 @@ pub mod url {
     create_test_for_fn_with_single_arg!(
         fragment,
         "url::fragment",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
+    create_test_for_fn_with_single_arg!(
+        host,
+        "url::host",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
+    create_test_for_fn_with_single_arg!(
+        path,
+        "url::path",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
+    create_test_for_fn_with_single_arg!(
+        port,
+        "url::port",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
+    create_test_for_fn_with_single_arg!(
+        query,
+        "url::query",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
 }
