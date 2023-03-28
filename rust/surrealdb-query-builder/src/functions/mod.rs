@@ -13,5 +13,6 @@ pub(crate) mod crypto;
 pub(crate) mod geo;
 pub(crate) mod http;
 pub(crate) mod math;
+pub(crate) mod parse;
 pub(crate) mod sleep;
 pub(crate) mod validation;
