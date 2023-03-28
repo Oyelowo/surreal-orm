@@ -67,6 +67,39 @@ macro_rules! concat_ {
 
 pub use concat_;
 
+pub fn join_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
+    let mut bindings = vec![];
+
+    let values = values
+        .into_iter()
+        .map(|v| {
+            let binding = Binding::new(v.into());
+            let string = binding.get_param_dollarised();
+            bindings.push(binding);
+            string
+        })
+        .collect::<Vec<_>>();
+
+    let query_string = format!("string::join({})", values.join(", "));
+
+    Function {
+        query_string,
+        bindings,
+    }
+}
+
+#[macro_export]
+macro_rules! join {
+        ( $val:expr ) => {
+            crate::functions::string::join_fn( $val )
+        };
+        ($( $val:expr ),*) => {
+            crate::functions::string::join_fn(crate::array![ $( $val ), * ])
+        };
+    }
+
+pub use join;
+
 pub fn ends_with_fn(string: impl Into<String>, ending: impl Into<String>) -> Function {
     let string_binding = Binding::new(string.into());
     let ending_binding = Binding::new(ending.into());
@@ -110,6 +143,27 @@ fn test_concat_macro_with_array() {
     assert_eq!(
         result.to_raw().to_string(),
         "string::concat('one', 'two', 3, 4.15385, 'five', true)"
+    );
+}
+
+#[test]
+fn test_join_macro() {
+    let title = Field::new("title");
+    let result = join!(title, "one", 3, 4.15385, "  ", true);
+    assert_eq!(result.fine_tune_params(), "string::join($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::join(title, 'one', 3, 4.15385, '  ', true)"
+    );
+}
+
+#[test]
+fn test_join_macro_with_array() {
+    let result = join!(array!["one", "two", 3, 4.15385, "five", true]);
+    assert_eq!(result.fine_tune_params(), "string::join($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::join('one', 'two', 3, 4.15385, 'five', true)"
     );
 }
 
