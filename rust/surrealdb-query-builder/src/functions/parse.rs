@@ -83,6 +83,7 @@ macro_rules! create_test_for_fn_with_single_arg {
         }
     };
 }
+
 pub mod email {
     use crate::functions::array::Function;
 
@@ -98,4 +99,29 @@ pub mod email {
 
     create_test_for_fn_with_single_arg!(domain, "email::domain", "oyelowo@codebreather.com");
     create_test_for_fn_with_single_arg!(user, "email::user", "oyelowo@codebreather.com");
+}
+
+pub mod url {
+    use crate::functions::array::Function;
+
+    use super::{create_fn_with_single_string_arg, String};
+
+    pub fn domain(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::domain")
+    }
+
+    pub fn fragment(value: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(value, "url::fragment")
+    }
+
+    create_test_for_fn_with_single_arg!(
+        domain,
+        "url::domain",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
+    create_test_for_fn_with_single_arg!(
+        fragment,
+        "url::fragment",
+        "https://codebreather.com:443/topics?arg=value#fragment"
+    );
 }
