@@ -30,7 +30,7 @@ use super::{array::Function, math::Number};
 
 use crate::array;
 
-fn rand() -> Function {
+fn rand_fn() -> Function {
     let query_string = format!("rand()");
 
     Function {
@@ -38,6 +38,15 @@ fn rand() -> Function {
         bindings: vec![],
     }
 }
+
+#[macro_export]
+macro_rules! rand {
+    () => {
+        crate::functions::rand::rand_fn()
+    };
+}
+
+// pub use rand;
 
 struct NumEmpty(sql::Value);
 
@@ -335,8 +344,15 @@ pub mod rand {
 }
 
 #[test]
-fn test_rand() {
-    let result = rand();
+fn test_rand_fn() {
+    let result = rand_fn();
+    assert_eq!(result.fine_tune_params(), "rand()");
+    assert_eq!(result.to_raw().to_string(), "rand()");
+}
+
+#[test]
+fn test_rand_macro() {
+    let result = rand!();
     assert_eq!(result.fine_tune_params(), "rand()");
     assert_eq!(result.to_raw().to_string(), "rand()");
 }
@@ -349,7 +365,7 @@ fn test_rand_bool_fn() {
 }
 
 #[test]
-fn test_rand_bool() {
+fn test_rand_bool_macro() {
     let result = rand::bool!();
     assert_eq!(result.fine_tune_params(), "rand::bool()");
     assert_eq!(result.to_raw().to_string(), "rand::bool()");
