@@ -86,6 +86,18 @@ macro_rules! reverse {
 
 pub use reverse;
 
+pub fn trim_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "trim")
+}
+
+#[macro_export]
+macro_rules! trim {
+    ( $string:expr ) => {
+        crate::functions::string::trim_fn($string)
+    };
+}
+pub use trim;
+
 pub fn slug_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "slug")
 }
@@ -485,6 +497,21 @@ fn test_reverse_with_macro_with_plain_string() {
         "string::reverse($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::reverse('oyelowo')");
+}
+
+#[test]
+fn test_trim_with_macro_with_field() {
+    let name = Field::new("name");
+    let result = trim!(name);
+    assert_eq!(result.fine_tune_params(), "string::trim($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::trim(name)");
+}
+
+#[test]
+fn test_trim_with_macro_with_plain_string() {
+    let result = trim!("oyelowo");
+    assert_eq!(result.fine_tune_params(), "string::trim($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::trim('oyelowo')");
 }
 
 #[test]
