@@ -295,49 +295,35 @@ fn test_rand_guid_macro_empty() {
     assert_eq!(result.fine_tune_params(), "rand::guid()");
     assert_eq!(result.to_raw().to_string(), "rand::guid()");
 }
-//
-// #[test]
-// fn test_rand_float_macro_with_range() {
-//     let result = rand::float!(34, 65);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "rand::float($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "rand::float(34, 65)");
-// }
-//
-// #[test]
-// fn test_rand_float_macro_with_invalid_input() {
-//     let result = rand::float!(34, "ere");
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "rand::float($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "rand::float(34, 0)");
-// }
-//
-// #[test]
-// fn test_rand_float_fn_with_field_inputs() {
-//     let start = Field::new("start");
-//     let end = Field::new("end");
-//
-//     let result = rand::float_fn(start, end);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "rand::float($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
-// }
-//
-// #[test]
-// fn test_rand_float_macro_with_field_inputs() {
-//     let start = Field::new("start");
-//     let end = Field::new("end");
-//
-//     let result = rand::float!(start, end);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "rand::float($_param_00000001, $_param_00000002)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
-// }
+
+#[test]
+fn test_rand_guid_macro_with_range() {
+    let result = rand::guid!(34);
+    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::guid(34)");
+}
+
+#[test]
+fn test_rand_guid_macro_with_invalid_input() {
+    let result = rand::guid!("ere");
+    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::guid(0)");
+}
+
+#[test]
+fn test_rand_guid_fn_with_field_input() {
+    let length = Field::new("length");
+
+    let result = rand::guid_fn(length);
+    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::guid(length)");
+}
+
+#[test]
+fn test_rand_guid_macro_with_field_input() {
+    let length = Field::new("length");
+
+    let result = rand::guid!(length);
+    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::guid(length)");
+}
