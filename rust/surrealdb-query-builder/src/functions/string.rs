@@ -30,6 +30,7 @@ use crate::{array, Field};
 use surrealdb::sql;
 
 use super::array::Function;
+use super::math::Number;
 use super::parse::String;
 
 // struct String(sql::Value);
@@ -163,6 +164,31 @@ macro_rules! ends_with {
 
 pub use ends_with;
 
+pub fn repeat_fn(string: impl Into<String>, ending: impl Into<Number>) -> Function {
+    let string_binding = Binding::new(string.into());
+    let ending_binding = Binding::new(ending.into());
+
+    let query_string = format!(
+        "string::repeat({}, {})",
+        string_binding.get_param_dollarised(),
+        ending_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, ending_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! repeat {
+    ( $string:expr, $ending: expr ) => {
+        crate::functions::string::repeat_fn($string, $ending)
+    };
+}
+
+pub use repeat;
+
 #[test]
 fn test_concat_macro() {
     let title = Field::new("title");
@@ -259,4 +285,26 @@ fn test_lowercase_with_macro_with_plain_string() {
         "string::lowercase($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::lowercase('OYELOWO')");
+}
+
+#[test]
+fn test_repeat_with_macro_with_fields() {
+    let name = Field::new("name");
+    let count = Field::new("count");
+    let result = repeat!(name, count);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::repeat($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::repeat(name, count)");
+}
+
+#[test]
+fn test_repeat_with_macro_with_plain_string() {
+    let result = repeat!("Oyelowo", 5);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::repeat($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::repeat('Oyelowo', 5)");
 }
