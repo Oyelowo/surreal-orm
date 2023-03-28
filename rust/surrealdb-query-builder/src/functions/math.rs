@@ -75,7 +75,7 @@ macro_rules! create_test_for_fn_with_single_arg {
             #[test]
             fn [<test_ $function_ident _fn_with_field_data >] () {
                 let temparate = Field::new("temperature");
-                let result = abs(temparate);
+                let result = $function_ident(temparate);
 
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name_str));
@@ -83,14 +83,14 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[test]
             fn [<test_ $function_ident _fn_with_fraction>]() {
-                let result = abs(45.23);
+                let result = $function_ident(45.23);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name_str));
             }
 
             #[test]
             fn [<test_ $function_ident _fn_with_negative_number>]() {
-                let result = abs(-454);
+                let result = $function_ident(-454);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name_str));
             }
@@ -99,3 +99,5 @@ macro_rules! create_test_for_fn_with_single_arg {
 }
 
 create_test_for_fn_with_single_arg!(abs, "abs");
+
+create_test_for_fn_with_single_arg!(ceil, "ceil");
