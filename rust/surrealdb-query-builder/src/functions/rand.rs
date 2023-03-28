@@ -103,7 +103,7 @@ pub mod rand {
 
     pub use enum_;
 
-    pub fn float(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
+    pub fn float_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
         let from: NumberOrEmpty = from.into();
         let to: NumberOrEmpty = to.into();
@@ -130,6 +130,18 @@ pub mod rand {
             bindings,
         }
     }
+
+    #[macro_export]
+    macro_rules! float {
+        () => {
+            crate::functions::rand::rand::enum_fn($val)
+        };
+        ( $from:expr, $to:expr ) => {
+            crate::functions::rand::rand::float_fn($from, $to)
+        };
+    }
+
+    pub use float;
 }
 
 #[test]
@@ -141,8 +153,6 @@ fn test_rand() {
 
 #[test]
 fn test_rand_bool() {
-    // crate::functions::rand::rand::
-
     let result = rand::bool!();
     assert_eq!(result.fine_tune_params(), "rand::bool()");
     assert_eq!(result.to_raw().to_string(), "rand::bool()");
@@ -159,7 +169,7 @@ fn test_rand_enum_macro() {
 }
 
 #[test]
-fn test_rand_enum() {
+fn test_rand_enum_macro_with_array() {
     let result = rand::enum_!(array!["one", "two", 3, 4.15385, "five", true]);
     assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
