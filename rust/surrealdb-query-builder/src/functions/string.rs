@@ -189,6 +189,37 @@ macro_rules! repeat {
 
 pub use repeat;
 
+pub fn replace_fn(
+    string: impl Into<String>,
+    to_match: impl Into<String>,
+    replacement: impl Into<String>,
+) -> Function {
+    let string_binding = Binding::new(string.into());
+    let match_binding = Binding::new(to_match.into());
+    let replacement_binding = Binding::new(replacement.into());
+
+    let query_string = format!(
+        "string::replace({}, {}, {})",
+        string_binding.get_param_dollarised(),
+        match_binding.get_param_dollarised(),
+        replacement_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, match_binding, replacement_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! replace {
+    ( $string:expr, $match: expr, $replacement: expr ) => {
+        crate::functions::string::replace_fn($string, $match, $replacement)
+    };
+}
+
+pub use replace;
+
 #[test]
 fn test_concat_macro() {
     let title = Field::new("title");
@@ -307,4 +338,34 @@ fn test_repeat_with_macro_with_plain_string() {
         "string::repeat($_param_00000001, $_param_00000002)"
     );
     assert_eq!(result.to_raw().to_string(), "string::repeat('Oyelowo', 5)");
+}
+
+#[test]
+fn test_replace_with_macro_with_fields() {
+    let name = Field::new("name");
+    let last_name = Field::new("last_name");
+    let first_name = Field::new("first_name");
+
+    let result = replace!(name, last_name, first_name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::replace($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::replace(name, last_name, first_name)"
+    );
+}
+
+#[test]
+fn test_replace_with_macro_with_plain_strings() {
+    let result = replace!("Oyelowo Oyedayo", "Oyelowo", "Oyedayo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::replace($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::replace('Oyelowo Oyedayo', 'Oyelowo', 'Oyedayo')"
+    );
 }
