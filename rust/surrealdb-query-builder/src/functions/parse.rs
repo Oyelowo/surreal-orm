@@ -20,10 +20,7 @@
 
 use surrealdb::sql;
 
-use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
-    Field,
-};
+use crate::{sql::Binding, Field};
 
 use super::array::Function;
 
@@ -35,9 +32,9 @@ impl From<String> for sql::Value {
     }
 }
 
-impl<T: Into<sql::Number>> From<T> for String {
+impl<T: Into<sql::Strand>> From<T> for String {
     fn from(value: T) -> Self {
-        let value: sql::Number = value.into();
+        let value: sql::Strand = value.into();
         Self(value.into())
     }
 }
@@ -58,6 +55,34 @@ fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &s
     }
 }
 
+#[macro_use]
+macro_rules! create_test_for_fn_with_single_arg {
+    ($function_ident: ident, $function_name_str: expr, $arg: expr) => {
+        ::paste::paste! {
+            use crate::{
+                sql::{Binding as _, Buildable as _, ToRawStatement as _},
+            };
+
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_field_data >] () {
+                let field = crate::Field::new("field");
+                let result = $function_ident(field);
+
+                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("parse::{}(field)", $function_name_str));
+            }
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_fraction>]() {
+                let result = $function_ident($arg);
+                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("parse::{}('{}')", $function_name_str, $arg));
+            }
+
+        }
+    };
+}
 pub mod email {
     use crate::functions::array::Function;
 
@@ -66,31 +91,11 @@ pub mod email {
     pub fn domain(number: impl Into<String>) -> Function {
         create_fn_with_single_string_arg(number, "email::domain")
     }
+
+    pub fn user(number: impl Into<String>) -> Function {
+        create_fn_with_single_string_arg(number, "email::user")
+    }
+
+    create_test_for_fn_with_single_arg!(domain, "email::domain", "oyelowo@codebreather.com");
+    create_test_for_fn_with_single_arg!(user, "email::user", "oyelowo@codebreather.com");
 }
-
-use paste::paste;
-
-macro_rules! create_test_for_fn_with_single_arg {
-    ($test_suffix: ident, $function_path: path, $arg: expr) => {
-        paste! {
-            #[test]
-            fn [<test_ $test_suffix _fn_with_field_data >] () {
-                let field = Field::new("field");
-                let result = $function_path(field);
-
-                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_path));
-                assert_eq!(result.to_raw().to_string(), format!("parse::{}(temperature)", $function_path));
-            }
-
-            #[test]
-            fn [<test_ $test_suffix _fn_with_fraction>]() {
-                let result = $function_path($arg);
-                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_path));
-                assert_eq!(result.to_raw().to_string(), format!("parse::{}({})", $function_path, $arg));
-            }
-
-        }
-    };
-}
-
-create_test_for_fn_with_single_arg!(email_domain, email::domain, "oyelowo@codebreather.com");
