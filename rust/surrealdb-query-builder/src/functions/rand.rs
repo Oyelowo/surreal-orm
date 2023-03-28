@@ -60,14 +60,13 @@ pub mod rand {
         }
     }
 
-    #[macro_export]
     macro_rules! bool {
         () => {
             crate::functions::rand::rand::bool_fn()
         };
     }
 
-    pub(crate) use bool;
+    pub use bool;
 
     pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
         // let values: sql::Value = values.into().into();
@@ -94,12 +93,15 @@ pub mod rand {
 
     #[macro_export]
     macro_rules! enum_ {
-        () => {
-            crate::functions::rand::rand::enum_fn()
+        ( $val:expr ) => {
+            crate::functions::rand::rand::enum_fn( $val )
+        };
+        ($( $val:expr ),*) => {
+            crate::functions::rand::rand::enum_fn(crate::array![ $( $val ), * ])
         };
     }
 
-    pub(crate) use enum_;
+    pub use enum_;
 
     pub fn float(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -147,8 +149,18 @@ fn test_rand_bool() {
 }
 
 #[test]
+fn test_rand_enum_macro() {
+    let result = rand::enum_!("one", "two", 3, 4.15385, "five", true);
+    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+    );
+}
+
+#[test]
 fn test_rand_enum() {
-    let result = rand::enum_fn(array!["one", "two", 3, 4.15385, "five", true]);
+    let result = rand::enum_!(array!["one", "two", 3, 4.15385, "five", true]);
     assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().to_string(),
