@@ -47,17 +47,17 @@ fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &s
     }
 }
 
-pub fn len_fn(string: impl Into<String>) -> Function {
-    create_fn_with_single_string_arg(string, "len")
+pub fn length_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "length")
 }
 
 #[macro_export]
-macro_rules! len {
+macro_rules! length {
     ( $string:expr ) => {
-        crate::functions::string::len_fn($string)
+        crate::functions::string::length_fn($string)
     };
 }
-pub use len;
+pub use length;
 
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
@@ -207,16 +207,22 @@ fn test_ends_with_macro_with_field_and_string() {
 }
 
 #[test]
-fn test_len_with_macro_with_field() {
+fn test_length_with_macro_with_field() {
     let name = Field::new("name");
-    let result = len!(name);
-    assert_eq!(result.fine_tune_params(), "string::len($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "string::len(name)");
+    let result = length!(name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::length($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::length(name)");
 }
 
 #[test]
-fn test_len_with_macro_with_plain_string() {
-    let result = len!("toronto");
-    assert_eq!(result.fine_tune_params(), "string::len($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "string::len('toronto')");
+fn test_length_with_macro_with_plain_string() {
+    let result = length!("toronto");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::length($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::length('toronto')");
 }
