@@ -195,6 +195,57 @@ pub mod rand {
     }
     pub use int;
 
+    pub fn string_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
+        let mut bindings = vec![];
+        let from: NumberOrEmpty = from.into();
+        let to: NumberOrEmpty = to.into();
+
+        let query_string = match (from, to) {
+            (NumberOrEmpty::Number(length), NumberOrEmpty::Empty) => {
+                let length_binding = Binding::new(length);
+
+                let query_string =
+                    format!("rand::string({})", length_binding.get_param_dollarised(),);
+
+                bindings = vec![length_binding];
+                query_string
+            }
+            (NumberOrEmpty::Number(from), NumberOrEmpty::Number(to)) => {
+                let from_binding = Binding::new(from);
+                let to_binding = Binding::new(to);
+
+                let query_string = format!(
+                    "rand::string({}, {})",
+                    from_binding.get_param_dollarised(),
+                    to_binding.get_param_dollarised()
+                );
+
+                bindings = vec![from_binding, to_binding];
+                query_string
+            }
+            _ => format!("rand::string()"),
+        };
+
+        Function {
+            query_string,
+            bindings,
+        }
+    }
+
+    #[macro_export]
+    macro_rules! string {
+        () => {
+            crate::functions::rand::rand::string_fn(crate::sql::Empty, crate::sql::Empty)
+        };
+        ( $length:expr) => {
+            crate::functions::rand::rand::string_fn($from, crate::sql::Empty)
+        };
+        ( $from:expr, $to:expr ) => {
+            crate::functions::rand::rand::string_fn($from, $to)
+        };
+    }
+    pub use string;
+
     pub fn guid_fn(length: impl Into<NumberOrEmpty>) -> Function {
         let length: NumberOrEmpty = length.into();
         match length {
@@ -261,6 +312,7 @@ fn test_rand_enum_macro_with_array() {
     );
 }
 
+// float
 #[test]
 fn test_rand_float_function_empty() {
     let result = rand::float_fn(Empty, Empty);
