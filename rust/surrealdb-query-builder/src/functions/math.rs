@@ -63,25 +63,39 @@ fn abs(number: impl Into<Number>) -> Function {
     create_fn_with_single_num_arg(number, "abs")
 }
 
-#[test]
-fn test_abs_fn_with_field_data() {
-    let temparate = Field::new("temperature");
-    let result = abs(temparate);
-
-    assert_eq!(result.fine_tune_params(), "math::abs($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "math::abs(temperature)");
+fn ceil(number: impl Into<Number>) -> Function {
+    create_fn_with_single_num_arg(number, "ceil")
 }
 
-#[test]
-fn test_abs_fn_with_fraction() {
-    let result = abs(45.23);
-    assert_eq!(result.fine_tune_params(), "math::abs($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "math::abs(45.23)");
+use paste::paste;
+
+macro_rules! create_test_for_fn_with_single_arg {
+    ($function_ident: ident, $function_name_str: expr) => {
+        paste! {
+            #[test]
+            fn [<test_ $function_ident _fn_with_field_data >] () {
+                let temparate = Field::new("temperature");
+                let result = abs(temparate);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name_str));
+            }
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_fraction>]() {
+                let result = abs(45.23);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name_str));
+            }
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_negative_number>]() {
+                let result = abs(-454);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name_str));
+            }
+        }
+    };
 }
 
-#[test]
-fn test_abs_fn_with_negative_number() {
-    let result = abs(-454);
-    assert_eq!(result.fine_tune_params(), "math::abs($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "math::abs(-454)");
-}
+create_test_for_fn_with_single_arg!(abs, "abs");
