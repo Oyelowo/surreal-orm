@@ -59,6 +59,19 @@ macro_rules! length {
 }
 pub use length;
 
+pub fn lowercase_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "lowercase")
+}
+
+#[macro_export]
+macro_rules! lowercase {
+    ( $string:expr ) => {
+        crate::functions::string::lowercase_fn($string)
+    };
+}
+
+pub use lowercase;
+
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -225,4 +238,25 @@ fn test_length_with_macro_with_plain_string() {
         "string::length($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::length('toronto')");
+}
+
+#[test]
+fn test_lowercase_with_macro_with_field() {
+    let name = Field::new("name");
+    let result = lowercase!(name);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::lowercase($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::lowercase(name)");
+}
+
+#[test]
+fn test_lowercase_with_macro_with_plain_string() {
+    let result = lowercase!("OYELOWO");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::lowercase($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "string::lowercase('OYELOWO')");
 }
