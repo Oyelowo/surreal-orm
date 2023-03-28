@@ -69,11 +69,11 @@ pub use concat_;
 #[test]
 fn test_concat_macro() {
     let title = Field::new("title");
-    let result = concat_!(title, "one", 3, 4.15385, "five", true);
+    let result = concat_!(title, "one", 3, 4.15385, "  ", true);
     assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().to_string(),
-        "string::concat(title, 'one', 3, 4.15385, 'five', true)"
+        "string::concat(title, 'one', 3, 4.15385, '  ', true)"
     );
 }
 
