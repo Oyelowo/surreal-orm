@@ -25,6 +25,8 @@ use crate::sql::{Buildable, ToRawStatement};
 
 use super::array::Function;
 
+use crate::array;
+
 fn rand() -> Function {
     let query_string = format!("rand()");
 
@@ -42,7 +44,7 @@ pub mod rand {
         sql::Binding,
     };
 
-    fn bool() -> Function {
+    pub fn bool() -> Function {
         let query_string = format!("rand::bool()");
 
         Function {
@@ -50,8 +52,12 @@ pub mod rand {
             bindings: vec![],
         }
     }
+    
+
+    
 
     pub fn enum_(values: impl Into<Array>) -> Function {
+        // let values: sql::Value = values.into().into();
         let binding = Binding::new(values.into());
         let query_string = format!("rand::enum({})", binding.get_param_dollarised());
 
@@ -95,4 +101,18 @@ fn test_rand() {
     let result = rand();
     assert_eq!(result.fine_tune_params(), "rand()");
     assert_eq!(result.to_raw().to_string(), "rand()");
+}
+
+#[test]
+fn test_rand_bool() {
+    let result = rand::bool();
+    assert_eq!(result.fine_tune_params(), "rand::bool()");
+    assert_eq!(result.to_raw().to_string(), "rand::bool()");
+}
+
+#[test]
+fn test_rand_enum() {
+    let result = rand::enum_(array!["one", "two", 3, 4.15385, "five", true]);
+    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "rand::enum(['one', 'two', 3, 4.15385, 'five', true])");
 }
