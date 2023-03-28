@@ -21,7 +21,7 @@
 
 use surrealdb::sql;
 
-use crate::sql::{Buildable, ToRawStatement};
+use crate::sql::{Buildable, Empty, ToRawStatement};
 
 use super::array::Function;
 
@@ -134,7 +134,7 @@ pub mod rand {
     #[macro_export]
     macro_rules! float {
         () => {
-            crate::functions::rand::rand::enum_fn($val)
+            crate::functions::rand::rand::float_fn(crate::sql::Empty, crate::sql::Empty)
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::float_fn($from, $to)
@@ -176,4 +176,38 @@ fn test_rand_enum_macro_with_array() {
         result.to_raw().to_string(),
         "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
     );
+}
+
+#[test]
+fn test_rand_float_function_empty() {
+    let result = rand::float_fn(Empty, Empty);
+    assert_eq!(result.fine_tune_params(), "rand::float()");
+    assert_eq!(result.to_raw().to_string(), "rand::float()");
+}
+
+#[test]
+fn test_rand_float_macro_empty() {
+    let result = rand::float!();
+    assert_eq!(result.fine_tune_params(), "rand::float()");
+    assert_eq!(result.to_raw().to_string(), "rand::float()");
+}
+
+#[test]
+fn test_rand_float_macro_with_range() {
+    let result = rand::float!(34, 65);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::float($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::float(34, 65)");
+}
+
+#[test]
+fn test_rand_float_macro_with_invalid_input() {
+    let result = rand::float!(34, "ere");
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::float($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::float(34, 0)");
 }
