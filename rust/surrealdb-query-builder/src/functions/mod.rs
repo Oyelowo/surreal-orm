@@ -15,5 +15,6 @@ pub(crate) mod http;
 pub(crate) mod math;
 pub(crate) mod parse;
 pub(crate) mod rand;
+pub(crate) mod session;
 pub(crate) mod sleep;
 pub(crate) mod validation;
