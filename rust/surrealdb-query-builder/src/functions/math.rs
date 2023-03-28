@@ -109,6 +109,10 @@ fn round(number: impl Into<Number>) -> Function {
     create_fn_with_single_num_arg(number, "round")
 }
 
+fn sqrt(number: impl Into<Number>) -> Function {
+    create_fn_with_single_num_arg(number, "sqrt")
+}
+
 fn max(number: impl Into<Array>) -> Function {
     create_fn_with_single_array_arg(number, "max")
 }
@@ -180,6 +184,7 @@ create_test_for_fn_with_single_arg!(abs, "abs");
 create_test_for_fn_with_single_arg!(ceil, "ceil");
 create_test_for_fn_with_single_arg!(floor, "floor");
 create_test_for_fn_with_single_arg!(round, "round");
+create_test_for_fn_with_single_arg!(sqrt, "sqrt");
 
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_ident: ident, $function_name_str: expr) => {
