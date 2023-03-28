@@ -135,16 +135,26 @@ fn test_fixed_fn_with_field_data() {
     );
 }
 
-// #[test]
-// fn test_sleep_fn() {
-//     let result = sleep(time::Duration::from_secs(55));
-//     assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "sleep(55s)");
-// }
-//
-// #[test]
-// fn test_sleep_fn_over_long_period() {
-//     let result = sleep(time::Duration::from_secs(55340223));
-//     assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "sleep(1y39w2d12h17m3s)");
-// }
+#[test]
+fn test_fixed_fn_with_raw_numbers() {
+    let result = fixed(13.45423, 4);
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "math::fixed(13.45423, 4)");
+}
+
+#[test]
+fn test_fixed_fn_with_raw_number_with_field() {
+    let land_mass = Field::new("country.land_mass");
+    let result = fixed(land_mass, 4);
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(`\\`country.land_mass\\``, 4)"
+    );
+}
