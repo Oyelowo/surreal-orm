@@ -156,6 +156,45 @@ pub mod rand {
 
     pub use float;
 
+    pub fn int_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
+        let mut bindings = vec![];
+        let from: NumberOrEmpty = from.into();
+        let to: NumberOrEmpty = to.into();
+
+        let query_string = match (from, to) {
+            (NumberOrEmpty::Number(from), NumberOrEmpty::Number(to)) => {
+                let from_binding = Binding::new(from);
+                let to_binding = Binding::new(to);
+
+                let query_string = format!(
+                    "rand::int({}, {})",
+                    from_binding.get_param_dollarised(),
+                    to_binding.get_param_dollarised()
+                );
+
+                bindings = vec![from_binding, to_binding];
+                query_string
+            }
+            _ => format!("rand::int()"),
+        };
+
+        Function {
+            query_string,
+            bindings,
+        }
+    }
+
+    #[macro_export]
+    macro_rules! int {
+        () => {
+            crate::functions::rand::rand::int_fn(crate::sql::Empty, crate::sql::Empty)
+        };
+        ( $from:expr, $to:expr ) => {
+            crate::functions::rand::rand::int_fn($from, $to)
+        };
+    }
+    pub use int;
+
     pub fn guid_fn(length: impl Into<NumberOrEmpty>) -> Function {
         let length: NumberOrEmpty = length.into();
         match length {
@@ -282,6 +321,68 @@ fn test_rand_float_macro_with_field_inputs() {
     assert_eq!(result.to_raw().to_string(), "rand::float(start, end)");
 }
 
+// Test Int
+#[test]
+fn test_rand_int_function_empty() {
+    let result = rand::int_fn(Empty, Empty);
+    assert_eq!(result.fine_tune_params(), "rand::int()");
+    assert_eq!(result.to_raw().to_string(), "rand::int()");
+}
+
+#[test]
+fn test_rand_int_macro_empty() {
+    let result = rand::int!();
+    assert_eq!(result.fine_tune_params(), "rand::int()");
+    assert_eq!(result.to_raw().to_string(), "rand::int()");
+}
+
+#[test]
+fn test_rand_int_macro_with_range() {
+    let result = rand::int!(34, 65);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::int($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::int(34, 65)");
+}
+
+#[test]
+fn test_rand_int_macro_with_invalid_input() {
+    let result = rand::int!(34, "ere");
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::int($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::int(34, 0)");
+}
+
+#[test]
+fn test_rand_int_fn_with_field_inputs() {
+    let start = Field::new("start");
+    let end = Field::new("end");
+
+    let result = rand::int_fn(start, end);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::int($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::int(start, end)");
+}
+
+#[test]
+fn test_rand_int_macro_with_field_inputs() {
+    let start = Field::new("start");
+    let end = Field::new("end");
+
+    let result = rand::int!(start, end);
+    assert_eq!(
+        result.fine_tune_params(),
+        "rand::int($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "rand::int(start, end)");
+}
+
+// Test Guid
 #[test]
 fn test_rand_guid_function_empty() {
     let result = rand::guid_fn(Empty);
