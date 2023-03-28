@@ -15,6 +15,7 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
+use crate::array;
 use surrealdb::sql;
 
 use crate::{
@@ -22,7 +23,10 @@ use crate::{
     Field,
 };
 
-use super::{array::Function, geo::NumberOrEmpty};
+use super::{
+    array::{ArrayOrField, Function},
+    geo::NumberOrEmpty,
+};
 
 pub struct Number(sql::Value);
 
@@ -45,8 +49,38 @@ impl From<Field> for Number {
     }
 }
 
+pub struct Array(sql::Value);
+
+impl From<Array> for sql::Value {
+    fn from(value: Array) -> Self {
+        value.0
+    }
+}
+
+impl<T: Into<sql::Array>> From<T> for Array {
+    fn from(value: T) -> Self {
+        let value: sql::Array = value.into();
+        Self(value.into())
+    }
+}
+
+impl From<Field> for Array {
+    fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
 fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
+    let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
+
+    Function {
+        query_string,
+        bindings: vec![binding],
+    }
+}
+
+fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str) -> Function {
+    let binding = Binding::new(value.into());
     let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
 
     Function {
@@ -69,6 +103,14 @@ fn ceil(number: impl Into<Number>) -> Function {
 
 fn floor(number: impl Into<Number>) -> Function {
     create_fn_with_single_num_arg(number, "floor")
+}
+
+fn max(number: impl Into<Array>) -> Function {
+    create_fn_with_single_array_arg(number, "max")
+}
+
+fn mean(number: impl Into<Array>) -> Function {
+    create_fn_with_single_array_arg(number, "mean")
 }
 
 fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
@@ -124,6 +166,41 @@ create_test_for_fn_with_single_arg!(ceil, "ceil");
 
 create_test_for_fn_with_single_arg!(floor, "floor");
 
+macro_rules! create_test_for_fn_with_single_array_arg {
+    ($function_ident: ident, $function_name_str: expr) => {
+        paste! {
+            #[test]
+            fn [<test_ $function_ident _fn_with_field_data >] () {
+                let size_list = Field::new("size_list");
+                let result = $function_ident(size_list);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name_str));
+            }
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_number_array>]() {
+                let arr1 = array![1, 2, 3, 3.5];
+                let result = $function_ident(arr1);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name_str));
+            }
+
+            #[test]
+            fn [<test_ $function_ident _fn_with_mixed_array>]() {
+                let age = Field::new("age");
+                let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", age];
+                let result = $function_ident(arr);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name_str));
+            }
+        }
+    };
+}
+
+create_test_for_fn_with_single_array_arg!(max, "max");
+create_test_for_fn_with_single_array_arg!(mean, "mean");
+
 #[test]
 fn test_fixed_fn_with_field_data() {
     let land_size = Field::new("land_size");
@@ -144,6 +221,8 @@ fn test_fixed_fn_with_field_data() {
 #[test]
 fn test_fixed_fn_with_raw_numbers() {
     let result = fixed(13.45423, 4);
+    let email = Field::new("email");
+    let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
     assert_eq!(
         result.fine_tune_params(),
         "math::fixed($_param_00000001, $_param_00000002)"
