@@ -195,6 +195,45 @@ pub mod rand {
     }
     pub use int;
 
+    pub fn time_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
+        let mut bindings = vec![];
+        let from: NumberOrEmpty = from.into();
+        let to: NumberOrEmpty = to.into();
+
+        let query_string = match (from, to) {
+            (NumberOrEmpty::Number(from), NumberOrEmpty::Number(to)) => {
+                let from_binding = Binding::new(from);
+                let to_binding = Binding::new(to);
+
+                let query_string = format!(
+                    "rand::time({}, {})",
+                    from_binding.get_param_dollarised(),
+                    to_binding.get_param_dollarised()
+                );
+
+                bindings = vec![from_binding, to_binding];
+                query_string
+            }
+            _ => format!("rand::time()"),
+        };
+
+        Function {
+            query_string,
+            bindings,
+        }
+    }
+
+    #[macro_export]
+    macro_rules! time {
+        () => {
+            crate::functions::rand::rand::time_fn(crate::sql::Empty, crate::sql::Empty)
+        };
+        ( $from:expr, $to:expr ) => {
+            crate::functions::rand::rand::time_fn($from, $to)
+        };
+    }
+    pub use time;
+
     pub fn string_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
         let from: NumberOrEmpty = from.into();
@@ -368,6 +407,7 @@ macro_rules! create_test_for_fn_with_two_args {
 create_test_for_fn_with_two_args!("float");
 create_test_for_fn_with_two_args!("int");
 create_test_for_fn_with_two_args!("string");
+create_test_for_fn_with_two_args!("time");
 
 #[test]
 fn test_rand_string_macro_with_one_arg_length() {
