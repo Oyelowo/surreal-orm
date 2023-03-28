@@ -30,6 +30,7 @@ use crate::{array, Field};
 use surrealdb::sql;
 
 use super::array::Function;
+use super::parse::String;
 
 // struct String(sql::Value);
 
@@ -66,6 +67,31 @@ macro_rules! concat_ {
 
 pub use concat_;
 
+pub fn ends_with_fn(string: impl Into<String>, ending: impl Into<String>) -> Function {
+    let string_binding = Binding::new(string.into());
+    let ending_binding = Binding::new(ending.into());
+
+    let query_string = format!(
+        "string::ends_with({}, {})",
+        string_binding.get_param_dollarised(),
+        ending_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![string_binding, ending_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! ends_with {
+    ( $string:expr, $ending: expr ) => {
+        crate::functions::string::ends_with_fn($string, $ending)
+    };
+}
+
+pub use ends_with;
+
 #[test]
 fn test_concat_macro() {
     let title = Field::new("title");
@@ -84,5 +110,47 @@ fn test_concat_macro_with_array() {
     assert_eq!(
         result.to_raw().to_string(),
         "string::concat('one', 'two', 3, 4.15385, 'five', true)"
+    );
+}
+
+#[test]
+fn test_ends_with_macro_with_field_and_string() {
+    let name = Field::new("name");
+    let result = ends_with!(name, "lowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::ends_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::ends_with(name, 'lowo')"
+    );
+}
+
+#[test]
+fn test_ends_with_macro_with_field_and_field() {
+    let name = Field::new("name");
+    let ending = Field::new("ending");
+    let result = ends_with!(name, ending);
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::ends_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::ends_with(name, ending)"
+    );
+}
+
+#[test]
+fn test_ends_with_macro_with_plain_strings() {
+    let result = ends_with!("toronto", "nto");
+    assert_eq!(
+        result.fine_tune_params(),
+        "string::ends_with($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::ends_with('toronto', 'nto')"
     );
 }
