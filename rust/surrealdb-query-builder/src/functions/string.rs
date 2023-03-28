@@ -86,6 +86,19 @@ macro_rules! reverse {
 
 pub use reverse;
 
+pub fn slug_fn(string: impl Into<String>) -> Function {
+    create_fn_with_single_string_arg(string, "slug")
+}
+
+#[macro_export]
+macro_rules! slug {
+    ( $string:expr ) => {
+        crate::functions::string::slug_fn($string)
+    };
+}
+
+pub use slug;
+
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -360,6 +373,24 @@ fn test_reverse_with_macro_with_plain_string() {
         "string::reverse($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "string::reverse('oyelowo')");
+}
+
+#[test]
+fn test_slug_with_macro_with_field() {
+    let name = Field::new("name");
+    let result = slug!(name);
+    assert_eq!(result.fine_tune_params(), "string::slug($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "string::slug(name)");
+}
+
+#[test]
+fn test_slug_with_macro_with_plain_string() {
+    let result = slug!("Codebreather is from #Jupiter");
+    assert_eq!(result.fine_tune_params(), "string::slug($_param_00000001)");
+    assert_eq!(
+        result.to_raw().to_string(),
+        "string::slug('Codebreather is from #Jupiter')"
+    );
 }
 
 #[test]
