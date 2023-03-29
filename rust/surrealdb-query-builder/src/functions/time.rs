@@ -77,6 +77,24 @@ impl From<Field> for Duration {
     }
 }
 
+pub fn now_fn() -> Function {
+    let query_string = format!("now()");
+
+    Function {
+        query_string,
+        bindings: vec![],
+    }
+}
+
+#[macro_export]
+macro_rules! now {
+    () => {
+        crate::functions::time::now_fn()
+    };
+}
+
+pub use now;
+
 macro_rules! create_time_fn_with_single_datetime_arg {
     ($function_name: expr) => {
         paste::paste! {
@@ -343,3 +361,17 @@ test_group_with_interval!(day_with_enum, Interval::Day);
 test_group_with_interval!(hour_with_enum, Interval::Hour);
 test_group_with_interval!(minute_with_enum, Interval::Minute);
 test_group_with_interval!(second_with_enum, Interval::Second);
+
+#[test]
+fn test_now_fn() {
+    let result = now_fn();
+    assert_eq!(result.fine_tune_params(), "now()");
+    assert_eq!(result.to_raw().to_string(), "now()");
+}
+
+#[test]
+fn test_now_macro() {
+    let result = now!();
+    assert_eq!(result.fine_tune_params(), "now()");
+    assert_eq!(result.to_raw().to_string(), "now()");
+}
