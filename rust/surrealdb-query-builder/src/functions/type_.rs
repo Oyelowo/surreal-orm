@@ -131,7 +131,7 @@ fn point_fn(point1: impl Into<Number>, point2: impl Into<Number>) -> Function {
     let point1_binding = Binding::new(point1.into());
     let point2_binding = Binding::new(point2.into());
     let query_string = format!(
-        "time::point({}, {})",
+        "type::point({}, {})",
         point1_binding.get_param_dollarised(),
         point2_binding.get_param_dollarised()
     );
@@ -169,7 +169,7 @@ fn thing_fn(point1: impl Into<Table>, point2: impl Into<sql::Value>) -> Function
 #[macro_export]
 macro_rules! thing {
     ( $table:expr, $value:expr ) => {
-        crate::functions::type_::point_fn($table, value)
+        crate::functions::type_::thing_fn($table, $value)
     };
 }
 
@@ -223,4 +223,55 @@ fn test_datetime_macro_with_datetime_field() {
         "type::datetime($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
+}
+
+#[test]
+fn test_point_macro_with_plain_values() {
+    let result = point!(51.509865, -0.118092);
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::point($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "type::point(51.509865, -0.118092)"
+    );
+}
+
+#[test]
+fn test_point_macro_with_fields() {
+    let home = Field::new("home");
+    let away = Field::new("away");
+    let result = point!(home, away);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::point($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::point(home, away)");
+}
+
+#[test]
+fn test_thing_macro_with_plain_values() {
+    let user = Table::from("user");
+    let id = "oyelowo";
+    let result = thing!(user, id);
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::thing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::thing(user, 'oyelowo')");
+}
+
+#[test]
+fn test_thing_macro_with_datetime_field() {
+    let table = Field::new("table");
+    let id = Field::new("id");
+    let result = thing!(table, id);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::thing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::thing(table, id)");
 }
