@@ -138,21 +138,37 @@ fn test_day_macro_with_plain_datetime() {
         "time::day('1970-01-01T00:01:01Z')"
     );
 }
-//
-// #[test]
-// fn test_rand_guid_fn_with_field_input() {
-//     let length = Field::new("length");
-//
-//     let result = rand::guid_fn(length);
-//     assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "rand::guid(length)");
-// }
-//
-// #[test]
-// fn test_rand_guid_macro_with_field_input() {
-//     let length = Field::new("length");
-//
-//     let result = rand::guid!(length);
-//     assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "rand::guid(length)");
-// }
+
+#[test]
+fn test_floor_macro_with_datetime_field() {
+    let rebirth_date = Field::new("rebirth_date");
+    let duration = Field::new("duration");
+    let result = floor!(rebirth_date, duration);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "time::floor($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "time::floor(rebirth_date, duration)"
+    );
+}
+
+#[test]
+fn test_floor_macro_with_plain_datetime_and_duration() {
+    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::Utc,
+    );
+    let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
+    let result = floor!(dt, duration);
+    assert_eq!(
+        result.fine_tune_params(),
+        "time::floor($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "time::floor('1970-01-01T00:01:01Z', 1w)"
+    );
+}
