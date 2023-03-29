@@ -29,43 +29,35 @@ use crate::{
     Field,
 };
 
-use super::{array::Function, time::Datetime};
+use super::{array::Function, math::Number, time::Datetime};
 
-fn bool_fn(value: impl Into<sql::Value>) -> Function {
-    let binding = Binding::new(value.into());
-    let query_string = format!("type::bool({})", binding.get_param_dollarised());
+macro_rules! create_type {
+    ($function_ident:ident, $function_name:expr, $value_type: ty) => {
+        paste::paste! {
+            fn [<$function_name _fn>](value: impl Into<$value_type>) -> Function {
+                let binding = Binding::new(value.into());
+                let query_string = format!("type::{}({})", $function_name, binding.get_param_dollarised());
 
-    Function {
-        query_string,
-        bindings: vec![binding],
-    }
-}
+                Function {
+                    query_string,
+                    bindings: vec![binding],
+                }
+            }
 
-#[macro_export]
-macro_rules! bool {
-    ( $string:expr ) => {
-        crate::functions::type_::bool_fn($string)
+            #[macro_export]
+            macro_rules! [<$function_ident>] {
+                ( $string:expr ) => {
+                    crate::functions::type_::[<$function_ident _fn>]($string)
+                };
+            }
+            pub use $function_ident;
+        }
     };
 }
-pub use bool;
 
-fn datetime_fn(value: impl Into<Datetime>) -> Function {
-    let binding = Binding::new(value.into());
-    let query_string = format!("type::datetime({})", binding.get_param_dollarised());
-
-    Function {
-        query_string,
-        bindings: vec![binding],
-    }
-}
-
-#[macro_export]
-macro_rules! datetime {
-    ( $value:expr ) => {
-        crate::functions::type_::datetime_fn($value)
-    };
-}
-pub use datetime;
+create_type!(bool, "bool", sql::Value);
+create_type!(datetime, "datetime", Datetime);
+create_type!(int_, "int", Number);
 
 #[test]
 fn test_bool_with_macro_with_field() {
