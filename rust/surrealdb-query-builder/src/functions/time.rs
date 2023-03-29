@@ -178,6 +178,30 @@ macro_rules! floor {
 
 pub use floor;
 
+fn round_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Function {
+    let datetime_binding = Binding::new(datetime.into());
+    let duration_binding = Binding::new(duration.into());
+    let query_string = format!(
+        "time::round({}, {})",
+        datetime_binding.get_param_dollarised(),
+        duration_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![datetime_binding, duration_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! round {
+    ( $datetime:expr, $duration:expr ) => {
+        crate::functions::time::round_fn($datetime, $duration)
+    };
+}
+
+pub use round;
+
 #[derive(Debug, Clone, Copy)]
 enum Interval {
     Year,
@@ -304,6 +328,40 @@ fn test_floor_macro_with_plain_datetime_and_duration() {
     assert_eq!(
         result.to_raw().to_string(),
         "time::floor('1970-01-01T00:01:01Z', 1w)"
+    );
+}
+
+#[test]
+fn test_round_macro_with_datetime_field() {
+    let rebirth_date = Field::new("rebirth_date");
+    let duration = Field::new("duration");
+    let result = round!(rebirth_date, duration);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "time::round($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "time::round(rebirth_date, duration)"
+    );
+}
+
+#[test]
+fn test_round_macro_with_plain_datetime_and_duration() {
+    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::Utc,
+    );
+    let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
+    let result = round!(dt, duration);
+    assert_eq!(
+        result.fine_tune_params(),
+        "time::round($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "time::round('1970-01-01T00:01:01Z', 1w)"
     );
 }
 
