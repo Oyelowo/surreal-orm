@@ -29,7 +29,7 @@ use crate::{
     Field,
 };
 
-use super::array::Function;
+use super::{array::Function, time::Datetime};
 
 fn bool_fn(value: impl Into<sql::Value>) -> Function {
     let binding = Binding::new(value.into());
@@ -48,6 +48,24 @@ macro_rules! bool {
     };
 }
 pub use bool;
+
+fn datetime_fn(value: impl Into<Datetime>) -> Function {
+    let binding = Binding::new(value.into());
+    let query_string = format!("type::datetime({})", binding.get_param_dollarised());
+
+    Function {
+        query_string,
+        bindings: vec![binding],
+    }
+}
+
+#[macro_export]
+macro_rules! datetime {
+    ( $value:expr ) => {
+        crate::functions::type_::datetime_fn($value)
+    };
+}
+pub use datetime;
 
 #[test]
 fn test_bool_with_macro_with_field() {
@@ -83,4 +101,33 @@ fn test_bool_with_macro_with_plain_true() {
     let result = bool!(true);
     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "type::bool(true)");
+}
+
+#[test]
+fn test_datetime_macro_with_plain_datetime() {
+    let value = chrono::DateTime::<chrono::Utc>::from_utc(
+        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::Utc,
+    );
+    let result = datetime!(value);
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "type::datetime('1970-01-01T00:01:01Z')"
+    );
+}
+
+#[test]
+fn test_datetime_macro_with_datetime_field() {
+    let rebirth_date = Field::new("rebirth_date");
+    let result = datetime!(rebirth_date);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
 }
