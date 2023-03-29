@@ -123,6 +123,8 @@ pub use floor;
 enum Interval {
     Year,
     Month,
+    Week,
+    Day,
     Hour,
     Minute,
     Second,
@@ -135,6 +137,8 @@ impl FromStr for Interval {
         match s {
             "year" => Ok(Interval::Year),
             "month" => Ok(Interval::Month),
+            "week" => Ok(Interval::Week),
+            "day" => Ok(Interval::Day),
             "hour" => Ok(Interval::Hour),
             "minute" => Ok(Interval::Minute),
             "second" => Ok(Interval::Second),
@@ -154,6 +158,8 @@ impl Display for Interval {
                 Interval::Hour => "hour",
                 Interval::Minute => "minute",
                 Interval::Second => "second",
+                Interval::Week => "week",
+                Interval::Day => "day",
             }
         )
     }
@@ -308,20 +314,41 @@ fn test_group_macro_with_datetime_field() {
     );
 }
 
-#[test]
-fn test_group_macro_with_plain_datetime_and_duration() {
-    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
-        chrono::Utc,
-    );
-    let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
-    let result = group!(dt, "year");
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::floor($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "time::floor('1970-01-01T00:01:01Z', 'year')"
-    );
+macro_rules! test_group_with_interval {
+    ($interval_name:ident, $interval: expr) => {
+        paste::paste! {
+            #[test]
+            fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
+                let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+                    chrono::NaiveDateTime::from_timestamp(61, 0),
+                    chrono::Utc,
+                );
+                let result = group!(dt, $interval);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    "time::floor($_param_00000001, $_param_00000002)"
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("time::floor('1970-01-01T00:01:01Z', '{}')", $interval)
+                );
+            }
+        }
+    };
 }
+
+test_group_with_interval!(year, "year");
+test_group_with_interval!(month, "month");
+test_group_with_interval!(week, "week");
+test_group_with_interval!(day, "day");
+test_group_with_interval!(hour, "hour");
+test_group_with_interval!(minute, "minute");
+test_group_with_interval!(second, "second");
+
+test_group_with_interval!(year_with_enum, Interval::Year);
+test_group_with_interval!(month_with_enum, Interval::Month);
+test_group_with_interval!(week_with_enum, Interval::Week);
+test_group_with_interval!(day_with_enum, Interval::Day);
+test_group_with_interval!(hour_with_enum, Interval::Hour);
+test_group_with_interval!(minute_with_enum, Interval::Minute);
+test_group_with_interval!(second_with_enum, Interval::Second);
