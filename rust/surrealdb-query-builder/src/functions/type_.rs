@@ -127,6 +127,54 @@ create_type!(string_, "string", sql::Value, 5454, "5454");
 create_type!(regex, "regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
 create_type!(table, "table", Table, Table::new("user"), "user");
 
+fn point_fn(point1: impl Into<Number>, point2: impl Into<Number>) -> Function {
+    let point1_binding = Binding::new(point1.into());
+    let point2_binding = Binding::new(point2.into());
+    let query_string = format!(
+        "time::point({}, {})",
+        point1_binding.get_param_dollarised(),
+        point2_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![point1_binding, point2_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! point {
+    ( $point1:expr, $point2:expr ) => {
+        crate::functions::type_::point_fn($point1, $point2)
+    };
+}
+
+pub use point;
+
+fn thing_fn(point1: impl Into<Table>, point2: impl Into<sql::Value>) -> Function {
+    let point1_binding = Binding::new(point1.into());
+    let point2_binding = Binding::new(point2.into());
+    let query_string = format!(
+        "type::thing({}, {})",
+        point1_binding.get_param_dollarised(),
+        point2_binding.get_param_dollarised()
+    );
+
+    Function {
+        query_string,
+        bindings: vec![point1_binding, point2_binding],
+    }
+}
+
+#[macro_export]
+macro_rules! thing {
+    ( $table:expr, $value:expr ) => {
+        crate::functions::type_::point_fn($table, value)
+    };
+}
+
+pub use thing;
+
 #[test]
 fn test_bool_with_macro_with_plain_number() {
     let result = bool!(43545);
