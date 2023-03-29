@@ -76,24 +76,65 @@ impl From<Field> for Duration {
         Self(value.into())
     }
 }
-fn day_fn(datetime: impl Into<Datetime>) -> Function {
-    let binding = Binding::new(datetime.into());
-    let query_string = format!("time::day({})", binding.get_param_dollarised());
 
-    Function {
-        query_string,
-        bindings: vec![binding],
-    }
-}
+macro_rules! create_time_fn_with_single_datetime_arg {
+    ($function_name: expr) => {
+        paste::paste! {
+            fn [<$function_name _fn>](datetime: impl Into<Datetime>) -> Function {
+                let binding = Binding::new(datetime.into());
+                let query_string = format!("time::{}({})", $function_name, binding.get_param_dollarised());
 
-#[macro_export]
-macro_rules! day {
-    ( $datetime:expr ) => {
-        crate::functions::time::day_fn($datetime)
+                Function {
+                    query_string,
+                    bindings: vec![binding],
+                }
+            }
+
+            #[macro_export]
+            macro_rules! [<$function_name>] {
+                ( $datetime:expr ) => {
+                    crate::functions::time::[<$function_name _fn>]($datetime)
+                };
+            }
+
+            pub use [<$function_name>];
+
+            #[test]
+            fn [<test_ $function_name _macro_with_datetime_field>]() {
+                let rebirth_date = Field::new("rebirth_date");
+                let result = day!(rebirth_date);
+
+                assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
+                assert_eq!(result.to_raw().to_string(), "time::day(rebirth_date)");
+            }
+            #[test]
+            fn [<test_ $function_name _macro_with_plain_datetime>]() {
+                let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+                    chrono::NaiveDateTime::from_timestamp(61, 0),
+                    chrono::Utc,
+                );
+                let result = day!(dt);
+                assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    "time::day('1970-01-01T00:01:01Z')"
+                );
+            }
+        }
     };
 }
 
-pub use day;
+create_time_fn_with_single_datetime_arg!("day");
+create_time_fn_with_single_datetime_arg!("hour");
+create_time_fn_with_single_datetime_arg!("mins");
+create_time_fn_with_single_datetime_arg!("month");
+create_time_fn_with_single_datetime_arg!("nano");
+create_time_fn_with_single_datetime_arg!("secs");
+create_time_fn_with_single_datetime_arg!("unix");
+create_time_fn_with_single_datetime_arg!("wday");
+create_time_fn_with_single_datetime_arg!("week");
+create_time_fn_with_single_datetime_arg!("yday");
+create_time_fn_with_single_datetime_arg!("year");
 
 fn floor_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Function {
     let datetime_binding = Binding::new(datetime.into());
@@ -213,28 +254,6 @@ macro_rules! group {
 }
 
 pub use group;
-
-#[test]
-fn test_day_macro_with_datetime_field() {
-    let rebirth_date = Field::new("rebirth_date");
-    let result = day!(rebirth_date);
-
-    assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "time::day(rebirth_date)");
-}
-#[test]
-fn test_day_macro_with_plain_datetime() {
-    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
-        chrono::Utc,
-    );
-    let result = day!(dt);
-    assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
-    assert_eq!(
-        result.to_raw().to_string(),
-        "time::day('1970-01-01T00:01:01Z')"
-    );
-}
 
 #[test]
 fn test_floor_macro_with_datetime_field() {
