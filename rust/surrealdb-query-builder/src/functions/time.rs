@@ -130,23 +130,6 @@ enum Interval {
     Second,
 }
 
-impl FromStr for Interval {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "year" => Ok(Interval::Year),
-            "month" => Ok(Interval::Month),
-            "week" => Ok(Interval::Week),
-            "day" => Ok(Interval::Day),
-            "hour" => Ok(Interval::Hour),
-            "minute" => Ok(Interval::Minute),
-            "second" => Ok(Interval::Second),
-            _ => Err("Invalid interval provided. It has to be one of these: `year, month, hour, minute, second`".to_string())
-        }
-    }
-}
-
 impl Display for Interval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -165,34 +148,23 @@ impl Display for Interval {
     }
 }
 
-enum IntervalOrField {
-    Field(Field),
-    Interval(Interval),
-}
+struct IntervalOrField(sql::Value);
 
 impl From<Field> for IntervalOrField {
     fn from(value: Field) -> Self {
-        Self::Field(value)
-    }
-}
-impl From<String> for IntervalOrField {
-    fn from(value: String) -> Self {
-        Self::Interval(value.parse().expect("Unable to ...todo!"))
+        Self(value.into())
     }
 }
 
 impl From<IntervalOrField> for sql::Value {
     fn from(value: IntervalOrField) -> Self {
-        match value {
-            IntervalOrField::Field(f) => f.into(),
-            IntervalOrField::Interval(i) => sql::Strand::from(i.to_string()).into(),
-        }
+        value.0
     }
 }
 
 impl From<Interval> for IntervalOrField {
     fn from(value: Interval) -> Self {
-        Self::Interval(value)
+        Self(value.to_string().into())
     }
 }
 
