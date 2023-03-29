@@ -127,67 +127,52 @@ create_type!(string_, "string", sql::Value, 5454, "5454");
 create_type!(regex, "regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
 create_type!(table, "table", Table, Table::new("user"), "user");
 
-// #[test]
-// fn test_bool_with_macro_with_field() {
-//     let name = Field::new("name");
-//     let result = bool!(name);
-//     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "type::bool(name)");
-// }
-//
-// #[test]
-// fn test_bool_with_macro_with_plain_string() {
-//     let result = bool!("toronto");
-//     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "type::bool('toronto')");
-// }
-//
-// #[test]
-// fn test_bool_with_macro_with_plain_number() {
-//     let result = bool!(43545);
-//     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "type::bool(43545)");
-// }
-//
-// #[test]
-// fn test_bool_with_macro_with_plain_false() {
-//     let result = bool!(false);
-//     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "type::bool(false)");
-// }
-//
-// #[test]
-// fn test_bool_with_macro_with_plain_true() {
-//     let result = bool!(true);
-//     assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "type::bool(true)");
-// }
-//
-// #[test]
-// fn test_datetime_macro_with_plain_datetime() {
-//     let value = chrono::DateTime::<chrono::Utc>::from_utc(
-//         chrono::NaiveDateTime::from_timestamp(61, 0),
-//         chrono::Utc,
-//     );
-//     let result = datetime!(value);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "type::datetime($_param_00000001)"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "type::datetime('1970-01-01T00:01:01Z')"
-//     );
-// }
-//
-// #[test]
-// fn test_datetime_macro_with_datetime_field() {
-//     let rebirth_date = Field::new("rebirth_date");
-//     let result = datetime!(rebirth_date);
-//
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "type::datetime($_param_00000001)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
-// }
+#[test]
+fn test_bool_with_macro_with_plain_number() {
+    let result = bool!(43545);
+    assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "type::bool(43545)");
+}
+
+#[test]
+fn test_bool_with_macro_with_plain_false() {
+    let result = bool!(false);
+    assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "type::bool(false)");
+}
+
+#[test]
+fn test_bool_with_macro_with_plain_true() {
+    let result = bool!(true);
+    assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "type::bool(true)");
+}
+
+#[test]
+fn test_datetime_macro_with_plain_datetime() {
+    let value = chrono::DateTime::<chrono::Utc>::from_utc(
+        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::Utc,
+    );
+    let result = datetime!(value);
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "type::datetime('1970-01-01T00:01:01Z')"
+    );
+}
+
+#[test]
+fn test_datetime_macro_with_datetime_field() {
+    let rebirth_date = Field::new("rebirth_date");
+    let result = datetime!(rebirth_date);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
+}
