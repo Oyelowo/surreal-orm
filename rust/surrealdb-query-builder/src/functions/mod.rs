@@ -18,4 +18,5 @@ pub(crate) mod rand;
 pub(crate) mod session;
 pub(crate) mod sleep;
 pub(crate) mod string;
+pub(crate) mod time;
 pub(crate) mod validation;
