@@ -19,6 +19,12 @@
 
 // format!("function({}) {}", stringify!($($arg),*), stringify!($code))
 macro_rules! function {
+    ((), $code:tt) => {
+        format!(
+            "function() {}",
+            stringify!($code)
+        )
+    };
     (($($arg:expr),*), $code:tt) => {
         format!(
             "function({}) {}",
@@ -29,7 +35,15 @@ macro_rules! function {
 }
 
 #[test]
-fn mana() {
+fn test_function_without_args() {
+    let f2 = function!((), {
+        return [1,2,3].map(v => v * 10);
+    });
+    assert_eq!(f2, "function() { return [1, 2, 3].map(v => v * 10) ; }");
+}
+
+#[test]
+fn test_function_with_args() {
     let f2 = function!(("$first", "$two"), {
         return [1,2,3].map(v => v * 10);
     });
@@ -37,9 +51,4 @@ fn mana() {
         f2,
         "function($first, $two) { return [1, 2, 3].map(v => v * 10) ; }"
     );
-    // js!(
-    // function(name, age){
-    //     name = lowo
-    // }
-    // );
 }
