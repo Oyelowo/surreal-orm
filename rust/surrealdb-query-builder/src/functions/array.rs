@@ -26,6 +26,8 @@ use crate::internal::replace_params;
 use crate::sql::{ArrayCustom, Binding, Buildable, ToRawStatement};
 use crate::{array, BindingsList, Field, Parametric};
 
+use super::math::Array;
+
 // pub fn val(val: impl Into<Value>) -> sql::Value {
 //     val.into()
 // }
@@ -64,7 +66,6 @@ impl From<ArrayOrField> for Mana {
             ArrayOrField::Field(f) => Self(f.into()),
             ArrayOrField::Array(a) => Self(a.into()),
         }
-        // Self(xx)
     }
 }
 
@@ -80,8 +81,6 @@ pub struct Function {
     pub query_string: String,
     pub bindings: BindingsList,
 }
-
-// impl ToRawStatement for Operatee {}
 
 impl Parametric for Function {
     fn get_bindings(&self) -> BindingsList {
@@ -102,8 +101,8 @@ impl Buildable for Function {
 }
 
 fn create_array_helper(
-    arr1: impl Into<ArrayCustom>,
-    arr2: impl Into<ArrayCustom>,
+    arr1: impl Into<Array>,
+    arr2: impl Into<Array>,
     func_name: &str,
 ) -> Function {
     let arr1: sql::Value = arr1.into().into();
@@ -122,41 +121,110 @@ fn create_array_helper(
 }
 
 macro_rules! create_fn_with_two_array_args {
-    ($function_name:expr) => {
+    ($function_ident:ident, $function_name:expr) => {
         paste::paste! {
 
-            pub fn [<$function_name _fn>](arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
+            pub fn [<$function_name _fn>](arr1: impl Into<Array>, arr2: impl Into<Array>) -> Function {
                 create_array_helper(arr1, arr2, $function_name)
             }
 
             #[macro_export]
-            macro_rules! [<$function_name>] {
+            // #[macro_use]
+            macro_rules! [<$function_ident>] {
                 ( $arr1:expr, $arr2:expr ) => {
                     crate::functions::array::[<$function_name _fn>]($arr1, $arr2)
                 };
             }
-            pub use [<$function_name>];
+            pub use [<$function_ident>] as [<$function_name>];
+
+            #[test]
+            fn [<test $function_name fn_on_array_macro_on_diverse_array>]() {
+                let age = Field::new("age");
+                let arr1 = array![1, "Oyelowo", age];
+                let arr2 = array![4, "dayo", 6];
+                let result = crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("array::{}([1, 'Oyelowo', age], [4, 'dayo', 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _fn_on_same_element_types>]() {
+                let arr1 = array![1, 2, 3];
+                let arr2 = array![4, 5, 6];
+                let result = crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_array_macro_on_diverse_array>]() {
+                let age = Field::new("age");
+                let arr1 = array![1, "Oyelowo", age];
+                let arr2 = array![4, "dayo", 6];
+                let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("array::{}([1, 'Oyelowo', age], [4, 'dayo', 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_same_element_types>]() {
+                let arr1 = array![1, 2, 3];
+                let arr2 = array![4, 5, 6];
+                let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_fields>]() {
+                let students_ages = Field::new("students_ages");
+                let teachers_ages = Field::new("teachers_ages");
+                let result = crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("array::{}(students_ages, teachers_ages)", $function_name)
+                );
+            }
         }
     };
 }
 
-create_fn_with_two_array_args!("combine");
-
-pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
-    create_array_helper(arr1, arr2, "concat")
-}
-
-pub fn union(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
-    create_array_helper(arr1, arr2, "union")
-}
-
-pub fn difference(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
-    create_array_helper(arr1, arr2, "difference")
-}
-
-pub fn intersect(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
-    create_array_helper(arr1, arr2, "intersect")
-}
+create_fn_with_two_array_args!(combine, "combine");
+create_fn_with_two_array_args!(concatx, "concat");
+create_fn_with_two_array_args!(union, "union");
+create_fn_with_two_array_args!(difference, "difference");
+create_fn_with_two_array_args!(intersect, "intersect");
 
 pub fn distinct(arr: impl Into<ArrayCustom>) -> Function {
     let arr: sql::Value = arr.into().into();
@@ -242,131 +310,67 @@ pub mod sort {
     }
 }
 
-#[test]
-fn test_array_macro_on_diverse_array() {
-    let age = Field::new("age");
-    let arr1 = array![1, "Oyelowo", age];
-    let arr2 = array![4, "dayo", 6];
-    let result = combine_fn(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::combine($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
-    );
-}
-
-#[test]
-fn test_combine() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![4, 5, 6];
-    let result = combine_fn(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::combine($_param_00000001, $_param_00000002)"
-    );
-
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::combine([1, 2, 3], [4, 5, 6])"
-    );
-}
-
-#[test]
-fn test_combine_array_macro_on_diverse_array() {
-    let age = Field::new("age");
-    let arr1 = array![1, "Oyelowo", age];
-    let arr2 = array![4, "dayo", 6];
-    let result = combine!(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::combine($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
-    );
-}
-
-#[test]
-fn test_combine_macro() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![4, 5, 6];
-    let result = combine!(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::combine($_param_00000001, $_param_00000002)"
-    );
-
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::combine([1, 2, 3], [4, 5, 6])"
-    );
-}
-
-#[test]
-fn test_concat() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![4, 5, 6];
-    let result = concat(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::concat($_param_00000001, $_param_00000002)"
-    );
-
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::concat([1, 2, 3], [4, 5, 6])"
-    );
-}
-
-#[test]
-fn test_union() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![4, 5, 6];
-    let result = union(arr1, arr2);
-
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::union($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::union([1, 2, 3], [4, 5, 6])"
-    );
-}
-
-#[test]
-fn test_difference() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![2, 3, 4];
-    let result = difference(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::difference($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::difference([1, 2, 3], [2, 3, 4])"
-    );
-}
-
-#[test]
-fn test_intersect() {
-    let arr1 = array![1, 2, 3];
-    let arr2 = array![2, 3, 4];
-    let result = intersect(arr1, arr2);
-    assert_eq!(
-        result.fine_tune_params(),
-        "array::intersect($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "array::intersect([1, 2, 3], [2, 3, 4])"
-    );
-}
+// #[test]
+// fn test_concat() {
+//     let arr1 = array![1, 2, 3];
+//     let arr2 = array![4, 5, 6];
+//     let result = concat(arr1, arr2);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "array::concat($_param_00000001, $_param_00000002)"
+//     );
+//
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "array::concat([1, 2, 3], [4, 5, 6])"
+//     );
+// }
+//
+// #[test]
+// fn test_union() {
+//     let arr1 = array![1, 2, 3];
+//     let arr2 = array![4, 5, 6];
+//     let result = union(arr1, arr2);
+//
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "array::union($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "array::union([1, 2, 3], [4, 5, 6])"
+//     );
+// }
+//
+// #[test]
+// fn test_difference() {
+//     let arr1 = array![1, 2, 3];
+//     let arr2 = array![2, 3, 4];
+//     let result = difference(arr1, arr2);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "array::difference($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "array::difference([1, 2, 3], [2, 3, 4])"
+//     );
+// }
+//
+// #[test]
+// fn test_intersect() {
+//     let arr1 = array![1, 2, 3];
+//     let arr2 = array![2, 3, 4];
+//     let result = intersect(arr1, arr2);
+//     assert_eq!(
+//         result.fine_tune_params(),
+//         "array::intersect($_param_00000001, $_param_00000002)"
+//     );
+//     assert_eq!(
+//         result.to_raw().to_string(),
+//         "array::intersect([1, 2, 3], [2, 3, 4])"
+//     );
+// }
 
 #[test]
 fn test_distinct() {
