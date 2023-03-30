@@ -101,18 +101,6 @@ impl Buildable for Function {
     }
 }
 
-pub fn combine_fn(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
-    create_array_helper(arr1, arr2, "combine")
-}
-
-#[macro_export]
-macro_rules! combine {
-    ( $arr1:expr, $arr2:expr ) => {
-        crate::functions::array::combine_fn($arr1, $arr2)
-    };
-}
-pub use combine;
-
 fn create_array_helper(
     arr1: impl Into<ArrayCustom>,
     arr2: impl Into<ArrayCustom>,
@@ -132,6 +120,27 @@ fn create_array_helper(
         bindings: vec![arr1, arr2],
     }
 }
+
+macro_rules! create_fn_with_two_array_args {
+    ($function_name:expr) => {
+        paste::paste! {
+
+            pub fn [<$function_name _fn>](arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
+                create_array_helper(arr1, arr2, $function_name)
+            }
+
+            #[macro_export]
+            macro_rules! [<$function_name>] {
+                ( $arr1:expr, $arr2:expr ) => {
+                    crate::functions::array::[<$function_name _fn>]($arr1, $arr2)
+                };
+            }
+            pub use [<$function_name>];
+        }
+    };
+}
+
+create_fn_with_two_array_args!("combine");
 
 pub fn concat(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "concat")
