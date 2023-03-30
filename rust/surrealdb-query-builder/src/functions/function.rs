@@ -45,11 +45,11 @@ fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> 
 
 #[macro_export]
 macro_rules! function {
-    ((), $code:tt) => {
-        format!("function() {}", stringify!($code))
-    };
+    // ((), $code:tt) => {
+    //     format!("function() {}", stringify!($code))
+    // };
     (($($arg:expr),*), $code:tt) => {
-        function_fn(vec![$($arg),*], stringify!($code))
+        function_fn(vec![$($arg),*] as Vec<Param>, stringify!($code))
         // format!(
         //     "function({}) {}",
         //     vec![$($arg),*].join(", "),
@@ -64,7 +64,7 @@ fn test_function_without_args() {
     let f2 = function!((), {
         return [1,2,3].map(v => v * 10);
     });
-    assert_eq!(f2, "function() { return [1, 2, 3].map(v => v * 10) ; }");
+    assert_eq!(f2.to_string(), "function() { return [1, 2, 3].map(v => v * 10) ; }");
 }
 
 #[test]
@@ -73,10 +73,10 @@ fn test_function_with_args() {
     let id = Param::new("id");
 
     let f2 = function!((name, id), {
-        return [1,2,3].map(v => v * 10);
+        return [1,2,3].map(v => v * 10 * $name * $id);
     });
     assert_eq!(
         f2.to_string(),
-        "function($name, $id) { return [1, 2, 3].map(v => v * 10) ; }"
+        "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
     );
 }
