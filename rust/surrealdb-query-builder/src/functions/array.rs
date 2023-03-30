@@ -121,7 +121,7 @@ fn create_array_helper(
 }
 
 macro_rules! create_fn_with_two_array_args {
-    ($function_ident:ident, $function_name:expr) => {
+    ($function_name:expr) => {
         paste::paste! {
 
             pub fn [<$function_name _fn>](arr1: impl Into<Array>, arr2: impl Into<Array>) -> Function {
@@ -129,13 +129,12 @@ macro_rules! create_fn_with_two_array_args {
             }
 
             #[macro_export]
-            // #[macro_use]
-            macro_rules! [<$function_ident>] {
+            macro_rules! [<array_ $function_name>] {
                 ( $arr1:expr, $arr2:expr ) => {
                     crate::functions::array::[<$function_name _fn>]($arr1, $arr2)
                 };
             }
-            pub use [<$function_ident>] as [<$function_name>];
+            pub use [<array_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test $function_name fn_on_array_macro_on_diverse_array>]() {
@@ -220,11 +219,11 @@ macro_rules! create_fn_with_two_array_args {
     };
 }
 
-create_fn_with_two_array_args!(combine, "combine");
-create_fn_with_two_array_args!(concatx, "concat");
-create_fn_with_two_array_args!(union, "union");
-create_fn_with_two_array_args!(difference, "difference");
-create_fn_with_two_array_args!(intersect, "intersect");
+create_fn_with_two_array_args!("combine");
+create_fn_with_two_array_args!("concat");
+create_fn_with_two_array_args!("union");
+create_fn_with_two_array_args!("difference");
+create_fn_with_two_array_args!("intersect");
 
 pub fn distinct(arr: impl Into<ArrayCustom>) -> Function {
     let arr: sql::Value = arr.into().into();
