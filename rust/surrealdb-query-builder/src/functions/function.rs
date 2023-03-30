@@ -17,7 +17,33 @@
 //
 //
 
+use crate::sql::Param;
+
+use super::array::Function;
+
 // format!("function({}) {}", stringify!($($arg),*), stringify!($code))
+//
+fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: String) -> Function {
+    let query_string = format!(
+        "function({}, {})",
+        args.into_iter()
+            .map(|a| {
+                let a: Param = a.into();
+                let a = a.to_string();
+                a
+            })
+            .collect::<Vec<_>>()
+            .join(", "),
+        jscode_body
+    );
+
+    Function {
+        query_string,
+        bindings: vec![],
+    }
+}
+
+#[macro_export]
 macro_rules! function {
     ((), $code:tt) => {
         format!(
@@ -33,6 +59,7 @@ macro_rules! function {
         )
     };
 }
+pub use function;
 
 #[test]
 fn test_function_without_args() {
