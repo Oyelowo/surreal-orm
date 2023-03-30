@@ -17,7 +17,7 @@
 //
 //
 
-use crate::sql::Param;
+use crate::sql::{Param, ToRawStatement};
 
 use super::array::Function;
 
@@ -46,6 +46,9 @@ macro_rules! function {
     (($($arg:expr),*), {$($code:tt)*}) => {
         function_fn(vec![$($arg),*] as Vec<Param>, stringify!({$($code)*}))
     };
+    (($($arg:expr),*), $($code:tt)*) => {
+        function_fn(vec![$($arg),*] as Vec<Param>, concat!($($code)*))
+    };
 }
 pub use function;
 
@@ -55,6 +58,10 @@ fn test_function_without_args() {
         return [1,2,3].map(v => v * 10);
     });
     assert_eq!(f2.to_string(), "function() { return [1, 2, 3].map(v => v * 10) ; }");
+    assert_eq!(
+        f2.to_raw().to_string(),
+        "function() { return [1, 2, 3].map(v => v * 10) ; }"
+    );
 }
 
 #[test]
@@ -69,18 +76,21 @@ fn test_function_with_args() {
         f2.to_string(),
         "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
     );
+    assert_eq!(
+        f2.to_raw().to_string(),
+        "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
+    );
 }
 
-// #[test]
-// fn test_function_with_args() {
-//     let name = Param::new("name");
-//     let id = Param::new("id");
-//
-//     let f2 = function!((name, id), {
-//         "return [1,2,3].map(v => v * 10 * $name * $id);"
-//     });
-//     assert_eq!(
-//         f2.to_string(),
-//         "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
-//     );
-// }
+#[test]
+fn test_function_with_args_code_str() {
+    let name = Param::new("name");
+    let id = Param::new("id");
+
+    let f2 = function!(
+        (name, id),
+        "{ return [1,2,3].map(v => v * 10 * $name * $id) ; }"
+    );
+    insta::assert_display_snapshot!(f2);
+    insta::assert_display_snapshot!(f2.to_raw());
+}
