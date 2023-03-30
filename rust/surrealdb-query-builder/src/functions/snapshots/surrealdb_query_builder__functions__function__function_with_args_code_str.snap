@@ -1,0 +1,5 @@
+---
+source: surrealdb-query-builder/src/functions/function.rs
+expression: f2
+---
+function($name, $id) { return [1,2,3].map(v => v * 10 * $name * $id) ; }
