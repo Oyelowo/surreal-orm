@@ -23,9 +23,9 @@ use super::array::Function;
 
 // format!("function({}) {}", stringify!($($arg),*), stringify!($code))
 //
-fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: String) -> Function {
+fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> Function {
     let query_string = format!(
-        "function({}, {})",
+        "function({}) {}",
         args.into_iter()
             .map(|a| {
                 let a: Param = a.into();
@@ -34,7 +34,7 @@ fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: String) -> Function {
             })
             .collect::<Vec<_>>()
             .join(", "),
-        jscode_body
+        jscode_body.into()
     );
 
     Function {
@@ -46,17 +46,15 @@ fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: String) -> Function {
 #[macro_export]
 macro_rules! function {
     ((), $code:tt) => {
-        format!(
-            "function() {}",
-            stringify!($code)
-        )
+        format!("function() {}", stringify!($code))
     };
     (($($arg:expr),*), $code:tt) => {
-        format!(
-            "function({}) {}",
-            vec![$($arg),*].join(", "),
-            stringify!($code)
-        )
+        function_fn(vec![$($arg),*], stringify!($code))
+        // format!(
+        //     "function({}) {}",
+        //     vec![$($arg),*].join(", "),
+        //     stringify!($code)
+        // )
     };
 }
 pub use function;
@@ -71,11 +69,14 @@ fn test_function_without_args() {
 
 #[test]
 fn test_function_with_args() {
-    let f2 = function!(("$first", "$two"), {
+    let name = Param::new("name");
+    let id = Param::new("id");
+
+    let f2 = function!((name, id), {
         return [1,2,3].map(v => v * 10);
     });
     assert_eq!(
-        f2,
-        "function($first, $two) { return [1, 2, 3].map(v => v * 10) ; }"
+        f2.to_string(),
+        "function($name, $id) { return [1, 2, 3].map(v => v * 10) ; }"
     );
 }
