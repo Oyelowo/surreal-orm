@@ -101,9 +101,17 @@ impl Buildable for Function {
     }
 }
 
-pub fn combine(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
+pub fn combine_fn(arr1: impl Into<ArrayCustom>, arr2: impl Into<ArrayCustom>) -> Function {
     create_array_helper(arr1, arr2, "combine")
 }
+
+#[macro_export]
+macro_rules! combine {
+    ( $arr1:expr, $arr2:expr ) => {
+        crate::functions::array::combine_fn($arr1, $arr2)
+    };
+}
+pub use combine;
 
 fn create_array_helper(
     arr1: impl Into<ArrayCustom>,
@@ -230,7 +238,7 @@ fn test_array_macro_on_diverse_array() {
     let age = Field::new("age");
     let arr1 = array![1, "Oyelowo", age];
     let arr2 = array![4, "dayo", 6];
-    let result = combine(arr1, arr2);
+    let result = combine_fn(arr1, arr2);
     assert_eq!(
         result.fine_tune_params(),
         "array::combine($_param_00000001, $_param_00000002)"
@@ -245,7 +253,39 @@ fn test_array_macro_on_diverse_array() {
 fn test_combine() {
     let arr1 = array![1, 2, 3];
     let arr2 = array![4, 5, 6];
-    let result = combine(arr1, arr2);
+    let result = combine_fn(arr1, arr2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::combine($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 2, 3], [4, 5, 6])"
+    );
+}
+
+#[test]
+fn test_combine_array_macro_on_diverse_array() {
+    let age = Field::new("age");
+    let arr1 = array![1, "Oyelowo", age];
+    let arr2 = array![4, "dayo", 6];
+    let result = combine!(arr1, arr2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::combine($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::combine([1, 'Oyelowo', age], [4, 'dayo', 6])"
+    );
+}
+
+#[test]
+fn test_combine_macro() {
+    let arr1 = array![1, 2, 3];
+    let arr2 = array![4, 5, 6];
+    let result = combine!(arr1, arr2);
     assert_eq!(
         result.fine_tune_params(),
         "array::combine($_param_00000001, $_param_00000002)"
