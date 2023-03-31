@@ -170,9 +170,26 @@ fn create_fn_with_three_args(
     }
 }
 
-pub fn head(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
-    create_fn_with_two_args(url, custom_headers, "head")
+macro_rules! create_fn_with_url_and_hears {
+    ($function_name: expr) => {
+        paste::paste! {
+            pub fn [<$function_name _fn>](url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+               create_fn_with_two_args(url, custom_headers, $function_name)
+           }
+
+           #[macro_export]
+           macro_rules! [<http_ $function_name>] {
+               ( $geometry:expr ) => {
+                   crate::functions::http::[<$function_name _fn>]($geometry)
+               };
+           }
+           pub use [<http_ $function_name>] as [<$function_name>];
+
+        }
+    };
 }
+
+create_fn_with_url_and_hears!("head");
 
 pub fn get(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
     create_fn_with_two_args(url, custom_headers, "get")
@@ -208,7 +225,7 @@ pub fn patch(
 
 #[test]
 fn test_head_method_with_empty_header() {
-    let result = head("https://codebreather.com", Empty);
+    let result = head_fn("https://codebreather.com", Empty);
     assert_eq!(result.fine_tune_params(), "http::head($_param_00000001)");
     assert_eq!(
         result.to_raw().to_string(),
@@ -220,7 +237,7 @@ fn test_head_method_with_empty_header() {
 fn test_field_head_method_with_empty_header() {
     let homepage = Field::new("homepage");
 
-    let result = head(homepage, Empty);
+    let result = head_fn(homepage, Empty);
     assert_eq!(result.fine_tune_params(), "http::head($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "http::head(homepage)");
 }
@@ -228,7 +245,7 @@ fn test_field_head_method_with_empty_header() {
 #[test]
 fn test_head_method_with_plain_custom_header() {
     let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = head("https://codebreather.com", headers);
+    let result = head_fn("https://codebreather.com", headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::head($_param_00000001, $_param_00000002)"
@@ -244,7 +261,7 @@ fn test_head_method_with_field_custom_header() {
     let homepage = Field::new("homepage");
     let headers = Field::new("headers");
 
-    let result = head(homepage, headers);
+    let result = head_fn(homepage, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::head($_param_00000001, $_param_00000002)"
