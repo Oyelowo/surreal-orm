@@ -20,7 +20,10 @@
 
 use surrealdb::sql;
 
-use crate::{sql::Binding, Field};
+use crate::{
+    sql::{Binding, Param},
+    Field,
+};
 
 use super::array::Function;
 
@@ -41,6 +44,12 @@ impl<T: Into<sql::Strand>> From<T> for String {
 
 impl From<Field> for String {
     fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<Param> for String {
+    fn from(value: Param) -> Self {
         Self(value.into())
     }
 }
@@ -67,14 +76,14 @@ macro_rules! create_test_for_fn_with_single_arg {
                 create_fn_with_single_string_arg(number, format!("{}::{}", $module_name, $function_name).as_str())
             }
 
-            // #[macro_export]
-            // macro_rules! geo_area {
-            //     ( $value:expr ) => {
-            //         crate::functions::[<$module_name>]::[<$function_name _fn>]($value)
-            //     };
-            // }
-            //
-            // pub use geo_area as area;
+            #[macro_export]
+            macro_rules! [<parse_ $module_name _ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::parse::[<$module_name>]::[<$function_name _fn>]($value)
+                };
+            }
+
+            pub use [<parse_ $module_name _ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _fn_with_field_data >] () {
@@ -89,6 +98,34 @@ macro_rules! create_test_for_fn_with_single_arg {
             #[test]
             fn [<test_ $function_name _fn_with_fraction>]() {
                 let result = [<$function_name _fn>]($arg);
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let field = crate::Field::new("field");
+                let result = [<$function_name>]!(field);
+
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}(field)", function_path));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let param = crate::sql::Param::new("param");
+                let result = [<$function_name>]!(param);
+
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}($param)", function_path));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_fraction>]() {
+                let result = [<$function_name>]!($arg);
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
                 assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
                 assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
