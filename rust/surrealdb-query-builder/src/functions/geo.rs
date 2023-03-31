@@ -134,7 +134,7 @@ pub fn bearing_fn(point1: impl Into<Geometry>, point2: impl Into<Geometry>) -> F
 #[macro_export]
 macro_rules! geo_bearing {
     ( $point1:expr,  $point2:expr ) => {
-        crate::functions::geo::area_fn($point1, $point2)
+        crate::functions::geo::bearing_fn($point1, $point2)
     };
 }
 
@@ -427,6 +427,63 @@ fn test_bearing_with_raw_point_with_field() {
     assert_eq!(
         result.to_raw().to_string(),
         "geo::bearing(hometown, (80.02, 103.19))"
+    );
+}
+
+#[test]
+fn test_bearing_macro_with_raw_points() {
+    let point1 = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let point2 = point! {
+        x: 80.02f64,
+        y: 103.19,
+    };
+    let result = bearing!(point1, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::bearing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::bearing((40.02, 116.34), (80.02, 103.19))"
+    );
+}
+
+#[test]
+fn test_bearing_macro_with_raw_point_with_field() {
+    let hometown = Field::new("hometown");
+
+    let point2 = point! {
+        x: 80.02f64,
+        y: 103.19,
+    };
+    let result = bearing!(hometown, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::bearing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::bearing(hometown, (80.02, 103.19))"
+    );
+}
+
+#[test]
+fn test_bearing_macro_with_raw_params() {
+    let hometown = Param::new("hometown");
+    let point2 = Param::new("point2");
+
+    let result = bearing!(hometown, point2);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::bearing($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::bearing($hometown, $point2)"
     );
 }
 
