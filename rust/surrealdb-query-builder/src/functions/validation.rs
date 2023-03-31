@@ -96,7 +96,7 @@ macro_rules! test_validator {
 
                 assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
-                }
+            }
 
             #[test]
             fn [<test_ $function_name _macro_string_username>] ()  {
