@@ -212,7 +212,7 @@ pub mod hash {
     use crate::{
         field::GeometryOrField,
         functions::array::Function,
-        sql::{Binding, Empty},
+        sql::{Binding, Empty, Param},
         Field,
     };
 
@@ -235,6 +235,12 @@ pub mod hash {
         }
     }
 
+    impl From<Param> for GeoHash {
+        fn from(value: Param) -> Self {
+            Self(value.into())
+        }
+    }
+
     impl From<GeoHash> for sql::Value {
         fn from(value: GeoHash) -> Self {
             value.0
@@ -252,7 +258,7 @@ pub mod hash {
     //     GeoHash(GeoHash),
     // }
 
-    pub fn decode(geometry: impl Into<GeoHash>) -> Function {
+    pub fn decode_fn(geometry: impl Into<GeoHash>) -> Function {
         let binding = Binding::new(geometry.into());
         let string = binding.get_param_dollarised();
 
@@ -264,12 +270,12 @@ pub mod hash {
     #[macro_export]
     macro_rules! geo_hash_decode {
         ( $geometry:expr ) => {
-            crate::functions::geo::decode_fn($geometry)
+            crate::functions::geo::hash::decode_fn($geometry)
         };
     }
     pub use geo_hash_decode as decode;
 
-    pub fn encode(geometry: impl Into<Geometry>, accuracy: impl Into<Accuracy>) -> Function {
+    pub fn encode_fn(geometry: impl Into<Geometry>, accuracy: impl Into<Accuracy>) -> Function {
         let binding = Binding::new(geometry.into());
         let accuracy: Accuracy = accuracy.into();
         let geometry_param = binding.get_param_dollarised();
@@ -702,7 +708,7 @@ fn test_distance_macro_with_only_params() {
 #[test]
 fn test_hash_decode_with_field() {
     let city = Field::new("city");
-    let result = hash::decode(city);
+    let result = hash::decode_fn(city);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -713,7 +719,44 @@ fn test_hash_decode_with_field() {
 
 #[test]
 fn test_hash_decode_with_string() {
-    let result = hash::decode("mpuxk4s24f51");
+    let result = hash::decode_fn("mpuxk4s24f51");
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::decode($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::hash::decode('mpuxk4s24f51')"
+    );
+}
+
+#[test]
+fn test_hash_decode_macro_with_field() {
+    let city = Field::new("city");
+    let result = hash::decode!(city);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::decode($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "geo::hash::decode(city)");
+}
+
+#[test]
+fn test_hash_decode_macro_with_param() {
+    let city = Param::new("city");
+    let result = hash::decode!(city);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::hash::decode($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "geo::hash::decode($city)");
+}
+
+#[test]
+fn test_hash_decode_macro_with_string() {
+    let result = hash::decode!("mpuxk4s24f51");
     assert_eq!(
         result.fine_tune_params(),
         "geo::hash::decode($_param_00000001)"
@@ -727,7 +770,7 @@ fn test_hash_decode_with_string() {
 #[test]
 fn test_hash_encode_with_field_and_empty_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode(city, Empty);
+    let result = hash::encode_fn(city, Empty);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -740,7 +783,7 @@ fn test_hash_encode_with_field_and_empty_accuracy() {
 fn test_hash_encode_with_field_and_field_accuracy() {
     let city = Field::new("city");
     let accuracy = Field::new("accuracy");
-    let result = hash::encode(city, accuracy);
+    let result = hash::encode_fn(city, accuracy);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -755,7 +798,7 @@ fn test_hash_encode_with_field_and_field_accuracy() {
 #[test]
 fn test_hash_encode_with_field_and_number_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode(city, 5);
+    let result = hash::encode_fn(city, 5);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -771,7 +814,7 @@ fn test_hash_encode_with_point() {
         y: 116.34,
     };
 
-    let result = hash::encode(point, 5);
+    let result = hash::encode_fn(point, 5);
     assert_eq!(
         result.fine_tune_params(),
         "geo::hash::encode($_param_00000001, $_param_00000002)"
