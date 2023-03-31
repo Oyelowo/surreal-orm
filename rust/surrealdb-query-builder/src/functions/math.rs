@@ -22,7 +22,7 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
-use crate::array;
+use crate::{array, sql::Param};
 use surrealdb::sql;
 
 use crate::{
@@ -56,6 +56,12 @@ impl From<Field> for Number {
     }
 }
 
+impl From<Param> for Number {
+    fn from(value: Param) -> Self {
+        Self(value.into())
+    }
+}
+
 pub struct Array(sql::Value);
 
 impl From<Array> for sql::Value {
@@ -76,6 +82,13 @@ impl From<Field> for Array {
         Self(value.into())
     }
 }
+
+impl From<Param> for Array {
+    fn from(value: Param) -> Self {
+        Self(value.into())
+    }
+}
+
 fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
@@ -96,57 +109,9 @@ fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str)
     }
 }
 
-// Although, surrealdb technically accepts stringified number also,
-// I dont see why that should be allowed at the app layer in rust
-// Obviously, if a field has stringified number that would work
-// during query execution
-fn abs(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "abs")
-}
-
-fn ceil(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "ceil")
-}
-
-fn floor(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "floor")
-}
-
-fn round(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "round")
-}
-
-fn sqrt(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "sqrt")
-}
-
-fn max(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "max")
-}
-
-fn mean(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "mean")
-}
-
-fn median(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "median")
-}
-
-fn min(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "min")
-}
-
-fn product(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "product")
-}
-
-fn sum(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "sum")
-}
-
-fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
+fn fixed_fn(number: impl Into<Number>, decimal_place: impl Into<Number>) -> Function {
     let num_binding = Binding::new(number.into());
-    let decimal_place_binding = Binding::new(decimal_number.into());
+    let decimal_place_binding = Binding::new(decimal_place.into());
 
     let query_string = format!(
         "math::fixed({}, {})",
@@ -160,87 +125,193 @@ fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Functi
     }
 }
 
-use paste::paste;
+#[macro_export]
+macro_rules! math_fixed {
+    ( $number:expr, $decimal_place:expr ) => {
+        crate::functions::math::fixed_fn($number, $decimal_place)
+    };
+}
+
+pub use math_fixed as fixed;
 
 macro_rules! create_test_for_fn_with_single_arg {
-    ($function_ident: ident, $function_name_str: expr) => {
-        paste! {
+    ($function_name: expr) => {
+        paste::paste! {
+            // Although, surrealdb technically accepts stringified number also,
+            // I dont see why that should be allowed at the app layer in rust
+            // Obviously, if a field has stringified number that would work
+            // during query execution
+            fn [<$function_name _fn>](number: impl Into<Number>) -> Function {
+                create_fn_with_single_num_arg(number, $function_name)
+            }
+
+            #[macro_export]
+            macro_rules!  [<math_ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::math::[<$function_name _fn>]($value)
+                };
+            }
+
+            pub use [<math_ $function_name>] as [<$function_name>];
+
             #[test]
-            fn [<test_ $function_ident _fn_with_field_data >] () {
+            fn [<test_ $function_name _fn_with_field_data >] () {
                 let temparate = Field::new("temperature");
-                let result = $function_ident(temparate);
+                let result = [<$function_name _fn>](temparate);
 
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name_str));
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_fraction>]() {
-                let result = $function_ident(45.23);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name_str));
+            fn [<test_ $function_name _fn_with_fraction>]() {
+                let result = [<$function_name _fn>](45.23);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_negative_number>]() {
-                let result = $function_ident(-454);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name_str));
+            fn [<test_ $function_name _fn_with_negative_number>]() {
+                let result = [<$function_name _fn>](-454);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name));
             }
+
+            // Macro version
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let temparate = Field::new("temperature");
+                let result = [<$function_name>]!(temparate);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let temparate = Param::new("temperature");
+                let result = [<$function_name>]!(temparate);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}($temperature)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_fraction>]() {
+                let result = [<$function_name>]!(45.23);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_negative_number>]() {
+                let result = [<$function_name>]!(-454);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name));
+            }
+
         }
     };
 }
 
-create_test_for_fn_with_single_arg!(abs, "abs");
-create_test_for_fn_with_single_arg!(ceil, "ceil");
-create_test_for_fn_with_single_arg!(floor, "floor");
-create_test_for_fn_with_single_arg!(round, "round");
-create_test_for_fn_with_single_arg!(sqrt, "sqrt");
+create_test_for_fn_with_single_arg!("abs");
+create_test_for_fn_with_single_arg!("ceil");
+create_test_for_fn_with_single_arg!("floor");
+create_test_for_fn_with_single_arg!("round");
+create_test_for_fn_with_single_arg!("sqrt");
 
 macro_rules! create_test_for_fn_with_single_array_arg {
-    ($function_ident: ident, $function_name_str: expr) => {
-        paste! {
+    ($function_name: expr) => {
+        paste::paste! {
+            fn [<$function_name _fn>](number: impl Into<Array>) -> Function {
+                create_fn_with_single_array_arg(number, $function_name)
+            }
+
+            #[macro_export]
+            macro_rules!  [<math_ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::math::[<$function_name _fn>]($value)
+                };
+            }
+            pub use [<math_ $function_name>] as [<$function_name>];
+
             #[test]
-            fn [<test_ $function_ident _fn_with_field_data >] () {
+            fn [<test_ $function_name _fn_with_field_data >] () {
                 let size_list = Field::new("size_list");
-                let result = $function_ident(size_list);
+                let result = [<$function_name _fn>](size_list);
 
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name_str));
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_number_array>]() {
+            fn [<test_ $function_name _fn_with_number_array>]() {
                 let arr1 = array![1, 2, 3, 3.5];
-                let result = $function_ident(arr1);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name_str));
+                let result = [<$function_name _fn>](arr1);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_mixed_array>]() {
+            fn [<test_ $function_name _fn_with_mixed_array>]() {
                 let age = Field::new("age");
                 let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", age];
-                let result = $function_ident(arr);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name_str));
+                let result = [<$function_name _fn>](arr);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name));
+            }
+
+            // Macro version
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let size_list = Field::new("size_list");
+                let result = [<$function_name>]!(size_list);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let size_list = Param::new("size_list");
+                let result = [<$function_name>]!(size_list);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}($size_list)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_number_array>]() {
+                let arr1 = array![1, 2, 3, 3.5];
+                let result = [<$function_name>]!(arr1);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_mixed_array>]() {
+                let age = Field::new("age");
+                let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", age];
+                let result = [<$function_name>]!(arr);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name));
             }
         }
     };
 }
 
-create_test_for_fn_with_single_array_arg!(max, "max");
-create_test_for_fn_with_single_array_arg!(mean, "mean");
-create_test_for_fn_with_single_array_arg!(median, "median");
-create_test_for_fn_with_single_array_arg!(min, "min");
-create_test_for_fn_with_single_array_arg!(product, "product");
-create_test_for_fn_with_single_array_arg!(sum, "sum");
+create_test_for_fn_with_single_array_arg!("max");
+create_test_for_fn_with_single_array_arg!("mean");
+create_test_for_fn_with_single_array_arg!("median");
+create_test_for_fn_with_single_array_arg!("min");
+create_test_for_fn_with_single_array_arg!("product");
+create_test_for_fn_with_single_array_arg!("sum");
 
 #[test]
 fn test_fixed_fn_with_field_data() {
     let land_size = Field::new("land_size");
     let decimal_place = Field::new("decimal_place");
-    let result = fixed(land_size, decimal_place);
+    let result = fixed_fn(land_size, decimal_place);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -255,7 +326,7 @@ fn test_fixed_fn_with_field_data() {
 
 #[test]
 fn test_fixed_fn_with_raw_numbers() {
-    let result = fixed(13.45423, 4);
+    let result = fixed_fn(13.45423, 4);
     let email = Field::new("email");
     let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
     assert_eq!(
@@ -268,7 +339,68 @@ fn test_fixed_fn_with_raw_numbers() {
 #[test]
 fn test_fixed_fn_with_raw_number_with_field() {
     let land_mass = Field::new("country.land_mass");
-    let result = fixed(land_mass, 4);
+    let result = fixed_fn(land_mass, 4);
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(`\\`country.land_mass\\``, 4)"
+    );
+}
+
+// Macro versions
+#[test]
+fn test_fixed_macro_with_field_data() {
+    let land_size = Field::new("land_size");
+    let decimal_place = Field::new("decimal_place");
+    let result = fixed!(land_size, decimal_place);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(land_size, decimal_place)"
+    );
+}
+
+#[test]
+fn test_fixed_macro_with_params() {
+    let land_size = Param::new("land_size");
+    let decimal_place = Param::new("decimal_place");
+    let result = fixed!(land_size, decimal_place);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed($land_size, $decimal_place)"
+    );
+}
+
+#[test]
+fn test_fixed_macro_with_raw_numbers() {
+    let result = fixed!(13.45423, 4);
+    let email = Field::new("email");
+    let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "math::fixed(13.45423, 4)");
+}
+
+#[test]
+fn test_fixed_macro_with_raw_number_with_field() {
+    let land_mass = Field::new("country.land_mass");
+    let result = fixed!(land_mass, 4);
     assert_eq!(
         result.fine_tune_params(),
         "math::fixed($_param_00000001, $_param_00000002)"
