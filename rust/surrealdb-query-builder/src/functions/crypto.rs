@@ -127,10 +127,24 @@ pub mod argon2 {
     pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
         create_fn_with_two_values(value1, value2, "argon2::compare")
     }
+    #[macro_export]
+    macro_rules! crypto_argon2_compare {
+        ( $value1:expr,  $value2:expr ) => {
+            crate::functions::crypto::argon2::compare_fn($value1, $value2)
+        };
+    }
+    pub use crypto_argon2_compare as compare;
 
     pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "argon2::generate")
     }
+    #[macro_export]
+    macro_rules! crypto_argon2_generate {
+        ( $value1:expr) => {
+            crate::functions::crypto::argon2::generate_fn($value1)
+        };
+    }
+    pub use crypto_argon2_generate as generate;
 }
 
 pub mod pbkdf2 {
@@ -174,10 +188,24 @@ pub mod scrypt {
     pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
         create_fn_with_two_values(value1, value2, "scrypt::compare")
     }
+    #[macro_export]
+    macro_rules! crypto_scrypt_compare {
+        ( $value1:expr,  $value2:expr ) => {
+            crate::functions::crypto::scrypt::compare_fn($value1, $value2)
+        };
+    }
+    pub use crypto_scrypt_compare as compare;
 
     pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "scrypt::generate")
     }
+    #[macro_export]
+    macro_rules! crypto_scrypt_generate {
+        ( $value1:expr) => {
+            crate::functions::crypto::scrypt::generate_fn($value1)
+        };
+    }
+    pub use crypto_scrypt_generate as generate;
 }
 
 #[test]
