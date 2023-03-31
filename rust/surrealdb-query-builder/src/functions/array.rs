@@ -308,6 +308,9 @@ macro_rules! array_sort {
     ( $arr:expr, false ) => {
         crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::False)
     };
+    ( $arr:expr, $ordering:expr ) => {
+        crate::functions::array::sort_fn($arr, $ordering)
+    };
     ( $arr:expr ) => {
         crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::Empty)
     };
@@ -338,7 +341,7 @@ pub mod sort {
     }
     pub use array_sort_asc_fn as asc;
 
-    pub fn desc(arr: impl Into<Array>) -> Function {
+    pub fn desc_fn(arr: impl Into<Array>) -> Function {
         let arr: sql::Value = arr.into().into();
         let arr = Binding::new(arr).with_description("Array to be made distinct");
 
@@ -442,6 +445,38 @@ fn test_sort() {
 }
 
 #[test]
+fn test_sort_macro_ordering_type() {
+    let arr = array![3, 2, 1];
+    let result = sort!(arr.clone(), Ordering::Asc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'asc')"
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
+
+    let result = sort!(arr.clone(), Ordering::Desc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'desc')"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::sort([3, 2, 1], 'desc')"
+    );
+
+    let result = sort!(arr.clone(), Ordering::Empty);
+    assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
+
+    let result = sort!(arr.clone(), Ordering::False);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, false)"
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
+}
+
+#[test]
 fn test_sort_macro() {
     let arr = array![3, 2, 1];
     let result = sort!(arr.clone(), "asc");
@@ -486,9 +521,31 @@ fn test_sort_asc() {
 }
 
 #[test]
+fn test_sort_asc_macro() {
+    let arr = array![3, 2, 1];
+    let result = sort::asc!(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::asc($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::asc([3, 2, 1])");
+}
+
+#[test]
 fn test_sort_desc() {
     let arr = array![3, 2, 1];
-    let result = sort::desc(arr);
+    let result = sort::desc_fn(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::desc($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort::desc([3, 2, 1])");
+}
+
+#[test]
+fn test_sort_desc_macro() {
+    let arr = array![3, 2, 1];
+    let result = sort::desc!(arr);
     assert_eq!(
         result.fine_tune_params(),
         "array::sort::desc($_param_00000001)"
