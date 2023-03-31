@@ -190,14 +190,8 @@ macro_rules! create_fn_with_url_and_hears {
 }
 
 create_fn_with_url_and_hears!("head");
-
-pub fn get(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
-    create_fn_with_two_args(url, custom_headers, "get")
-}
-
-pub fn delete(url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
-    create_fn_with_two_args(url, custom_headers, "delete")
-}
+create_fn_with_url_and_hears!("get");
+create_fn_with_url_and_hears!("delete");
 
 pub fn post(
     url: impl Into<Url>,
@@ -271,7 +265,7 @@ fn test_head_method_with_field_custom_header() {
 
 #[test]
 fn test_get_method_with_empty_header() {
-    let result = get("https://codebreather.com", Empty);
+    let result = get_fn("https://codebreather.com", Empty);
     assert_eq!(result.fine_tune_params(), "http::get($_param_00000001)");
     assert_eq!(
         result.to_raw().to_string(),
@@ -283,7 +277,7 @@ fn test_get_method_with_empty_header() {
 fn test_field_get_method_with_empty_header() {
     let homepage = Field::new("homepage");
 
-    let result = get(homepage, Empty);
+    let result = get_fn(homepage, Empty);
     assert_eq!(result.fine_tune_params(), "http::get($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "http::get(homepage)");
 }
@@ -291,7 +285,7 @@ fn test_field_get_method_with_empty_header() {
 #[test]
 fn test_get_method_with_plain_custom_header() {
     let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = get("https://codebreather.com", headers);
+    let result = get_fn("https://codebreather.com", headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::get($_param_00000001, $_param_00000002)"
@@ -307,7 +301,7 @@ fn test_get_method_with_field_custom_header() {
     let homepage = Field::new("homepage");
     let headers = Field::new("headers");
 
-    let result = get(homepage, headers);
+    let result = get_fn(homepage, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::get($_param_00000001, $_param_00000002)"
@@ -317,7 +311,7 @@ fn test_get_method_with_field_custom_header() {
 
 #[test]
 fn test_delete_method_with_empty_header() {
-    let result = delete("https://codebreather.com", Empty);
+    let result = delete_fn("https://codebreather.com", Empty);
     assert_eq!(result.fine_tune_params(), "http::delete($_param_00000001)");
     assert_eq!(
         result.to_raw().to_string(),
@@ -329,7 +323,7 @@ fn test_delete_method_with_empty_header() {
 fn test_field_delete_method_with_empty_header() {
     let homepage = Field::new("homepage");
 
-    let result = delete(homepage, Empty);
+    let result = delete_fn(homepage, Empty);
     assert_eq!(result.fine_tune_params(), "http::delete($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "http::delete(homepage)");
 }
@@ -337,7 +331,7 @@ fn test_field_delete_method_with_empty_header() {
 #[test]
 fn test_delete_method_with_plain_custom_header() {
     let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = delete("https://codebreather.com", headers);
+    let result = delete_fn("https://codebreather.com", headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::delete($_param_00000001, $_param_00000002)"
@@ -353,7 +347,7 @@ fn test_delete_method_with_field_custom_header() {
     let homepage = Field::new("homepage");
     let headers = Field::new("headers");
 
-    let result = delete(homepage, headers);
+    let result = delete_fn(homepage, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::delete($_param_00000001, $_param_00000002)"
