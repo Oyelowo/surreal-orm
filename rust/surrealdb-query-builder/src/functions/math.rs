@@ -96,54 +96,6 @@ fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str)
     }
 }
 
-// Although, surrealdb technically accepts stringified number also,
-// I dont see why that should be allowed at the app layer in rust
-// Obviously, if a field has stringified number that would work
-// during query execution
-fn abs(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "abs")
-}
-
-fn ceil(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "ceil")
-}
-
-fn floor(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "floor")
-}
-
-fn round(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "round")
-}
-
-fn sqrt(number: impl Into<Number>) -> Function {
-    create_fn_with_single_num_arg(number, "sqrt")
-}
-
-fn max(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "max")
-}
-
-fn mean(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "mean")
-}
-
-fn median(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "median")
-}
-
-fn min(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "min")
-}
-
-fn product(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "product")
-}
-
-fn sum(number: impl Into<Array>) -> Function {
-    create_fn_with_single_array_arg(number, "sum")
-}
-
 fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
     let num_binding = Binding::new(number.into());
     let decimal_place_binding = Binding::new(decimal_number.into());
@@ -163,39 +115,47 @@ fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Functi
 use paste::paste;
 
 macro_rules! create_test_for_fn_with_single_arg {
-    ($function_ident: ident, $function_name_str: expr) => {
+    ($function_name: expr) => {
         paste! {
+            // Although, surrealdb technically accepts stringified number also,
+            // I dont see why that should be allowed at the app layer in rust
+            // Obviously, if a field has stringified number that would work
+            // during query execution
+            fn [<$function_name>](number: impl Into<Number>) -> Function {
+                create_fn_with_single_num_arg(number, $function_name)
+            }
+
             #[test]
-            fn [<test_ $function_ident _fn_with_field_data >] () {
+            fn [<test_ $function_name _fn_with_field_data >] () {
                 let temparate = Field::new("temperature");
                 let result = $function_ident(temparate);
 
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name_str));
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_fraction>]() {
+            fn [<test_ $function_name _fn_with_fraction>]() {
                 let result = $function_ident(45.23);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name_str));
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_negative_number>]() {
+            fn [<test_ $function_name _fn_with_negative_number>]() {
                 let result = $function_ident(-454);
-                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name_str));
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name));
             }
         }
     };
 }
 
-create_test_for_fn_with_single_arg!(abs, "abs");
-create_test_for_fn_with_single_arg!(ceil, "ceil");
-create_test_for_fn_with_single_arg!(floor, "floor");
-create_test_for_fn_with_single_arg!(round, "round");
-create_test_for_fn_with_single_arg!(sqrt, "sqrt");
+create_test_for_fn_with_single_arg!("abs");
+create_test_for_fn_with_single_arg!("ceil");
+create_test_for_fn_with_single_arg!("floor");
+create_test_for_fn_with_single_arg!("round");
+create_test_for_fn_with_single_arg!("sqrt");
 
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_ident: ident, $function_name_str: expr) => {
@@ -229,12 +189,12 @@ macro_rules! create_test_for_fn_with_single_array_arg {
     };
 }
 
-create_test_for_fn_with_single_array_arg!(max, "max");
-create_test_for_fn_with_single_array_arg!(mean, "mean");
-create_test_for_fn_with_single_array_arg!(median, "median");
-create_test_for_fn_with_single_array_arg!(min, "min");
-create_test_for_fn_with_single_array_arg!(product, "product");
-create_test_for_fn_with_single_array_arg!(sum, "sum");
+create_test_for_fn_with_single_array_arg!("max");
+create_test_for_fn_with_single_array_arg!("mean");
+create_test_for_fn_with_single_array_arg!("median");
+create_test_for_fn_with_single_array_arg!("min");
+create_test_for_fn_with_single_array_arg!("product");
+create_test_for_fn_with_single_array_arg!("sum");
 
 #[test]
 fn test_fixed_fn_with_field_data() {
