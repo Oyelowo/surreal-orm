@@ -31,7 +31,7 @@ use crate::{
 
 use super::array::Function;
 
-fn fun_name(value: impl Into<sql::Value>, function_name: &str) -> Function {
+fn create_validation_function(value: impl Into<sql::Value>, function_name: &str) -> Function {
     let binding = Binding::new(value);
 
     Function {
@@ -44,16 +44,16 @@ macro_rules! test_validator {
     ($function_name: expr) => {
         paste::paste! {
             pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
-                fun_name(value, $function_name)
+                super::create_validation_function(value, $function_name)
             }
 
             #[macro_export]
-            macro_rules!  [<validation_ $function_name>]{
+            macro_rules!  [<validation_is_ $function_name>]{
                 ( $geometry:expr ) => {
-                    crate::functions::validation::[<$function_name _fn>]($geometry)
+                    crate::functions::validation::is::[<$function_name _fn>]($geometry)
                 };
             }
-            pub use [<validation_ $function_name>] as [<$function_name>];
+            pub use [<validation_is_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _with_field>] ()  {
@@ -126,14 +126,25 @@ macro_rules! test_validator {
     };
 }
 
-test_validator!("alphanum");
-test_validator!("alpha");
-test_validator!("ascii");
-test_validator!("domain");
-test_validator!("email");
-test_validator!("hexadecimal");
-test_validator!("latitude");
-test_validator!("longitude");
-test_validator!("numeric");
-test_validator!("semver");
-test_validator!("uuid");
+pub mod is {
+    use surrealdb::sql;
+
+    use crate::{
+        sql::{Binding, Buildable, Name, ToRawStatement},
+        Field,
+    };
+
+    use super::super::array::Function;
+
+    test_validator!("alphanum");
+    test_validator!("alpha");
+    test_validator!("ascii");
+    test_validator!("domain");
+    test_validator!("email");
+    test_validator!("hexadecimal");
+    test_validator!("latitude");
+    test_validator!("longitude");
+    test_validator!("numeric");
+    test_validator!("semver");
+    test_validator!("uuid");
+}
