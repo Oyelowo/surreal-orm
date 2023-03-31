@@ -50,9 +50,6 @@ pub use rand_rand as rand;
 
 struct NumEmpty(sql::Value);
 
-fn erer() {
-    rand::bool!();
-}
 pub(crate) fn create_fn_with_single_num_arg(
     number: impl Into<Number>,
     function_name: &str,
