@@ -108,7 +108,7 @@ create_type!(
     "datetime",
     Datetime,
     chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
     ),
     "'1970-01-01T00:01:01Z'"

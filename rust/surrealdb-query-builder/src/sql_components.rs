@@ -279,6 +279,12 @@ pub struct ArrayCustom(sql::Value);
 //     }
 // }
 
+// impl From<Field> for ArrayCustom {
+//     fn from(value: Field) -> Self {
+//         Self(value.into())
+//     }
+// }
+//
 impl Display for ArrayCustom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)

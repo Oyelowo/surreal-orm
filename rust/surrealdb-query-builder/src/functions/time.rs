@@ -98,6 +98,7 @@ pub use now;
 macro_rules! create_time_fn_with_single_datetime_arg {
     ($function_name: expr) => {
         paste::paste! {
+            #[allow(dead_code)]
             fn [<$function_name _fn>](datetime: impl Into<Datetime>) -> Function {
                 let binding = Binding::new(datetime.into());
                 let query_string = format!("time::{}({})", $function_name, binding.get_param_dollarised());
@@ -128,7 +129,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
             #[test]
             fn [<test_ $function_name _macro_with_plain_datetime>]() {
                 let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-                    chrono::NaiveDateTime::from_timestamp(61, 0),
+                    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                     chrono::Utc,
                 );
                 let result = day!(dt);
@@ -316,7 +317,7 @@ fn test_floor_macro_with_datetime_field() {
 #[test]
 fn test_floor_macro_with_plain_datetime_and_duration() {
     let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
     );
     let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
@@ -350,7 +351,7 @@ fn test_round_macro_with_datetime_field() {
 #[test]
 fn test_round_macro_with_plain_datetime_and_duration() {
     let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
     );
     let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
@@ -387,7 +388,7 @@ macro_rules! test_group_with_interval {
             #[test]
             fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
                 let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-                    chrono::NaiveDateTime::from_timestamp(61, 0),
+                    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                     chrono::Utc,
                 );
                 let result = group!(dt, $interval);

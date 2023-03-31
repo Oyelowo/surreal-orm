@@ -30,6 +30,9 @@ mod statements;
 pub mod functions;
 
 pub mod query {
+    // TODO: remove this, Here just for testing purpose
+    pub use super::functions::array::concat;
+    // pub use super::functions::array::concatx as concat_;
     pub use super::raw_statements::{RawStatement, ToRawStatement};
     pub use super::statements::statements::*;
 }
