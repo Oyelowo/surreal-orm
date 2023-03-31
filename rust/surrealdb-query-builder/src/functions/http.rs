@@ -212,7 +212,7 @@ macro_rules! create_fn_with_url_and_head {
             }
 
             #[test]
-            fn [<test_ $function_name _head_method_with_empty_header>]() {
+            fn [<test_ $function_name _method_with_field_and_empty_header>]() {
                 let homepage = Field::new("homepage");
 
                 let result = [<$function_name _fn>](homepage, Empty);
@@ -246,6 +246,54 @@ macro_rules! create_fn_with_url_and_head {
                 );
                 assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage, headers)", $function_name));
             }
+
+            // Macro version
+            #[test]
+            fn [<test_ $function_name _macro_method_with_empty_header_not_listed>]() {
+                let result = [<$function_name>]!("https://codebreather.com");
+                assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("http::{}('https://codebreather.com')", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_method_with_empty_header>]() {
+                let homepage = Field::new("homepage");
+
+                let result = [<$function_name>]!(homepage, Empty);
+                assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_method_with_plain_custom_header>]() {
+                let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                let result = [<$function_name>]!("https://codebreather.com", headers);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("http::{}('https://codebreather.com', {})", $function_name, "{ \"x-my-header\": 'some unique string' }")
+                );
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_method_with_field_custom_header>]() {
+                let homepage = Field::new("homepage");
+                let headers = Field::new("headers");
+
+                let result = [<$function_name>]!(homepage, headers);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
+                );
+                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage, headers)", $function_name));
+            }
+
         }
     };
 }
@@ -350,6 +398,21 @@ macro_rules! create_fn_with_3args_url_body_and_head {
             }
 
             // Macro versions
+            #[test]
+            fn [<test_field_ $function_name _macro_method_with_no_custom_headers>]() {
+                let homepage = Field::new("homepage");
+                let body = Field::new("body");
+                let result = [<$function_name>]!("https://codebreather.com", body);
+
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("http::{}('https://codebreather.com', body, {})", $function_name, "{  }")
+                );
+            }
             #[test]
             fn [<test_field_ $function_name _macro_method_with_empty_body_and_headers>]() {
                 let homepage = Field::new("homepage");
