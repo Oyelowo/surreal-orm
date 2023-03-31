@@ -109,9 +109,9 @@ fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str)
     }
 }
 
-fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Function {
+fn fixed_fn(number: impl Into<Number>, decimal_place: impl Into<Number>) -> Function {
     let num_binding = Binding::new(number.into());
-    let decimal_place_binding = Binding::new(decimal_number.into());
+    let decimal_place_binding = Binding::new(decimal_place.into());
 
     let query_string = format!(
         "math::fixed({}, {})",
@@ -125,11 +125,18 @@ fn fixed(number: impl Into<Number>, decimal_number: impl Into<Number>) -> Functi
     }
 }
 
-use paste::paste;
+#[macro_export]
+macro_rules! math_fixed {
+    ( $number:expr, $decimal_place:expr ) => {
+        crate::functions::math::fixed_fn($number, $decimal_place)
+    };
+}
+
+pub use math_fixed as fixed;
 
 macro_rules! create_test_for_fn_with_single_arg {
     ($function_name: expr) => {
-        paste! {
+        paste::paste! {
             // Although, surrealdb technically accepts stringified number also,
             // I dont see why that should be allowed at the app layer in rust
             // Obviously, if a field has stringified number that would work
@@ -304,7 +311,7 @@ create_test_for_fn_with_single_array_arg!("sum");
 fn test_fixed_fn_with_field_data() {
     let land_size = Field::new("land_size");
     let decimal_place = Field::new("decimal_place");
-    let result = fixed(land_size, decimal_place);
+    let result = fixed_fn(land_size, decimal_place);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -319,7 +326,7 @@ fn test_fixed_fn_with_field_data() {
 
 #[test]
 fn test_fixed_fn_with_raw_numbers() {
-    let result = fixed(13.45423, 4);
+    let result = fixed_fn(13.45423, 4);
     let email = Field::new("email");
     let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
     assert_eq!(
@@ -332,7 +339,68 @@ fn test_fixed_fn_with_raw_numbers() {
 #[test]
 fn test_fixed_fn_with_raw_number_with_field() {
     let land_mass = Field::new("country.land_mass");
-    let result = fixed(land_mass, 4);
+    let result = fixed_fn(land_mass, 4);
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(`\\`country.land_mass\\``, 4)"
+    );
+}
+
+// Macro versions
+#[test]
+fn test_fixed_macro_with_field_data() {
+    let land_size = Field::new("land_size");
+    let decimal_place = Field::new("decimal_place");
+    let result = fixed!(land_size, decimal_place);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed(land_size, decimal_place)"
+    );
+}
+
+#[test]
+fn test_fixed_macro_with_params() {
+    let land_size = Param::new("land_size");
+    let decimal_place = Param::new("decimal_place");
+    let result = fixed!(land_size, decimal_place);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+
+    assert_eq!(
+        result.to_raw().to_string(),
+        "math::fixed($land_size, $decimal_place)"
+    );
+}
+
+#[test]
+fn test_fixed_macro_with_raw_numbers() {
+    let result = fixed!(13.45423, 4);
+    let email = Field::new("email");
+    let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
+    assert_eq!(
+        result.fine_tune_params(),
+        "math::fixed($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(result.to_raw().to_string(), "math::fixed(13.45423, 4)");
+}
+
+#[test]
+fn test_fixed_macro_with_raw_number_with_field() {
+    let land_mass = Field::new("country.land_mass");
+    let result = fixed!(land_mass, 4);
     assert_eq!(
         result.fine_tune_params(),
         "math::fixed($_param_00000001, $_param_00000002)"
