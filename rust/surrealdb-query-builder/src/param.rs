@@ -22,6 +22,12 @@ pub struct Param {
     bindings: BindingsList,
 }
 
+impl From<Param> for sql::Value {
+    fn from(value: Param) -> Self {
+        value.param.into()
+    }
+}
+
 impl Erroneous for Param {
     fn get_errors(&self) -> Vec<String> {
         vec![]
