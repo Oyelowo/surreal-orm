@@ -53,87 +53,87 @@ pub fn length_fn(string: impl Into<String>) -> Function {
 }
 
 #[macro_export]
-macro_rules! length {
+macro_rules! string_length {
     ( $string:expr ) => {
         crate::functions::string::length_fn($string)
     };
 }
-pub use length;
+pub use string_length as length;
 
 pub fn lowercase_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "lowercase")
 }
 
 #[macro_export]
-macro_rules! lowercase {
+macro_rules! string_lowercase {
     ( $string:expr ) => {
         crate::functions::string::lowercase_fn($string)
     };
 }
 
-pub use lowercase;
+pub use string_lowercase as lowercase;
 
 pub fn uppercase_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "uppercase")
 }
 
 #[macro_export]
-macro_rules! uppercase {
+macro_rules! string_uppercase {
     ( $string:expr ) => {
         crate::functions::string::uppercase_fn($string)
     };
 }
-pub use uppercase;
+pub use string_uppercase as uppercase;
 
 pub fn words_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "words")
 }
 
 #[macro_export]
-macro_rules! words {
+macro_rules! string_words {
     ( $string:expr ) => {
         crate::functions::string::words_fn($string)
     };
 }
-pub use words;
+pub use string_words as words;
 
 pub fn reverse_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "reverse")
 }
 
 #[macro_export]
-macro_rules! reverse {
+macro_rules! string_reverse {
     ( $string:expr ) => {
         crate::functions::string::reverse_fn($string)
     };
 }
 
-pub use reverse;
+pub use string_reverse as reverse;
 
 pub fn trim_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "trim")
 }
 
 #[macro_export]
-macro_rules! trim {
+macro_rules! string_trim {
     ( $string:expr ) => {
         crate::functions::string::trim_fn($string)
     };
 }
-pub use trim;
+pub use string_trim as trim;
 
 pub fn slug_fn(string: impl Into<String>) -> Function {
     create_fn_with_single_string_arg(string, "slug")
 }
 
 #[macro_export]
-macro_rules! slug {
+macro_rules! string_slug {
     ( $string:expr ) => {
         crate::functions::string::slug_fn($string)
     };
 }
 
-pub use slug;
+pub use string_slug as slug;
 
 pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
@@ -157,7 +157,7 @@ pub fn concat_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
 }
 
 #[macro_export]
-macro_rules! concat_ {
+macro_rules! string_concat {
         ( $val:expr ) => {
             crate::functions::string::concat_fn( $val )
         };
@@ -166,7 +166,7 @@ macro_rules! concat_ {
         };
     }
 
-pub use concat_;
+pub use string_concat as concat;
 
 pub fn join_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
@@ -190,7 +190,7 @@ pub fn join_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
 }
 
 #[macro_export]
-macro_rules! join {
+macro_rules! string_join {
         ( $val:expr ) => {
             crate::functions::string::join_fn( $val )
         };
@@ -199,7 +199,7 @@ macro_rules! join {
         };
     }
 
-pub use join;
+pub use string_join as join;
 
 pub fn ends_with_fn(string: impl Into<String>, ending: impl Into<String>) -> Function {
     let string_binding = Binding::new(string.into());
@@ -218,13 +218,13 @@ pub fn ends_with_fn(string: impl Into<String>, ending: impl Into<String>) -> Fun
 }
 
 #[macro_export]
-macro_rules! ends_with {
+macro_rules! string_ends_with {
     ( $string:expr, $ending: expr ) => {
         crate::functions::string::ends_with_fn($string, $ending)
     };
 }
 
-pub use ends_with;
+pub use string_ends_with as ends_with;
 
 pub fn starts_with_fn(string: impl Into<String>, starting: impl Into<String>) -> Function {
     let string_binding = Binding::new(string.into());
@@ -243,12 +243,12 @@ pub fn starts_with_fn(string: impl Into<String>, starting: impl Into<String>) ->
 }
 
 #[macro_export]
-macro_rules! starts_with {
+macro_rules! string_starts_with {
     ( $string:expr, $ending: expr ) => {
         crate::functions::string::starts_with_fn($string, $ending)
     };
 }
-pub use starts_with;
+pub use string_starts_with as starts_with;
 
 pub fn split_fn(string: impl Into<String>, by: impl Into<String>) -> Function {
     let string_binding = Binding::new(string.into());
@@ -267,13 +267,13 @@ pub fn split_fn(string: impl Into<String>, by: impl Into<String>) -> Function {
 }
 
 #[macro_export]
-macro_rules! split {
+macro_rules! string_split {
     ( $string:expr, $by: expr ) => {
         crate::functions::string::split_fn($string, $by)
     };
 }
 
-pub use split;
+pub use string_split as split;
 
 pub fn repeat_fn(string: impl Into<String>, ending: impl Into<Number>) -> Function {
     let string_binding = Binding::new(string.into());
@@ -292,13 +292,13 @@ pub fn repeat_fn(string: impl Into<String>, ending: impl Into<Number>) -> Functi
 }
 
 #[macro_export]
-macro_rules! repeat {
+macro_rules! string_repeat {
     ( $string:expr, $ending: expr ) => {
         crate::functions::string::repeat_fn($string, $ending)
     };
 }
 
-pub use repeat;
+pub use string_repeat as repeat;
 
 pub fn slice_fn(
     string: impl Into<String>,
@@ -323,13 +323,13 @@ pub fn slice_fn(
 }
 
 #[macro_export]
-macro_rules! slice {
+macro_rules! string_slice {
     ( $string:expr, $from: expr, $to: expr ) => {
         crate::functions::string::slice_fn($string, $from, $to)
     };
 }
 
-pub use slice;
+pub use string_slice as slice;
 
 pub fn replace_fn(
     string: impl Into<String>,
@@ -354,18 +354,18 @@ pub fn replace_fn(
 }
 
 #[macro_export]
-macro_rules! replace {
+macro_rules! string_replace {
     ( $string:expr, $match: expr, $replacement: expr ) => {
         crate::functions::string::replace_fn($string, $match, $replacement)
     };
 }
 
-pub use replace;
+pub use string_replace as replace;
 
 #[test]
 fn test_concat_macro() {
     let title = Field::new("title");
-    let result = concat_!(title, "one", 3, 4.15385, "  ", true);
+    let result = self::concat!(title, "one", 3, 4.15385, "  ", true);
     assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().to_string(),
@@ -375,7 +375,7 @@ fn test_concat_macro() {
 
 #[test]
 fn test_concat_macro_with_array() {
-    let result = concat_!(array!["one", "two", 3, 4.15385, "five", true]);
+    let result = self::concat!(array!["one", "two", 3, 4.15385, "five", true]);
     assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().to_string(),

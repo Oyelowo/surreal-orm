@@ -28,7 +28,7 @@
 use std::{fmt::Display, str::FromStr};
 
 use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
+    sql::{Binding, Buildable, Param, ToRawStatement},
     Field,
 };
 
@@ -52,6 +52,12 @@ impl<T: Into<sql::Datetime>> From<T> for Datetime {
 
 impl From<Field> for Datetime {
     fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<Param> for Datetime {
+    fn from(value: Param) -> Self {
         Self(value.into())
     }
 }
@@ -110,13 +116,13 @@ macro_rules! create_time_fn_with_single_datetime_arg {
             }
 
             #[macro_export]
-            macro_rules! [<$function_name>] {
+            macro_rules! [<time_ $function_name>] {
                 ( $datetime:expr ) => {
                     crate::functions::time::[<$function_name _fn>]($datetime)
                 };
             }
 
-            pub use [<$function_name>];
+            pub use [<time_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _macro_with_datetime_field>]() {
@@ -126,6 +132,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                 assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
                 assert_eq!(result.to_raw().to_string(), "time::day(rebirth_date)");
             }
+
             #[test]
             fn [<test_ $function_name _macro_with_plain_datetime>]() {
                 let dt = chrono::DateTime::<chrono::Utc>::from_utc(
@@ -171,13 +178,13 @@ fn floor_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Fun
 }
 
 #[macro_export]
-macro_rules! floor {
+macro_rules! time_floor {
     ( $datetime:expr, $duration:expr ) => {
         crate::functions::time::floor_fn($datetime, $duration)
     };
 }
 
-pub use floor;
+pub use time_floor as floor;
 
 fn round_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Function {
     let datetime_binding = Binding::new(datetime.into());
@@ -195,13 +202,13 @@ fn round_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Fun
 }
 
 #[macro_export]
-macro_rules! round {
+macro_rules! time_round {
     ( $datetime:expr, $duration:expr ) => {
         crate::functions::time::round_fn($datetime, $duration)
     };
 }
 
-pub use round;
+pub use time_round as round;
 
 #[derive(Debug, Clone, Copy)]
 enum Interval {
@@ -240,6 +247,12 @@ impl From<Field> for IntervalOrField {
     }
 }
 
+impl From<Param> for IntervalOrField {
+    fn from(value: Param) -> Self {
+        Self(value.into())
+    }
+}
+
 impl From<IntervalOrField> for sql::Value {
     fn from(value: IntervalOrField) -> Self {
         value.0
@@ -269,7 +282,7 @@ fn group_fn(datetime: impl Into<Datetime>, interval: impl Into<IntervalOrField>)
 }
 // ::<crate::functions::time::IntervalOrField>
 #[macro_export]
-macro_rules! group {
+macro_rules! time_group {
     ( $datetime:expr, "year" ) => {
         crate::functions::time::group_fn($datetime, Interval::Year)
     };
@@ -296,7 +309,7 @@ macro_rules! group {
     };
 }
 
-pub use group;
+pub use time_group as group;
 
 #[test]
 fn test_floor_macro_with_datetime_field() {
@@ -379,6 +392,22 @@ fn test_group_macro_with_datetime_field() {
     assert_eq!(
         result.to_raw().to_string(),
         "time::floor(rebirth_date, duration)"
+    );
+}
+
+#[test]
+fn test_group_macro_with_datetime_params() {
+    let rebirth_date = Param::new("rebirth_date");
+    let duration = Param::new("duration");
+    let result = group!(rebirth_date, duration);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "time::floor($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "time::floor($rebirth_date, $duration)"
     );
 }
 

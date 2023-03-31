@@ -25,7 +25,7 @@
 use surrealdb::sql::{self};
 
 use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
+    sql::{Binding, Buildable, Param, ToRawStatement},
     Field,
 };
 
@@ -64,7 +64,7 @@ impl From<Field> for Table {
 }
 
 macro_rules! create_type {
-    ($function_ident:ident, $function_name:expr, $value_type: ty, $test_data_input:expr, $test_stringified_data_output: expr) => {
+    ($function_name:expr, $value_type: ty, $test_data_input:expr, $test_stringified_data_output: expr) => {
         paste::paste! {
             fn [<$function_name _fn>](value: impl Into<$value_type>) -> Function {
                 let binding = Binding::new(value.into());
@@ -77,24 +77,24 @@ macro_rules! create_type {
             }
 
             #[macro_export]
-            macro_rules! [<$function_ident>] {
+            macro_rules! [<type_ $function_name>] {
                 ( $string:expr ) => {
                     crate::functions::type_::[<$function_name _fn>]($string)
                 };
             }
-            pub use $function_ident;
+            pub use [<type_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _with_macro_with_field>]() {
                 let name = Field::new("name");
-                let result = $function_ident!(name);
+                let result = [<$function_name>]!(name);
                 assert_eq!(result.fine_tune_params(), format!("type::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("type::{}(name)", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _with_macro_with_plain_string>]() {
-                let result = $function_ident!($test_data_input);
+                let result = [<$function_name>]!($test_data_input);
                 assert_eq!(result.fine_tune_params(), format!("type::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("type::{}({})", $function_name, $test_stringified_data_output));
             }
@@ -102,9 +102,8 @@ macro_rules! create_type {
     };
 }
 
-create_type!(bool, "bool", sql::Value, "toronto", "'toronto'");
+create_type!("bool", sql::Value, "toronto", "'toronto'");
 create_type!(
-    datetime,
     "datetime",
     Datetime,
     chrono::DateTime::<chrono::Utc>::from_utc(
@@ -114,18 +113,17 @@ create_type!(
     "'1970-01-01T00:01:01Z'"
 );
 create_type!(
-    duration,
     "duration",
     Duration,
     std::time::Duration::from_secs(24 * 60 * 60 * 7),
     "1w"
 );
-create_type!(float_, "float", Number, 43.5, 43.5);
-create_type!(int_, "int", Number, 99, 99);
-create_type!(number, "number", Number, 5, 5);
-create_type!(string_, "string", sql::Value, 5454, "5454");
-create_type!(regex, "regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
-create_type!(table, "table", Table, Table::new("user"), "user");
+create_type!("float", Number, 43.5, 43.5);
+create_type!("int", Number, 99, 99);
+create_type!("number", Number, 5, 5);
+create_type!("string", sql::Value, 5454, "5454");
+create_type!("regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
+create_type!("table", Table, Table::new("user"), "user");
 
 fn point_fn(point1: impl Into<Number>, point2: impl Into<Number>) -> Function {
     let point1_binding = Binding::new(point1.into());
@@ -143,13 +141,13 @@ fn point_fn(point1: impl Into<Number>, point2: impl Into<Number>) -> Function {
 }
 
 #[macro_export]
-macro_rules! point {
+macro_rules! type_point {
     ( $point1:expr, $point2:expr ) => {
         crate::functions::type_::point_fn($point1, $point2)
     };
 }
 
-pub use point;
+pub use type_point as point;
 
 fn thing_fn(point1: impl Into<Table>, point2: impl Into<sql::Value>) -> Function {
     let point1_binding = Binding::new(point1.into());
@@ -167,13 +165,13 @@ fn thing_fn(point1: impl Into<Table>, point2: impl Into<sql::Value>) -> Function
 }
 
 #[macro_export]
-macro_rules! thing {
+macro_rules! type_thing {
     ( $table:expr, $value:expr ) => {
         crate::functions::type_::thing_fn($table, $value)
     };
 }
 
-pub use thing;
+pub use type_thing as thing;
 
 #[test]
 fn test_bool_with_macro_with_plain_number() {
@@ -223,6 +221,18 @@ fn test_datetime_macro_with_datetime_field() {
         "type::datetime($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
+}
+
+#[test]
+fn test_datetime_macro_with_param() {
+    let rebirth_date = Param::new("rebirth_date");
+    let result = datetime!(rebirth_date);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::datetime($rebirth_date)");
 }
 
 #[test]

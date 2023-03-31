@@ -42,11 +42,13 @@ macro_rules! create_function {
             }
 
             #[macro_export]
-            macro_rules! [<$function_name>] {
+            macro_rules! [<session_ $function_name>] {
                 () => {
                     crate::functions::session::[<$function_name _fn>]()
                 };
             }
+
+            pub use [<session_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _fn>]() {
