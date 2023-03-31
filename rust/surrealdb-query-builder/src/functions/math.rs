@@ -22,7 +22,7 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
-use crate::array;
+use crate::{array, sql::Param};
 use surrealdb::sql;
 
 use crate::{
@@ -52,6 +52,12 @@ impl<T: Into<sql::Number>> From<T> for Number {
 
 impl From<Field> for Number {
     fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<Param> for Number {
+    fn from(value: Param) -> Self {
         Self(value.into())
     }
 }
@@ -121,14 +127,23 @@ macro_rules! create_test_for_fn_with_single_arg {
             // I dont see why that should be allowed at the app layer in rust
             // Obviously, if a field has stringified number that would work
             // during query execution
-            fn [<$function_name>](number: impl Into<Number>) -> Function {
+            fn [<$function_name _fn>](number: impl Into<Number>) -> Function {
                 create_fn_with_single_num_arg(number, $function_name)
             }
+
+            #[macro_export]
+            macro_rules!  [<math_ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::math::[<$function_name _fn>]($value)
+                };
+            }
+
+            pub use [<math_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _fn_with_field_data >] () {
                 let temparate = Field::new("temperature");
-                let result = [<$function_name>](temparate);
+                let result = [<$function_name _fn>](temparate);
 
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name));
@@ -136,17 +151,51 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[test]
             fn [<test_ $function_name _fn_with_fraction>]() {
-                let result = [<$function_name>](45.23);
+                let result = [<$function_name _fn>](45.23);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _fn_with_negative_number>]() {
-                let result = [<$function_name>](-454);
+                let result = [<$function_name _fn>](-454);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name));
             }
+
+            // Macro version
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let temparate = Field::new("temperature");
+                let result = [<$function_name>]!(temparate);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(temperature)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let temparate = Param::new("temperature");
+                let result = [<$function_name>]!(temparate);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}($temperature)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_fraction>]() {
+                let result = [<$function_name>]!(45.23);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(45.23)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_negative_number>]() {
+                let result = [<$function_name>]!(-454);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(-454)", $function_name));
+            }
+
         }
     };
 }
