@@ -82,6 +82,13 @@ impl From<Field> for Array {
         Self(value.into())
     }
 }
+
+impl From<Param> for Array {
+    fn from(value: Param) -> Self {
+        Self(value.into())
+    }
+}
+
 fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
@@ -209,14 +216,22 @@ create_test_for_fn_with_single_arg!("sqrt");
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_name: expr) => {
         paste::paste! {
-            fn [<$function_name>](number: impl Into<Array>) -> Function {
+            fn [<$function_name _fn>](number: impl Into<Array>) -> Function {
                 create_fn_with_single_array_arg(number, $function_name)
             }
+
+            #[macro_export]
+            macro_rules!  [<math_ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::math::[<$function_name _fn>]($value)
+                };
+            }
+            pub use [<math_ $function_name>] as [<$function_name>];
 
             #[test]
             fn [<test_ $function_name _fn_with_field_data >] () {
                 let size_list = Field::new("size_list");
-                let result = [<$function_name>](size_list);
+                let result = [<$function_name _fn>](size_list);
 
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name));
@@ -225,7 +240,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
             #[test]
             fn [<test_ $function_name _fn_with_number_array>]() {
                 let arr1 = array![1, 2, 3, 3.5];
-                let result = [<$function_name>](arr1);
+                let result = [<$function_name _fn>](arr1);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
             }
@@ -234,7 +249,43 @@ macro_rules! create_test_for_fn_with_single_array_arg {
             fn [<test_ $function_name _fn_with_mixed_array>]() {
                 let age = Field::new("age");
                 let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", age];
-                let result = [<$function_name>](arr);
+                let result = [<$function_name _fn>](arr);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name));
+            }
+
+            // Macro version
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let size_list = Field::new("size_list");
+                let result = [<$function_name>]!(size_list);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}(size_list)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let size_list = Param::new("size_list");
+                let result = [<$function_name>]!(size_list);
+
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}($size_list)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_number_array>]() {
+                let arr1 = array![1, 2, 3, 3.5];
+                let result = [<$function_name>]!(arr1);
+                assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_mixed_array>]() {
+                let age = Field::new("age");
+                let arr = array![1, 2, 3, 4, 5, "4334", "Oyelowo", age];
+                let result = [<$function_name>]!(arr);
                 assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("math::{}([1, 2, 3, 4, 5, '4334', 'Oyelowo', age])", $function_name));
             }
