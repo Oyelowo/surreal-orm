@@ -88,24 +88,62 @@ fn create_geo_fn_with_two_args(
     }
 }
 
-pub fn area(geometry: impl Into<GeometryOrField>) -> Function {
+pub fn area_fn(geometry: impl Into<GeometryOrField>) -> Function {
     create_geo_with_single_arg(geometry, "area")
 }
 
-pub fn bearing(point1: impl Into<GeometryOrField>, point2: impl Into<GeometryOrField>) -> Function {
+#[macro_export]
+macro_rules! geo_area {
+    ( $geometry:expr ) => {
+        crate::functions::geo::area_fn($geometry)
+    };
+}
+
+pub use geo_area as area;
+
+pub fn bearing_fn(
+    point1: impl Into<GeometryOrField>,
+    point2: impl Into<GeometryOrField>,
+) -> Function {
     create_geo_fn_with_two_args(point1, point2, "bearing")
 }
+
+#[macro_export]
+macro_rules! geo_bearing {
+    ( $point1:expr,  $point2:expr ) => {
+        crate::functions::geo::area_fn($point1, $point2)
+    };
+}
+
+pub use geo_bearing as bearing;
 
 pub fn centroid(geometry: impl Into<GeometryOrField>) -> Function {
     create_geo_with_single_arg(geometry, "centroid")
 }
 
-pub fn distance(
+#[macro_export]
+macro_rules! geo_centroid {
+    ( $geometry:expr ) => {
+        crate::functions::geo::centroid_fn($geometry)
+    };
+}
+
+pub use geo_centroid as centroid;
+
+pub fn distance_fn(
     point1: impl Into<GeometryOrField>,
     point2: impl Into<GeometryOrField>,
 ) -> Function {
     create_geo_fn_with_two_args(point1, point2, "distance")
 }
+
+#[macro_export]
+macro_rules! geo_distance {
+    ( $point1:expr,  $point2:expr ) => {
+        crate::functions::geo::distance_fn($point1, $point2)
+    };
+}
+pub use geo_distance as distance;
 
 pub enum NumberOrEmpty {
     Empty,
@@ -203,6 +241,13 @@ pub mod hash {
             bindings: vec![binding],
         }
     }
+    #[macro_export]
+    macro_rules! geo_hash_decode {
+        ( $geometry:expr ) => {
+            crate::functions::geo::decode_fn($geometry)
+        };
+    }
+    pub use geo_hash_decode as decode;
 
     pub fn encode(geometry: impl Into<GeometryOrField>, accuracy: impl Into<Accuracy>) -> Function {
         let binding = Binding::new(geometry.into());
@@ -232,11 +277,22 @@ pub mod hash {
             bindings,
         }
     }
+
+    #[macro_export]
+    macro_rules! geo_hash_encode {
+        ( $geometry:expr, $accuracy:expr ) => {
+            crate::functions::geo::encode_fn($geometry, $accuracy)
+        };
+        ( $geometry:expr ) => {
+            crate::functions::geo::encode_fn($geometry)
+        };
+    }
+    pub use geo_hash_encode as encode;
 }
 #[test]
 fn test_area_with_field() {
     let city = Field::new("city");
-    let result = area(city);
+    let result = area_fn(city);
 
     assert_eq!(result.fine_tune_params(), "geo::area($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "geo::area(city)");
@@ -260,7 +316,7 @@ fn test_area_with_raw_polygon() {
                 ],
             ],
         );
-    let result = area(poly);
+    let result = area_fn(poly);
     assert_eq!(
         result.fine_tune_params(),
         "geo::area($_param_00000001)"
@@ -272,6 +328,34 @@ fn test_area_with_raw_polygon() {
 }
 
 #[test]
+fn test_area_with_raw_polygon() {
+    let poly = polygon!(
+            exterior: [
+                (x: -111., y: 45.),
+                (x: -111., y: 41.),
+                (x: -104., y: 41.),
+                (x: -104., y: 45.),
+            ],
+            interiors: [
+                [
+                    (x: -110., y: 44.),
+                    (x: -110., y: 42.),
+                    (x: -105., y: 42.),
+                    (x: -105., y: 44.),
+                ],
+            ],
+        );
+    let result = area_fn(poly);
+    assert_eq!(
+        result.fine_tune_params(),
+        "geo::area($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "geo::area({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
+    );
+}
+#[test]
 fn test_bearing_with_raw_points() {
     let point1 = point! {
         x: 40.02f64,
@@ -282,7 +366,7 @@ fn test_bearing_with_raw_points() {
         x: 80.02f64,
         y: 103.19,
     };
-    let result = bearing(point1, point2);
+    let result = bearing_fn(point1, point2);
     assert_eq!(
         result.fine_tune_params(),
         "geo::bearing($_param_00000001, $_param_00000002)"
@@ -301,7 +385,7 @@ fn test_bearing_with_raw_point_with_field() {
         x: 80.02f64,
         y: 103.19,
     };
-    let result = bearing(hometown, point2);
+    let result = bearing_fn(hometown, point2);
     assert_eq!(
         result.fine_tune_params(),
         "geo::bearing($_param_00000001, $_param_00000002)"
@@ -361,7 +445,7 @@ fn test_distance_with_raw_points() {
         x: 80.02f64,
         y: 103.19,
     };
-    let result = distance(point1, point2);
+    let result = distance_fn(point1, point2);
     assert_eq!(
         result.fine_tune_params(),
         "geo::distance($_param_00000001, $_param_00000002)"
@@ -380,7 +464,7 @@ fn test_distance_with_raw_point_with_field() {
         x: 80.02f64,
         y: 103.19,
     };
-    let result = distance(hometown, point2);
+    let result = distance_fn(hometown, point2);
     assert_eq!(
         result.fine_tune_params(),
         "geo::distance($_param_00000001, $_param_00000002)"
@@ -396,7 +480,7 @@ fn test_distance_with_only_fields() {
     let hometown = Field::new("hometown");
     let yukon = Field::new("yukon");
 
-    let result = distance(hometown, yukon);
+    let result = distance_fn(hometown, yukon);
     assert_eq!(
         result.fine_tune_params(),
         "geo::distance($_param_00000001, $_param_00000002)"
