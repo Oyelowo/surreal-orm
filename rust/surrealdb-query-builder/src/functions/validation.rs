@@ -40,59 +40,25 @@ fn fun_name(value: impl Into<sql::Value>, function_name: &str) -> Function {
     }
 }
 
-pub fn alphanum(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "alphanum")
-}
-
-pub fn alpha(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "alpha")
-}
-
-pub fn ascii(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "ascii")
-}
-
-pub fn domain(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "domain")
-}
-
-pub fn email(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "email")
-}
-
-pub fn hexadecimal(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "hexadecimal")
-}
-
-pub fn latitude(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "latitude")
-}
-
-pub fn longitude(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "longitude")
-}
-
-pub fn numeric(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "numeric")
-}
-
-pub fn semver(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "semver")
-}
-
-pub fn uuid(value: impl Into<sql::Value>) -> Function {
-    fun_name(value, "uuid")
-}
-
-use paste::paste;
-
 macro_rules! test_validator {
-    ($function_ident: ident, $function_name: expr) => {
-        paste! {
+    ($function_name: expr) => {
+        paste::paste! {
+            pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
+                fun_name(value, $function_name)
+            }
+
+            #[macro_export]
+            macro_rules!  [<validation_ $function_name>]{
+                ( $geometry:expr ) => {
+                    crate::functions::validation::[<$function_name _fn>]($geometry)
+                };
+            }
+            pub use [<validation_ $function_name>] as [<$function_name>];
+
             #[test]
             fn [<test_ $function_name _with_field>] ()  {
                 let username = Field::new("username");
-                let result = $function_ident(username);
+                let result = [<$function_name _fn>](username);
 
                 assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
@@ -100,7 +66,7 @@ macro_rules! test_validator {
 
             #[test]
             fn [<test_ $function_name _string_username>] ()  {
-                let result = $function_ident("oyelowo1234");
+                let result = [<$function_name _fn>]("oyelowo1234");
 
                 assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
@@ -108,7 +74,7 @@ macro_rules! test_validator {
 
             #[test]
             fn [<test_ $function_name _with_number>] ()  {
-                let result = $function_ident(123456423);
+                let result = [<$function_name _fn>](123456423);
 
                 assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
@@ -116,23 +82,58 @@ macro_rules! test_validator {
 
             #[test]
             fn [<test_ $function_name _with_fraction>] ()  {
-                let result = $function_ident(12.3456423);
+                let result = [<$function_name _fn>](12.3456423);
 
                 assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
             }
+
+            // Macro versions
+            #[test]
+            fn [<test_ $function_name _macro_with_field>] ()  {
+                let username = Field::new("username");
+                let result = [<$function_name>]!(username);
+
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
+                }
+
+            #[test]
+            fn [<test_ $function_name _macro_string_username>] ()  {
+                let result = [<$function_name>]!("oyelowo1234");
+
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_number>] ()  {
+                let result = [<$function_name>]!(123456423);
+
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_fraction>] ()  {
+                let result = [<$function_name>]!(12.3456423);
+
+                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
+            }
+
         }
     };
 }
 
-test_validator!(alphanum, "alphanum");
-test_validator!(alpha, "alpha");
-test_validator!(ascii, "ascii");
-test_validator!(domain, "domain");
-test_validator!(email, "email");
-test_validator!(hexadecimal, "hexadecimal");
-test_validator!(latitude, "latitude");
-test_validator!(longitude, "longitude");
-test_validator!(numeric, "numeric");
-test_validator!(semver, "semver");
-test_validator!(uuid, "uuid");
+test_validator!("alphanum");
+test_validator!("alpha");
+test_validator!("ascii");
+test_validator!("domain");
+test_validator!("email");
+test_validator!("hexadecimal");
+test_validator!("latitude");
+test_validator!("longitude");
+test_validator!("numeric");
+test_validator!("semver");
+test_validator!("uuid");
