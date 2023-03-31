@@ -199,7 +199,7 @@ fn test_bool_with_macro_with_plain_true() {
 #[test]
 fn test_datetime_macro_with_plain_datetime() {
     let value = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp(61, 0),
+        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
     );
     let result = datetime!(value);
