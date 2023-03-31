@@ -66,21 +66,57 @@ pub(crate) fn create_fn_with_two_values(
     }
 }
 
-fn md5(value: impl Into<sql::Value>) -> Function {
-    create_fn_with_single_value(value, "md5")
-}
+macro_rules! create_fn_with_single_arg_value {
+    ($function_name: expr) => {
+        paste::paste! {
+            pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
+                create_fn_with_single_value(value, $function_name)
+            }
 
-pub fn sha1(value: impl Into<sql::Value>) -> Function {
-    create_fn_with_single_value(value, "sha1")
-}
+            #[macro_export]
+            macro_rules! [<cryto_ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::crypto::[<$function_name _fn>]($value)
+                };
+            }
+            pub use [<cryto_ $function_name>] as [<$function_name>];
 
-pub fn sha256(value: impl Into<sql::Value>) -> Function {
-    create_fn_with_single_value(value, "sha256")
-}
+            #[test]
+            fn [<test_ $function_name>]() {
+                let result = [<$function_name _fn>]("Oyelowo");
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("crypto::{}('Oyelowo')", $function_name));
+            }
 
-pub fn sha512(value: impl Into<sql::Value>) -> Function {
-    create_fn_with_single_value(value, "sha512")
+            #[test]
+            fn [<test_ $function_name _with_macro>]() {
+                let result = [<$function_name>]!("Oyelowo");
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("crypto::{}('Oyelowo')", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _with_field>]() {
+                let title = Field::new("title");
+                let result = [<$function_name _fn>](title);
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_field>]() {
+                let title = Field::new("title");
+                let result = [<$function_name>]!(title);
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
+            }
+        }
+    };
 }
+create_fn_with_single_arg_value!("md5");
+create_fn_with_single_arg_value!("sha1");
+create_fn_with_single_arg_value!("sha256");
+create_fn_with_single_arg_value!("sha512");
 
 pub mod argon2 {
     use surrealdb::sql;
@@ -126,48 +162,6 @@ pub mod scrypt {
     pub fn generate(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "scrypt::generate")
     }
-}
-
-#[test]
-fn test_md5() {
-    let result = md5("Oyelowo");
-    assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "crypto::md5('Oyelowo')");
-}
-
-#[test]
-fn test_md5_with_field() {
-    let title = Field::new("title");
-    let result = md5(title);
-    assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "crypto::md5(title)");
-}
-
-#[test]
-fn test_sha1() {
-    let result = sha1("Oyelowo");
-    assert_eq!(result.fine_tune_params(), "crypto::sha1($_param_00000001)");
-    assert_eq!(result.to_raw().to_string(), "crypto::sha1('Oyelowo')");
-}
-
-#[test]
-fn test_sha256() {
-    let result = sha256("Oyelowo");
-    assert_eq!(
-        result.fine_tune_params(),
-        "crypto::sha256($_param_00000001)"
-    );
-    assert_eq!(result.to_raw().to_string(), "crypto::sha256('Oyelowo')");
-}
-
-#[test]
-fn test_sha512() {
-    let result = sha512("Oyelowo");
-    assert_eq!(
-        result.fine_tune_params(),
-        "crypto::sha512($_param_00000001)"
-    );
-    assert_eq!(result.to_raw().to_string(), "crypto::sha512('Oyelowo')");
 }
 
 #[test]
