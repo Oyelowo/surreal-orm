@@ -30,7 +30,7 @@ use super::{array::Function, math::Number};
 
 use crate::array;
 
-fn rand_fn() -> Function {
+pub fn rand_fn() -> Function {
     let query_string = format!("rand()");
 
     Function {
@@ -40,16 +40,19 @@ fn rand_fn() -> Function {
 }
 
 #[macro_export]
-macro_rules! rand {
+macro_rules! rand_rand {
     () => {
         crate::functions::rand::rand_fn()
     };
 }
 
-// pub use rand;
+pub use rand_rand as rand;
 
 struct NumEmpty(sql::Value);
 
+fn erer() {
+    rand::bool!();
+}
 pub(crate) fn create_fn_with_single_num_arg(
     number: impl Into<Number>,
     function_name: &str,
@@ -84,13 +87,14 @@ pub mod rand {
         }
     }
 
-    macro_rules! bool {
+    #[macro_export]
+    macro_rules! rand_bool {
         () => {
             crate::functions::rand::rand::bool_fn()
         };
     }
 
-    pub use bool;
+    pub use rand_bool as bool;
 
     pub fn uuid_fn() -> Function {
         let query_string = format!("rand::uuid()");
@@ -101,13 +105,14 @@ pub mod rand {
         }
     }
 
-    macro_rules! uuid {
+    #[macro_export]
+    macro_rules! rand_uuid {
         () => {
             crate::functions::rand::rand::uuid_fn()
         };
     }
 
-    pub use uuid;
+    pub use rand_uuid as uuid;
 
     pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
         let mut bindings = vec![];
@@ -131,7 +136,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! enum_ {
+    macro_rules! rand_enum {
         ( $val:expr ) => {
             crate::functions::rand::rand::enum_fn( $val )
         };
@@ -140,7 +145,7 @@ pub mod rand {
         };
     }
 
-    pub use enum_;
+    pub use rand_enum as enum_;
 
     pub fn float_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -171,7 +176,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! float {
+    macro_rules! rand_float {
         () => {
             crate::functions::rand::rand::float_fn(crate::sql::Empty, crate::sql::Empty)
         };
@@ -180,7 +185,7 @@ pub mod rand {
         };
     }
 
-    pub use float;
+    pub use rand_float as float;
 
     pub fn int_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -211,7 +216,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! int {
+    macro_rules! rand_int {
         () => {
             crate::functions::rand::rand::int_fn(crate::sql::Empty, crate::sql::Empty)
         };
@@ -219,7 +224,7 @@ pub mod rand {
             crate::functions::rand::rand::int_fn($from, $to)
         };
     }
-    pub use int;
+    pub use rand_int as int;
 
     pub fn time_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -250,7 +255,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! time {
+    macro_rules! rand_time {
         () => {
             crate::functions::rand::rand::time_fn(crate::sql::Empty, crate::sql::Empty)
         };
@@ -258,7 +263,7 @@ pub mod rand {
             crate::functions::rand::rand::time_fn($from, $to)
         };
     }
-    pub use time;
+    pub use rand_time as time;
 
     pub fn string_fn(from: impl Into<NumberOrEmpty>, to: impl Into<NumberOrEmpty>) -> Function {
         let mut bindings = vec![];
@@ -298,7 +303,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! string {
+    macro_rules! rand_string {
         () => {
             crate::functions::rand::rand::string_fn(crate::sql::Empty, crate::sql::Empty)
         };
@@ -309,7 +314,7 @@ pub mod rand {
             crate::functions::rand::rand::string_fn($from, $to)
         };
     }
-    pub use string;
+    pub use rand_string as string;
 
     pub fn guid_fn(length: impl Into<NumberOrEmpty>) -> Function {
         let length: NumberOrEmpty = length.into();
@@ -331,7 +336,7 @@ pub mod rand {
     }
 
     #[macro_export]
-    macro_rules! guid {
+    macro_rules! rand_guid {
         () => {
             crate::functions::rand::rand::guid_fn(crate::sql::Empty)
         };
@@ -340,7 +345,7 @@ pub mod rand {
         };
     }
 
-    pub use guid;
+    pub use rand_guid as guid;
 }
 
 #[test]
@@ -352,7 +357,7 @@ fn test_rand_fn() {
 
 #[test]
 fn test_rand_macro() {
-    let result = rand!();
+    let result = rand_rand!();
     assert_eq!(result.fine_tune_params(), "rand()");
     assert_eq!(result.to_raw().to_string(), "rand()");
 }
