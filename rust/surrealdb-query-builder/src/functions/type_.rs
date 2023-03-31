@@ -25,7 +25,7 @@
 use surrealdb::sql::{self};
 
 use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
+    sql::{Binding, Buildable, Param, ToRawStatement},
     Field,
 };
 
@@ -221,6 +221,18 @@ fn test_datetime_macro_with_datetime_field() {
         "type::datetime($_param_00000001)"
     );
     assert_eq!(result.to_raw().to_string(), "type::datetime(rebirth_date)");
+}
+
+#[test]
+fn test_datetime_macro_with_param() {
+    let rebirth_date = Param::new("rebirth_date");
+    let result = datetime!(rebirth_date);
+
+    assert_eq!(
+        result.fine_tune_params(),
+        "type::datetime($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().to_string(), "type::datetime($rebirth_date)");
 }
 
 #[test]
