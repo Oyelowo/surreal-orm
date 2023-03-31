@@ -20,7 +20,10 @@
 
 use surrealdb::sql;
 
-use crate::{sql::Binding, Field};
+use crate::{
+    sql::{Binding, Param},
+    Field,
+};
 
 use super::array::Function;
 
@@ -45,6 +48,12 @@ impl From<Field> for String {
     }
 }
 
+impl From<Param> for String {
+    fn from(value: Param) -> Self {
+        Self(value.into())
+    }
+}
+
 fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!("parse::{function_name}({})", binding.get_param_dollarised());
@@ -57,27 +66,69 @@ fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &s
 
 #[macro_use]
 macro_rules! create_test_for_fn_with_single_arg {
-    ($function_ident: ident, $function_name_str: expr, $arg: expr) => {
+    ($module_name:expr, $function_name:expr, $arg:expr) => {
         ::paste::paste! {
             use crate::{
                 sql::{Binding as _, Buildable as _, ToRawStatement as _},
             };
 
+            pub fn [<$function_name _fn>](number: impl Into<String>) -> Function {
+                create_fn_with_single_string_arg(number, format!("{}::{}", $module_name, $function_name).as_str())
+            }
+
+            #[macro_export]
+            macro_rules! [<parse_ $module_name _ $function_name>] {
+                ( $value:expr ) => {
+                    crate::functions::parse::[<$module_name>]::[<$function_name _fn>]($value)
+                };
+            }
+
+            pub use [<parse_ $module_name _ $function_name>] as [<$function_name>];
 
             #[test]
-            fn [<test_ $function_ident _fn_with_field_data >] () {
+            fn [<test_ $function_name _fn_with_field_data >] () {
                 let field = crate::Field::new("field");
-                let result = $function_ident(field);
+                let result = [<$function_name _fn>](field);
 
-                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("parse::{}(field)", $function_name_str));
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}(field)", function_path));
             }
 
             #[test]
-            fn [<test_ $function_ident _fn_with_fraction>]() {
-                let result = $function_ident($arg);
-                assert_eq!(result.fine_tune_params(), format!("parse::{}($_param_00000001)", $function_name_str));
-                assert_eq!(result.to_raw().to_string(), format!("parse::{}('{}')", $function_name_str, $arg));
+            fn [<test_ $function_name _fn_with_fraction>]() {
+                let result = [<$function_name _fn>]($arg);
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_field_data >] () {
+                let field = crate::Field::new("field");
+                let result = [<$function_name>]!(field);
+
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}(field)", function_path));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_param >] () {
+                let param = crate::sql::Param::new("param");
+                let result = [<$function_name>]!(param);
+
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}($param)", function_path));
+            }
+
+            #[test]
+            fn [<test_ $function_name _macro_with_fraction>]() {
+                let result = [<$function_name>]!($arg);
+                let function_path = format!("parse::{}::{}", $module_name, $function_name);
+                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
+                assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
             }
 
         }
@@ -89,16 +140,8 @@ pub mod email {
 
     use super::{create_fn_with_single_string_arg, String};
 
-    pub fn domain(number: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(number, "email::domain")
-    }
-
-    pub fn user(number: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(number, "email::user")
-    }
-
-    create_test_for_fn_with_single_arg!(domain, "email::domain", "oyelowo@codebreather.com");
-    create_test_for_fn_with_single_arg!(user, "email::user", "oyelowo@codebreather.com");
+    create_test_for_fn_with_single_arg!("email", "domain", "oyelowo@codebreather.com");
+    create_test_for_fn_with_single_arg!("email", "user", "oyelowo@codebreather.com");
 }
 
 pub mod url {
@@ -106,58 +149,34 @@ pub mod url {
 
     use super::{create_fn_with_single_string_arg, String};
 
-    pub fn domain(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::domain")
-    }
-
-    pub fn fragment(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::fragment")
-    }
-
-    pub fn host(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::host")
-    }
-
-    pub fn path(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::path")
-    }
-
-    pub fn port(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::port")
-    }
-
-    pub fn query(value: impl Into<String>) -> Function {
-        create_fn_with_single_string_arg(value, "url::query")
-    }
-
     create_test_for_fn_with_single_arg!(
-        domain,
-        "url::domain",
+        "url",
+        "domain",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
-        fragment,
-        "url::fragment",
+        "url",
+        "fragment",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
-        host,
-        "url::host",
+        "url",
+        "host",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
-        path,
-        "url::path",
+        "url",
+        "path",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
-        port,
-        "url::port",
+        "url",
+        "port",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
-        query,
-        "url::query",
+        "url",
+        "query",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
 }
