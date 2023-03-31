@@ -139,13 +139,29 @@ pub mod pbkdf2 {
     use crate::functions::array::Function;
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
-    pub fn compare(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+    pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
         create_fn_with_two_values(value1, value2, "pbkdf2::compare")
     }
 
-    pub fn generate(value: impl Into<sql::Value>) -> Function {
+    #[macro_export]
+    macro_rules! crypto_pbkdf2_compare {
+        ( $value1:expr,  $value2:expr ) => {
+            crate::functions::crypto::pbkdf2::compare_fn($value1, $value2)
+        };
+    }
+    pub use crypto_pbkdf2_compare as compare;
+
+    // Crypto generate function
+    pub fn generate_fn(value: impl Into<sql::Value>) -> Function {
         create_fn_with_single_value(value, "pbkdf2::generate")
     }
+    #[macro_export]
+    macro_rules! crypto_pbkdf2_generate {
+        ( $value1:expr) => {
+            crate::functions::crypto::pbkdf2::generate_fn($value1)
+        };
+    }
+    pub use crypto_pbkdf2_generate as generate;
 }
 
 pub mod scrypt {
@@ -213,7 +229,7 @@ fn test_pbkdf2_compare_with_param() {
     let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
     let pass = let_("pass").equal("the strongest password");
 
-    let result = pbkdf2::compare(hash.get_param(), pass.get_param());
+    let result = pbkdf2::compare_fn(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
         "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
@@ -226,7 +242,65 @@ fn test_pbkdf2_compare_with_param() {
 
 #[test]
 fn test_pbkdf2_generate() {
-    let result = pbkdf2::generate("Oyelowo");
+    let result = pbkdf2::generate_fn("Oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::pbkdf2::generate($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::pbkdf2::generate('Oyelowo')"
+    );
+}
+
+#[test]
+fn test_pbkdf2_compare_macro_with_raw_values() {
+    let result = pbkdf2::compare!("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA", "the strongest password");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::pbkdf2::compare('$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA', 'the strongest password')"
+    );
+}
+
+#[test]
+fn test_pbkdf2_compare_macro_with_fields() {
+    let hash = Field::new("hash");
+    let pass = Field::new("pass");
+
+    let result = pbkdf2::compare!(hash, pass);
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::pbkdf2::compare(hash, pass)"
+    );
+}
+
+#[test]
+fn test_pbkdf2_compare_macro_with_param() {
+    let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    let pass = let_("pass").equal("the strongest password");
+
+    let result = pbkdf2::compare!(hash.get_param(), pass.get_param());
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "crypto::pbkdf2::compare($hash, $pass)"
+    );
+}
+
+#[test]
+fn test_pbkdf2_generate_fn() {
+    let result = pbkdf2::generate!("Oyelowo");
     assert_eq!(
         result.fine_tune_params(),
         "crypto::pbkdf2::generate($_param_00000001)"
