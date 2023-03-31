@@ -21,7 +21,7 @@ use std::collections::{hash_map, HashMap};
 use surrealdb::sql;
 
 use crate::{
-    sql::{Binding, Buildable, Empty, ToRawStatement},
+    sql::{Binding, Buildable, Empty, Param, ToRawStatement},
     Field,
 };
 
@@ -38,6 +38,12 @@ impl<T: Into<sql::Strand>> From<T> for Url {
 
 impl From<Field> for Url {
     fn from(value: Field) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<Param> for Url {
+    fn from(value: Param) -> Self {
         Self(value.into())
     }
 }
@@ -69,6 +75,12 @@ impl From<Empty> for Object {
 
 impl From<Field> for Object {
     fn from(value: Field) -> Self {
+        Self::Object(value.into())
+    }
+}
+
+impl From<Param> for Object {
+    fn from(value: Param) -> Self {
         Self::Object(value.into())
     }
 }
@@ -248,6 +260,23 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                 assert_eq!(
                     result.to_raw().to_string(),
                     format!("http::{}(homepage, request_body, headers)", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test_field_ $function_name _method_with_params_as_args>]() {
+                let homepage = Param::new("homepage");
+                let request_body = Param::new("request_body");
+                let headers = Param::new("headers");
+
+                let result = [<$function_name _fn>](homepage, request_body, headers);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().to_string(),
+                    format!("http::{}($homepage, $request_body, $headers)", $function_name)
                 );
             }
 
