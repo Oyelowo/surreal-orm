@@ -170,7 +170,7 @@ fn create_fn_with_three_args(
     }
 }
 
-macro_rules! create_fn_with_url_and_hears {
+macro_rules! create_fn_with_url_and_head {
     ($function_name: expr) => {
         paste::paste! {
             pub fn [<$function_name _fn>](url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
@@ -179,8 +179,11 @@ macro_rules! create_fn_with_url_and_hears {
 
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
-               ( $geometry:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($geometry)
+               ( $url:expr ) => {
+                   crate::functions::http::[<$function_name _fn>]($url, crate::sql::Empty)
+               };
+               ( $url:expr, $custom_headers:expr ) => {
+                   crate::functions::http::[<$function_name _fn>]($url, $custom_headers)
                };
            }
            pub use [<http_ $function_name>] as [<$function_name>];
@@ -189,33 +192,38 @@ macro_rules! create_fn_with_url_and_hears {
     };
 }
 
-create_fn_with_url_and_hears!("head");
-create_fn_with_url_and_hears!("get");
-create_fn_with_url_and_hears!("delete");
+create_fn_with_url_and_head!("head");
+create_fn_with_url_and_head!("get");
+create_fn_with_url_and_head!("delete");
 
-pub fn post(
-    url: impl Into<Url>,
-    request_body: impl Into<Object>,
-    custom_headers: impl Into<Object>,
-) -> Function {
-    create_fn_with_three_args(url, request_body, custom_headers, "post")
-}
+macro_rules! create_fn_with_3args_url_body_and_head {
+    ($function_name: expr) => {
+        paste::paste! {
+            pub fn [<$function_name _fn>](
+                url: impl Into<Url>,
+                request_body: impl Into<Object>,
+                custom_headers: impl Into<Object>
+            ) -> Function {
+               create_fn_with_three_args(url, request_body, custom_headers, $function_name)
+           }
 
-pub fn put(
-    url: impl Into<Url>,
-    request_body: impl Into<Object>,
-    custom_headers: impl Into<Object>,
-) -> Function {
-    create_fn_with_three_args(url, request_body, custom_headers, "put")
-}
+           #[macro_export]
+           macro_rules! [<http_ $function_name>] {
+               ( $url:expr, $request_body:expr ) => {
+                   crate::functions::http::[<$function_name _fn>]($url, $request_body, crate::sql::Empty)
+               };
+               ( $url:expr, $request_body:expr, $custom_headers:expr ) => {
+                   crate::functions::http::[<$function_name _fn>]($url, $request_body ,$custom_headers)
+               };
+           }
+           pub use [<http_ $function_name>] as [<$function_name>];
 
-pub fn patch(
-    url: impl Into<Url>,
-    request_body: impl Into<Object>,
-    custom_headers: impl Into<Object>,
-) -> Function {
-    create_fn_with_three_args(url, request_body, custom_headers, "patch")
+        }
+    };
 }
+create_fn_with_3args_url_body_and_head!("post");
+create_fn_with_3args_url_body_and_head!("put");
+create_fn_with_3args_url_body_and_head!("patch");
 
 #[test]
 fn test_head_method_with_empty_header() {
@@ -362,7 +370,7 @@ fn test_delete_method_with_field_custom_header() {
 fn test_field_post_method_with_empty_body() {
     let homepage = Field::new("homepage");
     let headers = Field::new("headers");
-    let result = post("https://codebreather.com", Empty, headers);
+    let result = post_fn("https://codebreather.com", Empty, headers);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -376,7 +384,7 @@ fn test_field_post_method_with_empty_body() {
 #[test]
 fn test_field_post_method_with_empty_body_and_headers() {
     let homepage = Field::new("homepage");
-    let result = post("https://codebreather.com", Empty, Empty);
+    let result = post_fn("https://codebreather.com", Empty, Empty);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -394,7 +402,7 @@ fn test_field_post_method_with_fields_as_args() {
     let request_body = Field::new("request_body");
     let headers = Field::new("headers");
 
-    let result = post(homepage, request_body, headers);
+    let result = post_fn(homepage, request_body, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::post($_param_00000001, $_param_00000002, $_param_00000003)"
@@ -413,7 +421,7 @@ fn test_post_method_with_body_and_custom_headers_as_plain_values() {
         ("postId".into(), 100.into()),
     ]);
     let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = post("https://codebreather.com", body, headers);
+    let result = post_fn("https://codebreather.com", body, headers);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -428,7 +436,7 @@ fn test_post_method_with_body_and_custom_headers_as_plain_values() {
 #[test]
 fn test_field_put_method_with_empty_body_and_headers() {
     let homepage = Field::new("homepage");
-    let result = put("https://codebreather.com", Empty, Empty);
+    let result = put_fn("https://codebreather.com", Empty, Empty);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -446,7 +454,7 @@ fn test_field_put_method_with_fields_as_args() {
     let request_body = Field::new("request_body");
     let headers = Field::new("headers");
 
-    let result = put(homepage, request_body, headers);
+    let result = put_fn(homepage, request_body, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::put($_param_00000001, $_param_00000002, $_param_00000003)"
@@ -465,7 +473,7 @@ fn test_put_method_with_body_and_custom_headers_as_plain_values() {
         ("postId".into(), 100.into()),
     ]);
     let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = put("https://codebreather.com", body, headers);
+    let result = put_fn("https://codebreather.com", body, headers);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -480,7 +488,7 @@ fn test_put_method_with_body_and_custom_headers_as_plain_values() {
 #[test]
 fn test_field_patch_method_with_empty_body_and_headers() {
     let homepage = Field::new("homepage");
-    let result = patch("https://codebreather.com", Empty, Empty);
+    let result = patch_fn("https://codebreather.com", Empty, Empty);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -498,7 +506,7 @@ fn test_field_patch_method_with_fields_as_args() {
     let request_body = Field::new("request_body");
     let headers = Field::new("headers");
 
-    let result = patch(homepage, request_body, headers);
+    let result = patch_fn(homepage, request_body, headers);
     assert_eq!(
         result.fine_tune_params(),
         "http::patch($_param_00000001, $_param_00000002, $_param_00000003)"
@@ -517,7 +525,7 @@ fn test_patch_method_with_body_and_custom_headers_as_plain_values() {
         ("postId".into(), 100.into()),
     ]);
     let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-    let result = patch("https://codebreather.com", body, headers);
+    let result = patch_fn("https://codebreather.com", body, headers);
 
     assert_eq!(
         result.fine_tune_params(),
