@@ -40,7 +40,7 @@ fn create_validation_function(value: impl Into<sql::Value>, function_name: &str)
     }
 }
 
-macro_rules! test_validator {
+macro_rules! create_validation_with_tests {
     ($function_name: expr) => {
         paste::paste! {
             pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
@@ -136,15 +136,15 @@ pub mod is {
 
     use super::super::array::Function;
 
-    test_validator!("alphanum");
-    test_validator!("alpha");
-    test_validator!("ascii");
-    test_validator!("domain");
-    test_validator!("email");
-    test_validator!("hexadecimal");
-    test_validator!("latitude");
-    test_validator!("longitude");
-    test_validator!("numeric");
-    test_validator!("semver");
-    test_validator!("uuid");
+    create_validation_with_tests!("alphanum");
+    create_validation_with_tests!("alpha");
+    create_validation_with_tests!("ascii");
+    create_validation_with_tests!("domain");
+    create_validation_with_tests!("email");
+    create_validation_with_tests!("hexadecimal");
+    create_validation_with_tests!("latitude");
+    create_validation_with_tests!("longitude");
+    create_validation_with_tests!("numeric");
+    create_validation_with_tests!("semver");
+    create_validation_with_tests!("uuid");
 }
