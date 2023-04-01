@@ -9,16 +9,12 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::{
-    binding::{Binding, BindingsList},
-    filter::Conditional,
-    sql::Name,
-    Erroneous, Operatable, Parametric,
-};
+use crate::traits::{Buildable, Erroneous, Operatable, Parametric};
+
+use super::Idiomx;
 
 pub struct Param {
     param: sql::Param,
-    condition_query_string: String,
     bindings: BindingsList,
 }
 
@@ -34,15 +30,15 @@ impl Erroneous for Param {
     }
 }
 
-impl Display for Param {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.condition_query_string)
+impl Buildable for Param {
+    fn build(&self) -> String {
+        self.param.to_string()
     }
 }
 
-impl Conditional for Param {
-    fn get_condition_query_string(&self) -> String {
-        format!("{}", self.condition_query_string)
+impl Display for Param {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 
@@ -53,39 +49,16 @@ impl Parametric for Param {
 }
 
 impl Param {
-    pub fn new(param: impl Into<Name>) -> Self {
-        let param: Name = param.into();
+    pub fn new(param: impl Into<Idiomx>) -> Self {
+        let param: Idiomx = param.into();
         let param = sql::Idiom::from(param);
         let param = sql::Param::from(param);
-        let param_str = format!("{}", &param);
 
         Self {
-            param: param.into(),
-            condition_query_string: param_str,
+            param,
             bindings: vec![].into(),
         }
     }
 }
 
-impl Operatable for Param {
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Param
-    where
-        T: Into<sql::Value>,
-    {
-        let value: sql::Value = value.into();
-        let binding = Binding::new(value);
-        let condition = format!(
-            "{} {} ${}",
-            self.condition_query_string,
-            operator,
-            &binding.get_param()
-        );
-        let updated_bindings = self.__update_bindings(binding);
-
-        Self {
-            param: self.param.clone(),
-            condition_query_string: condition,
-            bindings: updated_bindings,
-        }
-    }
-}
+impl Operatable for Param {}
