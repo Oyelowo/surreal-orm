@@ -1,3 +1,7 @@
+use std::fmt::{self, Display};
+
+use super::Field;
+
 #[derive(Debug)]
 pub enum Return {
     None,
