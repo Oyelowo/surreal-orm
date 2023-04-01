@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use surrealdb::sql;
 
 use super::{Field, Param};
