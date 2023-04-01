@@ -27,7 +27,8 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, Buildable, ToRaw},
     types::{
-        DatetimeLike, DurationLike, Field, Function, NumberLike, Param, StrandLike, TableLike,
+        DatetimeLike, DurationLike, Field, Function, NumberLike, Param, StrandLike, Table,
+        TableLike,
     },
 };
 
