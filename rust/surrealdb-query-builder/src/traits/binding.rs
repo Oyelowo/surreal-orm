@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use std::env;
-
 use serde::Serialize;
 use surrealdb::sql;
 

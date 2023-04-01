@@ -1,27 +1,8 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowooyedayo@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
-
-use std::fmt::Display;
-
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{internal::replace_params, Erroneous, Parametric};
-
-pub trait Buildable {
-    fn build(&self) -> String;
-
-    fn fine_tune_params(&self) -> String {
-        replace_params(&self.build())
-    }
-}
-
-pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
+use super::{Buildable, Parametric};
 
 #[async_trait]
 pub trait Runnable<T>
@@ -33,8 +14,6 @@ where
         let query = self.build();
         let query = db.query(query);
 
-        // Binding should only happen if raw
-        #[cfg(not(feature = "raw"))]
         let mut query = self.get_bindings().iter().fold(query, |acc, val| {
             acc.bind((val.get_param(), val.get_value()))
         });
@@ -58,8 +37,6 @@ where
         let query = self.build();
         let query = db.query(query);
 
-        // Binding should only happen if raw
-        #[cfg(not(feature = "raw"))]
         let mut query = self.get_bindings().iter().fold(query, |acc, val| {
             acc.bind((val.get_param(), val.get_value()))
         });
