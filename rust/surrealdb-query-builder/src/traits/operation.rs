@@ -9,7 +9,7 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use super::{BindingsList, Buildable, Parametric};
+use super::{BindingsList, Buildable, Erroneous, Parametric};
 
 #[derive(Debug, Clone)]
 pub struct Operation {
@@ -64,7 +64,7 @@ impl Parametric for Operation {
 
 impl Operatable for Operation {}
 
-pub trait Operatable: Sized + Parametric + Buildable {
+pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
     ///
     /// # Arguments

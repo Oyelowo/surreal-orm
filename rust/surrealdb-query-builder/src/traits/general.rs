@@ -19,6 +19,8 @@ pub trait Buildable {
 
 pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
 
-// pub trait Conditional: Parametric + std::fmt::Display + Erroneous {
-//     fn get_condition_query_string(&self) -> String;
-// }
+pub trait Conditional: Parametric + Buildable + Erroneous {
+    fn get_condition_query_string(&self) -> String {
+        self.build()
+    }
+}

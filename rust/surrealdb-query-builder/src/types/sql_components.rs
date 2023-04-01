@@ -14,8 +14,8 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::{self, thing};
 
 use crate::{
-    binding::Binding, binding::BindingsList, errors::SurrealdbOrmError, filter::Conditional,
-    statements::select::SelectStatement, Erroneous, Field, Parametric,
+    errors::SurrealdbOrmError,
+    traits::{Conditional, Erroneous, Parametric},
 };
 
 #[derive(Debug, Clone)]
@@ -560,10 +560,10 @@ enum CoordinateValue {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct GeometryCustom(pub sql::Geometry);
+pub struct Geometry(pub sql::Geometry);
 
-impl<'de> Deserialize<'de> for GeometryCustom {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<GeometryCustom, D::Error>
+impl<'de> Deserialize<'de> for Geometry {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Geometry, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
@@ -581,7 +581,7 @@ impl<'de> Deserialize<'de> for GeometryCustom {
             MultiPoint { coordinates: Vec<PointCoords> },
             MultiLineString { coordinates: Vec<LineCoords> },
             MultiPolygon { coordinates: Vec<PolygonCoords> },
-            GeometryCollection { geometries: Vec<GeometryCustom> },
+            GeometryCollection { geometries: Vec<Geometry> },
         }
 
         let geo_type = GeometryType::deserialize(deserializer)?;
@@ -699,19 +699,19 @@ impl CoordParser for (String, String) {
     }
 }
 
-impl From<sql::Geometry> for GeometryCustom {
+impl From<sql::Geometry> for Geometry {
     fn from(value: sql::Geometry) -> Self {
         Self(value)
     }
 }
 
-impl From<GeometryCustom> for sql::Geometry {
-    fn from(value: GeometryCustom) -> Self {
+impl From<Geometry> for sql::Geometry {
+    fn from(value: Geometry) -> Self {
         value.0
     }
 }
 
-impl Deref for GeometryCustom {
+impl Deref for Geometry {
     type Target = sql::Geometry;
 
     fn deref(&self) -> &Self::Target {

@@ -5,7 +5,12 @@
  * Licensed under the MIT license
  */
 
-use super::Conditional;
+use crate::{
+    statements::SelectStatement,
+    traits::{Conditional, Operatable, Parametric},
+};
+
+use super::{Filter, SurrealId};
 
 pub fn where_(condition: impl Conditional) -> Filter {
     if condition.get_errors().is_empty() {
