@@ -281,33 +281,3 @@ impl Display for NONE {
         write!(f, "NONE")
     }
 }
-
-// impl<T> From<T> for ArrayCustom
-// where
-//     T: Into<sql::Value>,
-// {
-//     fn from(value: T) -> Self {
-//         Self(sql::Value::from(value.into()))
-//     }
-// }
-//
-// impl<T, const N: usize> From<&[T; N]> for ArrayCustom
-// where
-//     T: Into<sql::Value> + Clone,
-// {
-//     fn from(value: &[T; N]) -> Self {
-//         Self(
-//             value
-//                 .into_iter()
-//                 .map(|v| v.clone().into())
-//                 .collect::<Vec<sql::Value>>()
-//                 .into(),
-//         )
-//     }
-// }
-
-impl From<ArrayCustom> for sql::Value {
-    fn from(value: ArrayCustom) -> Self {
-        value.0
-    }
-}

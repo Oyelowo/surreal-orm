@@ -12,7 +12,6 @@ pub(crate) mod field;
 pub(crate) mod field_updater;
 pub(crate) mod filter;
 pub(crate) mod geometry;
-pub(crate) mod helper;
 pub(crate) mod idiom;
 pub(crate) mod numbers;
 pub(crate) mod ordinal;
@@ -42,6 +41,7 @@ pub use surreal_id::*;
 pub use token_target::*;
 pub use value::*;
 
+use surrealdb::sql;
 macro_rules! create_value_like_struct {
     ($sql_type_name:expr) => {
         paste::paste! {
@@ -126,3 +126,27 @@ create_value_like_struct!("Array");
 create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
+
+// impl<T> From<T> for ArrayCustom
+// where
+//     T: Into<sql::Value>,
+// {
+//     fn from(value: T) -> Self {
+//         Self(sql::Value::from(value.into()))
+//     }
+// }
+//
+// impl<T, const N: usize> From<&[T; N]> for ArrayCustom
+// where
+//     T: Into<sql::Value> + Clone,
+// {
+//     fn from(value: &[T; N]) -> Self {
+//         Self(
+//             value
+//                 .into_iter()
+//                 .map(|v| v.clone().into())
+//                 .collect::<Vec<sql::Value>>()
+//                 .into(),
+//         )
+//     }
+// }
