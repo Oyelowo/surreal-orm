@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 pub(crate) mod array;
 pub(crate) mod clause;
 pub(crate) mod expression;
@@ -111,6 +118,7 @@ macro_rules! create_value_like_struct {
     };
 }
 
+// creates NumberLike, StrandLike etc which can also be a field or param
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");

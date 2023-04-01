@@ -1,3 +1,16 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+use std::fmt::{self, Display};
+
+use surrealdb::sql;
+
+use crate::{statements::SelectStatement, traits::Parametric};
+
 #[derive(Clone)]
 pub enum Expression {
     SelectStatement(SelectStatement),
