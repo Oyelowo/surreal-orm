@@ -1,6 +1,19 @@
-pub mod clause;
-pub mod field;
-pub mod geometry;
-pub mod numbers;
-pub mod ordinal;
-pub mod param;
+pub(crate) mod clause;
+pub(crate) mod field;
+pub(crate) mod field_updater;
+pub(crate) mod filter;
+pub(crate) mod geometry;
+pub(crate) mod numbers;
+pub(crate) mod ordinal;
+pub(crate) mod param;
+pub(crate) mod sql_components;
+
+pub use clause::*;
+pub use field::*;
+pub use field_updater::*;
+pub use filter::*;
+pub use geometry::*;
+pub use numbers::*;
+pub use ordinal::*;
+pub use param::*;
+pub use sql_components::*;

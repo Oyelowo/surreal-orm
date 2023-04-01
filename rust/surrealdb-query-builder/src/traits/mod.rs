@@ -14,11 +14,9 @@ pub(crate) mod operation;
 pub(crate) mod raw;
 pub(crate) mod statements;
 
-// pub mod traits {
 pub use binding::*;
 pub use general::*;
 pub use model::*;
 pub use operation::*;
 pub use raw::*;
 pub use statements::*;
-// }

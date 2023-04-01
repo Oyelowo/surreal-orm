@@ -26,6 +26,7 @@ pub mod traits;
 pub mod types;
 
 pub mod functions;
+pub mod traits;
 
 pub mod query {
     // TODO: remove this, Here just for testing purpose

@@ -7,11 +7,9 @@
 
 use std::{borrow::Cow, fmt::Display};
 
-use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::Empty,
-    Erroneous,
-};
+use crate::traits::{BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric};
+
+use super::Empty;
 
 /// This module provides functionality for building complex filters for database queries.
 ///
@@ -58,10 +56,6 @@ impl From<Empty> for Filter {
     }
 }
 
-pub trait Conditional: Parametric + std::fmt::Display + Erroneous {
-    fn get_condition_query_string(&self) -> String;
-}
-
 impl Parametric for Filter {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -85,7 +79,7 @@ impl Parametric for Filter {
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Conditional) -> Filter {
+pub fn cond(filterable: impl Operatable) -> Filter {
     Filter::new(filterable)
 }
 
@@ -104,17 +98,12 @@ pub fn cond(filterable: impl Conditional) -> Filter {
 //     Empty
 // }
 
-impl Conditional for Filter {
-    fn get_condition_query_string(&self) -> String {
-        format!("{}", self.query_string)
-    }
-}
-
 impl Erroneous for Filter {
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
+
 impl Filter {
     /// Creates a new `Filter` instance.
     ///
@@ -132,8 +121,8 @@ impl Filter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     // pub fn new(query_string: String) -> Self {
-    pub fn new(query: impl Conditional) -> Self {
-        let query_string = format!("{}", query.get_condition_query_string());
+    pub fn new(query: Operation) -> Self {
+        let query_string = format!("{}", query.build());
         // let query_string = if query_string.is_empty() {
         //     "".into()
         // } else {
@@ -163,11 +152,11 @@ impl Filter {
     ///
     /// assert_eq!(filter.to_string(), "(name = 'John') OR (age > 30)");
     /// ```
-    pub fn or(self, filter: impl Conditional) -> Self {
+    pub fn or(self, filter: Operation) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter = filter.get_condition_query_string();
+        let ref filter = filter.build();
         let query_string = format!("{precendence} OR ({filter})");
 
         Filter {
@@ -193,11 +182,11 @@ impl Filter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(self, filter: impl Conditional) -> Self {
+    pub fn and(self, filter: Operation) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter = filter.get_condition_query_string();
+        let ref filter = filter.build();
         let query_string = format!("{precendence} AND ({filter})");
 
         Filter {

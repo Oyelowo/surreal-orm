@@ -12,7 +12,7 @@ use surrealdb::sql;
 use super::{BindingsList, Buildable, Parametric};
 
 #[derive(Debug, Clone)]
-pub struct Operator {
+pub struct Operation {
     query_string: String,
     bindings: BindingsList,
 }
@@ -44,25 +44,25 @@ pub struct Operator {
 //     }
 // }
 
-impl Display for Operator {
+impl Display for Operation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
-impl Buildable for Operator {
+impl Buildable for Operation {
     fn build(&self) -> String {
         self.query_string.to_string()
     }
 }
 
-impl Parametric for Operator {
+impl Parametric for Operation {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl Operatable for Operator {}
+impl Operatable for Operation {}
 
 pub trait Operatable: Sized + Parametric + Buildable {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
@@ -80,7 +80,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
-    fn equal<T>(&self, value: T) -> Operator
+    fn equal<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -102,7 +102,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```
-    fn not_equal<T>(&self, value: T) -> Operator
+    fn not_equal<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -123,7 +123,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::column("age").exactly_equal(42);
     /// assert_eq!(query.to_string(), "age == 42");
     /// ```
-    fn exactly_equal<T>(&self, value: T) -> Operator
+    fn exactly_equal<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
         Self: Sized,
@@ -146,7 +146,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = col.any_equal("Alice");
     /// assert_eq!(query.to_string(), friends ?= Alice)");
     /// ```
-    fn any_equal<T>(&self, value: T) -> Operator
+    fn any_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Value>,
     {
@@ -168,7 +168,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = col.any_equal("Alice");
     /// assert_eq!(query.to_string(), friends *= Alice)");
     /// ```
-    fn all_equal<T>(&self, value: T) -> Operator
+    fn all_equal<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -189,7 +189,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::column("name").like("A");
     /// assert_eq!(query.to_string(), "name ~ 'A'");
     /// ```
-    fn like<T>(&self, value: T) -> Operator
+    fn like<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -210,7 +210,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::column("name").not_like("A");
     /// assert_eq!(query.to_string(), "name !~ 'A'");
     /// ```
-    fn not_like<T>(&self, value: T) -> Operator
+    fn not_like<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -231,7 +231,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::column("name").all_like("A");
     /// assert_eq!(query.to_string(), "name ?~ 'A'");
     /// ```
-    fn any_like<T>(&self, value: T) -> Operator
+    fn any_like<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -252,7 +252,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::column("name").all_like("A");
     /// assert_eq!(query.to_string(), "name *~ 'A'");
     /// ```
-    fn all_like<T>(&self, value: T) -> Operator
+    fn all_like<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -273,7 +273,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").less_than(30);
     /// assert_eq!(query.to_string(), "age < 30");
     /// ```
-    fn less_than<T>(&self, value: T) -> Operator
+    fn less_than<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -295,7 +295,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").less_than_or_equals(30);
     /// assert_eq!(query.to_string(), "age <= 30");
     /// ```
-    fn less_than_or_equal<T>(&self, value: T) -> Operator
+    fn less_than_or_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -317,7 +317,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").greater_than(18);
     /// assert_eq!(query.to_string(), "age > 18");
     /// ```
-    fn greater_than<T>(&self, value: T) -> Operator
+    fn greater_than<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -339,7 +339,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").greater_than_or_equals(18);
     /// assert_eq!(query.to_string(), "age >= 18");
     /// ```
-    fn greater_than_or_equal<T>(&self, value: T) -> Operator
+    fn greater_than_or_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -363,7 +363,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age + 5");
     /// ```
-    fn add<T>(&self, value: T) -> Operator
+    fn add<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -386,7 +386,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age - 5");
     /// ```
-    fn subtract<T>(&self, value: T) -> Operator
+    fn subtract<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -409,7 +409,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age * 5");
     /// ```
-    fn multiply<T>(&self, value: T) -> Operator
+    fn multiply<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -432,7 +432,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age / 5");
     /// ```
-    fn divide<T>(&self, value: T) -> Operator
+    fn divide<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -455,7 +455,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age && 5");
     /// ```
-    fn truthy_and<T>(&self, value: T) -> Operator
+    fn truthy_and<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -479,7 +479,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age || 5");
     /// ```
-    fn truthy_or<T>(&self, value: T) -> Operator
+    fn truthy_or<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -502,7 +502,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age AND 5");
     /// ```
-    fn and<T>(&self, value: T) -> Operator
+    fn and<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -525,7 +525,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age OR 5");
     /// ```
-    fn or<T>(&self, value: T) -> Operator
+    fn or<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -549,7 +549,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age IS 5");
     /// ```
-    fn is<T>(&self, value: T) -> Operator
+    fn is<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -573,7 +573,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "age IS NOT 5");
     /// ```
-    fn is_not<T>(&self, value: T) -> Operator
+    fn is_not<T>(&self, value: T) -> Operation
     where
         T: Into<Value>,
     {
@@ -597,7 +597,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "friends CONTAINS 'Oyelowo'");
     /// ```
-    fn contains<T>(&self, value: T) -> Operator
+    fn contains<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -621,7 +621,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "friends CONTAINSNOT 'Oyelowo'");
     /// ```
-    fn contains_not<T>(&self, value: T) -> Operator
+    fn contains_not<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -644,7 +644,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSALL [10, 20, 10]");
     /// ```
-    fn contains_all<T>(&self, value: T) -> Operator
+    fn contains_all<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -668,7 +668,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSANY [10, 20, 10]");
     /// ```
-    fn contains_any<T>(&self, value: T) -> Operator
+    fn contains_any<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -692,7 +692,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSNONE [10, 20, 10]");
     /// ```
-    fn contains_none<T>(&self, value: T) -> Operator
+    fn contains_none<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -716,7 +716,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts INSIDE [10, 20, 10]");
     /// ```
-    fn inside<T>(&self, value: T) -> Operator
+    fn inside<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -739,7 +739,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
     /// ```
-    fn not_inside<T>(&self, value: T) -> Operator
+    fn not_inside<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -762,7 +762,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
     /// ```
-    fn all_inside<T>(&self, value: T) -> Operator
+    fn all_inside<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -786,7 +786,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts ANYINSIDE [10, 20, 10]");
     /// ```
-    fn any_inside<T>(&self, value: T) -> Operator
+    fn any_inside<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -810,7 +810,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NONEINSIDE [10, 20, 10]");
     /// ```
-    fn none_inside<T>(&self, value: T) -> Operator
+    fn none_inside<T>(&self, value: T) -> Operation
     where
         T: Into<ArrayCustom>,
     {
@@ -842,7 +842,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///   };
     /// ");
     /// ```
-    fn outside<T>(&self, value: T) -> Operator
+    fn outside<T>(&self, value: T) -> Operation
     where
         T: Into<GeometryOrField>,
     {
@@ -874,7 +874,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     ///   };
     /// ");
     /// ```
-    fn intersects<T>(&self, value: T) -> Operator
+    fn intersects<T>(&self, value: T) -> Operation
     where
         T: Into<GeometryOrField>,
     {
@@ -899,7 +899,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.increment_by(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
     /// ```
-    fn increment_by<T>(&self, value: T) -> Operator
+    fn increment_by<T>(&self, value: T) -> Operation
     where
         T: Into<Number>,
     {
@@ -922,7 +922,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.append("python");
     /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust', 'python']");
     /// ```
-    fn append<T>(&self, value: T) -> Operator
+    fn append<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -945,7 +945,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.decrement_by(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 - 2");
     /// ```
-    fn decrement_by<T>(&self, value: T) -> Operator
+    fn decrement_by<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Number>,
     {
@@ -968,7 +968,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.remove("python");
     /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust']");
     /// ```
-    fn remove<T>(&self, value: T) -> Operator
+    fn remove<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -990,7 +990,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.plus_equal(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
     /// ```
-    fn plus_equal<T>(&self, value: T) -> Operator
+    fn plus_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Value>,
     {
@@ -1012,7 +1012,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let updated_updater = updater.minus_equal("ohn");
     /// assert_eq!(updated_updater.to_string(), "name = 'J'");
     /// ```
-    fn minus_equal<T>(&self, value: T) -> Operator
+    fn minus_equal<T>(&self, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -1035,8 +1035,8 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = field.__as__("name_alias");
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> Operator {
-        Operator::new(format!("{} AS {}", self.build(), alias))
+    pub fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
+        Operation::new(format!("{} AS {}", self.build(), alias))
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -1054,7 +1054,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").between(18, 30);
     /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
     /// ```
-    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operator
+    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -1074,7 +1074,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
         let lower_updated_params = self.__update_bindings(lower_bound_binding);
         let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Operator {
+        Operation {
             condition_query_string: condition,
             bindings: updated_params,
             field_name: self.field_name.clone(),
@@ -1096,7 +1096,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
     /// let query = DbQuery::field("age").within(18, 30);
     /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
     /// ```
-    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operator
+    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -1116,7 +1116,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
         let lower_updated_params = self.__update_bindings(lower_bound_binding);
         let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Operator {
+        Operation {
             query_string: condition,
             bindings: updated_params,
         }
@@ -1125,13 +1125,13 @@ pub trait Operatable: Sized + Parametric + Buildable {
     pub fn ____________update_many_bindings<'bi>(
         &self,
         bindings: impl Into<&'bi [Binding]>,
-    ) -> Operator {
+    ) -> Operation {
         let bindings: &'bi [Binding] = bindings.into();
         // println!("bindingszz {bindings:?}");
         // updated_params.extend_from_slice(&self.bindings[..]);
         // updated_params.extend_from_slice(&bindings[..]);
         let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
-        Operator {
+        Operation {
             query_string: self.build(),
             bindings: updated_params,
         }
@@ -1161,7 +1161,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
         [self.get_bindings().as_slice(), &[binding]].concat()
     }
 
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operator
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
         T: Into<sql::Value>,
     {
@@ -1170,7 +1170,7 @@ pub trait Operatable: Sized + Parametric + Buildable {
         let condition = format!("{} {} ${}", self.build(), operator, &binding.get_param());
         let updated_bindings = self.__update_bindings(binding);
 
-        Operator {
+        Operation {
             query_string: condition,
             bindings: updated_bindings,
         }
