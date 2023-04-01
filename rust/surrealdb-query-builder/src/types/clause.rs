@@ -7,10 +7,10 @@
 
 use crate::{
     statements::SelectStatement,
-    traits::{Conditional, Operatable, Parametric},
+    traits::{BindingsList, Conditional, Erroneous, Parametric},
 };
 
-use super::{Filter, SurrealId};
+use super::{surreal_id::SurrealId, Filter, SurrealId};
 
 pub fn where_(condition: impl Conditional) -> Filter {
     if condition.get_errors().is_empty() {
@@ -212,10 +212,7 @@ impl std::fmt::Display for Index {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
-    use crate::{filter::cond, query_select::select, Operatable, Table};
-
     use super::*;
 
     #[test]

@@ -1,3 +1,13 @@
+use std::ops::Deref;
+
+use serde::Deserialize;
+use surrealdb::sql;
+
+use crate::{
+    errors::SurrealdbOrmError,
+    traits::{BindingsList, Conditional, Erroneous, Parametric},
+};
+
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(surrealdb::opt::RecordId);
 
