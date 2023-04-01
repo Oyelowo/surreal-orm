@@ -20,89 +20,14 @@
 use std::fmt::Display;
 
 use surrealdb::sql;
-use surrealdb::sql::Value;
 
-use crate::internal::replace_params;
-use crate::sql::{ArrayCustom, Binding, Buildable, ToRawStatement};
-use crate::{array, BindingsList, Field, Parametric};
-
-use super::math::Array;
-
-// pub fn val(val: impl Into<Value>) -> sql::Value {
-//     val.into()
-// }
-//
-// #[macro_export]
-// macro_rules! array {
-//     ($( $val:expr ),*) => {{
-//         vec![
-//             $( val($val) ),*
-//         ]
-//     }};
-// }
-
-pub enum ArrayOrField {
-    Field(Field),
-    Array(sql::Array),
-}
-
-impl From<Field> for ArrayOrField {
-    fn from(value: Field) -> Self {
-        Self::Field(value)
-    }
-}
-
-struct Mana(sql::Value);
-
-impl Mana {
-    fn to_array(self) -> sql::Value {
-        self.0
-    }
-}
-
-impl From<ArrayOrField> for Mana {
-    fn from(value: ArrayOrField) -> Self {
-        match value {
-            ArrayOrField::Field(f) => Self(f.into()),
-            ArrayOrField::Array(a) => Self(a.into()),
-        }
-    }
-}
-
-impl<U: Into<sql::Array>> From<U> for ArrayOrField {
-    fn from(value: U) -> Self {
-        let value: sql::Array = value.into();
-        Self::Array(value)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Function {
-    pub query_string: String,
-    pub bindings: BindingsList,
-}
-
-impl Parametric for Function {
-    fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
-    }
-}
-
-impl Display for Function {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-
-impl Buildable for Function {
-    fn build(&self) -> String {
-        self.query_string.clone()
-    }
-}
+use crate::array;
+use crate::traits::{Binding, BindingsList, Buildable, Parametric, ToRaw};
+use crate::types::{ArrayLike, Field, Function};
 
 fn create_array_helper(
-    arr1: impl Into<Array>,
-    arr2: impl Into<Array>,
+    arr1: impl Into<ArrayLike>,
+    arr2: impl Into<ArrayLike>,
     func_name: &str,
 ) -> Function {
     let arr1: sql::Value = arr1.into().into();
@@ -124,7 +49,7 @@ macro_rules! create_fn_with_two_array_args {
     ($function_name:expr) => {
         paste::paste! {
 
-            pub fn [<$function_name _fn>](arr1: impl Into<Array>, arr2: impl Into<Array>) -> Function {
+            pub fn [<$function_name _fn>](arr1: impl Into<ArrayLike>, arr2: impl Into<ArrayLike>) -> Function {
                 create_array_helper(arr1, arr2, $function_name)
             }
 
@@ -225,7 +150,7 @@ create_fn_with_two_array_args!("union");
 create_fn_with_two_array_args!("difference");
 create_fn_with_two_array_args!("intersect");
 
-pub fn distinct_fn(arr: impl Into<Array>) -> Function {
+pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: sql::Value = arr.into().into();
     let arr = Binding::new(arr).with_description("Array to be made distinct");
 
@@ -243,7 +168,7 @@ macro_rules! array_distinct_fn {
 }
 pub use array_distinct_fn as distinct;
 
-pub fn len_fn(arr1: impl Into<Array>) -> Function {
+pub fn len_fn(arr1: impl Into<ArrayLike>) -> Function {
     let arr: sql::Value = arr1.into().into();
     let arr =
         Binding::new(arr).with_description("Length of array to be checked. Also checks falsies");
@@ -284,7 +209,7 @@ impl Display for Ordering {
     }
 }
 
-pub fn sort_fn(arr: impl Into<ArrayCustom>, ordering: Ordering) -> Function {
+pub fn sort_fn(arr: impl Into<ArrayLike>, ordering: Ordering) -> Function {
     let arr: sql::Value = arr.into().into();
     let arr = Binding::new(arr);
     let query_string = match ordering {
@@ -318,7 +243,7 @@ macro_rules! array_sort {
 pub use array_sort as sort;
 
 pub mod sort {
-    use crate::{functions::math::Array, sql::Binding};
+    use crate::{functions::math::Array, sql::Binding, traits::Binding};
     use surrealdb::sql;
 
     use super::Function;

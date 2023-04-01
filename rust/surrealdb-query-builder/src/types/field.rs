@@ -52,7 +52,7 @@ pub struct Field {
 }
 
 impl Field {
-    fn new(value: impl Into<Idiomx>) -> Operation {
+    pub fn new(value: impl Into<Idiomx>) -> Operation {
         let value: sql::Idiom = value.into().into();
         let bindings = vec![Binding::new(sql::Value::from(value.clone()))];
         Self {
