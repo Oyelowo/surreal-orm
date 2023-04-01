@@ -486,7 +486,8 @@ struct Fielda {
 }
 
 impl Fielda {
-    fn new(value: sql::Idiom) -> Self {
+    fn new(value: impl Into<Name>) -> Self {
+        let value: sql::Idiom = value.into().into();
         // let value: sql::Idiom = value.clone().into();
         // println!("erer {}", value.clone());
         let bindings = dbg!(vec![Binding::new(sql::Value::from(value.clone()))]);
@@ -511,7 +512,8 @@ impl Buildable for Fielda {
 
 #[test]
 fn test_field() {
-    let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
+    let xx = Fielda::new("lowo");
+    // let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
     let mm = xx.equal(34).less_than_or_equal(46);
     assert_eq!(mm.clone().to_raw().to_string(), "lowo = 34 <= 46");
     assert_eq!(mm.build(), "nawa");
