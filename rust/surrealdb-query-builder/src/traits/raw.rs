@@ -40,14 +40,14 @@ impl Buildable for Raw {
     }
 }
 
-pub trait ToRawStatement
+pub trait ToRaw
 where
     Self: Sized,
 {
     fn to_raw(self) -> Raw;
 }
 
-impl<T> ToRawStatement for T
+impl<T> ToRaw for T
 where
     T: Parametric + Buildable,
 {

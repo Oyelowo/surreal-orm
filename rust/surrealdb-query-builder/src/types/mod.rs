@@ -1,4 +1,5 @@
 pub(crate) mod clause;
+pub(crate) mod expression;
 pub(crate) mod field;
 pub(crate) mod field_updater;
 pub(crate) mod filter;
@@ -6,7 +7,10 @@ pub(crate) mod geometry;
 pub(crate) mod numbers;
 pub(crate) mod ordinal;
 pub(crate) mod param;
+pub(crate) mod return_;
 pub(crate) mod sql_components;
+pub(crate) mod surreal_id;
+pub(crate) mod token_target;
 
 pub use clause::*;
 pub use field::*;
