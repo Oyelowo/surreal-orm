@@ -21,43 +21,6 @@
 use geo::{point, polygon};
 use surrealdb::sql;
 
-use crate::{
-    field::GeometryOrField,
-    sql::{Binding, Buildable, Empty, Param, ToRawStatement},
-    Field,
-};
-
-use super::array::Function;
-
-// enum GeometryOrField {
-//     Field(Field),
-//     Geometry(sql::Geometry),
-// }
-//
-// impl From<GeometryOrField> for sql::Value {
-//     fn from(value: GeometryOrField) -> Self {
-//         match value {
-//             GeometryOrField::Field(f) => f.into(),
-//             GeometryOrField::Geometry(geo) => geo.into(),
-//         }
-//     }
-// }
-//
-// impl From<Field> for GeometryOrField {
-//     fn from(value: Field) -> Self {
-//         Self::Field(value)
-//     }
-// }
-//
-// impl<T> From<T> for GeometryOrField
-// where
-//     T: Into<sql::Geometry>,
-// {
-//     fn from(value: T) -> Self {
-//         let value: sql::Geometry = value.into();
-//         Self::Geometry(value)
-//     }
-// }
 pub(crate) fn create_geo_with_single_arg(
     geometry: impl Into<GeometryLike>,
     fn_suffix: &str,
@@ -139,101 +102,23 @@ macro_rules! geo_distance {
 }
 pub use geo_distance as distance;
 
-pub enum NumberOrEmpty {
-    Empty,
-    Number(surrealdb::sql::Value),
-    // Field(Field),
-}
-
-// impl From<NumberOrEmpty> for sql::Value {
-//     fn from(value: NumberOrEmpty) -> Self {
-//         match value {
-//             NumberOrEmpty::Empty => sql::Idiom::from("".to_string()).into(),
-//             NumberOrEmpty::Number(n) => n.into(),
-//             // NumberOrEmpty::Field(f) => f.into(),
-//         }
-//     }
-// }
-impl<T> From<T> for NumberOrEmpty
-where
-    T: Into<sql::Number>,
-{
-    fn from(value: T) -> Self {
-        let value: sql::Number = value.into();
-        Self::Number(value.into())
-    }
-}
-
-impl From<Field> for NumberOrEmpty {
-    fn from(value: Field) -> Self {
-        Self::Number(value.into())
-    }
-}
-
-impl From<Empty> for NumberOrEmpty {
-    fn from(value: Empty) -> Self {
-        Self::Empty
-    }
-}
+use crate::{
+    traits::{Buildable, ToRaw},
+    types::{Field, Param},
+};
 
 pub mod hash {
-
-    type Accuracy = super::NumberOrEmpty;
-
-    use surrealdb::sql;
-
     use super::{create_geo_with_single_arg, GeometryLike};
     use crate::{
-        field::GeometryOrField,
-        functions::array::Function,
-        sql::{Binding, Empty, Param},
-        Field,
+        traits::Binding,
+        types::{Function, GeometryLike, NumberLike, StrandLike},
     };
+    use surrealdb::sql;
 
-    pub struct GeoHash(sql::Value);
+    pub type GeoHash = StrandLike;
 
-    impl From<&str> for GeoHash {
-        fn from(value: &str) -> Self {
-            Self(value.into())
-        }
-    }
-    impl From<String> for GeoHash {
-        fn from(value: String) -> Self {
-            Self(value.into())
-        }
-    }
-
-    impl From<Field> for GeoHash {
-        fn from(value: Field) -> Self {
-            Self(value.into())
-        }
-    }
-
-    impl From<Param> for GeoHash {
-        fn from(value: Param) -> Self {
-            Self(value.into())
-        }
-    }
-
-    impl From<GeoHash> for sql::Value {
-        fn from(value: GeoHash) -> Self {
-            value.0
-        }
-    }
-
-    // impl GeoHash {
-    //     fn new(hash: String) -> Self {
-    //         Self(hash)
-    //     }
-    // }
-    //
-    // enum GeoHashDecodeArg {
-    //     Field(Field),
-    //     GeoHash(GeoHash),
-    // }
-
-    pub fn decode_fn(geometry: impl Into<GeoHash>) -> Function {
-        let binding = Binding::new(geometry.into());
+    pub fn decode_fn(geohash: impl Into<GeoHash>) -> Function {
+        let binding = Binding::new(geohash.into());
         let string = binding.get_param_dollarised();
 
         Function {
@@ -249,28 +134,42 @@ pub mod hash {
     }
     pub use geo_hash_decode as decode;
 
-    pub fn encode_fn(geometry: impl Into<GeometryLike>, accuracy: impl Into<Accuracy>) -> Function {
+    pub fn encode_fn(
+        geometry: impl Into<GeometryLike>,
+        accuracy: Option<impl Into<NumberLike>>,
+    ) -> Function {
         let binding = Binding::new(geometry.into());
-        let accuracy: Accuracy = accuracy.into();
+        let accuracy: NumberLike = accuracy.into();
         let geometry_param = binding.get_param_dollarised();
 
         let mut bindings = vec![binding];
 
-        let str = match accuracy {
-            Accuracy::Empty => format!("geo::hash::encode({geometry_param})",),
-            Accuracy::Number(num) => {
-                let binding = Binding::new(num);
-                let accuracy_param = binding.get_param_dollarised();
-                bindings.push(binding);
+        let str = if let Some(accuracy) = accuracy {
+            match accuracy {
+                NumberLike::Number(num) => {
+                    let binding = Binding::new(num);
+                    let accuracy_param = binding.get_param_dollarised();
+                    bindings.push(binding);
 
-                format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
-            } // Accuracy::Field(field) => {
-              //     let binding = Binding::new(field);
-              //     let accuracy_param = binding.get_param_dollarised();
-              //     bindings.push(binding);
-              //
-              //     format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
-              // }
+                    format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
+                }
+                NumberLike::Field(field) => {
+                    let binding = Binding::new(field);
+                    let accuracy_param = binding.get_param_dollarised();
+                    bindings.push(binding);
+
+                    format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
+                }
+                NumberLike::Param(field) => {
+                    let binding = Binding::new(field);
+                    let accuracy_param = binding.get_param_dollarised();
+                    bindings.push(binding);
+
+                    format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
+                }
+            };
+        } else {
+            format!("geo::hash::encode({geometry_param})")
         };
         Function {
             query_string: str,
@@ -281,7 +180,7 @@ pub mod hash {
     #[macro_export]
     macro_rules! geo_hash_encode {
         ( $geometry:expr ) => {
-            crate::functions::geo::hash::encode_fn($geometry, crate::sql::Empty)
+            crate::functions::geo::hash::encode_fn($geometry, crate::types::Empty)
         };
         ( $geometry:expr, $accuracy:expr ) => {
             crate::functions::geo::hash::encode_fn($geometry, $accuracy)
