@@ -28,7 +28,7 @@ use crate::{
     binding::{Binding, BindingsList, Parametric},
     clause::Empty,
     filter::Conditional,
-    sql::{ArrayCustom, Name},
+    sql::{ArrayCustom, Buildable, Name, ToRawStatement},
     Clause, Erroneous, SurrealdbModel,
 };
 
@@ -480,7 +480,120 @@ impl Operatable for Field {
     }
 }
 
-pub trait Operatable: Sized + Parametric {
+struct Fielda {
+    value: sql::Idiom,
+    bindings: BindingsList,
+}
+
+impl Fielda {
+    fn new(value: sql::Idiom) -> Self {
+        // let value: sql::Idiom = value.clone().into();
+        // println!("erer {}", value.clone());
+        let bindings = dbg!(vec![Binding::new(sql::Value::from(value.clone()))]);
+        Self { value, bindings }
+    }
+}
+
+// impl ToRawStatement for Fielda {}
+
+impl Parametric for Fielda {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Buildable for Fielda {
+    fn build(&self) -> String {
+        self.get_bindings().first().unwrap().get_param_dollarised()
+        // self.0.to_string()
+    }
+}
+
+#[test]
+fn test_field() {
+    let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
+    let mm = xx.equal(34).less_than_or_equal(46);
+    assert_eq!(mm.clone().to_raw().to_string(), "lowo = 34 <= 46");
+    assert_eq!(mm.build(), "nawa");
+}
+impl Operational for Fielda {}
+
+#[derive(Debug, Clone)]
+pub struct Operator {
+    query_string: String,
+    bindings: BindingsList,
+}
+
+impl Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+impl Buildable for Operator {
+    fn build(&self) -> String {
+        self.query_string.to_string()
+    }
+}
+
+impl Parametric for Operator {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Operational for Operator {}
+
+pub trait Operational: Sized + Parametric + Buildable {
+    fn equal<T>(&self, value: T) -> Operator
+    where
+        T: Into<sql::Value>,
+    {
+        self.generate_query(sql::Operator::Equal, value)
+    }
+
+    fn less_than_or_equal<T>(&self, value: T) -> Operator
+    where
+        T: Into<Ordinal>,
+    {
+        let value: Ordinal = value.into();
+        self.generate_query(sql::Operator::LessThanOrEqual, value)
+    }
+
+    fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
+        // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
+        // updated_params.extend(self.bindings.to_vec());
+        // updated_params.extend([binding]);
+        // updated_params
+        [self.get_bindings().as_slice(), &[binding]].concat()
+    }
+
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operator
+    where
+        T: Into<sql::Value>,
+    {
+        let value: sql::Value = value.into();
+        let binding = Binding::new(value);
+        let condition = format!(
+            "{} {} ${}",
+            self.build(),
+            // self.condition_query_string,
+            operator,
+            &binding.get_param()
+        );
+        let updated_bindings = self.__update_bindings(binding);
+
+        // let updated_bindings = self.__update_bindings(param, value);
+        Operator {
+            // condition_query_string: condition,
+            query_string: condition,
+            bindings: updated_bindings,
+            // field_name: self.field_name.clone(),
+        }
+    }
+}
+
+pub trait Operatable: Sized + Parametric + Display {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
     ///
     /// # Arguments
@@ -1469,17 +1582,19 @@ pub trait Operatable: Sized + Parametric {
     //     let binding = Binding::new(value);
     //     let condition = format!(
     //         "{} {} ${}",
-    //         self.condition_query_string,
+    //         self.to_string(),
+    //         // self.condition_query_string,
     //         operator,
     //         &binding.get_param()
     //     );
     //     let updated_bindings = self.__update_bindings(binding);
     //
     //     // let updated_bindings = self.__update_bindings(param, value);
-    //     Self {
-    //         condition_query_string: condition,
+    //     Operator {
+    //         // condition_query_string: condition,
+    //         query_string: condition,
     //         bindings: updated_bindings,
-    //         field_name: self.field_name.clone(),
+    //         // field_name: self.field_name.clone(),
     //     }
     // }
 }
