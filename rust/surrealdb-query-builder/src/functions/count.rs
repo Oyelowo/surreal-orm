@@ -1,23 +1,19 @@
 use std::fmt::{self, Display};
 
-use crate::array;
-use crate::sql::ToRawStatement;
-use surrealdb::sql;
-
 use crate::{
-    filter::{cond, Filter},
-    sql::{ArrayCustom, Binding, Buildable, Empty},
-    Field, Operatable, Parametric,
+    array,
+    traits::{Buildable, Operatable, Parametric, ToRaw},
+    types::{ArrayLike, Empty, Field, Filter, Function, Param},
 };
-
-use super::array::Function;
+use surrealdb::sql;
 
 #[derive(Debug, Clone)]
 pub enum CountArg {
     Empty,
     Field(Field),
+    Param(Param),
     Filter(Filter),
-    Array(ArrayCustom),
+    Array(ArrayLike),
 }
 
 impl From<Empty> for CountArg {
@@ -38,7 +34,7 @@ impl From<Filter> for CountArg {
     }
 }
 
-impl<T: Into<ArrayCustom>> From<T> for CountArg {
+impl<T: Into<ArrayLike>> From<T> for CountArg {
     fn from(value: T) -> Self {
         Self::Array(value.into())
     }
@@ -50,6 +46,10 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 
     let string = match countable {
         CountArg::Empty => format!(""),
+        CountArg::Param(param) => {
+            bindings = param.get_bindings();
+            format!("{}", param)
+        }
         CountArg::Field(field) => {
             bindings = field.get_bindings();
             format!("{}", field)
@@ -78,7 +78,7 @@ macro_rules! count {
         crate::functions::count::count_fn($countable)
     };
     () => {
-        crate::functions::count::count_fn(crate::sql::Empty)
+        crate::functions::count::count_fn(crate::types::Empty)
     };
 }
 pub use count;
