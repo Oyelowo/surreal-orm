@@ -7,10 +7,9 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    Field,
-};
+use crate::traits::{BindingsList, Buildable, Parametric};
+
+use super::Field;
 
 /// A helper struct for generating SQL update statements.
 pub struct Updater {
@@ -28,9 +27,15 @@ pub fn updater(field: impl Into<Field>) -> Updater {
     Updater::new(field)
 }
 
+impl Buildable for Updater {
+    fn build(&self) -> String {
+        self.column_updater_string
+    }
+}
+
 impl std::fmt::Display for Updater {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.column_updater_string))
+        write!(f, "{}", self.build())
     }
 }
 
@@ -200,19 +205,6 @@ impl Updater {
         self._____update_field(Operator::Dec, value)
     }
 
-    /// Returns the string representation of the column update statement.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = score + 1".to_string());
-    /// assert_eq!(updater.to_string(), "score = score + 1");
-    /// ```
-    pub fn get_updater_string(self) -> String {
-        self.column_updater_string
-    }
-
     fn _____update_field(&self, operator: sql::Operator, value: impl Into<sql::Value>) -> Updater {
         let value: sql::Value = value.into();
         let binding = Binding::new(value);
@@ -225,7 +217,6 @@ impl Updater {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
     use super::*;
 
@@ -233,59 +224,41 @@ mod tests {
     fn test_increment_by() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.increment_by(10);
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "score += _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "score += _param_00000000");
     }
 
     #[test]
     fn test_append() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.append("Alice");
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "names += _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "names += _param_00000000");
     }
 
     #[test]
     fn test_decrement_by() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.decrement_by(5);
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "score -= _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "score -= _param_00000000");
     }
 
     #[test]
     fn test_remove() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.remove("Alice");
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "names -= _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "names -= _param_00000000");
     }
 
     #[test]
     fn test_plus_equal() {
         let updater = Updater::new("score".to_string());
         let updated_updater = updater.plus_equal(10);
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "score += _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "score += _param_00000000");
     }
 
     #[test]
     fn test_minus_equal() {
         let updater = Updater::new("names".to_string());
         let updated_updater = updater.minus_equal("Alice");
-        assert_eq!(
-            updated_updater.get_updater_string(),
-            "names -= _param_00000000"
-        );
+        assert_eq!(updated_updater.build(), "names -= _param_00000000");
     }
 }

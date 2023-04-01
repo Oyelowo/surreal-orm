@@ -46,7 +46,7 @@ use super::{
 /// assert_eq!(field.to_string(), "name");
 /// ```
 #[derive(Debug, Clone)]
-struct Field {
+pub struct Field {
     name: sql::Idiom,
     bindings: BindingsList,
 }
@@ -75,16 +75,6 @@ impl Buildable for Field {
         self.name.to_string()
     }
 }
-
-#[test]
-fn test_field() {
-    let xx = Field::new("lowo");
-    // let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
-    let mm = xx.equal(34).less_than_or_equal(46);
-    assert_eq!(mm.clone().to_raw().to_string(), "lowo = 34 <= 46");
-    assert_eq!(mm.build(), "nawa");
-}
-impl Operational for Field {}
 
 impl Parametric for Field {
     fn get_bindings(&self) -> BindingsList {
@@ -173,4 +163,13 @@ impl std::fmt::Display for Field {
             self.build() // self.condition_query_string.trim_start_matches("`")
         ))
     }
+}
+
+#[test]
+fn test_field() {
+    let xx = Field::new("lowo");
+    // let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
+    let mm = xx.equal(34).less_than_or_equal(46);
+    assert_eq!(mm.clone().to_raw().to_string(), "lowo = 34 <= 46");
+    assert_eq!(mm.build(), "nawa");
 }
