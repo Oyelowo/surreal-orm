@@ -5,7 +5,7 @@ use surrealdb::sql;
 
 use crate::{
     errors::SurrealdbOrmError,
-    traits::{BindingsList, Conditional, Erroneous, Parametric},
+    traits::{Binding, BindingsList, Conditional, Erroneous, Parametric},
 };
 
 #[derive(Debug, Serialize, Clone)]

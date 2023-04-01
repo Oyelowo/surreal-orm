@@ -1,7 +1,7 @@
-struct ValueCustom(sql::Value);
+struct Value(sql::Value);
 
-impl From<sql::Value> for ValueCustom {
+impl From<sql::Value> for Value {
     fn from(value: sql::Value) -> Operator {
-        ValueCustom(value)
+        Value(value)
     }
 }

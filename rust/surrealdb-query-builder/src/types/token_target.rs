@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 pub enum TokenType {
     EDDSA,
     ES256,
