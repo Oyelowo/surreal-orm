@@ -11,29 +11,22 @@ use std::fmt::Display;
 use std::ops::Deref;
 
 // pub(crate) mod binding;
-pub mod clause;
 pub(crate) mod errors;
-mod field_updater;
-pub mod filter;
+pub mod functions;
 pub(crate) mod helpers;
 pub(crate) mod internal;
-pub mod links;
 pub mod model_id;
 mod operators_macros;
-mod sql_components;
 mod statements;
 pub mod traits;
 pub mod types;
-
-pub mod functions;
-pub mod traits;
 
 pub mod query {
     // TODO: remove this, Here just for testing purpose
     pub use super::functions::array::concat;
     // pub use super::functions::array::concatx as concat_;
-    pub use super::raw_statements::{RawStatement, ToRawStatement};
-    pub use super::statements::statements::*;
+    // pub use super::raw_statements::{Raw, To};
+    pub use super::statements::*;
 }
 
 pub use binding::{BindingsList, Parametric};
@@ -51,18 +44,18 @@ pub use surrealdb::sql::json;
 pub use surrealdb::sql::Value;
 
 pub mod sql {
-    pub use super::clause::*;
-    pub use super::field::*;
-    pub use super::field_updater::*;
-    pub use super::param::*;
-    pub use super::raw_statements::*;
-    pub use super::sql_components::*;
-    pub use super::sql_traits::*;
-    // pub use super::types::binding::*;
+    // pub use super::clause::*;
+    // pub use super::field::*;
+    // pub use super::field_updater::*;
+    // pub use super::param::*;
+    // pub use super::raw_statements::*;
+    // pub use super::sql_components::*;
+    // pub use super::sql_traits::*;
+    // // pub use super::types::binding::*;
 }
 
 pub mod utils {
-    pub use super::filter::cond;
+    // pub use super::filter::cond;
 }
 pub mod prelude {
     use super::statements;

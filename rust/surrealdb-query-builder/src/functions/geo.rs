@@ -29,32 +29,6 @@ use crate::{
 
 use super::array::Function;
 
-pub struct Geometry(sql::Value);
-
-impl From<Geometry> for sql::Value {
-    fn from(value: Geometry) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Geometry>> From<T> for Geometry {
-    fn from(value: T) -> Self {
-        let value: sql::Geometry = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Geometry {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for Geometry {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
 // enum GeometryOrField {
 //     Field(Field),
 //     Geometry(sql::Geometry),
@@ -85,7 +59,7 @@ impl From<Param> for Geometry {
 //     }
 // }
 pub(crate) fn create_geo_with_single_arg(
-    geometry: impl Into<Geometry>,
+    geometry: impl Into<GeometryLike>,
     fn_suffix: &str,
 ) -> Function {
     let binding = Binding::new(geometry.into());
@@ -98,8 +72,8 @@ pub(crate) fn create_geo_with_single_arg(
 }
 
 fn create_geo_fn_with_two_args(
-    point1: impl Into<Geometry>,
-    point2: impl Into<Geometry>,
+    point1: impl Into<GeometryLike>,
+    point2: impl Into<GeometryLike>,
     fn_suffix: &str,
 ) -> Function {
     let binding1 = Binding::new(point1.into());
@@ -114,7 +88,7 @@ fn create_geo_fn_with_two_args(
     }
 }
 
-pub fn area_fn(geometry: impl Into<Geometry>) -> Function {
+pub fn area_fn(geometry: impl Into<GeometryLike>) -> Function {
     create_geo_with_single_arg(geometry, "area")
 }
 
@@ -127,7 +101,7 @@ macro_rules! geo_area {
 
 pub use geo_area as area;
 
-pub fn bearing_fn(point1: impl Into<Geometry>, point2: impl Into<Geometry>) -> Function {
+pub fn bearing_fn(point1: impl Into<GeometryLike>, point2: impl Into<GeometryLike>) -> Function {
     create_geo_fn_with_two_args(point1, point2, "bearing")
 }
 
@@ -140,7 +114,7 @@ macro_rules! geo_bearing {
 
 pub use geo_bearing as bearing;
 
-pub fn centroid_fn(geometry: impl Into<Geometry>) -> Function {
+pub fn centroid_fn(geometry: impl Into<GeometryLike>) -> Function {
     create_geo_with_single_arg(geometry, "centroid")
 }
 
@@ -153,7 +127,7 @@ macro_rules! geo_centroid {
 
 pub use geo_centroid as centroid;
 
-pub fn distance_fn(point1: impl Into<Geometry>, point2: impl Into<Geometry>) -> Function {
+pub fn distance_fn(point1: impl Into<GeometryLike>, point2: impl Into<GeometryLike>) -> Function {
     create_geo_fn_with_two_args(point1, point2, "distance")
 }
 
@@ -208,7 +182,7 @@ pub mod hash {
 
     use surrealdb::sql;
 
-    use super::{create_geo_with_single_arg, Geometry};
+    use super::{create_geo_with_single_arg, GeometryLike};
     use crate::{
         field::GeometryOrField,
         functions::array::Function,
@@ -275,7 +249,7 @@ pub mod hash {
     }
     pub use geo_hash_decode as decode;
 
-    pub fn encode_fn(geometry: impl Into<Geometry>, accuracy: impl Into<Accuracy>) -> Function {
+    pub fn encode_fn(geometry: impl Into<GeometryLike>, accuracy: impl Into<Accuracy>) -> Function {
         let binding = Binding::new(geometry.into());
         let accuracy: Accuracy = accuracy.into();
         let geometry_param = binding.get_param_dollarised();
