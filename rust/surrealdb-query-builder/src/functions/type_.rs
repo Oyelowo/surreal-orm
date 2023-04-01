@@ -22,46 +22,14 @@
 // type::table()	Converts a value into a table
 // type::thing()	Converts a value into a record pointer
 
-use surrealdb::sql::{self};
+use surrealdb::sql;
 
 use crate::{
-    sql::{Binding, Buildable, Param, ToRawStatement},
-    Field,
+    traits::{Binding, Buildable, ToRaw},
+    types::{
+        DatetimeLike, DurationLike, Field, Function, NumberLike, Param, StrandLike, TableLike,
+    },
 };
-
-use super::{
-    array::Function,
-    math::Number,
-    parse::String,
-    time::{Datetime, Duration},
-};
-
-pub struct Table(sql::Value);
-
-impl Table {
-    fn new(table_name: impl Into<std::string::String>) -> Table {
-        Table(sql::Table::from(table_name.into()).into())
-    }
-}
-
-impl From<Table> for sql::Value {
-    fn from(value: Table) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Table>> From<T> for Table {
-    fn from(value: T) -> Self {
-        let value: sql::Table = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Table {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
 
 macro_rules! create_type {
     ($function_name:expr, $value_type: ty, $test_data_input:expr, $test_stringified_data_output: expr) => {
@@ -105,7 +73,7 @@ macro_rules! create_type {
 create_type!("bool", sql::Value, "toronto", "'toronto'");
 create_type!(
     "datetime",
-    Datetime,
+    DatetimeLike,
     chrono::DateTime::<chrono::Utc>::from_utc(
         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
@@ -114,18 +82,18 @@ create_type!(
 );
 create_type!(
     "duration",
-    Duration,
+    DurationLike,
     std::time::Duration::from_secs(24 * 60 * 60 * 7),
     "1w"
 );
-create_type!("float", Number, 43.5, 43.5);
-create_type!("int", Number, 99, 99);
-create_type!("number", Number, 5, 5);
+create_type!("float", NumberLike, 43.5, 43.5);
+create_type!("int", NumberLike, 99, 99);
+create_type!("number", NumberLike, 5, 5);
 create_type!("string", sql::Value, 5454, "5454");
 create_type!("regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
-create_type!("table", Table, Table::new("user"), "user");
+create_type!("table", TableLike, Table::new("user"), "user");
 
-fn point_fn(point1: impl Into<Number>, point2: impl Into<Number>) -> Function {
+fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) -> Function {
     let point1_binding = Binding::new(point1.into());
     let point2_binding = Binding::new(point2.into());
     let query_string = format!(
@@ -149,7 +117,7 @@ macro_rules! type_point {
 
 pub use type_point as point;
 
-fn thing_fn(point1: impl Into<Table>, point2: impl Into<sql::Value>) -> Function {
+fn thing_fn(point1: impl Into<TableLike>, point2: impl Into<sql::Value>) -> Function {
     let point1_binding = Binding::new(point1.into());
     let point2_binding = Binding::new(point2.into());
     let query_string = format!(
