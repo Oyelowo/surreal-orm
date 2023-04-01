@@ -23,12 +23,9 @@
 use surrealdb::sql;
 
 use crate::{
-    sql::{Binding, Buildable, Param, ToRawStatement},
-    statements::let_::let_,
-    Field,
+    traits::{Binding, Buildable, ToRaw},
+    types::{Field, Function, Param},
 };
-
-use super::array::Function;
 
 pub(crate) fn create_fn_with_single_value(
     value: impl Into<sql::Value>,
@@ -148,11 +145,10 @@ pub mod argon2 {
 }
 
 pub mod pbkdf2 {
+    use super::{create_fn_with_single_value, create_fn_with_two_values};
+    use crate::types::Function;
     use surrealdb::sql;
 
-    use crate::functions::array::Function;
-
-    use super::{create_fn_with_single_value, create_fn_with_two_values};
     pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
         create_fn_with_two_values(value1, value2, "pbkdf2::compare")
     }
@@ -181,7 +177,7 @@ pub mod pbkdf2 {
 pub mod scrypt {
     use surrealdb::sql;
 
-    use crate::functions::array::Function;
+    use crate::types::Function;
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
 
