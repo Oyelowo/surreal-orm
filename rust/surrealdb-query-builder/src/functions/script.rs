@@ -17,9 +17,10 @@
 //
 //
 
-use crate::sql::{Param, ToRawStatement};
+use crate::traits::ToRaw;
 
-use super::array::Function;
+use crate::types::Function;
+use crate::types::Param;
 
 fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> Function {
     let query_string = format!(

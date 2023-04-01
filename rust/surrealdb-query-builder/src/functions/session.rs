@@ -19,7 +19,7 @@
 
 use surrealdb::sql;
 
-use crate::traits::{Binding, Buildable, Empty, ToRaw};
+use crate::traits::{Binding, Buildable, ToRaw};
 
 use crate::types::{Function, NumberLike};
 
