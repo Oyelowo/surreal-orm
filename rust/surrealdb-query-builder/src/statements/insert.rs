@@ -23,12 +23,14 @@ use surrealdb::{
 };
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Queryable, Runnable, Updateables},
-    Erroneous, SurrealdbModel,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        SurrealdbModel,
+    },
+    types::{expression::Expression, Updateables},
 };
 
-use super::select::SelectStatement;
+use super::SelectStatement;
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
     node_type: PhantomData<T>,

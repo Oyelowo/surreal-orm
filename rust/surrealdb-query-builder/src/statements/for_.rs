@@ -1,10 +1,11 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::{Conditional, Filter},
-    sql::{Buildable, Queryable, RawStatement, ToRawStatement},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
+        Raw, Runnable, Runnables, SurrealdbModel, ToRaw,
+    },
+    types::{expression::Expression, Filter, Updateables},
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -134,8 +135,8 @@ pub struct NONE;
 pub enum PermissionForables {
     For(For),
     Fors(Vec<For>),
-    RawStatement(RawStatement),
-    RawStatementList(Vec<RawStatement>),
+    RawStatement(Raw),
+    RawStatementList(Vec<Raw>),
 }
 
 impl ToRawStatement for PermissionForables {
