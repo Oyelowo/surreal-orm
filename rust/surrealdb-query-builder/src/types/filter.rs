@@ -8,7 +8,7 @@
 use std::{borrow::Cow, fmt::Display};
 
 use crate::traits::{
-    Binding, BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric,
+    Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation, Parametric,
 };
 
 use super::Empty;
@@ -81,7 +81,7 @@ impl Parametric for Filter {
 ///
 /// assert_eq!(combined_filter.to_string(), "(name = 'John') AND (age > 18)");
 /// ```
-pub fn cond(filterable: impl Operatable) -> Filter {
+pub fn cond(filterable: impl Conditional) -> Filter {
     Filter::new(filterable)
 }
 
@@ -123,7 +123,7 @@ impl Filter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     // pub fn new(query_string: String) -> Self {
-    pub fn new(query: impl Operatable) -> Self {
+    pub fn new(query: impl Conditional) -> Self {
         let query_string = format!("{}", query.build());
         // let query_string = if query_string.is_empty() {
         //     "".into()

@@ -24,7 +24,8 @@ use surrealdb::{
 };
 
 use crate::traits::{
-    Binding, BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric, ToRaw,
+    Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation, Parametric,
+    ToRaw,
 };
 
 use super::Idiomx;
@@ -50,7 +51,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(value: impl Into<Idiomx>) -> Operation {
+    pub fn new(value: impl Into<Idiomx>) -> Self {
         let value: sql::Idiom = value.into().into();
         let bindings = vec![Binding::new(sql::Value::from(value.clone()))];
         Self {
@@ -59,6 +60,8 @@ impl Field {
         }
     }
 }
+
+impl Conditional for Field {}
 
 impl Operatable for Field {}
 impl Erroneous for Field {}

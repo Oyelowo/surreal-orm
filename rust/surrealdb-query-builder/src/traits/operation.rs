@@ -11,7 +11,7 @@ use surrealdb::sql;
 
 use crate::types::{ArrayLike, GeometryLike, NumberLike, Ordinal};
 
-use super::{Binding, BindingsList, Buildable, Erroneous, Parametric};
+use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
 
 type ValueLike = sql::Value;
 
@@ -67,6 +67,8 @@ impl Parametric for Operation {
 }
 
 impl Operatable for Operation {}
+
+impl Conditional for Operation {}
 
 impl Erroneous for Operation {}
 
