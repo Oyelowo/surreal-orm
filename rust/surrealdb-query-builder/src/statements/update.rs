@@ -14,6 +14,7 @@ use crate::{
     binding::{Binding, BindingsList, Parametric},
     filter::Filter,
     sql::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables},
+    types::DurationLike,
     Erroneous, SurrealdbModel,
 };
 
@@ -240,8 +241,8 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
-        let duration: crate::sql::Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
+        let duration: DurationLike = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
