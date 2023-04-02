@@ -21,40 +21,14 @@
 use surrealdb::sql;
 
 use crate::{
-    sql::{Binding, Param},
-    Field,
+    traits::Binding,
+    types::{Field, Function, Param, StrandLike},
 };
 
-use super::array::Function;
-
-pub struct String(sql::Value);
-
-impl From<String> for sql::Value {
-    fn from(value: String) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Strand>> From<T> for String {
-    fn from(value: T) -> Self {
-        let value: sql::Strand = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for String {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for String {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &str) -> Function {
+fn create_fn_with_single_string_arg(
+    number: impl Into<StrandLike>,
+    function_name: &str,
+) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!("parse::{function_name}({})", binding.get_param_dollarised());
 
@@ -68,11 +42,7 @@ fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &s
 macro_rules! create_test_for_fn_with_single_arg {
     ($module_name:expr, $function_name:expr, $arg:expr) => {
         ::paste::paste! {
-            use crate::{
-                sql::{Binding as _, Buildable as _, ToRawStatement as _},
-            };
-
-            pub fn [<$function_name _fn>](number: impl Into<String>) -> Function {
+            pub fn [<$function_name _fn>](number: impl Into<StrandLike>) -> Function {
                 create_fn_with_single_string_arg(number, format!("{}::{}", $module_name, $function_name).as_str())
             }
 
@@ -87,7 +57,7 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[test]
             fn [<test_ $function_name _fn_with_field_data >] () {
-                let field = crate::Field::new("field");
+                let field = Field::new("field");
                 let result = [<$function_name _fn>](field);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
@@ -105,7 +75,7 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[test]
             fn [<test_ $function_name _macro_with_field_data >] () {
-                let field = crate::Field::new("field");
+                let field = Field::new("field");
                 let result = [<$function_name>]!(field);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
@@ -115,7 +85,7 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[test]
             fn [<test_ $function_name _macro_with_param >] () {
-                let param = crate::sql::Param::new("param");
+                let param = Param::new("param");
                 let result = [<$function_name>]!(param);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
@@ -136,18 +106,19 @@ macro_rules! create_test_for_fn_with_single_arg {
 }
 
 pub mod email {
-    use crate::functions::array::Function;
-
-    use super::{create_fn_with_single_string_arg, String};
+    use super::create_fn_with_single_string_arg;
+    use crate::traits::{Buildable, ToRaw};
+    use crate::types::Function;
 
     create_test_for_fn_with_single_arg!("email", "domain", "oyelowo@codebreather.com");
     create_test_for_fn_with_single_arg!("email", "user", "oyelowo@codebreather.com");
 }
 
 pub mod url {
-    use crate::functions::array::Function;
+    use crate::traits::{Buildable, ToRaw};
+    use crate::types::Function;
 
-    use super::{create_fn_with_single_string_arg, String};
+    use super::{create_fn_with_single_string_arg, StrandLike};
 
     create_test_for_fn_with_single_arg!(
         "url",
