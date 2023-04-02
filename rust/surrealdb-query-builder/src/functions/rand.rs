@@ -144,8 +144,8 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into().into());
-                let to_binding = Binding::new(to.into().into());
+                let from_binding = Binding::new(from.into());
+                let to_binding = Binding::new(to.into());
 
                 let query_string = format!(
                     "rand::float({}, {})",
@@ -168,7 +168,10 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_float {
         () => {
-            crate::functions::rand::rand::float_fn(None, None)
+            crate::functions::rand::rand::float_fn(
+                None as Option<NumberLike>,
+                None as Option<NumberLike>,
+            )
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::float_fn(Some($from), Some($to))
@@ -185,8 +188,8 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into().into());
-                let to_binding = Binding::new(to.into().into());
+                let from_binding = Binding::new(from.into());
+                let to_binding = Binding::new(to.into());
 
                 let query_string = format!(
                     "rand::int({}, {})",
@@ -209,7 +212,10 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_int {
         () => {
-            crate::functions::rand::rand::int_fn(None, None)
+            crate::functions::rand::rand::int_fn(
+                None as Option<NumberLike>,
+                None as Option<NumberLike>,
+            )
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::int_fn(Some($from), Some($to))
@@ -225,8 +231,8 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into().into());
-                let to_binding = Binding::new(to.into().into());
+                let from_binding = Binding::new(from.into());
+                let to_binding = Binding::new(to.into());
 
                 let query_string = format!(
                     "rand::time({}, {})",
@@ -249,7 +255,10 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_time {
         () => {
-            crate::functions::rand::rand::time_fn(None, None)
+            crate::functions::rand::rand::time_fn(
+                None as Option<NumberLike>,
+                None as Option<NumberLike>,
+            )
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::time_fn(Some($from), Some($to))
@@ -265,7 +274,7 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(length), None) => {
-                let length_binding = Binding::new(length.into().into());
+                let length_binding = Binding::new(length.into());
 
                 let query_string =
                     format!("rand::string({})", length_binding.get_param_dollarised(),);
@@ -274,8 +283,8 @@ pub mod rand {
                 query_string
             }
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into().into());
-                let to_binding = Binding::new(to.into().into());
+                let from_binding = Binding::new(from.into());
+                let to_binding = Binding::new(to.into());
 
                 let query_string = format!(
                     "rand::string({}, {})",
@@ -298,10 +307,13 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_string {
         () => {
-            crate::functions::rand::rand::string_fn(None, None)
+            crate::functions::rand::rand::string_fn(
+                None as Option<NumberLike>,
+                None as Option<NumberLike>,
+            )
         };
         ( $length:expr) => {
-            crate::functions::rand::rand::string_fn(Some($length), None)
+            crate::functions::rand::rand::string_fn(Some($length), None as Option<NumberLike>)
         };
         ( $from:expr, $to:expr ) => {
             crate::functions::rand::rand::string_fn(Some($from), Some($to))
@@ -316,7 +328,7 @@ pub mod rand {
                 bindings: vec![],
             },
             Some(length) => {
-                let binding = Binding::new(length.into().into());
+                let binding = Binding::new(length.into());
                 let query_string = format!("rand::guid({})", binding.get_param_dollarised());
 
                 Function {
@@ -330,7 +342,7 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_guid {
         () => {
-            crate::functions::rand::rand::guid_fn(None)
+            crate::functions::rand::rand::guid_fn(None as Option<NumberLike>)
         };
         ( $length:expr ) => {
             crate::functions::rand::rand::guid_fn(Some($length))
@@ -407,7 +419,7 @@ macro_rules! create_test_for_fn_with_two_args {
         paste::paste! {
                 #[test]
                 fn [<test_rand_ $function_ident _function_empty>]() {
-                    let result = rand::[< $function_ident _fn>](None, None);
+                    let result = rand::[< $function_ident _fn>](None as Option<NumberLike>, None as Option<NumberLike>);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}()", $function_ident));
                 }
@@ -438,7 +450,7 @@ macro_rules! create_test_for_fn_with_two_args {
                     let start = Field::new("start");
                     let end = Field::new("end");
 
-                    let result = rand::[< $function_ident _fn>](start, end);
+                    let result = rand::[< $function_ident _fn>](Some(start), Some(end));
                     assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}(start, end)", $function_ident));
                 }
@@ -478,7 +490,7 @@ fn test_rand_string_macro_with_one_arg_field() {
 // Test Guid
 #[test]
 fn test_rand_guid_function_empty() {
-    let result = rand::guid_fn(None);
+    let result = rand::guid_fn(None as Option<NumberLike>);
     assert_eq!(result.fine_tune_params(), "rand::guid()");
     assert_eq!(result.to_raw().to_string(), "rand::guid()");
 }

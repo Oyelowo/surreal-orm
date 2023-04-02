@@ -64,7 +64,7 @@ impl DefineScopeStatement {
 
     // Set the session duration
     pub fn session(mut self, duration: impl Into<DurationLike>) -> Self {
-        let binding = Binding::new(duration.into().into()).with_description("Session durration.");
+        let binding = Binding::new(duration.into()).with_description("Session durration.");
         let duration_param = format!("{}", binding.get_param_dollarised());
         self.bindings.push(binding);
         self.duration = Some(duration_param);

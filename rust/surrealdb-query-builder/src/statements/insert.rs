@@ -170,11 +170,8 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
         let updates: Updateables = updateables.into();
         self.bindings.extend(updates.get_bindings());
         let updater_query = match updates {
-            Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => ups
-                .into_iter()
-                .map(|u| u.get_updater_string())
-                .collect::<Vec<_>>(),
+            Updateables::Updater(up) => vec![up.build()],
+            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.on_duplicate_key_update.extend(updater_query);
         self

@@ -1009,8 +1009,8 @@ impl SelectStatement {
     /// query_builder.parallel();
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: DurationLike = duration.into();
-        let duration = sql::Duration::from(duration);
+        let duration: sql::Value = duration.into().into();
+        // let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
     }

@@ -81,11 +81,22 @@ macro_rules! create_value_like_struct {
                 }
             }
 
-            // impl From<Field> for [<$sql_type_name Like>] {
-            //     fn from(val: Field) -> Self {
-            //         [<$sql_type_name Like>]::Field(val.into())
+            // impl From<crate::types::Empty> for Option<[<$sql_type_name Like>]> {
+            //     fn from(value: crate::types::Empty) -> Self {
+            //         None
             //     }
             // }
+
+            // impl From<Option<Self>> for [<$sql_type_name Like>] {
+            //     fn from(value: Option<Self>) -> Self {
+            //         todo!()
+            //     }
+            // }
+            impl From<Field> for [<$sql_type_name Like>] {
+                fn from(val: Field) -> Self {
+                    [<$sql_type_name Like>]::Field(val.into())
+                }
+            }
 
             impl From<Param> for [<$sql_type_name Like>] {
                 fn from(val: Param) -> Self {
@@ -123,7 +134,7 @@ create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
 create_value_like_struct!("Array");
-create_value_like_struct!("Idiom");
+// create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
 create_value_like_struct!("Table");

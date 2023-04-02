@@ -34,7 +34,7 @@ impl From<Filter> for CountArg {
     }
 }
 
-impl<T: Into<ArrayLike>> From<T> for CountArg {
+impl<T: Into<sql::Array>> From<T> for CountArg {
     fn from(value: T) -> Self {
         Self::Array(value.into())
     }

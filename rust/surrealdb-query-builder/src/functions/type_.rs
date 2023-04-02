@@ -244,7 +244,7 @@ fn test_thing_macro_with_plain_values() {
 
 #[test]
 fn test_thing_macro_with_datetime_field() {
-    let table = Field::new("table");
+    let table = Table::new("table");
     let id = Field::new("id");
     let result = thing!(table, id);
 
