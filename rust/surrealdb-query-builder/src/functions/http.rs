@@ -21,95 +21,31 @@ use std::collections::{hash_map, HashMap};
 use surrealdb::sql;
 
 use crate::{
-    sql::{Binding, Buildable, Empty, Param, ToRawStatement},
-    Field,
+    traits::{Binding, Buildable, ToRaw},
+    types::{Function, ObjectLike, StrandLike},
 };
 
 use super::array::Function;
 
-pub struct Url(sql::Value);
-
-impl<T: Into<sql::Strand>> From<T> for Url {
-    fn from(value: T) -> Self {
-        let value: sql::Strand = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Url {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for Url {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Url> for sql::Value {
-    fn from(value: Url) -> Self {
-        value.0
-    }
-}
-pub enum Object {
-    Empty,
-    Object(sql::Value),
-}
-
-// impl From<Object> for sql::Value {
-//     fn from(value: Object) -> Self {
-//         match value {
-//             Object::Empty => ,
-//             Object::Object(_) => todo!(),
-//         }
-//     }
-// }
-
-impl From<Empty> for Object {
-    fn from(value: Empty) -> Self {
-        Self::Empty
-    }
-}
-
-impl From<Field> for Object {
-    fn from(value: Field) -> Self {
-        Self::Object(value.into())
-    }
-}
-
-impl From<Param> for Object {
-    fn from(value: Param) -> Self {
-        Self::Object(value.into())
-    }
-}
-
-impl<T: Into<sql::Object>> From<T> for Object {
-    fn from(value: T) -> Self {
-        let value: sql::Object = value.into();
-        Self::Object(value.into())
-    }
-}
+pub type Url = StrandLike;
 
 fn create_fn_with_two_args(
     url: impl Into<Url>,
-    custom_headers: impl Into<Object>,
+    custom_headers: Option<impl Into<ObjectLike>>,
     method: &str,
 ) -> Function {
     let url: sql::Value = url.into().into();
-    let custom_headers: Object = custom_headers.into();
     let url_binding = Binding::new(url);
     let url_parametized = url_binding.get_param_dollarised();
 
     let mut all_bindings = vec![url_binding];
 
     let string = match custom_headers {
-        Object::Empty => {
+        None => {
             format!("http::{method}({})", &url_parametized)
         }
-        Object::Object(headers) => {
-            let header_binding = Binding::new(headers);
+        Some(headers) => {
+            let header_binding = Binding::new(headers.into().into());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
@@ -128,20 +64,18 @@ fn create_fn_with_two_args(
 
 fn create_fn_with_three_args(
     url: impl Into<Url>,
-    request_body: impl Into<Object>,
-    custom_headers: impl Into<Object>,
+    request_body: Option<impl Into<ObjectLike>>,
+    custom_headers: Option<impl Into<ObjectLike>>,
     method: &str,
 ) -> Function {
     let url: sql::Value = url.into().into();
-    let request_body: Object = request_body.into();
-    let custom_headers: Object = custom_headers.into();
     let url_binding = Binding::new(url);
     let url_parametized = url_binding.get_param_dollarised();
 
     let mut all_bindings = vec![url_binding];
 
     let string = match request_body {
-        Object::Empty => {
+        None => {
             let header_binding = Binding::new(sql::Object::default());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
@@ -151,8 +85,8 @@ fn create_fn_with_three_args(
                 &url_parametized, header_parametized
             )
         }
-        Object::Object(body) => {
-            let header_binding = Binding::new(body);
+        Some(body) => {
+            let header_binding = Binding::new(headers.into().into());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
@@ -161,14 +95,14 @@ fn create_fn_with_three_args(
     };
 
     let string = match custom_headers {
-        Object::Empty => {
+        None => {
             let header_binding = Binding::new(sql::Object::default());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
             format!("{string}, {})", header_parametized)
         }
-        Object::Object(headers) => {
-            let header_binding = Binding::new(headers);
+        Some(headers) => {
+            let header_binding = Binding::new(headers.into().into());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
@@ -185,17 +119,17 @@ fn create_fn_with_three_args(
 macro_rules! create_fn_with_url_and_head {
     ($function_name: expr) => {
         paste::paste! {
-            pub fn [<$function_name _fn>](url: impl Into<Url>, custom_headers: impl Into<Object>) -> Function {
+            pub fn [<$function_name _fn>](url: impl Into<Url>, custom_headers: Option<impl Into<ObjectLike>>) -> Function {
                create_fn_with_two_args(url, custom_headers, $function_name)
            }
 
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, crate::sql::Empty)
+                   crate::functions::http::[<$function_name _fn>]($url, None)
                };
                ( $url:expr, $custom_headers:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, $custom_headers)
+                   crate::functions::http::[<$function_name _fn>]($url, Some($custom_headers))
                };
            }
            pub use [<http_ $function_name>] as [<$function_name>];
@@ -203,7 +137,7 @@ macro_rules! create_fn_with_url_and_head {
 
             #[test]
             fn [<test_ $function_name _method_with_empty_header>]() {
-                let result = [<$function_name _fn>]("https://codebreather.com", Empty);
+                let result = [<$function_name _fn>]("https://codebreather.com", None);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(
                     result.to_raw().to_string(),
@@ -215,7 +149,7 @@ macro_rules! create_fn_with_url_and_head {
             fn [<test_ $function_name _method_with_field_and_empty_header>]() {
                 let homepage = Field::new("homepage");
 
-                let result = [<$function_name _fn>](homepage, Empty);
+                let result = [<$function_name _fn>](homepage, None);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
             }
@@ -223,7 +157,7 @@ macro_rules! create_fn_with_url_and_head {
             #[test]
             fn [<test_ $function_name _method_with_plain_custom_header>]() {
                 let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
-                let result = [<$function_name _fn>]("https://codebreather.com", headers);
+                let result = [<$function_name _fn>]("https://codebreather.com", Some(headers));
                 assert_eq!(
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
@@ -239,7 +173,7 @@ macro_rules! create_fn_with_url_and_head {
                 let homepage = Field::new("homepage");
                 let headers = Field::new("headers");
 
-                let result = [<$function_name _fn>](homepage, headers);
+                let result = [<$function_name _fn>](homepage, Some(headers));
                 assert_eq!(
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
@@ -262,7 +196,7 @@ macro_rules! create_fn_with_url_and_head {
             fn [<test_ $function_name _macro_method_with_empty_header>]() {
                 let homepage = Field::new("homepage");
 
-                let result = [<$function_name>]!(homepage, Empty);
+                let result = [<$function_name>]!(homepage);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
             }
@@ -307,8 +241,8 @@ macro_rules! create_fn_with_3args_url_body_and_head {
         paste::paste! {
             pub fn [<$function_name _fn>](
                 url: impl Into<Url>,
-                request_body: impl Into<Object>,
-                custom_headers: impl Into<Object>
+                request_body: Option<impl Into<ObjectLike>>,
+                custom_headers: Option<impl Into<ObjectLike>>,
             ) -> Function {
                create_fn_with_three_args(url, request_body, custom_headers, $function_name)
            }
@@ -316,10 +250,10 @@ macro_rules! create_fn_with_3args_url_body_and_head {
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr, $request_body:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, $request_body, crate::sql::Empty)
+                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body), None)
                };
                ( $url:expr, $request_body:expr, $custom_headers:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, $request_body ,$custom_headers)
+                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body) ,Some($custom_headers))
                };
            }
            pub use [<http_ $function_name>] as [<$function_name>];
@@ -346,7 +280,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                 let request_body = Field::new("request_body");
                 let headers = Field::new("headers");
 
-                let result = [<$function_name _fn>](homepage, request_body, headers);
+                let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
                 assert_eq!(
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
@@ -363,7 +297,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                 let request_body = Param::new("request_body");
                 let headers = Param::new("headers");
 
-                let result = [<$function_name _fn>](homepage, request_body, headers);
+                let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
                 assert_eq!(
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
@@ -382,7 +316,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     ("postId".into(), 100.into()),
                 ]);
                 let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-                let result = [<$function_name _fn>]("https://codebreather.com", body, headers);
+                let result = [<$function_name _fn>]("https://codebreather.com", Some(body), Some(headers));
 
                 assert_eq!(
                     result.fine_tune_params(),
@@ -416,7 +350,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
             #[test]
             fn [<test_field_ $function_name _macro_method_with_empty_body_and_headers>]() {
                 let homepage = Field::new("homepage");
-                let result = [<$function_name>]!("https://codebreather.com", Empty, Empty);
+                let result = [<$function_name>]!("https://codebreather.com", None, None);
 
                 assert_eq!(
                     result.fine_tune_params(),

@@ -131,6 +131,7 @@ create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
 create_value_like_struct!("Table");
+create_value_like_struct!("Object");
 
 // impl<T> From<T> for ArrayCustom
 // where
@@ -155,3 +156,4 @@ create_value_like_struct!("Table");
 //         )
 //     }
 // }
+
