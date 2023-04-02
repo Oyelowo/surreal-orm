@@ -163,9 +163,12 @@ impl std::fmt::Display for Field {
 
 #[test]
 fn test_field() {
-    let xx = Field::new("lowo");
-    // let xx = Fielda::new(sql::Idiom::from("lowo".to_string()));
-    let mm = xx.equal(34).less_than_or_equal(46);
-    assert_eq!(mm.clone().to_raw().to_string(), "lowo = 34 <= 46");
-    assert_eq!(mm.build(), "nawa");
+    let age = Field::new("age");
+    let operation = age.greater_than_or_equal(18).less_than_or_equal(56);
+
+    assert_eq!(
+        operation.fine_tune_params(),
+        "age >= $_param_00000001 <= $_param_00000002"
+    );
+    assert_eq!(operation.clone().to_raw().to_string(), "age >= 18 <= 56");
 }

@@ -6,8 +6,9 @@
  */
 
 use crate::{
-    statements::SelectStatement,
+    statements::{select, SelectStatement},
     traits::{BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric},
+    types::{cond, Table},
 };
 
 use super::{Field, Filter, SurrealId};
@@ -28,6 +29,27 @@ pub enum Clause {
     Where(Filter),
     Query(SelectStatement),
     Id(SurrealId),
+}
+
+impl Buildable for Clause {
+    fn build(&self) -> String {
+        match self {
+            Clause::Empty => "".into(),
+            Clause::Where(filter) => {
+                format!("[WHERE {filter}]")
+            }
+            Clause::Id(surreal_id) => {
+                // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
+                format!(":{}", surreal_id.id)
+            }
+            Clause::Query(select_statement) => {
+                format!("({})", select_statement.to_string().trim_end_matches(";"))
+            }
+            Clause::All => format!("[*]"),
+            Clause::Last => format!("[$]"),
+            Clause::Index(i) => format!("[{i}]"),
+        }
+    }
 }
 
 impl From<&Self> for Clause {
@@ -76,24 +98,7 @@ impl Clause {
 
 impl std::fmt::Display for Clause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let clause = match self {
-            Clause::Empty => "".into(),
-            Clause::Where(filter) => {
-                format!("[WHERE {filter}]")
-            }
-            Clause::Id(surreal_id) => {
-                // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
-                format!(":{}", surreal_id.id)
-            }
-            Clause::Query(select_statement) => {
-                format!("({})", select_statement.to_string().trim_end_matches(";"))
-            }
-            Clause::All => format!("[*]"),
-            Clause::Last => format!("[$]"),
-            Clause::Index(i) => format!("[{i}]"),
-        };
-
-        write!(f, "{}", clause)
+        write!(f, "{}", self.build())
     }
 }
 
@@ -219,50 +224,58 @@ impl std::fmt::Display for Index {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::{
-        statements::select,
-        traits::Operatable,
-        types::{cond, Field, Table},
-    };
-
-    use super::*;
-
-    #[test]
-    fn test_display_clause() {
-        // test empty clause
-        let empty_clause = Clause::Empty;
-        assert_eq!(format!("{}", empty_clause), "");
-
-        // test where clause
-        let filter = cond(Field::new("age").equal(18));
-        let where_clause = Clause::Where(filter);
-        assert_eq!(
-            format!("{}", where_clause),
-            "[WHERE age = $_param_00000000]"
-        );
-
-        // test id clause
-        let id_clause = Clause::Id(SurrealId::try_from("student:5").unwrap());
-        assert_eq!(format!("{}", id_clause), ":5");
-
-        // test query clause
-        let table = Table::new("students");
-        let select_statement = select(All).from(table);
-        let query_clause = Clause::Query(select_statement);
-        assert_eq!(format!("{}", query_clause), "(SELECT * FROM students)");
-
-        // test all clause
-        let all_clause = Clause::All;
-        assert_eq!(format!("{}", all_clause), "[*]");
-
-        // test last clause
-        let last_clause = Clause::Last;
-        assert_eq!(format!("{}", last_clause), "[$]");
-
-        // test index clause
-        let index_clause = Clause::Index(42);
-        assert_eq!(format!("{}", index_clause), "[42]");
-    }
+#[test]
+fn test_display_clause_with_empty() {
+    // test empty clause
+    let empty_clause = Clause::Empty;
+    assert_eq!(format!("{}", empty_clause), "");
 }
+
+#[test]
+fn test_display_clause_with_where_filter() {
+    // test where clause
+    let filter = cond(Field::new("age").equal(18));
+    let where_clause = Clause::Where(filter);
+    assert_eq!(
+        format!("{}", where_clause.fine_tune_params()),
+        "[WHERE age = $_param_00000001]"
+    );
+}
+
+#[test]
+fn test_display_clause_with_id() {
+    // test id clause
+    let id_clause = Clause::Id(SurrealId::try_from("student:5").unwrap());
+    assert_eq!(format!("{}", id_clause), ":5");
+}
+
+#[test]
+fn test_display_clause_with_query() {
+    // test query clause
+    let table = Table::new("students");
+    let select_statement = select(All).from(table);
+    let query_clause = Clause::Query(select_statement);
+    assert_eq!(format!("{}", query_clause), "(SELECT * FROM students)");
+}
+
+#[test]
+fn test_display_clause_with_all() {
+    // test all clause
+    let all_clause = Clause::All;
+    assert_eq!(format!("{}", all_clause), "[*]");
+}
+
+#[test]
+fn test_display_clause_with_last() {
+    // test last clause
+    let last_clause = Clause::Last;
+    assert_eq!(format!("{}", last_clause), "[$]");
+}
+
+#[test]
+fn test_display_clause_with_index() {
+    // test index clause
+    let index_clause = Clause::Index(42);
+    assert_eq!(format!("{}", index_clause), "[42]");
+}
+// }
