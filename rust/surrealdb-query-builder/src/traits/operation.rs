@@ -9,9 +9,11 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::types::{ArrayLike, GeometryLike, NumberLike, Ordinal, ValueLike};
+use crate::types::{ArrayLike, GeometryLike, NumberLike, Ordinal};
 
 use super::{Binding, BindingsList, Buildable, Erroneous, Parametric};
+
+type ValueLike = sql::Value;
 
 #[derive(Debug, Clone)]
 pub struct Operation {
@@ -65,6 +67,8 @@ impl Parametric for Operation {
 }
 
 impl Operatable for Operation {}
+
+impl Erroneous for Operation {}
 
 pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value

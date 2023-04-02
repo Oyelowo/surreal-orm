@@ -7,7 +7,7 @@
 
 use crate::{
     statements::SelectStatement,
-    traits::{BindingsList, Conditional, Erroneous, Parametric},
+    traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric},
 };
 
 use super::{surreal_id::SurrealId, Field, Filter, SurrealId};
@@ -152,6 +152,12 @@ impl From<&SelectStatement> for Clause {
 }
 
 pub struct Empty;
+
+impl Buildable for Empty {
+    fn build(&self) -> String {
+        "".to_string()
+    }
+}
 
 impl Conditional for Empty {
     fn get_condition_query_string(&self) -> String {

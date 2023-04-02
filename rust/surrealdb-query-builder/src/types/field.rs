@@ -23,7 +23,9 @@ use surrealdb::{
     sql::{self, Number, Value},
 };
 
-use crate::traits::{Binding, BindingsList, Buildable, Operatable, Operation, Parametric, ToRaw};
+use crate::traits::{
+    Binding, BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric, ToRaw,
+};
 
 use super::Idiomx;
 
@@ -59,6 +61,7 @@ impl Field {
 }
 
 impl Operatable for Field {}
+impl Erroneous for Field {}
 
 impl Parametric for Field {
     fn get_bindings(&self) -> BindingsList {
@@ -69,12 +72,6 @@ impl Parametric for Field {
 impl Buildable for Field {
     fn build(&self) -> String {
         self.name.to_string()
-    }
-}
-
-impl Parametric for Field {
-    fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
     }
 }
 

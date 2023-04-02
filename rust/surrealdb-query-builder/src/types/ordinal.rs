@@ -61,23 +61,23 @@ impl From<sql::Number> for Ordinal {
         Ordinal::Number(val)
     }
 }
-impl<T: Into<sql::Number>> From<T> for Ordinal {
-    fn from(value: T) -> Self {
-        let value: sql::Number = value.into();
-        Self::Number(value.into())
-    }
-}
+// impl<T: Into<sql::Number>> From<T> for Ordinal {
+//     fn from(value: T) -> Self {
+//         let value: sql::Number = value.into();
+//         Self::Number(value.into())
+//     }
+// }
 
-impl<T: Into<sql::Datetime>> From<T> for Ordinal {
-    fn from(value: T) -> Self {
-        let value: sql::Datetime = value.into();
-        Self::Datetime(value.into())
-    }
-}
+// impl<T: Into<sql::Datetime>> From<T> for Ordinal {
+//     fn from(value: T) -> Self {
+//         let value: sql::Datetime = value.into();
+//         Self::Datetime(value.into())
+//     }
+// }
 
-impl<T: Into<Field>> From<T> for Ordinal {
-    fn from(value: T) -> Self {
-        let value: Field = value.into();
-        Self::Field(value.into())
-    }
-}
+// impl<T: Into<Field>> From<T> for Ordinal {
+//     fn from(value: T) -> Self {
+//         let value: Field = value.into();
+//         Self::Field(value.into())
+//     }
+// }

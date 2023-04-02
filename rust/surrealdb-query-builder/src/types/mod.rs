@@ -81,11 +81,11 @@ macro_rules! create_value_like_struct {
                 }
             }
 
-            impl From<Field> for [<$sql_type_name Like>] {
-                fn from(val: Field) -> Self {
-                    [<$sql_type_name Like>]::Field(val.into())
-                }
-            }
+            // impl From<Field> for [<$sql_type_name Like>] {
+            //     fn from(val: Field) -> Self {
+            //         [<$sql_type_name Like>]::Field(val.into())
+            //     }
+            // }
 
             impl From<Param> for [<$sql_type_name Like>] {
                 fn from(val: Param) -> Self {
@@ -99,11 +99,11 @@ macro_rules! create_value_like_struct {
                 }
             }
 
-            impl From<sql::Value> for [<$sql_type_name Like>] {
-                fn from(value: sql::Value) -> [<$sql_type_name Like>] {
-                    Self::Geometry(value)
-                }
-            }
+            // impl From<sql::Value> for [<$sql_type_name Like>] {
+            //     fn from(value: sql::Value) -> [<$sql_type_name Like>] {
+            //         Self::[<$sql_type_name>](value)
+            //     }
+            // }
 
             impl From<[<$sql_type_name Like>]> for sql::Value {
                 fn from(val: StrandLike) -> sql::Value {
@@ -127,7 +127,7 @@ create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
 create_value_like_struct!("Table");
-create_value_like_struct!("Value");
+// create_value_like_struct!("Value");
 create_value_like_struct!("Object");
 
 // impl<T> From<T> for ArrayCustom

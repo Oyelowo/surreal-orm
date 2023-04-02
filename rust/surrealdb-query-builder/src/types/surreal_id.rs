@@ -5,11 +5,19 @@ use surrealdb::sql::{self, thing};
 
 use crate::{
     errors::SurrealdbOrmError,
-    traits::{Binding, BindingsList, Conditional, Erroneous, Parametric},
+    traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric},
 };
 
 #[derive(Debug, Serialize, Clone)]
 pub struct SurrealId(surrealdb::opt::RecordId);
+
+// impl Operatable for SurrealId {}
+
+impl Buildable for SurrealId {
+    fn build(&self) -> String {
+        self.to_string()
+    }
+}
 
 impl Deref for SurrealId {
     type Target = surrealdb::opt::RecordId;

@@ -15,7 +15,7 @@ use crate::{
         Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
         SurrealdbNode,
     },
-    types::Table,
+    types::{DurationLike, Return, Table, Updateables},
 };
 
 use super::update::TargettablesForUpdate;
