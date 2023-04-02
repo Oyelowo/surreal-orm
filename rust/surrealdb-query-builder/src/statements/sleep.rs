@@ -23,8 +23,8 @@ pub struct SleepStatement(String);
 
 impl SleepStatement {
     fn new(duration: impl Into<DurationLike>) -> Self {
-        let duration: DurationLike = duration.into();
-        let duration = sql::Duration::from(duration);
+        let duration: sql::Value = duration.into().into();
+        // let duration = sql::Duration::from(duration);
         Self(duration.to_string())
     }
 }

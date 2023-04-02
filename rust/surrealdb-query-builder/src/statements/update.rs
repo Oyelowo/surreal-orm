@@ -12,7 +12,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
+        ruildable, Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
         SurrealdbModel,
     },
     types::{DurationLike, Filter, Return, SurrealId, Updateables},
@@ -169,11 +169,8 @@ where
         self.bindings.extend(settable.get_bindings());
 
         let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => ups
-                .into_iter()
-                .map(|u| u.get_updater_string())
-                .collect::<Vec<_>>(),
+            Updateables::Updater(up) => vec![up.build()],
+            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.set.extend(setter_query);
         self
@@ -242,8 +239,8 @@ where
     /// query_builder.parallel();
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: DurationLike = duration.into();
-        let duration = sql::Duration::from(duration);
+        let duration: sql::Value = duration.into().into();
+        // let duration: sql::Duration = duration.into();
         self.timeout = Some(duration.to_string());
         self
     }

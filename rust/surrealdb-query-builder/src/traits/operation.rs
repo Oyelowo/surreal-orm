@@ -957,7 +957,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<NumberLike>,
     {
-        let value: sql::Number = value.into();
+        let value: NumberLike = value.into();
         self.generate_query("-=", value)
     }
 
@@ -1044,7 +1044,10 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
     pub fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
-        Operation::new(format!("{} AS {}", self.build(), alias))
+        Operation {
+            query_string: format!("{} AS {}", self.build(), alias),
+            bindings: self.get_bindings(),
+        }
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -1068,8 +1071,8 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     {
         let lower_bound: Ordinal = lower_bound.into();
         let upper_bound: Ordinal = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound.into());
-        let upper_bound_binding = Binding::new(upper_bound.into());
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
         let condition = format!(
             "{} < {} < {}",
             lower_bound_binding.get_param(),
@@ -1081,9 +1084,8 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         let upper_updated_params = self.__update_bindings(upper_bound_binding);
         let updated_params = [lower_updated_params, upper_updated_params].concat();
         Operation {
-            condition_query_string: condition,
+            query_string: condition,
             bindings: updated_params,
-            field_name: self.field_name.clone(),
         }
     }
 
@@ -1108,8 +1110,8 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     {
         let lower_bound: Ordinal = lower_bound.into();
         let upper_bound: Ordinal = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound.into());
-        let upper_bound_binding = Binding::new(upper_bound.into());
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
         let condition = format!(
             "{} <= {} <= {}",
             lower_bound_binding.get_param(),
