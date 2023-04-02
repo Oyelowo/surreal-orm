@@ -287,7 +287,7 @@ fn test_fixed_fn_with_raw_number_with_field() {
     );
     assert_eq!(
         result.to_raw().to_string(),
-        "math::fixed(`\\`country.land_mass\\``, 4)"
+        "math::fixed(`country.land_mass`, 4)"
     );
 }
 
@@ -348,6 +348,6 @@ fn test_fixed_macro_with_raw_number_with_field() {
     );
     assert_eq!(
         result.to_raw().to_string(),
-        "math::fixed(`\\`country.land_mass\\``, 4)"
+        "math::fixed(`country.land_mass`, 4)"
     );
 }
