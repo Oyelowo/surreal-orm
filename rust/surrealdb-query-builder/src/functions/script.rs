@@ -19,8 +19,7 @@
 
 use crate::traits::ToRaw;
 
-use crate::types::Function;
-use crate::types::Param;
+use crate::types::{Function, Param};
 
 fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> Function {
     let query_string = format!(
