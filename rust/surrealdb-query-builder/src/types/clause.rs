@@ -10,7 +10,7 @@ use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
-    types::{cond, Table},
+    types::{cond, Param, Table},
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -339,4 +339,13 @@ fn test_display_clause_with_index_field() {
     let index_clause = Clause::from(index(position));
     assert_eq!(index_clause.fine_tune_params(), "[$_param_00000001]");
     assert_eq!(format!("{}", index_clause.to_raw()), "[position]");
+}
+
+#[test]
+fn test_display_clause_with_index_param() {
+    // test index clause
+    let position = Param::new("position");
+    let index_clause = Clause::from(index(position));
+    assert_eq!(index_clause.fine_tune_params(), "[$_param_00000001]");
+    assert_eq!(format!("{}", index_clause.to_raw()), "[$position]");
 }
