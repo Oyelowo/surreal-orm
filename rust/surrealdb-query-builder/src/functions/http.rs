@@ -22,7 +22,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{Binding, Buildable, ToRaw},
-    types::{Function, ObjectLike, StrandLike},
+    types::{Field, Function, ObjectLike, Param, StrandLike},
 };
 
 pub type Url = StrandLike;
@@ -260,7 +260,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
             #[test]
             fn [<test_field_ $function_name _method_with_empty_body_and_headers>]() {
                 let homepage = Field::new("homepage");
-                let result = [<$function_name _fn>]("https://codebreather.com", Empty, Empty);
+                let result = [<$function_name _fn>]("https://codebreather.com", None, None);
 
                 assert_eq!(
                     result.fine_tune_params(),
@@ -422,4 +422,3 @@ macro_rules! create_fn_with_3args_url_body_and_head {
 create_fn_with_3args_url_body_and_head!("post");
 create_fn_with_3args_url_body_and_head!("put");
 create_fn_with_3args_url_body_and_head!("patch");
-

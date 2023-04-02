@@ -24,7 +24,7 @@
 
 use crate::{
     array,
-    types::{ArrayLike, Function, NumberLike},
+    types::{ArrayLike, Field, Function, NumberLike, Param},
 };
 use surrealdb::sql;
 
