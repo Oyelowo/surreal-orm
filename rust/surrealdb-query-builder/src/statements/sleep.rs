@@ -10,20 +10,20 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    binding::BindingsList,
-    sql::{Buildable, Duration, Queryable, Runnables},
-    Erroneous, Parametric,
+    traits::BindingsList,
+    traits::{Buildable, Erroneous, Parametric, Queryable, Runnables},
+    types::DurationLike,
 };
 
-pub fn sleep(duration: impl Into<Duration>) -> SleepStatement {
+pub fn sleep(duration: impl Into<DurationLike>) -> SleepStatement {
     SleepStatement::new(duration)
 }
 
 pub struct SleepStatement(String);
 
 impl SleepStatement {
-    fn new(duration: impl Into<Duration>) -> Self {
-        let duration: Duration = duration.into();
+    fn new(duration: impl Into<DurationLike>) -> Self {
+        let duration: DurationLike = duration.into();
         let duration = sql::Duration::from(duration);
         Self(duration.to_string())
     }
@@ -52,7 +52,6 @@ impl Display for SleepStatement {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
 
     use std::time::Duration;

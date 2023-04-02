@@ -243,12 +243,13 @@ macro_rules! array_sort {
 pub use array_sort as sort;
 
 pub mod sort {
-    use crate::{functions::math::Array, sql::Binding, traits::Binding};
     use surrealdb::sql;
+
+    use crate::{traits::Binding, types::ArrayLike};
 
     use super::Function;
 
-    pub fn asc_fn(arr: impl Into<Array>) -> Function {
+    pub fn asc_fn(arr: impl Into<ArrayLike>) -> Function {
         let arr: sql::Value = arr.into().into();
         let arr = Binding::new(arr).with_description("Array to be made distinct");
 
@@ -266,7 +267,7 @@ pub mod sort {
     }
     pub use array_sort_asc_fn as asc;
 
-    pub fn desc_fn(arr: impl Into<Array>) -> Function {
+    pub fn desc_fn(arr: impl Into<ArrayLike>) -> Function {
         let arr: sql::Value = arr.into().into();
         let arr = Binding::new(arr).with_description("Array to be made distinct");
 

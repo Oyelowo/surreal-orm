@@ -8,10 +8,7 @@
 use serde::Serialize;
 use surrealdb::opt::RecordId;
 
-use crate::{
-    types::{Clause, Table},
-    Table,
-};
+use crate::types::{Clause, Table};
 
 use super::Raw;
 

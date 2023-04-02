@@ -7,8 +7,6 @@
 
 use std::fmt::Display;
 
-use crate::internal::replace_params;
-
 use super::{Erroneous, Parametric};
 
 pub trait Buildable {
