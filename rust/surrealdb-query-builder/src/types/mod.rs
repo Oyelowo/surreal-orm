@@ -55,6 +55,16 @@ macro_rules! create_value_like_struct {
                 Field(sql::Idiom),
                 Param(sql::Param),
             }
+
+            impl [<$sql_type_name Like>] {
+                pub fn to_value(self) -> sql::Value {
+                    match self {
+                        [<$sql_type_name Like>]::[<$sql_type_name>](g) => g.into(),
+                        [<$sql_type_name Like>]::Field(f) => f.into(),
+                        [<$sql_type_name Like>]::Param(p) => p.into(),
+                    }
+                }
+            }
             // macro_rules! impl_geometry_like_from {
             //     ($($t:ty),*) => {
             //         $(impl From<$t> for GeometryLike {
