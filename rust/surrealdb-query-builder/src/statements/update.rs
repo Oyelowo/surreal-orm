@@ -11,10 +11,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    filter::Filter,
-    traits::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables, Erroneous, SurrealdbModel};
-    types::DurationLike,
+    traits::{BindingsList, Buildable, Erroneous, Queryable, Runnable, SurrealdbModel},
+    types::{DurationLike, Filter, Return, SurrealId, Updateables},
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>

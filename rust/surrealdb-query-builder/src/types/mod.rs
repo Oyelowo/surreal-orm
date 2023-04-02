@@ -59,7 +59,6 @@ macro_rules! create_value_like_struct {
             //     ($($t:ty),*) => {
             //         $(impl From<$t> for GeometryLike {
             //             fn from(value: $t) -> Self {
-            //                 Self::Geometry(sql::Geometry::from(value))
             //             }
             //         })*
             //     };
@@ -74,9 +73,6 @@ macro_rules! create_value_like_struct {
             //     geo::MultiLineString
             // );
 
-            use surrealdb::sql;
-
-            use super::{Field, Param};
 
             impl<T: Into<sql::[<$sql_type_name>]>> From<T> for [<$sql_type_name Like>] {
                 fn from(value: T) -> Self {

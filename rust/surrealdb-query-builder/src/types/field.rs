@@ -23,13 +23,9 @@ use surrealdb::{
     sql::{self, Number, Value},
 };
 
-use crate::traits::{BindingsList, Buildable, Operatable, Operation, Parametric, ToRaw};
+use crate::traits::{Binding, BindingsList, Buildable, Operatable, Operation, Parametric, ToRaw};
 
-use super::{
-    binding::{Binding, Parametric},
-    Idiomx,
-    Operation::{Operatable, Operation},
-};
+use super::Idiomx;
 
 /// Represents a field in the database. This type wraps a `String` and
 /// provides a convenient way to refer to a database fields.

@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use surrealdb::sql::{self, thing};
 
 use crate::{

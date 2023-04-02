@@ -14,8 +14,6 @@ use std::ops::Deref;
 pub(crate) mod errors;
 pub mod functions;
 pub(crate) mod helpers;
-pub(crate) mod internal;
-pub mod model_id;
 mod operators_macros;
 mod statements;
 pub mod traits;

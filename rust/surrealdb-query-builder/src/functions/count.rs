@@ -2,8 +2,8 @@ use std::fmt::{self, Display};
 
 use crate::{
     array,
-    traits::{Buildable, Operatable, Parametric, ToRaw},
-    types::{ArrayLike, Empty, Field, Filter, Function, Param},
+    traits::{Binding, Buildable, Operatable, Parametric, ToRaw},
+    types::{cond, ArrayLike, Empty, Field, Filter, Function, Param},
 };
 use surrealdb::sql;
 
