@@ -10,7 +10,7 @@ use crate::{
     traits::{BindingsList, Conditional, Erroneous, Parametric},
 };
 
-use super::{surreal_id::SurrealId, Filter, SurrealId};
+use super::{surreal_id::SurrealId, Field, Filter, SurrealId};
 
 pub fn where_(condition: impl Conditional) -> Filter {
     if condition.get_errors().is_empty() {
@@ -213,6 +213,12 @@ impl std::fmt::Display for Index {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        statements::select,
+        traits::Operatable,
+        types::{cond, Field, Table},
+    };
+
     use super::*;
 
     #[test]

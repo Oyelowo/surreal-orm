@@ -9,7 +9,10 @@ use std::fmt::{self, Display};
 
 use surrealdb::sql;
 
-use crate::{statements::SelectStatement, traits::Parametric};
+use crate::{
+    statements::SelectStatement,
+    traits::{Binding, BindingsList, Parametric},
+};
 
 #[derive(Clone)]
 pub enum Expression {

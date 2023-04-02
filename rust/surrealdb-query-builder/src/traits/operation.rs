@@ -9,7 +9,9 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use super::{BindingsList, Buildable, Erroneous, Parametric};
+use crate::types::{NumberLike, Ordinal};
+
+use super::{Binding, BindingsList, Buildable, Erroneous, Parametric};
 
 #[derive(Debug, Clone)]
 pub struct Operation {
@@ -901,9 +903,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn increment_by<T>(&self, value: T) -> Operation
     where
-        T: Into<Number>,
+        T: Into<NumberLike>,
     {
-        let value: Number = value.into();
+        let value: NumberLike = value.into();
         self.generate_query("+=", value)
     }
 
@@ -992,7 +994,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn plus_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Value>,
+        T: Into<sql::Value>,
     {
         let value: sql::Value = value.into();
         self.generate_query("+=", value)
@@ -1059,11 +1061,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         T: Into<Ordinal>,
     {
         let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
         let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
+        let lower_bound_binding = Binding::new(lower_bound.into());
+        let upper_bound_binding = Binding::new(upper_bound.into());
         let condition = format!(
             "{} < {} < {}",
             lower_bound_binding.get_param(),
@@ -1101,11 +1101,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         T: Into<Ordinal>,
     {
         let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
         let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
+        let lower_bound_binding = Binding::new(lower_bound.into());
+        let upper_bound_binding = Binding::new(upper_bound.into());
         let condition = format!(
             "{} <= {} <= {}",
             lower_bound_binding.get_param(),

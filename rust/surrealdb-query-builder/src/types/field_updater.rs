@@ -7,7 +7,7 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::traits::{BindingsList, Buildable, Parametric};
+use crate::traits::{Binding, BindingsList, Buildable, Parametric};
 
 use super::Field;
 
