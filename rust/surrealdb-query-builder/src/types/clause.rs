@@ -54,15 +54,6 @@ impl From<&Self> for Clause {
 impl Parametric for Clause {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
-        // match self.kind.clone() {
-        //     ClauseType::Empty => vec![],
-        //     ClauseType::Where(filter) => filter.get_bindings(),
-        //     ClauseType::Query(select_statement) => select_statement.get_bindings(),
-        //     ClauseType::Id(id) => id.get_bindings(),
-        //     ClauseType::All => vec![],
-        //     ClauseType::Last => vec![],
-        //     ClauseType::Index(_) => vec![],
-        // }
     }
 }
 
@@ -91,7 +82,12 @@ impl Clause {
             }
             All => format!("[*]"),
             Last => format!("[$]"),
-            Index(i) => format!("[{i}]"),
+            Index(index) => {
+                let index_bindings = Binding::new(index.clone().0.to_value());
+                let param_string = format!("{}", index_bindings.get_param_dollarised());
+                bindings = vec![index_bindings];
+                format!("[{param_string}]")
+            }
         };
         Self {
             kind,
@@ -255,9 +251,9 @@ impl From<Index> for Clause {
         Self::new(ClauseType::Index(value))
     }
 }
-pub fn index(index: Index) -> Index {
+pub fn index(index: impl Into<NumberLike>) -> Index {
     // Index(index)
-    index
+    Index(index.into())
 }
 
 impl std::fmt::Display for Index {
@@ -271,6 +267,7 @@ fn test_display_clause_with_empty() {
     // test empty clause
     let empty_clause = Clause::from(Empty);
     assert_eq!(format!("{}", empty_clause), "");
+    assert_eq!(format!("{}", empty_clause.to_raw()), "");
 }
 
 #[test]
@@ -283,6 +280,7 @@ fn test_display_clause_with_where_filter() {
         format!("{}", where_clause.fine_tune_params()),
         "[WHERE age = $_param_00000001]"
     );
+    assert_eq!(format!("{}", where_clause.to_raw()), "[WHERE age = 18]");
 }
 
 #[test]
@@ -301,6 +299,10 @@ fn test_display_clause_with_query() {
     let select_statement = select(All).from(table);
     let query_clause = Clause::from(select_statement);
     assert_eq!(format!("{}", query_clause), "(SELECT * FROM students)");
+    assert_eq!(
+        query_clause.to_raw().to_string(),
+        "(SELECT * FROM students)"
+    );
 }
 
 #[test]
@@ -308,6 +310,7 @@ fn test_display_clause_with_all() {
     // test all clause
     let all_clause = Clause::from(All);
     assert_eq!(format!("{}", all_clause), "[*]");
+    assert_eq!(format!("{}", all_clause.to_raw()), "[*]");
 }
 
 #[test]
@@ -315,12 +318,25 @@ fn test_display_clause_with_last() {
     // test last clause
     let last_clause = Clause::from(Last);
     assert_eq!(format!("{}", last_clause), "[$]");
+    assert_eq!(format!("{}", last_clause.to_raw()), "[$]");
 }
 
 #[test]
 fn test_display_clause_with_index() {
     // test index clause
-    let index_clause = Clause::from(Index(42.into()));
-    assert_eq!(format!("{}", index_clause), "[42]");
+    let index_clause = Clause::from(index(42));
+    assert_eq!(
+        format!("{}", index_clause.fine_tune_params()),
+        "[$_param_00000001]"
+    );
+    assert_eq!(format!("{}", index_clause.to_raw()), "[42]");
 }
-// }
+
+#[test]
+fn test_display_clause_with_index_field() {
+    // test index clause
+    let position = Field::new("position");
+    let index_clause = Clause::from(index(position));
+    assert_eq!(index_clause.fine_tune_params(), "[$_param_00000001]");
+    assert_eq!(format!("{}", index_clause.to_raw()), "[position]");
+}
