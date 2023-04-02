@@ -23,6 +23,7 @@
 use surrealdb::sql;
 
 use crate::{
+    statements::let_,
     traits::{Binding, Buildable, ToRaw},
     types::{Field, Function, Param},
 };
@@ -117,6 +118,8 @@ create_fn_with_single_arg_value!("sha512");
 
 pub mod argon2 {
     use surrealdb::sql;
+
+    use crate::types::Function;
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
 
