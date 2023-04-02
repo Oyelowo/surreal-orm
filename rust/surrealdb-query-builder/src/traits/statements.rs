@@ -4,6 +4,29 @@ use surrealdb::{engine::local::Db, Surreal};
 
 use super::{Buildable, Parametric};
 
+// ReturnType standard
+// Create, Update, Relate, Delete
+// [ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
+// return_none(),
+// return_one_before(),
+// return_one_after(),
+// return_many_before(),
+// return_many_after(),
+// return_one_diff(),
+// return_many_diff(),
+// return_one_projections(),
+// return_many_projections()
+//
+//
+// ReturnSimeple/ReturnBasic:
+// return_one()
+// return_many()
+// return_none()
+//
+//
+//
+// Runnable: method: run() ...Just run. Don't care about return type
+// run()
 #[async_trait]
 pub trait Runnable<T>
 where
