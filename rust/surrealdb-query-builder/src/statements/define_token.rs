@@ -12,9 +12,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Name, Runnables, Scope, TokenTarget, TokenType},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::{Database, Idiomx, Namespace, Scope, Table, Token, TokenTarget, TokenType},
 };
 
 // DEFINE TOKEN statement
@@ -52,12 +53,12 @@ pub struct DefineTokenStatement {
     bindings: BindingsList,
 }
 
-pub fn define_token(token_name: impl Into<Name>) -> DefineTokenStatement {
+pub fn define_token(token_name: impl Into<Idiomx>) -> DefineTokenStatement {
     DefineTokenStatement::new(token_name.into())
 }
 
 impl DefineTokenStatement {
-    pub fn new(token_name: impl Into<Name>) -> Self {
+    pub fn new(token_name: impl Into<Idiomx>) -> Self {
         let binding = Binding::new(token_name.into());
         Self {
             name: binding.get_param_dollarised().to_owned(),

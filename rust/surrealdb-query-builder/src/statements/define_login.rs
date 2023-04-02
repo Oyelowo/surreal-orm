@@ -12,10 +12,12 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Name, Runnables},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::{Idiomx, Table},
 };
+
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
 // DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';
 
@@ -88,12 +90,12 @@ pub struct DefineLoginStatement {
     bindings: BindingsList,
 }
 
-pub fn define_login(name: impl Into<Name>) -> DefineLoginStatement {
+pub fn define_login(name: impl Into<Idiomx>) -> DefineLoginStatement {
     DefineLoginStatement::new(name)
 }
 impl DefineLoginStatement {
     // Set the login name
-    fn new(name: impl Into<Name>) -> Self {
+    fn new(name: impl Into<Idiomx>) -> Self {
         let binding = Binding::new(name.into()).with_description("login name");
         Self {
             name: binding.get_param_dollarised(),

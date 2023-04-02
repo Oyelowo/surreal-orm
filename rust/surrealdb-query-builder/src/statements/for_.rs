@@ -139,11 +139,11 @@ pub enum PermissionForables {
     RawStatementList(Vec<Raw>),
 }
 
-impl ToRawStatement for PermissionForables {
-    fn to_raw(self) -> RawStatement {
+impl ToRaw for PermissionForables {
+    fn to_raw(self) -> Raw {
         match self {
             PermissionForables::For(for_one) => for_one.to_raw(),
-            PermissionForables::Fors(for_many) => RawStatement::new(
+            PermissionForables::Fors(for_many) => Raw::new(
                 for_many
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
@@ -151,7 +151,7 @@ impl ToRawStatement for PermissionForables {
                     .join(", "),
             ),
             PermissionForables::RawStatement(r) => r,
-            PermissionForables::RawStatementList(raw_list) => RawStatement::new(
+            PermissionForables::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
@@ -180,32 +180,31 @@ impl<'a, const N: usize> From<&[For; N]> for PermissionForables {
     }
 }
 
-impl From<RawStatement> for PermissionForables {
-    fn from(value: RawStatement) -> Self {
+impl From<Raw> for PermissionForables {
+    fn from(value: Raw) -> Self {
         Self::RawStatement(value)
     }
 }
 
-impl From<Vec<RawStatement>> for PermissionForables {
-    fn from(value: Vec<RawStatement>) -> Self {
+impl From<Vec<Raw>> for PermissionForables {
+    fn from(value: Vec<Raw>) -> Self {
         Self::RawStatementList(value)
     }
 }
 
-impl From<&Vec<RawStatement>> for PermissionForables {
-    fn from(value: &Vec<RawStatement>) -> Self {
+impl From<&Vec<Raw>> for PermissionForables {
+    fn from(value: &Vec<Raw>) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[RawStatement; N]> for PermissionForables {
-    fn from(value: &[RawStatement; N]) -> Self {
+impl<'a, const N: usize> From<&[Raw; N]> for PermissionForables {
+    fn from(value: &[Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;
@@ -213,7 +212,8 @@ mod tests {
 
     use crate::{
         statements::{order, select},
-        Field, Operatable,
+        traits::Operatable,
+        types::Field,
     };
 
     use super::*;

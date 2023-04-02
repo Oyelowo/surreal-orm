@@ -15,10 +15,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::Filter,
-    sql::{Buildable, Event, Queryable, Runnables, Table},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::{Event, Filter, Table},
 };
 
 // DEFINE EVENT statement

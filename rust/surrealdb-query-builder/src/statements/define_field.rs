@@ -17,11 +17,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::Filter,
-    param::Param,
-    sql::{Buildable, Queryable, Table},
-    Erroneous, Field,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::{Field, Filter, Param, Table},
 };
 
 use super::for_::PermissionForables;

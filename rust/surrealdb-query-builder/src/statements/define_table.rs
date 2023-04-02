@@ -15,9 +15,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{Buildable, Queryable, Runnables, Table},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::Table,
 };
 
 use super::{for_::PermissionForables, select::SelectStatement};

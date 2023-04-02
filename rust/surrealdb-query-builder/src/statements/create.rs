@@ -11,10 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Queryable, Return, Runnable, Updateables},
-    types::DurationLike,
-    Erroneous, SurrealdbNode,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        SurrealdbNode,
+    },
+    types::Table,
 };
 
 use super::update::TargettablesForUpdate;
