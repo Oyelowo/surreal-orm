@@ -13,11 +13,11 @@ pub struct SurrealId(surrealdb::opt::RecordId);
 
 // impl Operatable for SurrealId {}
 
-impl Buildable for SurrealId {
-    fn build(&self) -> String {
-        self.to_string()
-    }
-}
+// impl Buildable for SurrealId {
+//     fn build(&self) -> String {
+//         self.to_string()
+//     }
+// }
 
 impl Deref for SurrealId {
     type Target = surrealdb::opt::RecordId;
@@ -27,25 +27,25 @@ impl Deref for SurrealId {
     }
 }
 
-impl Conditional for SurrealId {
-    fn get_condition_query_string(&self) -> String {
-        self.to_string()
-    }
-}
-
+// impl Conditional for SurrealId {
+//     fn get_condition_query_string(&self) -> String {
+//         self.to_string()
+//     }
+// }
+//
 impl Erroneous for SurrealId {
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
 
-impl Parametric for SurrealId {
-    fn get_bindings(&self) -> BindingsList {
-        let val: sql::Thing = self.to_owned().into();
-        let val: sql::Value = val.into();
-        vec![Binding::new(val)]
-    }
-}
+// impl Parametric for SurrealId {
+//     fn get_bindings(&self) -> BindingsList {
+//         let val: sql::Thing = self.to_owned().into();
+//         let val: sql::Value = val.into();
+//         vec![Binding::new(val)]
+//     }
+//}
 
 impl ::std::fmt::Display for SurrealId {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {

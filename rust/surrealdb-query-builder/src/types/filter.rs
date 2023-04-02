@@ -52,6 +52,14 @@ pub struct Filter {
     bindings: BindingsList,
 }
 
+impl Buildable for Filter {
+    fn build(&self) -> String {
+        self.query_string.to_string()
+    }
+}
+
+impl Conditional for Filter {}
+
 impl From<Empty> for Filter {
     fn from(value: Empty) -> Self {
         Filter::new(Empty)
