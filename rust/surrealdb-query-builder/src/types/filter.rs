@@ -123,7 +123,7 @@ impl Filter {
     /// assert_eq!(filter.to_string(), "name = 'John'");
     /// ```
     // pub fn new(query_string: String) -> Self {
-    pub fn new(query: Operation) -> Self {
+    pub fn new(query: impl Operatable) -> Self {
         let query_string = format!("{}", query.build());
         // let query_string = if query_string.is_empty() {
         //     "".into()

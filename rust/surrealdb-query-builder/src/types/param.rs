@@ -13,9 +13,16 @@ use crate::traits::{BindingsList, Buildable, Erroneous, Operatable, Parametric};
 
 use super::Idiomx;
 
+#[derive(Debug, Clone)]
 pub struct Param {
     param: sql::Param,
     bindings: BindingsList,
+}
+
+impl From<Param> for sql::Param {
+    fn from(value: Param) -> Self {
+        value.param
+    }
 }
 
 impl From<Param> for sql::Value {

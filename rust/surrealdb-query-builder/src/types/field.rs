@@ -82,7 +82,7 @@ impl From<&Field> for Idiomx {
 }
 
 impl From<&mut Field> for sql::Value {
-    fn from(value: &mut Field) -> Operation {
+    fn from(value: &mut Field) -> Self {
         Self::Idiom(value.name.to_string().into())
     }
 }
@@ -100,14 +100,14 @@ impl Into<sql::Idiom> for Field {
 }
 
 impl From<Field> for sql::Value {
-    fn from(val: Field) -> Operation {
+    fn from(val: Field) -> Self {
         let idiom = sql::Idiom::from(val.name);
         sql::Value::from(idiom)
     }
 }
 
 impl<'a> From<Cow<'a, Self>> for Field {
-    fn from(value: Cow<'a, Field>) -> Operation {
+    fn from(value: Cow<'a, Field>) -> Self {
         match value {
             Cow::Borrowed(v) => v.clone(),
             Cow::Owned(v) => v,
@@ -115,29 +115,29 @@ impl<'a> From<Cow<'a, Self>> for Field {
     }
 }
 impl<'a> From<&'a Field> for Cow<'a, Field> {
-    fn from(value: &'a Field) -> Operation {
+    fn from(value: &'a Field) -> Self {
         Cow::Borrowed(value)
     }
 }
 
 impl From<Field> for Cow<'static, Field> {
-    fn from(value: Field) -> Operation {
+    fn from(value: Field) -> Self {
         Cow::Owned(value)
     }
 }
 
 impl From<String> for Field {
-    fn from(value: String) -> Operation {
+    fn from(value: String) -> Self {
         Self::new(value)
     }
 }
 impl From<&Self> for Field {
-    fn from(value: &Field) -> Operation {
+    fn from(value: &Field) -> Self {
         value.to_owned()
     }
 }
 impl From<&str> for Field {
-    fn from(value: &str) -> Operation {
+    fn from(value: &str) -> Self {
         let value: sql::Idiom = value.to_string().into();
         Self::new(Idiomx::new(value))
     }

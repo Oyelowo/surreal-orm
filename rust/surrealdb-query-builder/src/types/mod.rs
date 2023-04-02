@@ -77,7 +77,7 @@ macro_rules! create_value_like_struct {
             impl<T: Into<sql::[<$sql_type_name>]>> From<T> for [<$sql_type_name Like>] {
                 fn from(value: T) -> Self {
                     let value: sql::[<$sql_type_name>] = value.into();
-                    Self::Geometry(value.into())
+                    Self::[<$sql_type_name>](value.into())
                 }
             }
 
@@ -89,13 +89,13 @@ macro_rules! create_value_like_struct {
 
             impl From<Param> for [<$sql_type_name Like>] {
                 fn from(val: Param) -> Self {
-                    [<$sql_type_name Like>]::Param(val.into())
+                    [<$sql_type_name Like>]::Param(val.clone().into())
                 }
             }
 
             impl From<&Field> for [<$sql_type_name Like>] {
                 fn from(val: &Field) -> Self {
-                    [<$sql_type_name Like>]::Field(val.into())
+                    [<$sql_type_name Like>]::Field(val.clone().into())
                 }
             }
 
@@ -106,7 +106,7 @@ macro_rules! create_value_like_struct {
             // }
 
             impl From<[<$sql_type_name Like>]> for sql::Value {
-                fn from(val: StrandLike) -> sql::Value {
+                fn from(val: [<$sql_type_name Like>]) -> sql::Value {
                     match val {
                         [<$sql_type_name Like>]::[<$sql_type_name>](g) => g.into(),
                         [<$sql_type_name Like>]::Field(f) => f.into(),
