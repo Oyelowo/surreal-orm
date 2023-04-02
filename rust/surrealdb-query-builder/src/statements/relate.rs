@@ -11,9 +11,13 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Operator};
 
 use crate::{
-    binding::{Binding, BindingsList},
-    sql::{Buildable, Duration, Queryable, Return, Runnable, Updateables},
-    Clause, Erroneous, ErrorList, Field, Parametric, SurrealdbEdge,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Runnable,
+        Runnables, SurrealdbEdge,
+    },
+    types::{
+        Database, DurationLike, Namespace, Return, Scope, Table, TableIndex, Token, Updateables,
+    },
 };
 
 // RELATE @from -> @table -> @with
@@ -118,8 +122,8 @@ where
     /// let mut query_builder = SelectStatement::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<Duration>) -> Self {
-        let duration: Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
+        let duration: DurationLike = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self

@@ -29,12 +29,8 @@ use std::fmt::{self, Display};
 use surrealdb::sql;
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{
-        Buildable, Database, Event, Login, Namespace, Queryable, Runnables, Scope, Table,
-        TableIndex, Token,
-    },
-    Erroneous, Field,
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    types::{Database, Field, Namespace, Scope, Table, TableIndex, Token},
 };
 
 pub fn remove_field(field: impl Into<Field>) -> RemoveFieldStatement {
