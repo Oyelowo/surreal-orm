@@ -136,11 +136,13 @@ where
         let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
+        // TODO: Do all the parametization here when writing tests for this function
         let target_names = match targets {
             TargettablesForUpdate::Table(table) => vec![table.to_string()],
             TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
-                .map(|b| format!("${}", b.get_param()))
+                .map(|b| format!("{}", b.get_param_dollarised()))
+         
                 .collect::<Vec<_>>(),
         };
         self.update_bindings(targets_bindings);
