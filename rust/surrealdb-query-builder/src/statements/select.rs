@@ -17,7 +17,13 @@ use regex::Replacer;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Value};
 
-use crate::traits::{BindingsList, Parametric, RunnableSelect};
+use crate::{
+    traits::{
+        Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable,
+        RunnableSelect,
+    },
+    types::{All, DurationLike, Field, Filter, SurrealId, Table},
+};
 
 /// Creates a new `Order` instance with the specified database field.
 ///
@@ -1002,8 +1008,8 @@ impl SelectStatement {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<Duration>) -> Self {
-        let duration: Duration = duration.into();
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
+        let duration: DurationLike = duration.into();
         let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
