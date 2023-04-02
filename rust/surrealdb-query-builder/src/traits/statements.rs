@@ -8,6 +8,8 @@ use super::{Buildable, Parametric};
 // Create, Update, Relate, Delete
 // [ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
 // return_none(),
+// return_one(),
+// return_many(),
 // return_one_before(),
 // return_one_after(),
 // return_many_before(),
