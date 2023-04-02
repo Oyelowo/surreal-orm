@@ -13,9 +13,8 @@ use surrealdb::sql;
 use crate::{
     binding::{Binding, BindingsList, Parametric},
     filter::Filter,
-    sql::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables},
+    traits::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables, Erroneous, SurrealdbModel};
     types::DurationLike,
-    Erroneous, SurrealdbModel,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
