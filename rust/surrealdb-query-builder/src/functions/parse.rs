@@ -108,17 +108,16 @@ macro_rules! create_test_for_fn_with_single_arg {
 pub mod email {
     use super::create_fn_with_single_string_arg;
     use crate::traits::{Buildable, ToRaw};
-    use crate::types::Function;
+    use crate::types::{Field, Function, Param, StrandLike};
 
     create_test_for_fn_with_single_arg!("email", "domain", "oyelowo@codebreather.com");
     create_test_for_fn_with_single_arg!("email", "user", "oyelowo@codebreather.com");
 }
 
 pub mod url {
+    use super::create_fn_with_single_string_arg;
     use crate::traits::{Buildable, ToRaw};
-    use crate::types::Function;
-
-    use super::{create_fn_with_single_string_arg, StrandLike};
+    use crate::types::{Field, Function, Param, StrandLike};
 
     create_test_for_fn_with_single_arg!(
         "url",

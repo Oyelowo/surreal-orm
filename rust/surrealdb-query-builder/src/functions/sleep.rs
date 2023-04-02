@@ -17,7 +17,7 @@ use surrealdb::sql;
 
 use crate::traits::{Binding, Buildable, ToRaw};
 
-use crate::types::{DurationLike, Function};
+use crate::types::{DurationLike, Field, Function};
 
 fn sleep_fn(duration: impl Into<DurationLike>) -> Function {
     let value: sql::Value = duration.into().into();

@@ -23,7 +23,7 @@ use surrealdb::sql;
 
 use crate::array;
 use crate::traits::{Binding, Buildable, ToRaw};
-use crate::types::{Function, NumberLike};
+use crate::types::{Field, Function, NumberLike};
 
 pub fn rand_fn() -> Function {
     let query_string = format!("rand()");
@@ -407,7 +407,7 @@ macro_rules! create_test_for_fn_with_two_args {
         paste::paste! {
                 #[test]
                 fn [<test_rand_ $function_ident _function_empty>]() {
-                    let result = rand::[< $function_ident _fn>](Empty, Empty);
+                    let result = rand::[< $function_ident _fn>](None, None);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
                     assert_eq!(result.to_raw().to_string(), format!("rand::{}()", $function_ident));
                 }
@@ -478,7 +478,7 @@ fn test_rand_string_macro_with_one_arg_field() {
 // Test Guid
 #[test]
 fn test_rand_guid_function_empty() {
-    let result = rand::guid_fn(Empty);
+    let result = rand::guid_fn(None);
     assert_eq!(result.fine_tune_params(), "rand::guid()");
     assert_eq!(result.to_raw().to_string(), "rand::guid()");
 }
@@ -508,7 +508,7 @@ fn test_rand_guid_macro_with_invalid_input() {
 fn test_rand_guid_fn_with_field_input() {
     let length = Field::new("length");
 
-    let result = rand::guid_fn(length);
+    let result = rand::guid_fn(Some(length));
     assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
     assert_eq!(result.to_raw().to_string(), "rand::guid(length)");
 }
