@@ -103,8 +103,8 @@ macro_rules! geo_distance {
 pub use geo_distance as distance;
 
 use crate::{
-    traits::{Buildable, ToRaw},
-    types::{Field, Param},
+    traits::{Binding, Buildable, ToRaw},
+    types::{Field, Function, GeometryLike, Param},
 };
 
 pub mod hash {
