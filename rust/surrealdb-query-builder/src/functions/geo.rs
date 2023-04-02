@@ -180,10 +180,10 @@ pub mod hash {
     #[macro_export]
     macro_rules! geo_hash_encode {
         ( $geometry:expr ) => {
-            crate::functions::geo::hash::encode_fn($geometry, crate::types::Empty)
+            crate::functions::geo::hash::encode_fn($geometry, None)
         };
         ( $geometry:expr, $accuracy:expr ) => {
-            crate::functions::geo::hash::encode_fn($geometry, $accuracy)
+            crate::functions::geo::hash::encode_fn($geometry, Some($accuracy))
         };
     }
     pub use geo_hash_encode as encode;
@@ -643,7 +643,7 @@ fn test_hash_decode_macro_with_string() {
 #[test]
 fn test_hash_encode_with_field_and_empty_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode_fn(city, Empty);
+    let result = hash::encode_fn(city, None);
 
     assert_eq!(
         result.fine_tune_params(),
@@ -656,7 +656,7 @@ fn test_hash_encode_with_field_and_empty_accuracy() {
 fn test_hash_encode_with_field_and_field_accuracy() {
     let city = Field::new("city");
     let accuracy = Field::new("accuracy");
-    let result = hash::encode_fn(city, accuracy);
+    let result = hash::encode_fn(city, Some(accuracy));
 
     assert_eq!(
         result.fine_tune_params(),
@@ -671,7 +671,7 @@ fn test_hash_encode_with_field_and_field_accuracy() {
 #[test]
 fn test_hash_encode_with_field_and_number_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode_fn(city, 5);
+    let result = hash::encode_fn(city, Some(5));
 
     assert_eq!(
         result.fine_tune_params(),
@@ -687,7 +687,7 @@ fn test_hash_encode_with_point() {
         y: 116.34,
     };
 
-    let result = hash::encode_fn(point, 5);
+    let result = hash::encode_fn(point, Some(5));
     assert_eq!(
         result.fine_tune_params(),
         "geo::hash::encode($_param_00000001, $_param_00000002)"
@@ -713,7 +713,7 @@ fn test_hash_encode_macro_with_field_and_empty_accuracy_not_mentioned_at_all() {
 #[test]
 fn test_hash_encode_macro_with_field_and_empty_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode!(city, Empty);
+    let result = hash::encode!(city);
 
     assert_eq!(
         result.fine_tune_params(),
