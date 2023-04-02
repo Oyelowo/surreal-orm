@@ -12,7 +12,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, SurrealdbModel},
-    types::{DurationLike, Filter},
+    types::{DurationLike, Filter, Return},
 };
 
 use super::update::TargettablesForUpdate;

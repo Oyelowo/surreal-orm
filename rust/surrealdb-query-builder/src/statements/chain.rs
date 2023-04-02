@@ -11,11 +11,7 @@ use insta::{assert_debug_snapshot, assert_display_snapshot};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
-use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{Buildable, Queryable},
-    Erroneous, ErrorList,
-};
+use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
 pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
     QueryChain {
@@ -48,7 +44,7 @@ impl Parametric for QueryChain {
 
 impl Queryable for QueryChain {}
 impl Erroneous for QueryChain {
-    fn get_errors(&self) -> crate::ErrorList {
+    fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
     }
 }
