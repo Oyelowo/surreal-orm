@@ -12,7 +12,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        ruildable, Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
         SurrealdbModel,
     },
     types::{DurationLike, Filter, Return, SurrealId, Updateables},

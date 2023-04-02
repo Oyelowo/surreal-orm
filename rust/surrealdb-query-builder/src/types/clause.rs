@@ -10,7 +10,7 @@ use crate::{
     traits::{BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric},
 };
 
-use super::{surreal_id::SurrealId, Field, Filter, SurrealId};
+use super::{Field, Filter, SurrealId};
 
 pub fn where_(condition: impl Conditional) -> Filter {
     if condition.get_errors().is_empty() {

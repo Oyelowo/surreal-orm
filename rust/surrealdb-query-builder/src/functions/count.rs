@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use crate::{
     array,
-    traits::{Binding, Buildable, Operatable, Parametric, ToRaw},
+    traits::{Binding, Buildable, Operatable, Operation, Parametric, ToRaw},
     types::{cond, ArrayLike, Empty, Field, Filter, Function, Param},
 };
 use surrealdb::sql;
@@ -12,8 +12,9 @@ pub enum CountArg {
     Empty,
     Field(Field),
     Param(Param),
+    Operation(Operation),
     Filter(Filter),
-    Array(ArrayLike),
+    Array(sql::Array),
 }
 
 impl From<Empty> for CountArg {
@@ -25,6 +26,12 @@ impl From<Empty> for CountArg {
 impl From<Field> for CountArg {
     fn from(value: Field) -> Self {
         CountArg::Field(value)
+    }
+}
+
+impl From<Operation> for CountArg {
+    fn from(value: Operation) -> Self {
+        CountArg::Operation(value)
     }
 }
 
@@ -64,6 +71,11 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
             let param = format!("{}", array_binding.get_param_dollarised());
             bindings = vec![array_binding];
             param
+        }
+        CountArg::Operation(op) => {
+            bindings = op.get_bindings();
+            // format!("{}", filter)
+            op.build()
         }
     };
     Function {

@@ -43,7 +43,7 @@ fn create_fn_with_two_args(
             format!("http::{method}({})", &url_parametized)
         }
         Some(headers) => {
-            let header_binding = Binding::new(headers.into().into());
+            let header_binding = Binding::new(headers.into());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
@@ -84,7 +84,7 @@ fn create_fn_with_three_args(
             )
         }
         Some(body) => {
-            let body_binding = Binding::new(body.into().into());
+            let body_binding = Binding::new(body.into());
             let body_parametized = body_binding.get_param_dollarised();
             all_bindings.push(body_binding);
 
@@ -100,7 +100,7 @@ fn create_fn_with_three_args(
             format!("{string}, {})", header_parametized)
         }
         Some(headers) => {
-            let header_binding = Binding::new(headers.into().into());
+            let header_binding = Binding::new(headers.into());
             let header_parametized = header_binding.get_param_dollarised();
             all_bindings.push(header_binding);
 
@@ -124,7 +124,7 @@ macro_rules! create_fn_with_url_and_head {
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, None)
+                   crate::functions::http::[<$function_name _fn>]($url, None as Option<ObjectLike>)
                };
                ( $url:expr, $custom_headers:expr ) => {
                    crate::functions::http::[<$function_name _fn>]($url, Some($custom_headers))
@@ -135,7 +135,7 @@ macro_rules! create_fn_with_url_and_head {
 
             #[test]
             fn [<test_ $function_name _method_with_empty_header>]() {
-                let result = [<$function_name _fn>]("https://codebreather.com", None);
+                let result = [<$function_name _fn>]("https://codebreather.com", None as Option<ObjectLike>);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(
                     result.to_raw().to_string(),
@@ -147,7 +147,7 @@ macro_rules! create_fn_with_url_and_head {
             fn [<test_ $function_name _method_with_field_and_empty_header>]() {
                 let homepage = Field::new("homepage");
 
-                let result = [<$function_name _fn>](homepage, None);
+                let result = [<$function_name _fn>](homepage, None as Option<ObjectLike>);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
             }
@@ -248,7 +248,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr, $request_body:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body), None)
+                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body), None as Option<ObjectLike>)
                };
                ( $url:expr, $request_body:expr, $custom_headers:expr ) => {
                    crate::functions::http::[<$function_name _fn>]($url, Some($request_body) ,Some($custom_headers))
@@ -260,7 +260,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
             #[test]
             fn [<test_field_ $function_name _method_with_empty_body_and_headers>]() {
                 let homepage = Field::new("homepage");
-                let result = [<$function_name _fn>]("https://codebreather.com", None, None);
+                let result = [<$function_name _fn>]("https://codebreather.com", None as Option<ObjectLike>, None as Option<ObjectLike>);
 
                 assert_eq!(
                     result.fine_tune_params(),

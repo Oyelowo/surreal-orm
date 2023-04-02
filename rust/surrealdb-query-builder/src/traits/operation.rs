@@ -1043,7 +1043,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// let query = field.__as__("name_alias");
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
+    fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
         Operation {
             query_string: format!("{} AS {}", self.build(), alias),
             bindings: self.get_bindings(),
@@ -1065,7 +1065,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// let query = DbQuery::field("age").between(18, 30);
     /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
     /// ```
-    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operation
+    fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -1104,7 +1104,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// let query = DbQuery::field("age").within(18, 30);
     /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
     /// ```
-    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operation
+    fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -1128,7 +1128,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         }
     }
 
-    pub fn ____________update_many_bindings<'bi>(
+    fn ____________update_many_bindings<'bi>(
         &self,
         bindings: impl Into<&'bi [Binding]>,
     ) -> Operation {

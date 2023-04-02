@@ -92,7 +92,7 @@ impl From<&mut Field> for sql::Value {
 
 impl Into<sql::Value> for &Field {
     fn into(self) -> Value {
-        sql::Value::from(self.name).into()
+        sql::Value::from(self.name.clone()).into()
     }
 }
 

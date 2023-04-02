@@ -29,7 +29,7 @@ pub fn updater(field: impl Into<Field>) -> Updater {
 
 impl Buildable for Updater {
     fn build(&self) -> String {
-        self.column_updater_string
+        self.column_updater_string.to_string()
     }
 }
 

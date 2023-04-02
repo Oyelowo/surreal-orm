@@ -64,9 +64,8 @@ impl fmt::Display for QueryChain {
 #[cfg(test)]
 mod tests {
     use crate::{
-        filter::cond,
-        sql::{All, SurrealId},
-        Field, Operatable,
+        traits::Operatable,
+        types::{All, Field, SurrealId},
     };
 
     use super::*;

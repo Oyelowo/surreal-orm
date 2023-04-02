@@ -104,11 +104,11 @@ pub use geo_distance as distance;
 
 use crate::{
     traits::{Binding, Buildable, ToRaw},
-    types::{Field, Function, GeometryLike, Param},
+    types::{Field, Function, GeometryLike, NumberLike, Param},
 };
 
 pub mod hash {
-    use super::{create_geo_with_single_arg, GeometryLike};
+    use super::create_geo_with_single_arg;
     use crate::{
         traits::Binding,
         types::{Function, GeometryLike, NumberLike, StrandLike},
@@ -139,12 +139,12 @@ pub mod hash {
         accuracy: Option<impl Into<NumberLike>>,
     ) -> Function {
         let binding = Binding::new(geometry.into());
-        let accuracy: NumberLike = accuracy.into();
         let geometry_param = binding.get_param_dollarised();
 
         let mut bindings = vec![binding];
 
         let str = if let Some(accuracy) = accuracy {
+            let accuracy: NumberLike = accuracy.into();
             match accuracy {
                 NumberLike::Number(num) => {
                     let binding = Binding::new(num);
@@ -167,7 +167,7 @@ pub mod hash {
 
                     format!("geo::hash::encode({geometry_param}, {accuracy_param})",)
                 }
-            };
+            }
         } else {
             format!("geo::hash::encode({geometry_param})")
         };
@@ -180,7 +180,10 @@ pub mod hash {
     #[macro_export]
     macro_rules! geo_hash_encode {
         ( $geometry:expr ) => {
-            crate::functions::geo::hash::encode_fn($geometry, None)
+            crate::functions::geo::hash::encode_fn(
+                $geometry,
+                None as Option<crate::types::NumberLike>,
+            )
         };
         ( $geometry:expr, $accuracy:expr ) => {
             crate::functions::geo::hash::encode_fn($geometry, Some($accuracy))
@@ -643,7 +646,7 @@ fn test_hash_decode_macro_with_string() {
 #[test]
 fn test_hash_encode_with_field_and_empty_accuracy() {
     let city = Field::new("city");
-    let result = hash::encode_fn(city, None);
+    let result = hash::encode_fn(city, None as Option<NumberLike>);
 
     assert_eq!(
         result.fine_tune_params(),

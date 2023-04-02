@@ -125,7 +125,7 @@ macro_rules! create_value_like_struct {
                     }
                 }
             }
-        };
+        }
     };
 }
 
