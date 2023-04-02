@@ -84,11 +84,11 @@ fn create_fn_with_three_args(
             )
         }
         Some(body) => {
-            let header_binding = Binding::new(headers.into().into());
-            let header_parametized = header_binding.get_param_dollarised();
-            all_bindings.push(header_binding);
+            let body_binding = Binding::new(body.into().into());
+            let body_parametized = body_binding.get_param_dollarised();
+            all_bindings.push(body_binding);
 
-            format!("http::{method}({}, {}", url_parametized, header_parametized)
+            format!("http::{method}({}, {}", url_parametized, body_parametized)
         }
     };
 
