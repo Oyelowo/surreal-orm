@@ -224,11 +224,15 @@ mod tests {
 
         let for_res = for_(ForCrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
-            for_res.to_string(),
-            "FOR create\n\tWHERE name ~ $_param_00000000".to_string()
+            for_res.fine_tune_params(),
+            "FOR create\n\tWHERE name ~ $_param_00000001".to_string()
         );
-        insta::assert_display_snapshot!(for_res);
-        insta::assert_debug_snapshot!(for_res.get_bindings());
+        assert_eq!(
+            for_res.to_raw().to_string(),
+            "FOR create\n\tWHERE name ~ 'Oyelowo'".to_string()
+        );
+        // insta::assert_display_snapshot!(for_res);
+        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 
     #[test]
@@ -238,10 +242,14 @@ mod tests {
 
         let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
-            for_res.to_string(),
-            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
+            for_res.fine_tune_params(),
+            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001".to_string()
         );
-        insta::assert_display_snapshot!(for_res);
-        insta::assert_debug_snapshot!(for_res.get_bindings());
+        assert_eq!(
+            for_res.to_raw().to_string(),
+            "FOR create, delete, select, update\n\tWHERE name IS 'Oyedayo'".to_string()
+        );
+        // insta::assert_display_snapshot!(for_res);
+        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 }

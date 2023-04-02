@@ -91,7 +91,7 @@ create_type!("float", NumberLike, 43.5, 43.5);
 create_type!("int", NumberLike, 99, 99);
 create_type!("number", NumberLike, 5, 5);
 create_type!("string", sql::Value, 5454, "5454");
-create_type!("regex", String, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
+create_type!("regex", StrandLike, "/[A-Z]{3}/", "'/[A-Z]{3}/'");
 create_type!("table", TableLike, Table::new("user"), "user");
 
 fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) -> Function {

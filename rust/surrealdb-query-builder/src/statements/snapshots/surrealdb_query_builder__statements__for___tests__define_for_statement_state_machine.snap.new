@@ -1,0 +1,7 @@
+---
+source: surrealdb-query-builder/src/statements/for_.rs
+assertion_line: 230
+expression: for_res
+---
+FOR create
+	WHERE name ~ $_param_76e8f7aa
