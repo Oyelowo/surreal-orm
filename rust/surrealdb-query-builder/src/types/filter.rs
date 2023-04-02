@@ -7,7 +7,9 @@
 
 use std::{borrow::Cow, fmt::Display};
 
-use crate::traits::{BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric};
+use crate::traits::{
+    Binding, BindingsList, Buildable, Erroneous, Operatable, Operation, Parametric,
+};
 
 use super::Empty;
 

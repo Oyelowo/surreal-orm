@@ -9,7 +9,7 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::traits::{Buildable, Erroneous, Operatable, Parametric};
+use crate::traits::{BindingsList, Buildable, Erroneous, Operatable, Parametric};
 
 use super::Idiomx;
 

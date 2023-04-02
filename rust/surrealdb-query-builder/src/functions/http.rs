@@ -25,8 +25,6 @@ use crate::{
     types::{Function, ObjectLike, StrandLike},
 };
 
-use super::array::Function;
-
 pub type Url = StrandLike;
 
 fn create_fn_with_two_args(
@@ -424,3 +422,4 @@ macro_rules! create_fn_with_3args_url_body_and_head {
 create_fn_with_3args_url_body_and_head!("post");
 create_fn_with_3args_url_body_and_head!("put");
 create_fn_with_3args_url_body_and_head!("patch");
+

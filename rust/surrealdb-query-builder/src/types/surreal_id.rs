@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use serde::Deserialize;
-use surrealdb::sql;
+use surrealdb::sql::{self, thing};
 
 use crate::{
     errors::SurrealdbOrmError,

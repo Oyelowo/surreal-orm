@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::traits::{Buildable, Parametric};
+use crate::traits::{BindingsList, Buildable, Parametric};
 
 #[derive(Debug, Clone)]
 pub struct Function {

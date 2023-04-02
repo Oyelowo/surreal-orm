@@ -10,13 +10,13 @@ pub enum Ordinal {
     Field(sql::Value),
 }
 impl From<sql::Datetime> for Ordinal {
-    fn from(value: sql::Datetime) -> Operator {
+    fn from(value: sql::Datetime) -> Self {
         Self::Datetime(value.into())
     }
 }
 
 impl From<chrono::DateTime<chrono::Utc>> for Ordinal {
-    fn from(value: chrono::DateTime<chrono::Utc>) -> Operator {
+    fn from(value: chrono::DateTime<chrono::Utc>) -> Self {
         Self::Datetime(value.into())
     }
 }

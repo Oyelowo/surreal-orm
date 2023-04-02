@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+use serde::Deserialize;
 use surrealdb::sql;
 
 use super::{Field, Param};

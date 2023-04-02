@@ -119,7 +119,6 @@ pub mod argon2 {
     use surrealdb::sql;
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
-    use crate::functions::array::Function;
 
     pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
         create_fn_with_two_values(value1, value2, "argon2::compare")
