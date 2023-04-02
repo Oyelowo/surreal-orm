@@ -19,12 +19,9 @@
 
 use surrealdb::sql;
 
-use crate::{
-    sql::{Binding, Buildable, Empty, ToRawStatement},
-    Field,
-};
+use crate::traits::{Binding, Buildable, ToRaw};
 
-use super::{array::Function, math::Number};
+use crate::types::{Function, NumberLike};
 
 use crate::array;
 

@@ -22,74 +22,15 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
-use crate::{array, sql::Param};
+use crate::{
+    array,
+    types::{ArrayLike, Field, Function, NumberLike, Param},
+};
 use surrealdb::sql;
 
-use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
-    Field,
-};
+use crate::traits::{Binding, Buildable, ToRaw};
 
-use super::{
-    array::{ArrayOrField, Function},
-    geo::NumberOrEmpty,
-};
-
-pub struct Number(sql::Value);
-
-impl From<Number> for sql::Value {
-    fn from(value: Number) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Number>> From<T> for Number {
-    fn from(value: T) -> Self {
-        let value: sql::Number = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Number {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for Number {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-pub struct Array(sql::Value);
-
-impl From<Array> for sql::Value {
-    fn from(value: Array) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Array>> From<T> for Array {
-    fn from(value: T) -> Self {
-        let value: sql::Array = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Array {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for Array {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str) -> Function {
+fn create_fn_with_single_num_arg(number: impl Into<NumberLike>, function_name: &str) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
 
@@ -99,7 +40,7 @@ fn create_fn_with_single_num_arg(number: impl Into<Number>, function_name: &str)
     }
 }
 
-fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str) -> Function {
+fn create_fn_with_single_array_arg(value: impl Into<ArrayLike>, function_name: &str) -> Function {
     let binding = Binding::new(value.into());
     let query_string = format!("math::{function_name}({})", binding.get_param_dollarised());
 
@@ -109,7 +50,7 @@ fn create_fn_with_single_array_arg(value: impl Into<Array>, function_name: &str)
     }
 }
 
-fn fixed_fn(number: impl Into<Number>, decimal_place: impl Into<Number>) -> Function {
+fn fixed_fn(number: impl Into<NumberLike>, decimal_place: impl Into<NumberLike>) -> Function {
     let num_binding = Binding::new(number.into());
     let decimal_place_binding = Binding::new(decimal_place.into());
 
@@ -141,7 +82,7 @@ macro_rules! create_test_for_fn_with_single_arg {
             // I dont see why that should be allowed at the app layer in rust
             // Obviously, if a field has stringified number that would work
             // during query execution
-            fn [<$function_name _fn>](number: impl Into<Number>) -> Function {
+            fn [<$function_name _fn>](number: impl Into<NumberLike>) -> Function {
                 create_fn_with_single_num_arg(number, $function_name)
             }
 
@@ -223,7 +164,7 @@ create_test_for_fn_with_single_arg!("sqrt");
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_name: expr) => {
         paste::paste! {
-            fn [<$function_name _fn>](number: impl Into<Array>) -> Function {
+            fn [<$function_name _fn>](number: impl Into<ArrayLike>) -> Function {
                 create_fn_with_single_array_arg(number, $function_name)
             }
 
@@ -346,7 +287,7 @@ fn test_fixed_fn_with_raw_number_with_field() {
     );
     assert_eq!(
         result.to_raw().to_string(),
-        "math::fixed(`\\`country.land_mass\\``, 4)"
+        "math::fixed(`country.land_mass`, 4)"
     );
 }
 
@@ -407,6 +348,6 @@ fn test_fixed_macro_with_raw_number_with_field() {
     );
     assert_eq!(
         result.to_raw().to_string(),
-        "math::fixed(`\\`country.land_mass\\``, 4)"
+        "math::fixed(`country.land_mass`, 4)"
     );
 }

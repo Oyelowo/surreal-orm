@@ -5,482 +5,74 @@
  * Licensed under the MIT license
  */
 
-use bigdecimal::BigDecimal;
-use serde::{
-    de::{value, DeserializeOwned},
-    Serialize,
-};
-use std::{
-    borrow::Cow,
-    cell::{Cell, RefCell},
-    fmt::{format, Display},
-    ops::Deref,
-    rc::Rc,
-};
+use std::fmt::Display;
 
-use proc_macro2::Span;
-use surrealdb::{
-    engine::local::Db,
-    sql::{self, Number, Value},
-};
+use surrealdb::sql;
 
-use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    clause::Empty,
-    filter::Conditional,
-    sql::{ArrayCustom, Name},
-    Clause, Erroneous, SurrealdbModel,
-};
+use crate::types::{ArrayLike, GeometryLike, NumberLike, Ordinal};
 
-/// Represents a field in the database. This type wraps a `String` and
-/// provides a convenient way to refer to a database fields.
-///
-/// # Examples
-///
-/// Creating a `Field`:
-///
-/// ```
-/// use crate::query::field::Field;
-///
-/// let field = Field::new("name");
-///
-/// assert_eq!(field.to_string(), "name");
-/// ```
+use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
+
+type ValueLike = sql::Value;
+
 #[derive(Debug, Clone)]
-pub struct Field {
-    field_name: sql::Idiom,
-    pub condition_query_string: String,
+pub struct Operation {
+    query_string: String,
     bindings: BindingsList,
 }
 
-impl Erroneous for Field {
-    fn get_errors(&self) -> Vec<String> {
-        vec![]
+// impl Operator {
+//     pub fn new(query_string: String, bindings: BindingsList) -> Self {
+//         Self {
+//             query_string,
+//             bindings,
+//         }
+//     }
+//     /// Append the specified string to the field name
+//     ///
+//     /// # Arguments
+//     ///
+//     /// * `string` - The string to append
+//     ///
+//     /// # Example
+//     ///
+//     /// ```
+//     /// use surrealdb::Field;
+//     ///
+//     /// let mut field = Field::new("name");
+//     /// field.push_str("_alias");
+//     /// ```
+//     // TODO: replace with long underscore to show it is an internal variable
+//     pub fn push_str(&mut self, string: &str) {
+//         self.query_string.push_str(string)
+//     }
+// }
+
+impl Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 
-impl Conditional for Field {
-    fn get_condition_query_string(&self) -> String {
-        format!("{}", self.condition_query_string)
+impl Buildable for Operation {
+    fn build(&self) -> String {
+        self.query_string.to_string()
     }
 }
 
-impl Parametric for Field {
+impl Parametric for Operation {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl From<&Field> for Name {
-    fn from(value: &Field) -> Self {
-        Self::new(value.field_name.clone().into())
-    }
-}
+impl Operatable for Operation {}
 
-impl From<&mut Field> for sql::Value {
-    fn from(value: &mut Field) -> Self {
-        Self::Idiom(value.field_name.to_string().into())
-    }
-}
+impl Conditional for Operation {}
 
-struct ValueCustom(sql::Value);
+impl Erroneous for Operation {}
 
-impl From<sql::Value> for ValueCustom {
-    fn from(value: sql::Value) -> Self {
-        ValueCustom(value)
-    }
-}
-
-// impl<T: Into<sql::Value>> Deref for ValueCustom<T> {
-//     type Target = sql::Value;
-//
-//     fn deref(&self) -> &Self::Target {
-//         todo!()
-//     }
-// }
-
-impl Into<sql::Value> for &Field {
-    fn into(self) -> Value {
-        sql::Table(self.condition_query_string.to_string()).into()
-    }
-}
-
-impl Into<sql::Idiom> for Field {
-    fn into(self) -> sql::Idiom {
-        self.field_name.into()
-    }
-}
-
-impl From<Field> for sql::Value {
-    fn from(val: Field) -> Self {
-        let mk = sql::Idiom::from(val.condition_query_string.to_string());
-        // assert_eq!(sql::Value::from(mk).to_string(), "nawa".to_string());
-        sql::Value::from(mk)
-    }
-}
-
-#[derive(serde::Serialize, Debug, Clone)]
-pub enum GeometryOrField {
-    Geometry(sql::Geometry),
-    Field(sql::Value),
-}
-
-macro_rules! impl_geometry_or_field_from {
-    ($($t:ty),*) => {
-        $(impl From<$t> for GeometryOrField {
-            fn from(value: $t) -> Self {
-                Self::Geometry(sql::Geometry::from(value))
-            }
-        })*
-    };
-}
-
-impl_geometry_or_field_from!(
-    geo::Polygon,
-    geo::Point,
-    geo::LineString,
-    geo::MultiPoint,
-    geo::MultiPolygon,
-    geo::MultiLineString
-);
-
-impl Into<GeometryOrField> for Field {
-    fn into(self) -> GeometryOrField {
-        GeometryOrField::Field(self.into())
-    }
-}
-
-impl Into<GeometryOrField> for &Field {
-    fn into(self) -> GeometryOrField {
-        GeometryOrField::Field(self.into())
-    }
-}
-
-impl From<sql::Value> for GeometryOrField {
-    fn from(value: Value) -> Self {
-        Self::Field(value)
-    }
-}
-
-impl From<GeometryOrField> for sql::Value {
-    fn from(val: GeometryOrField) -> Self {
-        match val {
-            GeometryOrField::Geometry(g) => g.into(),
-            GeometryOrField::Field(f) => f.into(),
-        }
-    }
-}
-
-#[derive(serde::Serialize, Debug, Clone)]
-pub enum Ordinal {
-    Datetime(sql::Datetime),
-    Number(sql::Number),
-    Field(sql::Value),
-}
-impl From<sql::Datetime> for Ordinal {
-    fn from(value: sql::Datetime) -> Self {
-        Self::Datetime(value.into())
-    }
-}
-
-impl From<chrono::DateTime<chrono::Utc>> for Ordinal {
-    fn from(value: chrono::DateTime<chrono::Utc>) -> Self {
-        Self::Datetime(value.into())
-    }
-}
-
-macro_rules! impl_number_or_field_from {
-    ($($t:ty),*) => {
-        $(impl From<$t> for Ordinal {
-            fn from(value: $t) -> Self {
-                Self::Number(sql::Number::from(value))
-            }
-        })*
-    };
-}
-
-impl_number_or_field_from!(
-    i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
-);
-
-impl Into<Ordinal> for Field {
-    fn into(self) -> Ordinal {
-        Ordinal::Field(self.into())
-    }
-}
-
-impl Into<Ordinal> for &Field {
-    fn into(self) -> Ordinal {
-        Ordinal::Field(self.into())
-    }
-}
-impl Into<sql::Value> for Ordinal {
-    fn into(self) -> sql::Value {
-        match self {
-            Ordinal::Datetime(n) => n.into(),
-            Ordinal::Number(n) => n.into(),
-            Ordinal::Field(f) => f.into(),
-        }
-    }
-}
-
-impl Into<Ordinal> for sql::Number {
-    fn into(self) -> Ordinal {
-        Ordinal::Number(self)
-    }
-}
-
-impl<'a> From<Cow<'a, Self>> for Field {
-    fn from(value: Cow<'a, Field>) -> Self {
-        match value {
-            Cow::Borrowed(v) => v.clone(),
-            Cow::Owned(v) => v,
-        }
-    }
-}
-impl<'a> From<&'a Field> for Cow<'a, Field> {
-    fn from(value: &'a Field) -> Self {
-        Cow::Borrowed(value)
-    }
-}
-
-impl From<Field> for Cow<'static, Field> {
-    fn from(value: Field) -> Self {
-        Cow::Owned(value)
-    }
-}
-
-impl From<String> for Field {
-    fn from(value: String) -> Self {
-        Self::new(value)
-    }
-}
-impl From<&Self> for Field {
-    fn from(value: &Field) -> Self {
-        value.to_owned()
-    }
-}
-impl From<&str> for Field {
-    fn from(value: &str) -> Self {
-        let value: sql::Idiom = value.to_string().into();
-        Self::new(Name::new(value))
-    }
-}
-
-impl From<Field> for String {
-    fn from(value: Field) -> Self {
-        value.condition_query_string
-    }
-}
-
-impl std::fmt::Display for Field {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(
-            "{}",
-            self.condition_query_string // self.condition_query_string.trim_start_matches("`")
-        ))
-    }
-}
-
-impl Field {
-    pub fn new(field_name: impl Into<Name>) -> Self {
-        let field_name: Name = field_name.into();
-        let field_name: sql::Idiom = field_name.into();
-        let field_name_str = format!("{}", &field_name);
-        // let field: sql::Value = field_name.into();
-        // This would be necessary if I decide to parametize and bind field names themselves
-        // let binding = Binding::new(field_name.into());
-        Self {
-            field_name: field_name.into(),
-            condition_query_string: field_name_str,
-            bindings: vec![].into(),
-            // TODO: Rethink if bindings should be used even for fields. If so, just uncomment
-            // below in favour over above. This is more paranoid mode.
-            // field_name: binding.get_param().to_string(),
-            // bindings: vec![binding.into()].into(),
-        }
-    }
-
-    pub fn set_condition_query_string(mut self, connection_string: String) -> Self {
-        self.condition_query_string = connection_string;
-        self
-    }
-    /// Append the specified string to the field name
-    ///
-    /// # Arguments
-    ///
-    /// * `string` - The string to append
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::Field;
-    ///
-    /// let mut field = Field::new("name");
-    /// field.push_str("_alias");
-    /// ```
-    // TODO: replace with long underscore to show it is an internal variable
-    pub fn push_str(&mut self, string: &str) {
-        self.condition_query_string.push_str(string)
-    }
-
-    /// Return a new `DbQuery` that renames the field with the specified alias
-    ///
-    /// # Arguments
-    ///
-    /// * `alias` - The alias to use for the field
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::{Field, DbQuery};
-    ///
-    /// let field = Field::new("name");
-    /// let query = field.__as__("name_alias");
-    /// assert_eq!(query.to_string(), "name AS name_alias");
-    /// ```
-    pub fn __as__(&self, alias: impl std::fmt::Display) -> Self {
-        Self::new(format!("{} AS {}", self.condition_query_string, alias))
-    }
-
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").between(18, 30);
-    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
-    /// ```
-    pub fn between<T>(&self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<Ordinal>,
-    {
-        let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} < {} < {}",
-            lower_bound_binding.get_param(),
-            self.condition_query_string,
-            upper_bound_binding.get_param()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Self {
-            condition_query_string: condition,
-            bindings: updated_params,
-            field_name: self.field_name.clone(),
-        }
-    }
-
-    /// Check whether the value of the field is between the given lower and upper bounds.
-    ///
-    /// # Arguments
-    ///
-    /// * `lower_bound` - The lower bound to compare against the field.
-    /// * `upper_bound` - The upper bound to compare against the field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").within(18, 30);
-    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
-    /// ```
-    pub fn within<T>(&self, lower_bound: T, upper_bound: T) -> Self
-    where
-        T: Into<Ordinal>,
-    {
-        let lower_bound: Ordinal = lower_bound.into();
-        let lower_bound: Value = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let upper_bound: Value = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} <= {} <= {}",
-            lower_bound_binding.get_param(),
-            self.condition_query_string,
-            upper_bound_binding.get_param()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Self {
-            condition_query_string: condition,
-            bindings: updated_params,
-            field_name: self.field_name.clone(),
-        }
-    }
-
-    pub fn ____________update_many_bindings<'bi>(
-        &self,
-        bindings: impl Into<&'bi [Binding]>,
-    ) -> Self {
-        let bindings: &'bi [Binding] = bindings.into();
-        // println!("bindingszz {bindings:?}");
-        // updated_params.extend_from_slice(&self.bindings[..]);
-        // updated_params.extend_from_slice(&bindings[..]);
-        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
-        Self {
-            condition_query_string: self.condition_query_string.to_string(),
-            bindings: updated_params,
-            field_name: self.field_name.clone(),
-        }
-    }
-}
-
-impl Operatable for Field {
-    // fn ____________get_condition_string(&self) -> String {
-    //     todo!()
-    // }
-    //
-    // fn ____________update_condition_string(&mut self, condition_string: String) -> Self {
-    //     todo!()
-    // }
-    //
-    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self {
-    //     todo!()
-    // }
-
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Field
-    where
-        T: Into<sql::Value>,
-    {
-        let value: sql::Value = value.into();
-        let binding = Binding::new(value);
-        let condition = format!(
-            "{} {} {}",
-            self.condition_query_string,
-            operator,
-            &binding.get_param_dollarised()
-        );
-        let updated_bindings = self.__update_bindings(binding);
-
-        // let updated_bindings = self.__update_bindings(param, value);
-        Self {
-            condition_query_string: condition,
-            bindings: updated_bindings,
-            field_name: self.field_name.clone(),
-        }
-    }
-}
-
-pub trait Operatable: Sized + Parametric {
+pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// Return a new `DbQuery` that checks whether the field is equal to the specified value
     ///
     /// # Arguments
@@ -496,9 +88,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = field.equals(25);
     /// assert_eq!(query.to_string(), "age = 25");
     /// ```
-    fn equal<T>(&self, value: T) -> Self
+    fn equal<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Equal, value)
     }
@@ -518,9 +110,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = field.not_equals(25);
     /// assert_eq!(query.to_string(), "age != 25");
     /// ```
-    fn not_equal<T>(&self, value: T) -> Self
+    fn not_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotEqual, value)
     }
@@ -539,9 +131,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::column("age").exactly_equal(42);
     /// assert_eq!(query.to_string(), "age == 42");
     /// ```
-    fn exactly_equal<T>(&self, value: T) -> Self
+    fn exactly_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
         Self: Sized,
     {
         self.generate_query(sql::Operator::Exact, value)
@@ -562,9 +154,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = col.any_equal("Alice");
     /// assert_eq!(query.to_string(), friends ?= Alice)");
     /// ```
-    fn any_equal<T>(&self, value: T) -> Self
+    fn any_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AnyEqual, value)
     }
@@ -584,9 +176,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = col.any_equal("Alice");
     /// assert_eq!(query.to_string(), friends *= Alice)");
     /// ```
-    fn all_equal<T>(&self, value: T) -> Self
+    fn all_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AllEqual, value)
     }
@@ -605,9 +197,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::column("name").like("A");
     /// assert_eq!(query.to_string(), "name ~ 'A'");
     /// ```
-    fn like<T>(&self, value: T) -> Self
+    fn like<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Like, value.into())
     }
@@ -626,9 +218,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::column("name").not_like("A");
     /// assert_eq!(query.to_string(), "name !~ 'A'");
     /// ```
-    fn not_like<T>(&self, value: T) -> Self
+    fn not_like<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotLike, value)
     }
@@ -647,9 +239,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::column("name").all_like("A");
     /// assert_eq!(query.to_string(), "name ?~ 'A'");
     /// ```
-    fn any_like<T>(&self, value: T) -> Self
+    fn any_like<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AnyLike, value)
     }
@@ -668,9 +260,9 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::column("name").all_like("A");
     /// assert_eq!(query.to_string(), "name *~ 'A'");
     /// ```
-    fn all_like<T>(&self, value: T) -> Self
+    fn all_like<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AllLike, value)
     }
@@ -689,7 +281,7 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::field("age").less_than(30);
     /// assert_eq!(query.to_string(), "age < 30");
     /// ```
-    fn less_than<T>(&self, value: T) -> Self
+    fn less_than<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -711,7 +303,7 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::field("age").less_than_or_equals(30);
     /// assert_eq!(query.to_string(), "age <= 30");
     /// ```
-    fn less_than_or_equal<T>(&self, value: T) -> Self
+    fn less_than_or_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -733,7 +325,7 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::field("age").greater_than(18);
     /// assert_eq!(query.to_string(), "age > 18");
     /// ```
-    fn greater_than<T>(&self, value: T) -> Self
+    fn greater_than<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -755,7 +347,7 @@ pub trait Operatable: Sized + Parametric {
     /// let query = DbQuery::field("age").greater_than_or_equals(18);
     /// assert_eq!(query.to_string(), "age >= 18");
     /// ```
-    fn greater_than_or_equal<T>(&self, value: T) -> Self
+    fn greater_than_or_equal<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -779,9 +371,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age + 5");
     /// ```
-    fn add<T>(&self, value: T) -> Self
+    fn add<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Add, value)
     }
@@ -802,9 +394,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age - 5");
     /// ```
-    fn subtract<T>(&self, value: T) -> Self
+    fn subtract<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Sub, value)
     }
@@ -825,9 +417,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age * 5");
     /// ```
-    fn multiply<T>(&self, value: T) -> Self
+    fn multiply<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Mul, value)
     }
@@ -848,9 +440,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age / 5");
     /// ```
-    fn divide<T>(&self, value: T) -> Self
+    fn divide<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Div, value)
     }
@@ -871,9 +463,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age && 5");
     /// ```
-    fn truthy_and<T>(&self, value: T) -> Self
+    fn truthy_and<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query("&&", value)
     }
@@ -895,9 +487,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age || 5");
     /// ```
-    fn truthy_or<T>(&self, value: T) -> Self
+    fn truthy_or<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query("||", value)
     }
@@ -918,9 +510,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age AND 5");
     /// ```
-    fn and<T>(&self, value: T) -> Self
+    fn and<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::And, value)
     }
@@ -941,11 +533,11 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age OR 5");
     /// ```
-    fn or<T>(&self, value: T) -> Self
+    fn or<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query(sql::Operator::Or, value)
     }
 
@@ -965,11 +557,11 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age IS 5");
     /// ```
-    fn is<T>(&self, value: T) -> Self
+    fn is<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("IS", value)
     }
 
@@ -989,11 +581,11 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "age IS NOT 5");
     /// ```
-    fn is_not<T>(&self, value: T) -> Self
+    fn is_not<T>(&self, value: T) -> Operation
     where
-        T: Into<Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("IS NOT", value)
     }
 
@@ -1013,11 +605,11 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "friends CONTAINS 'Oyelowo'");
     /// ```
-    fn contains<T>(&self, value: T) -> Self
+    fn contains<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query(sql::Operator::Contain, value)
     }
 
@@ -1037,9 +629,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "friends CONTAINSNOT 'Oyelowo'");
     /// ```
-    fn contains_not<T>(&self, value: T) -> Self
+    fn contains_not<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotContain, value)
     }
@@ -1060,9 +652,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSALL [10, 20, 10]");
     /// ```
-    fn contains_all<T>(&self, value: T) -> Self
+    fn contains_all<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainAll, value)
@@ -1084,9 +676,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSANY [10, 20, 10]");
     /// ```
-    fn contains_any<T>(&self, value: T) -> Self
+    fn contains_any<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainAny, value)
@@ -1108,9 +700,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts CONTAINSNONE [10, 20, 10]");
     /// ```
-    fn contains_none<T>(&self, value: T) -> Self
+    fn contains_none<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::ContainNone, value)
@@ -1132,9 +724,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts INSIDE [10, 20, 10]");
     /// ```
-    fn inside<T>(&self, value: T) -> Self
+    fn inside<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Inside, value)
     }
@@ -1155,9 +747,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
     /// ```
-    fn not_inside<T>(&self, value: T) -> Self
+    fn not_inside<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotInside, value)
     }
@@ -1178,9 +770,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
     /// ```
-    fn all_inside<T>(&self, value: T) -> Self
+    fn all_inside<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::AllInside, value)
@@ -1202,9 +794,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts ANYINSIDE [10, 20, 10]");
     /// ```
-    fn any_inside<T>(&self, value: T) -> Self
+    fn any_inside<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::AllInside, value)
@@ -1226,9 +818,9 @@ pub trait Operatable: Sized + Parametric {
     ///
     /// assert_eq!(new_query.to_string(), "number_counts NONEINSIDE [10, 20, 10]");
     /// ```
-    fn none_inside<T>(&self, value: T) -> Self
+    fn none_inside<T>(&self, value: T) -> Operation
     where
-        T: Into<ArrayCustom>,
+        T: Into<ArrayLike>,
     {
         let value = value.into();
         self.generate_query(sql::Operator::NoneInside, value)
@@ -1258,11 +850,11 @@ pub trait Operatable: Sized + Parametric {
     ///   };
     /// ");
     /// ```
-    fn outside<T>(&self, value: T) -> Self
+    fn outside<T>(&self, value: T) -> Operation
     where
-        T: Into<GeometryOrField>,
+        T: Into<GeometryLike>,
     {
-        let value: GeometryOrField = value.into();
+        let value: GeometryLike = value.into();
         self.generate_query(sql::Operator::Outside, value)
     }
 
@@ -1290,11 +882,11 @@ pub trait Operatable: Sized + Parametric {
     ///   };
     /// ");
     /// ```
-    fn intersects<T>(&self, value: T) -> Self
+    fn intersects<T>(&self, value: T) -> Operation
     where
-        T: Into<GeometryOrField>,
+        T: Into<GeometryLike>,
     {
-        let value: GeometryOrField = value.into();
+        let value: GeometryLike = value.into();
         self.generate_query(sql::Operator::Intersects, value)
     }
 
@@ -1315,11 +907,11 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.increment_by(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
     /// ```
-    fn increment_by<T>(&self, value: T) -> Self
+    fn increment_by<T>(&self, value: T) -> Operation
     where
-        T: Into<Number>,
+        T: Into<NumberLike>,
     {
-        let value: Number = value.into();
+        let value: NumberLike = value.into();
         self.generate_query("+=", value)
     }
 
@@ -1338,11 +930,11 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.append("python");
     /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust', 'python']");
     /// ```
-    fn append<T>(&self, value: T) -> Self
+    fn append<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("+=", value)
     }
 
@@ -1361,11 +953,11 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.decrement_by(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 - 2");
     /// ```
-    fn decrement_by<T>(&self, value: T) -> Self
+    fn decrement_by<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Number>,
+        T: Into<NumberLike>,
     {
-        let value: sql::Number = value.into();
+        let value: NumberLike = value.into();
         self.generate_query("-=", value)
     }
 
@@ -1384,11 +976,11 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.remove("python");
     /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust']");
     /// ```
-    fn remove<T>(&self, value: T) -> Self
+    fn remove<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("-=", value)
     }
 
@@ -1406,11 +998,11 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.plus_equal(2);
     /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
     /// ```
-    fn plus_equal<T>(&self, value: T) -> Self
+    fn plus_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("+=", value)
     }
 
@@ -1428,19 +1020,133 @@ pub trait Operatable: Sized + Parametric {
     /// let updated_updater = updater.minus_equal("ohn");
     /// assert_eq!(updated_updater.to_string(), "name = 'J'");
     /// ```
-    fn minus_equal<T>(&self, value: T) -> Self
+    fn minus_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<sql::Value>,
+        T: Into<ValueLike>,
     {
-        let value: sql::Value = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("-=", value)
     }
 
+    /// Return a new `DbQuery` that renames the field with the specified alias
+    ///
+    /// # Arguments
+    ///
+    /// * `alias` - The alias to use for the field
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::{Field, DbQuery};
+    ///
+    /// let field = Field::new("name");
+    /// let query = field.__as__("name_alias");
+    /// assert_eq!(query.to_string(), "name AS name_alias");
+    /// ```
+    fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
+        Operation {
+            query_string: format!("{} AS {}", self.build(), alias),
+            bindings: self.get_bindings(),
+        }
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").between(18, 30);
+    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
+    /// ```
+    fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let lower_bound: Ordinal = lower_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} < {} < {}",
+            lower_bound_binding.get_param(),
+            self.build(),
+            upper_bound_binding.get_param()
+        );
+
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_params,
+        }
+    }
+
+    /// Check whether the value of the field is between the given lower and upper bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `lower_bound` - The lower bound to compare against the field.
+    /// * `upper_bound` - The upper bound to compare against the field.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use surrealdb::DbQuery;
+    ///
+    /// let query = DbQuery::field("age").within(18, 30);
+    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
+    /// ```
+    fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let lower_bound: Ordinal = lower_bound.into();
+        let upper_bound: Ordinal = upper_bound.into();
+        let lower_bound_binding = Binding::new(lower_bound);
+        let upper_bound_binding = Binding::new(upper_bound);
+        let condition = format!(
+            "{} <= {} <= {}",
+            lower_bound_binding.get_param(),
+            self.build(),
+            upper_bound_binding.get_param()
+        );
+
+        let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_params,
+        }
+    }
+
+    fn ____________update_many_bindings<'bi>(
+        &self,
+        bindings: impl Into<&'bi [Binding]>,
+    ) -> Operation {
+        let bindings: &'bi [Binding] = bindings.into();
+        // println!("bindingszz {bindings:?}");
+        // updated_params.extend_from_slice(&self.bindings[..]);
+        // updated_params.extend_from_slice(&bindings[..]);
+        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
+        Operation {
+            query_string: self.build(),
+            bindings: updated_params,
+        }
+    }
     // fn ____________get_condition_string(&self) -> String;
     //
-    // fn ____________update_condition_string(&mut self, condition_string: String) -> Self;
+    // fn ____________update_condition_string(&mut self, condition_string: String) -> Operator;
     //
-    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Self;
+    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Operator;
     // let bindings: &'bi [Binding] = bindings.into();
     // // println!("bindingszz {bindings:?}");
     // // updated_params.extend_from_slice(&self.bindings[..]);
@@ -1461,25 +1167,18 @@ pub trait Operatable: Sized + Parametric {
         [self.get_bindings().as_slice(), &[binding]].concat()
     }
 
-    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Self
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
-        T: Into<sql::Value>;
-    // {
-    //     let value: sql::Value = value.into();
-    //     let binding = Binding::new(value);
-    //     let condition = format!(
-    //         "{} {} ${}",
-    //         self.condition_query_string,
-    //         operator,
-    //         &binding.get_param()
-    //     );
-    //     let updated_bindings = self.__update_bindings(binding);
-    //
-    //     // let updated_bindings = self.__update_bindings(param, value);
-    //     Self {
-    //         condition_query_string: condition,
-    //         bindings: updated_bindings,
-    //         field_name: self.field_name.clone(),
-    //     }
-    // }
+        T: Into<ValueLike>,
+    {
+        let value: ValueLike = value.into();
+        let binding = Binding::new(value);
+        let condition = format!("{} {} ${}", self.build(), operator, &binding.get_param());
+        let updated_bindings = self.__update_bindings(binding);
+
+        Operation {
+            query_string: condition,
+            bindings: updated_bindings,
+        }
+    }
 }

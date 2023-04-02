@@ -11,10 +11,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::Filter,
-    sql::{Buildable, Queryable, Return, Runnable},
-    Erroneous, SurrealdbModel,
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, SurrealdbModel},
+    types::{DurationLike, Filter, Return},
 };
 
 use super::update::TargettablesForUpdate;
@@ -153,9 +151,9 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.timeout();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
-        let duration: crate::sql::Duration = duration.into();
-        let duration = sql::Duration::from(duration);
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
+        let duration: sql::Value = duration.into().into();
+        // let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
     }

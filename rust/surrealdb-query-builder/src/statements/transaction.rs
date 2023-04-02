@@ -12,9 +12,8 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{Buildable, Queryable},
-    Erroneous,
+    traits::{BindingsList, Parametric},
+    traits::{Buildable, Erroneous, Queryable},
 };
 
 pub fn begin_transaction() -> QueryTransaction {

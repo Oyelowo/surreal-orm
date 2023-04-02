@@ -12,10 +12,11 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::{Conditional, Filter},
-    sql::{Buildable, Expression},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
+        Runnable, Runnables, SurrealdbModel,
+    },
+    types::{expression::Expression, Filter, Updateables},
 };
 
 impl Into<ExpressionContent> for Expression {

@@ -8,9 +8,6 @@
 use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
-use sql_components::SurrealId;
-
-use super::*;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]

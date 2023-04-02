@@ -11,9 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Queryable, Return, Runnable, Updateables},
-    Erroneous, SurrealdbNode,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        SurrealdbNode,
+    },
+    types::{DurationLike, Return, Table, Updateables},
 };
 
 use super::update::TargettablesForUpdate;
@@ -101,11 +103,8 @@ where
         self.bindings.extend(settable.get_bindings());
 
         let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => ups
-                .into_iter()
-                .map(|u| u.get_updater_string())
-                .collect::<Vec<_>>(),
+            Updateables::Updater(up) => vec![up.build()],
+            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.set.extend(setter_query);
         self
@@ -144,10 +143,10 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         // TODO: Revisit if this should also be parametized
-        let duration: crate::sql::Duration = duration.into();
-        let duration = sql::Duration::from(duration);
+        let duration: sql::Value = duration.into().into();
+        // let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
     }

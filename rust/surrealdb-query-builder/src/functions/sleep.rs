@@ -15,35 +15,11 @@ use core::time;
 
 use surrealdb::sql;
 
-use crate::{
-    sql::{Binding, Buildable, ToRawStatement},
-    Field,
-};
+use crate::traits::{Binding, Buildable, ToRaw};
 
-use super::array::Function;
+use crate::types::{DurationLike, Field, Function};
 
-struct Duration(sql::Value);
-
-impl From<Duration> for sql::Value {
-    fn from(value: Duration) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Duration>> From<T> for self::Duration {
-    fn from(value: T) -> Self {
-        let value: sql::Duration = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for self::Duration {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-fn sleep_fn(duration: impl Into<Duration>) -> Function {
+fn sleep_fn(duration: impl Into<DurationLike>) -> Function {
     let value: sql::Value = duration.into().into();
     let binding = Binding::new(value);
 

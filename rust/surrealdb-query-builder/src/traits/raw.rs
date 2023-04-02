@@ -7,54 +7,51 @@
 
 use std::fmt::{Display, Formatter};
 
-use crate::{
-    sql::{Buildable, Queryable},
-    Erroneous, Parametric,
-};
+use super::{BindingsList, Buildable, Erroneous, Parametric, Queryable};
 
 #[derive(Debug, Clone)]
-pub struct RawStatement(String);
+pub struct Raw(String);
 
-impl RawStatement {
+impl Raw {
     pub fn new(query: String) -> Self {
         Self(query)
     }
 }
 
-impl Parametric for RawStatement {
-    fn get_bindings(&self) -> crate::BindingsList {
+impl Parametric for Raw {
+    fn get_bindings(&self) -> BindingsList {
         vec![]
     }
 }
 
-impl Erroneous for RawStatement {}
+impl Erroneous for Raw {}
 
-impl Queryable for RawStatement {}
+impl Queryable for Raw {}
 
-impl Display for RawStatement {
+impl Display for Raw {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
-impl Buildable for RawStatement {
+impl Buildable for Raw {
     fn build(&self) -> String {
         self.0.to_string()
     }
 }
 
-pub trait ToRawStatement
+pub trait ToRaw
 where
     Self: Sized,
 {
-    fn to_raw(self) -> RawStatement;
+    fn to_raw(self) -> Raw;
 }
 
-impl<T> ToRawStatement for T
+impl<T> ToRaw for T
 where
     T: Parametric + Buildable,
 {
-    fn to_raw(self) -> RawStatement {
+    fn to_raw(self) -> Raw {
         let query_raw =
             self.get_bindings()
                 .into_iter()
@@ -65,6 +62,6 @@ where
                     )
                 });
 
-        RawStatement(query_raw)
+        Raw(query_raw)
     }
 }

@@ -1,10 +1,11 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    filter::{Conditional, Filter},
-    sql::{Buildable, Queryable, RawStatement, ToRawStatement},
-    Erroneous,
+    traits::{
+        Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
+        Raw, Runnable, Runnables, SurrealdbModel, ToRaw,
+    },
+    types::{expression::Expression, Filter, Updateables},
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -134,15 +135,15 @@ pub struct NONE;
 pub enum PermissionForables {
     For(For),
     Fors(Vec<For>),
-    RawStatement(RawStatement),
-    RawStatementList(Vec<RawStatement>),
+    RawStatement(Raw),
+    RawStatementList(Vec<Raw>),
 }
 
-impl ToRawStatement for PermissionForables {
-    fn to_raw(self) -> RawStatement {
+impl ToRaw for PermissionForables {
+    fn to_raw(self) -> Raw {
         match self {
             PermissionForables::For(for_one) => for_one.to_raw(),
-            PermissionForables::Fors(for_many) => RawStatement::new(
+            PermissionForables::Fors(for_many) => Raw::new(
                 for_many
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
@@ -150,7 +151,7 @@ impl ToRawStatement for PermissionForables {
                     .join(", "),
             ),
             PermissionForables::RawStatement(r) => r,
-            PermissionForables::RawStatementList(raw_list) => RawStatement::new(
+            PermissionForables::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
@@ -179,32 +180,31 @@ impl<'a, const N: usize> From<&[For; N]> for PermissionForables {
     }
 }
 
-impl From<RawStatement> for PermissionForables {
-    fn from(value: RawStatement) -> Self {
+impl From<Raw> for PermissionForables {
+    fn from(value: Raw) -> Self {
         Self::RawStatement(value)
     }
 }
 
-impl From<Vec<RawStatement>> for PermissionForables {
-    fn from(value: Vec<RawStatement>) -> Self {
+impl From<Vec<Raw>> for PermissionForables {
+    fn from(value: Vec<Raw>) -> Self {
         Self::RawStatementList(value)
     }
 }
 
-impl From<&Vec<RawStatement>> for PermissionForables {
-    fn from(value: &Vec<RawStatement>) -> Self {
+impl From<&Vec<Raw>> for PermissionForables {
+    fn from(value: &Vec<Raw>) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[RawStatement; N]> for PermissionForables {
-    fn from(value: &[RawStatement; N]) -> Self {
+impl<'a, const N: usize> From<&[Raw; N]> for PermissionForables {
+    fn from(value: &[Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;
@@ -212,7 +212,8 @@ mod tests {
 
     use crate::{
         statements::{order, select},
-        Field, Operatable,
+        traits::Operatable,
+        types::Field,
     };
 
     use super::*;
@@ -223,11 +224,15 @@ mod tests {
 
         let for_res = for_(ForCrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
-            for_res.to_string(),
-            "FOR create\n\tWHERE name ~ $_param_00000000".to_string()
+            for_res.fine_tune_params(),
+            "FOR create\n\tWHERE name ~ $_param_00000001".to_string()
         );
-        insta::assert_display_snapshot!(for_res);
-        insta::assert_debug_snapshot!(for_res.get_bindings());
+        assert_eq!(
+            for_res.to_raw().to_string(),
+            "FOR create\n\tWHERE name ~ 'Oyelowo'".to_string()
+        );
+        // insta::assert_display_snapshot!(for_res);
+        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 
     #[test]
@@ -237,10 +242,14 @@ mod tests {
 
         let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
-            for_res.to_string(),
-            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000000".to_string()
+            for_res.fine_tune_params(),
+            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001".to_string()
         );
-        insta::assert_display_snapshot!(for_res);
-        insta::assert_debug_snapshot!(for_res.get_bindings());
+        assert_eq!(
+            for_res.to_raw().to_string(),
+            "FOR create, delete, select, update\n\tWHERE name IS 'Oyedayo'".to_string()
+        );
+        // insta::assert_display_snapshot!(for_res);
+        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 }

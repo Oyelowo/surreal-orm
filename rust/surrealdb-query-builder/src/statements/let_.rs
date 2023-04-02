@@ -10,9 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{Buildable, Expression, Queryable, Runnables},
-    Erroneous,
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    types::expression::Expression,
 };
 
 pub fn let_(parameter: impl Into<Parameter>) -> LetStatement {

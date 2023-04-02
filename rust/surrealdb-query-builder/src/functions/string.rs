@@ -25,17 +25,16 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::sql::{Binding, Buildable, ToRawStatement};
-use crate::{array, Field};
+use crate::array;
+use crate::traits::{Binding, Buildable, ToRaw};
 use surrealdb::sql;
 
-use super::array::Function;
-use super::math::Number;
-use super::parse::String;
+use crate::types::{Field, Function, NumberLike, StrandLike};
 
-// struct String(sql::Value);
-
-fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &str) -> Function {
+fn create_fn_with_single_string_arg(
+    number: impl Into<StrandLike>,
+    function_name: &str,
+) -> Function {
     let binding = Binding::new(number.into());
     let query_string = format!(
         "string::{function_name}({})",
@@ -48,7 +47,7 @@ fn create_fn_with_single_string_arg(number: impl Into<String>, function_name: &s
     }
 }
 
-pub fn length_fn(string: impl Into<String>) -> Function {
+pub fn length_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "length")
 }
 
@@ -60,7 +59,7 @@ macro_rules! string_length {
 }
 pub use string_length as length;
 
-pub fn lowercase_fn(string: impl Into<String>) -> Function {
+pub fn lowercase_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "lowercase")
 }
 
@@ -73,7 +72,7 @@ macro_rules! string_lowercase {
 
 pub use string_lowercase as lowercase;
 
-pub fn uppercase_fn(string: impl Into<String>) -> Function {
+pub fn uppercase_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "uppercase")
 }
 
@@ -85,7 +84,7 @@ macro_rules! string_uppercase {
 }
 pub use string_uppercase as uppercase;
 
-pub fn words_fn(string: impl Into<String>) -> Function {
+pub fn words_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "words")
 }
 
@@ -97,7 +96,7 @@ macro_rules! string_words {
 }
 pub use string_words as words;
 
-pub fn reverse_fn(string: impl Into<String>) -> Function {
+pub fn reverse_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "reverse")
 }
 
@@ -110,7 +109,7 @@ macro_rules! string_reverse {
 
 pub use string_reverse as reverse;
 
-pub fn trim_fn(string: impl Into<String>) -> Function {
+pub fn trim_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "trim")
 }
 
@@ -122,7 +121,7 @@ macro_rules! string_trim {
 }
 pub use string_trim as trim;
 
-pub fn slug_fn(string: impl Into<String>) -> Function {
+pub fn slug_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "slug")
 }
 
@@ -201,7 +200,7 @@ macro_rules! string_join {
 
 pub use string_join as join;
 
-pub fn ends_with_fn(string: impl Into<String>, ending: impl Into<String>) -> Function {
+pub fn ends_with_fn(string: impl Into<StrandLike>, ending: impl Into<StrandLike>) -> Function {
     let string_binding = Binding::new(string.into());
     let ending_binding = Binding::new(ending.into());
 
@@ -226,7 +225,7 @@ macro_rules! string_ends_with {
 
 pub use string_ends_with as ends_with;
 
-pub fn starts_with_fn(string: impl Into<String>, starting: impl Into<String>) -> Function {
+pub fn starts_with_fn(string: impl Into<StrandLike>, starting: impl Into<StrandLike>) -> Function {
     let string_binding = Binding::new(string.into());
     let starting_binding = Binding::new(starting.into());
 
@@ -250,7 +249,7 @@ macro_rules! string_starts_with {
 }
 pub use string_starts_with as starts_with;
 
-pub fn split_fn(string: impl Into<String>, by: impl Into<String>) -> Function {
+pub fn split_fn(string: impl Into<StrandLike>, by: impl Into<StrandLike>) -> Function {
     let string_binding = Binding::new(string.into());
     let by_binding = Binding::new(by.into());
 
@@ -275,7 +274,7 @@ macro_rules! string_split {
 
 pub use string_split as split;
 
-pub fn repeat_fn(string: impl Into<String>, ending: impl Into<Number>) -> Function {
+pub fn repeat_fn(string: impl Into<StrandLike>, ending: impl Into<NumberLike>) -> Function {
     let string_binding = Binding::new(string.into());
     let ending_binding = Binding::new(ending.into());
 
@@ -301,9 +300,9 @@ macro_rules! string_repeat {
 pub use string_repeat as repeat;
 
 pub fn slice_fn(
-    string: impl Into<String>,
-    from: impl Into<Number>,
-    to: impl Into<Number>,
+    string: impl Into<StrandLike>,
+    from: impl Into<NumberLike>,
+    to: impl Into<NumberLike>,
 ) -> Function {
     let string_binding = Binding::new(string.into());
     let from_binding = Binding::new(from.into());
@@ -332,9 +331,9 @@ macro_rules! string_slice {
 pub use string_slice as slice;
 
 pub fn replace_fn(
-    string: impl Into<String>,
-    to_match: impl Into<String>,
-    replacement: impl Into<String>,
+    string: impl Into<StrandLike>,
+    to_match: impl Into<StrandLike>,
+    replacement: impl Into<StrandLike>,
 ) -> Function {
     let string_binding = Binding::new(string.into());
     let match_binding = Binding::new(to_match.into());

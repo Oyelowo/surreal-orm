@@ -35,9 +35,10 @@ use surrealdb::sql::{self, statements::DefineStatement};
 use std::collections::HashMap;
 
 use crate::{
-    binding::{BindingsList, Parametric},
-    sql::{Buildable, Index, Queryable, Runnables, Table, TableIndex},
-    Erroneous, Field,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+    },
+    types::{Field, Table, TableIndex},
 };
 
 // Struct to represent a SurrealDB index definition

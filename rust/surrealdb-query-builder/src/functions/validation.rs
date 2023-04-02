@@ -24,12 +24,7 @@
 
 use surrealdb::sql;
 
-use crate::{
-    sql::{Binding, Buildable, Name, ToRawStatement},
-    Field,
-};
-
-use super::array::Function;
+use crate::{traits::Binding, types::Function};
 
 fn create_validation_function(value: impl Into<sql::Value>, function_name: &str) -> Function {
     let binding = Binding::new(value);
@@ -129,12 +124,9 @@ macro_rules! create_validation_with_tests {
 pub mod is {
     use surrealdb::sql;
 
-    use crate::{
-        sql::{Binding, Buildable, Name, ToRawStatement},
-        Field,
-    };
+    use crate::traits::{Binding, Buildable, ToRaw};
 
-    use super::super::array::Function;
+    use crate::types::{Field, Function};
 
     create_validation_with_tests!("alphanum");
     create_validation_with_tests!("alpha");

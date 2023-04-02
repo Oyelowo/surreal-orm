@@ -23,12 +23,14 @@ use surrealdb::{
 };
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    sql::{Buildable, Queryable, Runnable, Updateables},
-    Erroneous, SurrealdbModel,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        SurrealdbModel,
+    },
+    types::{expression::Expression, Updateables},
 };
 
-use super::select::SelectStatement;
+use super::SelectStatement;
 
 pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
     node_type: PhantomData<T>,
@@ -168,11 +170,8 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
         let updates: Updateables = updateables.into();
         self.bindings.extend(updates.get_bindings());
         let updater_query = match updates {
-            Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => ups
-                .into_iter()
-                .map(|u| u.get_updater_string())
-                .collect::<Vec<_>>(),
+            Updateables::Updater(up) => vec![up.build()],
+            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.on_duplicate_key_update.extend(updater_query);
         self

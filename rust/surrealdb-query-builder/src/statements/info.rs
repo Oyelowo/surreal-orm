@@ -8,9 +8,11 @@
 use std::fmt;
 
 use crate::{
-    binding::BindingsList,
-    sql::{Buildable, Queryable, Runnables},
-    Erroneous, ErrorList, Parametric,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Runnable,
+        Runnables, SurrealdbModel,
+    },
+    types::{expression::Expression, Updateables},
 };
 
 pub fn info_for() -> InfoStatement {

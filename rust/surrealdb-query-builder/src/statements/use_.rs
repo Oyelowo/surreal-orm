@@ -10,9 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    binding::BindingsList,
-    sql::{Buildable, Database, Namespace, Queryable, Runnable, Runnables},
-    Erroneous, Parametric,
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    types::{Database, Namespace},
 };
 
 pub fn use_() -> UseStatement {
@@ -74,10 +73,7 @@ impl Parametric for UseStatement {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
-
-    use crate::sql::Database;
 
     use super::*;
 

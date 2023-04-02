@@ -1,23 +1,20 @@
 use std::fmt::{self, Display};
 
-use crate::array;
-use crate::sql::ToRawStatement;
-use surrealdb::sql;
-
 use crate::{
-    filter::{cond, Filter},
-    sql::{ArrayCustom, Binding, Buildable, Empty},
-    Field, Operatable, Parametric,
+    array,
+    traits::{Binding, Buildable, Operatable, Operation, Parametric, ToRaw},
+    types::{cond, ArrayLike, Empty, Field, Filter, Function, Param},
 };
-
-use super::array::Function;
+use surrealdb::sql;
 
 #[derive(Debug, Clone)]
 pub enum CountArg {
     Empty,
     Field(Field),
+    Param(Param),
+    Operation(Operation),
     Filter(Filter),
-    Array(ArrayCustom),
+    Array(sql::Array),
 }
 
 impl From<Empty> for CountArg {
@@ -32,13 +29,19 @@ impl From<Field> for CountArg {
     }
 }
 
+impl From<Operation> for CountArg {
+    fn from(value: Operation) -> Self {
+        CountArg::Operation(value)
+    }
+}
+
 impl From<Filter> for CountArg {
     fn from(value: Filter) -> Self {
         CountArg::Filter(value)
     }
 }
 
-impl<T: Into<ArrayCustom>> From<T> for CountArg {
+impl<T: Into<sql::Array>> From<T> for CountArg {
     fn from(value: T) -> Self {
         Self::Array(value.into())
     }
@@ -50,6 +53,10 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 
     let string = match countable {
         CountArg::Empty => format!(""),
+        CountArg::Param(param) => {
+            bindings = param.get_bindings();
+            format!("{}", param)
+        }
         CountArg::Field(field) => {
             bindings = field.get_bindings();
             format!("{}", field)
@@ -65,6 +72,11 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
             bindings = vec![array_binding];
             param
         }
+        CountArg::Operation(op) => {
+            bindings = op.get_bindings();
+            // format!("{}", filter)
+            op.build()
+        }
     };
     Function {
         query_string: format!("count({})", &string),
@@ -78,7 +90,7 @@ macro_rules! count {
         crate::functions::count::count_fn($countable)
     };
     () => {
-        crate::functions::count::count_fn(crate::sql::Empty)
+        crate::functions::count::count_fn(crate::types::Empty)
     };
 }
 pub use count;

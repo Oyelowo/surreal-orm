@@ -28,60 +28,11 @@
 use std::{fmt::Display, str::FromStr};
 
 use crate::{
-    sql::{Binding, Buildable, Param, ToRawStatement},
-    Field,
+    traits::{Binding, Buildable, ToRaw},
+    types::{DatetimeLike, DurationLike, Field, Function, Interval, IntervalLike, Param},
 };
 
-use super::array::Function;
 use surrealdb::sql;
-
-pub struct Datetime(sql::Value);
-
-impl From<Datetime> for sql::Value {
-    fn from(value: Datetime) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Datetime>> From<T> for Datetime {
-    fn from(value: T) -> Self {
-        let value: sql::Datetime = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Datetime {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for Datetime {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-pub struct Duration(sql::Value);
-
-impl From<Duration> for sql::Value {
-    fn from(value: Duration) -> Self {
-        value.0
-    }
-}
-
-impl<T: Into<sql::Duration>> From<T> for Duration {
-    fn from(value: T) -> Self {
-        let value: sql::Duration = value.into();
-        Self(value.into())
-    }
-}
-
-impl From<Field> for Duration {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
 
 pub fn now_fn() -> Function {
     let query_string = format!("now()");
@@ -105,7 +56,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
     ($function_name: expr) => {
         paste::paste! {
             #[allow(dead_code)]
-            fn [<$function_name _fn>](datetime: impl Into<Datetime>) -> Function {
+            fn [<$function_name _fn>](datetime: impl Into<DatetimeLike>) -> Function {
                 let binding = Binding::new(datetime.into());
                 let query_string = format!("time::{}({})", $function_name, binding.get_param_dollarised());
 
@@ -162,7 +113,7 @@ create_time_fn_with_single_datetime_arg!("week");
 create_time_fn_with_single_datetime_arg!("yday");
 create_time_fn_with_single_datetime_arg!("year");
 
-fn floor_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Function {
+fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime_binding = Binding::new(datetime.into());
     let duration_binding = Binding::new(duration.into());
     let query_string = format!(
@@ -186,7 +137,7 @@ macro_rules! time_floor {
 
 pub use time_floor as floor;
 
-fn round_fn(datetime: impl Into<Datetime>, duration: impl Into<Duration>) -> Function {
+fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime_binding = Binding::new(datetime.into());
     let duration_binding = Binding::new(duration.into());
     let query_string = format!(
@@ -210,62 +161,7 @@ macro_rules! time_round {
 
 pub use time_round as round;
 
-#[derive(Debug, Clone, Copy)]
-enum Interval {
-    Year,
-    Month,
-    Week,
-    Day,
-    Hour,
-    Minute,
-    Second,
-}
-
-impl Display for Interval {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Interval::Year => "year",
-                Interval::Month => "month",
-                Interval::Hour => "hour",
-                Interval::Minute => "minute",
-                Interval::Second => "second",
-                Interval::Week => "week",
-                Interval::Day => "day",
-            }
-        )
-    }
-}
-
-struct IntervalOrField(sql::Value);
-
-impl From<Field> for IntervalOrField {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for IntervalOrField {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<IntervalOrField> for sql::Value {
-    fn from(value: IntervalOrField) -> Self {
-        value.0
-    }
-}
-
-impl From<Interval> for IntervalOrField {
-    fn from(value: Interval) -> Self {
-        Self(value.to_string().into())
-    }
-}
-
-fn group_fn(datetime: impl Into<Datetime>, interval: impl Into<IntervalOrField>) -> Function {
+fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<IntervalLike>) -> Function {
     let datetime_binding = Binding::new(datetime.into());
     let interval_binding = Binding::new(interval.into());
 
@@ -305,7 +201,7 @@ macro_rules! time_group {
         crate::functions::time::group_fn($datetime, Interval::Second)
     };
     ( $datetime:expr, $interval:expr ) => {
-        crate::functions::time::group_fn($datetime, IntervalOrField::from($interval))
+        crate::functions::time::group_fn($datetime, IntervalLike::from($interval))
     };
 }
 

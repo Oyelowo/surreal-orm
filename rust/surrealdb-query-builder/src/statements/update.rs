@@ -11,10 +11,11 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    binding::{Binding, BindingsList, Parametric},
-    filter::Filter,
-    sql::{Buildable, Queryable, Return, Runnable, SurrealId, Updateables},
-    Erroneous, SurrealdbModel,
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
+        SurrealdbModel,
+    },
+    types::{DurationLike, Filter, Return, SurrealId, Updateables},
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
@@ -135,11 +136,13 @@ where
         let targets: TargettablesForUpdate = targettables.into();
         let targets_bindings = targets.get_bindings();
 
+        // TODO: Do all the parametization here when writing tests for this function
         let target_names = match targets {
             TargettablesForUpdate::Table(table) => vec![table.to_string()],
             TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
-                .map(|b| format!("${}", b.get_param()))
+                .map(|b| format!("{}", b.get_param_dollarised()))
+         
                 .collect::<Vec<_>>(),
         };
         self.update_bindings(targets_bindings);
@@ -168,11 +171,8 @@ where
         self.bindings.extend(settable.get_bindings());
 
         let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.get_updater_string()],
-            Updateables::Updaters(ups) => ups
-                .into_iter()
-                .map(|u| u.get_updater_string())
-                .collect::<Vec<_>>(),
+            Updateables::Updater(up) => vec![up.build()],
+            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.set.extend(setter_query);
         self
@@ -240,9 +240,9 @@ where
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.parallel();
     /// ```
-    pub fn timeout(mut self, duration: impl Into<crate::sql::Duration>) -> Self {
-        let duration: crate::sql::Duration = duration.into();
-        let duration = sql::Duration::from(duration);
+    pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
+        let duration: sql::Value = duration.into().into();
+        // let duration: sql::Duration = duration.into();
         self.timeout = Some(duration.to_string());
         self
     }

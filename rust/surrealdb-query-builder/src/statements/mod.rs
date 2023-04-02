@@ -33,44 +33,40 @@ pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
 
-pub mod statements {
-    pub use super::chain::{chain, QueryChain};
-    pub use super::create::{create, CreateStatement};
-    pub use super::define_database::{define_database, DefineDatabaseStatement};
-    pub use super::define_event::{define_event, DefineEventStatement};
-    pub use super::define_field::{
-        define_field, value, DefineFieldStatement, FieldType, ValueAssert,
-    };
-    pub use super::define_index::{define_index, DefineIndexStatement};
-    pub use super::define_login::{define_login, DefineLoginStatement};
-    pub use super::define_namespace::{define_namespace, DefineNamespaceStatement};
-    pub use super::define_scope::{define_scope, DefineScopeStatement};
-    pub use super::define_table::{define_table, DefineTableStatement};
-    pub use super::define_token::{define_token, DefineTokenStatement};
-    pub use super::delete::{delete, DeleteStatement};
-    pub use super::for_::{for_, For, ForCrudType, PermissionForables};
-    pub use super::ifelse::{if_, IfStatement};
-    pub use super::info::{info_for, InfoStatement};
-    pub use super::insert::{insert, InsertStatement, Insertables};
-    pub use super::let_::{let_, LetStatement};
-    pub use super::relate::{relate, RelateStatement};
-    pub use super::remove_database::{remove_database, RemoveDatabaseStatement};
-    pub use super::remove_event::{remove_event, RemoveEventStatement};
-    pub use super::remove_field::{remove_field, RemoveFieldStatement};
-    pub use super::remove_index::{remove_index, RemoveIndexStatement};
-    pub use super::remove_login::{remove_login, RemoveLoginStatement};
-    pub use super::remove_namespace::{remove_namespace, RemoveNamespaceStatement};
-    pub use super::remove_scope::{remove_scope, RemoveScopeStatement};
-    pub use super::remove_table::{remove_table, RemoveTableStatement};
-    pub use super::remove_token::{remove_token, RemoveTokenStatement};
-    pub use super::select::{
-        order, select, Order, Orderables, SelectStatement, Selectables, Splittables,
-    };
-    pub use super::sleep::{sleep, SleepStatement};
-    pub use super::transaction::{begin_transaction, BeginTransactionStatement};
-    pub use super::update::{update, UpdateStatement};
-    pub use super::use_::{use_, UseStatement};
-}
+pub use chain::{chain, QueryChain};
+pub use create::{create, CreateStatement};
+pub use define_database::{define_database, DefineDatabaseStatement};
+pub use define_event::{define_event, DefineEventStatement};
+pub use define_field::{define_field, value, DefineFieldStatement, FieldType, ValueAssert};
+pub use define_index::{define_index, DefineIndexStatement};
+pub use define_login::{define_login, DefineLoginStatement};
+pub use define_namespace::{define_namespace, DefineNamespaceStatement};
+pub use define_scope::{define_scope, DefineScopeStatement};
+pub use define_table::{define_table, DefineTableStatement};
+pub use define_token::{define_token, DefineTokenStatement};
+pub use delete::{delete, DeleteStatement};
+pub use for_::{for_, For, ForCrudType, PermissionForables};
+pub use ifelse::{if_, IfStatement};
+pub use info::{info_for, InfoStatement};
+pub use insert::{insert, InsertStatement, Insertables};
+pub use let_::{let_, LetStatement};
+pub use relate::{relate, RelateStatement};
+pub use remove_database::{remove_database, RemoveDatabaseStatement};
+pub use remove_event::{remove_event, RemoveEventStatement};
+pub use remove_field::{remove_field, RemoveFieldStatement};
+pub use remove_index::{remove_index, RemoveIndexStatement};
+pub use remove_login::{remove_login, RemoveLoginStatement};
+pub use remove_namespace::{remove_namespace, RemoveNamespaceStatement};
+pub use remove_scope::{remove_scope, RemoveScopeStatement};
+pub use remove_table::{remove_table, RemoveTableStatement};
+pub use remove_token::{remove_token, RemoveTokenStatement};
+pub use select::{
+    order, select, Order, Orderables, SelectStatement, Selectables, Splittables,
+};
+pub use sleep::{sleep, SleepStatement};
+pub use transaction::{begin_transaction, BeginTransactionStatement};
+pub use update::{update, UpdateStatement};
+pub use use_::{use_, UseStatement};
 
 pub(crate) enum NamespaceOrDatabase {
     Namespace,
