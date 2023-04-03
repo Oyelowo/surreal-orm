@@ -11,6 +11,7 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
     types::{cond, Param, Table},
+    Operation,
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -42,6 +43,13 @@ pub struct Clause {
 impl Buildable for Clause {
     fn build(&self) -> String {
         self.query_string.to_string()
+    }
+}
+
+impl From<Operation> for Clause {
+    fn from(value: Operation) -> Self {
+        let filter = Filter::new(value);
+        Self::new(ClauseType::Where(filter))
     }
 }
 
