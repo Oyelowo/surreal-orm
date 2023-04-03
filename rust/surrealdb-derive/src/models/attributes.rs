@@ -630,7 +630,7 @@ impl ReferencedNodeMeta {
                 let ref_node_type = format_ident!("{ref_node_type}");
                 define_array_field_content_methods
                         // .push(quote!(.type_(#crate_name::FieldType::Record)));
-                            .push(quote!(.type_(#crate_name::statements::FieldType::Record(#ref_node_type::table_name()))));
+                            .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
             }
             _ => {}
         }
