@@ -567,15 +567,19 @@ impl ReferencedNodeMeta {
                 let struct_ident = format_ident!("{struct_name_ident_str}");
 
                 if field_name_normalized == "id" {
-                    define_field_methods.push(
-                        quote!(.type_(#crate_name::FieldType::RecordList(Self::table_name()))),
-                    );
+                    define_field_methods
+                        .push(quote!(.type_(#crate_name::FieldType::Record(Self::table_name()))));
                 } else if field_name_normalized == "out" || field_name_normalized == "in" {
-                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::Record)));
+                    // Note: It might be possible to support multiple out and in nodes within same edge.
+                    // So, commenting this out for now, as surrealdb does not yet support defining
+                    // record type without specifying the reference table. specifying the reference
+                    // table here will limit us to only supporting a single out and in nodes for a
+                    // single edge
+                    // define_field_methods.push(quote!(.type_(#crate_name::FieldType::Record)));
                 } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
-                            .push(quote!(.type_(#crate_name::FieldType::RecordList(#ref_node_type::table_name()))));
+                            .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
                 } else if let Some(ref_node_type) = link_many {
                     define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
                 }
@@ -628,7 +632,7 @@ impl ReferencedNodeMeta {
                 let ref_node_type = format_ident!("{ref_node_type}");
                 define_array_field_content_methods
                         // .push(quote!(.type_(#crate_name::FieldType::Record)));
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
+                            .push(quote!(.type_(#crate_name::statements::FieldType::Record(#ref_node_type::table_name()))));
             }
             _ => {}
         }

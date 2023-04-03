@@ -69,10 +69,17 @@ pub enum FieldType {
     Number,
     Object,
     String,
-    Record,
-    RecordList(Table),
-    Geometry,
-    GeometryList(Vec<GeometryType>),
+    // Even though the documentation states that you can have a record type without specifying
+    // the reference table, from my test as at 3rd of April, this is an invalid query. Same goes
+    // for geometry, you have to specify the geomtry type. So, I am commenting these out for now.
+    // Prior to that, I had a different name for Record with referent table name. Same for
+    // geometry.
+    // If these happen to be supported in the future, I can have Record(Table) ->
+    // RecordWithTable(Table) and Geomtry(Vec<GeomtryType>) -> GeometryWithTypes(Vec<GeomtryType>)
+    // Record,
+    Record(Table),
+    // Geometry,
+    Geometry(Vec<GeometryType>),
 }
 
 impl From<FieldType> for String {
@@ -96,10 +103,10 @@ impl Display for FieldType {
             FieldType::Number => "number".to_string(),
             FieldType::Object => "object".to_string(),
             FieldType::String => "string".to_string(),
-            FieldType::RecordList(table) => format!("record ({table})"),
-            FieldType::Record => "record".to_string(),
-            FieldType::Geometry => "geometry".to_string(),
-            FieldType::GeometryList(geometries) => format!(
+            FieldType::Record(table) => format!("record ({table})"),
+            // FieldType::Record => "record".to_string(),
+            // FieldType::Geometry => "geometry".to_string(),
+            FieldType::Geometry(geometries) => format!(
                 "geometry ({})",
                 geometries
                     .iter()
@@ -137,7 +144,7 @@ impl FromStr for FieldType {
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
             (Some("record"), None) => FieldType::Record,
-            (Some("record"), Some(record_type)) => FieldType::RecordList(Table::from(record_type)),
+            (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("array"), None) => FieldType::Array,
             // (Some("array"), Some(content)) => {
             //     let content_type = Self::from_str(content)?;
@@ -149,7 +156,7 @@ impl FromStr for FieldType {
                     .split(",")
                     .map(|g| g.parse::<GeometryType>())
                     .collect();
-                FieldType::GeometryList(geoms?)
+                FieldType::Geometry(geoms?)
             }
             _ => return Err(format!("Invalid/Unsupported database type: {s}")),
         };
