@@ -24,11 +24,7 @@ use surrealdb::{
 
 // use surrealdb_orm::SurrealdbEdge;
 use std::fmt::{Debug, Display};
-use surrealdb_orm::{
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
-    model_id::SurId,
-    RecordId, SurrealdbEdge, SurrealdbNode,
-};
+use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode};
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 

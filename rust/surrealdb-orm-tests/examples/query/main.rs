@@ -26,7 +26,7 @@ use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use surrealdb::sql::thing;
 use surrealdb::sql::Datetime;
-use surrealdb::sql::Geometry;
+// use surrealdb::sql::Geometry;
 use surrealdb::sql::Limit;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
@@ -45,10 +45,8 @@ struct User {
 use serde_json::Result;
 use serde_json::{Map, Value};
 use surrealdb_orm::{
-    sql::{updater, All, GeometryCustom, SurrealId},
-    statements::select,
-    utils::cond,
-    Field, Operatable, Parametric, SurrealdbModel, SurrealdbNode,
+    cond, statements::select, updater, All, Field, Geometry, Operatable, Parametric, SurrealId,
+    SurrealdbModel, SurrealdbNode,
 };
 
 fn mana() {
@@ -185,7 +183,7 @@ struct Company {
     // founders: Vec<Person>,
     // tags: Vec<String>,
     // location: Geometry,
-    home: GeometryCustom,
+    home: Geometry,
 }
 
 // {
@@ -316,7 +314,7 @@ async fn test_it() -> surrealdb::Result<()> {
         geo::Geometry::Point(point),
         geo::Geometry::LineString(linestring),
     ]);
-    let a = Geometry::from(a);
+    let a = sql::Geometry::from(a);
 
     let companies = vec![
         Company {
@@ -337,7 +335,7 @@ async fn test_it() -> surrealdb::Result<()> {
             // tags: vec!["foo".to_string(), "bar".to_string()],
             // nam: Uuid::new(), // location: Geometry::Point((45.0, 45.0).into()),
             // location: (45.0, 45.0).into(),
-            home: GeometryCustom(a.clone().into()),
+            home: Geometry(a.clone().into()),
             // home: GeometryCustom((45.0, 45.0).into()),
             // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
@@ -359,7 +357,7 @@ async fn test_it() -> surrealdb::Result<()> {
             // nam: Uuid::new(),
             // home: Point::new(25.3, 39.4).into(),
             // home: Geometry::Line(b.into()),
-            home: GeometryCustom((63.0, 21.0).into()),
+            home: Geometry((63.0, 21.0).into()),
             // location: Geometry::Point((45.0, 45.0).into()),
         },
     ];
@@ -382,7 +380,7 @@ async fn test_it() -> surrealdb::Result<()> {
         // tags: vec!["foo".to_string(), "bar".to_string()],
         // nam: Uuid::new(), // location: (63.0, 21.0).into(),
         // home: Geome(Geometry::Point((45.0, 45.0).into())),
-        home: GeometryCustom(a.clone().into()),
+        home: Geometry(a.clone().into()),
         // home: Geome((63.0, 21.0).into()),
         // home: Geometry::Point(Point::new(20.2, 60.9)),
         // home: (63.0, 21.0).into(),
