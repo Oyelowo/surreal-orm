@@ -31,8 +31,8 @@ use surrealdb_orm::{
         define_field, define_table, for_, order, select, value, CrudType, DefineFieldStatement,
         DefineTableStatement, For, PermissionType, SelectStatement,
     },
-    All, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId, Relate,
-    SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table, NONE,
+    All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,
+    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table, NONE,
 };
 
 use test_case::test_case;
@@ -45,24 +45,24 @@ fn gama() -> SelectStatement {
 fn full() -> u32 {
     54
 }
-fn perm() -> RawStatement {
-    use CrudType::*;
-    let name = Field::new("name");
-    let age = Field::new("age");
-    // vec![
-    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-    //     for_(Update).where_(age.less_than_or_equal(130)),
-    // ]
-    // .into_iter()
-    // .map(|e| e.to_raw())
-    // .collect::<Vec<_>>()
-    // .to_vec()
-    PermissionForables::from(vec![
-        for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-        for_(Update).where_(age.less_than_or_equal(130)),
-    ])
-    .to_raw()
-}
+// fn perm() -> RawStatement {
+//     use CrudType::*;
+//     let name = Field::new("name");
+//     let age = Field::new("age");
+//     // vec![
+//     //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+//     //     for_(Update).where_(age.less_than_or_equal(130)),
+//     // ]
+//     // .into_iter()
+//     // .map(|e| e.to_raw())
+//     // .collect::<Vec<_>>()
+//     // .to_vec()
+//     PermissionType::from(vec![
+//         for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+//         for_(Update).where_(age.less_than_or_equal(130)),
+//     ])
+//     // .to_raw()
+// }
 
 fn define_student() -> DefineTableStatement {
     use CrudType::*;
