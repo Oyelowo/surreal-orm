@@ -20,7 +20,7 @@ use surrealdb::engine::local::Mem;
 use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use surrealdb::sql::Datetime;
-use surrealdb::sql::Geometry;
+// use surrealdb::sql::Geometry;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 // use surrealdb_derive::SurrealdbNode;
@@ -30,8 +30,7 @@ use geo::Coord;
 use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
-    Geometry, Operatable, Parametric, RunnableSelect, SurrealId, SurrealdbNode,
-    {All, Runnable, RunnableSelect},
+    All, Geometry, Operatable, Parametric, Runnable, RunnableSelect, SurrealId, SurrealdbNode,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -276,7 +275,7 @@ async fn geom_collection() -> surrealdb::Result<()> {
     let point = Point(Coord { x: 0.0, y: 0.0 });
     let linestring = LineString(vec![Coord { x: 1.0, y: 1.0 }, Coord { x: 2.0, y: 2.0 }]);
     let geometry_collection = vec![sql::Geometry::Point(point), sql::Geometry::Line(linestring)];
-    let geometry_collection = Geometry::Collection(geometry_collection);
+    let geometry_collection = sql::Geometry::Collection(geometry_collection);
     let company = create_geom_test(geometry_collection).await?;
     insta::assert_snapshot!(company);
     Ok(())
