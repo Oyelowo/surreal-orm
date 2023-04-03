@@ -12,7 +12,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{links::LinkOne, query::FieldType};
+use surrealdb_query_builder::{FieldType, LinkOne};
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
@@ -491,8 +491,7 @@ impl ReferencedNodeMeta {
                         // provided, do static assertions validation to check the inner type e.g
                         // record(book)
                         match field_type {
-                            FieldType::Record => {}
-                            FieldType::RecordList(link_table_name) => {
+                            FieldType::Record(link_table_name) => {
                                 let link_table_name =
                                     format_ident!("{}", link_table_name.to_string());
                                 let ref_node = NodeTypeName::from(&link_single_ref_node);
@@ -521,8 +520,7 @@ impl ReferencedNodeMeta {
                                         FieldType::from_str(&content_type.0.to_string()).unwrap();
 
                                     match content_type {
-                                        FieldType::Record => {}
-                                        FieldType::RecordList(array_content_table_name) => {
+                                        FieldType::Record(array_content_table_name) => {
                                             let array_content_table_name = format_ident!(
                                                 "{}",
                                                 array_content_table_name.to_string()

@@ -28,7 +28,7 @@ use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     cond,
     statements::{
-        define_field, define_table, for_, order, select, value, CrudType, DefineFieldStatement,
+        define_field, define_table, for_, order, select, value, DefineFieldStatement,
         DefineTableStatement, For, PermissionType, SelectStatement,
     },
     All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,

@@ -48,6 +48,7 @@ use super::Idiomx;
 pub struct Field {
     name: sql::Idiom,
     bindings: BindingsList,
+    graph_string: String,
 }
 
 impl Field {
@@ -57,6 +58,28 @@ impl Field {
         Self {
             name: value,
             bindings,
+            graph_string: "".into(),
+        }
+    }
+
+    pub fn set_graph_string(mut self, connection_string: String) -> Self {
+        self.graph_string = connection_string;
+        self
+    }
+
+    pub fn ____________update_many_bindings<'bi>(
+        &self,
+        bindings: impl Into<&'bi [Binding]>,
+    ) -> Self {
+        let bindings: &'bi [Binding] = bindings.into();
+        // println!("bindingszz {bindings:?}");
+        // updated_params.extend_from_slice(&self.bindings[..]);
+        // updated_params.extend_from_slice(&bindings[..]);
+        let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
+        Self {
+            graph_string: self.graph_string.to_string(),
+            bindings: updated_params,
+            name: self.name.clone(),
         }
     }
 }

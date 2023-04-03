@@ -105,7 +105,6 @@ impl ToTokens for NodeToken{
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
 
         
@@ -131,7 +130,7 @@ impl ToTokens for NodeToken{
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!( 
-            use #crate_name::{ToRaw as _, Raw};
+            use #crate_name::{ToRaw as _};
             
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -292,7 +291,8 @@ impl ToTokens for NodeToken{
             }
 
                 
-            fn #test_function_name() {
+            #[test]
+            fn test_surreal_assertions() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
                 
