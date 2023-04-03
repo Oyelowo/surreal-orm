@@ -30,8 +30,8 @@ use surrealdb_orm::{
     links::{LinkMany, LinkOne, LinkSelf, Relate},
     sql::{All, SurrealId, NONE},
     statements::{
-        define_field, define_table, for_, order, select, value, DefineFieldStatement,
-        DefineTableStatement, FieldType, For, CrudType, PermissionForables, SelectStatement,
+        define_field, define_table, for_, order, select, value, CrudType, DefineFieldStatement,
+        DefineTableStatement, FieldType, For, PermissionForables, SelectStatement,
     },
     utils::cond,
     Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
@@ -47,24 +47,24 @@ fn gama() -> SelectStatement {
 fn full() -> u32 {
     54
 }
-// fn perm() -> RawStatement {
-//     use CrudType::*;
-//     let name = Field::new("name");
-//     let age = Field::new("age");
-//     // vec![
-//     //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//     //     for_(Update).where_(age.less_than_or_equal(130)),
-//     // ]
-//     // .into_iter()
-//     // .map(|e| e.to_raw())
-//     // .collect::<Vec<_>>()
-//     // .to_vec()
-//     PermissionForables::from(vec![
-//         for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//         for_(Update).where_(age.less_than_or_equal(130)),
-//     ])
-//     .to_raw()
-// }
+fn perm() -> RawStatement {
+    use CrudType::*;
+    let name = Field::new("name");
+    let age = Field::new("age");
+    // vec![
+    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+    //     for_(Update).where_(age.less_than_or_equal(130)),
+    // ]
+    // .into_iter()
+    // .map(|e| e.to_raw())
+    // .collect::<Vec<_>>()
+    // .to_vec()
+    PermissionForables::from(vec![
+        for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+        for_(Update).where_(age.less_than_or_equal(130)),
+    ])
+    .to_raw()
+}
 
 fn define_student() -> DefineTableStatement {
     use CrudType::*;
@@ -358,4 +358,3 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 
     serde_json::to_string(&updated_value).expect("Failed to serialize JSON value")
 }
-

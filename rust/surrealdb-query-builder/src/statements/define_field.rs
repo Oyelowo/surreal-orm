@@ -23,7 +23,7 @@ use crate::{
     types::{Field, FieldType, Filter, Param, Table},
 };
 
-use super::for_::PermissionForables;
+use super::for_::PermissionType;
 
 // DEFINE FIELD statement
 // The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.

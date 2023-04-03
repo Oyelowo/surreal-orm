@@ -21,7 +21,7 @@ use crate::{
     types::Table,
 };
 
-use super::{for_::PermissionForables, select::SelectStatement};
+use super::{for_::PermissionType, select::SelectStatement};
 
 // DEFINE TABLE statement
 // The DEFINE TABLE statement allows you to declare your table by name, enabling you to apply strict controls to a table's schema by making it SCHEMAFULL, create a foreign table view, and set permissions specifying what operations can be performed on the field.
