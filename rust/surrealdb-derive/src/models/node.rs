@@ -197,7 +197,7 @@ impl ToTokens for NodeToken{
                #( #imports_referenced_node_schema) *
                 
 
-                #[derive(Debug)]
+                #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     #___________graph_traversal_string: ::std::string::String,
@@ -214,6 +214,12 @@ impl ToTokens for NodeToken{
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
+                    }
+                }
+            
+                impl #crate_name::Buildable for #struct_name_ident {
+                    fn build(&self) -> ::std::string::String {
+                        self.#___________graph_traversal_string.to_string()
                     }
                 }
                 

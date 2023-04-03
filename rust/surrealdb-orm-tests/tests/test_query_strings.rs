@@ -25,6 +25,7 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
+use surrealdb_orm::ToRaw;
 use surrealdb_orm::{
     array, cond,
     statements::{order, relate, select},
@@ -434,7 +435,7 @@ fn multiplication_tests2() {
     assert_eq!(
         replace_params(&x.build()),
         // "->writes->book[WHERE id = book:blaze].title".to_string()
-        "->writes->book[WHERE id = $_param_00000001].title".to_string()
+        "->writes->book[WHERE $_param_00000001 = $_param_00000002].title".to_string()
     );
 
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
@@ -448,8 +449,25 @@ fn multiplication_tests2() {
         .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
 
     // insta::assert_display_snapshot!(&x.to_string());
-    insta::assert_display_snapshot!(replace_params(&x.to_string()));
-    insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
+
+    insta::assert_display_snapshot!(&x.fine_tune_params());
+    dbg!(&x.get_bindings());
+    dbg!(&x.clone().to_string());
+    dbg!("====================");
+    dbg!("====================");
+    dbg!(&x.clone().to_raw());
+    assert!(false);
+    // insta::assert_debug_snapshot!(&x.get_bindings());
+    // dbg!(&x.to_raw());
+    // insta::assert_display_snapshot!(format!(
+    //     "bindings:{:?}, raw:{:?}",
+    //     &x.get_bindings(),
+    //     &x.to_raw()
+    // ));
+
+    // insta::assert_display_snapshot!(&x.to_raw());
+    // insta::assert_display_snapshot!(replace_params(&x.to_string()));
+    // insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
     // assert_eq!(
     //     x.to_string(),
     //     // "->writes->book[WHERE id = book:blaze].title".to_string()
@@ -492,6 +510,6 @@ fn multiplication_tests3() {
     assert_eq!(
         replace_params(&x.to_string()),
         // "->writes[WHERE timeWritten = 12:00]->book.content".to_string()
-        "->writes[WHERE timeWritten = $_param_00000001]->book.content".to_string()
+        "->writes[WHERE $_param_00000001 = $_param_00000002]->book.content".to_string()
     )
 }

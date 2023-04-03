@@ -54,8 +54,9 @@ pub struct Field {
 impl Field {
     pub fn new(value: impl Into<Idiomx>) -> Self {
         let value: sql::Idiom = value.into().into();
-        let graph_string = format!("{}", &value);
-        let bindings = vec![Binding::new(sql::Value::from(value.clone()))];
+        let binding = Binding::new(sql::Value::from(value.clone()));
+        let graph_string = format!("{}", &binding.get_param_dollarised());
+        let bindings = vec![binding];
         Self {
             name: value,
             bindings,

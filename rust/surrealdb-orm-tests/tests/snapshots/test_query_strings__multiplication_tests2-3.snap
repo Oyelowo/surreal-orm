@@ -1,0 +1,121 @@
+---
+source: surrealdb-orm-tests/tests/test_query_strings.rs
+expression: "&x.get_bindings()"
+---
+[
+    Binding {
+        param: "_param_f4fb2e4d",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "age",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_f4fb2e4d",
+        raw_string: "age",
+        description: None,
+    },
+    Binding {
+        param: "_param_01b1f8e7",
+        value: Number(
+            Int(
+                18,
+            ),
+        ),
+        original_inline_name: "_param_01b1f8e7",
+        raw_string: "18",
+        description: None,
+    },
+    Binding {
+        param: "_param_f4fb2e4d",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "age",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_f4fb2e4d",
+        raw_string: "age",
+        description: None,
+    },
+    Binding {
+        param: "_param_4cbe7bbd",
+        value: Number(
+            Int(
+                150,
+            ),
+        ),
+        original_inline_name: "_param_4cbe7bbd",
+        raw_string: "150",
+        description: None,
+    },
+    Binding {
+        param: "_param_c66c474a",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "timeWritten",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_c66c474a",
+        raw_string: "timeWritten",
+        description: None,
+    },
+    Binding {
+        param: "_param_c2c98e95",
+        value: Number(
+            Int(
+                3422,
+            ),
+        ),
+        original_inline_name: "_param_c2c98e95",
+        raw_string: "3422",
+        description: None,
+    },
+    Binding {
+        param: "_param_89a906c6",
+        value: Idiom(
+            Idiom(
+                [
+                    Field(
+                        Ident(
+                            "id",
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        original_inline_name: "_param_89a906c6",
+        raw_string: "id",
+        description: None,
+    },
+    Binding {
+        param: "_param_9f189b9b",
+        value: Thing(
+            Thing {
+                tb: "book",
+                id: String(
+                    "blaze",
+                ),
+            },
+        ),
+        original_inline_name: "_param_9f189b9b",
+        raw_string: "book:blaze",
+        description: None,
+    },
+]
