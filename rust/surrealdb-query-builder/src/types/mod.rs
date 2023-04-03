@@ -1,4 +1,4 @@
-/*
+/*cond,
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
@@ -17,6 +17,7 @@ pub(crate) mod function;
 pub(crate) mod geometry;
 pub(crate) mod idiom;
 pub(crate) mod interval;
+pub(crate) mod links;
 pub(crate) mod numbers;
 pub(crate) mod ordinal;
 pub(crate) mod param;
@@ -37,6 +38,7 @@ pub use function::*;
 pub use geometry::*;
 pub use idiom::*;
 pub use interval::*;
+pub use links::*;
 pub use numbers::*;
 pub use numbers::*;
 pub use ordinal::*;
