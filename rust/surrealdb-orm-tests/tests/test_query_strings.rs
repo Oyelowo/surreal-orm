@@ -28,8 +28,8 @@ use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWrite
 use surrealdb_orm::{
     array, cond,
     statements::{order, relate, select},
-    All, Empty, Erroneous, Field, LinkMany, LinkOne, LinkSelf, Operatable, Parametric, RecordId,
-    Relate, Return, Runnable, SurrealId, SurrealdbEdge, SurrealdbNode,
+    All, Buildable, Empty, Erroneous, Field, LinkMany, LinkOne, LinkSelf, Operatable, Parametric,
+    RecordId, Relate, Return, Runnable, SurrealId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 // use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
@@ -420,7 +420,7 @@ async fn relate_query_building_for_subqueries() {
             ),
     )
     .content(write);
-    insta::assert_debug_snapshot!(replace_params(&relation.to_string()));
+    insta::assert_debug_snapshot!(replace_params(&relation.build()));
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", relation.get_bindings())));
 }
 
@@ -432,7 +432,7 @@ fn multiplication_tests2() {
         .title;
 
     assert_eq!(
-        replace_params(&x.to_string()),
+        replace_params(&x.build()),
         // "->writes->book[WHERE id = book:blaze].title".to_string()
         "->writes->book[WHERE id = $_param_00000001].title".to_string()
     );

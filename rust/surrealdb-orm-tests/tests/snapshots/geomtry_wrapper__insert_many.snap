@@ -1,6 +1,5 @@
 ---
 source: surrealdb-orm-tests/tests/geomtry_wrapper.rs
-assertion_line: 326
 expression: results
 ---
 [

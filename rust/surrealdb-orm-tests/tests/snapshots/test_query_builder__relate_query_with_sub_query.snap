@@ -1,6 +1,5 @@
 ---
 source: surrealdb-orm-tests/tests/test_query_builder.rs
-assertion_line: 242
 expression: relate_more
 ---
 []
