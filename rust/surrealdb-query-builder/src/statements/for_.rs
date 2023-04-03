@@ -5,32 +5,12 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
         Raw, Runnable, Runnables, SurrealdbModel, ToRaw,
     },
-    types::{expression::Expression, Filter, Updateables},
+    types::{expression::Expression, CrudType, Filter, Updateables},
 };
-
-#[derive(Clone, Copy, Debug)]
-pub enum ForCrudType {
-    Create,
-    Select,
-    Update,
-    Delete,
-}
-
-impl Display for ForCrudType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let crud_type = match self {
-            ForCrudType::Create => "create",
-            ForCrudType::Select => "select",
-            ForCrudType::Update => "update",
-            ForCrudType::Delete => "delete",
-        };
-        write!(f, "{}", crud_type)
-    }
-}
 
 #[derive(Clone, Debug)]
 struct ForData {
-    crud_types: Vec<ForCrudType>,
+    crud_types: Vec<CrudType>,
     condition: Option<Filter>,
     bindings: BindingsList,
 }
@@ -46,21 +26,21 @@ impl Parametric for For {
 
 #[derive(Clone, Debug)]
 pub enum ForArgs {
-    ForOption(ForCrudType),
-    ForOptions(Vec<ForCrudType>),
+    ForOption(CrudType),
+    ForOptions(Vec<CrudType>),
 }
-impl From<ForCrudType> for ForArgs {
-    fn from(value: ForCrudType) -> Self {
+impl From<CrudType> for ForArgs {
+    fn from(value: CrudType) -> Self {
         Self::ForOption(value)
     }
 }
 
-impl From<Vec<ForCrudType>> for ForArgs {
-    fn from(value: Vec<ForCrudType>) -> Self {
+impl From<Vec<CrudType>> for ForArgs {
+    fn from(value: Vec<CrudType>) -> Self {
         Self::ForOptions(value)
     }
 }
-impl From<ForArgs> for Vec<ForCrudType> {
+impl From<ForArgs> for Vec<CrudType> {
     fn from(value: ForArgs) -> Self {
         match value {
             ForArgs::ForOption(one) => vec![one],
@@ -69,8 +49,8 @@ impl From<ForArgs> for Vec<ForCrudType> {
     }
 }
 
-impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
-    fn from(value: &[ForCrudType; N]) -> Self {
+impl<'a, const N: usize> From<&[CrudType; N]> for ForArgs {
+    fn from(value: &[CrudType; N]) -> Self {
         Self::ForOptions(value.to_vec())
     }
 }
@@ -222,7 +202,7 @@ mod tests {
     fn test_define_for_statement_state_machine() {
         let name = Field::new("name");
 
-        let for_res = for_(ForCrudType::Create).where_(name.like("Oyelowo"));
+        let for_res = for_(CrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
             for_res.fine_tune_params(),
             "FOR create\n\tWHERE name ~ $_param_00000001".to_string()
@@ -237,7 +217,7 @@ mod tests {
 
     #[test]
     fn test_define_for_statement_state_machine_multiple() {
-        use ForCrudType::*;
+        use CrudType::*;
         let name = Field::new("name");
 
         let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));

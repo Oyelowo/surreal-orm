@@ -7,8 +7,10 @@
 
 pub(crate) mod array;
 pub(crate) mod clause;
+pub(crate) mod crud_type;
 pub(crate) mod expression;
 pub(crate) mod field;
+pub(crate) mod field_type;
 pub(crate) mod field_updater;
 pub(crate) mod filter;
 pub(crate) mod function;
@@ -26,7 +28,9 @@ pub(crate) mod value;
 
 pub use array::*;
 pub use clause::*;
+pub use crud_type::*;
 pub use field::*;
+pub use field_type::*;
 pub use field_updater::*;
 pub use filter::*;
 pub use function::*;
