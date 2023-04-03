@@ -34,7 +34,7 @@ use super::{Buildable, Parametric};
 // #[async_trait]
 // pub trait RunnableStandard<T>
 #[async_trait]
-pub trait Runnable<T>
+pub trait RunnableStandard<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned,
@@ -136,7 +136,8 @@ where
         Ok(only_or_last)
     }
 
-    async fn return_many<M: Into<Vec<T>>>(&self, db: Surreal<Db>) -> surrealdb::Result<M> {
+    // async fn return_many<M: Into<Vec<T>>>(&self, db: Surreal<Db>) -> surrealdb::Result<M> {
+    async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
         let query = self.build();
         let query = db.query(query);
 
