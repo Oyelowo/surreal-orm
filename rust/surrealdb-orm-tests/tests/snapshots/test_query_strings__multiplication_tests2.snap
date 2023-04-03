@@ -1,0 +1,5 @@
+---
+source: surrealdb-orm-tests/tests/test_query_strings.rs
+expression: "replace_params(&format!(\"{:?}\", x.get_bindings()))"
+---
+"[Binding { param: \"_param_00000001\", value: Idiom(Idiom([Field(Ident(\"\"))])), original_inline_name: \"_param_00000002\", raw_string: \"``\", description: None }, Binding { param: \"_param_00000003\", value: Idiom(Idiom([Field(Ident(\"id\"))])), original_inline_name: \"_param_00000004\", raw_string: \"id\", description: None }, Binding { param: \"_param_00000005\", value: Thing(Thing { tb: \"book\", id: String(\"blaze\") }), original_inline_name: \"_param_00000006\", raw_string: \"book:blaze\", description: None }]"

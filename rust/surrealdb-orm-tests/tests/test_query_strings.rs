@@ -447,6 +447,7 @@ fn multiplication_tests2() {
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
         .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
 
+    // insta::assert_display_snapshot!(&x.to_string());
     insta::assert_display_snapshot!(replace_params(&x.to_string()));
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
     // assert_eq!(
