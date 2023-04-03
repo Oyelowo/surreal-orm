@@ -57,6 +57,8 @@ impl Field {
         let binding = Binding::new(sql::Value::from(value.clone()));
         let graph_string = format!("{}", &binding.get_param_dollarised());
         let bindings = vec![binding];
+        // TODO: Check if surrealdb drive supports binding field param idiom. IF so, I can just
+        // parametize everything. Otherwise, I can leave fields out of parametization
         Self {
             name: value,
             bindings,

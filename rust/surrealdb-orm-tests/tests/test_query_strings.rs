@@ -450,13 +450,13 @@ fn multiplication_tests2() {
 
     // insta::assert_display_snapshot!(&x.to_string());
 
-    insta::assert_display_snapshot!(&x.fine_tune_params());
-    dbg!(&x.get_bindings());
-    dbg!(&x.clone().to_string());
-    dbg!("====================");
-    dbg!("====================");
-    dbg!(&x.clone().to_raw());
-    assert!(false);
+    // insta::assert_display_snapshot!(&x.fine_tune_params());
+    // dbg!(&x.get_bindings());
+    // dbg!(&x.clone().to_string());
+    // dbg!("====================");
+    // dbg!("====================");
+    // dbg!(&x.clone().to_raw());
+    // assert!(false);
     // insta::assert_debug_snapshot!(&x.get_bindings());
     // dbg!(&x.to_raw());
     // insta::assert_display_snapshot!(format!(
@@ -465,7 +465,8 @@ fn multiplication_tests2() {
     //     &x.to_raw()
     // ));
 
-    // insta::assert_display_snapshot!(&x.to_raw());
+    insta::assert_display_snapshot!(&x.fine_tune_params());
+    insta::assert_display_snapshot!(&x.to_raw());
     // insta::assert_display_snapshot!(replace_params(&x.to_string()));
     // insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
     // assert_eq!(
