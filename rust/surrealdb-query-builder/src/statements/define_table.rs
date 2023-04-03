@@ -161,21 +161,22 @@ impl DefineTableStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionForables>) -> Self {
-        let fors: PermissionForables = fors.into();
+    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+        use PermissionType::*;
+        let fors: PermissionType = fors.into();
         match fors {
-            PermissionForables::For(one) => {
+            For(one) => {
                 self.permissions_for.push(one.to_string());
                 self.bindings.extend(one.get_bindings());
             }
-            PermissionForables::Fors(many) => many.iter().for_each(|f| {
+            Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
                 self.bindings.extend(f.get_bindings());
             }),
-            PermissionForables::RawStatement(raw) => {
+            RawStatement(raw) => {
                 self.permissions_for.push(raw.to_string());
             }
-            PermissionForables::RawStatementList(raw_list) => {
+            RawStatementList(raw_list) => {
                 self.permissions_for.extend(
                     raw_list
                         .into_iter()

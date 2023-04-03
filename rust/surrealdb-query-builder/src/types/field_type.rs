@@ -143,14 +143,14 @@ impl FromStr for FieldType {
             (Some("number"), None) => FieldType::Number,
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
-            (Some("record"), None) => FieldType::Record,
+            // (Some("record"), None) => FieldType::Record,
             (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("array"), None) => FieldType::Array,
             // (Some("array"), Some(content)) => {
             //     let content_type = Self::from_str(content)?;
             //     FieldType::ArrayList(Box::new(content_type))
             // }
-            (Some("geometry"), None) => FieldType::Geometry,
+            // (Some("geometry"), None) => FieldType::Geometry,
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
                     .split(",")
