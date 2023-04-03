@@ -132,7 +132,7 @@ impl ToTokens for EdgeToken {
         
 
         tokens.extend(quote!( 
-                use #crate_name::traits::{ToRaw as _, Raw};
+                use #crate_name::{ToRaw as _, Raw};
                         
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
@@ -167,7 +167,7 @@ impl ToTokens for EdgeToken {
                         #table_definitions
                     }
                     
-                    fn define_fields() -> Vec<#crate_name::traits::Raw> {
+                    fn define_fields() -> Vec<#crate_name::Raw> {
                         vec![
                        #( #field_definitions), *
                         ]
