@@ -215,4 +215,7 @@ where
 }
 
 impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
-impl<T> Runnable<T> for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Runnable<T> for CreateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync
+{
+}

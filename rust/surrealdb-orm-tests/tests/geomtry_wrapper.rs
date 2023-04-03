@@ -367,7 +367,22 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
     // Insert companies
-    let results = insert(companies).return_many(db.clone()).await.unwrap();
+    // let results = insert(companies).return_many(db.clone()).await.unwrap();
+    let results = insert(companies)
+        // .return_many(db.clone())
+        // .return_many(db.clone())
+        .return_many_explicit::<Vec<_>>(db.clone())
+        // .return_many_explicit::<Vec<Company>>(db.clone())
+        // .return_many(db.clone())
+        .await
+        .unwrap();
+    // results.into_iter().collect();
+
+    // let results = insert(companies)
+    //     .return_many(db.clone())
+    //     // .return_many_test::<Vec<_>>(db.clone())
+    //     .await
+    //     .unwrap();
 
     println!("QQQQQQINS {:?}", results);
     // db.clone()
@@ -422,7 +437,11 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         .await
         .unwrap();
 
-    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    let results = insert(select_query)
+        .return_many_explicit::<Vec<GenZCompany>>(db.clone())
+        .await
+        .unwrap();
 
     insta::assert_debug_snapshot!(results);
     Ok(())

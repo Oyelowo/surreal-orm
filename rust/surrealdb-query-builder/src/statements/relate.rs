@@ -210,7 +210,10 @@ where
     }
 }
 
-impl<T> Runnable<T> for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbEdge {}
+impl<T> Runnable<T> for RelateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbEdge + Send + Sync
+{
+}
 
 #[test]
 #[cfg(feature = "mock")]

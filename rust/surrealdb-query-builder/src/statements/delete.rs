@@ -206,7 +206,10 @@ where
     }
 }
 
-impl<T> Runnable<T> for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Runnable<T> for DeleteStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync
+{
+}
 #[test]
 fn test_query_builder() {
     assert_eq!(2, 2);

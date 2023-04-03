@@ -142,7 +142,6 @@ where
             TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("{}", b.get_param_dollarised()))
-         
                 .collect::<Vec<_>>(),
         };
         self.update_bindings(targets_bindings);
@@ -327,4 +326,7 @@ where
     }
 }
 
-impl<T> Runnable<T> for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Runnable<T> for UpdateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync
+{
+}
