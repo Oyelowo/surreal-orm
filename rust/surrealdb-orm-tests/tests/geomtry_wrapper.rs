@@ -50,7 +50,7 @@ struct Company {
     founded: Datetime,
     founders: Vec<Person>,
     tags: Vec<String>,
-    home: GeometryCustom,
+    home: Geometry,
 }
 
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
@@ -93,7 +93,7 @@ fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
             },
         ],
         tags: vec!["foo".to_string(), "bar".to_string()],
-        home: GeometryCustom(geom.into()),
+        home: Geometry(geom.into()),
     };
     company
 }
@@ -299,7 +299,7 @@ async fn insert_many() -> surrealdb::Result<()> {
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
             nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-            home: GeometryCustom((45.3, 78.1).into()),
+            home: Geometry((45.3, 78.1).into()),
         },
         Company {
             id: Some("company:2".try_into().unwrap()),
@@ -315,7 +315,7 @@ async fn insert_many() -> surrealdb::Result<()> {
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
             nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-            home: GeometryCustom((63.0, 21.0).into()),
+            home: Geometry((63.0, 21.0).into()),
         },
     ];
 
@@ -345,7 +345,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
             nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-            home: GeometryCustom((45.3, 78.1).into()),
+            home: Geometry((45.3, 78.1).into()),
         },
         Company {
             id: Some("company:2".try_into().unwrap()),
@@ -361,7 +361,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
             nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-            home: GeometryCustom((63.0, 21.0).into()),
+            home: Geometry((63.0, 21.0).into()),
         },
     ];
 
