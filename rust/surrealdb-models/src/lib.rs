@@ -26,13 +26,15 @@ use surrealdb::{
 
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
-    cond,
+    filter::Filter,
+    links::{LinkMany, LinkOne, LinkSelf, Relate},
+    sql::{All, SurrealId, NONE},
     statements::{
         define_field, define_table, for_, order, select, value, DefineFieldStatement,
-        DefineTableStatement, For, PermissionType, SelectStatement,
+        DefineTableStatement, FieldType, For, CrudType, PermissionForables, SelectStatement,
     },
-    All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,
-    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table, NONE,
+    utils::cond,
+    Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
 };
 
 use test_case::test_case;
@@ -45,24 +47,24 @@ fn gama() -> SelectStatement {
 fn full() -> u32 {
     54
 }
-// fn perm() -> RawStatement {
-//     use CrudType::*;
-//     let name = Field::new("name");
-//     let age = Field::new("age");
-//     // vec![
-//     //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//     //     for_(Update).where_(age.less_than_or_equal(130)),
-//     // ]
-//     // .into_iter()
-//     // .map(|e| e.to_raw())
-//     // .collect::<Vec<_>>()
-//     // .to_vec()
-//     PermissionType::from(vec![
-//         for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//         for_(Update).where_(age.less_than_or_equal(130)),
-//     ])
-//     // .to_raw()
-// }
+fn perm() -> RawStatement {
+    use CrudType::*;
+    let name = Field::new("name");
+    let age = Field::new("age");
+    // vec![
+    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+    //     for_(Update).where_(age.less_than_or_equal(130)),
+    // ]
+    // .into_iter()
+    // .map(|e| e.to_raw())
+    // .collect::<Vec<_>>()
+    // .to_vec()
+    PermissionForables::from(vec![
+        for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+        for_(Update).where_(age.less_than_or_equal(130)),
+    ])
+    .to_raw()
+}
 
 fn define_student() -> DefineTableStatement {
     use CrudType::*;
@@ -120,8 +122,6 @@ fn define_age() -> DefineFieldStatement {
     //     .on_table(Student::table_name())
     //     .type_(String)
     //     .value("example@codebreather.com")
-    //     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-    //     // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
     //     .permissions_for(PermissionForables::from(
     //         for_(&[Create, Update])
     //             .where_(firstName.is("Oyedayo"))
@@ -340,6 +340,8 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 
     let updated_value = match value {
         Value::Object(mut map) => {
+            map.remove(field_name);
+            Value::Object(map)
             map.remove(field_name);
             Value::Object(map)
         }
