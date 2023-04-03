@@ -8,7 +8,7 @@ pub fn val(val: impl Into<sql::Value>) -> sql::Value {
 macro_rules! array {
     ($( $val:expr ),*) => {{
         vec![
-            $( crate::helpers::val($val) ),*
+            $( surrealdb::sql::Value::from($val) ),*
         ]
     }};
 }

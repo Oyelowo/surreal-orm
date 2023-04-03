@@ -27,6 +27,8 @@ pub(crate) mod surreal_id;
 pub(crate) mod token_target;
 pub(crate) mod value;
 
+use std::fmt::{self, Display};
+
 pub use array::*;
 pub use clause::*;
 pub use crud_type::*;
@@ -149,7 +151,7 @@ macro_rules! create_value_like_struct {
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
-create_value_like_struct!("Array");
+// create_value_like_struct!("Array");
 // create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
@@ -157,21 +159,53 @@ create_value_like_struct!("Table");
 // create_value_like_struct!("Value");
 create_value_like_struct!("Object");
 
-// impl<T> From<T> for ArrayCustom
-// where
-//     T: Into<sql::Value>,
-// {
-//     fn from(value: T) -> Self {
-//         Self(sql::Value::from(value.into()))
-//     }
-// }
-//
-// impl<T, const N: usize> From<&[T; N]> for ArrayCustom
+pub struct ArrayLike(sql::Value);
+
+impl From<ArrayLike> for sql::Value {
+    fn from(value: ArrayLike) -> Self {
+        value.0
+    }
+}
+
+// impl<T, const N: usize> From<&[T; N]> for ArrayLike
 // where
 //     T: Into<sql::Value> + Clone,
 // {
 //     fn from(value: &[T; N]) -> Self {
 //         Self(
+//             value
+//                 .into_iter()
+//                 .map(|v| v.clone().into())
+//                 .collect::<Vec<sql::Value>>()
+//                 .into(),
+//         )
+//     }
+// }
+impl Display for ArrayLike {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl<T: Into<sql::Array>> From<T> for ArrayLike {
+    fn from(value: T) -> Self {
+        Self(value.into().into())
+    }
+}
+// impl<T> From<T> for ArrayLike
+// where
+//     T: Into<sql::Value>,
+// {
+//     fn from(value: T) -> Self {
+//         Self::Array(sql::Value::from(value.into()))
+//     }
+// }
+
+// impl<T, const N: usize> From<&[T; N]> for ArrayLike
+// where
+//     T: Into<sql::Value> + Clone,
+// {
+//     fn from(value: &[T; N]) -> Self {
+//         Self::Array(
 //             value
 //                 .into_iter()
 //                 .map(|v| v.clone().into())

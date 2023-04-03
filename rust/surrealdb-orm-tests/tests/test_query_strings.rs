@@ -26,7 +26,7 @@ use surrealdb::{
 };
 use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
 use surrealdb_orm::{
-    cond,
+    array, cond,
     statements::{order, relate, select},
     All, Empty, Erroneous, Field, LinkMany, LinkOne, LinkSelf, Operatable, Parametric, RecordId,
     Relate, Return, Runnable, SurrealId, SurrealdbEdge, SurrealdbNode,
@@ -35,7 +35,6 @@ use test_case::test_case;
 // use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
 
 use std::fmt::{Debug, Display};
-use test_case::test_case;
 use typed_builder::TypedBuilder;
 
 trait WhiteSpaceRemoval {
@@ -251,20 +250,21 @@ fn multiplication_tests1() {
 
     let book::Book { content, .. } = Book::schema();
 
-    content
-        .contains_any(vec!["Dyayo", "fdfd"])
-        .contains_any(&["Dyayo", "fdfd"])
-        .contains_all(vec!["Dyayo", "fdfd"])
-        .contains_all(&["Dyayo", "fdfd"])
-        .contains_none(vec!["Dyayo", "fdfd"])
-        .contains_none(&["Dyayo", "fdfd"])
-        .contains_none(vec![1, 3])
-        .contains_none(&[1, 3])
-        .or("lowo")
-        .and(age.less_than(55))
-        .or(age.greater_than(17))
-        .or(firstName.equal("Oyelowo"))
-        .and(lastName.equal("Oyedayo"));
+    cond(
+        content
+            .contains_any(vec!["Dyayo", "fdfd"])
+            .contains_any(array!["Dyayo", "fdfd"])
+            .contains_all(vec!["Dyayo", "fdfd"])
+            .contains_all(array!["Dyayo", "fdfd"])
+            .contains_none(vec!["Dyayo", "fdfd"])
+            .contains_none(array!["Dyayo", "fdfd"])
+            .contains_none(array![1, 3])
+            .or("lowo"),
+    )
+    .and(age.less_than(55))
+    .or(age.greater_than(17))
+    .or(firstName.equal("Oyelowo"))
+    .and(lastName.equal("Oyedayo"));
 
     let mut query1 = select(All)
         .from(Book::get_table_name())
