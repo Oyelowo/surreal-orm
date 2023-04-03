@@ -163,7 +163,7 @@ impl ToTokens for EdgeToken {
                         return vec![#( #serialized_field_name_no_skip), *]
                     }
                     
-                    fn define_table() -> #crate_name::traits::Raw{
+                    fn define_table() -> #crate_name::Raw{
                         #table_definitions
                     }
                     
