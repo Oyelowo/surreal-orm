@@ -106,6 +106,7 @@ impl ToTokens for NodeToken{
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
         let table_definitions = self.get_table_definition_token();
@@ -292,7 +293,7 @@ impl ToTokens for NodeToken{
 
                 
             #[test]
-            fn test_surreal_assertions() {
+            fn #test_function_name() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions
                 
