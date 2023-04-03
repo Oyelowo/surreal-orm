@@ -64,6 +64,7 @@ impl Field {
 
     pub fn set_graph_string(mut self, connection_string: String) -> Self {
         self.graph_string = connection_string;
+        // self.graph_string.push_str(&self.name.to_string());
         self
     }
 
@@ -97,7 +98,7 @@ impl Parametric for Field {
 
 impl Buildable for Field {
     fn build(&self) -> String {
-        self.name.to_string()
+        self.graph_string.to_string()
     }
 }
 

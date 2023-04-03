@@ -304,14 +304,10 @@ impl Display for DefineFieldStatement {
 mod tests {
 
     use super::*;
-    use crate::CrudType::*;
+    use crate::{statements::for_, CrudType::*};
     use std::time::Duration;
 
-    use crate::{
-        sql::NONE,
-        utils::{cond, for_},
-        Operatable,
-    };
+    use crate::{cond, Operatable, NONE};
 
     use super::*;
 
