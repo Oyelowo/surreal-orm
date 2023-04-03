@@ -139,7 +139,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for Insertable
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
     pub fn new() -> Self {
         Self {
-            on_duplicate_key_update: Vec::new(),
+            on_duplicate_key_update: vec![],
             bindings: vec![],
             node_type: PhantomData,
             select_query_string: None,

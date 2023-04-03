@@ -12,3 +12,5 @@ macro_rules! array {
         ]
     }};
 }
+
+pub use array;
