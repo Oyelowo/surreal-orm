@@ -310,7 +310,7 @@ impl SchemaFieldsProperties {
                     },
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkOne<#foreign_node>);));
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)
                     }
                     RelationType::LinkSelf(node_object) => {
@@ -322,11 +322,11 @@ impl SchemaFieldsProperties {
                                    and the type is LinkSelf<{struct_name_ident}>. ");
                         }
                         
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkSelf<#foreign_node>);));
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::links::LinkMany<#foreign_node>);));
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }                    
                     RelationType::None => ReferencedNodeMeta::default()
@@ -447,7 +447,7 @@ impl NodeEdgeMetadataStore {
             // e.g Relate<Book> should match from attribute link = "->Writes->Book"
             quote!(
              ::static_assertions::assert_impl_one!(#relation_model: #crate_name::SurrealdbEdge);
-             ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::links::Relate<#foreign_node_ident>);
+             ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_ident>);
             ),
         ];
         quote!(
