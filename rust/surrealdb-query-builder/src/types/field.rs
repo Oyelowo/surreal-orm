@@ -54,15 +54,15 @@ pub struct Field {
 impl Field {
     pub fn new(value: impl Into<Idiomx>) -> Self {
         let value: sql::Idiom = value.into().into();
-        let binding = Binding::new(sql::Value::from(value.clone()));
-        let graph_string = format!("{}", &binding.get_param_dollarised());
-        let bindings = vec![binding];
+        // let binding = Binding::new(sql::Value::from(value.clone()));
+        // let graph_string = format!("{}", &binding.get_param_dollarised());
+        // let bindings = vec![binding];
         // TODO: Check if surrealdb drive supports binding field param idiom. IF so, I can just
         // parametize everything. Otherwise, I can leave fields out of parametization
         Self {
-            name: value,
-            bindings,
-            graph_string,
+            name: value.clone(),
+            bindings: vec![],
+            graph_string: value.to_string(),
         }
     }
 

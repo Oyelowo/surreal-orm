@@ -56,10 +56,8 @@ impl Parametric for Param {
 }
 
 impl Param {
-    pub fn new(param: impl Into<Idiomx>) -> Self {
-        let param: Idiomx = param.into();
-        let param = sql::Idiom::from(param);
-        let param = sql::Param::from(param);
+    pub fn new(param: impl Into<sql::Param>) -> Self {
+        let param = sql::Param::from(param.into());
 
         Self {
             param,
