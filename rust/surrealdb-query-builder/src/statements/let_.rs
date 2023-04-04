@@ -10,7 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,  Runnable} ,
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::expression::Expression,
     Param,
 };
@@ -63,8 +63,6 @@ impl Display for LetStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnable for  LetStatement {}
 
 impl Parametric for LetStatement {
     fn get_bindings(&self) -> BindingsList {

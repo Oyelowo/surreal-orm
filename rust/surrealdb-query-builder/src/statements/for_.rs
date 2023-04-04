@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Raw, Runnable, Runnable,   SurrealdbModel, ToRaw,
+        Raw, Runnable, SurrealdbModel, ToRaw,
     },
     types::{expression::Expression, CrudType, Filter, Updateables},
 };
@@ -13,15 +13,6 @@ struct ForData {
     crud_types: Vec<CrudType>,
     condition: Option<Filter>,
     bindings: BindingsList,
-}
-
-impl Erroneous for For {}
-impl Queryable for For {}
-
-impl Parametric for For {
-    fn get_bindings(&self) -> BindingsList {
-        self.0.bindings.to_vec()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -100,6 +91,15 @@ impl Buildable for For {
             query = format!("{query}\n\tWHERE {cond}");
         }
         query
+    }
+}
+
+impl Erroneous for For {}
+impl Queryable for For {}
+
+impl Parametric for For {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
     }
 }
 
@@ -186,9 +186,7 @@ impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
-    use std::time::Duration;
 
     use crate::{
         statements::{order, select},

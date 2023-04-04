@@ -14,7 +14,7 @@ use surrealdb::sql;
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Runnable, Runnable,   SurrealdbModel,
+        Runnable, Runnable, SurrealdbModel,
     },
     types::{expression::Expression, Filter, Updateables},
 };
@@ -216,6 +216,8 @@ impl Buildable for End {
         output
     }
 }
+
+impl Queryable for End {}
 
 impl fmt::Display for End {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

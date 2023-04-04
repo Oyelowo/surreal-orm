@@ -444,6 +444,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
 
     // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
     let results = insert(select_query)
+        .return_many()
         .return_many_explicit::<Vec<GenZCompany>>(db.clone())
         .await
         .unwrap();

@@ -24,7 +24,7 @@ use surrealdb::{
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
         SurrealdbModel,
     },
     types::{expression::Expression, Updateables},

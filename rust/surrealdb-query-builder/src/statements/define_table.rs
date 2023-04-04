@@ -15,9 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::Table,
 };
 
@@ -244,8 +242,6 @@ impl Display for DefineTableStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnable for  DefineTableStatement {}
 
 impl Queryable for DefineTableStatement {}
 impl Erroneous for DefineTableStatement {}
