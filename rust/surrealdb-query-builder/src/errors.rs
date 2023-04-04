@@ -9,6 +9,7 @@ use std::fmt::Display;
 
 use thiserror::Error;
 
+#[derive(Debug, Clone, Copy)]
 struct ExpectedLength(u8);
 
 impl Display for ExpectedLength {
