@@ -2,4 +2,4 @@
 source: surrealdb-orm-tests/tests/test_query_strings.rs
 expression: replace_params(&query1.to_string())
 ---
-SELECT * FROM book WHERE ($_param_00000001 ~ $_param_00000002 AND $_param_00000003 >= $_param_00000004) OR ($_param_00000005 = $_param_00000006) AND ($_param_00000007 = $_param_00000008) GROUP BY $_param_00000009, $_param_00000010 ORDER BY $_param_00000011  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;
+SELECT * FROM book WHERE (content ~ $_param_00000001 AND $_param_00000002 >= $_param_00000003) OR (firstName = $_param_00000004) AND (lastName = $_param_00000005) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;

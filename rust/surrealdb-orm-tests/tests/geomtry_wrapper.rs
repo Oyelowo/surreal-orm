@@ -23,6 +23,8 @@ use surrealdb::sql::Datetime;
 // use surrealdb::sql::Geometry;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
+use surrealdb_orm::Buildable;
+use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
 
@@ -329,120 +331,123 @@ async fn insert_many() -> surrealdb::Result<()> {
 
 #[tokio::test]
 async fn insert_from_select_query() -> surrealdb::Result<()> {
-    // let companies = vec![
-    //     Company {
-    //         id: Some("company:1".try_into().unwrap()),
-    //         name: "Acme Inc.".to_string(),
-    //         founded: "1967-05-03".into(),
-    //         founders: vec![
-    //             Person {
-    //                 name: "John Doe".to_string(),
-    //             },
-    //             Person {
-    //                 name: "Jane Doe".to_string(),
-    //             },
-    //         ],
-    //         tags: vec!["foo".to_string(), "bar".to_string()],
-    //         nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-    //         home: Geometry((45.3, 78.1).into()),
-    //     },
-    //     Company {
-    //         id: Some("company:2".try_into().unwrap()),
-    //         name: "Apple Inc.".to_string(),
-    //         founded: "1967-05-03".into(),
-    //         founders: vec![
-    //             Person {
-    //                 name: "John Doe".to_string(),
-    //             },
-    //             Person {
-    //                 name: "Jane Doe".to_string(),
-    //             },
-    //         ],
-    //         tags: vec!["foo".to_string(), "bar".to_string()],
-    //         nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
-    //         home: Geometry((63.0, 21.0).into()),
-    //     },
-    // ];
-    //
-    // let db = Surreal::new::<Mem>(()).await.unwrap();
-    // db.use_ns("test").use_db("test").await?;
-    // // Insert companies
-    // // let results = insert(companies).return_many(db.clone()).await.unwrap();
+    let companies = vec![
+        Company {
+            id: Some("company:1".try_into().unwrap()),
+            name: "Acme Inc.".to_string(),
+            founded: "1967-05-03".into(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            home: Geometry((45.3, 78.1).into()),
+        },
+        Company {
+            id: Some("company:2".try_into().unwrap()),
+            name: "Apple Inc.".to_string(),
+            founded: "1967-05-03".into(),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            home: Geometry((63.0, 21.0).into()),
+        },
+    ];
+
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await?;
+    // Insert companies
+    // let results = insert(companies).return_many(db.clone()).await.unwrap();
+    let results = insert(companies)
+        // .return_many(db.clone())
+        // .return_many(db.clone())
+        .return_many_explicit::<Vec<_>>(db.clone())
+        // .return_many_explicit::<Vec<Company>>(db.clone())
+        // .return_many(db.clone())
+        .await
+        .unwrap();
+    // results.into_iter().collect();
+
     // let results = insert(companies)
-    //     // .return_many(db.clone())
-    //     // .return_many(db.clone())
-    //     .return_many_explicit::<Vec<_>>(db.clone())
-    //     // .return_many_explicit::<Vec<Company>>(db.clone())
-    //     // .return_many(db.clone())
-    //     .await
-    //     .unwrap();
-    // // results.into_iter().collect();
-    //
-    // // let results = insert(companies)
-    // //     .return_many(db.clone())
-    // //     // .return_many_test::<Vec<_>>(db.clone())
-    // //     .await
-    // //     .unwrap();
-    //
-    // println!("QQQQQQINS {:?}", results);
-    // // db.clone()
-    // //     .query(format!("{}", CommitStatement))
-    // //     .await
-    // //     .unwrap();
-    // //
-    // let c = Company::schema();
-    // let select_query = select(All)
-    //     .from(&SurrealId::try_from("company:2").unwrap())
-    //     .where_(c.tags.any_like("foo"))
-    //     .parallel();
-    // // .return_one(db.clone())
-    // // .await
-    // // .unwrap();
-    //
-    // // println!("BindSel {:?}", select_query.get_bindings());
-    // let one_: Company = select_query.return_one(db.clone()).await.unwrap();
-    // println!("SSSSSSS {:?}", one_);
-    //
-    // println!(
-    //     "SSSSSSS {:?}",
-    //     select_query
-    //         .return_many::<Company>(db.clone())
-    //         .await
-    //         .unwrap()
-    // );
-    //
-    // let ref select_query = select(All)
-    //     .from(Company::get_table_name())
-    //     .where_(c.tags.any_like("foo"))
-    //     .timeout(Duration::from_secs(20))
-    //     .parallel();
-    //
-    // println!("BindSel {:?}", select_query.get_bindings());
-    // println!(
-    //     "SSSSSSS {:?}",
-    //     select_query
-    //         .return_many::<Company>(db.clone())
-    //         .await
-    //         .unwrap()
-    // );
-    // // TODO: The fall back to return_one if list returned not working. Investigate.
-    // // let results = insert::<GenZCompany>(select_query)
-    // //     .return_one(db.clone())
-    // //     .await
-    // //     .unwrap();
-    // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
-    //
-    // let results = insert::<GenZCompany>(select_query)
     //     .return_many(db.clone())
+    //     // .return_many_test::<Vec<_>>(db.clone())
+    //     .await
+    //     .unwrap();
+
+    println!("QQQQQQINS {:?}", results);
+    // db.clone()
+    //     .query(format!("{}", CommitStatement))
     //     .await
     //     .unwrap();
     //
-    // // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
-    // let results = insert(select_query)
-    //     .return_many_explicit::<Vec<GenZCompany>>(db.clone())
+    let c = Company::schema();
+    let select_query = select(All)
+        .from(&SurrealId::try_from("company:2").unwrap())
+        .where_(c.tags.any_like("foo"))
+        .parallel();
+    // .return_one(db.clone())
+    // .await
+    // .unwrap();
+
+    dbg!(select_query.clone().get_bindings());
+    dbg!(select_query.clone().to_raw());
+    assert_eq!(select_query.clone().build().to_string(), "dfd");
+    // println!("BindSel {:?}", select_query.get_bindings());
+    let one_: Company = select_query.return_one(db.clone()).await.unwrap();
+    println!("SSSSSSS {:?}", one_);
+
+    println!(
+        "SSSSSSS {:?}",
+        select_query
+            .return_many::<Company>(db.clone())
+            .await
+            .unwrap()
+    );
+
+    let ref select_query = select(All)
+        .from(Company::get_table_name())
+        .where_(c.tags.any_like("foo"))
+        .timeout(Duration::from_secs(20))
+        .parallel();
+
+    println!("BindSel {:?}", select_query.get_bindings());
+    println!(
+        "SSSSSSS {:?}",
+        select_query
+            .return_many::<Company>(db.clone())
+            .await
+            .unwrap()
+    );
+    // TODO: The fall back to return_one if list returned not working. Investigate.
+    // let results = insert::<GenZCompany>(select_query)
+    //     .return_one(db.clone())
     //     .await
     //     .unwrap();
-    //
-    // insta::assert_debug_snapshot!(results);
+    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+
+    let results = insert::<GenZCompany>(select_query)
+        .return_many(db.clone())
+        .await
+        .unwrap();
+
+    // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    let results = insert(select_query)
+        .return_many_explicit::<Vec<GenZCompany>>(db.clone())
+        .await
+        .unwrap();
+
+    insta::assert_debug_snapshot!(results);
     Ok(())
 }

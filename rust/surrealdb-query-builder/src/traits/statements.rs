@@ -115,6 +115,9 @@ where
 {
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let query = self.build();
+        dbg!(self.get_bindings());
+        dbg!(query.clone());
+
         let query = db.query(query);
 
         let mut query = self.get_bindings().iter().fold(query, |acc, val| {
@@ -193,7 +196,7 @@ where
         db: surrealdb::Surreal<surrealdb::engine::local::Db>,
     ) -> surrealdb::Result<T> {
         let query = self.build();
-        println!("XXXX {query}");
+        println!("Return one queryMMMMM {query}");
         let mut response = self
             .get_bindings()
             .iter()
