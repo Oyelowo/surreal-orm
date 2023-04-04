@@ -19,6 +19,37 @@ pub struct Param {
     bindings: BindingsList,
 }
 
+// impl<T> From<T> for Param
+// where
+//     T: Into<sql::Param>,
+// {
+//     fn from(value: T) -> Self {
+//         // let value: sql::Param = v
+//         Self {
+//             param: value.into(),
+//             bindings: vec![],
+//         }
+//     }
+// }
+
+impl From<String> for Param {
+    fn from(value: String) -> Self {
+        Self {
+            param: sql::Param::from(value),
+            bindings: vec![],
+        }
+    }
+}
+
+impl From<&str> for Param {
+    fn from(value: &str) -> Self {
+        Self {
+            param: sql::Param::from(value),
+            bindings: vec![],
+        }
+    }
+}
+
 impl From<Param> for sql::Param {
     fn from(value: Param) -> Self {
         value.param

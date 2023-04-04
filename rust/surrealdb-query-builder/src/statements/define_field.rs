@@ -332,11 +332,11 @@ mod tests {
             ]);
 
         assert_eq!(
-            statement.to_string(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000000) AND ($value ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
+            statement.fine_tune_params(),
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000001) AND ($value ~ $_param_00000002)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000003\nFOR create, update\n\tWHERE name IS $_param_00000004\nFOR create, delete\n\tWHERE name IS $_param_00000005\nFOR update\n\tWHERE age <= $_param_00000006;"
         );
-        insta::assert_display_snapshot!(statement);
-        insta::assert_debug_snapshot!(statement.get_bindings());
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 4);
     }
 
     #[test]
@@ -348,10 +348,10 @@ mod tests {
         let statement = define_field(email).on_table(user_table).type_(String);
 
         assert_eq!(
-            statement.to_string(),
+            statement.build(),
             "DEFINE FIELD email ON TABLE user TYPE string;"
         );
-        insta::assert_display_snapshot!(statement);
-        insta::assert_debug_snapshot!(statement.get_bindings());
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 }
