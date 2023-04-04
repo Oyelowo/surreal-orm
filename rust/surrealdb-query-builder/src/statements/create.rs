@@ -220,7 +220,8 @@ impl<T> RunnableStandard<T> for CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {
-    fn set_return_type(&self, return_type: ReturnType) {
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);
+        self
     }
 }

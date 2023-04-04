@@ -44,90 +44,93 @@ where
 #[async_trait]
 pub trait RunnableStandard<T>: Runnable + RunnableDefault<T>
 where
-    Self: Parametric + Buildable,
+    Self: Parametric + Buildable + Sized + Send + Sync,
     T: Serialize + DeserializeOwned,
 {
-    async fn return_first_before(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::Before);
-        self.return_first(db).await
+    async fn return_first_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::Before);
+        query.return_first(db).await
     }
 
-    async fn return_first_after(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::After);
-        self.return_first(db).await
+    async fn return_first_after(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::After);
+        query.return_first(db).await
     }
 
-    async fn return_first_diff(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::Diff);
-        self.return_first(db).await
+    async fn return_first_diff(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::Diff);
+        query.return_first(db).await
     }
 
     async fn return_first_projections(
-        &self,
+        self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
     ) -> crate::Result<Option<T>> {
+        let mut query = self;
         if let Some(projections) = projections {
-            self.set_return_type(ReturnType::Projections(projections));
+            query = query.set_return_type(ReturnType::Projections(projections));
         }
-        self.return_first(db).await
+        query.return_first(db).await
     }
 
-    async fn return_one_before(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::Before);
-        self.return_one(db).await
+    async fn return_one_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::Before);
+        query.return_one(db).await
     }
 
-    async fn return_one_after(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::After);
-        self.return_one(db).await
+    async fn return_one_after(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::After);
+        query.return_one(db).await
     }
 
-    async fn return_one_diff(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
-        self.set_return_type(ReturnType::Diff);
-        self.return_one(db).await
+    async fn return_one_diff(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+        let query = self.set_return_type(ReturnType::Diff);
+        query.return_one(db).await
     }
 
     async fn return_one_projections(
-        &self,
+        self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
     ) -> crate::Result<Option<T>> {
+        let mut query = self;
         if let Some(projections) = projections {
-            self.set_return_type(ReturnType::Projections(projections));
+            query = query.set_return_type(ReturnType::Projections(projections));
         }
 
-        self.return_one(db).await
+        query.return_one(db).await
     }
 
-    async fn return_many_before(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
-        self.set_return_type(ReturnType::Before);
-        self.return_many(db).await
+    async fn return_many_before(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+        let query = self.set_return_type(ReturnType::Before);
+        query.return_many(db).await
     }
 
-    async fn return_many_after(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
-        self.set_return_type(ReturnType::After);
-        self.return_many(db).await
+    async fn return_many_after(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+        let query = self.set_return_type(ReturnType::After);
+        query.return_many(db).await
     }
 
-    async fn return_many_diff(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
-        self.set_return_type(ReturnType::Diff);
-        self.return_many(db).await
+    async fn return_many_diff(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+        let query = self.set_return_type(ReturnType::Diff);
+        query.return_many(db).await
     }
 
     async fn return_many_projections(
-        &self,
+        self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
     ) -> crate::Result<Vec<T>> {
+        let mut query = self;
         if let Some(projections) = projections {
-            self.set_return_type(ReturnType::Projections(projections));
+            query = query.set_return_type(ReturnType::Projections(projections));
         }
 
-        self.return_many(db).await
+        query.return_many(db).await
     }
 
-    fn set_return_type(&self, return_type: ReturnType);
+    fn set_return_type(self, return_type: ReturnType) -> Self;
 }
 
 #[async_trait::async_trait]
@@ -228,7 +231,7 @@ fn get_first<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
 where
     T: Serialize + DeserializeOwned,
 {
-    let value = response
+    let mut value = response
         .take::<Vec<T>>(0)
         .map_err(SurrealdbOrmError::Deserialization)?;
 
@@ -245,7 +248,7 @@ fn get_last<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
 where
     T: Serialize + DeserializeOwned,
 {
-    let value = response
+    let mut value = response
         .take::<Vec<T>>(0)
         .map_err(SurrealdbOrmError::Deserialization)?;
 

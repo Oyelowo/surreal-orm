@@ -215,8 +215,9 @@ impl<T> RunnableStandard<T> for RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge + Send + Sync,
 {
-    fn set_return_type(&self, return_type: ReturnType) {
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);
+        self
     }
 }
 
