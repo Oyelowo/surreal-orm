@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::ReturnType;
+use crate::{Field, ReturnType};
 
 use super::{Buildable, Parametric};
 
@@ -31,6 +31,42 @@ where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned,
 {
+    async fn return_first_before(&self, db: Surreal<Db>) -> surrealdb::Result<Option<T>> {
+        self.set_return_type(ReturnType::Before);
+        self.return_one(db)
+    }
+
+    async fn return_first_after(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        self.set_return_type(ReturnType::After);
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
+    }
+
+    async fn return_first_diff(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        self.set_return_type(ReturnType::Diff);
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
+    }
+
+    async fn return_first_projections(
+        &self,
+        db: Surreal<Db>,
+        projections: Option<Vec<Field>>,
+    ) -> surrealdb::Result<T> {
+        if let Some(projections) = projections {
+            self.set_return_type(ReturnType::Projections(projections));
+        }
+
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
+    }
+
     async fn return_one_before(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         self.set_return_type(ReturnType::Before);
         let response = self.run(db).await?;
@@ -40,6 +76,7 @@ where
     }
 
     async fn return_one_after(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        self.set_return_type(ReturnType::After);
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         // Maybe check if there are multiple items and return error if there are more than one;
@@ -47,13 +84,22 @@ where
     }
 
     async fn return_one_diff(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        self.set_return_type(ReturnType::Diff);
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         // Maybe check if there are multiple items and return error if there are more than one;
         Ok(value.pop().unwrap())
     }
 
-    async fn return_one_projections(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+    async fn return_one_projections(
+        &self,
+        db: Surreal<Db>,
+        projections: Option<Vec<Field>>,
+    ) -> surrealdb::Result<T> {
+        if let Some(projections) = projections {
+            self.set_return_type(ReturnType::Projections(projections));
+        }
+
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         // Maybe check if there are multiple items and return error if there are more than one;
@@ -61,30 +107,54 @@ where
     }
 
     async fn return_many_before(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        self.set_return_type(ReturnType::Before);
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         Ok(value)
     }
 
     async fn return_many_after(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        self.set_return_type(ReturnType::After);
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         Ok(value)
     }
 
     async fn return_many_diff(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        self.set_return_type(ReturnType::Diff);
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         Ok(value)
     }
 
-    async fn return_many_projections(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+    async fn return_many_projections(
+        &self,
+        db: Surreal<Db>,
+        projections: Option<Vec<Field>>,
+    ) -> surrealdb::Result<Vec<T>> {
+        if let Some(projections) = projections {
+            self.set_return_type(ReturnType::Projections(projections));
+        }
+
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         Ok(value)
     }
 
     fn set_return_type(&self, return_type: ReturnType);
+}
+
+fn get_first<T>(mut response: surrealdb::Response) -> Result<T, surrealdb::Error>
+where
+    T: Serialize + DeserializeOwned,
+{
+    let mut value = response.take::<Vec<T>>(0)?;
+    let value = if !value.is_empty() {
+        value.swap_remove(0)
+    } else {
+        None
+    };
+    Ok(value)
 }
 
 #[async_trait::async_trait]
@@ -98,10 +168,16 @@ where
         Ok(())
     }
 
+    async fn return_first(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let response = self.run(db).await?;
+        get_first::<T>(response)
+    }
+
     async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
         let response = self.run(db).await?;
         let mut value = response.take::<Vec<T>>(0)?;
         // Maybe check if there are multiple items and return error if there are more than one;
+        // get_first
         Ok(value.pop().unwrap())
     }
 
