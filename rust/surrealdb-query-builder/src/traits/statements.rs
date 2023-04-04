@@ -17,7 +17,9 @@ where
     async fn run(&self, db: Surreal<Db>) -> crate::Result<surrealdb::Response> {
         let query_builder_error = self.get_errors();
         if !query_builder_error.is_empty() {
-            SurrealdbOrmError::QueryBuilder(query_builder_error.join(". \n"))
+            return Err(SurrealdbOrmError::QueryBuilder(
+                query_builder_error.join(". \n"),
+            ));
         }
         let query = self.build();
         let query = db.query(query);
@@ -31,6 +33,14 @@ where
 
 impl<Q> Runnable for Q where Q: Queryable {}
 
+impl<Q, T> RunnableDefault<T> for Q
+where
+    Q: RunnableStandard<T>,
+    Self: Parametric + Buildable,
+    T: Serialize + DeserializeOwned,
+{
+}
+
 #[async_trait]
 pub trait RunnableStandard<T>: Runnable + RunnableDefault<T>
 where
@@ -42,12 +52,12 @@ where
         self.return_first(db).await
     }
 
-    async fn return_first_after(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+    async fn return_first_after(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
         self.set_return_type(ReturnType::After);
         self.return_first(db).await
     }
 
-    async fn return_first_diff(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+    async fn return_first_diff(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
         self.set_return_type(ReturnType::Diff);
         self.return_first(db).await
     }
@@ -56,24 +66,24 @@ where
         &self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> surrealdb::Result<T> {
+    ) -> crate::Result<Option<T>> {
         if let Some(projections) = projections {
             self.set_return_type(ReturnType::Projections(projections));
         }
         self.return_first(db).await
     }
 
-    async fn return_one_before(&self, db: Surreal<Db>) -> crate::Result<T> {
+    async fn return_one_before(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
         self.set_return_type(ReturnType::Before);
         self.return_one(db).await
     }
 
-    async fn return_one_after(&self, db: Surreal<Db>) -> crate::Result<T> {
+    async fn return_one_after(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
         self.set_return_type(ReturnType::After);
         self.return_one(db).await
     }
 
-    async fn return_one_diff(&self, db: Surreal<Db>) -> crate::Result<T> {
+    async fn return_one_diff(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
         self.set_return_type(ReturnType::Diff);
         self.return_one(db).await
     }
@@ -90,17 +100,17 @@ where
         self.return_one(db).await
     }
 
-    async fn return_many_before(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+    async fn return_many_before(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
         self.set_return_type(ReturnType::Before);
-        self.return_many(db).await;
+        self.return_many(db).await
     }
 
-    async fn return_many_after(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+    async fn return_many_after(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
         self.set_return_type(ReturnType::After);
         self.return_many(db).await
     }
 
-    async fn return_many_diff(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+    async fn return_many_diff(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
         self.set_return_type(ReturnType::Diff);
         self.return_many(db).await
     }
@@ -109,7 +119,7 @@ where
         &self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> surrealdb::Result<Vec<T>> {
+    ) -> crate::Result<Vec<T>> {
         if let Some(projections) = projections {
             self.set_return_type(ReturnType::Projections(projections));
         }
@@ -198,7 +208,7 @@ where
         .take::<Vec<T>>(0)
         .map_err(SurrealdbOrmError::Deserialization)?;
     if value.len() > 1 {
-        return SurrealdbOrmError::TooManyItemsReturned(1.into());
+        return Err(SurrealdbOrmError::TooManyItemsReturned(1.into()));
     }
     Ok(value.pop())
 }
@@ -239,11 +249,7 @@ where
         .take::<Vec<T>>(0)
         .map_err(SurrealdbOrmError::Deserialization)?;
 
-    let value = if !value.is_empty() {
-        Some(value.pop())
-    } else {
-        None
-    };
+    let value = if !value.is_empty() { value.pop() } else { None };
 
     Ok(value)
 }

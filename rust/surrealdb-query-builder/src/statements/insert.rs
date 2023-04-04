@@ -244,11 +244,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStat
     }
 }
 
-impl<T> RunnableDefault<T> for InsertStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync
-{
-}
-
 fn get_field_names<T>(value: &T) -> Vec<String>
 where
     T: serde::Serialize,
