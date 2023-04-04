@@ -171,6 +171,14 @@ where
         get_one::<T>(response)
     }
 
+    async fn return_one_unchecked<T>(&self, db: Surreal<Db>) -> crate::Result<Option<T>>
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        let response = self.run(db).await?;
+        get_last::<T>(response)
+    }
+
     async fn return_many<T>(&self, db: Surreal<Db>) -> crate::Result<Vec<T>>
     where
         T: Serialize + DeserializeOwned,
@@ -214,6 +222,23 @@ where
 
     let value = if !value.is_empty() {
         Some(value.swap_remove(0))
+    } else {
+        None
+    };
+
+    Ok(value)
+}
+
+fn get_last<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
+where
+    T: Serialize + DeserializeOwned,
+{
+    let value = response
+        .take::<Vec<T>>(0)
+        .map_err(SurrealdbOrmError::Deserialization)?;
+
+    let value = if !value.is_empty() {
+        Some(value.pop())
     } else {
         None
     };
