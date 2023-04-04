@@ -18,10 +18,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Value};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable,
-        RunnableDefault,
-    },
+    traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
     types::{All, DurationLike, Field, Filter, SurrealId, Table},
     RunnableSelect,
 };

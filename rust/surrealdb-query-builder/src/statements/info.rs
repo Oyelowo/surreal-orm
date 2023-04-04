@@ -62,6 +62,7 @@ impl InfoStatement {
         self
     }
 }
+
 impl Queryable for InfoStatement {}
 
 impl Erroneous for InfoStatement {}
@@ -89,8 +90,6 @@ impl fmt::Display for InfoStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnable for InfoStatement {}
 
 // Example usage
 fn main() {

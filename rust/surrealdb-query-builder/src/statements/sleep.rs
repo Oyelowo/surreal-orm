@@ -11,7 +11,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::BindingsList,
-    traits::{Buildable, Erroneous, Parametric, Queryable,  Runnable} ,
+    traits::{Buildable, Erroneous, Parametric, Queryable},
     types::DurationLike,
 };
 
@@ -42,8 +42,6 @@ impl Parametric for SleepStatement {
         vec![]
     }
 }
-
-impl Runnable for  SleepStatement {}
 
 impl Display for SleepStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

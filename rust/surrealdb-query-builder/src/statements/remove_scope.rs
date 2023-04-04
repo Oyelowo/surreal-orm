@@ -29,8 +29,8 @@ use std::fmt::{self, Display};
 use surrealdb::sql;
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,  Runnable} ,
-    types::{Database, Namespace, Scope, Table, Token},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Scope,
 };
 
 pub fn remove_scope(scope: impl Into<Scope>) -> RemoveScopeStatement {
@@ -50,7 +50,6 @@ impl RemoveScopeStatement {
 
 impl Queryable for RemoveScopeStatement {}
 impl Erroneous for RemoveScopeStatement {}
-impl Runnable for  RemoveScopeStatement {}
 
 impl Parametric for RemoveScopeStatement {
     fn get_bindings(&self) -> BindingsList {
