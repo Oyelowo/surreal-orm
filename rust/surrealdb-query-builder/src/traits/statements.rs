@@ -2,261 +2,142 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
+use crate::ReturnType;
+
 use super::{Buildable, Parametric};
 
-// ReturnType standard
 // Create, Update, Relate, Delete
 // [ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
-// return_none(),
-// return_one(),
-// return_many(),
-// return_one_before(),
-// return_one_after(),
-// return_many_before(),
-// return_many_after(),
-// return_one_diff(),
-// return_many_diff(),
-// return_one_projections(),
-// return_many_projections()
-//
-//
-// ReturnSimeple/ReturnBasic:
-// return_one()
-// return_many()
-// return_none()
-//
-//
-//
-// Runnable: method: run() ...Just run. Don't care about return type
-// run()
 
-// RunnableStandard
-// #[async_trait]
-// pub trait RunnableStandard<T>
+#[async_trait::async_trait]
+pub trait Runnable
+where
+    Self: Parametric + Buildable,
+{
+    async fn run(&self, db: Surreal<Db>) -> Result<surrealdb::Response, surrealdb::Error> {
+        let query = self.build();
+        let query = db.query(query);
+        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
+            acc.bind((val.get_param(), val.get_value()))
+        });
+        let mut response = query.await?;
+        Ok(response)
+    }
+}
+
 #[async_trait]
-pub trait RunnableStandard<T>
+pub trait RunnableStandard<T>: Runnable + RunnableDefault<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned,
 {
-    // async fn return_none(&self, db: Surreal<Db>)->surrealdb::Result<T>;
-    // return_one(),
-    // return_many(),
-    // return_one_before(),
-    // return_one_after(),
-    // return_many_before(),
-    // return_many_after(),
-    // return_one_diff(),
-    // return_many_diff(),
-    // return_one_projections(),
-    // return_many_projections()
-    // async fn return_none(&self, db: Surreal<Db>) -> surrealdb::Result<T>;
-    // async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T>;
-    // async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>>;
-    // async fn return_one_before(&self, db: Surreal<Db>) -> surrealdb::Result<Option<T>>;
-    // async fn return_one_after(&self, db: Surreal<Db>) -> surrealdb::Result<Option<T>>;
-    // async fn return_many_before(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>>;
-    // async fn return_many_after(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>>;
-    // async fn return_one_diff(&self, db: Surreal<Db>) -> surrealdb::Result<Option<T>>;
-    // async fn return_many_diff(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>>;
-    // async fn return_one_projections(&self, db: Surreal<Db>) -> surrealdb::Result<Option<T>>;
-    // async fn return_many_projections(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>>;
-
-    async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
-        let query = self.build();
-        let query = db.query(query);
-
-        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
-            acc.bind((val.get_param(), val.get_value()))
-        });
-
-        let mut response = query.await?;
-
-        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-        // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
-        // Ok<T>.
-        let mut returned_val = match response.take::<Option<T>>(0) {
-            Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec<T>>(0)?,
-        };
-
-        // TODO:: Handle error if nothing is returned
-        let only_or_last = returned_val.pop().unwrap();
-        Ok(only_or_last)
+    async fn return_one_before(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        self.set_return_type(ReturnType::Before);
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
     }
 
-    async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        let query = db.query(query);
-
-        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
-            acc.bind((val.get_param(), val.get_value()))
-        });
-
-        let mut response = query.await?;
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option<T>, then pick the return the only item as Vec<T>.
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Ok(many) => many,
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
-    }
-}
-
-#[async_trait]
-pub trait Runnable<T>
-where
-    Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned + Send + Sync,
-{
-    async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
-        let query = self.build();
-        dbg!(self.get_bindings());
-        dbg!(query.clone());
-
-        let query = db.query(query);
-
-        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
-            acc.bind((val.get_param(), val.get_value()))
-        });
-
-        let mut response = query.await?;
-
-        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-        // trying to return Vec<T> rather than Option<T>, then pick the first of the returned
-        // Ok<T>.
-        let mut returned_val = match response.take::<Option<T>>(0) {
-            Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec<T>>(0)?,
-        };
-
-        // TODO:: Handle error if nothing is returned
-        let only_or_last = returned_val.pop().unwrap();
-        Ok(only_or_last)
+    async fn return_one_after(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
     }
 
-    async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        // async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        let query = db.query(query);
-
-        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
-            acc.bind((val.get_param(), val.get_value()))
-        });
-
-        let mut response = query.await?;
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option<T>, then pick the return the only item as Vec<T>.
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Ok(many) => many,
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
+    async fn return_one_diff(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
     }
-    async fn return_many_explicit<M: Into<Vec<T>>>(
-        &self,
-        db: Surreal<Db>,
-    ) -> surrealdb::Result<Vec<T>> {
-        // async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        let query = db.query(query);
 
-        let mut query = self.get_bindings().iter().fold(query, |acc, val| {
-            acc.bind((val.get_param(), val.get_value()))
-        });
-
-        let mut response = query.await?;
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option<T>, then pick the return the only item as Vec<T>.
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Ok(many) => many,
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
+    async fn return_one_projections(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
     }
+
+    async fn return_many_before(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        Ok(value)
+    }
+
+    async fn return_many_after(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        Ok(value)
+    }
+
+    async fn return_many_diff(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        Ok(value)
+    }
+
+    async fn return_many_projections(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        Ok(value)
+    }
+
+    fn set_return_type(&self, return_type: ReturnType);
 }
 
 #[async_trait::async_trait]
-pub trait RunnableSelect
+pub trait RunnableDefault<T>: Runnable
 where
     Self: Parametric + Buildable,
+    T: Serialize + DeserializeOwned,
 {
-    async fn return_one<T: Serialize + DeserializeOwned>(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<T> {
-        let query = self.build();
-        println!("Return one queryMMMMM {query}");
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        // If it errors, try to check if multiple entries have been inputed, hence, suurealdb
-        // trying to return Vec  rather than Option , then pick the first of the returned
-        // Ok .
-        let mut returned_val = match response.take::<Option<T>>(0) {
-            Ok(one) => vec![one.unwrap()],
-            Err(err) => response.take::<Vec<T>>(0)?,
-        };
-
-        // TODO:: Handle error if nothing is returned
-        let only_or_last = returned_val.pop().unwrap();
-        Ok(only_or_last)
-    }
-
-    async fn return_many<T: Serialize + DeserializeOwned>(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<Vec<T>> {
-        let query = self.build();
-        println!("XXXX {query}");
-        let mut response = self
-            .get_bindings()
-            .iter()
-            .fold(db.query(query), |acc, val| {
-                acc.bind((val.get_param(), val.get_value()))
-            })
-            .await?;
-
-        println!("mmmmm {response:?}");
-        // This does the reverse of get_one
-        // If it errors, try to check if only single entry has been inputed, hence, suurealdb
-        // trying to return Option , then pick the return the only item as Vec .
-        let mut returned_val = match response.take::<Vec<T>>(0) {
-            Ok(many) => many,
-            Err(err) => vec![response.take::<Option<T>>(0)?.unwrap()],
-        };
-
-        // TODO:: Handle error if nothing is returned
-        Ok(returned_val)
-    }
-}
-
-#[async_trait::async_trait]
-pub trait Runnables
-where
-    Self: Buildable,
-{
-    async fn run(
-        &self,
-        db: surrealdb::Surreal<surrealdb::engine::local::Db>,
-    ) -> surrealdb::Result<()> {
-        let query = self.build();
-        db.query(query).await?;
+    async fn return_none(&self, db: Surreal<Db>) -> surrealdb::Result<()> {
+        self.run(db).await?;
         Ok(())
+    }
+
+    async fn return_one(&self, db: Surreal<Db>) -> surrealdb::Result<T> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
+    }
+
+    async fn return_many(&self, db: Surreal<Db>) -> surrealdb::Result<Vec<T>> {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        Ok(value)
+    }
+}
+
+#[async_trait::async_trait]
+pub trait RunnableSelect: Runnable
+where
+    Self: Parametric + Buildable,
+{
+    async fn return_none(&self, db: Surreal<Db>) -> surrealdb::Result<()> {
+        self.run(db).await?;
+        Ok(())
+    }
+
+    async fn return_one<T>(&self, db: Surreal<Db>) -> surrealdb::Result<T>
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        let response = self.run(db).await?;
+        let mut value = response.take::<Vec<T>>(0)?;
+        // Maybe check if there are multiple items and return error if there are more than one;
+        Ok(value.pop().unwrap())
+    }
+
+    async fn return_many<T>(&self, db: Surreal<Db>) -> surrealdb::Result<T>
+    where
+        T: Serialize + DeserializeOwned + IntoIterator,
+    {
+        let response = self.run(db).await?;
+        let mut value = response.take::<T>(0)?;
+        Ok(value)
     }
 }

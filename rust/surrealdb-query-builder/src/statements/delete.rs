@@ -12,7 +12,8 @@ use surrealdb::sql;
 
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, SurrealdbModel},
-    types::{DurationLike, Filter, Return},
+    types::{DurationLike, Filter, ReturnType},
+    RunnableStandard,
 };
 
 use super::update::TargettablesForUpdate;
@@ -56,7 +57,7 @@ where
 {
     target: String,
     where_: Option<String>,
-    return_type: Option<Return>,
+    return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
@@ -206,10 +207,15 @@ where
     }
 }
 
-impl<T> Runnable<T> for DeleteStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync
+impl<T> RunnableStandard<T> for DeleteStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
 {
+    fn set_return_type(&self, return_type: ReturnType) {
+        self.return_type = Some(return_type);
+    }
 }
+
 #[test]
 fn test_query_builder() {
     assert_eq!(2, 2);

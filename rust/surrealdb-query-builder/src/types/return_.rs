@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 use super::Field;
 
 #[derive(Debug)]
-pub enum Return {
+pub enum ReturnType {
     None,
     Before,
     After,
@@ -11,14 +11,14 @@ pub enum Return {
     Projections(Vec<Field>),
 }
 
-impl Display for Return {
+impl Display for ReturnType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let return_type = match self {
-            Return::None => "NONE".to_string(),
-            Return::Before => "BEFORE".to_string(),
-            Return::After => "AFTER".to_string(),
-            Return::Diff => "DIFF".to_string(),
-            Return::Projections(projections) => projections
+            ReturnType::None => "NONE".to_string(),
+            ReturnType::Before => "BEFORE".to_string(),
+            ReturnType::After => "AFTER".to_string(),
+            ReturnType::Diff => "DIFF".to_string(),
+            ReturnType::Projections(projections) => projections
                 .iter()
                 .map(ToString::to_string)
                 .collect::<Vec<_>>()
@@ -28,25 +28,25 @@ impl Display for Return {
     }
 }
 
-impl From<Vec<&Field>> for Return {
+impl From<Vec<&Field>> for ReturnType {
     fn from(value: Vec<&Field>) -> Self {
         Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
 }
 
-impl From<Vec<Field>> for Return {
+impl From<Vec<Field>> for ReturnType {
     fn from(value: Vec<Field>) -> Self {
         Self::Projections(value)
     }
 }
 
-impl<const N: usize> From<&[Field; N]> for Return {
+impl<const N: usize> From<&[Field; N]> for ReturnType {
     fn from(value: &[Field; N]) -> Self {
         Self::Projections(value.to_vec())
     }
 }
 
-impl<const N: usize> From<&[&Field; N]> for Return {
+impl<const N: usize> From<&[&Field; N]> for ReturnType {
     fn from(value: &[&Field; N]) -> Self {
         Self::Projections(
             value

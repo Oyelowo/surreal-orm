@@ -124,6 +124,7 @@ impl FromStr for FieldType {
             (Some("number"), None) => FieldType::Number,
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
+            (Some("array"), None) => FieldType::Array,
             (Some("record()"), None) => FieldType::RecordAny,
             (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("geometry"), Some(geom_types)) => {

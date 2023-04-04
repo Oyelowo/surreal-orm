@@ -12,10 +12,10 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-        SurrealdbNode,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
+        RunnableDefault, RunnableStandard, SurrealdbNode,
     },
-    types::{DurationLike, Return, Table, Updateables},
+    types::{DurationLike, ReturnType, Table, Updateables},
 };
 
 use super::update::TargettablesForUpdate;
@@ -51,7 +51,7 @@ where
     target: String,
     content: Option<String>,
     set: Vec<String>,
-    return_type: Option<Return>,
+    return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
@@ -110,7 +110,7 @@ where
         self
     }
 
-    pub fn return_(mut self, return_type: impl Into<Return>) -> Self {
+    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -215,7 +215,12 @@ where
 }
 
 impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
-impl<T> Runnable<T> for CreateStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync
+
+impl<T> RunnableStandard<T> for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {
+    fn set_return_type(&self, return_type: ReturnType) {
+        self.return_type = Some(return_type);
+    }
 }

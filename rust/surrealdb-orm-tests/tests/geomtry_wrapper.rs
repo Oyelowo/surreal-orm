@@ -32,7 +32,7 @@ use geo::Coord;
 use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
-    All, Geometry, Operatable, Parametric, Runnable, RunnableSelect, SurrealId, SurrealdbNode,
+    All, Geometry, Operatable, Parametric, Runnable, RunnableDefault, SurrealId, SurrealdbNode,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

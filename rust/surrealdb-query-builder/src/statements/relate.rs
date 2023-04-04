@@ -13,11 +13,12 @@ use surrealdb::sql::{self, Operator};
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Runnable,
-        Runnables, SurrealdbEdge,
+        SurrealdbEdge,
     },
     types::{
-        Database, DurationLike, Namespace, Return, Scope, Table, TableIndex, Token, Updateables,
+        Database, DurationLike, Namespace, ReturnType, Scope, Table, TableIndex, Token, Updateables,
     },
+    RunnableStandard,
 };
 
 // RELATE @from -> @table -> @with
@@ -54,7 +55,7 @@ where
     relation: String,
     content_param: Option<String>,
     set: Vec<String>,
-    return_type: Option<Return>,
+    return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
@@ -86,7 +87,7 @@ where
         self
     }
 
-    pub fn return_(mut self, return_type: impl Into<Return>) -> Self {
+    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -210,9 +211,13 @@ where
     }
 }
 
-impl<T> Runnable<T> for RelateStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealdbEdge + Send + Sync
+impl<T> RunnableStandard<T> for RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbEdge + Send + Sync,
 {
+    fn set_return_type(&self, return_type: ReturnType) {
+        self.return_type = Some(return_type);
+    }
 }
 
 #[test]

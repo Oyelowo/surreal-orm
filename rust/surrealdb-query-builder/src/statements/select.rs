@@ -20,9 +20,10 @@ use surrealdb::sql::{self, Value};
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable,
-        RunnableSelect,
+        RunnableDefault,
     },
     types::{All, DurationLike, Field, Filter, SurrealId, Table},
+    RunnableSelect,
 };
 
 /// Creates a new `Order` instance with the specified database field.
