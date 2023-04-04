@@ -18,7 +18,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Field, FieldType, Filter, Param, Table},
 };

@@ -29,7 +29,7 @@ use std::fmt::{self, Display};
 use surrealdb::sql;
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,  Runnable} ,
     types::{Database, Namespace, Scope, Table, Token},
 };
 
@@ -67,6 +67,6 @@ impl Parametric for RemoveNamespaceStatement {
 
 impl Erroneous for RemoveNamespaceStatement {}
 
-impl Runnables for RemoveNamespaceStatement {}
+impl Runnable for  RemoveNamespaceStatement {}
 
 impl Queryable for RemoveNamespaceStatement {}

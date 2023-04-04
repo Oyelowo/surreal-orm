@@ -13,7 +13,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{expression::Expression, DurationLike, Scope, Table},
 };
@@ -123,7 +123,7 @@ impl Parametric for DefineScopeStatement {
     }
 }
 
-impl Runnables for DefineScopeStatement {}
+impl Runnable for  DefineScopeStatement {}
 impl Erroneous for DefineScopeStatement {}
 
 #[cfg(test)]

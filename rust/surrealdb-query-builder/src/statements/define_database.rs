@@ -11,7 +11,7 @@ use surrealdb::sql::{self, Ident};
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Database, Table},
 };
@@ -48,7 +48,7 @@ impl Display for DefineDatabaseStatement {
     }
 }
 
-impl Runnables for DefineDatabaseStatement {}
+impl Runnable for  DefineDatabaseStatement {}
 
 impl Parametric for DefineDatabaseStatement {
     fn get_bindings(&self) -> BindingsList {

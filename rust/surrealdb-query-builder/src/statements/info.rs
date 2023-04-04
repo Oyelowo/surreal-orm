@@ -10,7 +10,7 @@ use std::fmt;
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Runnable,
-        Runnables, SurrealdbModel,
+        Runnable,   SurrealdbModel,
     },
     types::{expression::Expression, Updateables},
 };
@@ -90,7 +90,7 @@ impl fmt::Display for InfoStatement {
     }
 }
 
-impl Runnables for InfoStatement {}
+impl Runnable for  InfoStatement {}
 
 // Example usage
 fn main() {

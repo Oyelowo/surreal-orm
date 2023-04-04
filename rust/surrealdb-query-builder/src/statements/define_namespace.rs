@@ -11,7 +11,7 @@ use surrealdb::sql::{self, Ident};
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Namespace, Table},
 };
@@ -48,7 +48,7 @@ impl Display for DefineNamespaceStatement {
     }
 }
 
-impl Runnables for DefineNamespaceStatement {}
+impl Runnable for  DefineNamespaceStatement {}
 
 impl Parametric for DefineNamespaceStatement {
     fn get_bindings(&self) -> BindingsList {

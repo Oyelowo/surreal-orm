@@ -16,7 +16,7 @@ use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Event, Filter, Table},
 };
@@ -121,7 +121,7 @@ impl Parametric for DefineEventStatement {
     }
 }
 
-impl Runnables for DefineEventStatement {}
+impl Runnable for  DefineEventStatement {}
 impl Queryable for DefineEventStatement {}
 impl Erroneous for DefineEventStatement {}
 

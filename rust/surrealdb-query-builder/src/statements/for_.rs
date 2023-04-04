@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Raw, Runnable, Runnables, SurrealdbModel, ToRaw,
+        Raw, Runnable, Runnable,   SurrealdbModel, ToRaw,
     },
     types::{expression::Expression, CrudType, Filter, Updateables},
 };

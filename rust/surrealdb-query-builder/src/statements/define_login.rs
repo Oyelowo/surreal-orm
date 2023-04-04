@@ -13,7 +13,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Idiomx, Table},
 };
@@ -169,7 +169,7 @@ impl Parametric for DefineLoginStatement {
         self.bindings.to_vec()
     }
 }
-impl Runnables for DefineLoginStatement {}
+impl Runnable for  DefineLoginStatement {}
 impl Erroneous for DefineLoginStatement {}
 
 #[cfg(test)]

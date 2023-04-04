@@ -36,7 +36,7 @@ use std::collections::HashMap;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Field, Table, TableIndex},
 };
@@ -211,7 +211,7 @@ impl Parametric for DefineIndexStatement {
 
 impl Queryable for DefineIndexStatement {}
 impl Erroneous for DefineIndexStatement {}
-impl Runnables for DefineIndexStatement {}
+impl Runnable for  DefineIndexStatement {}
 
 #[cfg(test)]
 #[cfg(feature = "mock")]

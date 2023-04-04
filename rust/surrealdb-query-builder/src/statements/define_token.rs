@@ -13,7 +13,7 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
     },
     types::{Database, Idiomx, Namespace, Scope, Table, Token, TokenTarget, TokenType},
 };
@@ -134,7 +134,7 @@ impl Parametric for DefineTokenStatement {
     }
 }
 
-impl Runnables for DefineTokenStatement {}
+impl Runnable for  DefineTokenStatement {}
 impl Erroneous for DefineTokenStatement {}
 
 #[cfg(test)]

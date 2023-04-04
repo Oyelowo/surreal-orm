@@ -10,7 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,  Runnable} ,
     types::{Database, Namespace},
 };
 
@@ -60,7 +60,7 @@ impl Display for UseStatement {
     }
 }
 
-impl Runnables for UseStatement {}
+impl Runnable for  UseStatement {}
 
 impl Queryable for UseStatement {}
 
