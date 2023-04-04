@@ -59,6 +59,7 @@ impl Field {
         // let bindings = vec![binding];
         // TODO: Check if surrealdb drive supports binding field param idiom. IF so, I can just
         // parametize everything. Otherwise, I can leave fields out of parametization
+        // Update: This is checked and seems true
         Self {
             name: value.clone(),
             bindings: vec![],

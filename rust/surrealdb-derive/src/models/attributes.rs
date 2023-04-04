@@ -568,12 +568,9 @@ impl ReferencedNodeMeta {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::FieldType::Record(Self::table_name()))));
                 } else if field_name_normalized == "out" || field_name_normalized == "in" {
-                    // Note: It might be possible to support multiple out and in nodes within same edge.
-                    // So, commenting this out for now, as surrealdb does not yet support defining
-                    // record type without specifying the reference table. specifying the reference
-                    // table here will limit us to only supporting a single out and in nodes for a
-                    // single edge
-                    // define_field_methods.push(quote!(.type_(#crate_name::FieldType::Record)));
+                    // An edge might be shared by multiple In/Out nodes. So, default to any type of
+                    // record for edge in and out
+                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::RecordAny)));
                 } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
