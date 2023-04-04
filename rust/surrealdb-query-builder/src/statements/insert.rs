@@ -24,10 +24,11 @@ use surrealdb::{
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,
         SurrealdbModel,
     },
     types::{expression::Expression, Updateables},
+    RunnableDefault,
 };
 
 use super::SelectStatement;
@@ -243,7 +244,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStat
     }
 }
 
-impl<T> Runnable<T> for InsertStatement<T> where
+impl<T> RunnableDefault<T> for InsertStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync
 {
 }

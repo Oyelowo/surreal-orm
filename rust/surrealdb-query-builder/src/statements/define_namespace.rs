@@ -10,9 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
-    },
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::{Namespace, Table},
 };
 
@@ -47,8 +45,6 @@ impl Display for DefineNamespaceStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnable for  DefineNamespaceStatement {}
 
 impl Parametric for DefineNamespaceStatement {
     fn get_bindings(&self) -> BindingsList {

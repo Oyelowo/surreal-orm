@@ -29,6 +29,8 @@ where
     }
 }
 
+impl<Q> Runnable for Q where Q: Queryable {}
+
 #[async_trait]
 pub trait RunnableStandard<T>: Runnable + RunnableDefault<T>
 where

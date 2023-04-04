@@ -15,9 +15,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnable,  
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::{Event, Filter, Table},
 };
 
@@ -121,8 +119,8 @@ impl Parametric for DefineEventStatement {
     }
 }
 
-impl Runnable for  DefineEventStatement {}
 impl Queryable for DefineEventStatement {}
+
 impl Erroneous for DefineEventStatement {}
 
 #[cfg(test)]
