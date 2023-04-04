@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{Field, ReturnType};
+use crate::{Erroneous, Field, Queryable, ReturnType};
 
 use super::{Buildable, Parametric};
 
@@ -12,9 +12,10 @@ use super::{Buildable, Parametric};
 #[async_trait::async_trait]
 pub trait Runnable
 where
-    Self: Parametric + Buildable,
+    Self: Queryable,
 {
     async fn run(&self, db: Surreal<Db>) -> Result<surrealdb::Response, surrealdb::Error> {
+        self.get_errors();
         let query = self.build();
         let query = db.query(query);
         let mut query = self.get_bindings().iter().fold(query, |acc, val| {
