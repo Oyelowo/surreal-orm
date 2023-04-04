@@ -1,8 +1,6 @@
 use std::{
     fmt::{self, Display},
-    ops::Deref,
     str::FromStr,
-    string::ParseError,
 };
 
 use crate::Table;
@@ -59,7 +57,6 @@ impl Display for GeometryType {
 pub enum FieldType {
     Any,
     Array,
-    // ArrayList(Box<FieldType>),
     Bool,
     DateTime,
     Decimal,
@@ -69,16 +66,8 @@ pub enum FieldType {
     Number,
     Object,
     String,
-    // Even though the documentation states that you can have a record type without specifying
-    // the reference table, from my test as at 3rd of April, this is an invalid query. Same goes
-    // for geometry, you have to specify the geomtry type. So, I am commenting these out for now.
-    // Prior to that, I had a different name for Record with referent table name. Same for
-    // geometry.
-    // If these happen to be supported in the future, I can have Record(Table) ->
-    // RecordWithTable(Table) and Geomtry(Vec<GeomtryType>) -> GeometryWithTypes(Vec<GeomtryType>)
-    // Record,
+    RecordAny,
     Record(Table),
-    // Geometry,
     Geometry(Vec<GeometryType>),
 }
 
@@ -93,7 +82,6 @@ impl Display for FieldType {
         let data_type = match self {
             FieldType::Any => "any".to_string(),
             FieldType::Array => "array".to_string(),
-            // FieldType::ArrayList(field_type) => format!("array ({field_type})"),
             FieldType::Bool => "bool".to_string(),
             FieldType::DateTime => "datetime".to_string(),
             FieldType::Decimal => "decimal".to_string(),
@@ -104,8 +92,7 @@ impl Display for FieldType {
             FieldType::Object => "object".to_string(),
             FieldType::String => "string".to_string(),
             FieldType::Record(table) => format!("record ({table})"),
-            // FieldType::Record => "record".to_string(),
-            // FieldType::Geometry => "geometry".to_string(),
+            FieldType::RecordAny => "record()".to_string(),
             FieldType::Geometry(geometries) => format!(
                 "geometry ({})",
                 geometries
@@ -124,12 +111,6 @@ impl FromStr for FieldType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // Examples:
-        // datetime
-        // record
-        // record (user)
-        // geometry (polygon, multipolygon, collection)
-        // geometry
         let type_stringified = s.replace(" ", "");
         let mut type_with_content = type_stringified.trim_end_matches(")").split("(");
 
@@ -143,14 +124,8 @@ impl FromStr for FieldType {
             (Some("number"), None) => FieldType::Number,
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
-            // (Some("record"), None) => FieldType::Record,
+            (Some("record()"), None) => FieldType::RecordAny,
             (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
-            (Some("array"), None) => FieldType::Array,
-            // (Some("array"), Some(content)) => {
-            //     let content_type = Self::from_str(content)?;
-            //     FieldType::ArrayList(Box::new(content_type))
-            // }
-            // (Some("geometry"), None) => FieldType::Geometry,
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
                     .split(",")
