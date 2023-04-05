@@ -133,8 +133,7 @@ impl ToTokens for NodeToken{
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};
             
-            impl #crate_name::SurrealdbNode for #struct_name_ident {
-                type TableNameChecker = #module_name::TableNameStaticChecker;
+            impl #crate_name::SurrealdbObect for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
                 fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
@@ -153,47 +152,16 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
-                
-                fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
-                    let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
-                    record_id
-                }
-                
-                fn get_table_name() -> #crate_name::Table {
-                    #table_name_str.into()
-                }
-                
-            }
-
-            impl #crate_name::SurrealdbModel for #struct_name_ident {
-                fn table_name() -> #crate_name::Table {
-                    #table_name_str.into()
-                }
-                
-                fn get_serializable_field_names() -> Vec<&'static str> {
+                fn get_serializable_field_names() -> ::std::vec::Vec<&'static str> {
                     return vec![#( #serialized_field_name_no_skip), *]
                 }
-                
-                fn define_table() -> #crate_name::Raw {
-                    #table_definitions
-                }
-                
-                fn define_fields() -> Vec<#crate_name::Raw> {
-                    vec![
-                   #( #field_definitions), *
-                    ]
-                }
             }
-            
+
             pub mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Erroneous as _;
                 use #crate_name::Schemaful as _;
 
-                pub struct TableNameStaticChecker {
-                    pub #table_name_ident: String,
-                }
-                
                #( #imports_referenced_node_schema) *
                 
 
@@ -293,16 +261,12 @@ impl ToTokens for NodeToken{
                     }
                     
                 }
-                
-                #node_edge_metadata_tokens
             }
 
                 
             #[test]
             fn #test_function_name() {
                 #( #static_assertions) *
-                #node_edge_metadata_static_assertions
-                
             }
 ));
     }
