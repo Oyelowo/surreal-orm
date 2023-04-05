@@ -195,6 +195,12 @@ pub struct MyFieldReceiver {
     pub(crate) link_many: Option<String>,
 
     #[darling(default)]
+    pub(crate) nest_array: Option<String>,
+
+    #[darling(default)]
+    pub(crate) nest_object: Option<String>,
+
+    #[darling(default)]
     pub(crate) skip_serializing: bool,
 
     // #[darling(default)]
@@ -764,6 +770,55 @@ impl ReferencedNodeMeta {
 
             foreign_node_type_validator: quote!(
                 ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbNode);
+            ),
+
+            record_link_default_alias_as_method: quote!(
+                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
+                    #schema_type_ident::#__________connect_to_graph_traversal_string(
+                        // &self.#___________graph_traversal_string,
+                        self.get_connection(),
+                        clause,
+                        self.get_bindings(),
+                        self.get_errors()
+                    )
+
+                }
+            ),
+            foreign_node_type: quote!(schema_type_ident),
+            field_definition: quote!(),
+            field_type_validation_asserts: vec![],
+        }
+    }
+
+    pub(crate) fn from_nested(
+        node_type_name: &NodeTypeName,
+        normalized_field_name: &::syn::Ident,
+        struct_name_ident: &::syn::Ident,
+    ) -> Self {
+        let VariablesModelMacro {
+            __________connect_to_graph_traversal_string,
+            ___________graph_traversal_string,
+            ..
+        } = VariablesModelMacro::new();
+
+        let schema_type_ident = format_ident!("{node_type_name}");
+        let crate_name = get_crate_name(false);
+
+        let foreign_node_schema_import = if node_type_name.to_string()
+            == struct_name_ident.to_string()
+        {
+            // Dont import for current struct since that already exists in scope
+            quote!()
+        } else {
+            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbObject>::Schema;)
+        };
+        Self {
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SurrealdbObject>::Schema;
+            foreign_node_schema_import,
+
+            foreign_node_type_validator: quote!(
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbObject);
             ),
 
             record_link_default_alias_as_method: quote!(

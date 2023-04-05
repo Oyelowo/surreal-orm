@@ -21,7 +21,7 @@ use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate, FieldTypeWrapper},
     casing::CaseString,
     get_crate_name,
-    relations::{EdgeDirection, RelateAttribute, RelationType},
+    relations::{EdgeDirection, RelateAttribute, RelationType, NodeTypeName},
     variables::VariablesModelMacro, parse_lit_to_tokenstream, 
 };
 
@@ -302,17 +302,29 @@ impl SchemaFieldsProperties {
                 } = VariablesModelMacro::new();
                 
         
+                let get_link_meta_with_defs = |node_object: &NodeTypeName| {
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                };
+                
+                let get_nested_meta_with_defs = |node_object: &NodeTypeName| {
+                        ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                };
+                
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
                             ReferencedNodeMeta::default()
                                 
                     },
+                        
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)
+                        get_link_meta_with_defs(&node_object)
                     }
+                    
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         if node_object.to_string() != struct_name_ident.to_string() {
@@ -323,12 +335,30 @@ impl SchemaFieldsProperties {
                         }
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }
+                        
+                        get_link_meta_with_defs(&node_object)
+                    }
+                    
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }                    
+                    
+                        get_link_meta_with_defs(&node_object)
+                    }                    
+                    
+                    RelationType::NestObject(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                        
+                    RelationType::NestArray(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                        
                     RelationType::None => ReferencedNodeMeta::default()
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };

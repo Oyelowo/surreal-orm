@@ -45,6 +45,13 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     fn get_table_name() -> Table;
 }
 
+pub trait SurrealdbObject: Serialize {
+    type Schema;
+    // type TableNameChecker;
+    fn schema() -> Self::Schema;
+    // fn with(clause: impl Into<Clause>) -> Self::Schema;
+}
+
 pub trait Schemaful {
     fn get_connection(&self) -> String;
 }
