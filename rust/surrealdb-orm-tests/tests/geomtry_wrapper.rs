@@ -454,3 +454,4 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     insta::assert_debug_snapshot!(results);
     Ok(())
 }
+
