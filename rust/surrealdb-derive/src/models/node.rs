@@ -79,7 +79,7 @@ impl ToTokens for NodeToken{
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name_ident,
+            // table_name_ident,
         };
 
         let SchemaFieldsProperties {
@@ -105,8 +105,8 @@ impl ToTokens for NodeToken{
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
+        let test_function_name = format_ident!("test_{schema_mod_name}_edge_name");
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
-        let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
         let table_definitions = self.get_table_definition_token();
@@ -131,7 +131,7 @@ impl ToTokens for NodeToken{
         //     written_blogs: Relate<Blog>,
         // }
         tokens.extend(quote!( 
-            use #crate_name::{ToRaw as _};
+            use #crate_name::statements::{ToRawStatement as _, RawStatement};
             
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -174,11 +174,11 @@ impl ToTokens for NodeToken{
                     return vec![#( #serialized_field_name_no_skip), *]
                 }
                 
-                fn define_table() -> #crate_name::Raw {
+                fn define_table() -> #crate_name::statements::RawStatement {
                     #table_definitions
                 }
                 
-                fn define_fields() -> Vec<#crate_name::Raw> {
+                fn define_fields() -> Vec<#crate_name::statements::RawStatement> {
                     vec![
                    #( #field_definitions), *
                     ]
@@ -197,7 +197,7 @@ impl ToTokens for NodeToken{
                #( #imports_referenced_node_schema) *
                 
 
-                #[derive(Debug, Clone)]
+                #[derive(Debug)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
                     #___________graph_traversal_string: ::std::string::String,
@@ -214,12 +214,6 @@ impl ToTokens for NodeToken{
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
-                    }
-                }
-            
-                impl #crate_name::Buildable for #struct_name_ident {
-                    fn build(&self) -> ::std::string::String {
-                        self.#___________graph_traversal_string.to_string()
                     }
                 }
                 
@@ -298,7 +292,6 @@ impl ToTokens for NodeToken{
             }
 
                 
-            #[test]
             fn #test_function_name() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions

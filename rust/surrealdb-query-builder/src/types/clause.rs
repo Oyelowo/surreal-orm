@@ -126,6 +126,14 @@ impl Clause {
             _ => format!("{table_name}{self}"),
         }
     }
+
+    // pub fn format_with_object(&self) -> String {
+    //     match self.kind.clone() {
+    //         // ClauseType::Query(q) => self.to_string(),
+    //         ClauseType::Id(q) => self.to_string(),
+    //         _ => self.build(),
+    //     }
+    // }
 }
 
 impl std::fmt::Display for Clause {

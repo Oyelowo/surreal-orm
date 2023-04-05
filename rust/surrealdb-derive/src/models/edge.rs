@@ -98,7 +98,7 @@ impl ToTokens for EdgeToken {
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name_ident,
+            // table_name_ident,
         };
 
         let SchemaFieldsProperties {

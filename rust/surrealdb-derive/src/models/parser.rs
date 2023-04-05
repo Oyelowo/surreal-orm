@@ -260,7 +260,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
-    pub table_name_ident: &'a syn::Ident,
+    // pub table_name_ident: &'a syn::Ident,
 }
 impl SchemaFieldsProperties {
     /// .

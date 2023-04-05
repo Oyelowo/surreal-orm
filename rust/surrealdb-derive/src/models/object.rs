@@ -8,55 +8,46 @@
 #![allow(dead_code)]
 
 use convert_case::{Case, Casing};
-use darling::{FromDeriveInput, ToTokens};
+use darling::{FromDeriveInput, ToTokens, util, ast};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{str::FromStr, ops::Deref};
 
-use syn::{self, parse_macro_input, LitStr, Error};
+use syn::{self, parse_macro_input, LitStr, Error, Data};
 
 use super::{
-    attributes::TableDeriveAttributes,
+    attributes::{TableDeriveAttributes, MyFieldReceiver, Rename},
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
     variables::VariablesModelMacro, parse_lit_to_tokenstream,
 };
 
+// #[derive(Debug, FromDeriveInput)]
+// #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
+// struct ObjectToken(TableDeriveAttributes);
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
-struct NodeToken(TableDeriveAttributes);
+pub struct ObjectToken {
+    pub(crate) ident: syn::Ident,
+    pub(crate) attrs: Vec<syn::Attribute>,
+    pub(crate) generics: syn::Generics,
+    /// Receives the body of the struct or enum. We don't care about
+    /// struct fields because we previously told darling we only accept structs.
+    pub data: ast::Data<util::Ignored, MyFieldReceiver>,
 
-impl Deref for NodeToken {
-    type Target=TableDeriveAttributes;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    #[darling(default)]
+    pub(crate) rename_all: ::std::option::Option<Rename>,
 }
 
-impl ToTokens for NodeToken{
+impl ToTokens for ObjectToken{
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let TableDeriveAttributes {
+        let ObjectToken {
             ident: struct_name_ident,
             data,
             rename_all,
-            table_name,
-            relax_table_name,
-            drop,
-            schemafull,
-            as_,
-            as_fn,
-            permissions,
-            permissions_fn,
-            define,
-            define_fn,
             ..
-        } = &self.0;
-
-        let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
-        let table_name_str =
-            errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
+        } = &self;
 
         let struct_level_casing = rename_all.as_ref().map(|case| {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
@@ -79,7 +70,7 @@ impl ToTokens for NodeToken{
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name_ident,
+            // table_name_ident,
         };
 
         let SchemaFieldsProperties {
@@ -109,8 +100,6 @@ impl ToTokens for NodeToken{
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
-        let table_definitions = self.get_table_definition_token();
-
         // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // #[surrealdb(table_name = "student", drop, schemafull, permission, define="any_fnc")]
@@ -133,7 +122,7 @@ impl ToTokens for NodeToken{
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};
             
-            impl #crate_name::SurrealdbObect for #struct_name_ident {
+            impl #crate_name::SurrealdbObject for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
                 fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
@@ -152,9 +141,9 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn get_serializable_field_names() -> ::std::vec::Vec<&'static str> {
-                    return vec![#( #serialized_field_name_no_skip), *]
-                }
+                // fn get_serializable_field_names() -> ::std::vec::Vec<&'static str> {
+                //     return vec![#( #serialized_field_name_no_skip), *]
+                // }
             }
 
             pub mod #module_name {
@@ -235,14 +224,12 @@ impl ToTokens for NodeToken{
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let clause_errors = clause.get_errors(#table_name_str.into());
-                        let errors = [&existing_errors[..], &clause_errors[..]].concat();
-                        let errors = errors.as_slice();
+                        let errors = existing_errors.as_slice();
 
                         schema_instance.#___________errors = errors.into();
                         
                         
-                        let connection = format!("{}{}", store, clause.format_with_model(#table_name_str));
+                        let connection = format!("{}{}", store, clause);
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
@@ -277,7 +264,7 @@ pub fn generate_fields_getter_trait(input: proc_macro::TokenStream) -> proc_macr
     // that we can manipulate
     let input = parse_macro_input!(input);
     // let output = FieldsGetterOpts::from_derive_input(&input).expect("Wrong options");
-    let output = match NodeToken::from_derive_input(&input) {
+    let output = match ObjectToken::from_derive_input(&input) {
         Ok(out) => out,
         Err(err) => return proc_macro::TokenStream::from(err.write_errors()),
     };
