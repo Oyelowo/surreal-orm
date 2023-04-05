@@ -8,8 +8,8 @@ use crate::{
     traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric},
 };
 
-#[derive(Debug, Serialize, Clone)]
-pub struct SurrealId(surrealdb::opt::RecordId);
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SurrealId(sql::Thing);
 
 // impl Operatable for SurrealId {}
 
@@ -20,7 +20,7 @@ pub struct SurrealId(surrealdb::opt::RecordId);
 // }
 
 impl Deref for SurrealId {
-    type Target = surrealdb::opt::RecordId;
+    type Target = sql::Thing;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -53,15 +53,15 @@ impl ::std::fmt::Display for SurrealId {
     }
 }
 
-impl<'de> Deserialize<'de> for SurrealId {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        Ok(SurrealId(thing(&s).map_err(serde::de::Error::custom)?))
-    }
-}
+// impl<'de> Deserialize<'de> for SurrealId {
+//     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de>,
+//     {
+//         let s = String::deserialize(deserializer)?;
+//         Ok(SurrealId(thing(&s).map_err(serde::de::Error::custom)?))
+//     }
+// }
 
 impl TryFrom<&str> for SurrealId {
     type Error = SurrealdbOrmError;
