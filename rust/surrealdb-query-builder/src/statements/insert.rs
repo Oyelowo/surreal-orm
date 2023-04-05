@@ -28,7 +28,7 @@ use crate::{
         SurrealdbModel,
     },
     types::{expression::Expression, Updateables},
-    RunnableDefault,
+    RunnableDefault, RunnableStandard,
 };
 
 use super::SelectStatement;
@@ -52,6 +52,11 @@ where
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> RunnableDefault<T> for InsertStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
+}
 
 impl<T> Display for InsertStatement<T>
 where

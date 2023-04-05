@@ -216,6 +216,13 @@ where
 
 impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 
+impl<T> RunnableDefault<T> for CreateStatement<T>
+where
+    Self: Parametric + Buildable,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+}
+
 impl<T> RunnableStandard<T> for CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,

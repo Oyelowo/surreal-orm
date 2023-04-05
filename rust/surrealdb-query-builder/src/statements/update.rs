@@ -16,7 +16,7 @@ use crate::{
         SurrealdbModel,
     },
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    RunnableStandard,
+    RunnableDefault, RunnableStandard,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
@@ -325,6 +325,11 @@ where
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
+}
+
+impl<T> RunnableDefault<T> for UpdateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
 }
 
 impl<T> RunnableStandard<T> for UpdateStatement<T>

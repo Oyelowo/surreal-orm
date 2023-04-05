@@ -18,7 +18,7 @@ use crate::{
     types::{
         Database, DurationLike, Namespace, ReturnType, Scope, Table, TableIndex, Token, Updateables,
     },
-    RunnableStandard,
+    RunnableDefault, RunnableStandard,
 };
 
 // RELATE @from -> @table -> @with
@@ -209,6 +209,11 @@ where
 
         query
     }
+}
+
+impl<T> RunnableDefault<T> for RelateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbEdge + Send + Sync
+{
 }
 
 impl<T> RunnableStandard<T> for RelateStatement<T>

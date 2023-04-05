@@ -33,18 +33,18 @@ where
 
 impl<Q> Runnable for Q where Q: Queryable {}
 
-impl<Q, T> RunnableDefault<T> for Q
-where
-    Q: RunnableStandard<T>,
-    Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned,
-{
-}
-
+// impl<Q, T> RunnableDefault<T> for Q
+// where
+//     Q: RunnableStandard<T>,
+//     Self: Parametric + Buildable,
+//     T: Serialize + DeserializeOwned,
+// {
+// }
+//
 #[async_trait]
-pub trait RunnableStandard<T>: Runnable + RunnableDefault<T>
+pub trait RunnableStandard<T>
 where
-    Self: Parametric + Buildable + Sized + Send + Sync,
+    Self: Parametric + Buildable + Sized + Send + Sync + RunnableDefault<T> + Runnable,
     T: Serialize + DeserializeOwned,
 {
     async fn return_first_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
@@ -134,9 +134,9 @@ where
 }
 
 #[async_trait::async_trait]
-pub trait RunnableDefault<T>: Runnable
+pub trait RunnableDefault<T>
 where
-    Self: Parametric + Buildable,
+    Self: Parametric + Buildable + Runnable,
     T: Serialize + DeserializeOwned,
 {
     async fn return_none(&self, db: Surreal<Db>) -> crate::Result<()> {
