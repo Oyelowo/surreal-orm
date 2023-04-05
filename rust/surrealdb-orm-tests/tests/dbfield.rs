@@ -66,12 +66,25 @@ pub struct Student {
 pub struct Planet {
     name: String,
     distance: f32,
+
+    #[surrealdb(nest_object = "Scene")]
+    first_scene: Scene,
 }
 
-fn erer() {
-    let pl = Student::schema().myPlanet;
-    let xx = Student::schema().myPlanet(Empty);
-    // Planet::
+#[derive(SurrealdbObject, Debug, Clone, Serialize, Deserialize)]
+pub struct Scene {
+    act: String,
+    page: f32,
+}
+
+#[test]
+fn test_surreal_object() {
+    // let pl = Student::schema().myPlanet;
+    // let xx = Student::schema().bestFriend(Empty).firstName;
+    let xx = Student::schema().bestFriend(Empty).unoBook(Empty);
+    // bestFriend.firstName
+    // let xx = Student::schema().myPlanet(Empty);
+    assert_eq!(xx.to_string(), "Er");
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]

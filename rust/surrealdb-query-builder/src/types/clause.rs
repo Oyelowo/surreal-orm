@@ -123,7 +123,8 @@ impl Clause {
         match self.kind.clone() {
             ClauseType::Query(q) => self.to_string(),
             ClauseType::Id(q) => self.to_string(),
-            _ => format!("{table_name}{self}"),
+            // _ => format!("{table_name}{self}"),
+            _ => format!("{self}"),
         }
     }
 

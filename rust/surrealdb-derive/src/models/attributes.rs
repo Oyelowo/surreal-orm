@@ -751,6 +751,7 @@ impl ReferencedNodeMeta {
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
+        let fns = normalized_field_name.to_string(); 
 
         let schema_type_ident = format_ident!("{node_type_name}");
         let crate_name = get_crate_name(false);
@@ -776,7 +777,8 @@ impl ReferencedNodeMeta {
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
                     #schema_type_ident::#__________connect_to_graph_traversal_string(
                         // &self.#___________graph_traversal_string,
-                        self.get_connection(),
+                        // self.get_connection(),
+                        #fns.to_string(),
                         clause,
                         self.get_bindings(),
                         self.get_errors()
