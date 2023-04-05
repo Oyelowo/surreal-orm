@@ -236,6 +236,7 @@ impl ToTokens for EdgeToken {
                             store: ::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
+                            destination_table_name: ::std::string::String,
                             existing_bindings: #crate_name::BindingsList,
                             existing_errors: Vec<String>,
                         ) -> Self {
@@ -249,13 +250,16 @@ impl ToTokens for EdgeToken {
                             let errors = [&existing_errors[..], &clause_errors[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
+                            let origin_table_name = #table_name_str.to_string();
                         
                             let schema_edge_str_with_arrow = format!(
-                                "{}{}{}{}",
+                                "{}{}{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
+                                origin_table_name,
                                 clause.format_with_model(#table_name_str),
                                 arrow_direction,
+                                destination_table_name,
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());

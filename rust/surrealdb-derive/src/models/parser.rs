@@ -68,6 +68,7 @@ struct NodeEdgeMetadata {
     /// ],
     /// ```
     destination_node_schema: Vec<TokenStream>,
+    destination_node_name: String,
     /// Example Generated:
     ///
     /// ```
@@ -497,6 +498,7 @@ impl NodeEdgeMetadataStore {
         let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
         let ref destination_node_table_name =
             TokenStream::from(&relation_attributes.node_table_name);
+
         let ref edge_direction = relation_attributes.edge_direction;
 
         let ref edge_name_as_method_ident =
@@ -567,6 +569,7 @@ impl NodeEdgeMetadataStore {
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![imports()],
             edge_relation_model_selected_ident: relation_model.to_owned(),
+            destination_node_name:  destination_node_table_name.to_string()
         };
 
         match self.0.entry(edge_name_as_method_ident()) {
@@ -615,6 +618,7 @@ impl NodeEdgeMetadataStore {
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
+                    destination_node_name,
                     ..
             }: &NodeEdgeMetadata = value;
             
@@ -653,6 +657,7 @@ impl NodeEdgeMetadataStore {
                             self.get_connection(),
                             clause,
                             #arrow,
+                            #destination_node_name.to_string(),
                             self.get_bindings(),
                             self.get_errors()
                         ).into()
