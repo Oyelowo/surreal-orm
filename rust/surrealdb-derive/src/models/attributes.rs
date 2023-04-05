@@ -781,8 +781,6 @@ impl ReferencedNodeMeta {
                         format!("{}.{}",self.get_connection(), #normalized_field_name_str)
                     };
                     #schema_type_ident::#__________connect_to_graph_traversal_string(
-                        // &self.#___________graph_traversal_string,
-                        // self.get_connection(),
                         store,
                         clause,
                         self.get_bindings(),
@@ -809,6 +807,7 @@ impl ReferencedNodeMeta {
         } = VariablesModelMacro::new();
 
         let schema_type_ident = format_ident!("{node_type_name}");
+        let normalized_field_name_str = normalized_field_name.to_string();
         let crate_name = get_crate_name(false);
 
         let foreign_node_schema_import = if node_type_name.to_string()
@@ -830,9 +829,14 @@ impl ReferencedNodeMeta {
 
             record_link_default_alias_as_method: quote!(
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
+                    let store = if self.get_connection().is_empty(){
+                        #normalized_field_name_str.to_string()
+                    }else {
+                        format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                    };
                     #schema_type_ident::#__________connect_to_graph_traversal_string(
                         // &self.#___________graph_traversal_string,
-                        self.get_connection(),
+                        store,
                         clause,
                         self.get_bindings(),
                         self.get_errors()

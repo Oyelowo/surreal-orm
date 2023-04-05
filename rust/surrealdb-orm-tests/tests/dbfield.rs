@@ -25,8 +25,8 @@ use surrealdb::{
 // use surrealdb_orm::SurrealdbEdge;
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
-    Empty, LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode,
-    SurrealdbObject, where_, Operatable,
+    where_, Buildable, Empty, LinkMany, LinkOne, LinkSelf, Operatable, RecordId, Relate,
+    SurrealdbEdge, SurrealdbNode, SurrealdbObject,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -81,10 +81,33 @@ pub struct Scene {
 fn test_surreal_object() {
     let pl = Student::schema().myPlanet;
     // let xx = Student::schema().bestFriend(Empty).firstName;
-    let xx = Student::schema().bestFriend(where_(pl.greater_than(4))).unoBook(Empty).content;
-    // bestFriend.firstName
-    // let xx = Student::schema().myPlanet(Empty);
-    assert_eq!(xx.to_string(), "Er");
+    let link = Student::schema()
+        .bestFriend(where_(pl.greater_than(4)))
+        .unoBook(Empty)
+        .content;
+    assert_eq!(
+        link.fine_tune_params(),
+        "bestFriend[WHERE myPlanet > $_param_00000001].unoBook.content"
+    );
+    // assert_eq!(link.build(), "Er");
+    assert_eq!(
+        link.to_raw().to_string(),
+        "bestFriend[WHERE myPlanet > 4].unoBook.content"
+    );
+
+    let nested_object_access = Student::schema()
+        .myPlanet(Empty)
+        .first_scene(where_(pl.greater_than(4)))
+        .act;
+    assert_eq!(
+        nested_object_access.fine_tune_params(),
+        "myPlanet.first_scene[WHERE myPlanet > $_param_00000001].act"
+    );
+    // assert_eq!(nested_object_access.build(), "Er");
+    assert_eq!(
+        nested_object_access.to_raw().to_string(),
+        "myPlanet.first_scene[WHERE myPlanet > 4].act"
+    );
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
