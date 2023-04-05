@@ -445,7 +445,7 @@ fn multiplication_tests2() {
         .bestFriend(student.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+        .book(Book::schema().id.equal(RecordId::from(("book", "blaze")))).content;
 
     // insta::assert_display_snapshot!(&x.to_string());
 

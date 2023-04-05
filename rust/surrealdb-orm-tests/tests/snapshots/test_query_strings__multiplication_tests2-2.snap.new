@@ -3,4 +3,4 @@ source: surrealdb-orm-tests/tests/test_query_strings.rs
 assertion_line: 467
 expression: "&x.fine_tune_params()"
 ---
-bestFriend[WHERE $_param_00000001 < age < $_param_00000002].bestFriend->writes[WHERE timeWritten > $_param_00000003]->book[WHERE id = $_param_00000004]
+bestFriend[WHERE $_param_00000001 < age < $_param_00000002].bestFriend->writes[WHERE timeWritten > $_param_00000003]->book[WHERE id = $_param_00000004].content
