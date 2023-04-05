@@ -26,7 +26,7 @@ use surrealdb::{
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     Empty, LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode,
-    SurrealdbObject,
+    SurrealdbObject, where_, Operatable,
 };
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -79,9 +79,9 @@ pub struct Scene {
 
 #[test]
 fn test_surreal_object() {
-    // let pl = Student::schema().myPlanet;
+    let pl = Student::schema().myPlanet;
     // let xx = Student::schema().bestFriend(Empty).firstName;
-    let xx = Student::schema().bestFriend(Empty).unoBook(Empty);
+    let xx = Student::schema().bestFriend(where_(pl.greater_than(4))).unoBook(Empty).content;
     // bestFriend.firstName
     // let xx = Student::schema().myPlanet(Empty);
     assert_eq!(xx.to_string(), "Er");
