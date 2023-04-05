@@ -402,7 +402,10 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
 
     dbg!(select_query.clone().get_bindings());
     dbg!(select_query.clone().to_raw());
-    assert_eq!(select_query.clone().build().to_string(), "dfd");
+    assert_eq!(
+        select_query.clone().fine_tune_params(),
+        "SELECT * FROM $_param_00000001 WHERE tags ?~ $_param_00000002 PARALLEL;"
+    );
     // println!("BindSel {:?}", select_query.get_bindings());
     let one_ = select_query
         .return_one::<Company>(db.clone())

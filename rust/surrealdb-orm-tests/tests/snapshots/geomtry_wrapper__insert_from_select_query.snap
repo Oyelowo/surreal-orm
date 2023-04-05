@@ -33,14 +33,12 @@ expression: results
             "foo",
             "bar",
         ],
-        home: Geometry(
+        home: Point(
             Point(
-                Point(
-                    Coord {
-                        x: 45.3,
-                        y: 78.1,
-                    },
-                ),
+                Coord {
+                    x: 45.3,
+                    y: 78.1,
+                },
             ),
         ),
     },
@@ -74,14 +72,12 @@ expression: results
             "foo",
             "bar",
         ],
-        home: Geometry(
+        home: Point(
             Point(
-                Point(
-                    Coord {
-                        x: 63.0,
-                        y: 21.0,
-                    },
-                ),
+                Coord {
+                    x: 63.0,
+                    y: 21.0,
+                },
             ),
         ),
     },
