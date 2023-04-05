@@ -124,26 +124,10 @@ impl ToTokens for ObjectToken{
             
             impl #crate_name::SurrealdbObject for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
-
-                fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
-                    let clause: #crate_name::Clause = clause.into();
-                    
-                    #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
-                                "".into(),
-                                clause,
-                                // #module_name::#struct_name_ident::new().get_bindings()
-                                vec![],
-                                vec![],
-                    )
-                }
                 
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
-                
-                // fn get_serializable_field_names() -> ::std::vec::Vec<&'static str> {
-                //     return vec![#( #serialized_field_name_no_skip), *]
-                // }
             }
 
             pub mod #module_name {
@@ -255,7 +239,7 @@ impl ToTokens for ObjectToken{
             fn #test_function_name() {
                 #( #static_assertions) *
             }
-));
+        ));
     }
 }
 

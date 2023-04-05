@@ -62,7 +62,7 @@ pub struct Student {
     written_books: Relate<Book>,
 }
 
-#[derive(SurrealdbObject, Debug, Clone)]
+#[derive(SurrealdbObject, Debug, Clone, Serialize, Deserialize)]
 pub struct Planet {
     name: String,
     distance: f32,
@@ -71,6 +71,7 @@ pub struct Planet {
 fn erer() {
     let pl = Student::schema().myPlanet;
     let xx = Student::schema().myPlanet(Empty);
+    // Planet::
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
