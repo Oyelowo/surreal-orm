@@ -154,10 +154,26 @@ where
         get_one::<T>(response)
     }
 
+    // async fn return_one_explicit<V>(&self, db: Surreal<Db>) -> crate::Result<Option<V>>
+    // where
+    //     V: Serialize + DeserializeOwned,
+    // {
+    //     let response = self.run(db).await?;
+    //     get_one::<V>(response)
+    // }
+
     async fn return_many(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
         let response = self.run(db).await?;
         get_many::<T>(response)
     }
+
+    // async fn return_many_explicit<V>(&self, db: Surreal<Db>) -> crate::Result<Vec<V>>
+    // where
+    //     V: Serialize + DeserializeOwned,
+    // {
+    //     let response = self.run(db).await?;
+    //     get_many::<V>(response)
+    // }
 }
 
 #[async_trait::async_trait]

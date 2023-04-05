@@ -24,6 +24,7 @@ use surrealdb::sql::Datetime;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
+use surrealdb_orm::RunnableSelect;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
@@ -371,14 +372,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     db.use_ns("test").use_db("test").await?;
     // Insert companies
     // let results = insert(companies).return_many(db.clone()).await.unwrap();
-    let results = insert(companies)
-        // .return_many(db.clone())
-        // .return_many(db.clone())
-        .return_many_explicit::<Vec<_>>(db.clone())
-        // .return_many_explicit::<Vec<Company>>(db.clone())
-        // .return_many(db.clone())
-        .await
-        .unwrap();
+    let results = insert(companies).return_many(db.clone()).await.unwrap();
     // results.into_iter().collect();
 
     // let results = insert(companies)
@@ -406,7 +400,10 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     dbg!(select_query.clone().to_raw());
     assert_eq!(select_query.clone().build().to_string(), "dfd");
     // println!("BindSel {:?}", select_query.get_bindings());
-    let one_: Company = select_query.return_one(db.clone()).await.unwrap();
+    let one_ = select_query
+        .return_one::<Company>(db.clone())
+        .await
+        .unwrap();
     println!("SSSSSSS {:?}", one_);
 
     println!(
@@ -443,12 +440,12 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         .await
         .unwrap();
 
-    // let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
-    let results = insert(select_query)
-        .return_many()
-        .return_many_explicit::<Vec<GenZCompany>>(db.clone())
-        .await
-        .unwrap();
+    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    // let results = insert::<GenZCompany>(select_query)
+    //     .return_many(db.clone())
+    //     // .return_many_explicit::<Vec<GenZCompany>>(db.clone())
+    //     .await
+    //     .unwrap();
 
     insta::assert_debug_snapshot!(results);
     Ok(())

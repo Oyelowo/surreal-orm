@@ -25,12 +25,8 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
-use surrealdb_orm::{
-    cond,
-    statements::{order, relate, select},
-    All, Empty, Erroneous, Field, LinkMany, LinkOne, LinkSelf, Operatable, Parametric, RecordId,
-    Relate, ReturnType, Runnable, SurrealId, SurrealdbEdge, SurrealdbNode,
-};
+use surrealdb_orm::statements::{order, relate, select};
+use surrealdb_orm::*;
 
 use std::fmt::{Debug, Display};
 use test_case::test_case;
@@ -174,11 +170,14 @@ fn should_contain_error_when_invalid_id_use_in_connection() {
 }
 
 #[tokio::test]
-async fn relate_query() -> surrealdb::Result<()> {
+async fn relate_query() -> surrealdb_orm::Result<()> {
     use surrealdb::sql::Datetime;
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
+    db.use_ns("test")
+        .use_db("test")
+        .await
+        .expect("failed to use db");
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
 
@@ -215,9 +214,12 @@ async fn relate_query() -> surrealdb::Result<()> {
 }
 
 #[tokio::test]
-async fn relate_query_with_sub_query() -> surrealdb::Result<()> {
+async fn relate_query_with_sub_query() -> surrealdb_orm::Result<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
+    db.use_ns("test")
+        .use_db("test")
+        .await
+        .expect("failed to use db");
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
 
