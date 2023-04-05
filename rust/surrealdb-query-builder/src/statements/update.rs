@@ -16,7 +16,7 @@ use crate::{
         SurrealdbModel,
     },
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    RunnableDefault, RunnableStandard,
+    ReturnableDefault, ReturnableStandard,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
@@ -327,12 +327,12 @@ where
     }
 }
 
-impl<T> RunnableDefault<T> for UpdateStatement<T> where
+impl<T> ReturnableDefault<T> for UpdateStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbModel
 {
 }
 
-impl<T> RunnableStandard<T> for UpdateStatement<T>
+impl<T> ReturnableStandard<T> for UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
 {

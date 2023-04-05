@@ -42,9 +42,9 @@ impl<Q> Runnable for Q where Q: Queryable {}
 // }
 //
 #[async_trait]
-pub trait RunnableStandard<T>
+pub trait ReturnableStandard<T>
 where
-    Self: Parametric + Buildable + Sized + Send + Sync + RunnableDefault<T> + Runnable,
+    Self: Parametric + Buildable + Sized + Send + Sync + ReturnableDefault<T> + Runnable,
     T: Serialize + DeserializeOwned,
 {
     async fn return_first_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
@@ -134,7 +134,7 @@ where
 }
 
 #[async_trait::async_trait]
-pub trait RunnableDefault<T>
+pub trait ReturnableDefault<T>
 where
     Self: Parametric + Buildable + Runnable,
     T: Serialize + DeserializeOwned,
@@ -177,7 +177,7 @@ where
 }
 
 #[async_trait::async_trait]
-pub trait RunnableSelect: Runnable
+pub trait ReturnableSelect: Runnable
 where
     Self: Parametric + Buildable,
 {

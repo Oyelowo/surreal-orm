@@ -24,7 +24,7 @@ use surrealdb::sql::Datetime;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
-use surrealdb_orm::RunnableSelect;
+use surrealdb_orm::ReturnableSelect;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
@@ -33,8 +33,8 @@ use geo::Coord;
 use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
-    All, Geometry, Operatable, Parametric, Runnable, RunnableDefault, RunnableStandard, SurrealId,
-    SurrealdbNode,
+    All, Geometry, Operatable, Parametric, ReturnableDefault, ReturnableStandard, Runnable,
+    SurrealId, SurrealdbNode,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -457,4 +457,3 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     insta::assert_debug_snapshot!(results);
     Ok(())
 }
-

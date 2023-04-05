@@ -12,8 +12,8 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
-        RunnableDefault, RunnableStandard, SurrealdbNode,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, ReturnableDefault,
+        ReturnableStandard, Runnable, SurrealdbNode,
     },
     types::{DurationLike, ReturnType, Table, Updateables},
 };
@@ -216,14 +216,14 @@ where
 
 impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 
-impl<T> RunnableDefault<T> for CreateStatement<T>
+impl<T> ReturnableDefault<T> for CreateStatement<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
 }
 
-impl<T> RunnableStandard<T> for CreateStatement<T>
+impl<T> ReturnableStandard<T> for CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {

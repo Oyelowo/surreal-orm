@@ -13,7 +13,7 @@ use surrealdb::sql;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType},
-    RunnableDefault, RunnableStandard,
+    ReturnableDefault, ReturnableStandard,
 };
 
 use super::update::TargettablesForUpdate;
@@ -207,12 +207,12 @@ where
     }
 }
 
-impl<T> RunnableDefault<T> for DeleteStatement<T> where
+impl<T> ReturnableDefault<T> for DeleteStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbModel
 {
 }
 
-impl<T> RunnableStandard<T> for DeleteStatement<T>
+impl<T> ReturnableStandard<T> for DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
 {
