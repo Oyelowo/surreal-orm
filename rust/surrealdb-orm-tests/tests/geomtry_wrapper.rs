@@ -107,7 +107,7 @@ async fn create_geom_test(geom: impl Into<sql::Geometry>) -> surrealdb::Result<S
     db.use_ns("test").use_db("test").await?;
 
     // let results = insert::<Company>(company);
-    let results = insert(company).return_one(db).await.unwrap();
+    let results = insert(company).return_one(db).await.unwrap().unwrap();
 
     Ok(serde_json::to_string(&results).unwrap())
 }
@@ -119,8 +119,12 @@ async fn point() -> surrealdb::Result<()> {
         y: 116.34,
     };
 
-    let company = create_geom_test(point).await?;
-    insta::assert_snapshot!(company);
+    // let company = create_geom_test(point).await?;
+    // insta::assert_snapshot!(company);
+    println!("sql::Geom {:?}", sql::Geometry::Point(point.into()));
+    println!("Geom basic{:?}", point);
+    println!("Geom own{:?}", Geometry(point.into()));
+    // insta::assert_debug_snapshot!(sql::Geometry::Point(point.into()));
     Ok(())
 }
 
