@@ -7,16 +7,9 @@
 
 use std::fmt::{self, Display};
 
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
-
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Runnable, Runnables, SurrealdbModel,
-    },
-    types::{expression::Expression, Filter, Updateables},
+    traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
+    types::{expression::Expression, Filter},
 };
 
 impl Into<ExpressionContent> for Expression {
@@ -216,6 +209,8 @@ impl Buildable for End {
         output
     }
 }
+
+impl Queryable for End {}
 
 impl fmt::Display for End {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

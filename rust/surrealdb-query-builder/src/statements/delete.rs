@@ -11,8 +11,9 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, SurrealdbModel},
-    types::{DurationLike, Filter, Return},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
+    types::{DurationLike, Filter, ReturnType},
+    ReturnableDefault, ReturnableStandard,
 };
 
 use super::update::TargettablesForUpdate;
@@ -56,7 +57,7 @@ where
 {
     target: String,
     where_: Option<String>,
-    return_type: Option<Return>,
+    return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
@@ -206,7 +207,21 @@ where
     }
 }
 
-impl<T> Runnable<T> for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> ReturnableDefault<T> for DeleteStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
+}
+
+impl<T> ReturnableStandard<T> for DeleteStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
+        self.return_type = Some(return_type);
+        self
+    }
+}
+
 #[test]
 fn test_query_builder() {
     assert_eq!(2, 2);

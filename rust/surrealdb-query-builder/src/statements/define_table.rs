@@ -15,13 +15,11 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::Table,
 };
 
-use super::{for_::PermissionForables, select::SelectStatement};
+use super::{for_::PermissionType, select::SelectStatement};
 
 // DEFINE TABLE statement
 // The DEFINE TABLE statement allows you to declare your table by name, enabling you to apply strict controls to a table's schema by making it SCHEMAFULL, create a foreign table view, and set permissions specifying what operations can be performed on the field.
@@ -161,21 +159,22 @@ impl DefineTableStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionForables>) -> Self {
-        let fors: PermissionForables = fors.into();
+    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+        use PermissionType::*;
+        let fors: PermissionType = fors.into();
         match fors {
-            PermissionForables::For(one) => {
+            For(one) => {
                 self.permissions_for.push(one.to_string());
                 self.bindings.extend(one.get_bindings());
             }
-            PermissionForables::Fors(many) => many.iter().for_each(|f| {
+            Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
                 self.bindings.extend(f.get_bindings());
             }),
-            PermissionForables::RawStatement(raw) => {
+            RawStatement(raw) => {
                 self.permissions_for.push(raw.to_string());
             }
-            PermissionForables::RawStatementList(raw_list) => {
+            RawStatementList(raw_list) => {
                 self.permissions_for.extend(
                     raw_list
                         .into_iter()
@@ -243,8 +242,6 @@ impl Display for DefineTableStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnables for DefineTableStatement {}
 
 impl Queryable for DefineTableStatement {}
 impl Erroneous for DefineTableStatement {}

@@ -26,11 +26,9 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
-    types::{Database, Namespace, Table, Token},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Table,
 };
 
 pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {
@@ -67,7 +65,5 @@ impl Parametric for RemoveTableStatement {
 }
 
 impl Erroneous for RemoveTableStatement {}
-
-impl Runnables for RemoveTableStatement {}
 
 impl Queryable for RemoveTableStatement {}

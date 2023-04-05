@@ -12,7 +12,7 @@ use darling::{
     util, FromDeriveInput, FromField, FromMeta, ToTokens,
 };
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{links::LinkOne, query::FieldType};
+use surrealdb_query_builder::{FieldType, LinkOne};
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
@@ -491,8 +491,7 @@ impl ReferencedNodeMeta {
                         // provided, do static assertions validation to check the inner type e.g
                         // record(book)
                         match field_type {
-                            FieldType::Record => {}
-                            FieldType::RecordList(link_table_name) => {
+                            FieldType::Record(link_table_name) => {
                                 let link_table_name =
                                     format_ident!("{}", link_table_name.to_string());
                                 let ref_node = NodeTypeName::from(&link_single_ref_node);
@@ -521,8 +520,7 @@ impl ReferencedNodeMeta {
                                         FieldType::from_str(&content_type.0.to_string()).unwrap();
 
                                     match content_type {
-                                        FieldType::Record => {}
-                                        FieldType::RecordList(array_content_table_name) => {
+                                        FieldType::Record(array_content_table_name) => {
                                             let array_content_table_name = format_ident!(
                                                 "{}",
                                                 array_content_table_name.to_string()
@@ -549,7 +547,7 @@ impl ReferencedNodeMeta {
                 }
                 _ => {}
             };
-            define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::statements::FieldType>()
+            define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
                                       );
@@ -568,17 +566,17 @@ impl ReferencedNodeMeta {
 
                 if field_name_normalized == "id" {
                     define_field_methods
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(Self::table_name()))));
+                        .push(quote!(.type_(#crate_name::FieldType::Record(Self::table_name()))));
                 } else if field_name_normalized == "out" || field_name_normalized == "in" {
-                    define_field_methods
-                        .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
+                    // An edge might be shared by multiple In/Out nodes. So, default to any type of
+                    // record for edge in and out
+                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::RecordAny)));
                 } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
+                            .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
                 } else if let Some(ref_node_type) = link_many {
-                    define_field_methods
-                        .push(quote!(.type_(#crate_name::statements::FieldType::Array)));
+                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
                 }
             }
         };
@@ -616,7 +614,7 @@ impl ReferencedNodeMeta {
                 // but I want to give users the option to not set the record reference Node type
                 // i.e record instead of e.g record(book)
                 let content_type = content_type.0.to_string();
-                define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::statements::FieldType>()
+                define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
                                       );
@@ -627,9 +625,9 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let ref_node_type = format_ident!("{ref_node_type}");
-                define_array_field_content_methods
-                        // .push(quote!(.type_(#crate_name::statements::FieldType::Record)));
-                            .push(quote!(.type_(#crate_name::statements::FieldType::RecordList(#ref_node_type::table_name()))));
+                define_array_field_content_methods.push(
+                    quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))),
+                );
             }
             _ => {}
         }

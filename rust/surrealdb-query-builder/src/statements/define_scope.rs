@@ -12,9 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{expression::Expression, DurationLike, Scope, Table},
 };
 
@@ -123,7 +121,8 @@ impl Parametric for DefineScopeStatement {
     }
 }
 
-impl Runnables for DefineScopeStatement {}
+impl Queryable for DefineScopeStatement {}
+
 impl Erroneous for DefineScopeStatement {}
 
 #[cfg(test)]

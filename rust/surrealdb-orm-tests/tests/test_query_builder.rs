@@ -17,20 +17,18 @@ use insta;
 use regex;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
+use surrealdb::sql;
 use surrealdb::{
     engine::local::{Db, Mem},
     opt::IntoResource,
     sql::Id,
     Result, Surreal,
 };
-// use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
+use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
+use surrealdb_orm::statements::{order, relate, select};
+use surrealdb_orm::*;
 
 use std::fmt::{Debug, Display};
-use surrealdb_orm::{
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
-    sql::SurrealId,
-    RecordId, SurrealdbEdge, SurrealdbNode,
-};
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
@@ -124,169 +122,158 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
     serde_json::to_string(&updated_value).expect("Failed to serialize JSON value")
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use _core::time::Duration;
-    use surrealdb::sql;
-    use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
-    use surrealdb_orm::{
-        sql::{All, Empty, Parametric, Return, Runnable},
-        statements::{order, relate, select},
-        utils::cond,
-        Erroneous, Field, Operatable,
+#[test]
+fn should_not_contain_error_when_invalid_id_use_in_connection() {
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let write = StudentWritesBook {
+        time_written: Duration::from_secs(343),
+        ..Default::default()
     };
-    use test_case::test_case;
 
-    #[test]
-    fn should_not_contain_error_when_invalid_id_use_in_connection() {
-        let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book:2").unwrap();
+    let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+        .content(write.clone())
+        .return_(ReturnType::Before)
+        .parallel();
 
-        let write = StudentWritesBook {
-            time_written: Duration::from_secs(343),
-            ..Default::default()
-        };
-
-        let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .parallel();
-
-        assert_eq!(x.get_errors().len(), 0);
-        let errors: Vec<String> = vec![];
-        assert_eq!(x.get_errors(), errors);
-    }
-
-    #[test]
-    fn should_contain_error_when_invalid_id_use_in_connection() {
-        let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book:2").unwrap();
-
-        let write = StudentWritesBook {
-            time_written: Duration::from_secs(343),
-            ..Default::default()
-        };
-
-        // Book id used with student schema, while student_id used for book. This should generate
-        // two errors
-        let x = relate(Student::with(&book_id).writes__(Empty).book(&student_id))
-            .content(write.clone())
-            .return_(Return::Before)
-            .parallel();
-
-        assert_eq!(x.get_errors().len(), 2);
-        assert_eq!(
-            x.get_errors(),
-            vec![
-                "invalid id book:2. Id does not belong to table student",
-                "invalid id student:1. Id does not belong to table book"
-            ]
-        );
-    }
-
-    #[tokio::test]
-    async fn relate_query() -> surrealdb::Result<()> {
-        use surrealdb::sql::Datetime;
-
-        let db = Surreal::new::<Mem>(()).await.unwrap();
-        db.use_ns("test").use_db("test").await?;
-        let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book:2").unwrap();
-
-        let write = StudentWritesBook {
-            time_written: Duration::from_secs(343),
-            ..Default::default()
-        };
-
-        let relate_simple =
-            relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
-
-        // You can use return one method and it just returns the single object
-        let relate_simple_object = relate_simple.return_one(db.clone()).await?;
-        // Remove id bcos it is non-deterministic i.e changes on every run
-        let relate_simple_object = remove_field_from_json_string(
-            serde_json::to_string(&relate_simple_object)
-                .unwrap()
-                .as_str(),
-            "id",
-        );
-        insta::assert_display_snapshot!(relate_simple_object);
-
-        // You can also use return many and it just returns the single object as an array
-        let relate_simple_array = relate_simple.return_many(db.clone()).await?;
-        let relate_simple_object = remove_field_from_json_string(
-            serde_json::to_string(&relate_simple_object)
-                .unwrap()
-                .as_str(),
-            "id",
-        );
-        insta::assert_display_snapshot!(relate_simple_object);
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn relate_query_with_sub_query() -> surrealdb::Result<()> {
-        let db = Surreal::new::<Mem>(()).await.unwrap();
-        db.use_ns("test").use_db("test").await?;
-        let student_id = SurrealId::try_from("student:1").unwrap();
-        let book_id = SurrealId::try_from("book:2").unwrap();
-
-        let write = StudentWritesBook {
-            time_written: Duration::from_secs(52),
-            ..Default::default()
-        };
-        let relate_more = relate(
-            Student::with(select(All).from(Student::get_table_name()))
-                .writes__(Empty)
-                .book(
-                    select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
-                ),
-        )
-        .content(write)
-        .return_many(db.clone())
-        .await?;
-        let relate_more = remove_field_from_json_string(
-            serde_json::to_string(&relate_more).unwrap().as_str(),
-            "id",
-        );
-
-        // TODO: This returns empty array. Figure out if this is the expected behaviour
-        insta::assert_display_snapshot!(relate_more);
-        Ok(())
-    }
-
-    #[test]
-    fn multiplication_tests8() {
-        use serde_json;
-
-        let sur_id = SurrealId::try_from("alien:oyelowo").unwrap();
-        let json = serde_json::to_string(&sur_id).unwrap();
-        assert_eq!(json, "\"alien:oyelowo\"");
-
-        let sur_id = RecordId::from(("alien", "oyelowo"));
-        let json = serde_json::to_string(&sur_id).unwrap();
-        assert_eq!(json, "\"alien:oyelowo\"");
-    }
-
-    // #[test]
-    // #[cfg(feature = "raw")]
-    // fn should_display_actual_values_in_raw_format() {
-    //     let student_id = SurrealId::try_from("student:1").unwrap();
-    //     let book_id = SurrealId::try_from("book:2").unwrap();
-
-    //     let write = StudentWritesBook {
-    //         time_written: Duration::from_secs(343),
-    //         ..Default::default()
-    //     };
-
-    //     let raw = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
-    //         .content(write.clone())
-    //         .return_(Return::Before)
-    //         .parallel();
-
-    //     insta::assert_display_snapshot!(raw);
-    //     insta::assert_debug_snapshot!(raw.get_bindings());
-    // }
+    assert_eq!(x.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(x.get_errors(), errors);
 }
+
+#[test]
+fn should_contain_error_when_invalid_id_use_in_connection() {
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let write = StudentWritesBook {
+        time_written: Duration::from_secs(343),
+        ..Default::default()
+    };
+
+    // Book id used with student schema, while student_id used for book. This should generate
+    // two errors
+    let x = relate(Student::with(&book_id).writes__(Empty).book(&student_id))
+        .content(write.clone())
+        .return_(ReturnType::Before)
+        .parallel();
+
+    assert_eq!(x.get_errors().len(), 2);
+    assert_eq!(
+        x.get_errors(),
+        vec![
+            "invalid id book:2. Id does not belong to table student",
+            "invalid id student:1. Id does not belong to table book"
+        ]
+    );
+}
+
+#[tokio::test]
+async fn relate_query() -> surrealdb_orm::Result<()> {
+    use surrealdb::sql::Datetime;
+
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test")
+        .use_db("test")
+        .await
+        .expect("failed to use db");
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let write = StudentWritesBook {
+        time_written: Duration::from_secs(343),
+        ..Default::default()
+    };
+
+    let relate_simple =
+        relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
+
+    // You can use return one method and it just returns the single object
+    let relate_simple_object = relate_simple.return_one(db.clone()).await?;
+    // Remove id bcos it is non-deterministic i.e changes on every run
+    let relate_simple_object = remove_field_from_json_string(
+        serde_json::to_string(&relate_simple_object)
+            .unwrap()
+            .as_str(),
+        "id",
+    );
+    insta::assert_display_snapshot!(relate_simple_object);
+
+    // You can also use return many and it just returns the single object as an array
+    let relate_simple_array = relate_simple.return_many(db.clone()).await?;
+    let relate_simple_object = remove_field_from_json_string(
+        serde_json::to_string(&relate_simple_object)
+            .unwrap()
+            .as_str(),
+        "id",
+    );
+    insta::assert_display_snapshot!(relate_simple_object);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn relate_query_with_sub_query() -> surrealdb_orm::Result<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test")
+        .use_db("test")
+        .await
+        .expect("failed to use db");
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let write = StudentWritesBook {
+        time_written: Duration::from_secs(52),
+        ..Default::default()
+    };
+    let relate_more = relate(
+        Student::with(select(All).from(Student::get_table_name()))
+            .writes__(Empty)
+            .book(
+                select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
+            ),
+    )
+    .content(write)
+    .return_many(db.clone())
+    .await?;
+    let relate_more =
+        remove_field_from_json_string(serde_json::to_string(&relate_more).unwrap().as_str(), "id");
+
+    // TODO: This returns empty array. Figure out if this is the expected behaviour
+    insta::assert_display_snapshot!(relate_more);
+    Ok(())
+}
+
+#[test]
+fn multiplication_tests8() {
+    use serde_json;
+
+    let sur_id = SurrealId::try_from("alien:oyelowo").unwrap();
+    let json = serde_json::to_string(&sur_id).unwrap();
+    assert_eq!(json, "\"alien:oyelowo\"");
+
+    let sur_id = RecordId::from(("alien", "oyelowo"));
+    let json = serde_json::to_string(&sur_id).unwrap();
+    assert_eq!(json, "\"alien:oyelowo\"");
+}
+
+// #[test]
+// #[cfg(feature = "raw")]
+// fn should_display_actual_values_in_raw_format() {
+//     let student_id = SurrealId::try_from("student:1").unwrap();
+//     let book_id = SurrealId::try_from("book:2").unwrap();
+
+//     let write = StudentWritesBook {
+//         time_written: Duration::from_secs(343),
+//         ..Default::default()
+//     };
+
+//     let raw = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
+//         .content(write.clone())
+//         .return_(Return::Before)
+//         .parallel();
+
+//     insta::assert_display_snapshot!(raw);
+//     insta::assert_debug_snapshot!(raw.get_bindings());
+// }

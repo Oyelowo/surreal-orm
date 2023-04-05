@@ -12,9 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::{Database, Idiomx, Namespace, Scope, Table, Token, TokenTarget, TokenType},
 };
 
@@ -134,7 +132,8 @@ impl Parametric for DefineTokenStatement {
     }
 }
 
-impl Runnables for DefineTokenStatement {}
+impl Queryable for DefineTokenStatement {}
+
 impl Erroneous for DefineTokenStatement {}
 
 #[cfg(test)]

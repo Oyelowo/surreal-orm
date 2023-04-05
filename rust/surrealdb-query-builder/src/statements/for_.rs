@@ -3,64 +3,35 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Raw, Runnable, Runnables, SurrealdbModel, ToRaw,
+        Raw, Runnable, SurrealdbModel, ToRaw,
     },
-    types::{expression::Expression, Filter, Updateables},
+    types::{expression::Expression, CrudType, Filter, Updateables},
 };
-
-#[derive(Clone, Copy, Debug)]
-pub enum ForCrudType {
-    Create,
-    Select,
-    Update,
-    Delete,
-}
-
-impl Display for ForCrudType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let crud_type = match self {
-            ForCrudType::Create => "create",
-            ForCrudType::Select => "select",
-            ForCrudType::Update => "update",
-            ForCrudType::Delete => "delete",
-        };
-        write!(f, "{}", crud_type)
-    }
-}
 
 #[derive(Clone, Debug)]
 struct ForData {
-    crud_types: Vec<ForCrudType>,
+    crud_types: Vec<CrudType>,
     condition: Option<Filter>,
     bindings: BindingsList,
 }
 
-impl Erroneous for For {}
-impl Queryable for For {}
-
-impl Parametric for For {
-    fn get_bindings(&self) -> BindingsList {
-        self.0.bindings.to_vec()
-    }
-}
-
 #[derive(Clone, Debug)]
 pub enum ForArgs {
-    ForOption(ForCrudType),
-    ForOptions(Vec<ForCrudType>),
+    ForOption(CrudType),
+    ForOptions(Vec<CrudType>),
 }
-impl From<ForCrudType> for ForArgs {
-    fn from(value: ForCrudType) -> Self {
+impl From<CrudType> for ForArgs {
+    fn from(value: CrudType) -> Self {
         Self::ForOption(value)
     }
 }
 
-impl From<Vec<ForCrudType>> for ForArgs {
-    fn from(value: Vec<ForCrudType>) -> Self {
+impl From<Vec<CrudType>> for ForArgs {
+    fn from(value: Vec<CrudType>) -> Self {
         Self::ForOptions(value)
     }
 }
-impl From<ForArgs> for Vec<ForCrudType> {
+impl From<ForArgs> for Vec<CrudType> {
     fn from(value: ForArgs) -> Self {
         match value {
             ForArgs::ForOption(one) => vec![one],
@@ -69,8 +40,8 @@ impl From<ForArgs> for Vec<ForCrudType> {
     }
 }
 
-impl<'a, const N: usize> From<&[ForCrudType; N]> for ForArgs {
-    fn from(value: &[ForCrudType; N]) -> Self {
+impl<'a, const N: usize> From<&[CrudType; N]> for ForArgs {
+    fn from(value: &[CrudType; N]) -> Self {
         Self::ForOptions(value.to_vec())
     }
 }
@@ -123,6 +94,15 @@ impl Buildable for For {
     }
 }
 
+impl Erroneous for For {}
+impl Queryable for For {}
+
+impl Parametric for For {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
 impl Display for For {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
@@ -132,26 +112,26 @@ impl Display for For {
 pub struct NONE;
 
 #[derive(Clone)]
-pub enum PermissionForables {
+pub enum PermissionType {
     For(For),
     Fors(Vec<For>),
     RawStatement(Raw),
     RawStatementList(Vec<Raw>),
 }
 
-impl ToRaw for PermissionForables {
+impl ToRaw for PermissionType {
     fn to_raw(self) -> Raw {
         match self {
-            PermissionForables::For(for_one) => for_one.to_raw(),
-            PermissionForables::Fors(for_many) => Raw::new(
+            PermissionType::For(for_one) => for_one.to_raw(),
+            PermissionType::Fors(for_many) => Raw::new(
                 for_many
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
                     .collect::<Vec<_>>()
                     .join(", "),
             ),
-            PermissionForables::RawStatement(r) => r,
-            PermissionForables::RawStatementList(raw_list) => Raw::new(
+            PermissionType::RawStatement(r) => r,
+            PermissionType::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()
                     .map(|f| f.to_raw().to_string())
@@ -162,43 +142,43 @@ impl ToRaw for PermissionForables {
     }
 }
 
-impl From<For> for PermissionForables {
+impl From<For> for PermissionType {
     fn from(value: For) -> Self {
         Self::For(value)
     }
 }
 
-impl From<Vec<For>> for PermissionForables {
+impl From<Vec<For>> for PermissionType {
     fn from(value: Vec<For>) -> Self {
         Self::Fors(value)
     }
 }
 
-impl<'a, const N: usize> From<&[For; N]> for PermissionForables {
+impl<'a, const N: usize> From<&[For; N]> for PermissionType {
     fn from(value: &[For; N]) -> Self {
         Self::Fors(value.to_vec())
     }
 }
 
-impl From<Raw> for PermissionForables {
+impl From<Raw> for PermissionType {
     fn from(value: Raw) -> Self {
         Self::RawStatement(value)
     }
 }
 
-impl From<Vec<Raw>> for PermissionForables {
+impl From<Vec<Raw>> for PermissionType {
     fn from(value: Vec<Raw>) -> Self {
         Self::RawStatementList(value)
     }
 }
 
-impl From<&Vec<Raw>> for PermissionForables {
+impl From<&Vec<Raw>> for PermissionType {
     fn from(value: &Vec<Raw>) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[Raw; N]> for PermissionForables {
+impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
     fn from(value: &[Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
@@ -206,9 +186,7 @@ impl<'a, const N: usize> From<&[Raw; N]> for PermissionForables {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
-    use std::time::Duration;
 
     use crate::{
         statements::{order, select},
@@ -222,7 +200,7 @@ mod tests {
     fn test_define_for_statement_state_machine() {
         let name = Field::new("name");
 
-        let for_res = for_(ForCrudType::Create).where_(name.like("Oyelowo"));
+        let for_res = for_(CrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
             for_res.fine_tune_params(),
             "FOR create\n\tWHERE name ~ $_param_00000001".to_string()
@@ -237,7 +215,7 @@ mod tests {
 
     #[test]
     fn test_define_for_statement_state_machine_multiple() {
-        use ForCrudType::*;
+        use CrudType::*;
         let name = Field::new("name");
 
         let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));

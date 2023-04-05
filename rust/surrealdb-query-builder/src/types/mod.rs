@@ -1,4 +1,4 @@
-/*
+/*cond,
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
@@ -7,14 +7,17 @@
 
 pub(crate) mod array;
 pub(crate) mod clause;
+pub(crate) mod crud_type;
 pub(crate) mod expression;
 pub(crate) mod field;
+pub(crate) mod field_type;
 pub(crate) mod field_updater;
 pub(crate) mod filter;
 pub(crate) mod function;
 pub(crate) mod geometry;
 pub(crate) mod idiom;
 pub(crate) mod interval;
+pub(crate) mod links;
 pub(crate) mod numbers;
 pub(crate) mod ordinal;
 pub(crate) mod param;
@@ -26,13 +29,16 @@ pub(crate) mod value;
 
 pub use array::*;
 pub use clause::*;
+pub use crud_type::*;
 pub use field::*;
+pub use field_type::*;
 pub use field_updater::*;
 pub use filter::*;
 pub use function::*;
 pub use geometry::*;
 pub use idiom::*;
 pub use interval::*;
+pub use links::*;
 pub use numbers::*;
 pub use numbers::*;
 pub use ordinal::*;
@@ -151,21 +157,21 @@ create_value_like_struct!("Table");
 // create_value_like_struct!("Value");
 create_value_like_struct!("Object");
 
-// impl<T> From<T> for ArrayCustom
+// impl<T> From<T> for ArrayLike
 // where
 //     T: Into<sql::Value>,
 // {
 //     fn from(value: T) -> Self {
-//         Self(sql::Value::from(value.into()))
+//         Self::Array(sql::Value::from(value.into()))
 //     }
 // }
-//
-// impl<T, const N: usize> From<&[T; N]> for ArrayCustom
+
+// impl<T, const N: usize> From<&[T; N]> for ArrayLike
 // where
 //     T: Into<sql::Value> + Clone,
 // {
 //     fn from(value: &[T; N]) -> Self {
-//         Self(
+//         Self::Array(
 //             value
 //                 .into_iter()
 //                 .map(|v| v.clone().into())

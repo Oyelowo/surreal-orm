@@ -26,11 +26,9 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
-    types::{Database, Namespace, Scope, Table, TableIndex, Token},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Database,
 };
 
 pub fn remove_database(database: impl Into<Database>) -> RemoveDatabaseStatement {
@@ -67,7 +65,5 @@ impl Parametric for RemoveDatabaseStatement {
 }
 
 impl Erroneous for RemoveDatabaseStatement {}
-
-impl Runnables for RemoveDatabaseStatement {}
 
 impl Queryable for RemoveDatabaseStatement {}

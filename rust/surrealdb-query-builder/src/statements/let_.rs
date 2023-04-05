@@ -10,41 +10,28 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::expression::Expression,
+    Param,
 };
 
-pub fn let_(parameter: impl Into<Parameter>) -> LetStatement {
+pub fn let_(parameter: impl Into<Param>) -> LetStatement {
     LetStatement::new(parameter)
 }
 
 pub struct LetStatement {
-    parameter: String,
+    parameter: Param,
     value: Option<Expression>,
     bindings: BindingsList,
 }
 
-pub struct Parameter(String);
-
-impl From<String> for Parameter {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl From<&str> for Parameter {
-    fn from(value: &str) -> Self {
-        Self(value.to_string())
-    }
-}
-
 impl LetStatement {
-    pub fn new(parameter: impl Into<Parameter>) -> Self {
-        let param: Parameter = parameter.into();
+    pub fn new(parameter: impl Into<Param>) -> Self {
+        let param: Param = parameter.into();
         Self {
             value: None,
             bindings: vec![],
-            parameter: param.0,
+            parameter: param,
         }
     }
     pub fn equal(mut self, value: impl Into<Expression>) -> Self {
@@ -54,8 +41,8 @@ impl LetStatement {
         self
     }
 
-    pub fn get_param(&self) -> sql::Param {
-        sql::Param::from(sql::Idiom::from(format!("{}", self.parameter)))
+    pub fn get_param(&self) -> Param {
+        self.parameter.clone()
     }
 }
 
@@ -76,8 +63,6 @@ impl Display for LetStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnables for LetStatement {}
 
 impl Parametric for LetStatement {
     fn get_bindings(&self) -> BindingsList {

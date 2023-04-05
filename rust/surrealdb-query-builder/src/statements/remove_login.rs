@@ -26,11 +26,9 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
-    types::{Database, Login, Namespace, Scope, Table, Token},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Login,
 };
 
 use super::NamespaceOrDatabase;
@@ -86,7 +84,5 @@ impl Parametric for RemoveLoginStatement {
 }
 
 impl Erroneous for RemoveLoginStatement {}
-
-impl Runnables for RemoveLoginStatement {}
 
 impl Queryable for RemoveLoginStatement {}

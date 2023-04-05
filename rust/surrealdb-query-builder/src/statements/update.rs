@@ -15,7 +15,8 @@ use crate::{
         Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
         SurrealdbModel,
     },
-    types::{DurationLike, Filter, Return, SurrealId, Updateables},
+    types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
+    ReturnableDefault, ReturnableStandard,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
@@ -50,7 +51,7 @@ where
     merge: Option<String>,
     set: Vec<String>,
     where_: Option<String>,
-    return_type: Option<Return>,
+    return_type: Option<ReturnType>,
     timeout: Option<String>,
     bindings: BindingsList,
     parallel: bool,
@@ -142,7 +143,6 @@ where
             TargettablesForUpdate::SurrealId(_) => targets_bindings
                 .iter()
                 .map(|b| format!("{}", b.get_param_dollarised()))
-         
                 .collect::<Vec<_>>(),
         };
         self.update_bindings(targets_bindings);
@@ -207,7 +207,7 @@ where
         self
     }
 
-    pub fn return_(mut self, return_type: impl Into<Return>) -> Self {
+    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -327,4 +327,17 @@ where
     }
 }
 
-impl<T> Runnable<T> for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> ReturnableDefault<T> for UpdateStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
+}
+
+impl<T> ReturnableStandard<T> for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
+        self.return_type = Some(return_type);
+        self
+    }
+}

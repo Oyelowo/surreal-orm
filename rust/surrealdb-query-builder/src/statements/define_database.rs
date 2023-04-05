@@ -10,9 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql::{self, Ident};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::{Database, Table},
 };
 
@@ -47,8 +45,6 @@ impl Display for DefineDatabaseStatement {
         write!(f, "{}", self.build())
     }
 }
-
-impl Runnables for DefineDatabaseStatement {}
 
 impl Parametric for DefineDatabaseStatement {
     fn get_bindings(&self) -> BindingsList {

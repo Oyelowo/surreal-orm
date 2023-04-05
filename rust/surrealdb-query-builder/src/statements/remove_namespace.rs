@@ -26,11 +26,9 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables},
-    types::{Database, Namespace, Scope, Table, Token},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Namespace,
 };
 
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
@@ -66,7 +64,5 @@ impl Parametric for RemoveNamespaceStatement {
 }
 
 impl Erroneous for RemoveNamespaceStatement {}
-
-impl Runnables for RemoveNamespaceStatement {}
 
 impl Queryable for RemoveNamespaceStatement {}

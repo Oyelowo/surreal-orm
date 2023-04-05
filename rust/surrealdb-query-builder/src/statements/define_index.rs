@@ -32,12 +32,8 @@ use surrealdb::sql::{self, statements::DefineStatement};
 // -- Make sure that email addresses in the user table are always unique
 // DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
 
-use std::collections::HashMap;
-
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
     types::{Field, Table, TableIndex},
 };
 
@@ -211,7 +207,6 @@ impl Parametric for DefineIndexStatement {
 
 impl Queryable for DefineIndexStatement {}
 impl Erroneous for DefineIndexStatement {}
-impl Runnables for DefineIndexStatement {}
 
 #[cfg(test)]
 #[cfg(feature = "mock")]

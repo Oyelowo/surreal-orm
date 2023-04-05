@@ -9,6 +9,8 @@ use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
 
+use crate::{SurrealId, SurrealdbNode};
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Reference<V: SurrealdbNode> {

@@ -26,15 +26,13 @@ use surrealdb::{
 
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
-    filter::Filter,
-    links::{LinkMany, LinkOne, LinkSelf, Relate},
-    sql::{All, SurrealId, NONE},
+    cond,
     statements::{
         define_field, define_table, for_, order, select, value, DefineFieldStatement,
-        DefineTableStatement, FieldType, For, ForCrudType, PermissionForables, SelectStatement,
+        DefineTableStatement, For, PermissionType, SelectStatement,
     },
-    utils::cond,
-    Field, Operatable, RecordId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table,
+    All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,
+    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table, NONE,
 };
 
 use test_case::test_case;
@@ -47,27 +45,27 @@ fn gama() -> SelectStatement {
 fn full() -> u32 {
     54
 }
-fn perm() -> RawStatement {
-    use ForCrudType::*;
-    let name = Field::new("name");
-    let age = Field::new("age");
-    // vec![
-    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-    //     for_(Update).where_(age.less_than_or_equal(130)),
-    // ]
-    // .into_iter()
-    // .map(|e| e.to_raw())
-    // .collect::<Vec<_>>()
-    // .to_vec()
-    PermissionForables::from(vec![
-        for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-        for_(Update).where_(age.less_than_or_equal(130)),
-    ])
-    .to_raw()
-}
+// fn perm() -> RawStatement {
+//     use CrudType::*;
+//     let name = Field::new("name");
+//     let age = Field::new("age");
+//     // vec![
+//     //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+//     //     for_(Update).where_(age.less_than_or_equal(130)),
+//     // ]
+//     // .into_iter()
+//     // .map(|e| e.to_raw())
+//     // .collect::<Vec<_>>()
+//     // .to_vec()
+//     PermissionType::from(vec![
+//         for_(&[Create, Delete]).where_(name.is("Oyelowo")),
+//         for_(Update).where_(age.less_than_or_equal(130)),
+//     ])
+//     // .to_raw()
+// }
 
 fn define_student() -> DefineTableStatement {
-    use ForCrudType::*;
+    use CrudType::*;
     let name = Field::new("name");
     let user_table = Table::from("user");
     let age = Field::new("age");
@@ -104,7 +102,7 @@ fn erer() -> Filter {
 }
 fn define_age() -> DefineFieldStatement {
     use surrealdb_orm::{SurrealdbModel, SurrealdbNode};
-    use ForCrudType::*;
+    use CrudType::*;
     let student::Student {
         age,
         firstName,

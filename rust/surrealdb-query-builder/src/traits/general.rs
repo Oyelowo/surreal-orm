@@ -24,7 +24,8 @@ pub trait Buildable {
     }
 }
 
-pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
+// pub trait Queryable: Parametric + Buildable + Display + Erroneous {}
+pub trait Queryable: Parametric + Buildable + Erroneous {}
 
 pub trait Conditional: Parametric + Buildable + Erroneous {
     fn get_condition_query_string(&self) -> String {

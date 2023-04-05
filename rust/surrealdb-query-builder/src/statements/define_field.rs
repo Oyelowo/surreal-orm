@@ -17,13 +17,11 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use surrealdb::sql::{self, statements::DefineStatement};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
-    },
-    types::{Field, Filter, Param, Table},
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
+    types::{Field, FieldType, Filter, Param, Table},
 };
 
-use super::for_::PermissionForables;
+use super::for_::PermissionType;
 
 // DEFINE FIELD statement
 // The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
@@ -143,156 +141,6 @@ use super::for_::PermissionForables;
 // -- Define a field with specific geometric types
 // DEFINE FIELD area ON TABLE restaurant TYPE geometry (polygon, multipolygon, collection);
 
-#[derive(Debug, Clone)]
-pub enum GeometryType {
-    Feature,
-    Point,
-    Line,
-    Polygon,
-    Multipoint,
-    Multiline,
-    Multipolygon,
-    Collection,
-}
-
-impl FromStr for GeometryType {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "feature" => Ok(Self::Feature),
-            "point" => Ok(Self::Point),
-            "line" => Ok(Self::Line),
-            "polygon" => Ok(Self::Polygon),
-            "multipoint" => Ok(Self::Multipoint),
-            "multiline" => Ok(Self::Multiline),
-            "multipolygon" => Ok(Self::Multipolygon),
-            "collection" => Ok(Self::Collection),
-            _ => {
-                return Err(format!("Invalid geometry type: {}", s));
-            }
-        }
-    }
-}
-
-impl Display for GeometryType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let geom = match self {
-            GeometryType::Feature => "feature",
-            GeometryType::Point => "point",
-            GeometryType::Line => "line",
-            GeometryType::Polygon => "polygon",
-            GeometryType::Multipoint => "multipoint",
-            GeometryType::Multiline => "multiline",
-            GeometryType::Multipolygon => "multipolygon",
-            GeometryType::Collection => "collection",
-        };
-        write!(f, "{}", geom)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum FieldType {
-    Any,
-    Array,
-    // ArrayList(Box<FieldType>),
-    Bool,
-    DateTime,
-    Decimal,
-    Duration,
-    Float,
-    Int,
-    Number,
-    Object,
-    String,
-    Record,
-    RecordList(Table),
-    Geometry,
-    GeometryList(Vec<GeometryType>),
-}
-
-impl From<FieldType> for String {
-    fn from(val: FieldType) -> Self {
-        val.to_string()
-    }
-}
-
-impl Display for FieldType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data_type = match self {
-            FieldType::Any => "any".to_string(),
-            FieldType::Array => "array".to_string(),
-            // FieldType::ArrayList(field_type) => format!("array ({field_type})"),
-            FieldType::Bool => "bool".to_string(),
-            FieldType::DateTime => "datetime".to_string(),
-            FieldType::Decimal => "decimal".to_string(),
-            FieldType::Duration => "duration".to_string(),
-            FieldType::Float => "float".to_string(),
-            FieldType::Int => "int".to_string(),
-            FieldType::Number => "number".to_string(),
-            FieldType::Object => "object".to_string(),
-            FieldType::String => "string".to_string(),
-            FieldType::RecordList(table) => format!("record ({table})"),
-            FieldType::Record => "record".to_string(),
-            FieldType::Geometry => "geometry".to_string(),
-            FieldType::GeometryList(geometries) => format!(
-                "geometry ({})",
-                geometries
-                    .iter()
-                    .map(ToString::to_string)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-                    .to_string()
-            ),
-        };
-        write!(f, "{}", data_type)
-    }
-}
-
-impl FromStr for FieldType {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // Examples:
-        // datetime
-        // record
-        // record (user)
-        // geometry (polygon, multipolygon, collection)
-        // geometry
-        let type_stringified = s.replace(" ", "");
-        let mut type_with_content = type_stringified.trim_end_matches(")").split("(");
-
-        let db_type = match (type_with_content.next(), type_with_content.next()) {
-            (Some("any"), None) => FieldType::Any,
-            (Some("datetime"), None) => FieldType::DateTime,
-            (Some("decimal"), None) => FieldType::Decimal,
-            (Some("duration"), None) => FieldType::Duration,
-            (Some("float"), None) => FieldType::Float,
-            (Some("int"), None) => FieldType::Int,
-            (Some("number"), None) => FieldType::Number,
-            (Some("object"), None) => FieldType::Object,
-            (Some("string"), None) => FieldType::String,
-            (Some("record"), None) => FieldType::Record,
-            (Some("record"), Some(record_type)) => FieldType::RecordList(Table::from(record_type)),
-            (Some("array"), None) => FieldType::Array,
-            // (Some("array"), Some(content)) => {
-            //     let content_type = Self::from_str(content)?;
-            //     FieldType::ArrayList(Box::new(content_type))
-            // }
-            (Some("geometry"), None) => FieldType::Geometry,
-            (Some("geometry"), Some(geom_types)) => {
-                let geoms: Result<Vec<_>, _> = geom_types
-                    .split(",")
-                    .map(|g| g.parse::<GeometryType>())
-                    .collect();
-                FieldType::GeometryList(geoms?)
-            }
-            _ => return Err(format!("Invalid/Unsupported database type: {s}")),
-        };
-        Ok(db_type)
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct DefineFieldStatement {
     field_name: String,
@@ -370,21 +218,22 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionForables>) -> Self {
-        let fors: PermissionForables = fors.into();
+    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+        use PermissionType::*;
+        let fors: PermissionType = fors.into();
         match fors {
-            PermissionForables::For(one) => {
+            For(one) => {
                 self.permissions_for.push(one.to_string());
                 self.bindings.extend(one.get_bindings());
             }
-            PermissionForables::Fors(many) => many.iter().for_each(|f| {
+            Fors(many) => many.iter().for_each(|f| {
                 self.permissions_for.push(f.to_string());
                 self.bindings.extend(f.get_bindings());
             }),
-            PermissionForables::RawStatement(raw) => {
+            RawStatement(raw) => {
                 self.permissions_for.push(raw.to_string());
             }
-            PermissionForables::RawStatementList(raw_list) => {
+            RawStatementList(raw_list) => {
                 self.permissions_for.extend(
                     raw_list
                         .into_iter()
@@ -450,24 +299,18 @@ impl Display for DefineFieldStatement {
 // ``
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
 
     use super::*;
+    use crate::{statements::for_, CrudType::*};
     use std::time::Duration;
 
-    use crate::{
-        query_for::ForCrudType,
-        sql::NONE,
-        utils::{cond, for_},
-        Operatable,
-    };
+    use crate::{cond, Operatable, NONE};
 
     use super::*;
 
     #[test]
     fn test_define_field_statement_full() {
-        use ForCrudType::*;
         let name = Field::new("name");
         let user_table = Table::from("user");
         let age = Field::new("age");
@@ -487,11 +330,11 @@ mod tests {
             ]);
 
         assert_eq!(
-            statement.to_string(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000000) AND ($value ~ $_param_00000000)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, update\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;"
+            statement.fine_tune_params(),
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000001) AND ($value ~ $_param_00000002)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000003\nFOR create, update\n\tWHERE name IS $_param_00000004\nFOR create, delete\n\tWHERE name IS $_param_00000005\nFOR update\n\tWHERE age <= $_param_00000006;"
         );
-        insta::assert_display_snapshot!(statement);
-        insta::assert_debug_snapshot!(statement.get_bindings());
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 4);
     }
 
     #[test]
@@ -503,10 +346,10 @@ mod tests {
         let statement = define_field(email).on_table(user_table).type_(String);
 
         assert_eq!(
-            statement.to_string(),
+            statement.build(),
             "DEFINE FIELD email ON TABLE user TYPE string;"
         );
-        insta::assert_display_snapshot!(statement);
-        insta::assert_debug_snapshot!(statement.get_bindings());
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 }

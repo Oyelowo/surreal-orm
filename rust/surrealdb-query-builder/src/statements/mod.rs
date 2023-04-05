@@ -37,7 +37,7 @@ pub use chain::{chain, QueryChain};
 pub use create::{create, CreateStatement};
 pub use define_database::{define_database, DefineDatabaseStatement};
 pub use define_event::{define_event, DefineEventStatement};
-pub use define_field::{define_field, value, DefineFieldStatement, FieldType, ValueAssert};
+pub use define_field::{define_field, value, DefineFieldStatement, ValueAssert};
 pub use define_index::{define_index, DefineIndexStatement};
 pub use define_login::{define_login, DefineLoginStatement};
 pub use define_namespace::{define_namespace, DefineNamespaceStatement};
@@ -45,7 +45,7 @@ pub use define_scope::{define_scope, DefineScopeStatement};
 pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
 pub use delete::{delete, DeleteStatement};
-pub use for_::{for_, For, ForCrudType, PermissionForables};
+pub use for_::{for_, For, PermissionType};
 pub use ifelse::{if_, IfStatement};
 pub use info::{info_for, InfoStatement};
 pub use insert::{insert, InsertStatement, Insertables};
@@ -60,9 +60,7 @@ pub use remove_namespace::{remove_namespace, RemoveNamespaceStatement};
 pub use remove_scope::{remove_scope, RemoveScopeStatement};
 pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
-pub use select::{
-    order, select, Order, Orderables, SelectStatement, Selectables, Splittables,
-};
+pub use select::{order, select, Order, Orderables, SelectStatement, Selectables, Splittables};
 pub use sleep::{sleep, SleepStatement};
 pub use transaction::{begin_transaction, BeginTransactionStatement};
 pub use update::{update, UpdateStatement};

@@ -1075,9 +1075,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         let upper_bound_binding = Binding::new(upper_bound);
         let condition = format!(
             "{} < {} < {}",
-            lower_bound_binding.get_param(),
+            lower_bound_binding.get_param_dollarised(),
             self.build(),
-            upper_bound_binding.get_param()
+            upper_bound_binding.get_param_dollarised()
         );
 
         let lower_updated_params = self.__update_bindings(lower_bound_binding);
@@ -1114,9 +1114,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         let upper_bound_binding = Binding::new(upper_bound);
         let condition = format!(
             "{} <= {} <= {}",
-            lower_bound_binding.get_param(),
+            lower_bound_binding.get_param_dollarised(),
             self.build(),
-            upper_bound_binding.get_param()
+            upper_bound_binding.get_param_dollarised()
         );
 
         let lower_updated_params = self.__update_bindings(lower_bound_binding);
@@ -1173,7 +1173,12 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     {
         let value: ValueLike = value.into();
         let binding = Binding::new(value);
-        let condition = format!("{} {} ${}", self.build(), operator, &binding.get_param());
+        let condition = format!(
+            "{} {} {}",
+            self.build(),
+            operator,
+            &binding.get_param_dollarised()
+        );
         let updated_bindings = self.__update_bindings(binding);
 
         Operation {

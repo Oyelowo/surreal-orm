@@ -24,10 +24,11 @@ use surrealdb::{
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable, Runnables,
+        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
         SurrealdbModel,
     },
     types::{expression::Expression, Updateables},
+    ReturnableDefault, ReturnableStandard,
 };
 
 use super::SelectStatement;
@@ -51,6 +52,11 @@ where
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> ReturnableDefault<T> for InsertStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
+}
 
 impl<T> Display for InsertStatement<T>
 where
@@ -139,7 +145,7 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for Insertable
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
     pub fn new() -> Self {
         Self {
-            on_duplicate_key_update: Vec::new(),
+            on_duplicate_key_update: vec![],
             bindings: vec![],
             node_type: PhantomData,
             select_query_string: None,
@@ -242,8 +248,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStat
         self.bindings.to_vec()
     }
 }
-
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Runnable<T> for InsertStatement<T> {}
 
 fn get_field_names<T>(value: &T) -> Vec<String>
 where
