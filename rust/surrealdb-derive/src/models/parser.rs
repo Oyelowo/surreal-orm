@@ -355,7 +355,7 @@ impl SchemaFieldsProperties {
                         
                     RelationType::NestArray(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         get_nested_meta_with_defs(&node_object)
                     },
                         
