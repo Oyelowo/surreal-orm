@@ -47,7 +47,6 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
 
 pub trait SurrealdbObject: Serialize {
     type Schema;
-    // type TableNameChecker;
     fn schema() -> Self::Schema;
     // fn with(clause: impl Into<Clause>) -> Self::Schema;
 }

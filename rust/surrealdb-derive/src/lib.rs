@@ -19,3 +19,8 @@ pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
 pub fn surreal_edge_trait_derive(input: TokenStream) -> TokenStream {
     models::edge::generate_fields_getter_trait(input)
 }
+
+#[proc_macro_derive(SurrealdbObject, attributes(surrealdb))]
+pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
+    models::edge::generate_fields_getter_trait(input)
+}
