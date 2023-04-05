@@ -88,7 +88,7 @@ impl ToTokens for NodeToken{
             static_assertions,
             mut imports_referenced_node_schema,
             connection_with_field_appended,
-            record_link_fields_methods,
+             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
             serialized_field_name_no_skip,
@@ -120,10 +120,10 @@ impl ToTokens for NodeToken{
         //     id: Option<String>,
         //     first_name: String,
         //
-        //     #[surrealdb(link_one = "Book", skip_serializing)]
+        //     #[surrealdb(nest_object = "Book")]
         //     course: LinkOne<Book>,
         //
-        //     #[surrealdb(link_many = "Book", skip_serializing)]
+        //     #[surrealdb(nest_array = "Book")]
         //     #[serde(rename = "lowo")]
         //     all_semester_courses: LinkMany<Book>,
         //
