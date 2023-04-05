@@ -24,7 +24,9 @@ use surrealdb::{
 
 // use surrealdb_orm::SurrealdbEdge;
 use std::fmt::{Debug, Display};
-use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode};
+use surrealdb_orm::{
+    LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
+};
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
@@ -37,6 +39,9 @@ pub struct Student {
     id: Option<RecordId>,
     first_name: String,
     last_name: String,
+
+    #[surrealdb(nest_array = "Planet")]
+    my_planet: Planet,
 
     #[surrealdb(link_self = "Student", skip_serializing)]
     best_friend: LinkSelf<Student>,
@@ -54,6 +59,12 @@ pub struct Student {
 
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     written_books: Relate<Book>,
+}
+
+#[derive(SurrealdbObject, Debug, Clone)]
+pub struct Planet {
+    name: String,
+    distance: f32,
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
