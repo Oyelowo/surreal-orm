@@ -142,6 +142,7 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
                                 "".into(),
                                 clause,
+                                false,
                                 // #module_name::#struct_name_ident::new().get_bindings()
                                 vec![],
                                 vec![],
@@ -256,6 +257,7 @@ impl ToTokens for NodeToken{
                     pub fn #__________connect_node_to_graph_traversal_string(
                         store: ::std::string::String,
                         clause: impl Into<#crate_name::Clause>,
+                        use_table_name: bool,
                         existing_bindings: #crate_name::BindingsList,
                         existing_errors: Vec<String>,
                     ) -> Self {
@@ -273,7 +275,11 @@ impl ToTokens for NodeToken{
                         schema_instance.#___________errors = errors.into();
                         
                         
-                        let connection = format!("{}{}", store, clause.format_with_model(#table_name_str));
+                    let connection = if use_table_name {
+                        format!("{}{}", store, clause.format_with_model(#table_name_str))
+                    }else{
+                        format!("{}{}", store, clause) 
+                    };
 
                         #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;

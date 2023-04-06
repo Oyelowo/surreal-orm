@@ -783,6 +783,7 @@ impl ReferencedNodeMeta {
                     #schema_type_ident::#__________connect_node_to_graph_traversal_string(
                         store,
                         clause,
+                        false,
                         self.get_bindings(),
                         self.get_errors()
                     )

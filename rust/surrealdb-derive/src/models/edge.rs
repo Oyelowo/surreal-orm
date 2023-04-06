@@ -254,13 +254,12 @@ impl ToTokens for EdgeToken {
                             let origin_table_name = #table_name_str.to_string();
                         
                             let schema_edge_str_with_arrow = format!(
-                                "{}{}{}{}{}{}",
+                                "{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
-                                origin_table_name,
+                                // origin_table_name,
                                 clause.format_with_model(#table_name_str),
                                 arrow_direction,
-                                "",
                                 // destination_table_name,
                             );
                             

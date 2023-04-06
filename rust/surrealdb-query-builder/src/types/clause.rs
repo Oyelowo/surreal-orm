@@ -122,6 +122,7 @@ impl Clause {
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.to_string(),
+            ClauseType::Id(id) => id.to_string(),
             // ClauseType::Id(q) => self.to_string().split(":").next().unwrap().to_string(),
             // _ => format!("{table_name}{self}"),
             _ => format!("{table_name}{self}"),

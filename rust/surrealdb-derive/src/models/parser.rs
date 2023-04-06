@@ -534,7 +534,7 @@ impl NodeEdgeMetadataStore {
             )
         };
 
-        // i.e Node to Edge
+        // i.e Edge to destination Node
         let foreign_node_connection_method = || {
             quote!(
                 pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::Clause>) -> #destination_node_schema_ident {
@@ -544,6 +544,7 @@ impl NodeEdgeMetadataStore {
                                 self.get_connection(),
                                 // &self.#___________graph_traversal_string,
                                 clause,
+                                true,
                                 self.get_bindings(),
                                 self.get_errors(),
                     )
