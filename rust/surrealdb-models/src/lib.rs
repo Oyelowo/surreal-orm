@@ -32,7 +32,7 @@ use surrealdb_orm::{
         DefineTableStatement, For, PermissionType, SelectStatement,
     },
     All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,
-    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, Table, NONE,
+    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject, Table, NONE,
 };
 
 use test_case::test_case;

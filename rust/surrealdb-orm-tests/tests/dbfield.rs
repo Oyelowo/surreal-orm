@@ -24,7 +24,10 @@ use surrealdb::{
 
 // use surrealdb_orm::SurrealdbEdge;
 use std::fmt::{Debug, Display};
-use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, RecordId, Relate, SurrealdbEdge, SurrealdbNode};
+use surrealdb_orm::{
+    where_, Buildable, Empty, LinkMany, LinkOne, LinkSelf, Operatable, RecordId, Relate,
+    SurrealdbEdge, SurrealdbNode, SurrealdbObject,
+};
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
@@ -37,6 +40,9 @@ pub struct Student {
     id: Option<RecordId>,
     first_name: String,
     last_name: String,
+
+    #[surrealdb(nest_object = "Planet")]
+    my_planet: Planet,
 
     #[surrealdb(link_self = "Student", skip_serializing)]
     best_friend: LinkSelf<Student>,
@@ -54,6 +60,54 @@ pub struct Student {
 
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     written_books: Relate<Book>,
+}
+
+#[derive(SurrealdbObject, Debug, Clone, Serialize, Deserialize)]
+pub struct Planet {
+    name: String,
+    distance: f32,
+
+    #[surrealdb(nest_object = "Scene")]
+    first_scene: Scene,
+}
+
+#[derive(SurrealdbObject, Debug, Clone, Serialize, Deserialize)]
+pub struct Scene {
+    act: String,
+    page: f32,
+}
+
+#[test]
+fn test_surreal_object() {
+    let pl = Student::schema().myPlanet;
+    // let xx = Student::schema().bestFriend(Empty).firstName;
+    let link = Student::schema()
+        .bestFriend(where_(pl.greater_than(4)))
+        .unoBook(Empty)
+        .content;
+    assert_eq!(
+        link.fine_tune_params(),
+        "bestFriend[WHERE myPlanet > $_param_00000001].unoBook.content"
+    );
+    // assert_eq!(link.build(), "Er");
+    assert_eq!(
+        link.to_raw().to_string(),
+        "bestFriend[WHERE myPlanet > 4].unoBook.content"
+    );
+
+    let nested_object_access = Student::schema()
+        .myPlanet(Empty)
+        .first_scene(where_(pl.greater_than(4)))
+        .act;
+    assert_eq!(
+        nested_object_access.fine_tune_params(),
+        "myPlanet.first_scene[WHERE myPlanet > $_param_00000001].act"
+    );
+    // assert_eq!(nested_object_access.build(), "Er");
+    assert_eq!(
+        nested_object_access.to_raw().to_string(),
+        "myPlanet.first_scene[WHERE myPlanet > 4].act"
+    );
 }
 
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone)]

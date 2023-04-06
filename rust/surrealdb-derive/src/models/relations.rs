@@ -14,6 +14,8 @@ pub(crate) enum RelationType {
     LinkOne(NodeTypeName),
     LinkSelf(NodeTypeName),
     LinkMany(NodeTypeName),
+    NestObject(NodeTypeName),
+    NestArray(NodeTypeName),
     None,
 }
 
@@ -36,6 +38,14 @@ impl From<&MyFieldReceiver> for RelationType {
                 link_many: Some(link_many),
                 ..
             } => RelationType::LinkMany(link_many.into()),
+            MyFieldReceiver {
+                nest_object: Some(nest_object),
+                ..
+            } => RelationType::NestObject(nest_object.into()),
+            MyFieldReceiver {
+                nest_array: Some(nest_array),
+                ..
+            } => RelationType::NestArray(nest_array.into()),
             _ => RelationType::None,
         }
     }

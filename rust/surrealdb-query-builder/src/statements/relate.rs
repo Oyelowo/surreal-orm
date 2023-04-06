@@ -48,6 +48,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,

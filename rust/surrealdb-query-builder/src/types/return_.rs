@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use super::Field;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ReturnType {
     None,
     Before,

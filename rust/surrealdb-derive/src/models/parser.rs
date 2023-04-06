@@ -21,7 +21,7 @@ use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate, FieldTypeWrapper},
     casing::CaseString,
     get_crate_name,
-    relations::{EdgeDirection, RelateAttribute, RelationType},
+    relations::{EdgeDirection, RelateAttribute, RelationType, NodeTypeName},
     variables::VariablesModelMacro, parse_lit_to_tokenstream, 
 };
 
@@ -68,6 +68,7 @@ struct NodeEdgeMetadata {
     /// ],
     /// ```
     destination_node_schema: Vec<TokenStream>,
+    destination_node_name: String,
     /// Example Generated:
     ///
     /// ```
@@ -260,7 +261,7 @@ pub struct SchemaPropertiesArgs<'a> {
     pub data: &'a ast::Data<util::Ignored, MyFieldReceiver>,
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
-    pub table_name_ident: &'a syn::Ident,
+    // pub table_name_ident: &'a syn::Ident,
 }
 impl SchemaFieldsProperties {
     /// .
@@ -293,7 +294,6 @@ impl SchemaFieldsProperties {
                 } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
                 
                 let VariablesModelMacro { 
-                    __________connect_to_graph_traversal_string, 
                     ___________graph_traversal_string, 
                     ____________update_many_bindings,
                     schema_instance, 
@@ -302,17 +302,29 @@ impl SchemaFieldsProperties {
                 } = VariablesModelMacro::new();
                 
         
+                let get_link_meta_with_defs = |node_object: &NodeTypeName| {
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                };
+                
+                let get_nested_meta_with_defs = |node_object: &NodeTypeName| {
+                        ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                };
+                
                 let referenced_node_meta = match relationship {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
                             ReferencedNodeMeta::default()
                                 
                     },
+                        
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)
+                        get_link_meta_with_defs(&node_object)
                     }
+                    
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         if node_object.to_string() != struct_name_ident.to_string() {
@@ -323,12 +335,30 @@ impl SchemaFieldsProperties {
                         }
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident).with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }
+                        
+                        get_link_meta_with_defs(&node_object)
+                    }
+                    
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                    }                    
+                    
+                        get_link_meta_with_defs(&node_object)
+                    }                    
+                    
+                    RelationType::NestObject(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                        
+                    RelationType::NestArray(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                        
                     RelationType::None => ReferencedNodeMeta::default()
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
@@ -467,6 +497,7 @@ impl NodeEdgeMetadataStore {
         let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
         let ref destination_node_table_name =
             TokenStream::from(&relation_attributes.node_table_name);
+
         let ref edge_direction = relation_attributes.edge_direction;
 
         let ref edge_name_as_method_ident =
@@ -484,7 +515,7 @@ impl NodeEdgeMetadataStore {
             format_ident!("______________{destination_node_schema_ident}Model");
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
@@ -503,15 +534,17 @@ impl NodeEdgeMetadataStore {
             )
         };
 
+        // i.e Edge to destination Node
         let foreign_node_connection_method = || {
             quote!(
                 pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::Clause>) -> #destination_node_schema_ident {
                     let clause: #crate_name::Clause = clause.into();
 
-                    #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
+                    #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self.get_connection(),
                                 // &self.#___________graph_traversal_string,
                                 clause,
+                                true,
                                 self.get_bindings(),
                                 self.get_errors(),
                     )
@@ -537,6 +570,7 @@ impl NodeEdgeMetadataStore {
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![imports()],
             edge_relation_model_selected_ident: relation_model.to_owned(),
+            destination_node_name:  destination_node_table_name.to_string()
         };
 
         match self.0.entry(edge_name_as_method_ident()) {
@@ -585,6 +619,7 @@ impl NodeEdgeMetadataStore {
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
+                    destination_node_name,
                     ..
             }: &NodeEdgeMetadata = value;
             
@@ -602,7 +637,7 @@ impl NodeEdgeMetadataStore {
             let edge_inner_module_name = format_ident!("{}_schema________________", edge_name_as_struct_with_direction_ident.to_string().to_lowercase());
             
             let VariablesModelMacro { 
-                __________connect_to_graph_traversal_string, 
+                __________connect_edge_to_graph_traversal_string, 
                 ___________graph_traversal_string, 
                 .. 
             } = VariablesModelMacro::new();
@@ -618,11 +653,14 @@ impl NodeEdgeMetadataStore {
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
                         let clause: #crate_name::Clause = clause.into();
                         
-                        #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
+                        // i.e Edge to Node
+                        #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                             // &self.#___________graph_traversal_string,
                             self.get_connection(),
                             clause,
                             #arrow,
+                            // #destination_node_name.to_string(),
+                            "".to_string(),
                             self.get_bindings(),
                             self.get_errors()
                         ).into()

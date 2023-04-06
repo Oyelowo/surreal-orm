@@ -15,7 +15,9 @@ pub(crate) struct VariablesModelMacro {
     /// Mode.fieldname1, Model.fieldname2
     /// For edges, it usually surrounds the SurrealdbEdge with arrows e.g ->writes-> or <-writes<-
     /// Overall, this helps us do the graph traversal
-    pub __________connect_to_graph_traversal_string: syn::Ident,
+    pub __________connect_node_to_graph_traversal_string: syn::Ident,
+    pub __________connect_edge_to_graph_traversal_string: syn::Ident,
+    pub __________connect_object_to_graph_traversal_string: syn::Ident,
     pub ___________bindings: syn::Ident,
     pub ___________errors: syn::Ident,
     pub ___________graph_traversal_string: syn::Ident,
@@ -34,8 +36,15 @@ pub(crate) struct VariablesModelMacro {
 
 impl VariablesModelMacro {
     pub fn new() -> Self {
-        let __________connect_to_graph_traversal_string =
-            format_ident!("__________connect_to_graph_traversal_string");
+        let __________connect_node_to_graph_traversal_string =
+            format_ident!("__________connect_node_to_graph_traversal_string");
+
+        let __________connect_edge_to_graph_traversal_string =
+            format_ident!("__________connect_edge_to_graph_traversal_string");
+
+        let __________connect_object_to_graph_traversal_string =
+            format_ident!("__________connect_object_to_graph_traversal_string");
+
         let ___________graph_traversal_string = format_ident!("___________graph_traversal_string");
         let ___________bindings = format_ident!("___________bindings");
         let ___________errors = format_ident!("___________errors");
@@ -51,7 +60,6 @@ impl VariablesModelMacro {
             format_ident!("schema_instance_edge_arrow_trimmed");
 
         Self {
-            __________connect_to_graph_traversal_string,
             ___________graph_traversal_string,
             schema_instance,
             ___________model,
@@ -62,6 +70,9 @@ impl VariablesModelMacro {
             ____________update_many_bindings,
             bindings,
             ___________errors,
+            __________connect_node_to_graph_traversal_string,
+            __________connect_edge_to_graph_traversal_string,
+            __________connect_object_to_graph_traversal_string,
         }
     }
 

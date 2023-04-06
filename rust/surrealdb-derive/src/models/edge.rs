@@ -82,7 +82,7 @@ impl ToTokens for EdgeToken {
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________model,
             schema_instance_edge_arrow_trimmed,
@@ -93,12 +93,13 @@ impl ToTokens for EdgeToken {
             ____________update_many_bindings,
             bindings,
             ___________errors,
+        ..
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name_ident,
+            // table_name_ident,
         };
 
         let SchemaFieldsProperties {
@@ -232,10 +233,11 @@ impl ToTokens for EdgeToken {
                             }
                         }
                         
-                        pub fn #__________connect_to_graph_traversal_string(
+                        pub fn #__________connect_edge_to_graph_traversal_string(
                             store: ::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
+                            destination_table_name: ::std::string::String,
                             existing_bindings: #crate_name::BindingsList,
                             existing_errors: Vec<String>,
                         ) -> Self {
@@ -249,13 +251,16 @@ impl ToTokens for EdgeToken {
                             let errors = [&existing_errors[..], &clause_errors[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
+                            let origin_table_name = #table_name_str.to_string();
                         
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}{}{}",
                                 store.as_str(),
                                 arrow_direction,
+                                // origin_table_name,
                                 clause.format_with_model(#table_name_str),
                                 arrow_direction,
+                                // destination_table_name,
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());

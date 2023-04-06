@@ -184,6 +184,14 @@ fn multiplication_tests1() {
     let wrt = &StudentWritesBook::schema();
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
     let book::Book { content, .. } = Book::schema();
+    // Student ===
+    // ->writes->book as novel;
+    // student:1->writes->book:2
+    // (Select ... from .. where ..)->writes->(select ....)
+    //
+    // friend.name
+    // friend[where age > 5].name
+    // friend:1.name ..... not possible
     let xx = Student::with(Empty).writes__(Empty).book(Empty);
     assert_eq!(xx.to_string(), "student->writes->book".to_string());
 
@@ -393,7 +401,8 @@ async fn relate_query_building_for_ids() {
     let relate_simple =
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
-    insta::assert_display_snapshot!(replace_params(&relate_simple.to_string()));
+    insta::assert_display_snapshot!(&relate_simple.fine_tune_params());
+    insta::assert_display_snapshot!(&relate_simple.clone().to_raw());
     insta::assert_debug_snapshot!(replace_params(&format!(
         "{:?}",
         relate_simple.get_bindings()
@@ -439,13 +448,14 @@ fn multiplication_tests2() {
 
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
 
-    let student = Student::schema();
+    let st_schema = Student::schema();
     // Another case
-    let x = student
-        .bestFriend(student.age.between(18, 150))
+    let x = st_schema
+        .bestFriend(st_schema.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))));
+        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .content;
 
     // insta::assert_display_snapshot!(&x.to_string());
 
