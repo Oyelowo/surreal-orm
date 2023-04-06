@@ -747,8 +747,8 @@ impl ReferencedNodeMeta {
         struct_name_ident: &::syn::Ident,
     ) -> Self {
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
             ___________graph_traversal_string,
+            __________connect_node_to_graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
         let normalized_field_name_str = normalized_field_name.to_string();
@@ -780,7 +780,7 @@ impl ReferencedNodeMeta {
                     }else {
                         format!("{}.{}",self.get_connection(), #normalized_field_name_str)
                     };
-                    #schema_type_ident::#__________connect_to_graph_traversal_string(
+                    #schema_type_ident::#__________connect_node_to_graph_traversal_string(
                         store,
                         clause,
                         self.get_bindings(),
@@ -801,7 +801,7 @@ impl ReferencedNodeMeta {
         struct_name_ident: &::syn::Ident,
     ) -> Self {
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
@@ -834,7 +834,7 @@ impl ReferencedNodeMeta {
                     }else {
                         format!("{}.{}",self.get_connection(), #normalized_field_name_str)
                     };
-                    #schema_type_ident::#__________connect_to_graph_traversal_string(
+                    #schema_type_ident::#__________connect_object_to_graph_traversal_string(
                         // &self.#___________graph_traversal_string,
                         store,
                         clause,

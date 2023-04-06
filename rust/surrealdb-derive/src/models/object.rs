@@ -59,7 +59,7 @@ impl ToTokens for ObjectToken{
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_object_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________bindings,
             ___________errors,
@@ -195,7 +195,7 @@ impl ToTokens for ObjectToken{
                         }
                     }
                     
-                    pub fn #__________connect_to_graph_traversal_string(
+                    pub fn #__________connect_object_to_graph_traversal_string(
                         store: ::std::string::String,
                         clause: impl Into<#crate_name::Clause>,
                         existing_bindings: #crate_name::BindingsList,

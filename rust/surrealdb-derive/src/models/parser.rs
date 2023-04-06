@@ -294,7 +294,6 @@ impl SchemaFieldsProperties {
                 } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
                 
                 let VariablesModelMacro { 
-                    __________connect_to_graph_traversal_string, 
                     ___________graph_traversal_string, 
                     ____________update_many_bindings,
                     schema_instance, 
@@ -516,7 +515,7 @@ impl NodeEdgeMetadataStore {
             format_ident!("______________{destination_node_schema_ident}Model");
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
             ..
         } = VariablesModelMacro::new();
@@ -535,12 +534,13 @@ impl NodeEdgeMetadataStore {
             )
         };
 
+        // i.e Node to Edge
         let foreign_node_connection_method = || {
             quote!(
                 pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::Clause>) -> #destination_node_schema_ident {
                     let clause: #crate_name::Clause = clause.into();
 
-                    #destination_node_schema_ident::#__________connect_to_graph_traversal_string(
+                    #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self.get_connection(),
                                 // &self.#___________graph_traversal_string,
                                 clause,
@@ -636,7 +636,7 @@ impl NodeEdgeMetadataStore {
             let edge_inner_module_name = format_ident!("{}_schema________________", edge_name_as_struct_with_direction_ident.to_string().to_lowercase());
             
             let VariablesModelMacro { 
-                __________connect_to_graph_traversal_string, 
+                __________connect_edge_to_graph_traversal_string, 
                 ___________graph_traversal_string, 
                 .. 
             } = VariablesModelMacro::new();
@@ -652,12 +652,14 @@ impl NodeEdgeMetadataStore {
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
                         let clause: #crate_name::Clause = clause.into();
                         
-                        #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_to_graph_traversal_string(
+                        // i.e Edge to Node
+                        #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                             // &self.#___________graph_traversal_string,
                             self.get_connection(),
                             clause,
                             #arrow,
-                            #destination_node_name.to_string(),
+                            // #destination_node_name.to_string(),
+                            "".to_string(),
                             self.get_bindings(),
                             self.get_errors()
                         ).into()

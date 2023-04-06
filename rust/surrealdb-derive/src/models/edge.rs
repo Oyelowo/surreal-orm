@@ -82,7 +82,7 @@ impl ToTokens for EdgeToken {
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________model,
             schema_instance_edge_arrow_trimmed,
@@ -93,6 +93,7 @@ impl ToTokens for EdgeToken {
             ____________update_many_bindings,
             bindings,
             ___________errors,
+        ..
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {
             data,
@@ -232,7 +233,7 @@ impl ToTokens for EdgeToken {
                             }
                         }
                         
-                        pub fn #__________connect_to_graph_traversal_string(
+                        pub fn #__________connect_edge_to_graph_traversal_string(
                             store: ::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
@@ -259,7 +260,8 @@ impl ToTokens for EdgeToken {
                                 origin_table_name,
                                 clause.format_with_model(#table_name_str),
                                 arrow_direction,
-                                destination_table_name,
+                                "",
+                                // destination_table_name,
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());

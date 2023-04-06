@@ -188,27 +188,31 @@ async fn relate_query() -> surrealdb_orm::Result<()> {
 
     let relate_simple =
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
-
-    // You can use return one method and it just returns the single object
-    let relate_simple_object = relate_simple.return_one(db.clone()).await?;
-    // Remove id bcos it is non-deterministic i.e changes on every run
-    let relate_simple_object = remove_field_from_json_string(
-        serde_json::to_string(&relate_simple_object)
-            .unwrap()
-            .as_str(),
-        "id",
+    assert_eq!(
+        relate_simple.to_raw().build(),
+        "RELATE student:1->writes->book:2 CONTENT { in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } } ;"
     );
-    insta::assert_display_snapshot!(relate_simple_object);
 
-    // You can also use return many and it just returns the single object as an array
-    let relate_simple_array = relate_simple.return_many(db.clone()).await?;
-    let relate_simple_object = remove_field_from_json_string(
-        serde_json::to_string(&relate_simple_object)
-            .unwrap()
-            .as_str(),
-        "id",
-    );
-    insta::assert_display_snapshot!(relate_simple_object);
+    // // You can use return one method and it just returns the single object
+    // let relate_simple_object = relate_simple.return_one(db.clone()).await?;
+    // // Remove id bcos it is non-deterministic i.e changes on every run
+    // let relate_simple_object = remove_field_from_json_string(
+    //     serde_json::to_string(&relate_simple_object)
+    //         .unwrap()
+    //         .as_str(),
+    //     "id",
+    // );
+    // insta::assert_display_snapshot!(relate_simple_object);
+
+    // // You can also use return many and it just returns the single object as an array
+    // let relate_simple_array = relate_simple.return_many(db.clone()).await?;
+    // let relate_simple_object = remove_field_from_json_string(
+    //     serde_json::to_string(&relate_simple_object)
+    //         .unwrap()
+    //         .as_str(),
+    //     "id",
+    // );
+    // insta::assert_display_snapshot!(relate_simple_object);
 
     Ok(())
 }

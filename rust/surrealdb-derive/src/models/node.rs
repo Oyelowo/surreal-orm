@@ -68,7 +68,7 @@ impl ToTokens for NodeToken{
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
-            __________connect_to_graph_traversal_string,
+            __________connect_node_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________bindings,
             ___________errors,
@@ -139,7 +139,7 @@ impl ToTokens for NodeToken{
                 fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
                     let clause: #crate_name::Clause = clause.into();
                     
-                    #module_name::#struct_name_ident::#__________connect_to_graph_traversal_string(
+                    #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
                                 "".into(),
                                 clause,
                                 // #module_name::#struct_name_ident::new().get_bindings()
@@ -253,7 +253,7 @@ impl ToTokens for NodeToken{
                         }
                     }
                     
-                    pub fn #__________connect_to_graph_traversal_string(
+                    pub fn #__________connect_node_to_graph_traversal_string(
                         store: ::std::string::String,
                         clause: impl Into<#crate_name::Clause>,
                         existing_bindings: #crate_name::BindingsList,

@@ -184,7 +184,15 @@ fn multiplication_tests1() {
     let wrt = &StudentWritesBook::schema();
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
     let book::Book { content, .. } = Book::schema();
-    let xx = Student::with(Empty).writes__(Empty).book(Empty);
+    // Student ===
+    // ->writes->book as novel;
+    // student:1->writes->book:2
+    // (Select ... from .. where ..)->writes->(select ....)
+    //
+    // friend.name
+    // friend[where age > 5].name
+    // friend:1.name ..... not possible
+    let xx = Student::with(All).writes__(Empty).book(Empty);
     assert_eq!(xx.to_string(), "student->writes->book".to_string());
 
     let written_book_selection = st
@@ -445,7 +453,8 @@ fn multiplication_tests2() {
         .bestFriend(student.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze")))).content;
+        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .content;
 
     // insta::assert_display_snapshot!(&x.to_string());
 
