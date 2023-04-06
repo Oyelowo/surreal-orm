@@ -142,7 +142,7 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
                                 "".into(),
                                 clause,
-                                false,
+                                true,
                                 // #module_name::#struct_name_ident::new().get_bindings()
                                 vec![],
                                 vec![],

@@ -2,4 +2,4 @@
 source: surrealdb-orm-tests/tests/test_query_strings.rs
 expression: replace_params(&relate_simple.to_string())
 ---
-RELATE $_param_00000001->writes->$_param_00000002 CONTENT $_param_00000003 ;
+RELATE $_param_00000001->writes->book:2 CONTENT $_param_00000002 ;

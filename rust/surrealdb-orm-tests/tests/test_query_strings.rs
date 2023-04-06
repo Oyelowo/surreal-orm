@@ -192,7 +192,7 @@ fn multiplication_tests1() {
     // friend.name
     // friend[where age > 5].name
     // friend:1.name ..... not possible
-    let xx = Student::with(All).writes__(Empty).book(Empty);
+    let xx = Student::with(Empty).writes__(Empty).book(Empty);
     assert_eq!(xx.to_string(), "student->writes->book".to_string());
 
     let written_book_selection = st
@@ -447,10 +447,10 @@ fn multiplication_tests2() {
 
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
 
-    let student = Student::schema();
+    let st_schema = Student::schema();
     // Another case
-    let x = student
-        .bestFriend(student.age.between(18, 150))
+    let x = st_schema
+        .bestFriend(st_schema.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
         .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
