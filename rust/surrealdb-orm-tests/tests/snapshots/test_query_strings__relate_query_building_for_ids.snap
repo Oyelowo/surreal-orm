@@ -1,5 +1,5 @@
 ---
 source: surrealdb-orm-tests/tests/test_query_strings.rs
-expression: "&relate_simple.clone().to_raw()"
+expression: "&relate_simple.fine_tune_params()"
 ---
-RELATE student:1->writes->book:2 CONTENT { in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } } ;
+RELATE $_param_00000001->writes->$_param_00000002 CONTENT $_param_00000003 ;

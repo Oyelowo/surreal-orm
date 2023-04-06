@@ -401,6 +401,7 @@ async fn relate_query_building_for_ids() {
     let relate_simple =
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
+    insta::assert_display_snapshot!(&relate_simple.fine_tune_params());
     insta::assert_display_snapshot!(&relate_simple.clone().to_raw());
     insta::assert_debug_snapshot!(replace_params(&format!(
         "{:?}",

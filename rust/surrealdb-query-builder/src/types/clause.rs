@@ -122,9 +122,11 @@ impl Clause {
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.to_string(),
-            ClauseType::Id(id) => id.to_string(),
-            // ClauseType::Id(q) => self.to_string().split(":").next().unwrap().to_string(),
-            // _ => format!("{table_name}{self}"),
+            ClauseType::Id(id) => self
+                .get_bindings()
+                .pop()
+                .expect("Id must have only one binding. Has to be an error. Please report.")
+                .get_param_dollarised(),
             _ => format!("{table_name}{self}"),
         }
     }
