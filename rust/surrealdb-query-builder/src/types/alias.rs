@@ -93,7 +93,7 @@ where
 {
     fn __as__(&self, alias: impl Into<AliasName>) -> Alias {
         let alias: AliasName = alias.into();
-        let graph_string = format!("{} AS {}", self.build().trim_end_matches(";"), &alias);
+        let graph_string = format!("{} AS {}", self.build_aliasable(), &alias);
 
         Alias {
             name: alias,
@@ -102,5 +102,9 @@ where
             errors: self.get_errors(),
             graph_string,
         }
+    }
+
+    fn build_aliasable(&self) -> String {
+        self.build()
     }
 }

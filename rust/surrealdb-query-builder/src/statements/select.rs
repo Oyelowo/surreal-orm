@@ -608,7 +608,11 @@ pub struct SelectStatement {
     bindings: BindingsList,
 }
 
-impl Aliasable for SelectStatement {}
+impl Aliasable for SelectStatement {
+    fn build_aliasable(&self) -> String {
+        format!("({})", self.build().trim_end_matches(";"))
+    }
+}
 
 impl Queryable for SelectStatement {}
 
@@ -1148,10 +1152,10 @@ fn test_statement_with_alias() {
 
     assert_eq!(
         statement_aliased.fine_tune_params(),
-        "SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL AS legal_age"
+        "(SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
     );
     assert_eq!(
         statement_aliased.to_raw().to_string(),
-        "SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL AS legal_age"
+        "(SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
     );
 }
