@@ -54,6 +54,12 @@ impl Alias {
 #[derive(Debug, Clone)]
 pub struct AliasName(sql::Ident);
 
+impl From<&str> for AliasName {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
 impl AliasName {
     pub fn new(name: impl Into<sql::Ident>) -> Self {
         Self(name.into())
