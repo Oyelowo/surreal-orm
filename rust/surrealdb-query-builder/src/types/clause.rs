@@ -101,8 +101,9 @@ impl Clause {
                 format!("[{param_string}]")
             }
             Projections(projections) => {
-                let bindings = projections.get_bindings();
-                let param_string = format!("{}", index_bindings.get_param_dollarised());
+                let build = format!("{}", projections.build());
+                bindings = projections.get_bindings();
+                format!("({build})")
             }
         };
         Self {
@@ -129,7 +130,8 @@ impl Clause {
 
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
-            ClauseType::Query(q) => self.to_string(),
+            ClauseType::Query(q) => self.build(),
+            ClauseType::Projections(projections) => projections.build(),
             ClauseType::Id(id) => self
                 .get_bindings()
                 .pop()
@@ -206,6 +208,13 @@ impl From<&SelectStatement> for Clause {
     fn from(value: &SelectStatement) -> Self {
         // Self::Query(value.to_owned().into())
         Self::new(ClauseType::Query(value.clone()))
+    }
+}
+
+impl<T: Into<Selectables>> From<T> for Clause {
+    fn from(value: T) -> Self {
+        let selectables = value.into();
+        Self::new(ClauseType::Projections(selectables))
     }
 }
 
