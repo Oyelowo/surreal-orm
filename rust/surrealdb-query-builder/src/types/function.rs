@@ -9,7 +9,7 @@ use crate::{
 pub struct Function {
     pub query_string: String,
     pub bindings: BindingsList,
-    pub errors: ErrorList,
+    // pub errors: ErrorList,
 }
 
 impl Parametric for Function {
@@ -31,9 +31,9 @@ impl Buildable for Function {
 }
 
 impl Erroneous for Function {
-    fn get_errors(&self) -> ErrorList {
-        self.errors.to_vec()
-    }
+    // fn get_errors(&self) -> ErrorList {
+    // self.errors.to_vec()
+    // }
 }
 
 impl Aliasable for Function {}
