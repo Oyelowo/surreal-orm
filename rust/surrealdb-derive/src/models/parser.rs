@@ -414,6 +414,14 @@ impl SchemaFieldsProperties {
                     
                     store.schema_struct_fields_names_kv_empty
                         .push(quote!(#field_ident_normalised: "".into(),));
+                    
+                    store.connection_with_field_appended
+                        .push(quote!(
+                                    #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
+                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
+                                            .#____________update_many_bindings(#bindings);
+                                ));
+
                 }
   
 
@@ -424,13 +432,6 @@ impl SchemaFieldsProperties {
                     store.serialized_field_name_no_skip
                         .push(field_ident_normalised_as_str.to_owned());
                 }
-
-                store.connection_with_field_appended
-                    .push(quote!(
-                                #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
-                                  .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
-                                        .#____________update_many_bindings(#bindings);
-                                ));
 
                 store 
             });
