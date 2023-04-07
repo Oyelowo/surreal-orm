@@ -18,9 +18,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Value};
 
 use crate::{
+    cond,
     traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
     types::{All, DurationLike, Field, Filter, SurrealId, Table},
-    ReturnableSelect,
+    AliasName, Aliasable, Operatable, ReturnableSelect, ToRaw,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -607,7 +608,11 @@ pub struct SelectStatement {
     bindings: BindingsList,
 }
 
+impl Aliasable for SelectStatement {}
+
 impl Queryable for SelectStatement {}
+
+impl ReturnableSelect for SelectStatement {}
 
 impl Conditional for SelectStatement {
     fn get_condition_query_string(&self) -> String {
@@ -1121,4 +1126,33 @@ impl Buildable for SelectStatement {
     }
 }
 
-impl ReturnableSelect for SelectStatement {}
+#[test]
+fn test_field_with_operation_alias() {
+    let canadian_cities = AliasName::new("legal_age");
+    let name = Field::new("name");
+    let age = Field::new("age");
+    let city = Field::new("city");
+    let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+    let statement = select(All)
+        .from(fake_id)
+        .where_(
+            cond(city.is("Prince Edward Island"))
+                .and(city.is("NewFoundland"))
+                .or(city.like("Toronto")),
+        )
+        .order_by(order(&age).numeric())
+        .limit(153)
+        .start(10)
+        .parallel();
+
+    let statement_aliased = statement.__as__(canadian_cities);
+
+    assert_eq!(
+        statement_aliased.fine_tune_params(),
+        "SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL AS legal_age"
+    );
+    assert_eq!(
+        statement_aliased.to_raw().to_string(),
+        "SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL AS legal_age"
+    );
+}

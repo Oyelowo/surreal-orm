@@ -80,7 +80,7 @@ where
 {
     fn __as__(&self, alias: impl Into<AliasName>) -> Alias {
         let alias: AliasName = alias.into();
-        let graph_string = format!("{} AS {}", self.build(), &alias);
+        let graph_string = format!("{} AS {}", self.build().trim_end_matches(";"), &alias);
 
         Alias {
             name: alias,
