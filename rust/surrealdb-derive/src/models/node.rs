@@ -225,18 +225,6 @@ impl ToTokens for NodeToken{
                     }
                 }
 
-                // impl #crate_name::Parametric for #aliases_struct_name {
-                //     fn get_bindings(&self) -> #crate_name::BindingsList {
-                //         vec![]
-                //     }
-                // }
-                //
-                // impl #crate_name::Buildable for #aliases_struct_name {
-                //     fn build(&self) -> ::std::string::String {
-                //        "".into()
-                //     }
-                // }
-                //
                 impl #crate_name::Aliasable for #struct_name_ident {}
             
                 impl #crate_name::Schemaful for #struct_name_ident {

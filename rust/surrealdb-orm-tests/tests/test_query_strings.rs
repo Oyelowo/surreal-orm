@@ -25,12 +25,10 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
-use surrealdb_orm::ToRaw;
+use surrealdb_orm::*;
 use surrealdb_orm::{
     array, cond,
     statements::{order, relate, select},
-    All, Buildable, Empty, Erroneous, Field, LinkMany, LinkOne, LinkSelf, Operatable, Parametric,
-    RecordId, Relate, Runnable, SurrealId, SurrealdbEdge, SurrealdbNode,
 };
 use test_case::test_case;
 // use surrealdb_derive::{SurrealdbEdge, SurrealdbNode};
@@ -175,7 +173,6 @@ fn multiplication_tests1() {
         unoBook,
         course,
         semCoures,
-        writtenBooks,
         age,
         ..
     } = &Student::schema();
@@ -199,7 +196,7 @@ fn multiplication_tests1() {
         .bestFriend(Empty)
         .writes__(wrt.timeWritten.equal("12:00"))
         .book(bk.content.contains("Oyelowo in Uranus"))
-        .__as__(st.writtenBooks);
+        .__as__(Student::aliases().writtenBooks);
 
     // assert_eq!(written_book_selection, "34".to_string());
 
@@ -227,7 +224,7 @@ fn multiplication_tests1() {
         .bestFriend(Empty)
         .writes__(wrt.timeWritten.equal("12:00"))
         .book(bk.content.contains("Oyelowo in Uranus"))
-        .__as__(st.writtenBooks);
+        .__as__(Student::aliases().writtenBooks);
 
     let rer = "".to_string().is_empty();
 

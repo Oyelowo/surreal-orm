@@ -154,6 +154,16 @@ fn test_relation_graph_with_alias() {
         .book(&book_id)
         .__as__(Student::aliases().writtenBooks);
 
+    assert_eq!(
+        x.fine_tune_params(),
+        "$_param_00000001->writes->$_param_00000002 AS writtenBooks"
+    );
+
+    assert_eq!(
+        x.clone().to_raw().build(),
+        "student:1->writes->book:2 AS writtenBooks"
+    );
+
     assert_eq!(x.get_errors().len(), 0);
     let errors: Vec<String> = vec![];
     assert_eq!(x.get_errors(), errors);
