@@ -4,6 +4,7 @@ use crate::{
     array,
     traits::{Binding, Buildable, Operatable, Operation, Parametric, ToRaw},
     types::{cond, ArrayLike, Empty, Field, Filter, Function, Param},
+    AliasName, Aliasable,
 };
 use surrealdb::sql;
 
@@ -159,6 +160,15 @@ fn test_count_macro_withoout_arguments() {
     let result = count!();
     assert_eq!(result.fine_tune_params(), "count()");
     assert_eq!(result.to_raw().to_string(), "count()");
+}
+
+#[test]
+fn test_count_macro_withoout_arguments_aliased() {
+    let head_count = AliasName::new("head_count");
+    let result = count!().__as__(head_count);
+
+    assert_eq!(result.fine_tune_params(), "count() AS head_count");
+    assert_eq!(result.to_raw().to_string(), "count() AS head_count");
 }
 
 #[test]
