@@ -146,12 +146,9 @@ fn test_relation_graph_with_alias() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
 
-    // Student::aliases();
-    // Student::aliases().writtenBooks;
-    // Student::schema()
-    let x = Student::with(&student_id)
+    let x = Student::with(student_id)
         .writes__(Empty)
-        .book(&book_id)
+        .book(book_id)
         .__as__(Student::aliases().writtenBooks);
 
     assert_eq!(
