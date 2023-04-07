@@ -337,7 +337,7 @@ impl SchemaFieldsProperties {
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
                 
-                let referenced_node_meta = match relationship {
+                let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
                             ReferencedNodeMeta::default()
@@ -399,14 +399,23 @@ impl SchemaFieldsProperties {
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
-                store.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                if let RelationType::Relate(_) =  relationship {
+                    store.aliases_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
+                    
+                    store.aliases_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                }
+                else{
+                    store.schema_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                    store.schema_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                    
+                    store.schema_struct_fields_names_kv_empty
+                        .push(quote!(#field_ident_normalised: "".into(),));
+                }
   
-                store.schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                
-                store.schema_struct_fields_names_kv_empty
-                    .push(quote!(#field_ident_normalised: "".into(),));
 
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
