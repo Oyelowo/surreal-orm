@@ -9,7 +9,10 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
-use crate::types::{ArrayLike, GeometryLike, NumberLike, Ordinal};
+use crate::{
+    types::{ArrayLike, GeometryLike, NumberLike, Ordinal},
+    Aliasable,
+};
 
 use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
 
@@ -65,6 +68,8 @@ impl Parametric for Operation {
         self.bindings.to_vec()
     }
 }
+
+impl Aliasable for Operation {}
 
 impl Operatable for Operation {}
 
