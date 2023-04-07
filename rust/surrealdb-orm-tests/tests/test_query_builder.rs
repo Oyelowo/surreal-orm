@@ -146,24 +146,24 @@ fn test_relation_graph_with_alias() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
 
-    let x = Student::with(student_id)
+    let aliased_connection = Student::with(student_id)
         .writes__(Empty)
         .book(book_id)
         .__as__(Student::aliases().writtenBooks);
 
     assert_eq!(
-        x.fine_tune_params(),
+        aliased_connection.fine_tune_params(),
         "$_param_00000001->writes->$_param_00000002 AS writtenBooks"
     );
 
     assert_eq!(
-        x.clone().to_raw().build(),
+        aliased_connection.clone().to_raw().build(),
         "student:1->writes->book:2 AS writtenBooks"
     );
 
-    assert_eq!(x.get_errors().len(), 0);
+    assert_eq!(aliased_connection.get_errors().len(), 0);
     let errors: Vec<String> = vec![];
-    assert_eq!(x.get_errors(), errors);
+    assert_eq!(aliased_connection.get_errors(), errors);
 }
 
 #[test]
