@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+pub(crate) mod alias;
 pub(crate) mod array;
 pub(crate) mod clause;
 pub(crate) mod crud_type;
@@ -27,6 +28,7 @@ pub(crate) mod surreal_id;
 pub(crate) mod token_target;
 pub(crate) mod value;
 
+pub use alias::*;
 pub use array::*;
 pub use clause::*;
 pub use crud_type::*;
