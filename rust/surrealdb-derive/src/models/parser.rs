@@ -681,6 +681,7 @@ impl NodeEdgeMetadataStore {
              quote!(
                 #( #imports) *
                  
+                // Edge to Node
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
@@ -729,13 +730,15 @@ impl NodeEdgeMetadataStore {
                     impl #edge_name_as_struct_with_direction_ident {
                         #( #foreign_node_connection_method) *
                  
+                        // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
+                        // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
                             &self,
                             clause: impl Into<#crate_name::Clause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
                             let clause: #crate_name::Clause = clause.into();
                             
-                            // i.e Edge to Node
+                            // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                                 self.get_connection(),
                                 clause,

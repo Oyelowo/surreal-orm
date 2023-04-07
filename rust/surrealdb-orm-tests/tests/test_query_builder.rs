@@ -167,6 +167,37 @@ fn test_relation_graph_with_alias() {
 }
 
 #[test]
+fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
+    // This allows for pattern like this:
+    // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
+    // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
+
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let aliased_connection = Student::with(student_id)
+        .writes__(Empty)
+        .writes__(Empty)
+        .writes__(Where)
+        .book(book_id)
+        .__as__(Student::aliases().writtenBooks);
+
+    assert_eq!(
+        aliased_connection.fine_tune_params(),
+        "$_param_00000001->writes->$_param_00000002 AS writtenBooks"
+    );
+
+    assert_eq!(
+        aliased_connection.clone().to_raw().build(),
+        "student:1->writes->book:2 AS writtenBooks"
+    );
+
+    assert_eq!(aliased_connection.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(aliased_connection.get_errors(), errors);
+}
+
+#[test]
 fn should_contain_error_when_invalid_id_use_in_connection() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();

@@ -6,7 +6,10 @@
  */
 
 use crate::{
-    statements::{select, SelectStatement},
+    statements::{
+        select::{self, Selectables},
+        SelectStatement,
+    },
     traits::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
@@ -31,6 +34,7 @@ pub enum ClauseType {
     Where(Filter),
     Query(SelectStatement),
     Id(SurrealId),
+    Projections(Selectables),
 }
 
 #[derive(Debug, Clone)]
@@ -95,6 +99,10 @@ impl Clause {
                 let param_string = format!("{}", index_bindings.get_param_dollarised());
                 bindings = vec![index_bindings];
                 format!("[{param_string}]")
+            }
+            Projections(projections) => {
+                let bindings = projections.get_bindings();
+                let param_string = format!("{}", index_bindings.get_param_dollarised());
             }
         };
         Self {
