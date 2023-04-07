@@ -84,6 +84,8 @@ impl ToTokens for NodeToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            aliases_struct_fields_types_kv,
+            aliases_struct_fields_names_kv,
             static_assertions,
             mut imports_referenced_node_schema,
             connection_with_field_appended,
@@ -153,6 +155,18 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
+                fn aliases() -> Self::Aliases {
+                    #[derive(Debug, Clone)]
+                    pub struct #struct_name_ident {
+                       #( #aliases_struct_fields_types_kv) *
+                    }
+                
+                    pub fn new() -> Self {
+                        Self {
+                           #( #aliases_struct_fields_names_kv) *
+                        }
+                    }
+                }
                 
                 fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
                     let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
