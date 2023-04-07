@@ -131,7 +131,8 @@ fn should_not_contain_error_when_invalid_id_use_in_connection() {
         time_written: Duration::from_secs(343),
         ..Default::default()
     };
-
+    // Student::aliases();
+    // Student::aliases().
     let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
         .content(write.clone())
         .return_(ReturnType::Before)

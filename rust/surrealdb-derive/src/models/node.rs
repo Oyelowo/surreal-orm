@@ -107,6 +107,7 @@ impl ToTokens for NodeToken{
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
@@ -137,6 +138,7 @@ impl ToTokens for NodeToken{
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
+                type Aliases = #module_name::#aliases_struct_name;
 
                 fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
                     let clause: #crate_name::Clause = clause.into();
@@ -156,16 +158,7 @@ impl ToTokens for NodeToken{
                 }
                 
                 fn aliases() -> Self::Aliases {
-                    #[derive(Debug, Clone)]
-                    pub struct #struct_name_ident {
-                       #( #aliases_struct_fields_types_kv) *
-                    }
-                
-                    pub fn new() -> Self {
-                        Self {
-                           #( #aliases_struct_fields_names_kv) *
-                        }
-                    }
+                    #module_name::#aliases_struct_name::new()
                 }
                 
                 fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
@@ -217,6 +210,19 @@ impl ToTokens for NodeToken{
                     #___________graph_traversal_string: ::std::string::String,
                     #___________bindings: #crate_name::BindingsList,
                     #___________errors: Vec<String>,
+                }
+
+                #[derive(Debug, Clone)]
+                pub struct #aliases_struct_name {
+                   #( #aliases_struct_fields_types_kv) *
+                }
+                
+                impl #aliases_struct_name {
+                    pub fn new() -> Self {
+                        Self {
+                           #( #aliases_struct_fields_names_kv) *
+                        }
+                    }
                 }
 
                 impl #crate_name::Schemaful for #struct_name_ident {
