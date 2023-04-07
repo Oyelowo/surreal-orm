@@ -1127,7 +1127,7 @@ impl Buildable for SelectStatement {
 }
 
 #[test]
-fn test_field_with_operation_alias() {
+fn test_statement_with_alias() {
     let canadian_cities = AliasName::new("legal_age");
     let name = Field::new("name");
     let age = Field::new("age");
