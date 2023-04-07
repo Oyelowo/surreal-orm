@@ -225,6 +225,8 @@ impl ToTokens for NodeToken{
                     }
                 }
 
+                impl #crate_name::Aliasable for #aliases_struct_name {}
+            
                 impl #crate_name::Schemaful for #struct_name_ident {
                     fn get_connection(&self) -> String {
                         self.#___________graph_traversal_string.to_string()
@@ -310,13 +312,13 @@ impl ToTokens for NodeToken{
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
-                        where T: Into<::std::borrow::Cow<'a, #crate_name::Field>>
-                    {
-                        let alias: &#crate_name::Field = &alias.into();
-                        format!("{} AS {}", self, alias.to_string())
-                    }
-                    
+                    // pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
+                    //     where T: Into<::std::borrow::Cow<'a, #crate_name::Field>>
+                    // {
+                    //     let alias: &#crate_name::Field = &alias.into();
+                    //     format!("{} AS {}", self, alias.to_string())
+                    // }
+                    //
                 }
                 
                 #node_edge_metadata_tokens
