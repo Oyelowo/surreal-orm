@@ -19,8 +19,46 @@ pub struct Alias {
     graph_string: String,
 }
 
+impl Parametric for Alias {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Buildable for Alias {
+    fn build(&self) -> String {
+        self.graph_string.to_string()
+    }
+}
+
+impl Alias {
+    // pub fn new(
+    //     name: AliasName,
+    //     aliased: sql::Ident,
+    //     bindings: BindingsList,
+    //     graph_string: String,
+    // ) -> Self {
+    //     Self {
+    //         name,
+    //         aliased,
+    //         bindings,
+    //         graph_string,
+    //     }
+    // }
+
+    pub fn get_alias_name(self) -> AliasName {
+        self.name
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct AliasName(sql::Ident);
+
+impl AliasName {
+    pub fn new(name: impl Into<sql::Ident>) -> Self {
+        Self(name.into())
+    }
+}
 
 impl Deref for AliasName {
     type Target = sql::Ident;
@@ -36,7 +74,7 @@ impl Display for AliasName {
     }
 }
 
-trait Aliasable
+pub trait Aliasable
 where
     Self: Parametric + Buildable,
 {

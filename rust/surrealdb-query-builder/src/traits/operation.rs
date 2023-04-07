@@ -1043,12 +1043,12 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// let query = field.__as__("name_alias");
     /// assert_eq!(query.to_string(), "name AS name_alias");
     /// ```
-    fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
-        Operation {
-            query_string: format!("{} AS {}", self.build(), alias),
-            bindings: self.get_bindings(),
-        }
-    }
+    // fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
+    //     Operation {
+    //         query_string: format!("{} AS {}", self.build(), alias),
+    //         bindings: self.get_bindings(),
+    //     }
+    // }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
     ///

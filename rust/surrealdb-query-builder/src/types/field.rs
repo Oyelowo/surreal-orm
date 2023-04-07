@@ -23,9 +23,12 @@ use surrealdb::{
     sql::{self, Number, Value},
 };
 
-use crate::traits::{
-    Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation, Parametric,
-    ToRaw,
+use crate::{
+    traits::{
+        Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation,
+        Parametric, ToRaw,
+    },
+    AliasName, Aliasable,
 };
 
 use super::Idiomx;
@@ -89,6 +92,8 @@ impl Field {
         }
     }
 }
+
+impl Aliasable for Field {}
 
 impl Conditional for Field {}
 
@@ -200,4 +205,20 @@ fn test_field() {
         "age >= $_param_00000001 <= $_param_00000002"
     );
     assert_eq!(operation.clone().to_raw().to_string(), "age >= 18 <= 56");
+}
+
+#[test]
+fn test_field_alias() {
+    let age = Field::new("age");
+    let age_of_human = AliasName::new("age_of_human");
+
+    assert_eq!(age.__as__(age_of_human).build(), "erer");
+
+    // let operation = age.greater_than_or_equal(18).less_than_or_equal(56);
+    //
+    // assert_eq!(
+    //     operation.fine_tune_params(),
+    //     "age >= $_param_00000001 <= $_param_00000002"
+    // );
+    // assert_eq!(operation.clone().to_raw().to_string(), "age >= 18 <= 56");
 }
