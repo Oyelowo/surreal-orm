@@ -237,7 +237,6 @@ impl ToTokens for EdgeToken {
                             store: ::std::string::String,
                             clause: impl Into<#crate_name::Clause>,
                             arrow_direction: &str,
-                            destination_table_name: ::std::string::String,
                             existing_bindings: #crate_name::BindingsList,
                             existing_errors: Vec<String>,
                         ) -> Self {
