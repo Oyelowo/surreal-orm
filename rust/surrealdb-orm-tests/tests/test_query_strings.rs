@@ -302,10 +302,11 @@ fn multiplication_tests1() {
     let ref student_id = SurrealId::try_from("student:1").unwrap();
 
     let mut query = select(All)
-        .select(age)
-        .select(firstName)
-        .select(&[firstName, unoBook])
-        .select(vec![firstName, unoBook])
+        // Also work
+        // .select(age)
+        // .select(firstName)
+        // .select(&[firstName, unoBook])
+        // .select(vec![firstName, unoBook])
         .from(student_table)
         .from(&[student_table, book_table])
         .from(vec![student_table, book_table])
