@@ -17,6 +17,7 @@ use insta;
 use regex;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
+use std::fmt::{Debug, Display};
 use surrealdb::sql;
 use surrealdb::{
     engine::local::{Db, Mem},
@@ -27,8 +28,6 @@ use surrealdb::{
 use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
 use surrealdb_orm::statements::{order, relate, select};
 use surrealdb_orm::*;
-
-use std::fmt::{Debug, Display};
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
@@ -136,6 +135,31 @@ fn should_not_contain_error_when_invalid_id_use_in_connection() {
         .content(write.clone())
         .return_(ReturnType::Before)
         .parallel();
+
+    assert_eq!(x.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(x.get_errors(), errors);
+}
+
+#[test]
+fn test_relation_graph_with_alias() {
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+
+    let x = Student::with(student_id)
+        .writes__(Empty)
+        .book(book_id)
+        .__as__(Student::aliases().writtenBooks);
+
+    assert_eq!(
+        x.fine_tune_params(),
+        "$_param_00000001->writes->$_param_00000002 AS writtenBooks"
+    );
+
+    assert_eq!(
+        x.clone().to_raw().build(),
+        "student:1->writes->book:2 AS writtenBooks"
+    );
 
     assert_eq!(x.get_errors().len(), 0);
     let errors: Vec<String> = vec![];

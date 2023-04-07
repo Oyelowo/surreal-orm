@@ -149,7 +149,7 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
-
+    
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
@@ -161,6 +161,31 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
+
+    /// Generated example: pub writtenBooks: AliasName,
+    /// This is used when you have a relate attribute signaling a graph with e.g node->edge->node
+    /// The full thing can look like:
+    /// ```
+    ///     #[derive(Debug, Default)]
+    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
+    ///                pub writtenBooks: AliasName,
+    ///          }
+    /// ```
+    pub aliases_struct_fields_types_kv: Vec<TokenStream>,
+
+    /// Generated example: pub writtenBooks: "writtenBooks".into(),
+    /// This is used to build the actual instance of the struct with aliases 
+    /// The full thing can look like and the fields should be in normalized form:
+    /// i.e writtenBooks => writtenBooks if serde camelizes
+    /// ```
+    /// Self {
+    ///                pub writtenBooks: AliasName,
+    /// }
+    /// ```
+    pub aliases_struct_fields_names_kv: Vec<TokenStream>,
+
+    /// list of fields names that are actually serialized and not skipped.
+    pub serialized_alias_name_no_skip: Vec<String>,
 
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
@@ -312,7 +337,7 @@ impl SchemaFieldsProperties {
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
                 
-                let referenced_node_meta = match relationship {
+                let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
                             ReferencedNodeMeta::default()
@@ -374,14 +399,31 @@ impl SchemaFieldsProperties {
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
-                store.schema_struct_fields_types_kv
-                    .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                if let RelationType::Relate(_) =  relationship {
+                    store.aliases_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
+                    
+                    store.aliases_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                }
+                else{
+                    store.schema_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                    store.schema_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                    
+                    store.schema_struct_fields_names_kv_empty
+                        .push(quote!(#field_ident_normalised: "".into(),));
+                    
+                    store.connection_with_field_appended
+                        .push(quote!(
+                                    #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
+                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
+                                            .#____________update_many_bindings(#bindings);
+                                ));
+
+                }
   
-                store.schema_struct_fields_names_kv
-                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                
-                store.schema_struct_fields_names_kv_empty
-                    .push(quote!(#field_ident_normalised: "".into(),));
 
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
@@ -390,13 +432,6 @@ impl SchemaFieldsProperties {
                     store.serialized_field_name_no_skip
                         .push(field_ident_normalised_as_str.to_owned());
                 }
-
-                store.connection_with_field_appended
-                    .push(quote!(
-                                #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
-                                  .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
-                                        .#____________update_many_bindings(#bindings);
-                                ));
 
                 store 
             });

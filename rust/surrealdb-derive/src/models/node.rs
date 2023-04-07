@@ -84,6 +84,8 @@ impl ToTokens for NodeToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            aliases_struct_fields_types_kv,
+            aliases_struct_fields_names_kv,
             static_assertions,
             mut imports_referenced_node_schema,
             connection_with_field_appended,
@@ -105,6 +107,7 @@ impl ToTokens for NodeToken{
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
@@ -135,6 +138,7 @@ impl ToTokens for NodeToken{
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
+                type Aliases = #module_name::#aliases_struct_name;
 
                 fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
                     let clause: #crate_name::Clause = clause.into();
@@ -153,6 +157,9 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
+                fn aliases() -> Self::Aliases {
+                    #module_name::#aliases_struct_name::new()
+                }
                 
                 fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
                     let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
@@ -205,6 +212,21 @@ impl ToTokens for NodeToken{
                     #___________errors: Vec<String>,
                 }
 
+                #[derive(Debug, Clone)]
+                pub struct #aliases_struct_name {
+                   #( #aliases_struct_fields_types_kv) *
+                }
+                
+                impl #aliases_struct_name {
+                    pub fn new() -> Self {
+                        Self {
+                           #( #aliases_struct_fields_names_kv) *
+                        }
+                    }
+                }
+
+                impl #crate_name::Aliasable for #struct_name_ident {}
+            
                 impl #crate_name::Schemaful for #struct_name_ident {
                     fn get_connection(&self) -> String {
                         self.#___________graph_traversal_string.to_string()
@@ -259,7 +281,7 @@ impl ToTokens for NodeToken{
                         clause: impl Into<#crate_name::Clause>,
                         use_table_name: bool,
                         existing_bindings: #crate_name::BindingsList,
-                        existing_errors: Vec<String>,
+                        existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
                         let mut #schema_instance = Self::empty(); 
                         let clause: #crate_name::Clause = clause.into();
@@ -290,13 +312,6 @@ impl ToTokens for NodeToken{
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
-                        where T: Into<::std::borrow::Cow<'a, #crate_name::Field>>
-                    {
-                        let alias: &#crate_name::Field = &alias.into();
-                        format!("{} AS {}", self, alias.to_string())
-                    }
-                    
                 }
                 
                 #node_edge_metadata_tokens

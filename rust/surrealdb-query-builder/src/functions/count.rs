@@ -4,6 +4,7 @@ use crate::{
     array,
     traits::{Binding, Buildable, Operatable, Operation, Parametric, ToRaw},
     types::{cond, ArrayLike, Empty, Field, Filter, Function, Param},
+    AliasName, Aliasable,
 };
 use surrealdb::sql;
 
@@ -162,6 +163,15 @@ fn test_count_macro_withoout_arguments() {
 }
 
 #[test]
+fn test_count_macro_withoout_arguments_aliased() {
+    let head_count = AliasName::new("head_count");
+    let result = count!().__as__(head_count);
+
+    assert_eq!(result.fine_tune_params(), "count() AS head_count");
+    assert_eq!(result.to_raw().to_string(), "count() AS head_count");
+}
+
+#[test]
 fn test_count_macro_with_db_field() {
     let email = Field::new("email");
     let result = count!(email);
@@ -197,6 +207,22 @@ fn test_count_macro_with_complex_field_filter_operation() {
     assert_eq!(
         result.to_raw().to_string(),
         "count((age > 15) AND (email ~ 'oyelowo@example.com'))"
+    );
+}
+
+#[test]
+fn test_count_macro_with_complex_field_filter_operation_aliased() {
+    let email = Field::new("email");
+    let age = Field::new("age");
+    let student_count = AliasName::new("student_count");
+    let result = count!(cond(age.greater_than(15)).and(email.like("oyelowo@example.com"))).__as__(student_count);
+    assert_eq!(
+        result.fine_tune_params(),
+        "count((age > $_param_00000001) AND (email ~ $_param_00000002)) AS student_count"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "count((age > 15) AND (email ~ 'oyelowo@example.com')) AS student_count"
     );
 }
 

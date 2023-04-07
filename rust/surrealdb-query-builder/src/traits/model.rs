@@ -23,8 +23,10 @@ pub trait SurrealdbModel {
 
 pub trait SurrealdbNode: SurrealdbModel + Serialize {
     type Schema;
+    type Aliases;
     type TableNameChecker;
     fn schema() -> Self::Schema;
+    fn aliases() -> Self::Aliases;
     // fn get_key<T: Into<RecordId>>(&self) -> ::std::option::Option<&T>;
     fn get_key<T: From<RecordId>>(self) -> Option<T>;
     // fn get_table_name() -> surrealdb::sql::Table;

@@ -5,27 +5,13 @@
  * Licensed under the MIT license
  */
 
-use bigdecimal::BigDecimal;
-use serde::{
-    de::{value, DeserializeOwned},
-    Serialize,
-};
-use std::{
-    borrow::Cow,
-    cell::{Cell, RefCell},
-    fmt::{format, Display},
-    ops::Deref,
-    rc::Rc,
-};
+use std::borrow::Cow;
 
-use surrealdb::{
-    engine::local::Db,
-    sql::{self, Number, Value},
-};
+use surrealdb::sql::{self, Number, Value};
 
-use crate::traits::{
-    Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation, Parametric,
-    ToRaw,
+use crate::{
+    traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric},
+    AliasName, Aliasable, ToRaw,
 };
 
 use super::Idiomx;
@@ -90,9 +76,12 @@ impl Field {
     }
 }
 
+impl Aliasable for Field {}
+
 impl Conditional for Field {}
 
 impl Operatable for Field {}
+
 impl Erroneous for Field {}
 
 impl Parametric for Field {
@@ -146,6 +135,7 @@ impl<'a> From<Cow<'a, Self>> for Field {
         }
     }
 }
+
 impl<'a> From<&'a Field> for Cow<'a, Field> {
     fn from(value: &'a Field) -> Self {
         Cow::Borrowed(value)
@@ -163,11 +153,13 @@ impl From<String> for Field {
         Self::new(value)
     }
 }
+
 impl From<&Self> for Field {
     fn from(value: &Field) -> Self {
         value.to_owned()
     }
 }
+
 impl From<&str> for Field {
     fn from(value: &str) -> Self {
         let value: sql::Idiom = value.to_string().into();
@@ -200,4 +192,30 @@ fn test_field() {
         "age >= $_param_00000001 <= $_param_00000002"
     );
     assert_eq!(operation.clone().to_raw().to_string(), "age >= 18 <= 56");
+}
+
+#[test]
+fn test_field_alias() {
+    let age = Field::new("age");
+    let age_of_human = AliasName::new("age_of_human");
+
+    assert_eq!(age.__as__(age_of_human).build(), "age AS age_of_human");
+}
+
+#[test]
+fn test_field_with_operation_alias() {
+    let age = Field::new("age");
+    let legal_age = AliasName::new("legal_age");
+
+    let operation = age.greater_than_or_equal(18).less_than_or_equal(56);
+    let operation_aliased = operation.__as__(legal_age);
+
+    assert_eq!(
+        operation_aliased.fine_tune_params(),
+        "age >= $_param_00000001 <= $_param_00000002 AS legal_age"
+    );
+    assert_eq!(
+        operation_aliased.to_raw().to_string(),
+        "age >= 18 <= 56 AS legal_age"
+    );
 }
