@@ -149,7 +149,7 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
-
+    
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
@@ -161,6 +161,31 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
+
+    /// Generated example: pub writtenBooks: AliasName,
+    /// This is used when you have a relate attribute signaling a graph with e.g node->edge->node
+    /// The full thing can look like:
+    /// ```
+    ///     #[derive(Debug, Default)]
+    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
+    ///                pub writtenBooks: AliasName,
+    ///          }
+    /// ```
+    pub aliases_struct_fields_types_kv: Vec<TokenStream>,
+
+    /// Generated example: pub timeWritten: "timeWritten".into(),
+    /// This is used to build the actual instance of the struct with aliases 
+    /// The full thing can look like and the fields should be in normalized form:
+    /// i.e time_written => timeWritten if serde camelizes
+    /// ```
+    /// Self {
+    ///                pub writtenBooks: AliasName,
+    /// }
+    /// ```
+    pub aliases_struct_fields_names_kv: Vec<TokenStream>,
+
+    /// list of fields names that are actually serialized and not skipped.
+    pub serialized_alias_name_no_skip: Vec<String>,
 
     /// Field names after taking into consideration
     /// serde serialized renaming or casings
