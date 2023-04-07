@@ -729,21 +729,21 @@ impl NodeEdgeMetadataStore {
                     impl #edge_name_as_struct_with_direction_ident {
                         #( #foreign_node_connection_method) *
                  
-                    pub fn #edge_name_as_method_ident(
-                        &self,
-                        clause: impl Into<#crate_name::Clause>,
-                    ) -> #edge_name_as_struct_with_direction_ident {
-                        let clause: #crate_name::Clause = clause.into();
-                        
-                        // i.e Edge to Node
-                        #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
-                            self.get_connection(),
-                            clause,
-                            #arrow,
-                            self.get_bindings(),
-                            self.get_errors()
-                        ).into()
-                    }
+                        pub fn #edge_name_as_method_ident(
+                            &self,
+                            clause: impl Into<#crate_name::Clause>,
+                        ) -> #edge_name_as_struct_with_direction_ident {
+                            let clause: #crate_name::Clause = clause.into();
+                            
+                            // i.e Edge to Node
+                            #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
+                                self.get_connection(),
+                                clause,
+                                #arrow,
+                                self.get_bindings(),
+                                self.get_errors()
+                            ).into()
+                        }
                     }
                 }
                 
