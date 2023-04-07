@@ -1129,7 +1129,6 @@ impl Buildable for SelectStatement {
 #[test]
 fn test_statement_with_alias() {
     let canadian_cities = AliasName::new("legal_age");
-    let name = Field::new("name");
     let age = Field::new("age");
     let city = Field::new("city");
     let fake_id = SurrealId::try_from("user:oyelowo").unwrap();

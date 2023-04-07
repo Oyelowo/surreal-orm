@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use crate::traits::{BindingsList, Buildable, Parametric};
+use crate::{
+    traits::{BindingsList, Buildable, Parametric},
+    Aliasable,
+};
 
 #[derive(Debug, Clone)]
 pub struct Function {
@@ -25,3 +28,5 @@ impl Buildable for Function {
         self.query_string.clone()
     }
 }
+
+impl Aliasable for Function {}
