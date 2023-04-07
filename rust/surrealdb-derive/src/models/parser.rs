@@ -173,10 +173,10 @@ pub struct SchemaFieldsProperties {
     /// ```
     pub aliases_struct_fields_types_kv: Vec<TokenStream>,
 
-    /// Generated example: pub timeWritten: "timeWritten".into(),
+    /// Generated example: pub writtenBooks: "writtenBooks".into(),
     /// This is used to build the actual instance of the struct with aliases 
     /// The full thing can look like and the fields should be in normalized form:
-    /// i.e time_written => timeWritten if serde camelizes
+    /// i.e writtenBooks => writtenBooks if serde camelizes
     /// ```
     /// Self {
     ///                pub writtenBooks: AliasName,
