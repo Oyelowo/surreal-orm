@@ -2,13 +2,14 @@ use std::fmt::Display;
 
 use crate::{
     traits::{BindingsList, Buildable, Parametric},
-    Aliasable,
+    Aliasable, Erroneous, ErrorList,
 };
 
 #[derive(Debug, Clone)]
 pub struct Function {
     pub query_string: String,
     pub bindings: BindingsList,
+    pub errors: ErrorList,
 }
 
 impl Parametric for Function {
@@ -26,6 +27,12 @@ impl Display for Function {
 impl Buildable for Function {
     fn build(&self) -> String {
         self.query_string.clone()
+    }
+}
+
+impl Erroneous for Function {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
     }
 }
 

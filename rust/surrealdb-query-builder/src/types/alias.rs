@@ -9,14 +9,21 @@ use std::{fmt::Display, ops::Deref};
 
 use surrealdb::sql;
 
-use crate::{BindingsList, Buildable, Parametric};
+use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric};
 
 #[derive(Debug, Clone)]
 pub struct Alias {
     name: AliasName,
     aliased: sql::Ident,
     bindings: BindingsList,
+    errors: ErrorList,
     graph_string: String,
+}
+
+impl Erroneous for Alias {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
 }
 
 impl Parametric for Alias {
@@ -82,7 +89,7 @@ impl Display for AliasName {
 
 pub trait Aliasable
 where
-    Self: Parametric + Buildable,
+    Self: Parametric + Buildable + Erroneous,
 {
     fn __as__(&self, alias: impl Into<AliasName>) -> Alias {
         let alias: AliasName = alias.into();
@@ -92,6 +99,7 @@ where
             name: alias,
             aliased: self.build().into(),
             bindings: self.get_bindings(),
+            errors: self.get_errors(),
             graph_string,
         }
     }

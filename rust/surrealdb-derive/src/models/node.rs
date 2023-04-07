@@ -237,7 +237,7 @@ impl ToTokens for NodeToken{
                 //     }
                 // }
                 //
-                // impl #crate_name::Aliasable for #aliases_struct_name {}
+                impl #crate_name::Aliasable for #struct_name_ident {}
             
                 impl #crate_name::Schemaful for #struct_name_ident {
                     fn get_connection(&self) -> String {
