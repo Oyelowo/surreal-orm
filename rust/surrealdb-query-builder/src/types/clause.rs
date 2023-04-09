@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use surrealdb::sql;
 
 use crate::{
@@ -17,7 +19,7 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
     types::{cond, Param, Table},
-    Operation,
+    Operation, Tables,
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -38,57 +40,7 @@ pub enum ClauseType {
     Where(Filter),
     Query(SelectStatement),
     Id(SurrealId),
-    AnyEdge(AnyEdge),
-}
-
-#[derive(Debug, Clone)]
-pub struct AnyEdge {
-    edge_tables: Vec<Table>,
-    where_: Option<String>,
-    bindings: BindingsList,
-}
-
-impl AnyEdge {
-    pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
-        self.bindings.extend(condition.get_bindings());
-        let condition = Filter::new(condition);
-        self.where_ = Some(condition.to_string());
-        self
-    }
-}
-
-impl Buildable for AnyEdge {
-    fn build(&self) -> String {
-        let mut query = format!(
-            "{} ",
-            self.edge_tables
-                .to_vec()
-                .into_iter()
-                .map(|t| t.to_string())
-                .collect::<Vec<_>>()
-                .join(", ")
-        );
-
-        if let Some(where_) = &self.where_ {
-            query = format!("{} WHERE {}", query, where_);
-        }
-
-        query
-    }
-}
-
-impl Parametric for AnyEdge {
-    fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
-    }
-}
-
-pub fn any_edge(edges: impl Into<Vec<Table>>) -> AnyEdge {
-    AnyEdge {
-        edge_tables: edges.into(),
-        where_: None,
-        bindings: vec![],
-    }
+    AnyEdgeFilter(AnyEdgeFilter),
 }
 
 #[derive(Debug, Clone)]
@@ -154,7 +106,7 @@ impl Clause {
                 bindings = vec![index_bindings];
                 format!("[{param_string}]")
             }
-            AnyEdge(edge_tables) => {
+            AnyEdgeFilter(edge_tables) => {
                 let build = format!("{}", edge_tables.build());
                 bindings = vec![];
                 format!("({build})")
@@ -185,7 +137,7 @@ impl Clause {
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.build(),
-            ClauseType::AnyEdge(projections) => projections.build(),
+            ClauseType::AnyEdgeFilter(projections) => projections.build(),
             ClauseType::Id(id) => self
                 .get_bindings()
                 .pop()
@@ -347,6 +299,61 @@ impl std::fmt::Display for Index {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct AnyEdgeFilter {
+    edge_tables: Vec<Table>,
+    where_: Option<String>,
+    bindings: BindingsList,
+}
+
+impl AnyEdgeFilter {
+    pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
+        self.bindings.extend(condition.get_bindings());
+        let condition = Filter::new(condition);
+        self.where_ = Some(condition.to_string());
+        self
+    }
+}
+
+impl Buildable for AnyEdgeFilter {
+    fn build(&self) -> String {
+        let mut query = format!(
+            "{} ",
+            self.edge_tables
+                .to_vec()
+                .into_iter()
+                .map(|t| t.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+
+        if let Some(where_) = &self.where_ {
+            query = format!("{} WHERE {}", query, where_);
+        }
+
+        query
+    }
+}
+
+impl Parametric for AnyEdgeFilter {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl From<AnyEdgeFilter> for Clause {
+    fn from(value: AnyEdgeFilter) -> Self {
+        Self::new(ClauseType::AnyEdgeFilter(value))
+    }
+}
+
+pub fn any_edge(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
+    AnyEdgeFilter {
+        edge_tables: edges.into().into(),
+        where_: None,
+        bindings: vec![],
+    }
+}
 #[test]
 fn test_display_clause_with_empty() {
     // test empty clause

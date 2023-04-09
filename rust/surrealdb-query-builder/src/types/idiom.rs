@@ -72,6 +72,47 @@ impl Deref for Table {
         &self.0
     }
 }
+
+impl From<&Table> for Table {
+    fn from(value: &Table) -> Self {
+        Self(value.clone().into())
+    }
+}
+
+pub struct Tables(Vec<Table>);
+
+impl From<Vec<Table>> for Tables {
+    fn from(value: Vec<Table>) -> Self {
+        todo!()
+    }
+}
+
+impl<'a, const N: usize> From<&[Table; N]> for Tables {
+    fn from(value: &[Table; N]) -> Self {
+        Self(value.to_vec())
+    }
+}
+
+impl<'a, const N: usize> From<&[&Table; N]> for Tables {
+    fn from(value: &[&Table; N]) -> Self {
+        Self(value.map(Into::into).to_vec())
+    }
+}
+
+impl From<Tables> for Vec<Table> {
+    fn from(value: Tables) -> Self {
+        value.0
+    }
+}
+
+// impl Deref for Tables {
+//     type Target = Vec<Table>;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
 macro_rules! impl_new_for_all {
     ($($types_:ty),*) => {
         $(

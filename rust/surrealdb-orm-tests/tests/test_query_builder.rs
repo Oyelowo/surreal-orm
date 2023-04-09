@@ -174,15 +174,16 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
-    let likes = Field::new("likes");
+    let likes = Table::new("likes");
     let writes = StudentWritesBook::table_name();
+    let timeWritten = Field::new("timeWritten");
 
     // let knows = Field::writes("influencer");
 
     let aliased_connection = Student::with(student_id)
         .writes__(Empty)
         .writes__(Empty)
-        .writes__(vec![writes, likes])
+        .writes__(any_edge(&[writes, likes]).where_(timeWritten.less_than_or_equal(50)))
         .book(book_id)
         .__as__(Student::aliases().writtenBooks);
 
