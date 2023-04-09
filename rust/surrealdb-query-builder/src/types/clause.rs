@@ -5,9 +5,12 @@
  * Licensed under the MIT license
  */
 
+use surrealdb::sql;
+
 use crate::{
+    array,
     statements::{
-        select::{self, Selectables},
+        select::{select, Selectables},
         SelectStatement,
     },
     traits::{
@@ -25,6 +28,7 @@ pub fn where_(condition: impl Conditional) -> Filter {
     }
     Filter::new(condition)
 }
+
 #[derive(Debug, Clone)]
 pub enum ClauseType {
     All,
@@ -34,7 +38,57 @@ pub enum ClauseType {
     Where(Filter),
     Query(SelectStatement),
     Id(SurrealId),
-    Projections(Selectables),
+    AnyEdge(AnyEdge),
+}
+
+#[derive(Debug, Clone)]
+pub struct AnyEdge {
+    edge_tables: Vec<Table>,
+    where_: Option<String>,
+    bindings: BindingsList,
+}
+
+impl AnyEdge {
+    pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
+        self.bindings.extend(condition.get_bindings());
+        let condition = Filter::new(condition);
+        self.where_ = Some(condition.to_string());
+        self
+    }
+}
+
+impl Buildable for AnyEdge {
+    fn build(&self) -> String {
+        let mut query = format!(
+            "{} ",
+            self.edge_tables
+                .to_vec()
+                .into_iter()
+                .map(|t| t.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+
+        if let Some(where_) = &self.where_ {
+            query = format!("{} WHERE {}", query, where_);
+        }
+
+        query
+    }
+}
+
+impl Parametric for AnyEdge {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+fn any_edge(edges: impl Into<Vec<Table>>) -> AnyEdge {
+    AnyEdge {
+        edge_tables: edges.into(),
+        where_: None,
+        bindings: vec![],
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -100,9 +154,9 @@ impl Clause {
                 bindings = vec![index_bindings];
                 format!("[{param_string}]")
             }
-            Projections(projections) => {
-                let build = format!("{}", projections.build());
-                bindings = projections.get_bindings();
+            AnyEdge(edge_tables) => {
+                let build = format!("{}", edge_tables.build());
+                bindings = vec![];
                 format!("({build})")
             }
         };
@@ -131,7 +185,7 @@ impl Clause {
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.build(),
-            ClauseType::Projections(projections) => projections.build(),
+            ClauseType::AnyEdge(projections) => projections.build(),
             ClauseType::Id(id) => self
                 .get_bindings()
                 .pop()
@@ -208,13 +262,6 @@ impl From<&SelectStatement> for Clause {
     fn from(value: &SelectStatement) -> Self {
         // Self::Query(value.to_owned().into())
         Self::new(ClauseType::Query(value.clone()))
-    }
-}
-
-impl<T: Into<Selectables>> From<T> for Clause {
-    fn from(value: T) -> Self {
-        let selectables = value.into();
-        Self::new(ClauseType::Projections(selectables))
     }
 }
 
@@ -386,4 +433,47 @@ fn test_display_clause_with_index_param() {
     let index_clause = Clause::from(index(position));
     assert_eq!(index_clause.fine_tune_params(), "[$_param_00000001]");
     assert_eq!(format!("{}", index_clause.to_raw()), "[$position]");
+}
+
+#[test]
+fn test_display_clause_with_any_edge_condition_simple() {
+    let writes = Table::new("writes");
+    let reads = Table::new("reads");
+    let purchased = Table::new("purchased");
+    let amount = Field::new("amount");
+
+    let age_edge_condition =
+        any_edge(vec![writes, reads, purchased]).where_(amount.less_than_or_equal(120));
+
+    assert_eq!(
+        age_edge_condition.fine_tune_params(),
+        "writes, reads, purchased  WHERE amount <= $_param_00000001"
+    );
+    assert_eq!(
+        format!("{}", age_edge_condition.to_raw()),
+        "writes, reads, purchased  WHERE amount <= 120"
+    );
+}
+
+#[test]
+fn test_display_clause_with_any_edge_condition_complex() {
+    let writes = Table::new("writes");
+    let reads = Table::new("reads");
+    let purchased = Table::new("purchased");
+    let city = Field::new("city");
+
+    let age_edge_condition = any_edge(vec![writes, reads, purchased]).where_(
+        cond(city.is("Prince Edward Island"))
+            .and(city.is("NewFoundland"))
+            .or(city.like("Toronto")),
+    );
+
+    assert_eq!(
+        age_edge_condition.fine_tune_params(),
+        "writes, reads, purchased  WHERE (city IS $_param_00000001) AND (city IS $_param_00000002) OR (city ~ $_param_00000003)"
+    );
+    assert_eq!(
+        format!("{}", age_edge_condition.to_raw()),
+        "writes, reads, purchased  WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto')"
+    );
 }
