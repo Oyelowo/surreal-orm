@@ -83,7 +83,7 @@ impl Parametric for AnyEdge {
     }
 }
 
-fn any_edge(edges: impl Into<Vec<Table>>) -> AnyEdge {
+pub fn any_edge(edges: impl Into<Vec<Table>>) -> AnyEdge {
     AnyEdge {
         edge_tables: edges.into(),
         where_: None,
