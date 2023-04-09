@@ -137,7 +137,9 @@ impl Clause {
     pub fn format_with_model(&self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.build(),
-            ClauseType::AnyEdgeFilter(edge_filters) => format!("({})", edge_filters.build()),
+            ClauseType::AnyEdgeFilter(edge_filters) => {
+                format!("({table_name}, {})", edge_filters.build())
+            }
             ClauseType::Id(id) => self
                 .get_bindings()
                 .pop()
