@@ -83,7 +83,7 @@ pub struct Tables(Vec<Table>);
 
 impl From<Vec<Table>> for Tables {
     fn from(value: Vec<Table>) -> Self {
-        todo!()
+        Self(value)
     }
 }
 
