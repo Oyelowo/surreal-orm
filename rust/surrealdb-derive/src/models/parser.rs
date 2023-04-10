@@ -534,6 +534,7 @@ impl NodeEdgeMetadataStore {
         
         let ref destination_node_table_name =
             TokenStream::from(&relation_attributes.node_table_name);
+        let ref destination_node_table_name_str =  destination_node_table_name.to_string();
 
         let ref edge_direction = relation_attributes.edge_direction;
         let arrow = format!("{}", &edge_direction);
@@ -578,7 +579,7 @@ impl NodeEdgeMetadataStore {
                 pub fn #destination_node_table_name(self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
                     // let writes = 545;
                     let clause: #crate_name::NodeClause = clause.into();
-                    let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
+                    let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 
                     #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self,
