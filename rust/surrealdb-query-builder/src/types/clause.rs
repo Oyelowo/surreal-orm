@@ -55,7 +55,7 @@ struct Clause {
     // edge_table_name: Option<String>,
     arrow: Option<String>,
     model_or_field_name: Option<ModelOrFieldName>,
-    // query_string: String,
+    query_string: String,
     bindings: BindingsList,
     errors: ErrorList,
 }
@@ -72,7 +72,7 @@ impl Buildable for Clause {
         };
 
         let clause = match self.kind.clone() {
-            ClauseType::Query(q) => self.build(),
+            ClauseType::Query(q) => q.build(),
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!(
                     "{}({}, {})",
@@ -87,7 +87,7 @@ impl Buildable for Clause {
                 .pop()
                 .expect("Id must have only one binding. Has to be an error. Please report.")
                 .get_param_dollarised(),
-            _ => format!("{}{}", connection_name, self),
+            _ => format!("{}{}", connection_name, self.query_string),
         };
 
         let connection = self
@@ -315,7 +315,7 @@ impl Clause {
 
         Self {
             kind,
-            // query_string,
+            query_string,
             bindings,
             arrow: None,
             model_or_field_name: None,

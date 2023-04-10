@@ -578,7 +578,6 @@ impl NodeEdgeMetadataStore {
                     // let writes = 545;
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_table(#edge_table_name_str);
-                    // let clause = clause.with_table("writes");
 
                     #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self,
@@ -732,19 +731,23 @@ impl NodeEdgeMetadataStore {
                     
                     impl #crate_name::Buildable for #edge_name_as_struct_with_direction_ident {
                         fn build(&self) -> ::std::string::String {
-                            self.build()
+                            self.0.build()
+                     // "".to_string()
                         }
                     }
             
                     impl #crate_name::Parametric for #edge_name_as_struct_with_direction_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
-                            self.get_bindings()
+                     // vec![]
+                            self.0.get_bindings()
                         }
                     }
                     
                     impl #crate_name::Erroneous for #edge_name_as_struct_with_direction_ident {
                         fn get_errors(&self) -> Vec<::std::string::String> {
-                            self.get_errors()
+                     // vec![]
+                            self.0.get_errors()
+                     // vec![]
                         }
                     }
                     impl ::std::ops::Deref for #edge_name_as_struct_with_direction_ident {
@@ -764,9 +767,9 @@ impl NodeEdgeMetadataStore {
                             self,
                             clause: impl Into<#crate_name::EdgeClause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
-                            let writes = "Rer";
+                            // let writes = "Rer";
                             let clause: #crate_name::EdgeClause = clause.into();
-                            let clause = clause.with_arrow(#arrow).with_table(#edge_table_name);
+                            let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
                             
                             // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
