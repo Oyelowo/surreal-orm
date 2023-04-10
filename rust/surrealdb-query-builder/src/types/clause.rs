@@ -46,6 +46,7 @@ pub enum ClauseType {
 #[derive(Debug, Clone)]
 pub struct Clause {
     kind: ClauseType,
+    edge_table_name: Option<String>,
     arrow: Option<String>,
     query_string: String,
     bindings: BindingsList,
@@ -116,21 +117,23 @@ impl Clause {
 
         Self {
             kind,
-            arrow: None,
             query_string,
             bindings,
+            arrow: None,
+            edge_table_name: None,
         }
     }
 
     pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
         self.arrow = Some(arrow.into());
         self
-
-        // Self{
-        //     ..self,
-        //     arrow: Some(arrow),
-        // }
     }
+
+    pub fn with_edge(mut self, edge_table_name: impl Into<String>) -> Self {
+        self.edge_table_name = Some(edge_table_name.into());
+        self
+    }
+
     pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
         let mut errors = vec![];
         if let ClauseType::Id(id) = self.kind.clone() {
