@@ -234,39 +234,41 @@ impl ToTokens for EdgeToken {
                         }
                         
                         pub fn #__________connect_edge_to_graph_traversal_string(
-                            store: ::std::string::String,
-                            clause: impl Into<#crate_name::Clause>,
-                            arrow_direction: &str,
-                            existing_bindings: #crate_name::BindingsList,
-                            existing_errors: Vec<String>,
+                            connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
+                            // store: ::std::string::String,
+                            clause: impl Into<#crate_name::EdgeClause>,
+                            // arrow_direction: &str,
+                            // existing_bindings: #crate_name::BindingsList,
+                            // existing_errors: Vec<String>,
                         ) -> Self {
                             let mut schema_instance = Self::empty();
-                            let clause: #crate_name::Clause = clause.into();
-                            let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
+                            let clause: #crate_name::EdgeClause = clause.into();
+                            let bindings = [&connection.get_bindings()[..], &clause.get_bindings()[..]].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
-                            let clause_errors = clause.get_errors(#table_name_str.into());
-                            let errors = [&existing_errors[..], &clause_errors[..]].concat();
+                            // let clause_errors = clause.get_errors(#table_name_str.into());
+                            let errors = [&connection.get_errors()[..], &clause.get_errors()[..]].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
-                            let origin_table_name = #table_name_str.to_string();
+                            // let origin_table_name = #table_name_str.to_string();
                         
                             let schema_edge_str_with_arrow = format!(
-                                "{}{}{}{}",
-                                store.as_str(),
-                                arrow_direction,
+                                "{}{}",
+                                connection.build(),
+                                // arrow_direction,
                                 // origin_table_name,
-                                clause.format_with_model(#table_name_str),
-                                arrow_direction,
+                                // clause.format_with_model(#table_name_str),
+                                clause.build(),
+                                // arrow_direction,
                                 // destination_table_name,
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
-                            let #___________graph_traversal_string = &#schema_instance
-                                .#___________graph_traversal_string
-                                .replace(arrow_direction, "");
+                            // let #___________graph_traversal_string = &#schema_instance
+                            //     .#___________graph_traversal_string
+                            //     .replace(arrow_direction, "");
 
                             #( #connection_with_field_appended) *
                             

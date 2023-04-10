@@ -19,7 +19,7 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
     types::{cond, Param, Table},
-    Operation, Tables,
+    ErrorList, Operation, Tables,
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -44,17 +44,85 @@ pub enum ClauseType {
 }
 
 #[derive(Debug, Clone)]
-pub struct Clause {
+enum ModelOrFieldName {
+    Model(String),
+    Field(String),
+}
+
+#[derive(Debug, Clone)]
+struct Clause {
     kind: ClauseType,
-    edge_table_name: Option<String>,
+    // edge_table_name: Option<String>,
     arrow: Option<String>,
-    query_string: String,
+    model_or_field_name: Option<ModelOrFieldName>,
+    // query_string: String,
     bindings: BindingsList,
+    errors: ErrorList,
 }
 
 impl Buildable for Clause {
     fn build(&self) -> String {
-        self.query_string.to_string()
+        // let edge_table_name = self.clone().edge_table_name.unwrap_or_default();
+        let connection_name = match self.model_or_field_name {
+            Some(name) => match name {
+                ModelOrFieldName::Model(m) => m,
+                ModelOrFieldName::Field(f) => f,
+            },
+            None => "".to_string(),
+        };
+
+        let clause = match self.kind.clone() {
+            ClauseType::Query(q) => self.build(),
+            ClauseType::AnyEdgeFilter(edge_filters) => {
+                format!(
+                    "{}({}, {})",
+                    self.arrow.as_ref().unwrap_or(&"".to_string()),
+                    connection_name,
+                    edge_filters.build(),
+                    // self.arrow.as_ref().unwrap_or(&"".to_string()),
+                )
+            }
+            ClauseType::Id(id) => self
+                .get_bindings()
+                .pop()
+                .expect("Id must have only one binding. Has to be an error. Please report.")
+                .get_param_dollarised(),
+            _ => format!("{}{}", connection_name, self),
+        };
+
+        let connection = self.arrow.map_or(clause, |a| format!("{a}{clause}"));
+        connection
+    }
+}
+
+struct NodeClause(Clause);
+
+impl<T> From<T> for NodeClause
+where
+    T: Into<Clause>,
+{
+    fn from(value: T) -> Self {
+        let clause: Clause = value.into();
+        Self(clause)
+    }
+}
+
+struct EdgeClause(Clause);
+
+// impl EdgeClause {
+//     pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
+//         self.0.arrow = Some(arrow.into());
+//         self
+//     }
+// }
+
+impl<T> From<T> for EdgeClause
+where
+    T: Into<Clause>,
+{
+    fn from(value: T) -> Self {
+        let clause: Clause = value.into();
+        Self(clause)
     }
 }
 
@@ -74,6 +142,12 @@ impl From<&Self> for Clause {
 impl Parametric for Clause {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
+    }
+}
+
+impl Erroneous for Clause {
+    fn get_errors(&self) -> ErrorList {
+        vec![]
     }
 }
 
@@ -117,10 +191,12 @@ impl Clause {
 
         Self {
             kind,
-            query_string,
+            // query_string,
             bindings,
             arrow: None,
-            edge_table_name: None,
+            model_or_field_name: None,
+            // edge_table_name: None,
+            errors: todo!(),
         }
     }
 
@@ -129,14 +205,23 @@ impl Clause {
         self
     }
 
-    pub fn with_edge(mut self, edge_table_name: impl Into<String>) -> Self {
-        self.edge_table_name = Some(edge_table_name.into());
-        self
+    pub fn with_table_name(mut self, table_name: impl Into<String>) -> Self {
+        let table_name: String = table_name.into();
+        let mut updated_clause = self.update_errors(&table_name);
+        updated_clause.model_or_field_name = Some(ModelOrFieldName::Model(table_name));
+        updated_clause
     }
 
-    pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
+    pub fn with_field_name(mut self, field_name: impl Into<String>) -> Self {
+        let field_name: String = field_name.into();
+        let mut updated_clause = self.update_errors(&field_name);
+        updated_clause.model_or_field_name = Some(ModelOrFieldName::Field(field_name));
+        updated_clause
+    }
+
+    fn update_errors(mut self, table_name: &str) -> Self {
         let mut errors = vec![];
-        if let ClauseType::Id(id) = self.kind.clone() {
+        if let ClauseType::Id(id) = &self.kind {
             if !id
                 .to_string()
                 .starts_with(format!("{table_name}:").as_str())
@@ -146,7 +231,8 @@ impl Clause {
                 ))
             }
         }
-        errors
+        self.errors = errors;
+        self
     }
 
     pub fn format_with_model(mut self, table_name: &'static str) -> String {

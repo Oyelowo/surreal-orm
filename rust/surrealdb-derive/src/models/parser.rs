@@ -572,16 +572,17 @@ impl NodeEdgeMetadataStore {
         // i.e Edge to destination Node
         let foreign_node_connection_method = || {
             quote!(
-                pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::Clause>) -> #destination_node_schema_ident {
+                pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
                     let clause: #crate_name::Clause = clause.into();
 
                     #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
-                                self.get_connection(),
+                                self,
+                                // self.get_connection(),
                                 // &self.#___________graph_traversal_string,
                                 clause,
-                                true,
-                                self.get_bindings(),
-                                self.get_errors(),
+                                // true,
+                                // self.get_bindings(),
+                                // self.get_errors(),
                     )
                 }
             )
@@ -685,17 +686,19 @@ impl NodeEdgeMetadataStore {
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
                         &self,
-                        clause: impl Into<#crate_name::Clause>,
+                        clause: impl Into<#crate_name::EdgeClause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let clause: #crate_name::Clause = clause.into();
+                        let clause: #crate_name::EdgeClause = clause.into();
+                        let clause = clause.with_arrow(#arrow).with_edge(#edge_table_name);
                         
                         // i.e Edge to Node
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
-                            self.get_connection(),
+                            self,
+                            // self.get_connection(),
                             clause,
-                            #arrow,
-                            self.get_bindings(),
-                            self.get_errors()
+                            // #arrow,
+                            // self.get_bindings(),
+                            // self.get_errors()
                         ).into()
                     }
                 }
@@ -734,19 +737,20 @@ impl NodeEdgeMetadataStore {
                         // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
                             &self,
-                            clause: impl Into<#crate_name::Clause>,
+                            clause: impl Into<#crate_name::EdgeClause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
-                            let clause: #crate_name::Clause = clause.into();
-                            let clause = clause.with_arrow(#arrow);
+                            let clause: #crate_name::EdgeClause = clause.into();
+                            let clause = clause.with_arrow(#arrow).with_edge(#edge_table_name);
                             
                             // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
-                                self.get_connection(),
+                                self,
+                                // self.get_connection(),
                                 clause,
                                 // #arrow,
-                                "",
-                                self.get_bindings(),
-                                self.get_errors()
+                                // "",
+                                // self.get_bindings(),
+                                // self.get_errors()
                             ).into()
                         }
                     }
