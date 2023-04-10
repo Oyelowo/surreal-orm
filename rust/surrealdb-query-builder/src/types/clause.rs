@@ -63,7 +63,7 @@ struct Clause {
 impl Buildable for Clause {
     fn build(&self) -> String {
         // let edge_table_name = self.clone().edge_table_name.unwrap_or_default();
-        let connection_name = match self.model_or_field_name {
+        let connection_name = match self.model_or_field_name.clone() {
             Some(name) => match name {
                 ModelOrFieldName::Model(m) => m,
                 ModelOrFieldName::Field(f) => f,
@@ -90,12 +90,46 @@ impl Buildable for Clause {
             _ => format!("{}{}", connection_name, self),
         };
 
-        let connection = self.arrow.map_or(clause, |a| format!("{a}{clause}"));
+        let connection = self
+            .arrow
+            .as_ref()
+            .map_or(clause.clone(), |a| format!("{}{}", &a, clause));
         connection
     }
 }
 
-struct NodeClause(Clause);
+pub struct NodeClause(Clause);
+impl Parametric for NodeClause {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl Buildable for NodeClause {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl Erroneous for NodeClause {
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
+    }
+}
+
+impl NodeClause {
+    pub fn with_arrow(mut self, arrow: String) -> Self {
+        Self(self.0.with_arrow(arrow))
+    }
+
+    pub fn with_table(mut self, table_name: &str) -> Self {
+        Self(self.0.with_table(table_name))
+    }
+
+    pub fn with_field(mut self, field_name: String) -> Self {
+        Self(self.0.with_field(field_name))
+    }
+}
 
 impl<T> From<T> for NodeClause
 where
@@ -107,7 +141,49 @@ where
     }
 }
 
-struct EdgeClause(Clause);
+pub struct EdgeClause(Clause);
+
+impl Parametric for EdgeClause {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl Buildable for EdgeClause {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+impl Erroneous for EdgeClause {
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
+    }
+}
+// impl Deref for EdgeClause {
+//     type Target = Clause;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+impl EdgeClause {
+    pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
+        Self(self.0.with_arrow(arrow))
+    }
+
+    pub fn with_table(mut self, table_name: impl Into<String>) -> Self {
+        Self(self.0.with_table(table_name))
+    }
+}
+
+// impl Deref for EdgeClause {
+//     type Target = Clause;
+//
+//     fn deref(&self) -> &Self::Target {
+//         todo!()
+//     }
+// }
 
 // impl EdgeClause {
 //     pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
@@ -123,6 +199,50 @@ where
     fn from(value: T) -> Self {
         let clause: Clause = value.into();
         Self(clause)
+    }
+}
+
+pub struct NestedClause(Clause);
+
+impl NestedClause {
+    pub fn with_arrow(mut self, arrow: String) -> Self {
+        Self(self.0.with_arrow(arrow))
+    }
+
+    pub fn with_table(mut self, table_name: &str) -> Self {
+        Self(self.0.with_table(table_name))
+    }
+
+    pub fn with_field(mut self, field_name: String) -> Self {
+        Self(self.0.with_field(field_name))
+    }
+}
+
+impl<T> From<T> for NestedClause
+where
+    T: Into<Clause>,
+{
+    fn from(value: T) -> Self {
+        let clause: Clause = value.into();
+        Self(clause)
+    }
+}
+
+impl Parametric for NestedClause {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl Buildable for NestedClause {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl Erroneous for NestedClause {
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
     }
 }
 
@@ -155,12 +275,14 @@ impl Clause {
     pub fn new(kind: ClauseType) -> Self {
         use ClauseType::*;
         let mut bindings = vec![];
+        let mut errors = vec![];
 
         let query_string = match &kind {
             Empty => "".into(),
             Where(filter) => {
                 // bindings.extend(filter.get_bindings());
                 bindings = filter.get_bindings();
+                errors = filter.get_errors();
                 format!("[WHERE {filter}]")
             }
             Id(surreal_id) => {
@@ -172,6 +294,7 @@ impl Clause {
             }
             Query(select_statement) => {
                 bindings = select_statement.get_bindings();
+                errors = select_statement.get_errors();
                 format!("({})", select_statement.build().trim_end_matches(";"))
             }
             All => format!("[*]"),
@@ -184,6 +307,7 @@ impl Clause {
             }
             AnyEdgeFilter(edge_tables) => {
                 bindings = edge_tables.get_bindings();
+                errors = edge_tables.get_errors();
                 let build = format!("{}", edge_tables.build());
                 format!("({build})")
             }
@@ -196,7 +320,7 @@ impl Clause {
             arrow: None,
             model_or_field_name: None,
             // edge_table_name: None,
-            errors: todo!(),
+            errors,
         }
     }
 
@@ -205,14 +329,14 @@ impl Clause {
         self
     }
 
-    pub fn with_table_name(mut self, table_name: impl Into<String>) -> Self {
+    pub fn with_table(mut self, table_name: impl Into<String>) -> Self {
         let table_name: String = table_name.into();
         let mut updated_clause = self.update_errors(&table_name);
         updated_clause.model_or_field_name = Some(ModelOrFieldName::Model(table_name));
         updated_clause
     }
 
-    pub fn with_field_name(mut self, field_name: impl Into<String>) -> Self {
+    pub fn with_field(mut self, field_name: String) -> Self {
         let field_name: String = field_name.into();
         let mut updated_clause = self.update_errors(&field_name);
         updated_clause.model_or_field_name = Some(ModelOrFieldName::Field(field_name));
@@ -235,28 +359,28 @@ impl Clause {
         self
     }
 
-    pub fn format_with_model(mut self, table_name: &'static str) -> String {
-        match self.kind.clone() {
-            ClauseType::Query(q) => self.build(),
-            ClauseType::AnyEdgeFilter(edge_filters) => {
-                self.bindings.extend(edge_filters.get_bindings());
-
-                format!(
-                    "{}({}, {}){}",
-                    self.arrow.as_ref().unwrap_or(&"".to_string()),
-                    table_name,
-                    edge_filters.build(),
-                    self.arrow.as_ref().unwrap_or(&"".to_string()),
-                )
-            }
-            ClauseType::Id(id) => self
-                .get_bindings()
-                .pop()
-                .expect("Id must have only one binding. Has to be an error. Please report.")
-                .get_param_dollarised(),
-            _ => format!("{table_name}{self}"),
-        }
-    }
+    // pub fn format_with_model(mut self, table_name: &'static str) -> String {
+    //     match self.kind.clone() {
+    //         ClauseType::Query(q) => self.build(),
+    //         ClauseType::AnyEdgeFilter(edge_filters) => {
+    //             self.bindings.extend(edge_filters.get_bindings());
+    //
+    //             format!(
+    //                 "{}({}, {}){}",
+    //                 self.arrow.as_ref().unwrap_or(&"".to_string()),
+    //                 table_name,
+    //                 edge_filters.build(),
+    //                 self.arrow.as_ref().unwrap_or(&"".to_string()),
+    //             )
+    //         }
+    //         ClauseType::Id(id) => self
+    //             .get_bindings()
+    //             .pop()
+    //             .expect("Id must have only one binding. Has to be an error. Please report.")
+    //             .get_param_dollarised(),
+    //         _ => format!("{table_name}{self}"),
+    //     }
+    // }
 
     // pub fn format_with_object(&self) -> String {
     //     match self.kind.clone() {
@@ -415,11 +539,20 @@ pub struct AnyEdgeFilter {
     edge_tables: Vec<Table>,
     where_: Option<String>,
     bindings: BindingsList,
+    errors: ErrorList,
+}
+
+impl Erroneous for AnyEdgeFilter {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
 }
 
 impl AnyEdgeFilter {
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.bindings.extend(condition.get_bindings());
+        self.errors.extend(condition.get_errors());
+
         let condition = Filter::new(condition);
         self.where_ = Some(condition.build());
         self
@@ -463,6 +596,7 @@ pub fn any_edge(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
         edge_tables: edges.into().into(),
         where_: None,
         bindings: vec![],
+        errors: vec![],
     }
 }
 #[test]

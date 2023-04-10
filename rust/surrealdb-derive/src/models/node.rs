@@ -141,11 +141,12 @@ impl ToTokens for NodeToken{
                 type Aliases = #module_name::#aliases_struct_name;
 
                 fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
-                    let clause: #crate_name::Clause = clause.into();
+                    let clause: #crate_name::NodeClause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                "".into(),
-                                clause,
+                                // "".into(),
+                                #module_name::#struct_name_ident::empty(),
+                                clause.with_table(#table_name_str),
                                 // true,
                                 // #module_name::#struct_name_ident::new().get_bindings()
                                 // vec![],
@@ -194,6 +195,7 @@ impl ToTokens for NodeToken{
             
             pub mod #module_name {
                 use #crate_name::Parametric as _;
+                use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
                 use #crate_name::Schemaful as _;
 
@@ -278,20 +280,22 @@ impl ToTokens for NodeToken{
                     
                     pub fn #__________connect_node_to_graph_traversal_string(
                         // store: ::std::string::String,
+                        // connection: &(impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous),
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl Into<#crate_name::NodeClause>,
                         // use_table_name: bool,
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
+                        let writes = "Rer";
                         let mut #schema_instance = Self::empty(); 
                         let clause: #crate_name::NodeClause = clause.into();
-                        let bindings = [&connection.get_bindings()[..], &clause.get_bindings()[..]].concat();
+                        let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let errors = [&connection.get_errors()[..], &clause.get_errors()[..]].concat();
+                        let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
                         let errors = errors.as_slice();
 
                         schema_instance.#___________errors = errors.into();
@@ -304,7 +308,8 @@ impl ToTokens for NodeToken{
                     //     format!("{}{}", store, clause) 
                     // };
 
-                        #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
+                        let connection_str = format!("{}{}", connection.build(), clause.build());
+                        #schema_instance.#___________graph_traversal_string.push_str(connection_str.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
                         
                         #( #connection_with_field_appended) *

@@ -774,18 +774,24 @@ impl ReferencedNodeMeta {
             ),
 
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
-                    let store = if self.get_connection().is_empty(){
-                        #normalized_field_name_str.to_string()
-                    }else {
-                        format!("{}.{}",self.get_connection(), #normalized_field_name_str)
-                    };
+                pub fn #normalized_field_name(self, clause: impl Into<#crate_name::NodeClause>) -> #schema_type_ident {
+                     let clause: #crate_name::NodeClause = clause.into();
+                    // let store = if self.get_connection().is_empty(){
+                    //     // #normalized_field_name_str.to_string()
+                    //     "".to_string()
+                    // }else {
+                    //     // format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                    //     self.get_connection()
+                    // };
+                    let writes = "Rer";
+
                     #schema_type_ident::#__________connect_node_to_graph_traversal_string(
-                        store,
-                        clause,
-                        false,
-                        self.get_bindings(),
-                        self.get_errors()
+                        // store,
+                        self,
+                        clause.with_field(#normalized_field_name_str.into()),
+                        // false,
+                        // self.get_bindings(),
+                        // self.get_errors()
                     )
 
                 }
@@ -829,18 +835,23 @@ impl ReferencedNodeMeta {
             ),
 
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
-                    let store = if self.get_connection().is_empty(){
-                        #normalized_field_name_str.to_string()
-                    }else {
-                        format!("{}.{}",self.get_connection(), #normalized_field_name_str)
-                    };
+                pub fn #normalized_field_name(self, clause: impl Into<#crate_name::NestedClause>) -> #schema_type_ident {
+                    let clause: #crate_name::NestedClause = clause.into();
+                    // let store = if self.get_connection().is_empty(){
+                    //     // #normalized_field_name_str.to_string()
+                    //     "".to_string()
+                    // }else {
+                    //     // format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                    //     self.get_connection()
+                    // };
+
                     #schema_type_ident::#__________connect_object_to_graph_traversal_string(
-                        // &self.#___________graph_traversal_string,
-                        store,
-                        clause,
-                        self.get_bindings(),
-                        self.get_errors()
+                        // store,
+                        self,
+                        clause.with_field(#normalized_field_name_str.into()),
+                        // false,
+                        // self.get_bindings(),
+                        // self.get_errors()
                     )
 
                 }

@@ -530,6 +530,8 @@ impl NodeEdgeMetadataStore {
         let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
         let relation_attributes = RelateAttribute::from(relation);
         let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
+        let ref edge_table_name_str = format!("{}", &edge_table_name);
+        
         let ref destination_node_table_name =
             TokenStream::from(&relation_attributes.node_table_name);
 
@@ -572,8 +574,11 @@ impl NodeEdgeMetadataStore {
         // i.e Edge to destination Node
         let foreign_node_connection_method = || {
             quote!(
-                pub fn #destination_node_table_name(&self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
-                    let clause: #crate_name::Clause = clause.into();
+                pub fn #destination_node_table_name(self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
+                    // let writes = 545;
+                    let clause: #crate_name::NodeClause = clause.into();
+                    let clause = clause.with_table(#edge_table_name_str);
+                    // let clause = clause.with_table("writes");
 
                     #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self,
@@ -661,6 +666,7 @@ impl NodeEdgeMetadataStore {
             
             let crate_name = get_crate_name(false);
             let arrow = format!("{}", direction);
+            let edge_table_name_str = format!("{}", &edge_table_name);
             let  edge_name_as_struct_original_ident = format_ident!("{}", &edge_table_name.to_string().to_case(Case::Pascal));
             let  edge_name_as_struct_with_direction_ident = format_ident!("{}",
                                                                           self.add_direction_indication_to_ident(
@@ -685,11 +691,12 @@ impl NodeEdgeMetadataStore {
                 // Edge to Node
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
-                        &self,
+                        self,
                         clause: impl Into<#crate_name::EdgeClause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
+                        let writes = "Rer";
                         let clause: #crate_name::EdgeClause = clause.into();
-                        let clause = clause.with_arrow(#arrow).with_edge(#edge_table_name);
+                        let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
                         
                         // i.e Edge to Node
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
@@ -706,6 +713,7 @@ impl NodeEdgeMetadataStore {
                 mod #edge_inner_module_name {
                     #( #imports) *
                     use #crate_name::Parametric as _;
+                    use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
                     use #crate_name::Schemaful as _;
                     
@@ -722,6 +730,23 @@ impl NodeEdgeMetadataStore {
                         }
                     }
                     
+                    impl #crate_name::Buildable for #edge_name_as_struct_with_direction_ident {
+                        fn build(&self) -> ::std::string::String {
+                            self.build()
+                        }
+                    }
+            
+                    impl #crate_name::Parametric for #edge_name_as_struct_with_direction_ident {
+                        fn get_bindings(&self) -> #crate_name::BindingsList {
+                            self.get_bindings()
+                        }
+                    }
+                    
+                    impl #crate_name::Erroneous for #edge_name_as_struct_with_direction_ident {
+                        fn get_errors(&self) -> Vec<::std::string::String> {
+                            self.get_errors()
+                        }
+                    }
                     impl ::std::ops::Deref for #edge_name_as_struct_with_direction_ident {
                         type Target = #edge_name_as_struct_original_ident;
 
@@ -736,11 +761,12 @@ impl NodeEdgeMetadataStore {
                         // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
                         // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
-                            &self,
+                            self,
                             clause: impl Into<#crate_name::EdgeClause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
+                            let writes = "Rer";
                             let clause: #crate_name::EdgeClause = clause.into();
-                            let clause = clause.with_arrow(#arrow).with_edge(#edge_table_name);
+                            let clause = clause.with_arrow(#arrow).with_table(#edge_table_name);
                             
                             // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(

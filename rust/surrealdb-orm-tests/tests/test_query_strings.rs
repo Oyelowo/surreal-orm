@@ -449,6 +449,7 @@ fn multiplication_tests2() {
     let st_schema = Student::schema();
     // Another case
     let x = st_schema
+        .clone()
         .bestFriend(st_schema.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))

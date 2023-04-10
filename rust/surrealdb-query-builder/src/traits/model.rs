@@ -8,7 +8,7 @@
 use serde::Serialize;
 use surrealdb::opt::RecordId;
 
-use crate::types::{Clause, Table};
+use crate::types::{NodeClause, Table};
 
 use super::Raw;
 
@@ -31,7 +31,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     fn get_key<T: From<RecordId>>(self) -> Option<T>;
     // fn get_table_name() -> surrealdb::sql::Table;
     fn get_table_name() -> Table;
-    fn with(clause: impl Into<Clause>) -> Self::Schema;
+    fn with(clause: impl Into<NodeClause>) -> Self::Schema;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel + Serialize {
