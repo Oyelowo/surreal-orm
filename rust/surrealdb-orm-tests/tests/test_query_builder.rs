@@ -189,13 +189,14 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 
     assert_eq!(
         aliased_connection.fine_tune_params(),
-        "$_param_00000001->writes->writes->writes, likes  WHERE timeWritten <= $_param_00000002->$_param_00000003 AS writtenBooks"
+        "$_param_00000001->writes->writes->(writes, writes, likes  WHERE timeWritten <= $_param_00000002)->$_param_00000003 AS writtenBooks"
         // "$_param_00000001->writes->->writes->->writes, likes  WHERE timeWritten <= $_param_00000002->$_param_00000003 AS writtenBooks"
+        // "$_param_00000001->writes->->writes->->(writes, likes)  WHERE timeWritten <= $_param_00000002->$_param_00000003 AS writtenBooks"
     );
 
     assert_eq!(
-        aliased_connection.clone().to_raw().build(),
-        "student:1->writes->book:2 AS writtenBooks"
+       dbg!( aliased_connection.clone()).to_raw().build(),
+        "student:1->writes->writes->(writes, writes, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
     );
 
     assert_eq!(aliased_connection.get_errors().len(), 0);

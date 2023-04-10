@@ -46,6 +46,7 @@ pub enum ClauseType {
 #[derive(Debug, Clone)]
 pub struct Clause {
     kind: ClauseType,
+    arrow: Option<String>,
     query_string: String,
     bindings: BindingsList,
 }
@@ -107,18 +108,29 @@ impl Clause {
                 format!("[{param_string}]")
             }
             AnyEdgeFilter(edge_tables) => {
+                bindings = edge_tables.get_bindings();
                 let build = format!("{}", edge_tables.build());
-                bindings = vec![];
                 format!("({build})")
             }
         };
+
         Self {
             kind,
+            arrow: None,
             query_string,
             bindings,
         }
     }
 
+    pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
+        self.arrow = Some(arrow.into());
+        self
+
+        // Self{
+        //     ..self,
+        //     arrow: Some(arrow),
+        // }
+    }
     pub fn get_errors(&self, table_name: &'static str) -> Vec<String> {
         let mut errors = vec![];
         if let ClauseType::Id(id) = self.kind.clone() {
@@ -134,11 +146,19 @@ impl Clause {
         errors
     }
 
-    pub fn format_with_model(&self, table_name: &'static str) -> String {
+    pub fn format_with_model(mut self, table_name: &'static str) -> String {
         match self.kind.clone() {
             ClauseType::Query(q) => self.build(),
             ClauseType::AnyEdgeFilter(edge_filters) => {
-                format!("({table_name}, {})", edge_filters.build())
+                self.bindings.extend(edge_filters.get_bindings());
+
+                format!(
+                    "{}({}, {}){}",
+                    self.arrow.as_ref().unwrap_or(&"".to_string()),
+                    table_name,
+                    edge_filters.build(),
+                    self.arrow.as_ref().unwrap_or(&"".to_string()),
+                )
             }
             ClauseType::Id(id) => self
                 .get_bindings()
@@ -312,7 +332,7 @@ impl AnyEdgeFilter {
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.bindings.extend(condition.get_bindings());
         let condition = Filter::new(condition);
-        self.where_ = Some(condition.to_string());
+        self.where_ = Some(condition.build());
         self
     }
 }

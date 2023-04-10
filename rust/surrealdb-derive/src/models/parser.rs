@@ -737,12 +737,14 @@ impl NodeEdgeMetadataStore {
                             clause: impl Into<#crate_name::Clause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
                             let clause: #crate_name::Clause = clause.into();
+                            let clause = clause.with_arrow(#arrow);
                             
                             // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                                 self.get_connection(),
                                 clause,
-                                #arrow,
+                                // #arrow,
+                                "",
                                 self.get_bindings(),
                                 self.get_errors()
                             ).into()
