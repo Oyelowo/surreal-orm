@@ -72,7 +72,7 @@ impl Buildable for Clause {
         };
 
         let clause = match self.kind.clone() {
-            ClauseType::Query(q) => q.build(),
+            ClauseType::Query(q) => self.clone().query_string,
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!(
                     "({}, {})",
@@ -101,7 +101,9 @@ impl Buildable for Clause {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct NodeClause(Clause);
+
 impl Parametric for NodeClause {
     fn get_bindings(&self) -> BindingsList {
         self.0.get_bindings()
@@ -144,6 +146,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct EdgeClause(Clause);
 
 impl Parametric for EdgeClause {
@@ -205,6 +208,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct NestedClause(Clause);
 
 impl NestedClause {
@@ -270,7 +274,7 @@ impl Parametric for Clause {
 
 impl Erroneous for Clause {
     fn get_errors(&self) -> ErrorList {
-        vec![]
+        self.errors.to_vec()
     }
 }
 
@@ -292,6 +296,7 @@ impl Clause {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
                 let id_bindings = Binding::new(surreal_id.clone());
                 let param_string = format!("{}", id_bindings.get_param_dollarised());
+                errors = vec!["lowo aaaa".to_string()];
                 bindings = vec![id_bindings];
                 param_string
             }
@@ -341,14 +346,15 @@ impl Clause {
 
     pub fn with_field(mut self, field_name: String) -> Self {
         let field_name: String = field_name.into();
-        let mut updated_clause = self.update_errors(&field_name);
-        updated_clause.model_or_field_name = Some(ModelOrFieldName::Field(field_name));
-        updated_clause
+        // let mut updated_clause = self.update_errors(&field_name);
+        self.model_or_field_name = Some(ModelOrFieldName::Field(field_name));
+        self
     }
 
     fn update_errors(mut self, table_name: &str) -> Self {
         let mut errors = vec![];
         if let ClauseType::Id(id) = &self.kind {
+            // assert_eq!(format!("id={}....tb={}", id.clone(), table_name), "trt");
             if !id
                 .to_string()
                 .starts_with(format!("{table_name}:").as_str())

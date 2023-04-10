@@ -694,7 +694,6 @@ impl NodeEdgeMetadataStore {
                         self,
                         clause: impl Into<#crate_name::EdgeClause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
-                        let writes = "Rer";
                         let clause: #crate_name::EdgeClause = clause.into();
                         let clause = clause.with_arrow(#arrow).with_table(#edge_table_name_str);
                         
