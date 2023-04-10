@@ -75,18 +75,21 @@ impl Buildable for Clause {
             ClauseType::Query(q) => q.build(),
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!(
-                    "{}({}, {})",
-                    self.arrow.as_ref().unwrap_or(&"".to_string()),
+                    "({}, {})",
+                    // self.arrow.as_ref().unwrap_or(&"".to_string()),
                     connection_name,
                     edge_filters.build(),
                     // self.arrow.as_ref().unwrap_or(&"".to_string()),
                 )
             }
-            ClauseType::Id(id) => self
-                .get_bindings()
-                .pop()
-                .expect("Id must have only one binding. Has to be an error. Please report.")
-                .get_param_dollarised(),
+            ClauseType::Id(id) => format!(
+                "{}",
+                // self.arrow.clone().unwrap_or_default(),
+                self.get_bindings()
+                    .pop()
+                    .expect("Id must have only one binding. Has to be an error. Please report.")
+                    .get_param_dollarised()
+            ),
             _ => format!("{}{}", connection_name, self.query_string),
         };
 
@@ -118,11 +121,11 @@ impl Erroneous for NodeClause {
 }
 
 impl NodeClause {
-    pub fn with_arrow(mut self, arrow: String) -> Self {
+    pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
         Self(self.0.with_arrow(arrow))
     }
 
-    pub fn with_table(mut self, table_name: &str) -> Self {
+    pub fn with_table(mut self, table_name: impl Into<String>) -> Self {
         Self(self.0.with_table(table_name))
     }
 
