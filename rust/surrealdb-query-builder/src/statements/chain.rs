@@ -7,10 +7,6 @@
 
 use std::fmt::{self, Display};
 
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
-
 use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
 pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
@@ -64,58 +60,16 @@ impl fmt::Display for QueryChain {
 #[cfg(test)]
 mod tests {
     use crate::{
-        traits::Operatable,
-        types::{All, Field, SurrealId},
+        cond,
+        statements::{chain, select},
+        traits::Buildable,
+        All, Field, Operatable, SurrealId, ToRaw,
     };
-
-    use super::*;
-
-    #[test]
-    #[cfg(feature = "mock")]
-    fn test_transaction_commit() {
-        use crate::statements::select;
-
-        let name = Field::new("name");
-        let age = Field::new("age");
-        let country = Field::new("country");
-        let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
-        let fake_id3 = SurrealId::try_from("user:4").unwrap();
-
-        let statement1 = select(All)
-            .from(fake_id)
-            .where_(
-                cond(city.is("Prince Edward Island"))
-                    .and(city.is("NewFoundland"))
-                    .or(city.like("Toronto")),
-            )
-            .order_by(order(&age).numeric())
-            .limit(153)
-            .start(10)
-            .parallel();
-
-        let statement2 = select(All)
-            .from(fake_id2)
-            .where_(country.is("INDONESIA"))
-            .order_by(order(&age).numeric())
-            .limit(20)
-            .start(5);
-
-        let transaction = chain(statement1)
-            .chain(statement2)
-            .chain(select(All).from(fake_id3));
-
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
-    }
+    use insta::assert_display_snapshot;
+    use select::order;
 
     #[test]
-    #[cfg(feature = "raw")]
-    fn test_transaction_cancel() {
-        use crate::statements::select::order;
-
-        let name = Field::new("name");
+    fn test_chaining() {
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -146,7 +100,7 @@ mod tests {
             .chain(statement2)
             .chain(select(All).from(fake_id3));
 
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
+        assert_display_snapshot!(transaction.fine_tune_params());
+        assert_display_snapshot!(transaction.to_raw().to_string());
     }
 }
