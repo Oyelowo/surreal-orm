@@ -66,6 +66,7 @@ impl Buildable for Clause {
         let connection_name = match self.model_or_field_name.clone() {
             Some(name) => match name {
                 ModelOrFieldName::Model(m) => m,
+                // ModelOrFieldName::Field(f) => format!(".{f}"),
                 ModelOrFieldName::Field(f) => f,
             },
             None => "".to_string(),

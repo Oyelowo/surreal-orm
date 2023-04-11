@@ -776,19 +776,22 @@ impl ReferencedNodeMeta {
             record_link_default_alias_as_method: quote!(
                 pub fn #normalized_field_name(self, clause: impl Into<#crate_name::NodeClause>) -> #schema_type_ident {
                      let clause: #crate_name::NodeClause = clause.into();
-                    // let store = if self.get_connection().is_empty(){
-                    //     // #normalized_field_name_str.to_string()
-                    //     "".to_string()
-                    // }else {
-                    //     // format!("{}.{}",self.get_connection(), #normalized_field_name_str)
-                    //     self.get_connection()
-                    // };
-                    let writes = "Rer";
+                    let clause = if self.get_connection().is_empty(){
+                        // #normalized_field_name_str.to_string()
+                        // "".to_string()
+                        clause.with_field(#normalized_field_name_str.into())
+                    }else {
+                        // format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                        // self.get_connection()
+                        // clause.with_field(.#normalized_field_name_str.into()),
+                        clause.with_field(format!(".{}", #normalized_field_name_str))
+                    };
+
 
                     #schema_type_ident::#__________connect_node_to_graph_traversal_string(
                         // store,
                         self,
-                        clause.with_field(#normalized_field_name_str.into()),
+                        clause,
                         // false,
                         // self.get_bindings(),
                         // self.get_errors()
@@ -922,6 +925,7 @@ impl FromMeta for FieldTypeWrapper {
             Ok(f) => Ok(Self(value.to_string())),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
+        // assert_eq!(self.errors, vec![] as ErrorList);
     }
 }
 
