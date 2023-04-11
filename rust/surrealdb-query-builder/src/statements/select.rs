@@ -616,8 +616,8 @@ pub struct SelectStatement {
     split: Vec<String>,
     group_by: Vec<String>,
     order_by: Vec<Order>,
-    limit: Option<u64>,
-    start: Option<u64>,
+    limit: Option<String>,
+    start: Option<String>,
     fetch: Vec<String>,
     timeout: Option<String>,
     parallel: bool,
@@ -895,8 +895,18 @@ impl SelectStatement {
     /// let mut query_builder = QueryBuilder::new();
     /// query_builder.limit(10);
     /// ```
-    pub fn limit(mut self, limit: u64) -> Self {
-        self.limit = Some(limit);
+    pub fn limit(mut self, limit: impl Into<crate::NumberLike>) -> Self {
+        let limit: crate::NumberLike = limit.into();
+        match limit {
+            crate::NumberLike::Number(n) => {
+                let binding = Binding::new(n);
+                self.limit = Some(binding.get_param_dollarised());
+                self.update_bindings(vec![binding]);
+            }
+            crate::NumberLike::Field(_) | crate::NumberLike::Param(_) => {
+                self.limit = Some(limit.to_value().to_raw_string());
+            } // crate::NumberLike::Param(_) => todo!(),
+        };
         self
     }
 
@@ -936,8 +946,18 @@ impl SelectStatement {
     ///
     /// assert_eq!(query, "SELECT id, name FROM users OFFSET 50");
     /// ```
-    pub fn start(mut self, start: u64) -> Self {
-        self.start = Some(start);
+    pub fn start(mut self, start: impl Into<crate::NumberLike>) -> Self {
+        let start: crate::NumberLike = start.into();
+        match start {
+            crate::NumberLike::Number(n) => {
+                let binding = Binding::new(n);
+                self.start = Some(binding.get_param_dollarised());
+                self.update_bindings(vec![binding]);
+            }
+            crate::NumberLike::Field(_) | crate::NumberLike::Param(_) => {
+                self.start = Some(start.to_value().to_raw_string());
+            }
+        };
         self
     }
 
@@ -1089,12 +1109,12 @@ impl Buildable for SelectStatement {
             );
         }
 
-        if let Some(limit_value) = self.limit {
+        if let Some(limit_value) = &self.limit {
             query.push_str(" LIMIT ");
             query.push_str(&limit_value.to_string());
         }
 
-        if let Some(start_value) = self.start {
+        if let Some(start_value) = &self.start {
             query.push_str(" START AT ");
             query.push_str(&start_value.to_string());
         }
