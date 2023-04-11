@@ -243,6 +243,7 @@ pub struct SchemaFieldsProperties {
     pub record_link_fields_methods: Vec<TokenStream>,
     pub field_definitions: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,
+    pub fields_relations_aliased: Vec<TokenStream>,
 }
 
 #[derive(Clone)]
@@ -340,6 +341,8 @@ impl SchemaFieldsProperties {
                 let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
+                        let connection = relation.connection_model; 
+                        store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
                             ReferencedNodeMeta::default()
                                 
                     },

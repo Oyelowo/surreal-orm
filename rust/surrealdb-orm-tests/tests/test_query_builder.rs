@@ -122,6 +122,19 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 }
 
 #[test]
+fn can_get_structs_relations() {
+    let relations_aliases = Student::get_fields_relations_aliased();
+    assert_eq!(
+        relations_aliases
+            .into_iter()
+            .map(|r| r.to_raw().to_string())
+            .collect::<Vec<_>>()
+            .join(", "),
+        "`->writes->book` AS writtenBooks, `->writes->blog` AS blogsssss"
+    );
+}
+
+#[test]
 fn should_not_contain_error_when_invalid_id_use_in_connection() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();

@@ -170,7 +170,7 @@ impl ToTokens for EdgeToken {
                     
                     fn define_fields() -> Vec<#crate_name::Raw> {
                         vec![
-                       #( #field_definitions), *
+                           #( #field_definitions), *
                         ]
                     }
                 }

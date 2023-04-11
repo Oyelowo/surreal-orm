@@ -94,6 +94,7 @@ impl ToTokens for NodeToken{
             schema_struct_fields_names_kv_empty,
             serialized_field_name_no_skip,
             field_definitions,
+            fields_relations_aliased,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         
@@ -136,6 +137,7 @@ impl ToTokens for NodeToken{
         // }
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};
+            use #crate_name::Aliasable as _;
             
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -166,6 +168,12 @@ impl ToTokens for NodeToken{
                 
                 fn get_table_name() -> #crate_name::Table {
                     #table_name_str.into()
+                }
+            
+                fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
+                    vec![
+                       #( #fields_relations_aliased), *
+                    ]
                 }
                 
             }
