@@ -595,9 +595,9 @@ impl Parametric for AnyEdgeFilter {
     }
 }
 
-impl From<AnyEdgeFilter> for Clause {
+impl From<AnyEdgeFilter> for EdgeClause {
     fn from(value: AnyEdgeFilter) -> Self {
-        Self::new(ClauseType::AnyEdgeFilter(value))
+        Self(Clause::new(ClauseType::AnyEdgeFilter(value)))
     }
 }
 
@@ -609,6 +609,7 @@ pub fn any_other_edges(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
         errors: vec![],
     }
 }
+
 #[test]
 fn test_display_clause_with_empty() {
     // test empty clause
