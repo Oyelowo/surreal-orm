@@ -213,6 +213,13 @@ pub struct Student {
     #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
     #[serde(skip_serializing)]
     written_books: Relate<Book>,
+
+    // #[surrealdb(relate(model = "StudentWritesBook", connection = "->writes->book"))]
+    // #[serde(skip_serializing)]
+    // prof_book: Relate<Book>,
+    #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
+    #[serde(skip_serializing)]
+    blogsssss: Relate<Blog>,
 }
 #[test]
 fn xama() {
@@ -244,6 +251,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 }
 
 pub type StudentWritesBook = Writes<Student, Book>;
+pub type StudentWritesBlog = Writes<Student, Blog>;
 
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -256,7 +264,7 @@ pub struct Book {
     content: String,
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "blog")]
 pub struct Blog {

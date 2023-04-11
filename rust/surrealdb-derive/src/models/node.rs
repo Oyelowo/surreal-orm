@@ -96,6 +96,8 @@ impl ToTokens for NodeToken{
             field_definitions,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        
+        
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
@@ -144,13 +146,8 @@ impl ToTokens for NodeToken{
                     let clause: #crate_name::NodeClause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                // "".into(),
                                 #module_name::#struct_name_ident::empty(),
                                 clause.with_table(#table_name_str),
-                                // true,
-                                // #module_name::#struct_name_ident::new().get_bindings()
-                                // vec![],
-                                // vec![],
                     )
                 }
                 
@@ -188,7 +185,7 @@ impl ToTokens for NodeToken{
                 
                 fn define_fields() -> Vec<#crate_name::Raw> {
                     vec![
-                   #( #field_definitions), *
+                       #( #field_definitions), *
                     ]
                 }
             }

@@ -388,7 +388,9 @@ impl SchemaFieldsProperties {
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
                 
-                store.field_definitions.push(referenced_node_meta.field_definition);
+                if !referenced_node_meta.field_definition.is_empty() {
+                    store.field_definitions.push(referenced_node_meta.field_definition);
+                }
                 
                 store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
                 store.static_assertions.extend(referenced_node_meta.field_type_validation_asserts);

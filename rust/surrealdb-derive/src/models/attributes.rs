@@ -713,7 +713,7 @@ impl ReferencedNodeMeta {
 
         // Helps to define the schema definition of the content
         let array_field_content_str = format!("{field_name_normalized}.*");
-        // Im puting coma before this to separate from the top field array type definition in case
+        // Im putting coma before this to separate from the top field array type definition in case
         // it is present
         let array_content_definition = if define_array_field_content_methods.is_empty() {
             quote!()
