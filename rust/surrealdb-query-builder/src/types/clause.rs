@@ -103,6 +103,25 @@ impl Buildable for Clause {
 }
 
 #[derive(Debug, Clone)]
+pub struct NodeAliasClause(NodeClause);
+
+impl NodeAliasClause {
+    pub fn into_inner(self) -> NodeClause {
+        self.0
+    }
+}
+
+impl<T> From<T> for NodeAliasClause
+where
+    T: Into<Clause>,
+{
+    fn from(value: T) -> Self {
+        let clause: Clause = value.into();
+        Self(NodeClause(clause))
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct NodeClause(Clause);
 
 impl Parametric for NodeClause {
@@ -134,6 +153,18 @@ impl NodeClause {
 
     pub fn with_field(mut self, field_name: String) -> Self {
         Self(self.0.with_field(field_name))
+    }
+}
+
+impl From<SurrealId> for NodeClause {
+    fn from(value: SurrealId) -> Self {
+        Self(Clause::new(ClauseType::Id(value.clone())))
+    }
+}
+
+impl From<&SurrealId> for NodeClause {
+    fn from(value: &SurrealId) -> Self {
+        Self(Clause::new(ClauseType::Id(value.clone())))
     }
 }
 
@@ -404,18 +435,6 @@ impl Clause {
 impl std::fmt::Display for Clause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
-    }
-}
-
-impl From<SurrealId> for Clause {
-    fn from(value: SurrealId) -> Self {
-        Self::new(ClauseType::Id(value.clone()))
-    }
-}
-
-impl From<&SurrealId> for Clause {
-    fn from(value: &SurrealId) -> Self {
-        Self::new(ClauseType::Id(value.clone()))
     }
 }
 
