@@ -686,7 +686,7 @@ impl NodeEdgeMetadataStore {
                 // Edge to Node
                 impl #origin_struct_ident {
                     pub fn #edge_name_as_method_ident(
-                        self,
+                        &self,
                         clause: impl Into<#crate_name::EdgeClause>,
                     ) -> #edge_inner_module_name::#edge_name_as_struct_with_direction_ident {
                         let clause: #crate_name::EdgeClause = clause.into();
@@ -737,6 +737,25 @@ impl NodeEdgeMetadataStore {
                             self.0.get_errors()
                         }
                     }
+             
+                    impl #crate_name::Buildable for &#edge_name_as_struct_with_direction_ident {
+                        fn build(&self) -> ::std::string::String {
+                            self.0.build()
+                        }
+                    }
+            
+                    impl #crate_name::Parametric for &#edge_name_as_struct_with_direction_ident {
+                        fn get_bindings(&self) -> #crate_name::BindingsList {
+                            self.0.get_bindings()
+                        }
+                    }
+                    
+                    impl #crate_name::Erroneous for &#edge_name_as_struct_with_direction_ident {
+                        fn get_errors(&self) -> Vec<::std::string::String> {
+                            self.0.get_errors()
+                        }
+                    }
+             
                     impl ::std::ops::Deref for #edge_name_as_struct_with_direction_ident {
                         type Target = #edge_name_as_struct_original_ident;
 
@@ -752,7 +771,7 @@ impl NodeEdgeMetadataStore {
                         // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
                         // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
-                            self,
+                            &self,
                             clause: impl Into<#crate_name::EdgeClause>,
                         ) -> #edge_name_as_struct_with_direction_ident {
                             let clause: #crate_name::EdgeClause = clause.into();

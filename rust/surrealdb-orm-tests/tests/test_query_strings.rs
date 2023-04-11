@@ -446,11 +446,10 @@ fn multiplication_tests2() {
 
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
 
-    let st_schema = Student::schema();
+    let ref st_schema = Student::schema();
     let student_id = SurrealId::try_from("student:1").unwrap();
     // Another case
     let x = st_schema
-        .clone()
         // .bestFriend(student_id)
         .bestFriend(st_schema.age.between(18, 150))
         .bestFriend(Empty)

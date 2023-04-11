@@ -258,6 +258,32 @@ impl ToTokens for NodeToken{
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
+            
+                impl #crate_name::Aliasable for &#struct_name_ident {}
+            
+                impl #crate_name::Schemaful for &#struct_name_ident {
+                    fn get_connection(&self) -> String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
+                impl #crate_name::Parametric for &#struct_name_ident {
+                    fn get_bindings(&self) -> #crate_name::BindingsList {
+                        self.#___________bindings.to_vec()
+                    }
+                }
+            
+                impl #crate_name::Buildable for &#struct_name_ident {
+                    fn build(&self) -> ::std::string::String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
+                impl #crate_name::Erroneous for &#struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
+                    }
+                }
 
                 impl #struct_name_ident {
                     pub fn new() -> Self {
@@ -279,15 +305,9 @@ impl ToTokens for NodeToken{
                     }
                     
                     pub fn #__________connect_node_to_graph_traversal_string(
-                        // store: ::std::string::String,
-                        // connection: &(impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous),
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl Into<#crate_name::NodeClause>,
-                        // use_table_name: bool,
-                        // existing_bindings: #crate_name::BindingsList,
-                        // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
-                        let writes = "Rer";
                         let mut #schema_instance = Self::empty(); 
                         let clause: #crate_name::NodeClause = clause.into();
                         let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
@@ -300,14 +320,6 @@ impl ToTokens for NodeToken{
 
                         schema_instance.#___________errors = errors.into();
                         
-                        
-                    // let connection = if use_table_name {
-                    //     // format!("{}{}", store, clause.format_with_model(#table_name_str))
-                    //     format!("{}{}", store, clause)
-                    // }else{
-                    //     format!("{}{}", store, clause) 
-                    // };
-
                         let connection_str = format!("{}{}", connection.build(), clause.build());
                         #schema_instance.#___________graph_traversal_string.push_str(connection_str.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
