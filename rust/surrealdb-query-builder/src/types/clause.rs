@@ -651,7 +651,7 @@ fn test_display_clause_with_where_filter() {
 }
 
 #[test]
-fn test_display_clause_with_id_only_wors_With_node() {
+fn test_display_clause_with_id_only_wors_with_node() {
     // test id clause
     let id_clause = NodeClause::from(SurrealId::try_from("student:5").unwrap());
     // assert_eq!(format!("{:?}", id_clause), ":5");
