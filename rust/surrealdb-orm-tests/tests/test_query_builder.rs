@@ -190,13 +190,40 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
     assert_eq!(
         aliased_connection.fine_tune_params(),
         "$_param_00000001->writes->writes->(writes, writes, likes  WHERE timeWritten <= $_param_00000002)->$_param_00000003 AS writtenBooks"
-        // "$_param_00000001->writes->->writes->->writes, likes  WHERE timeWritten <= $_param_00000002->$_param_00000003 AS writtenBooks"
-        // "$_param_00000001->writes->->writes->->(writes, likes)  WHERE timeWritten <= $_param_00000002->$_param_00000003 AS writtenBooks"
     );
 
     assert_eq!(
        dbg!( aliased_connection.clone()).to_raw().build(),
         "student:1->writes->writes->(writes, writes, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
+    );
+
+    assert_eq!(aliased_connection.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(aliased_connection.get_errors(), errors);
+}
+
+#[test]
+fn test_any_edge_filter() {
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+    let likes = Table::new("likes");
+    let wants = Table::new("wants");
+    let writes = StudentWritesBook::table_name();
+    let timeWritten = Field::new("timeWritten");
+
+    let aliased_connection = Student::with(student_id)
+        .writes__(any_edge(&[wants, likes]).where_(timeWritten.less_than_or_equal(50)))
+        .book(book_id)
+        .__as__(Student::aliases().writtenBooks);
+
+    assert_eq!(
+        aliased_connection.fine_tune_params(),
+        "$_param_00000001->(writes, wants, likes  WHERE timeWritten <= $_param_00000002)->$_param_00000003 AS writtenBooks"
+    );
+
+    assert_eq!(
+        dbg!(aliased_connection.clone()).to_raw().build(),
+        "student:1->(writes, wants, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
     );
 
     assert_eq!(aliased_connection.get_errors().len(), 0);
