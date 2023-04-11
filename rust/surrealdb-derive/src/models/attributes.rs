@@ -713,7 +713,7 @@ impl ReferencedNodeMeta {
 
         // Helps to define the schema definition of the content
         let array_field_content_str = format!("{field_name_normalized}.*");
-        // Im puting coma before this to separate from the top field array type definition in case
+        // Im putting coma before this to separate from the top field array type definition in case
         // it is present
         let array_content_definition = if define_array_field_content_methods.is_empty() {
             quote!()
@@ -774,18 +774,20 @@ impl ReferencedNodeMeta {
             ),
 
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
-                    let store = if self.get_connection().is_empty(){
+                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #schema_type_ident {
+                     let clause: #crate_name::NodeAliasClause = clause.into();
+                     let clause: #crate_name::NodeClause = clause.into_inner();
+
+                    let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
-                        format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                        format!(".{}", #normalized_field_name_str)
                     };
+
+
                     #schema_type_ident::#__________connect_node_to_graph_traversal_string(
-                        store,
-                        clause,
-                        false,
-                        self.get_bindings(),
-                        self.get_errors()
+                        self,
+                        clause.with_field(normalized_field_name_str)
                     )
 
                 }
@@ -829,18 +831,18 @@ impl ReferencedNodeMeta {
             ),
 
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::Clause>) -> #schema_type_ident {
-                    let store = if self.get_connection().is_empty(){
+                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::ObjectClause>) -> #schema_type_ident {
+                     let clause: #crate_name::ObjectClause = clause.into();
+                    let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
-                        format!("{}.{}",self.get_connection(), #normalized_field_name_str)
+                        format!(".{}", #normalized_field_name_str)
                     };
+
+
                     #schema_type_ident::#__________connect_object_to_graph_traversal_string(
-                        // &self.#___________graph_traversal_string,
-                        store,
-                        clause,
-                        self.get_bindings(),
-                        self.get_errors()
+                        self,
+                        clause.with_field(normalized_field_name_str)
                     )
 
                 }
@@ -911,6 +913,7 @@ impl FromMeta for FieldTypeWrapper {
             Ok(f) => Ok(Self(value.to_string())),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
+        // assert_eq!(self.errors, vec![] as ErrorList);
     }
 }
 

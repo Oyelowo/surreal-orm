@@ -94,8 +94,11 @@ impl ToTokens for NodeToken{
             schema_struct_fields_names_kv_empty,
             serialized_field_name_no_skip,
             field_definitions,
+            fields_relations_aliased,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        
+        
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
@@ -134,22 +137,19 @@ impl ToTokens for NodeToken{
         // }
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};
+            use #crate_name::Aliasable as _;
             
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;
 
-                fn with(clause: impl Into<#crate_name::Clause>) -> Self::Schema {
-                    let clause: #crate_name::Clause = clause.into();
+                fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
+                    let clause: #crate_name::NodeClause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                "".into(),
-                                clause,
-                                true,
-                                // #module_name::#struct_name_ident::new().get_bindings()
-                                vec![],
-                                vec![],
+                                #module_name::#struct_name_ident::empty(),
+                                clause.with_table(#table_name_str),
                     )
                 }
                 
@@ -169,6 +169,12 @@ impl ToTokens for NodeToken{
                 fn get_table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }
+            
+                fn get_fields_relations_aliased() -> Vec<#crate_name::Alias> {
+                    vec![
+                       #( #fields_relations_aliased), *
+                    ]
+                }
                 
             }
 
@@ -187,15 +193,15 @@ impl ToTokens for NodeToken{
                 
                 fn define_fields() -> Vec<#crate_name::Raw> {
                     vec![
-                   #( #field_definitions), *
+                       #( #field_definitions), *
                     ]
                 }
             }
             
             pub mod #module_name {
                 use #crate_name::Parametric as _;
+                use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
-                use #crate_name::Schemaful as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -226,12 +232,6 @@ impl ToTokens for NodeToken{
                 }
 
                 impl #crate_name::Aliasable for #struct_name_ident {}
-            
-                impl #crate_name::Schemaful for #struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
                 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
@@ -256,6 +256,26 @@ impl ToTokens for NodeToken{
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
                     }
                 }
+            
+                impl #crate_name::Aliasable for &#struct_name_ident {}
+            
+                impl #crate_name::Parametric for &#struct_name_ident {
+                    fn get_bindings(&self) -> #crate_name::BindingsList {
+                        self.#___________bindings.to_vec()
+                    }
+                }
+            
+                impl #crate_name::Buildable for &#struct_name_ident {
+                    fn build(&self) -> ::std::string::String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
+                impl #crate_name::Erroneous for &#struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
+                    }
+                }
 
                 impl #struct_name_ident {
                     pub fn new() -> Self {
@@ -277,33 +297,23 @@ impl ToTokens for NodeToken{
                     }
                     
                     pub fn #__________connect_node_to_graph_traversal_string(
-                        store: ::std::string::String,
-                        clause: impl Into<#crate_name::Clause>,
-                        use_table_name: bool,
-                        existing_bindings: #crate_name::BindingsList,
-                        existing_errors: ::std::vec::Vec<String>,
+                        connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
+                        clause: impl Into<#crate_name::NodeClause>,
                     ) -> Self {
                         let mut #schema_instance = Self::empty(); 
-                        let clause: #crate_name::Clause = clause.into();
-                        let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
+                        let clause: #crate_name::NodeClause = clause.into();
+                        let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let clause_errors = clause.get_errors(#table_name_str.into());
-                        let errors = [&existing_errors[..], &clause_errors[..]].concat();
+                        let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
                         let errors = errors.as_slice();
 
                         schema_instance.#___________errors = errors.into();
                         
-                        
-                    let connection = if use_table_name {
-                        format!("{}{}", store, clause.format_with_model(#table_name_str))
-                    }else{
-                        format!("{}{}", store, clause) 
-                    };
-
-                        #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
+                        let connection_str = format!("{}{}", connection.build(), clause.build());
+                        #schema_instance.#___________graph_traversal_string.push_str(connection_str.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
                         
                         #( #connection_with_field_appended) *

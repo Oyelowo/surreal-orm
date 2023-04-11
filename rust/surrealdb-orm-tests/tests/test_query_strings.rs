@@ -302,10 +302,11 @@ fn multiplication_tests1() {
     let ref student_id = SurrealId::try_from("student:1").unwrap();
 
     let mut query = select(All)
-        .select(age)
-        .select(firstName)
-        .select(&[firstName, unoBook])
-        .select(vec![firstName, unoBook])
+        // Also work
+        // .select(age)
+        // .select(firstName)
+        // .select(&[firstName, unoBook])
+        // .select(vec![firstName, unoBook])
         .from(student_table)
         .from(&[student_table, book_table])
         .from(vec![student_table, book_table])
@@ -445,9 +446,11 @@ fn multiplication_tests2() {
 
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", x.get_bindings())));
 
-    let st_schema = Student::schema();
+    let ref st_schema = Student::schema();
+    let student_id = SurrealId::try_from("student:1").unwrap();
     // Another case
     let x = st_schema
+        // .bestFriend(student_id)
         .bestFriend(st_schema.age.between(18, 150))
         .bestFriend(Empty)
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))

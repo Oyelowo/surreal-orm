@@ -132,9 +132,9 @@ impl ToTokens for ObjectToken{
 
             pub mod #module_name {
                 use #crate_name::Parametric as _;
+                use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
-                use #crate_name::Schemaful as _;
-
+            
                #( #imports_referenced_node_schema) *
                 
 
@@ -146,12 +146,6 @@ impl ToTokens for ObjectToken{
                     #___________errors: Vec<String>,
                 }
 
-                impl #crate_name::Schemaful for #struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
-                
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
@@ -176,6 +170,27 @@ impl ToTokens for ObjectToken{
                     }
                 }
 
+                impl #crate_name::Aliasable for &#struct_name_ident {}
+            
+                impl #crate_name::Parametric for &#struct_name_ident {
+                    fn get_bindings(&self) -> #crate_name::BindingsList {
+                        self.#___________bindings.to_vec()
+                    }
+                }
+            
+                impl #crate_name::Buildable for &#struct_name_ident {
+                    fn build(&self) -> ::std::string::String {
+                        self.#___________graph_traversal_string.to_string()
+                    }
+                }
+                
+                impl #crate_name::Erroneous for &#struct_name_ident {
+                    fn get_errors(&self) -> Vec<String> {
+                        self.#___________errors.to_vec()
+                    }
+                }
+
+
                 impl #struct_name_ident {
                     pub fn new() -> Self {
                         Self {
@@ -196,26 +211,37 @@ impl ToTokens for ObjectToken{
                     }
                     
                     pub fn #__________connect_object_to_graph_traversal_string(
-                        store: ::std::string::String,
-                        clause: impl Into<#crate_name::Clause>,
-                        existing_bindings: #crate_name::BindingsList,
-                        existing_errors: Vec<String>,
+                        // store: ::std::string::String,
+                        connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
+                        clause: impl Into<#crate_name::ObjectClause>,
+                        // use_table_name: bool,
+                        // existing_bindings: #crate_name::BindingsList,
+                        // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
+                        let writes = "Rer";
                         let mut #schema_instance = Self::empty(); 
-                        let clause: #crate_name::Clause = clause.into();
-                        let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
+                        let clause: #crate_name::ObjectClause = clause.into();
+                        let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
                         
-                        let errors = existing_errors.as_slice();
+                        let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
+                        let errors = errors.as_slice();
 
                         schema_instance.#___________errors = errors.into();
                         
                         
-                        let connection = format!("{}{}", store, clause);
+                    // let connection = if use_table_name {
+                    //     // format!("{}{}", store, clause.format_with_model(#table_name_str))
+                    //     format!("{}{}", store, clause)
+                    // }else{
+                    //     format!("{}{}", store, clause) 
+                    // };
 
-                        #schema_instance.#___________graph_traversal_string.push_str(connection.as_str());
+                        // let connection_str = format!("{}{}", store, clause.build());
+                        let connection_str = format!("{}{}", connection.build(), clause.build());
+                        #schema_instance.#___________graph_traversal_string.push_str(connection_str.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
                         
                         #( #connection_with_field_appended) *
@@ -224,13 +250,6 @@ impl ToTokens for ObjectToken{
                     
                     #( #record_link_fields_methods) *
 
-                    pub fn __as__<'a, T>(&self, alias: T) -> ::std::string::String
-                        where T: Into<::std::borrow::Cow<'a, #crate_name::Field>>
-                    {
-                        let alias: &#crate_name::Field = &alias.into();
-                        format!("{} AS {}", self, alias.to_string())
-                    }
-                    
                 }
             }
 

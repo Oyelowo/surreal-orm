@@ -122,6 +122,19 @@ fn remove_field_from_json_string(json_string: &str, field_name: &str) -> String 
 }
 
 #[test]
+fn can_get_structs_relations() {
+    let relations_aliases = Student::get_fields_relations_aliased();
+    assert_eq!(
+        relations_aliases
+            .into_iter()
+            .map(|r| r.to_raw().to_string())
+            .collect::<Vec<_>>()
+            .join(", "),
+        "`->writes->book` AS writtenBooks, `->writes->blog` AS blogsssss"
+    );
+}
+
+#[test]
 fn should_not_contain_error_when_invalid_id_use_in_connection() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
@@ -146,24 +159,88 @@ fn test_relation_graph_with_alias() {
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
 
-    let x = Student::with(student_id)
+    let aliased_connection = Student::with(student_id)
         .writes__(Empty)
         .book(book_id)
         .__as__(Student::aliases().writtenBooks);
 
     assert_eq!(
-        x.fine_tune_params(),
+        aliased_connection.fine_tune_params(),
         "$_param_00000001->writes->$_param_00000002 AS writtenBooks"
     );
 
     assert_eq!(
-        x.clone().to_raw().build(),
+        aliased_connection.clone().to_raw().build(),
         "student:1->writes->book:2 AS writtenBooks"
     );
 
-    assert_eq!(x.get_errors().len(), 0);
+    assert_eq!(aliased_connection.get_errors().len(), 0);
     let errors: Vec<String> = vec![];
-    assert_eq!(x.get_errors(), errors);
+    assert_eq!(aliased_connection.get_errors(), errors);
+}
+
+#[test]
+fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
+    // This allows for pattern like this:
+    // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
+    // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
+
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+    let likes = Table::new("likes");
+    let writes = StudentWritesBook::table_name();
+    let timeWritten = Field::new("timeWritten");
+
+    // let knows = Field::writes("influencer");
+
+    let aliased_connection = Student::with(student_id)
+        .writes__(Empty)
+        .writes__(Empty)
+        .writes__(any_other_edges(&[writes, likes]).where_(timeWritten.less_than_or_equal(50)))
+        .book(book_id)
+        .__as__(Student::aliases().writtenBooks);
+
+    assert_eq!(
+        aliased_connection.fine_tune_params(),
+        "$_param_00000001->writes->writes->(writes, writes, likes  WHERE timeWritten <= $_param_00000002)->$_param_00000003 AS writtenBooks"
+    );
+
+    assert_eq!(
+       dbg!( aliased_connection.clone()).to_raw().build(),
+        "student:1->writes->writes->(writes, writes, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
+    );
+
+    assert_eq!(aliased_connection.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(aliased_connection.get_errors(), errors);
+}
+
+#[test]
+fn test_any_edge_filter() {
+    let student_id = SurrealId::try_from("student:1").unwrap();
+    let book_id = SurrealId::try_from("book:2").unwrap();
+    let likes = Table::new("likes");
+    let wants = Table::new("wants");
+    let timeWritten = Field::new("timeWritten");
+
+    let aliased_connection = Student::with(student_id)
+        .writes__(any_other_edges(&[wants, likes]).where_(timeWritten.less_than_or_equal(50)))
+        .book(book_id)
+        .__as__(Student::aliases().writtenBooks);
+
+    assert_eq!(
+        aliased_connection.fine_tune_params(),
+        "$_param_00000001->(writes, wants, likes  WHERE timeWritten <= $_param_00000002)->$_param_00000003 AS writtenBooks"
+    );
+
+    assert_eq!(
+        dbg!(aliased_connection.clone()).to_raw().build(),
+        "student:1->(writes, wants, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
+    );
+
+    assert_eq!(aliased_connection.get_errors().len(), 0);
+    let errors: Vec<String> = vec![];
+    assert_eq!(aliased_connection.get_errors(), errors);
 }
 
 #[test]

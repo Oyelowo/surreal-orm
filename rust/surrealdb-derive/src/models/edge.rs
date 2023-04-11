@@ -170,7 +170,7 @@ impl ToTokens for EdgeToken {
                     
                     fn define_fields() -> Vec<#crate_name::Raw> {
                         vec![
-                       #( #field_definitions), *
+                           #( #field_definitions), *
                         ]
                     }
                 }
@@ -178,8 +178,8 @@ impl ToTokens for EdgeToken {
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
                     use #crate_name::Parametric as _;
+                    use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
-                    use #crate_name::Schemaful as _;
                     
                     pub struct TableNameStaticChecker {
                         pub #table_name_ident: String,
@@ -188,7 +188,7 @@ impl ToTokens for EdgeToken {
                 
                     #( #imports_referenced_node_schema) *
 
-                    #[derive(Debug)]
+                    #[derive(Debug, Clone)]
                     pub struct #struct_name_ident {
                        #( #schema_struct_fields_types_kv) *
                         #___________graph_traversal_string: ::std::string::String,
@@ -196,12 +196,12 @@ impl ToTokens for EdgeToken {
                         #___________errors: Vec<String>,
                     }
                     
-                    impl #crate_name::Schemaful for #struct_name_ident {
-                        fn get_connection(&self) -> String {
+                    impl #crate_name::Buildable for #struct_name_ident {
+                        fn build(&self) -> ::std::string::String {
                             self.#___________graph_traversal_string.to_string()
                         }
                     }
-
+            
                     impl #crate_name::Parametric for #struct_name_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
                             self.#___________bindings.to_vec()
@@ -209,6 +209,26 @@ impl ToTokens for EdgeToken {
                     }
                     
                     impl #crate_name::Erroneous for #struct_name_ident {
+                        fn get_errors(&self) -> Vec<::std::string::String> {
+                            self.#___________errors.to_vec()
+                        }
+                    }
+                
+                    impl #crate_name::Aliasable for &#struct_name_ident {}
+                
+                    impl #crate_name::Parametric for &#struct_name_ident {
+                        fn get_bindings(&self) -> #crate_name::BindingsList {
+                            self.#___________bindings.to_vec()
+                        }
+                    }
+                
+                    impl #crate_name::Buildable for &#struct_name_ident {
+                        fn build(&self) -> ::std::string::String {
+                            self.#___________graph_traversal_string.to_string()
+                        }
+                    }
+                    
+                    impl #crate_name::Erroneous for &#struct_name_ident {
                         fn get_errors(&self) -> Vec<String> {
                             self.#___________errors.to_vec()
                         }
@@ -234,40 +254,34 @@ impl ToTokens for EdgeToken {
                         }
                         
                         pub fn #__________connect_edge_to_graph_traversal_string(
-                            store: ::std::string::String,
-                            clause: impl Into<#crate_name::Clause>,
-                            arrow_direction: &str,
-                            destination_table_name: ::std::string::String,
-                            existing_bindings: #crate_name::BindingsList,
-                            existing_errors: Vec<String>,
+                            connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
+                            clause: impl Into<#crate_name::EdgeClause>,
                         ) -> Self {
+                            let writes = "Rer";
                             let mut schema_instance = Self::empty();
-                            let clause: #crate_name::Clause = clause.into();
-                            let bindings = [&existing_bindings[..], &clause.get_bindings()[..]].concat();
+                            let clause: #crate_name::EdgeClause = clause.into();
+                            let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
                             
-                            let clause_errors = clause.get_errors(#table_name_str.into());
-                            let errors = [&existing_errors[..], &clause_errors[..]].concat();
+                            let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
-                            let origin_table_name = #table_name_str.to_string();
                         
                             let schema_edge_str_with_arrow = format!(
-                                "{}{}{}{}",
-                                store.as_str(),
-                                arrow_direction,
-                                // origin_table_name,
-                                clause.format_with_model(#table_name_str),
-                                arrow_direction,
-                                // destination_table_name,
+                                "{}{}",
+                                connection.build(),
+                                clause.build(),
                             );
                             
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
                             let #___________graph_traversal_string = &#schema_instance
-                                .#___________graph_traversal_string
-                                .replace(arrow_direction, "");
+                                .#___________graph_traversal_string;
+                    
+                            // let #___________graph_traversal_string = &#schema_instance
+                            //     .#___________graph_traversal_string
+                            //     .replace(arrow_direction, "");
 
                             #( #connection_with_field_appended) *
                             

@@ -8,7 +8,10 @@
 use serde::Serialize;
 use surrealdb::opt::RecordId;
 
-use crate::types::{Clause, Table};
+use crate::{
+    types::{NodeClause, Table},
+    Alias,
+};
 
 use super::Raw;
 
@@ -31,7 +34,9 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     fn get_key<T: From<RecordId>>(self) -> Option<T>;
     // fn get_table_name() -> surrealdb::sql::Table;
     fn get_table_name() -> Table;
-    fn with(clause: impl Into<Clause>) -> Self::Schema;
+    fn with(clause: impl Into<NodeClause>) -> Self::Schema;
+
+    fn get_fields_relations_aliased() -> Vec<Alias>;
 }
 
 pub trait SurrealdbEdge: SurrealdbModel + Serialize {
@@ -51,10 +56,6 @@ pub trait SurrealdbObject: Serialize {
     type Schema;
     fn schema() -> Self::Schema;
     // fn with(clause: impl Into<Clause>) -> Self::Schema;
-}
-
-pub trait Schemaful {
-    fn get_connection(&self) -> String;
 }
 
 pub type ErrorList = Vec<String>;
