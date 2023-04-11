@@ -601,7 +601,7 @@ impl From<AnyEdgeFilter> for Clause {
     }
 }
 
-pub fn any_edge(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
+pub fn any_other_edges(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
     AnyEdgeFilter {
         edge_tables: edges.into().into(),
         where_: None,
@@ -705,7 +705,7 @@ fn test_display_clause_with_any_edge_condition_simple() {
     let amount = Field::new("amount");
 
     let age_edge_condition =
-        any_edge(vec![writes, reads, purchased]).where_(amount.less_than_or_equal(120));
+        any_other_edges(vec![writes, reads, purchased]).where_(amount.less_than_or_equal(120));
 
     assert_eq!(
         age_edge_condition.fine_tune_params(),
@@ -724,7 +724,7 @@ fn test_display_clause_with_any_edge_condition_complex() {
     let purchased = Table::new("purchased");
     let city = Field::new("city");
 
-    let age_edge_condition = any_edge(vec![writes, reads, purchased]).where_(
+    let age_edge_condition = any_other_edges(vec![writes, reads, purchased]).where_(
         cond(city.is("Prince Edward Island"))
             .and(city.is("NewFoundland"))
             .or(city.like("Toronto")),
