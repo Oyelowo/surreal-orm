@@ -53,10 +53,6 @@ pub trait SurrealdbObject: Serialize {
     // fn with(clause: impl Into<Clause>) -> Self::Schema;
 }
 
-pub trait Schemaful {
-    fn get_connection(&self) -> String;
-}
-
 pub type ErrorList = Vec<String>;
 pub trait Erroneous {
     fn get_errors(&self) -> ErrorList {

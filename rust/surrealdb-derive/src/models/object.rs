@@ -134,7 +134,6 @@ impl ToTokens for ObjectToken{
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
-                use #crate_name::Schemaful as _;
             
                #( #imports_referenced_node_schema) *
                 
@@ -147,12 +146,6 @@ impl ToTokens for ObjectToken{
                     #___________errors: Vec<String>,
                 }
 
-                impl #crate_name::Schemaful for #struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
-                
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
@@ -179,12 +172,6 @@ impl ToTokens for ObjectToken{
 
                 impl #crate_name::Aliasable for &#struct_name_ident {}
             
-                impl #crate_name::Schemaful for &#struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
-                
                 impl #crate_name::Parametric for &#struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()

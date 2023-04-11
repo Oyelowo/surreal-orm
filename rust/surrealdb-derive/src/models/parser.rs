@@ -705,7 +705,6 @@ impl NodeEdgeMetadataStore {
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
-                    use #crate_name::Schemaful as _;
                     
                     #( #destination_node_schema) *
                     

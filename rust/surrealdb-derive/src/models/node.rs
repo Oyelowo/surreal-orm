@@ -197,7 +197,6 @@ impl ToTokens for NodeToken{
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
-                use #crate_name::Schemaful as _;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
@@ -228,12 +227,6 @@ impl ToTokens for NodeToken{
                 }
 
                 impl #crate_name::Aliasable for #struct_name_ident {}
-            
-                impl #crate_name::Schemaful for #struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
                 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
@@ -261,12 +254,6 @@ impl ToTokens for NodeToken{
             
                 impl #crate_name::Aliasable for &#struct_name_ident {}
             
-                impl #crate_name::Schemaful for &#struct_name_ident {
-                    fn get_connection(&self) -> String {
-                        self.#___________graph_traversal_string.to_string()
-                    }
-                }
-                
                 impl #crate_name::Parametric for &#struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()

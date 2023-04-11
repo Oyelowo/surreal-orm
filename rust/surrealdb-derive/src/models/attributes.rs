@@ -778,7 +778,7 @@ impl ReferencedNodeMeta {
                      let clause: #crate_name::NodeAliasClause = clause.into();
                      let clause: #crate_name::NodeClause = clause.into_inner();
 
-                    let normalized_field_name_str = if self.get_connection().is_empty(){
+                    let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
                         format!(".{}", #normalized_field_name_str)
@@ -833,7 +833,7 @@ impl ReferencedNodeMeta {
             record_link_default_alias_as_method: quote!(
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NestedClause>) -> #schema_type_ident {
                      let clause: #crate_name::NestedClause = clause.into();
-                    let normalized_field_name_str = if self.get_connection().is_empty(){
+                    let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
                         format!(".{}", #normalized_field_name_str)
