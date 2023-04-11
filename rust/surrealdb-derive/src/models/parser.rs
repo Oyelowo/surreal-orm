@@ -577,18 +577,12 @@ impl NodeEdgeMetadataStore {
         let foreign_node_connection_method = || {
             quote!(
                 pub fn #destination_node_table_name(self, clause: impl Into<#crate_name::NodeClause>) -> #destination_node_schema_ident {
-                    // let writes = 545;
                     let clause: #crate_name::NodeClause = clause.into();
                     let clause = clause.with_arrow(#arrow).with_table(#destination_node_table_name_str);
 
                     #destination_node_schema_ident::#__________connect_node_to_graph_traversal_string(
                                 self,
-                                // self.get_connection(),
-                                // &self.#___________graph_traversal_string,
                                 clause,
-                                // true,
-                                // self.get_bindings(),
-                                // self.get_errors(),
                     )
                 }
             )
@@ -701,11 +695,7 @@ impl NodeEdgeMetadataStore {
                         // i.e Edge to Node
                         #edge_inner_module_name::#edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                             self,
-                            // self.get_connection(),
                             clause,
-                            // #arrow,
-                            // self.get_bindings(),
-                            // self.get_errors()
                         ).into()
                     }
                 }
@@ -733,22 +723,18 @@ impl NodeEdgeMetadataStore {
                     impl #crate_name::Buildable for #edge_name_as_struct_with_direction_ident {
                         fn build(&self) -> ::std::string::String {
                             self.0.build()
-                     // "".to_string()
                         }
                     }
             
                     impl #crate_name::Parametric for #edge_name_as_struct_with_direction_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
-                     // vec![]
                             self.0.get_bindings()
                         }
                     }
                     
                     impl #crate_name::Erroneous for #edge_name_as_struct_with_direction_ident {
                         fn get_errors(&self) -> Vec<::std::string::String> {
-                     // vec![]
                             self.0.get_errors()
-                     // vec![]
                         }
                     }
                     impl ::std::ops::Deref for #edge_name_as_struct_with_direction_ident {
@@ -762,6 +748,7 @@ impl NodeEdgeMetadataStore {
                     impl #edge_name_as_struct_with_direction_ident {
                         #( #foreign_node_connection_method) *
                  
+                         // This is for recurive edge traversal which is supported by surrealdb: e.g ->knows(..)->knows(..)->knows(..)
                         // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
                         // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
                         pub fn #edge_name_as_method_ident(
@@ -774,12 +761,7 @@ impl NodeEdgeMetadataStore {
                             // i.e Edge to Edge
                             #edge_name_as_struct_original_ident::#__________connect_edge_to_graph_traversal_string(
                                 self,
-                                // self.get_connection(),
                                 clause,
-                                // #arrow,
-                                // "",
-                                // self.get_bindings(),
-                                // self.get_errors()
                             ).into()
                         }
                     }
