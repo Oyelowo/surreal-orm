@@ -241,9 +241,9 @@ where
 }
 
 #[derive(Debug, Clone)]
-pub struct NestedClause(Clause);
+pub struct ObjectClause(Clause);
 
-impl NestedClause {
+impl ObjectClause {
     pub fn with_arrow(mut self, arrow: String) -> Self {
         Self(self.0.with_arrow(arrow))
     }
@@ -257,7 +257,7 @@ impl NestedClause {
     }
 }
 
-impl<T> From<T> for NestedClause
+impl<T> From<T> for ObjectClause
 where
     T: Into<Clause>,
 {
@@ -267,19 +267,19 @@ where
     }
 }
 
-impl Parametric for NestedClause {
+impl Parametric for ObjectClause {
     fn get_bindings(&self) -> BindingsList {
         self.0.get_bindings()
     }
 }
 
-impl Buildable for NestedClause {
+impl Buildable for ObjectClause {
     fn build(&self) -> String {
         self.0.build()
     }
 }
 
-impl Erroneous for NestedClause {
+impl Erroneous for ObjectClause {
     fn get_errors(&self) -> ErrorList {
         self.0.get_errors()
     }

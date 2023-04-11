@@ -213,14 +213,14 @@ impl ToTokens for ObjectToken{
                     pub fn #__________connect_object_to_graph_traversal_string(
                         // store: ::std::string::String,
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
-                        clause: impl Into<#crate_name::NestedClause>,
+                        clause: impl Into<#crate_name::ObjectClause>,
                         // use_table_name: bool,
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
                         let writes = "Rer";
                         let mut #schema_instance = Self::empty(); 
-                        let clause: #crate_name::NestedClause = clause.into();
+                        let clause: #crate_name::ObjectClause = clause.into();
                         let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
 

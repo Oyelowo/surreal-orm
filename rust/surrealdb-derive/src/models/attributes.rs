@@ -831,8 +831,8 @@ impl ReferencedNodeMeta {
             ),
 
             record_link_default_alias_as_method: quote!(
-                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NestedClause>) -> #schema_type_ident {
-                     let clause: #crate_name::NestedClause = clause.into();
+                pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::ObjectClause>) -> #schema_type_ident {
+                     let clause: #crate_name::ObjectClause = clause.into();
                     let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
