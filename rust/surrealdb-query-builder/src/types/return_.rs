@@ -2,12 +2,17 @@ use std::fmt::{self, Display};
 
 use super::Field;
 
+/// Return type
 #[derive(Debug, Clone)]
 pub enum ReturnType {
     None,
+    /// Return previous state
     Before,
+    /// Return current state after change. This is the default
     After,
+    /// Return the diff
     Diff,
+    /// Return the listed fields/projection
     Projections(Vec<Field>),
 }
 
