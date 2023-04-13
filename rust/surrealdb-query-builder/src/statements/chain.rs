@@ -18,15 +18,21 @@ use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Q
 /// # Example Usage
 ///
 /// ```rust
-/// use surrealdb_query_builder::{chain, SurrealId, statements::select, All, Field, cond};
+/// use surrealdb_query_builder::{*, statements::{chain, select}};
 ///
-/// let user_id = Field::new("user_id");
-/// let age = Field::new("age");
+/// // Create a query chain with a single query
+/// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
+/// let user_dayo = SurrealId::try_from("user:oyedayo").unwrap();
 ///
-/// let query1 = select(All).from(users).where_(cond(age.gt(30)));
-/// let query2 = select(All).from(orders).where_(cond(user_id.eq(123)));
+/// // Append a new query to the chain
+/// let query1 = select(All).from(user_lowo);
+/// let query2 = select(All).from(user_dayo).limit(10);
+/// let chain = chain(query1).chain(query2);
 ///
-/// let query_chain = chain(query1).chain(query2);
+/// // The resulting chain contains both queries
+/// assert!(!chain.build().is_empty());
+/// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
+/// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\nSELECT * FROM user:oyedayo LIMIT 10;");
 /// ```
 pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
     QueryChain {
@@ -36,6 +42,10 @@ pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
     }
 }
 
+/// Chains together multiple queries into a single `QueryChain`.
+///
+/// A `QueryChain` is created with an initial query, and additional queries can be added to the chain using the `chain` method. A `QueryChain` can be built into a single SQL query using the `build` method.
+///
 pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,
@@ -53,15 +63,8 @@ impl QueryChain {
     ///
     /// # Examples
     ///
-    /// ```
-    /// use surrealdb_query_builder::{
-    ///     Queryable,
-    ///     Parametric,
-    ///     chain,
-    ///     statements::select,
-    ///     SurrealId,
-    ///     All
-    /// };
+    /// ```rust
+    /// use surrealdb_query_builder::{*, statements::{chain, select}};
     ///
     /// // Create a query chain with a single query
     /// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
@@ -73,7 +76,9 @@ impl QueryChain {
     /// let chain = chain(query1).chain(query2);
     ///
     /// // The resulting chain contains both queries
-    /// assert_eq!(chain.build(), "SELECT * FROM users;\nSELECT * FROM orders LIMIT 10;");
+    /// assert!(!chain.build().is_empty());
+    /// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
+    /// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\nSELECT * FROM user:oyedayo LIMIT 10;");
     /// ```
     ///
     /// # Panics
