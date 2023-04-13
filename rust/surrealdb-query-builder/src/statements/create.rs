@@ -106,6 +106,14 @@ where
     /// # Arguments
     ///
     /// * `content` - a serializable surrealdb node model.
+    /// # Examples
+    ///
+    /// ```rust, ignore
+    /// create(user_table).content(User{
+    ///         name: "Oylowo".to_string(),
+    ///         age: 192
+    ///     })
+    /// ```
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
@@ -122,6 +130,7 @@ where
     /// `updater`helper function or a list of updater functions for multiple fields
     ///
     /// # Examples
+    ///
     /// Setting single field
     /// ```rust, ignore
     /// assert_eq!(query.set(updater(name).equal("Oyelowo")).to_raw().build(), "SET name='Oyelowo'")
