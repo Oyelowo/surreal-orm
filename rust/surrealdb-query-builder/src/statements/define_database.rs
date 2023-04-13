@@ -7,31 +7,46 @@
 
 use std::fmt::Display;
 
-use surrealdb::sql::{self, Ident};
-
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
-    types::{Database, Table},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Database,
 };
 
+/// Define a new database statement.
+///
+/// # Arguments
+///
+/// * `database` - The name of the database to be defined.
+///
+/// # Returns
+///
+/// A `DefineDatabaseStatement` object that can be executed
+///
+/// # Example
+/// ```rust
+///  use surrealdb_query_builder::{*, statements::define_database};
+///  assert_eq!(
+///          define_database("oyelowo").build(),
+///          "DEFINE DATABASE oyelowo;"
+///      );
+///
+///  assert_eq!(
+///          define_database(Database::new("oyelowo")).build(),
+///          "DEFINE DATABASE oyelowo;"
+///      );
+/// ```
+///
 pub fn define_database(database: impl Into<Database>) -> DefineDatabaseStatement {
-    DefineDatabaseStatement::new(database)
+    DefineDatabaseStatement {
+        database: database.into().into(),
+        bindings: vec![],
+    }
 }
 
-// DEFINE DATABASE @name
+/// A statement for defining a database.
 pub struct DefineDatabaseStatement {
     database: String,
     bindings: BindingsList,
-}
-
-// Musings: Perhaps, definitions should not be parametized
-impl DefineDatabaseStatement {
-    pub fn new(database: impl Into<Database>) -> Self {
-        Self {
-            database: database.into().into(),
-            bindings: vec![],
-        }
-    }
 }
 
 impl Buildable for DefineDatabaseStatement {
@@ -56,9 +71,7 @@ impl Queryable for DefineDatabaseStatement {}
 impl Erroneous for DefineDatabaseStatement {}
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
-
     use super::*;
 
     #[test]
