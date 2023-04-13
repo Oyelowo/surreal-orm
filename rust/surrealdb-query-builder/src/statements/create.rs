@@ -112,7 +112,7 @@ where
     /// create(user_table).content(User{
     ///         name: "Oylowo".to_string(),
     ///         age: 192
-    ///     })
+    ///     });
     /// ```
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
@@ -295,7 +295,14 @@ where
     }
 }
 
-impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Erroneous for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> ReturnableDefault<T> for CreateStatement<T>
 where
