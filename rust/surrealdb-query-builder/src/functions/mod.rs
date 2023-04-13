@@ -5,20 +5,20 @@
  * Licensed under the MIT license
  */
 
-use surrealdb::sql;
+//! This is it
 
-pub(crate) mod array;
-pub(crate) mod count;
-pub(crate) mod crypto;
-pub(crate) mod geo;
-pub(crate) mod http;
-pub(crate) mod math;
-pub(crate) mod parse;
-pub(crate) mod rand;
-pub(crate) mod script;
-pub(crate) mod session;
-pub(crate) mod sleep;
-pub(crate) mod string;
-pub(crate) mod time;
-pub(crate) mod type_;
-pub(crate) mod validation;
+pub mod array;
+pub mod count;
+pub mod crypto;
+pub mod geo;
+pub mod http;
+pub mod math;
+pub mod parse;
+pub mod rand;
+pub mod script;
+pub mod session;
+pub mod sleep;
+pub mod string;
+pub mod time;
+pub mod type_;
+pub mod validation;

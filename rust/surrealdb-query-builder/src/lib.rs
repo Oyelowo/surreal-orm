@@ -5,7 +5,14 @@
  * Licensed under the MIT license
  */
 
+#![warn(missing_docs)]
+#![warn(missing_doc_code_examples)]
+#![forbid(unsafe_code)]
+
+//! This is it
+
 mod errors;
+
 pub mod functions;
 mod helpers;
 mod operators_macros;
