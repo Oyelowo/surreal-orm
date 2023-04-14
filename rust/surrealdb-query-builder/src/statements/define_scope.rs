@@ -19,7 +19,7 @@ use std::fmt::{self, Display};
 
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{expression::Expression, DurationLike, Scope, Table},
+    types::{DurationLike, Scope},
 };
 
 /// Define a new scope .
@@ -72,20 +72,18 @@ impl DefineScopeStatement {
     }
 
     /// Set the signup expression
-    pub fn signup(mut self, expression: impl Into<Expression>) -> Self {
-        let expression: Expression = expression.into();
+    pub fn signup(mut self, expression: impl Queryable) -> Self {
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
-        self.signup_expression = Some(format!("{expression}"));
+        self.signup_expression = Some(format!("{}", expression.build()));
         self
     }
 
     /// Set the signin expression
-    pub fn signin(mut self, expression: impl Into<Expression>) -> Self {
-        let expression: Expression = expression.into();
+    pub fn signin(mut self, expression: impl Queryable) -> Self {
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
-        self.signin_expression = Some(format!("{expression}"));
+        self.signin_expression = Some(format!("{}", expression.build()));
         self
     }
 }
