@@ -210,7 +210,6 @@ impl Erroneous for DefineIndexStatement {}
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
@@ -223,7 +222,7 @@ mod tests {
             .unique();
 
         assert_eq!(
-            query.to_string(),
+            query.build(),
             "DEFINE INDEX userEmailIndex ON TABLE user FIELDS email UNIQUE;"
         );
         assert_eq!(query.get_bindings().len(), 0);
@@ -239,7 +238,7 @@ mod tests {
             .unique();
 
         assert_eq!(
-            query.to_string(),
+            query.build(),
             "DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;"
         );
         assert_eq!(query.get_bindings().len(), 0);
@@ -258,7 +257,7 @@ mod tests {
             .unique();
 
         assert_eq!(
-            query.to_string(),
+            query.build(),
             "DEFINE INDEX alien_index ON TABLE alien FIELDS age, name, email, dob UNIQUE;"
         );
         assert_eq!(query.get_bindings().len(), 0);
@@ -277,7 +276,7 @@ mod tests {
             .unique();
 
         assert_eq!(
-            query.to_string(),
+            query.build(),
             "DEFINE INDEX alien_index ON TABLE alien COLUMNS age, name, email, dob UNIQUE;"
         );
         assert_eq!(query.get_bindings().len(), 0);
