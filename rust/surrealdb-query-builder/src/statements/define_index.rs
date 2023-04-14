@@ -28,6 +28,7 @@ use crate::{
 /// You must be authenticated as a root, namespace, or database user before you can use the DEFINE INDEX statement.
 /// You must select your namespace and database before you can use the DEFINE INDEX statement.
 ///
+/// Example:
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, CrudType::*, statements::{define_index, for_}};
