@@ -59,7 +59,7 @@ pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
         fields: vec![],
         columns: vec![],
         unique: None,
-        bindings: vec![],
+        // bindings: vec![],
     }
 }
 
@@ -70,7 +70,7 @@ pub struct DefineIndexStatement {
     fields: Vec<String>,
     columns: Vec<String>,
     unique: Option<bool>,
-    bindings: BindingsList,
+    // bindings: BindingsList,
 }
 
 pub enum Columns {
