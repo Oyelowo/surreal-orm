@@ -161,12 +161,12 @@ impl DefineFieldStatement {
     }
 
     /// set specific permissions for specific event type inluding CREATE, UPDATE, SELECT and DELETE.
-    ///
+    /// Additional permission chaining accumulates
     ///  Examples:
     ///  
     /// ```rust
     ///     # use surrealdb_query_builder as surrealdb_orm;
-    ///     use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
+    /// use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
     ///
     ///     # let name = Field::new("name");
     ///     # let user_table = Table::from("user");
@@ -178,11 +178,10 @@ impl DefineFieldStatement {
     ///     #    .value("example@codebreather.com")
     ///     #    .assert(cond(value().is_not(NONE)).and(value().like("is_email")));
     ///
-    /// // Additional permission chaining accumulates
-    ///  // You can create perimssion for a single event
+    /// // You can create perimssion for a single event
     /// let statement = statement.permissions(for_(Select).where_(age.greater_than_or_equal(18)));
     ///
-    ///  // Even multiple
+    /// // Even multiple
     /// let statement = statement.permissions(for_(&[Create, Update]).where_(name.is("Oyedayo")));
     ///
     /// // Multiples multples
