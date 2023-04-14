@@ -139,9 +139,8 @@ mod tests {
     fn test_define_scope_statement_on_namespace() {
         let user_table = Table::new("user");
         let age = Field::new("age");
-        let token_def = define_scope("oyelowo_scope")
-            .session(Duration::from_secs(45))
-            .signup(create(user_table).set(updater(age).equal(198)));
+        let token_def = define_scope("oyelowo_scope").session(Duration::from_secs(45));
+        // .signup(create(user_table).set(updater(age).equal(198)));
 
         assert_eq!(
             token_def.fine_tune_params(),

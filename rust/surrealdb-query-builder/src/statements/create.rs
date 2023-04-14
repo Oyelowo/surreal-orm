@@ -15,65 +15,40 @@ use crate::{
         Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, ReturnableDefault,
         ReturnableStandard, SurrealdbNode,
     },
-    types::{DurationLike, ReturnType, Updateables},
+    types::{DurationLike, ReturnType},
     ErrorList,
 };
 
-use super::update::TargettablesForUpdate;
-
-/// Creates a new CREATE SQL statement for a given type. This function returns a CreateStatement.
+/// Creates a new CREATE SQL statement for a given type.
+///
+/// Sets the content of the record to be created.
 ///
 /// # Arguments
 ///
-/// * `targettables` - a table or surrealdb record id. This can be one of the following:
+/// * `content` - a serializable surrealdb node model. Type must implement SurrealdbModel
+/// # Examples
 ///
-///   * `Table` - a surrealdb table.
-///
-///   * `SurrealdbId` - a surrealdb id.
-///
-/// # Panics
-///
-/// Panics when executed via `run` or `return_many`, `return_many` from generated error if `targettables` argument points to a wrong table.
-pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
+/// ```rust, ignore
+/// create(User{
+///         name: "Oylowo".to_string(),
+///         age: 192
+///     });
+/// ```
+pub fn create<T>(content: T) -> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    let table_name = T::table_name();
-    let mut errors = vec![];
-
-    let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        errors.push("You're trying to update into the wrong table".to_string());
-    }
-    let targets: TargettablesForUpdate = targettables.into();
-    let targets_bindings = targets.get_bindings();
-
-    let mut target_names = match targets {
-        TargettablesForUpdate::Table(table) => vec![table.to_string()],
-        TargettablesForUpdate::SurrealId(_) => targets_bindings
-            .iter()
-            .map(|b| format!("${}", b.get_param()))
-            .collect::<Vec<_>>(),
-    };
+    let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+    let binding = Binding::new(sql_value);
 
     CreateStatement::<T> {
-        target: target_names
-            .pop()
-            .expect("Table or record id must exist here. this is a bug"),
-        content: None,
-        set: Vec::new(),
+        target: T::table_name().to_string(),
+        content: binding.get_param_dollarised(),
         return_type: None,
         timeout: None,
         parallel: false,
-        bindings: targets_bindings,
-        errors,
+        bindings: vec![binding],
+        errors: vec![],
         __model_return_type: PhantomData,
     }
 }
@@ -85,8 +60,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     target: String,
-    content: Option<String>,
-    set: Vec<String>,
+    content: String,
     return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
@@ -101,68 +75,6 @@ impl<T> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    /// Sets the content of the record to be created.
-    ///
-    /// # Arguments
-    ///
-    /// * `content` - a serializable surrealdb node model.
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// create(user_table).content(User{
-    ///         name: "Oylowo".to_string(),
-    ///         age: 192
-    ///     });
-    /// ```
-    pub fn content(mut self, content: T) -> Self {
-        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
-        let binding = Binding::new(sql_value);
-        self.content = Some(binding.get_param().to_owned());
-        self.bindings.push(binding);
-        self
-    }
-
-    /// Sets the values of the fields to be updated in the record.
-    ///
-    /// # Arguments
-    ///
-    /// * `settables` - an instance of `Updateables` trait. This can be created using a single
-    /// `updater`helper function or a list of updater functions for multiple fields
-    ///
-    /// # Examples
-    ///
-    /// Setting single field
-    /// ```rust, ignore
-    /// assert_eq!(query.set(updater(name).equal("Oyelowo")).to_raw().build(), "SET name='Oyelowo'")
-    /// ```
-    ///
-    /// Setting multiple fields by chaining `set` method
-    /// ```rust, ignore
-    /// assert_eq!(query.
-    ///             set(updater(name).equal("Oyelowo"))
-    ///             set(updater(age).equal(192))
-    ///         ).to_raw().build(), "SET name='Oyelowo', age=192")
-    /// ```
-    ///
-    /// Setting multiple fields by using a list of updaters in a single `set` method
-    /// ```rust, ignore
-    /// assert_eq!(query.set(vec![
-    ///             updater(name).equal("Oyelowo"),
-    ///             updater(age).equal(192)],
-    ///         ).to_raw().build(), "SET name='Oyelowo', age=192")
-    /// ```
-    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
-        let settable: Updateables = settables.into();
-        self.bindings.extend(settable.get_bindings());
-
-        let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.build()],
-            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
-        };
-        self.set.extend(setter_query);
-        self
-    }
-
     /// Sets the return type for the query.
     ///
     /// # Arguments
@@ -248,14 +160,9 @@ where
         query.push_str("CREATE ");
         query.push_str(&self.target);
 
-        if let Some(content) = &self.content {
+        if !&self.content.is_empty() {
             query.push_str(" CONTENT ");
-            query.push_str(&content);
-        } else if !&self.set.is_empty() {
-            query += "SET ";
-            let set_vec = self.set.join(", ");
-            query += &set_vec;
-            query += " ";
+            query.push_str(&self.content);
         }
 
         if let Some(return_type) = &self.return_type {
