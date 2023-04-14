@@ -209,10 +209,7 @@ impl Queryable for DefineIndexStatement {}
 impl Erroneous for DefineIndexStatement {}
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
-
-    use std::time::Duration;
 
     use super::*;
 
@@ -229,7 +226,7 @@ mod tests {
             query.to_string(),
             "DEFINE INDEX userEmailIndex ON TABLE user FIELDS email UNIQUE;"
         );
-        insta::assert_debug_snapshot!(query.get_bindings());
+        assert_eq!(query.get_bindings().len(), 0);
     }
 
     #[test]
@@ -245,7 +242,7 @@ mod tests {
             query.to_string(),
             "DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;"
         );
-        insta::assert_debug_snapshot!(query.get_bindings());
+        assert_eq!(query.get_bindings().len(), 0);
     }
 
     #[test]
@@ -264,7 +261,7 @@ mod tests {
             query.to_string(),
             "DEFINE INDEX alien_index ON TABLE alien FIELDS age, name, email, dob UNIQUE;"
         );
-        insta::assert_debug_snapshot!(query.get_bindings());
+        assert_eq!(query.get_bindings().len(), 0);
     }
 
     #[test]
@@ -283,6 +280,6 @@ mod tests {
             query.to_string(),
             "DEFINE INDEX alien_index ON TABLE alien COLUMNS age, name, email, dob UNIQUE;"
         );
-        insta::assert_debug_snapshot!(query.get_bindings());
+        assert_eq!(query.get_bindings().len(), 0);
     }
 }

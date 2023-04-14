@@ -1,6 +1,5 @@
 ---
 source: surrealdb-query-builder/src/statements/define_event.rs
-assertion_line: 220
 expression: query.get_bindings()
 ---
 [
