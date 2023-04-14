@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 pub(crate) mod chain;
 pub(crate) mod create;
+pub(crate) mod create_by_setting;
 pub(crate) mod define_database;
 pub(crate) mod define_event;
 pub(crate) mod define_field;
@@ -35,6 +36,7 @@ pub(crate) mod use_;
 
 pub use chain::{chain, QueryChain};
 pub use create::{create, CreateStatement};
+pub use create_by_setting::{create_by_setting, CreateBySettingStatement};
 pub use define_database::{define_database, DefineDatabaseStatement};
 pub use define_event::{define_event, DefineEventStatement};
 pub use define_field::{define_field, DefineFieldStatement};

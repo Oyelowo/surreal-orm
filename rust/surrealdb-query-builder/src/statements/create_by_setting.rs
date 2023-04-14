@@ -34,7 +34,9 @@ use super::update::TargettablesForUpdate;
 /// # Panics
 ///
 /// Panics when executed via `run` or `return_many`, `return_many` from generated error if `targettables` argument points to a wrong table.
-pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
+pub fn create_by_setting<T>(
+    targettables: impl Into<TargettablesForUpdate>,
+) -> CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -63,7 +65,7 @@ where
             .collect::<Vec<_>>(),
     };
 
-    CreateStatement::<T> {
+    CreateBySettingStatement::<T> {
         target: target_names
             .pop()
             .expect("Table or record id must exist here. this is a bug"),
@@ -80,7 +82,7 @@ where
 
 /// Represents a CREATE SQL statement that can be executed. It implements various traits such as
 /// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
-pub struct CreateStatement<T>
+pub struct CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -95,9 +97,12 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Queryable for CreateBySettingStatement<T> where
+    T: Serialize + DeserializeOwned + SurrealdbNode
+{
+}
 
-impl<T> CreateStatement<T>
+impl<T> CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -238,7 +243,7 @@ where
     }
 }
 
-impl<T> Buildable for CreateStatement<T>
+impl<T> Buildable for CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -277,7 +282,7 @@ where
     }
 }
 
-impl<T> std::fmt::Display for CreateStatement<T>
+impl<T> std::fmt::Display for CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -286,7 +291,7 @@ where
     }
 }
 
-impl<T> Parametric for CreateStatement<T>
+impl<T> Parametric for CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -295,7 +300,7 @@ where
     }
 }
 
-impl<T> Erroneous for CreateStatement<T>
+impl<T> Erroneous for CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -304,14 +309,14 @@ where
     }
 }
 
-impl<T> ReturnableDefault<T> for CreateStatement<T>
+impl<T> ReturnableDefault<T> for CreateBySettingStatement<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
 }
 
-impl<T> ReturnableStandard<T> for CreateStatement<T>
+impl<T> ReturnableStandard<T> for CreateBySettingStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {
