@@ -26,7 +26,7 @@ use crate::{
 ///
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// use surrealdb_orm::{*, CrudType::*, statements::{define_login, for_}};
+/// use surrealdb_orm::{*, CrudType::*, statements::{define_login}};
 /// let username = Login::new("username");
 ///
 /// let statement = define_login(username).on_database().password("oyelowo");

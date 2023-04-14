@@ -31,7 +31,7 @@ use crate::{
 /// Example:
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// use surrealdb_orm::{*, CrudType::*, statements::{define_index, for_}};
+/// use surrealdb_orm::{*, CrudType::*, statements::{define_index}};
 /// # let alien = Table::from("alien");
 /// # let name = Field::new("name");
 /// # let age = Field::new("age");
