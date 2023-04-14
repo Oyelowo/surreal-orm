@@ -13,8 +13,8 @@ use super::{BindingsList, Buildable, Erroneous, Parametric, Queryable};
 pub struct Raw(String);
 
 impl Raw {
-    pub fn new(query: String) -> Self {
-        Self(query)
+    pub fn new(query: impl Into<String>) -> Self {
+        Self(query.into())
     }
 }
 

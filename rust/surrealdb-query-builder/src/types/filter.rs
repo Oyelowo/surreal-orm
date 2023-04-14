@@ -192,7 +192,7 @@ impl Filter {
     ///
     /// assert_eq!(combined.to_string(), "(name = 'John') AND (age > 30)");
     /// ```
-    pub fn and(self, filter: Operation) -> Self {
+    pub fn and(self, filter: impl Buildable + Parametric) -> Self {
         let precendence = self._______bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 

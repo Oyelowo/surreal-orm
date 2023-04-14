@@ -33,10 +33,25 @@ use crate::{
 ///
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// use surrealdb_orm::{*, CrudType::*, statements::{define_scope}};
-/// let regional = Scope::new("regional");
+/// use surrealdb_orm::{*, functions::crypto, statements::{define_scope, select}};
+/// use std::time::Duration;
 ///
-/// let statement = define_scope(regional);
+/// let user= Table::new("user");
+/// let email = Field::new("email");
+/// let pass = Field::new("pass");
+/// let pass_param = Field::new("pass_param");
+///
+/// let statement = define_scope("oyelowo_scope")
+///     .session(Duration::from_secs(45))
+///     .signup(Raw::new(
+///         "CREATE user SET email = $email, pass = crypto::argon2::generate($pass)",
+///     ))
+///     .signin(
+///         select(All).from(user).where_(
+///             cond(email.equal("oyelowo@codebreather.com"))
+///                 .and(crypto::argon2::compare!(pass, pass_param)),
+///         ),
+///     );
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
@@ -128,7 +143,8 @@ impl Erroneous for DefineScopeStatement {}
 #[cfg(test)]
 mod tests {
     use crate::{
-        statements::{create, define_scope},
+        functions::crypto,
+        statements::{define_scope, select},
         *,
     };
     use std::time::Duration;
@@ -138,13 +154,27 @@ mod tests {
     #[test]
     fn test_define_scope_statement_on_namespace() {
         let user_table = Table::new("user");
-        let age = Field::new("age");
-        let token_def = define_scope("oyelowo_scope").session(Duration::from_secs(45));
-        // .signup(create(user_table).set(updater(age).equal(198)));
+        let email = Field::new("email");
+        let pass = Field::new("pass");
+        let pass_param = Field::new("pass_param");
+
+        let token_def = define_scope("oyelowo_scope")
+            .session(Duration::from_secs(45))
+            .signup(Raw::new(
+                "CREATE user SET email = $email, pass = crypto::argon2::generate($pass)",
+            ))
+            .signin(
+                select(All).from(user_table).where_(
+                    cond(email.equal("oyelowo@codebreather.com"))
+                        .and(crypto::argon2::compare!(pass, pass_param)),
+                ),
+            );
 
         assert_eq!(
             token_def.fine_tune_params(),
-            "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002;"
+            "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 SIGNUP \
+                ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN \
+                ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare($_param_00000004, $_param_00000005)); );"
         );
         assert_eq!(
             token_def.to_raw().build(),
