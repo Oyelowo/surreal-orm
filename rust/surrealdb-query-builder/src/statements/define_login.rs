@@ -172,30 +172,44 @@ impl Queryable for DefineLoginStatement {}
 impl Erroneous for DefineLoginStatement {}
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
+    use crate::{Login, ToRaw};
 
     use super::*;
 
     #[test]
     fn test_define_login_statement_with_password() {
-        let login_with_password = define_login("username").on_database().password("oyelowo");
+        let username = Login::new("username");
+        let login_with_password = define_login(username).on_database().password("oyelowo");
 
         assert_eq!(
-            login_with_password.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000;" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            login_with_password.fine_tune_params(),
+            "DEFINE LOGIN $_param_00000001 ON DATABASE PASSWORD $_param_00000002;"
         );
-        insta::assert_debug_snapshot!(login_with_password.get_bindings());
+
+        assert_eq!(
+            login_with_password.to_raw().build(),
+            "DEFINE LOGIN username ON DATABASE PASSWORD 'oyelowo';"
+        );
+        assert_eq!(login_with_password.get_bindings().len(), 2);
     }
 
     #[test]
     fn test_define_login_statement_with_passhash() {
-        let login_with_hash = define_login("username").on_namespace().password("oyedayo");
+        let login_with_hash = define_login("username")
+            .on_namespace()
+            .passhash("reiiereroyedayo");
 
         assert_eq!(
-            login_with_hash.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000;"
+            login_with_hash.fine_tune_params(),
+            "DEFINE LOGIN $_param_00000001 ON NAMESPACE PASSHASH $_param_00000002;"
         );
-        insta::assert_debug_snapshot!(login_with_hash.get_bindings());
+
+        assert_eq!(
+            login_with_hash.to_raw().build(),
+            "DEFINE LOGIN username ON NAMESPACE PASSHASH 'reiiereroyedayo';"
+        );
+
+        assert_eq!(login_with_hash.get_bindings().len(), 2);
     }
 }
