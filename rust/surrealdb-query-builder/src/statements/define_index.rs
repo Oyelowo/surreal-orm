@@ -16,7 +16,7 @@ use std::fmt::{self, Display};
 // DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, Table, TableIndex},
 };
 
