@@ -5,23 +5,6 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::{self, Display};
-
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
-
-use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{expression::Expression, DurationLike, Scope, Table},
-};
-
-// DEFINE SCOPE statement
-// Setting scope access allows SurrealDB to operate as a web database. With scopes you can set authentication and access rules which enable fine-grained access to tables and fields.
-//
-// Requirements
-// To useDEFINE SCOPE you must have root, namespace, or database level access.
-// You must select your namespace and database before you can use the DEFINE SCOPE statement.
 // Statement syntax
 // DEFINE SCOPE @name SESSION @duration SIGNUP @expression SIGNIN @expression
 // Example usage
@@ -32,8 +15,44 @@ use crate::{
 // 	SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) )
 // 	SIGNIN ( SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass) )
 // ;
+use std::fmt::{self, Display};
 
-// Define the API for the Scope builder
+use crate::{
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::{expression::Expression, DurationLike, Scope, Table},
+};
+
+/// Define a new scope .
+/// Setting scope access allows SurrealDB to operate as a web database. With scopes you can set authentication and access rules which enable fine-grained access to tables and fields.
+///
+/// Requirements
+/// To use DEFINE SCOPE you must have root, namespace, or database level access.
+/// You must select your namespace and database before you can use the DEFINE SCOPE statement.
+///
+/// Examples:
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, CrudType::*, statements::{define_scope}};
+/// let regional = Scope::new("regional");
+///
+/// let statement = define_scope(regional);
+///
+/// assert!(!statement.build().is_empty());
+/// ```
+pub fn define_scope(scope_name: impl Into<Scope>) -> DefineScopeStatement {
+    let binding_scope_name = Binding::new(scope_name.into()).with_description("Session scope");
+    let name = binding_scope_name.get_param_dollarised();
+    DefineScopeStatement {
+        name,
+        duration: None,
+        signup_expression: None,
+        signin_expression: None,
+        bindings: vec![binding_scope_name],
+    }
+}
+
+/// Define the API for the Scope builder
 pub struct DefineScopeStatement {
     name: String,
     duration: Option<String>,
@@ -42,25 +61,8 @@ pub struct DefineScopeStatement {
     bindings: BindingsList,
 }
 
-pub fn define_scope(scope_name: impl Into<Scope>) -> DefineScopeStatement {
-    DefineScopeStatement::new(scope_name)
-}
-
 impl DefineScopeStatement {
-    // Set the scope name
-    pub fn new(scope_name: impl Into<Scope>) -> Self {
-        let binding_scope_name = Binding::new(scope_name.into()).with_description("Session scope");
-        let name = binding_scope_name.get_param_dollarised();
-        Self {
-            name,
-            duration: None,
-            signup_expression: None,
-            signin_expression: None,
-            bindings: vec![binding_scope_name],
-        }
-    }
-
-    // Set the session duration
+    /// Set the session duration
     pub fn session(mut self, duration: impl Into<DurationLike>) -> Self {
         let binding = Binding::new(duration.into()).with_description("Session durration.");
         let duration_param = format!("{}", binding.get_param_dollarised());
@@ -69,7 +71,7 @@ impl DefineScopeStatement {
         self
     }
 
-    // Set the signup expression
+    /// Set the signup expression
     pub fn signup(mut self, expression: impl Into<Expression>) -> Self {
         let expression: Expression = expression.into();
         let bindings = expression.get_bindings();
@@ -78,7 +80,7 @@ impl DefineScopeStatement {
         self
     }
 
-    // Set the signin expression
+    /// Set the signin expression
     pub fn signin(mut self, expression: impl Into<Expression>) -> Self {
         let expression: Expression = expression.into();
         let bindings = expression.get_bindings();
@@ -126,21 +128,24 @@ impl Queryable for DefineScopeStatement {}
 impl Erroneous for DefineScopeStatement {}
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
-
-    use std::time::Duration;
+    use crate::ToRaw;
 
     use super::*;
+    use std::time::Duration;
 
     #[test]
     fn test_define_scope_statement_on_namespace() {
         let token_def = define_scope("oyelowo_scope").session(Duration::from_secs(45));
 
         assert_eq!(
-            token_def.to_string(),
-            "DEFINE SCOPE $_param_00000000 SESSION $_param_00000000;"
+            token_def.fine_tune_params(),
+            "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002;"
         );
-        insta::assert_debug_snapshot!(token_def.get_bindings());
+        assert_eq!(
+            token_def.to_raw().build(),
+            "DEFINE SCOPE oyelowo_scope SESSION 45s;"
+        );
+        assert_eq!(token_def.get_bindings().len(), 2);
     }
 }
