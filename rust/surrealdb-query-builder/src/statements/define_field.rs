@@ -141,6 +141,7 @@ use super::for_::PermissionType;
 // -- Define a field with specific geometric types
 // DEFINE FIELD area ON TABLE restaurant TYPE geometry (polygon, multipolygon, collection);
 
+/// A statement for defining a Field.
 #[derive(Clone, Debug)]
 pub struct DefineFieldStatement {
     field_name: String,
@@ -154,6 +155,44 @@ pub struct DefineFieldStatement {
     bindings: BindingsList,
 }
 
+/**
+The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
+
+Requirements
+You must be authenticated as a root, namespace, or database user before you can use the DEFINE FIELD statement.
+You must select your namespace and database before you can use the DEFINE FIELD statement.
+
+```rust
+ # use surrealdb_query_builder as surrealdb_orm;
+  use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
+
+    # let name = Field::new("name");
+    # let user_table = Table::from("user");
+    # let age = Field::new("age");
+    # let email = Field::new("email");
+    let statement = define_field(email)
+        .on_table(user_table)
+        .type_(FieldType::String)
+        .value("example@codebreather.com")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
+        .permissions(&[
+            for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ]);
+
+    assert_eq!(
+        statement.fine_tune_params(),
+        "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000001) AND ($value ~ $_param_00000002)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000003\nFOR create, update\n\tWHERE name IS $_param_00000004\nFOR create, delete\n\tWHERE name IS $_param_00000005\nFOR update\n\tWHERE age <= $_param_00000006;"
+    );
+    assert_eq!(
+        statement.to_raw().build(),
+        "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000001) AND ($value ~ $_param_00000002)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000003\nFOR create, update\n\tWHERE name IS $_param_00000004\nFOR create, delete\n\tWHERE name IS $_param_00000005\nFOR update\n\tWHERE age <= $_param_00000006;"
+    );
+    assert_eq!(statement.get_bindings().len(), 4);
+```
+*/
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     let field: Field = fieldable.into();
     DefineFieldStatement {
@@ -167,20 +206,6 @@ pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
         permissions_for: vec![],
         bindings: vec![],
     }
-}
-
-pub struct ValueAssert(Param);
-
-impl Deref for ValueAssert {
-    type Target = Param;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-pub fn value() -> ValueAssert {
-    ValueAssert(Param::new("value"))
 }
 
 impl DefineFieldStatement {
@@ -218,7 +243,7 @@ impl DefineFieldStatement {
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+    pub fn permissions(mut self, fors: impl Into<PermissionType>) -> Self {
         use PermissionType::*;
         let fors: PermissionType = fors.into();
         match fors {
@@ -300,14 +325,9 @@ impl Display for DefineFieldStatement {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use crate::{cond, value, Operatable, NONE};
     use crate::{statements::for_, CrudType::*};
-    use std::time::Duration;
-
-    use crate::{cond, Operatable, NONE};
-
-    use super::*;
 
     #[test]
     fn test_define_field_statement_full() {
@@ -322,9 +342,9 @@ mod tests {
             .type_(String)
             .value("example@codebreather.com")
             .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-            .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-            .permissions_for(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
-            .permissions_for(&[
+            .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions(&[
                 for_(&[Create, Delete]).where_(name.is("Oyedayo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
             ]);
