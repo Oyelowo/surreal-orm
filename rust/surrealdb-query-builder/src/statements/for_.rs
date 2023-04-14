@@ -120,7 +120,7 @@ pub enum PermissionType {
 }
 
 impl ToRaw for PermissionType {
-    fn to_raw(self) -> Raw {
+    fn to_raw(self: &PermissionType) -> Raw {
         match self {
             PermissionType::For(for_one) => for_one.to_raw(),
             PermissionType::Fors(for_many) => Raw::new(
@@ -130,7 +130,7 @@ impl ToRaw for PermissionType {
                     .collect::<Vec<_>>()
                     .join(", "),
             ),
-            PermissionType::RawStatement(r) => r,
+            PermissionType::RawStatement(r) => r.to_raw(),
             PermissionType::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()

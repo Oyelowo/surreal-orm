@@ -44,14 +44,14 @@ pub trait ToRaw
 where
     Self: Sized,
 {
-    fn to_raw(self) -> Raw;
+    fn to_raw(&self) -> Raw;
 }
 
 impl<T> ToRaw for T
 where
     T: Parametric + Buildable,
 {
-    fn to_raw(self) -> Raw {
+    fn to_raw(&self) -> Raw {
         let query_raw =
             self.get_bindings()
                 .into_iter()
