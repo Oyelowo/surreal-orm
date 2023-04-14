@@ -5,15 +5,12 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::{self, Display};
-
 // Statement syntax
 // DEFINE INDEX @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields [ UNIQUE ]
 // Example usage
 // Below is an example showing how to create a unique index for the email address field on a user table.
-//
-// -- Make sure that email addresses in the user table are always unique
-// DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
+
+use std::fmt::{self, Display};
 
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
@@ -49,7 +46,6 @@ use crate::{
 /// "DEFINE INDEX alien_index ON TABLE alien FIELDS age, name, email, dob UNIQUE;");
 /// ```
 pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
-    // let binding_index_name = Binding::new(index_name.into()).with_description("Index name");
     let index_name: TableIndex = index_name.into();
     let index_name: String = index_name.to_string();
 
@@ -59,7 +55,6 @@ pub fn define_index(index_name: impl Into<TableIndex>) -> DefineIndexStatement {
         fields: vec![],
         columns: vec![],
         unique: None,
-        // bindings: vec![],
     }
 }
 
@@ -70,7 +65,6 @@ pub struct DefineIndexStatement {
     fields: Vec<String>,
     columns: Vec<String>,
     unique: Option<bool>,
-    // bindings: BindingsList,
 }
 
 pub enum Columns {
@@ -108,10 +102,6 @@ impl DefineIndexStatement {
     /// Set the table where the index is defined.
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         let table: Table = table.into();
-        // let binding = Binding::new(table).with_description("table name which fields are indexed");
-        // self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
-        // self.bindings.push(binding);
-
         self.table_name = Some(table.to_string());
         self
     }
@@ -119,11 +109,6 @@ impl DefineIndexStatement {
     /// Set the columns on the table where the index should be defined. This is alternative to
     /// fields just like in a relational database
     pub fn columns(mut self, columns: impl Into<Columns>) -> Self {
-        // let binding =
-        //     Binding::new(table.into()).with_description("table name which fields are indexed");
-        //
-        // self.table_name_param = Some(format!("{}", binding.get_param_dollarised()));
-        // self.bindings.push(binding);
         let columns: Columns = columns.into();
         let columns = match columns {
             Columns::Field(f) => vec![f],
