@@ -18,24 +18,26 @@ use crate::{
 ///
 /// * `database` - The name of the database to be defined.
 ///
-/// # Returns
-///
-/// A `DefineDatabaseStatement` object that can be executed
-///
 /// # Example
 /// ```rust
 ///  use surrealdb_query_builder::{*, statements::define_database};
 ///  assert_eq!(
-///          define_database("oyelowo").build(),
-///          "DEFINE DATABASE oyelowo;"
+///          define_database("codebreather").build(),
+///          "DEFINE DATABASE codebreather;"
 ///      );
 ///
+///  let codebreather = Database::new("codebreather");
 ///  assert_eq!(
-///          define_database(Database::new("oyelowo")).build(),
-///          "DEFINE DATABASE oyelowo;"
+///          define_database(codebreather).build(),
+///          "DEFINE DATABASE codebreather;"
+///      );
+///  
+///  let codebreather = Database::new("codebreather");
+///  assert_eq!(
+///          define_database(codebreather).to_raw().build(),
+///          "DEFINE DATABASE codebreather;"
 ///      );
 /// ```
-///
 pub fn define_database(database: impl Into<Database>) -> DefineDatabaseStatement {
     DefineDatabaseStatement {
         database: database.into().into(),
