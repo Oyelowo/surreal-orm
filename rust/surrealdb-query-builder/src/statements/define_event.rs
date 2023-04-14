@@ -10,7 +10,7 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{Buildable, Erroneous, Parametric, Queryable},
     types::{Event, Filter, Table},
-    Conditional, BindingsList,
+    BindingsList, Conditional,
 };
 
 // DEFINE EVENT statement
@@ -110,7 +110,7 @@ impl EventBuilder {
     /// Set the event trigger
     pub fn when(mut self, condition: impl Conditional) -> Then {
         let cond = Filter::new(condition);
-        self.when = Some(format!("{}", &cond));
+        self.when = Some(cond.build());
         self.bindings.extend(cond.get_bindings());
         Then(self)
     }
