@@ -127,14 +127,21 @@ impl Erroneous for DefineScopeStatement {}
 
 #[cfg(test)]
 mod tests {
-    use crate::ToRaw;
-
-    use super::*;
+    use crate::{
+        statements::{create, define_scope},
+        *,
+    };
     use std::time::Duration;
 
+    // SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) )
+    // SIGNIN ( SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass) )
     #[test]
     fn test_define_scope_statement_on_namespace() {
-        let token_def = define_scope("oyelowo_scope").session(Duration::from_secs(45));
+        let user_table = Table::new("user");
+        let age = Field::new("age");
+        let token_def = define_scope("oyelowo_scope")
+            .session(Duration::from_secs(45))
+            .signup(create(user_table).set(updater(age).equal(198)));
 
         assert_eq!(
             token_def.fine_tune_params(),
