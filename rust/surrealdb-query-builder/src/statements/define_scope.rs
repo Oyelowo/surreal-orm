@@ -156,7 +156,7 @@ mod tests {
         let user_table = Table::new("user");
         let email = Field::new("email");
         let pass = Field::new("pass");
-        let pass_param = Field::new("pass_param");
+        let pass_param = Param::new("pass_param");
 
         let token_def = define_scope("oyelowo_scope")
             .session(Duration::from_secs(45))
@@ -172,14 +172,14 @@ mod tests {
 
         assert_eq!(
             token_def.fine_tune_params(),
-            "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 SIGNUP \
-                ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN \
-                ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare($_param_00000004, $_param_00000005)); );"
+            "\n\t \n\t DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare($_param_00000004, $_param_00000005)); );"
         );
         assert_eq!(
             token_def.to_raw().build(),
-            "DEFINE SCOPE oyelowo_scope SESSION 45s;"
+            "\n\t \n\t DEFINE SCOPE oyelowo_scope SESSION 45s SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN ( SELECT * FROM user WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare(pass, $pass_param)); );"
         );
-        assert_eq!(token_def.get_bindings().len(), 2);
+        // insta::assert_debug_snapshot!(token_def.get_bindings());
+        // assert_eq!(token_def.get_bindings(), "rere");
+        assert_eq!(token_def.get_bindings().len(), 6);
     }
 }

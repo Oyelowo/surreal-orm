@@ -26,48 +26,64 @@ use crate::{
     statements::let_,
     traits::{Binding, Buildable, ToRaw},
     types::{Field, Function, Param},
+    StrandLike,
 };
 
 pub(crate) fn create_fn_with_single_value(
-    value: impl Into<sql::Value>,
+    value: impl Into<StrandLike>,
     function_suffix: &str,
 ) -> Function {
-    let value: sql::Value = value.into();
-    let binding = Binding::new(value);
+    let value: StrandLike = value.into();
+    let mut bindings = vec![];
+    let (value_bindings, param) = bind_value(value);
+
+    bindings.extend(value_bindings);
 
     Function {
-        query_string: format!(
-            "crypto::{function_suffix}({})",
-            binding.get_param_dollarised()
-        ),
-        bindings: vec![binding],
+        query_string: format!("crypto::{function_suffix}({})", param),
+        bindings,
     }
 }
 
+fn bind_value(value: StrandLike) -> (Vec<Binding>, String) {
+    let mut bindings = vec![];
+
+    let param = match value {
+        StrandLike::Strand(string) => {
+            let binding = Binding::new(string);
+            let param = binding.get_param_dollarised();
+            bindings.push(binding);
+            param
+        }
+        StrandLike::Field(field) => field.to_string(),
+        StrandLike::Param(param) => param.to_string(),
+    };
+    (bindings, param)
+}
+
 pub(crate) fn create_fn_with_two_values(
-    value1: impl Into<sql::Value>,
-    value2: impl Into<sql::Value>,
+    value1: impl Into<StrandLike>,
+    value2: impl Into<StrandLike>,
     function_suffix: &str,
 ) -> Function {
-    let value1: sql::Value = value1.into();
-    let value2: sql::Value = value2.into();
-    let binding1 = Binding::new(value1);
-    let binding2 = Binding::new(value2);
+    let value1: StrandLike = value1.into();
+    let value2: StrandLike = value2.into();
+    let mut bindings = vec![];
+    let (bindings1, param1) = bind_value(value1);
+    let (bindings2, param2) = bind_value(value2);
+    bindings.extend(bindings1);
+    bindings.extend(bindings2);
 
     Function {
-        query_string: format!(
-            "crypto::{function_suffix}({}, {})",
-            binding1.get_param_dollarised(),
-            binding2.get_param_dollarised()
-        ),
-        bindings: vec![binding1, binding2],
+        query_string: format!("crypto::{function_suffix}({}, {})", param1, param2),
+        bindings,
     }
 }
 
 macro_rules! create_fn_with_single_arg_value {
     ($function_name: expr) => {
         paste::paste! {
-            pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
+            pub fn [<$function_name _fn>](value: impl Into<crate::StrandLike>) -> Function {
                 create_fn_with_single_value(value, $function_name)
             }
 
@@ -97,7 +113,7 @@ macro_rules! create_fn_with_single_arg_value {
             fn [<test_ $function_name _with_field>]() {
                 let title = Field::new("title");
                 let result = [<$function_name _fn>](title);
-                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}(title)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
             }
 
@@ -105,7 +121,7 @@ macro_rules! create_fn_with_single_arg_value {
             fn [<test_ $function_name _macro_with_field>]() {
                 let title = Field::new("title");
                 let result = [<$function_name>]!(title);
-                assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
+                assert_eq!(result.fine_tune_params(), format!("crypto::{}(title)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
             }
         }
@@ -119,11 +135,11 @@ create_fn_with_single_arg_value!("sha512");
 pub mod argon2 {
     use surrealdb::sql;
 
-    use crate::types::Function;
+    use crate::{types::Function, StrandLike};
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
 
-    pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
         create_fn_with_two_values(value1, value2, "argon2::compare")
     }
     #[macro_export]
@@ -134,7 +150,7 @@ pub mod argon2 {
     }
     pub use crypto_argon2_compare as compare;
 
-    pub fn generate_fn(value: impl Into<sql::Value>) -> Function {
+    pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "argon2::generate")
     }
     #[macro_export]
@@ -148,10 +164,10 @@ pub mod argon2 {
 
 pub mod pbkdf2 {
     use super::{create_fn_with_single_value, create_fn_with_two_values};
-    use crate::types::Function;
+    use crate::{types::Function, StrandLike};
     use surrealdb::sql;
 
-    pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
         create_fn_with_two_values(value1, value2, "pbkdf2::compare")
     }
 
@@ -164,7 +180,7 @@ pub mod pbkdf2 {
     pub use crypto_pbkdf2_compare as compare;
 
     // Crypto generate function
-    pub fn generate_fn(value: impl Into<sql::Value>) -> Function {
+    pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "pbkdf2::generate")
     }
     #[macro_export]
@@ -179,11 +195,11 @@ pub mod pbkdf2 {
 pub mod scrypt {
     use surrealdb::sql;
 
-    use crate::types::Function;
+    use crate::{types::Function, StrandLike};
 
     use super::{create_fn_with_single_value, create_fn_with_two_values};
 
-    pub fn compare_fn(value1: impl Into<sql::Value>, value2: impl Into<sql::Value>) -> Function {
+    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
         create_fn_with_two_values(value1, value2, "scrypt::compare")
     }
     #[macro_export]
@@ -194,7 +210,7 @@ pub mod scrypt {
     }
     pub use crypto_scrypt_compare as compare;
 
-    pub fn generate_fn(value: impl Into<sql::Value>) -> Function {
+    pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "scrypt::generate")
     }
     #[macro_export]
@@ -229,7 +245,7 @@ fn test_argon2_compare_with_param() {
     let result = argon2::compare_fn(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::argon2::compare($_param_00000001, $_param_00000002)"
+        "crypto::argon2::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -271,7 +287,7 @@ fn test_argon2_compare_macro_with_fields() {
     let result = argon2::compare!(hash, pass);
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::argon2::compare($_param_00000001, $_param_00000002)"
+        "crypto::argon2::compare(hash, pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -287,7 +303,7 @@ fn test_argon2_compare_macro_with_param() {
     let result = argon2::compare!(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::argon2::compare($_param_00000001, $_param_00000002)"
+        "crypto::argon2::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -317,7 +333,7 @@ fn test_pbkdf2_compare_with_param() {
     let result = pbkdf2::compare_fn(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+        "crypto::pbkdf2::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -359,7 +375,7 @@ fn test_pbkdf2_compare_macro_with_fields() {
     let result = pbkdf2::compare!(hash, pass);
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+        "crypto::pbkdf2::compare(hash, pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -375,7 +391,7 @@ fn test_pbkdf2_compare_macro_with_param() {
     let result = pbkdf2::compare!(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
+        "crypto::pbkdf2::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -404,7 +420,7 @@ fn test_scrypt_compare_with_param() {
     let result = scrypt::compare_fn(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::scrypt::compare($_param_00000001, $_param_00000002)"
+        "crypto::scrypt::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -446,7 +462,7 @@ fn test_scrypt_compare_macro_with_fields() {
     let result = scrypt::compare!(hash, pass);
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::scrypt::compare($_param_00000001, $_param_00000002)"
+        "crypto::scrypt::compare(hash, pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
@@ -462,7 +478,7 @@ fn test_scrypt_compare_macro_with_param() {
     let result = scrypt::compare!(hash.get_param(), pass.get_param());
     assert_eq!(
         result.fine_tune_params(),
-        "crypto::scrypt::compare($_param_00000001, $_param_00000002)"
+        "crypto::scrypt::compare($hash, $pass)"
     );
     assert_eq!(
         result.to_raw().to_string(),
