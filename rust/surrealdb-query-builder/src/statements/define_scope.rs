@@ -22,8 +22,10 @@ use crate::{
     types::{DurationLike, Scope},
 };
 
-/// Define a new scope .
-/// Setting scope access allows SurrealDB to operate as a web database. With scopes you can set authentication and access rules which enable fine-grained access to tables and fields.
+/// Define a new scope.
+/// Setting scope access allows SurrealDB to operate as a web database.
+/// With scopes you can set authentication and access rules which enable
+/// fine-grained access to tables and fields.
 ///
 /// Requirements
 /// To use DEFINE SCOPE you must have root, namespace, or database level access.
@@ -40,7 +42,6 @@ use crate::{
 /// # let email = Field::new("email");
 /// # let pass = Field::new("pass");
 /// # let pass_param = Param::new("pass_param");
-///
 /// let statement = define_scope("oyelowo_scope")
 ///     .session(Duration::from_secs(45))
 ///     .signup(Raw::new(
