@@ -36,10 +36,10 @@ use crate::{
 /// use surrealdb_orm::{*, functions::crypto, statements::{define_scope, select}};
 /// use std::time::Duration;
 ///
-/// let user= Table::new("user");
-/// let email = Field::new("email");
-/// let pass = Field::new("pass");
-/// let pass_param = Param::new("pass_param");
+/// # let user= Table::new("user");
+/// # let email = Field::new("email");
+/// # let pass = Field::new("pass");
+/// # let pass_param = Param::new("pass_param");
 ///
 /// let statement = define_scope("oyelowo_scope")
 ///     .session(Duration::from_secs(45))
@@ -49,7 +49,7 @@ use crate::{
 ///     .signin(
 ///         select(All).from(user).where_(
 ///             cond(email.equal("oyelowo@codebreather.com"))
-///                 .and(crypto::argon2::compare!(pass, $pass_param)),
+///                 .and(crypto::argon2::compare!(pass, pass_param)),
 ///         ),
 ///     );
 ///
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_define_scope_statement_on_namespace() {
-        let user_table = Table::new("user");
+        let user = Table::new("user");
         let email = Field::new("email");
         let pass = Field::new("pass");
         let pass_param = Param::new("pass_param");
@@ -162,7 +162,7 @@ mod tests {
                 "CREATE user SET email = $email, pass = crypto::argon2::generate($pass)",
             ))
             .signin(
-                select(All).from(user_table).where_(
+                select(All).from(user).where_(
                     cond(email.equal("oyelowo@codebreather.com"))
                         .and(crypto::argon2::compare!(pass, pass_param)),
                 ),
