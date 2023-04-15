@@ -113,11 +113,11 @@ impl Buildable for DefineScopeStatement {
         }
 
         if let Some(signup) = &self.signup_expression {
-            query = format!("\n\t {query} SIGNUP ( {signup} )");
+            query = format!("{query} \n\tSIGNUP ( {signup} )");
         }
 
         if let Some(signin) = &self.signin_expression {
-            query = format!("\n\t {query} SIGNIN ( {signin} )");
+            query = format!("{query} \n\tSIGNIN ( {signin} )");
         }
 
         query += ";";
@@ -171,15 +171,15 @@ mod tests {
 
         assert_eq!(
             token_def.fine_tune_params(),
-            "\n\t \n\t DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 \
-                SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
-                SIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare(pass, $pass_param)); );"
+            "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 \
+                \n\tSIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
+                \n\tSIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare(pass, $pass_param)); );"
         );
         assert_eq!(
             token_def.to_raw().build(),
-            "\n\t \n\t DEFINE SCOPE oyelowo_scope SESSION 45s \
-                SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
-                SIGNIN ( SELECT * FROM user WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare(pass, $pass_param)); );"
+            "DEFINE SCOPE oyelowo_scope SESSION 45s \
+                \n\tSIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
+                \n\tSIGNIN ( SELECT * FROM user WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare(pass, $pass_param)); );"
         );
 
         assert_eq!(token_def.get_bindings().len(), 3);
