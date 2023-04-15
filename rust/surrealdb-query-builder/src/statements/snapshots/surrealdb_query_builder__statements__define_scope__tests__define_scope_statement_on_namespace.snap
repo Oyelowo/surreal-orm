@@ -1,6 +1,5 @@
 ---
 source: surrealdb-query-builder/src/statements/define_scope.rs
-assertion_line: 179
 expression: token_def.get_bindings()
 ---
 [
