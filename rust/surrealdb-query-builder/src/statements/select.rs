@@ -417,38 +417,6 @@ impl From<SelectStatement> for TargettablesForSelect {
     }
 }
 
-impl Parametric for TargettablesForSelect {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            TargettablesForSelect::Table(table) => {
-                // Table binding does not seem to work right now. skip it first
-                let binding = Binding::new(table.to_owned());
-                vec![binding]
-            }
-            TargettablesForSelect::Tables(tables) => {
-                // Table binding does not seem to work right now. skip it first
-                let bindings = tables
-                    .to_vec()
-                    .into_iter()
-                    .map(Binding::new)
-                    .collect::<Vec<_>>();
-                bindings
-            }
-            // Should already be bound
-            TargettablesForSelect::SubQuery(query) => query.get_bindings(),
-            TargettablesForSelect::SurrealId(id) => vec![Binding::new(id.to_owned())],
-
-            TargettablesForSelect::SurrealIds(ids) => {
-                let bindings = ids
-                    .into_iter()
-                    .map(|id| Binding::new(id.to_owned()))
-                    .collect::<Vec<_>>();
-                bindings
-            }
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Splittables {
     Field(Field),
@@ -491,21 +459,6 @@ impl From<Vec<&Field>> for Splittables {
     }
 }
 
-impl Parametric for Splittables {
-    fn get_bindings(&self) -> BindingsList {
-        // match self {
-        // Splittables::Split(s) => vec![Binding::new(s)],
-        // Splittables::Splits(splits) => {
-        //     let bindings = splits
-        //         .into_iter()
-        //         .map(|id| Binding::new(id.to_owned()))
-        //         .collect::<Vec<_>>();
-        //     bindings
-        // }
-        // }
-        vec![]
-    }
-}
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
@@ -710,25 +663,41 @@ impl SelectStatement {
     /// ```
     pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> Self {
         let targets: TargettablesForSelect = targettables.into();
-        let targets_bindings = targets.get_bindings();
+        let mut targets_bindings = vec![];
 
-        // When we have either one or many table names or record ids, we want to use placeholders
-        // as the targets which would be bound later but for a subquery in from, that must have
-        // already been done by the Subquery(in this case, select query) builder itself
         let target_names = match targets {
-            TargettablesForSelect::Table(table) => vec![table.to_string()],
-            TargettablesForSelect::Tables(tbs) => {
-                tbs.iter().map(|t| t.to_string()).collect::<Vec<_>>()
+            TargettablesForSelect::Table(table) => {
+                vec![table.to_string()]
             }
-            TargettablesForSelect::SurrealId(_) | TargettablesForSelect::SurrealIds(_) => {
-                targets_bindings
-                    .iter()
-                    .map(|b| format!("${}", b.get_param()))
-                    .collect::<Vec<_>>()
+            TargettablesForSelect::Tables(tables) => tables
+                .into_iter()
+                .map(|t| t.to_string())
+                .collect::<Vec<_>>(),
+            // Should already be bound
+            TargettablesForSelect::SubQuery(query) => {
+                let params = query.get_bindings();
+                vec![query.to_string()]
             }
-            // Subquery must have be built and interpolated, so no need for rebinding
-            TargettablesForSelect::SubQuery(subquery) => vec![format!("({subquery})")],
+            TargettablesForSelect::SurrealId(id) => {
+                let binding = Binding::new(id.to_owned());
+                let param = binding.get_param_dollarised();
+                targets_bindings.push(binding);
+                vec![param]
+            }
+
+            TargettablesForSelect::SurrealIds(ids) => {
+                let mut params = vec![];
+
+                ids.into_iter().for_each(|id| {
+                    let binding = Binding::new(id.to_owned());
+                    let param = binding.get_param_dollarised();
+                    targets_bindings.push(binding);
+                    params.push(param);
+                });
+                params
+            }
         };
+
         self.update_bindings(targets_bindings);
         self.targets.extend(target_names);
         self
@@ -797,7 +766,7 @@ impl SelectStatement {
     /// ```
     pub fn split(mut self, splittables: impl Into<Splittables>) -> Self {
         let fields: Splittables = splittables.into();
-        self.update_bindings(fields.get_bindings());
+        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Splittables::Field(one_field) => vec![one_field],
@@ -839,7 +808,7 @@ impl SelectStatement {
     /// ```
     pub fn group_by(mut self, groupables: impl Into<Groupables>) -> Self {
         let fields: Groupables = groupables.into();
-        self.update_bindings(fields.get_bindings());
+        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Groupables::Field(one_field) => vec![one_field],
@@ -982,7 +951,7 @@ impl SelectStatement {
     /// ```
     pub fn fetch(mut self, fetchables: impl Into<Fetchables>) -> Self {
         let fields: Fetchables = fetchables.into();
-        self.update_bindings(fields.get_bindings());
+        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Fetchables::Field(one_field) => vec![one_field],

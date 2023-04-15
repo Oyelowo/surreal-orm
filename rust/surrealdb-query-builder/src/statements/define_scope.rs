@@ -39,7 +39,7 @@ use crate::{
 /// let user= Table::new("user");
 /// let email = Field::new("email");
 /// let pass = Field::new("pass");
-/// let pass_param = Field::new("pass_param");
+/// let pass_param = Param::new("pass_param");
 ///
 /// let statement = define_scope("oyelowo_scope")
 ///     .session(Duration::from_secs(45))
@@ -49,7 +49,7 @@ use crate::{
 ///     .signin(
 ///         select(All).from(user).where_(
 ///             cond(email.equal("oyelowo@codebreather.com"))
-///                 .and(crypto::argon2::compare!(pass, pass_param)),
+///                 .and(crypto::argon2::compare!(pass, $pass_param)),
 ///         ),
 ///     );
 ///
@@ -149,8 +149,6 @@ mod tests {
     };
     use std::time::Duration;
 
-    // SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) )
-    // SIGNIN ( SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass) )
     #[test]
     fn test_define_scope_statement_on_namespace() {
         let user_table = Table::new("user");
@@ -172,7 +170,7 @@ mod tests {
 
         assert_eq!(
             token_def.fine_tune_params(),
-            "\n\t \n\t DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare($_param_00000004, $_param_00000005)); );"
+            "\n\t \n\t DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare(pass, $pass_param)); );"
         );
         assert_eq!(
             token_def.to_raw().build(),
@@ -180,6 +178,6 @@ mod tests {
         );
         // insta::assert_debug_snapshot!(token_def.get_bindings());
         // assert_eq!(token_def.get_bindings(), "rere");
-        assert_eq!(token_def.get_bindings().len(), 6);
+        assert_eq!(token_def.get_bindings().len(), 5);
     }
 }
