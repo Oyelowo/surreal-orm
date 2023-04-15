@@ -145,7 +145,7 @@ pub mod argon2 {
     #[macro_export]
     macro_rules! crypto_argon2_compare {
         ( $value1:expr,  $value2:expr ) => {
-            crate::functions::crypto::argon2::compare_fn($value1, $value2)
+            $crate::functions::crypto::argon2::compare_fn($value1, $value2)
         };
     }
     pub use crypto_argon2_compare as compare;
@@ -156,7 +156,7 @@ pub mod argon2 {
     #[macro_export]
     macro_rules! crypto_argon2_generate {
         ( $value1:expr) => {
-            crate::functions::crypto::argon2::generate_fn($value1)
+            $crate::functions::crypto::argon2::generate_fn($value1)
         };
     }
     pub use crypto_argon2_generate as generate;
@@ -174,7 +174,7 @@ pub mod pbkdf2 {
     #[macro_export]
     macro_rules! crypto_pbkdf2_compare {
         ( $value1:expr,  $value2:expr ) => {
-            crate::functions::crypto::pbkdf2::compare_fn($value1, $value2)
+            $crate::functions::crypto::pbkdf2::compare_fn($value1, $value2)
         };
     }
     pub use crypto_pbkdf2_compare as compare;
@@ -186,7 +186,7 @@ pub mod pbkdf2 {
     #[macro_export]
     macro_rules! crypto_pbkdf2_generate {
         ( $value1:expr) => {
-            crate::functions::crypto::pbkdf2::generate_fn($value1)
+            $crate::functions::crypto::pbkdf2::generate_fn($value1)
         };
     }
     pub use crypto_pbkdf2_generate as generate;
