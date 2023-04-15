@@ -2,4 +2,4 @@
 source: surrealdb-orm/src/lib.rs
 expression: xx
 ---
-SELECT * FROM  WHERE (email ~ '@oyelowo') AND (email IS 'Oyedayo') GROUP BY email PARALLEL;
+SELECT * FROM  WHERE (email ~ '@oyelow') AND (email IS 'Oyedayo') GROUP BY email PARALLEL;

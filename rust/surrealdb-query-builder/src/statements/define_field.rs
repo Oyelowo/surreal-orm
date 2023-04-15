@@ -5,20 +5,14 @@
  * Licensed under the MIT license
  */
 
-use std::{
-    fmt::{self, Display},
-    ops::Deref,
-    str::FromStr,
-    string::ParseError,
-};
+use std::fmt::{self, Display};
 
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql::{self, statements::DefineStatement};
+use surrealdb::sql;
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
-    types::{Field, FieldType, Filter, Param, Table},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::{Field, FieldType, Filter, Table},
+    Conditional,
 };
 
 use super::for_::PermissionType;
@@ -40,107 +34,8 @@ use super::for_::PermissionType;
 // 		| FOR update @expression
 // 		| FOR delete @expression
 // 	] ]
-// Example usage
-// The following expression shows the simplest way to use the DEFINE FIELD statement.
-//
-// -- Declare the name of a field.
-// DEFINE FIELD email ON TABLE user;
-// Defining data types
-// Simple data types
-// -- Set a field to have the string data type
-// DEFINE FIELD email ON TABLE user TYPE string;
-//
-// -- Set a field to have the datetime data type
-// DEFINE FIELD created ON TABLE user TYPE datetime;
-//
-// -- Set a field to have the object data type
-// DEFINE FIELD metadata ON TABLE user TYPE object;
-//
-// -- Set a field to have the bool data type
-// DEFINE FIELD locked ON TABLE user TYPE bool;
-// Array data type
-// -- Set a field to have the array data type
-// DEFINE FIELD roles ON TABLE user TYPE array;
-// -- Set the contents of the array to only support a string data type
-// DEFINE FIELD roles.* ON TABLE user TYPE string;
-//
-// -- Set a field to have the array data type
-// DEFINE FIELD posts ON TABLE user TYPE array;
-// -- Set the contents of the array to only support a record data type
-// DEFINE FIELD posts.* ON TABLE user TYPE record;
-// Setting a default value
-// -- A user is not locked by default.
-// DEFINE FIELD locked ON TABLE user TYPE bool
-//   -- Set a default value if empty
-//   VALUE $value OR false;
-// Asserting rules on fields
-// You can take your field definitions even further by using asserts. Assert is a powerful feature that can be used to ensure that your data remains consistent.
-//
-// Email is required
-// -- Give the user table an email field. Store it in a string
-// DEFINE FIELD email ON TABLE user TYPE string
-//   -- Make this field required
-//   ASSERT $value != NONE
-//   -- Check if the value is a properly formatted email address
-//   AND is::email($value);
-// Array with allowed values
-// By using an Access Control List as an example we can show how we can restrict what values can be stored in an array.
-//
-// DEFINE FIELD resource on acl TYPE record
-//   ASSERT $value != NONE;
-// DEFINE FIELD user ON TABLE acl TYPE record (user)
-//   ASSERT $value != NONE;
-//
-// -- A user can have multiple permissions on a acl
-// DEFINE FIELD permission ON TABLE acl TYPE array
-//   -- The array must not be empty because at least one permission is required
-//   ASSERT array::len($value) > 0;
-//
-// -- Assigned permissions are identified by strings
-// DEFINE FIELD type.* ON TABLE resource TYPE string
-//   -- Allow only these values in the array
-//   ASSERT $value INSIDE ["create", "read", "write", "delete"];
-// Use regex to validate a string
-// -- Specify a field on the user table
-// DEFINE FIELD countrycode ON user TYPE string
-// 	-- Ensure country code is ISO-3166
-// 	ASSERT $value != NONE AND $value = /[A-Z]{3}/
-// 	-- Set a default value if empty
-// 	VALUE $value OR 'GBR'
-// ;
-// Field data types
-// The DEFINE FIELD statement allows specify the following data types on the field.
-//
-// Type	Description
-// any	Use this when you explicitly don't want to specify the field's data type. The field will allow any data type supported by SurrealDB.
-// array
-// bool
-// datetime	An ISO 8601 compliant data type that stores a date with time and time zone.
-// decimal	Uses BigDecimal for storing any real number with arbitrary precision.
-// duration	Store a value representing a length of time. Can be added or subtracted from datetimes or other durations.
-// float	Store a value in a 64 bit float.
-// int	Store a value in a 64 bit integer.
-// number	Store numbers without specifying the type. SurrealDB will detect the type of number and store it using the minimal number of bytes. For numbers passed in as a string, this field will store the number in a BigDecimal.
-// object	Store formatted objects containing values of any supported type with no limit to object depth or nesting.
-// string
-// record	Store a reference to another record. The value must be a Record ID.
-// geometry	RFC 7946 compliant data type for storing geometry in the GeoJson format.
-// Geometric Types include:
-// feature
-// point
-// line
-// polygon
-// multipoint
-// multiline
-// multipolygon
-// collection
-// -- Define a field with a single type
-// DEFINE FIELD location ON TABLE restaurant TYPE geometry (point);
-// -- Define a field with any geometric type
-// DEFINE FIELD area ON TABLE restaurant TYPE geometry (feature);
-// -- Define a field with specific geometric types
-// DEFINE FIELD area ON TABLE restaurant TYPE geometry (polygon, multipolygon, collection);
 
+/// A statement for defining a Field.
 #[derive(Clone, Debug)]
 pub struct DefineFieldStatement {
     field_name: String,
@@ -154,6 +49,38 @@ pub struct DefineFieldStatement {
     bindings: BindingsList,
 }
 
+/// Define a new field.
+/// The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
+///
+/// Requirements
+/// You must be authenticated as a root, namespace, or database user before you can use the DEFINE FIELD statement.
+/// You must select your namespace and database before you can use the DEFINE FIELD statement.
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
+///
+/// # let name = Field::new("name");
+/// # let user_table = Table::from("user");
+/// # let age = Field::new("age");
+/// # let email = Field::new("email");
+/// let statement = define_field(email)
+///     .on_table(user_table)
+///     .type_(FieldType::String)
+///     .value("example@codebreather.com")
+///     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+///     // Additional permission chaining accumulates
+///     .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+///     .permissions(for_(&[Create, Update]).where_(name.is("Oyedayo"))) // Multiple
+///     // Multiples multples
+///     .permissions(&[
+///         for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+///         for_(Update).where_(age.less_than_or_equal(130)),
+///     ]);
+///
+/// assert!(!statement.build().is_empty());
+/// assert!(statement.build().starts_with("DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com'"));
+/// ```
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     let field: Field = fieldable.into();
     DefineFieldStatement {
@@ -169,56 +96,102 @@ pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     }
 }
 
-pub struct ValueAssert(Param);
-
-impl Deref for ValueAssert {
-    type Target = Param;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-pub fn value() -> ValueAssert {
-    ValueAssert(Param::new("value"))
-}
-
 impl DefineFieldStatement {
+    /// Set the table where the field is defined.
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         let table: Table = table.into();
         self.table_name = Some(table.to_string());
         self
     }
 
+    /// Set the data type of the field.
     pub fn type_(mut self, field_type: impl Into<FieldType>) -> Self {
         let field_type: FieldType = field_type.into();
         self.type_ = Some(field_type.to_string());
         self
     }
 
+    /// Set the default value for the field.
     pub fn value(mut self, default_value: impl Into<sql::Value>) -> Self {
         let value: sql::Value = default_value.into();
         self.value = Some(value.to_string());
         self
     }
 
-    pub fn assert(mut self, assertion: impl Into<Filter>) -> Self {
-        let assertion: Filter = assertion.into();
-        self.assert = Some(assertion.to_string());
+    /// assert constraint on the field.
+    ///  
+    ///  Examples:
+    ///  
+    /// ```rust
+    ///     # use surrealdb_query_builder as surrealdb_orm;
+    ///     use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
+    ///
+    ///     # let name = Field::new("name");
+    ///     # let user_table = Table::from("user");
+    ///     # let age = Field::new("age");
+    ///     # let email = Field::new("email");
+    ///     # let statement = define_field(email)
+    ///     #    .on_table(user_table)
+    ///     #    .type_(FieldType::String)
+    ///     #    .value("example@codebreather.com");
+    ///     
+    /// // For simple single condition
+    /// let statement = statement.assert(value().is_not(NONE));
+    ///
+    /// // For multiple conditions
+    /// let statement = statement.assert(cond(value().is_not(NONE))
+    ///                                      .and(value().like("is_email"))
+    ///                                 );
+    pub fn assert(mut self, assertion: impl Conditional) -> Self {
+        let assertion = Filter::new(assertion);
+        self.assert = Some(assertion.build());
         self
     }
 
+    /// set no permission.
     pub fn permissions_none(mut self) -> Self {
         self.permissions_none = Some(true);
         self
     }
 
+    /// set full permission.
     pub fn permissions_full(mut self) -> Self {
         self.permissions_full = Some(true);
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+    /// set specific permissions for specific event type inluding CREATE, UPDATE, SELECT and DELETE.
+    /// Additional permission chaining accumulates
+    ///  Examples:
+    ///  
+    /// ```rust
+    ///     # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, CrudType::*, statements::{define_field, for_}};
+    ///
+    ///     # let name = Field::new("name");
+    ///     # let user_table = Table::from("user");
+    ///     # let age = Field::new("age");
+    ///     # let email = Field::new("email");
+    ///     # let statement = define_field(email)
+    ///     #    .on_table(user_table)
+    ///     #    .type_(FieldType::String)
+    ///     #    .value("example@codebreather.com")
+    ///     #    .assert(cond(value().is_not(NONE)).and(value().like("is_email")));
+    ///
+    /// // You can create perimssion for a single event
+    /// let statement = statement.permissions(for_(Select).where_(age.greater_than_or_equal(18)));
+    ///
+    /// // Even multiple
+    /// let statement = statement.permissions(for_(&[Create, Update]).where_(name.is("Oyedayo")));
+    ///
+    /// // Multiples multples
+    /// let statement = statement.permissions(&[
+    ///     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+    ///     for_(Update).where_(age.less_than_or_equal(130)),
+    /// ]);
+    ///
+    /// ```
+    pub fn permissions(mut self, fors: impl Into<PermissionType>) -> Self {
         use PermissionType::*;
         let fors: PermissionType = fors.into();
         match fors {
@@ -294,20 +267,11 @@ impl Display for DefineFieldStatement {
     }
 }
 
-//
-// DEFINE FIELD email ON TABLE user; TYPE string; ASSERT $value != NONE AND is::email($value); VALUE $value OR '';
-// ``
-
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use crate::{cond, value, Operatable, NONE};
     use crate::{statements::for_, CrudType::*};
-    use std::time::Duration;
-
-    use crate::{cond, Operatable, NONE};
-
-    use super::*;
 
     #[test]
     fn test_define_field_statement_full() {
@@ -322,9 +286,9 @@ mod tests {
             .type_(String)
             .value("example@codebreather.com")
             .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-            .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-            .permissions_for(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
-            .permissions_for(&[
+            .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions(for_(&[Create, Update]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions(&[
                 for_(&[Create, Delete]).where_(name.is("Oyedayo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
             ]);

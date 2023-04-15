@@ -48,4 +48,4 @@ paste = "1.0.12"
 # proc-macro = true
 # crate_type = ["proc-macro"]
 [lib]
-doctest = false
+doctest = true

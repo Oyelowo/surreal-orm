@@ -45,6 +45,12 @@ pub enum Updateables {
     Updaters(Vec<Updater>),
 }
 
+impl From<Updater> for Updateables {
+    fn from(value: Updater) -> Self {
+        Self::Updater(value)
+    }
+}
+
 impl Parametric for Updateables {
     fn get_bindings(&self) -> BindingsList {
         match self {

@@ -13,48 +13,59 @@ use surrealdb::sql;
 use crate::{
     traits::{
         Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, ReturnableDefault,
-        ReturnableStandard, Runnable, SurrealdbNode,
+        ReturnableStandard, SurrealdbNode,
     },
-    types::{DurationLike, ReturnType, Table, Updateables},
+    types::{DurationLike, ReturnType},
+    ErrorList,
 };
 
-use super::update::TargettablesForUpdate;
-
-pub fn create<T>(targettables: impl Into<TargettablesForUpdate>) -> CreateStatement<T>
+/// Creates a new CREATE SQL statement for a given type.
+///
+/// Sets the content of the record to be created.
+///
+/// # Arguments
+///
+/// * `content` - a serializable surrealdb node model. Type must implement SurrealdbModel
+/// # Examples
+///
+/// ```rust, ignore
+/// create(User{
+///         name: "Oylowo".to_string(),
+///         age: 192
+///     });
+/// ```
+pub fn create<T>(content: T) -> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
-    // query is run using one of the run methods.
-    let table_name = T::table_name();
-    let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        panic!("You're trying to update into the wrong table");
+    let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+    let binding = Binding::new(sql_value);
+
+    CreateStatement::<T> {
+        target: T::table_name().to_string(),
+        content: binding.get_param_dollarised(),
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        bindings: vec![binding],
+        errors: vec![],
+        __model_return_type: PhantomData,
     }
-    // let errors: String = connection.get_errors();
-    let mut builder = CreateStatement::<T>::new(targettables);
-    builder
-    // builder.new(targettables)
 }
 
+/// Represents a CREATE SQL statement that can be executed. It implements various traits such as
+/// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
 pub struct CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     target: String,
-    content: Option<String>,
-    set: Vec<String>,
+    content: String,
     return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
+    errors: ErrorList,
     __model_return_type: PhantomData<T>,
 }
 
@@ -64,53 +75,44 @@ impl<T> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    pub fn new(targettables: impl Into<TargettablesForUpdate>) -> Self {
-        let targets: TargettablesForUpdate = targettables.into();
-        let targets_bindings = targets.get_bindings();
-
-        let mut target_names = match targets {
-            TargettablesForUpdate::Table(table) => vec![table.to_string()],
-            TargettablesForUpdate::SurrealId(_) => targets_bindings
-                .iter()
-                .map(|b| format!("${}", b.get_param()))
-                .collect::<Vec<_>>(),
-        };
-
-        Self {
-            target: target_names
-                .pop()
-                .expect("Table or record id must exist here. this is a bug"),
-            content: None,
-            set: Vec::new(),
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            bindings: targets_bindings,
-            __model_return_type: PhantomData,
-        }
-    }
-
-    pub fn content(mut self, content: T) -> Self {
-        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
-        let binding = Binding::new(sql_value);
-        self.content = Some(binding.get_param().to_owned());
-        self.bindings.push(binding);
-        self
-    }
-
-    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
-        let settable: Updateables = settables.into();
-        self.bindings.extend(settable.get_bindings());
-
-        let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.build()],
-            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
-        };
-        self.set.extend(setter_query);
-        self
-    }
-
-    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -120,37 +122,28 @@ where
     ///
     /// # Arguments
     ///
-    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    /// * `duration` - a value that can represent a duration for the timeout. This can be one of the following:
+    ///
+    ///   * `Duration` - a standard Rust `Duration` value.
+    ///
+    ///   * `Field` - an identifier for a specific field in the query, represented by an `Idiom` value.
+    ///
+    ///   * `Param` - a named parameter in the query, represented by a `Param` value.
     ///
     /// # Examples
     ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// ```rust,ignore
+    /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.timeout("5s");
-    /// ```
-    ///
-    /// ---
-    ///
-    /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
+    /// assert_eq!(query.to_raw().to_string(), "30000".to_string());
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        // TODO: Revisit if this should also be parametized
         let duration: sql::Value = duration.into().into();
-        // let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
     }
 
+    /// Indicates that the query should be executed in parallel.
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -167,14 +160,9 @@ where
         query.push_str("CREATE ");
         query.push_str(&self.target);
 
-        if let Some(content) = &self.content {
+        if !&self.content.is_empty() {
             query.push_str(" CONTENT ");
-            query.push_str(&content);
-        } else if !&self.set.is_empty() {
-            query += "SET ";
-            let set_vec = self.set.join(", ");
-            query += &set_vec;
-            query += " ";
+            query.push_str(&self.content);
         }
 
         if let Some(return_type) = &self.return_type {
@@ -214,7 +202,14 @@ where
     }
 }
 
-impl<T> Erroneous for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Erroneous for CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> ReturnableDefault<T> for CreateStatement<T>
 where

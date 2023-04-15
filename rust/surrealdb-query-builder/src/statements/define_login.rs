@@ -7,17 +7,39 @@
 
 use std::fmt::{self, Display};
 
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
-
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
-    types::{Idiomx, Table},
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    types::Idiomx,
 };
 
 // DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
 // DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';
+
+/// Define a new database login.
+/// Requirements
+/// You must be authenticated as a root or Namespace user to create a Namespace level account using the DEFINE LOGIN statement.
+/// You must be authenticated as a root, Namespace, or Database user to create a Database level account using the DEFINE LOGIN statement.
+/// You must select your namespace and/or database before you can use the DEFINE LOGIN statement.
+/// Note: You cannot use the DEFINE LOGIN statement to create a root or SCOPE user.
+///
+/// Examples:
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, CrudType::*, statements::{define_login}};
+/// let username = Login::new("username");
+///
+/// let statement = define_login(username).on_database().password("oyelowo");
+///
+/// let statement = define_login("username")
+///     .on_namespace()
+///     .passhash("reiiereroyedayo");
+///
+/// assert!(!statement.build().is_empty());
+/// ```
+pub fn define_login(name: impl Into<Idiomx>) -> DefineLoginStatement {
+    DefineLoginStatement::new(name)
+}
 
 // Define the types for the possible login types
 pub enum LoginType {
@@ -80,7 +102,7 @@ pub enum LoginCredential {
     Passhash(Passhash),
 }
 
-// Define the API for the Login builder
+/// Define the API for the Login builder
 pub struct DefineLoginStatement {
     name: String,
     login_type: Option<LoginType>,
@@ -88,9 +110,6 @@ pub struct DefineLoginStatement {
     bindings: BindingsList,
 }
 
-pub fn define_login(name: impl Into<Idiomx>) -> DefineLoginStatement {
-    DefineLoginStatement::new(name)
-}
 impl DefineLoginStatement {
     // Set the login name
     fn new(name: impl Into<Idiomx>) -> Self {
@@ -103,17 +122,19 @@ impl DefineLoginStatement {
         }
     }
 
-    // Set the login type
+    /// Set login on namespace
     pub fn on_namespace(mut self) -> Self {
         self.login_type = Some(LoginType::Namespace);
         self
     }
 
+    /// Set login on database
     pub fn on_database(mut self) -> Self {
         self.login_type = Some(LoginType::Database);
         self
     }
-    // Set the password credential
+
+    /// Set the password credential
     pub fn password(mut self, password: impl Into<Password>) -> Self {
         let password: Password = password.into();
         let binding = Binding::new(password.0.clone()).with_description("login password");
@@ -123,7 +144,7 @@ impl DefineLoginStatement {
         self
     }
 
-    // Set the passhash credential
+    /// Set the passhash credential
     pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
         let passhash: Passhash = passhash.into();
         let binding = Binding::new(passhash.0.clone());
@@ -167,35 +188,50 @@ impl Parametric for DefineLoginStatement {
         self.bindings.to_vec()
     }
 }
+
 impl Queryable for DefineLoginStatement {}
 
 impl Erroneous for DefineLoginStatement {}
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
+    use crate::{Login, ToRaw};
 
     use super::*;
 
     #[test]
     fn test_define_login_statement_with_password() {
-        let login_with_password = define_login("username").on_database().password("oyelowo");
+        let username = Login::new("username");
+        let login_with_password = define_login(username).on_database().password("oyelowo");
 
         assert_eq!(
-            login_with_password.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON DATABASE PASSWORD $_param_00000000;" // "DEFINE LOGIN username ON DATABASE PASSWORD oyelowo"
+            login_with_password.fine_tune_params(),
+            "DEFINE LOGIN $_param_00000001 ON DATABASE PASSWORD $_param_00000002;"
         );
-        insta::assert_debug_snapshot!(login_with_password.get_bindings());
+
+        assert_eq!(
+            login_with_password.to_raw().build(),
+            "DEFINE LOGIN username ON DATABASE PASSWORD 'oyelowo';"
+        );
+        assert_eq!(login_with_password.get_bindings().len(), 2);
     }
 
     #[test]
     fn test_define_login_statement_with_passhash() {
-        let login_with_hash = define_login("username").on_namespace().password("oyedayo");
+        let login_with_hash = define_login("username")
+            .on_namespace()
+            .passhash("reiiereroyedayo");
 
         assert_eq!(
-            login_with_hash.to_string(),
-            "DEFINE LOGIN $_param_00000000 ON NAMESPACE PASSWORD $_param_00000000;"
+            login_with_hash.fine_tune_params(),
+            "DEFINE LOGIN $_param_00000001 ON NAMESPACE PASSHASH $_param_00000002;"
         );
-        insta::assert_debug_snapshot!(login_with_hash.get_bindings());
+
+        assert_eq!(
+            login_with_hash.to_raw().build(),
+            "DEFINE LOGIN username ON NAMESPACE PASSHASH 'reiiereroyedayo';"
+        );
+
+        assert_eq!(login_with_hash.get_bindings().len(), 2);
     }
 }

@@ -7,12 +7,33 @@
 
 use std::fmt::{self, Display};
 
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql;
-
 use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
+/// Chains together multiple queries into a single `QueryChain`.
+///
+/// # Arguments
+///
+/// * `query` - The first query in the chain. Subsequent queries can be added using the `chain` method on the returned `QueryChain`.
+///
+/// # Example Usage
+///
+/// ```rust
+/// use surrealdb_query_builder::{*, statements::{chain, select}};
+///
+/// // Create a query chain with a single query
+/// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
+/// let user_dayo = SurrealId::try_from("user:oyedayo").unwrap();
+///
+/// // Append a new query to the chain
+/// let query1 = select(All).from(user_lowo);
+/// let query2 = select(All).from(user_dayo).limit(10);
+/// let chain = chain(query1).chain(query2);
+///
+/// // The resulting chain contains both queries
+/// assert!(!chain.build().is_empty());
+/// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
+/// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\nSELECT * FROM user:oyedayo LIMIT 10;");
+/// ```
 pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
     QueryChain {
         queries: vec![query.to_string()],
@@ -21,6 +42,10 @@ pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
     }
 }
 
+/// Chains together multiple queries into a single `QueryChain`.
+///
+/// A `QueryChain` is created with an initial query, and additional queries can be added to the chain using the `chain` method. A `QueryChain` can be built into a single SQL query using the `build` method.
+///
 pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,
@@ -28,6 +53,37 @@ pub struct QueryChain {
 }
 
 impl QueryChain {
+    /// Appends a new query to the end of the chain.
+    ///
+    /// This method takes a query that implements the `Queryable`, `Parametric`, and `Display` traits
+    /// and appends it to the end of the query chain. The `get_bindings()` and `get_errors()` methods of
+    /// the provided query are called to retrieve its bindings and errors, which are then merged with
+    /// those of the current query chain. The string representation of the query is also added to the
+    /// list of queries in the chain.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use surrealdb_query_builder::{*, statements::{chain, select}};
+    ///
+    /// // Create a query chain with a single query
+    /// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
+    /// let user_dayo = SurrealId::try_from("user:oyedayo").unwrap();
+    ///
+    /// // Append a new query to the chain
+    /// let query1 = select(All).from(user_lowo);
+    /// let query2 = select(All).from(user_dayo).limit(10);
+    /// let chain = chain(query1).chain(query2);
+    ///
+    /// // The resulting chain contains both queries
+    /// assert!(!chain.build().is_empty());
+    /// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
+    /// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\nSELECT * FROM user:oyedayo LIMIT 10;");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method does not panic.
     pub fn chain(mut self, query: impl Queryable + Parametric + Display) -> Self {
         self.bindings.extend(query.get_bindings());
         self.errors.extend(query.get_errors());
@@ -64,58 +120,16 @@ impl fmt::Display for QueryChain {
 #[cfg(test)]
 mod tests {
     use crate::{
-        traits::Operatable,
-        types::{All, Field, SurrealId},
+        cond,
+        statements::{chain, select},
+        traits::Buildable,
+        All, Field, Operatable, SurrealId, ToRaw,
     };
-
-    use super::*;
-
-    #[test]
-    #[cfg(feature = "mock")]
-    fn test_transaction_commit() {
-        use crate::statements::select;
-
-        let name = Field::new("name");
-        let age = Field::new("age");
-        let country = Field::new("country");
-        let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
-        let fake_id3 = SurrealId::try_from("user:4").unwrap();
-
-        let statement1 = select(All)
-            .from(fake_id)
-            .where_(
-                cond(city.is("Prince Edward Island"))
-                    .and(city.is("NewFoundland"))
-                    .or(city.like("Toronto")),
-            )
-            .order_by(order(&age).numeric())
-            .limit(153)
-            .start(10)
-            .parallel();
-
-        let statement2 = select(All)
-            .from(fake_id2)
-            .where_(country.is("INDONESIA"))
-            .order_by(order(&age).numeric())
-            .limit(20)
-            .start(5);
-
-        let transaction = chain(statement1)
-            .chain(statement2)
-            .chain(select(All).from(fake_id3));
-
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
-    }
+    use insta::assert_display_snapshot;
+    use select::order;
 
     #[test]
-    #[cfg(feature = "raw")]
-    fn test_transaction_cancel() {
-        use crate::statements::select::order;
-
-        let name = Field::new("name");
+    fn test_chaining() {
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -146,7 +160,7 @@ mod tests {
             .chain(statement2)
             .chain(select(All).from(fake_id3));
 
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
+        assert_display_snapshot!(transaction.fine_tune_params());
+        assert_display_snapshot!(transaction.to_raw().to_string());
     }
 }

@@ -66,11 +66,18 @@ pub enum TargettablesForUpdate {
     SurrealId(SurrealId),
 }
 
+impl From<crate::Table> for TargettablesForUpdate {
+    fn from(value: crate::Table) -> Self {
+        Self::Table(value.into())
+    }
+}
+
 impl From<&sql::Table> for TargettablesForUpdate {
     fn from(value: &sql::Table) -> Self {
         Self::Table(value.to_owned())
     }
 }
+
 impl From<&sql::Thing> for TargettablesForUpdate {
     fn from(value: &sql::Thing) -> Self {
         Self::SurrealId(value.to_owned().into())
