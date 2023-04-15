@@ -41,40 +41,43 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     let table_name = T::table_name();
-    let mut errors = vec![];
-
     let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        errors.push("You're trying to update into the wrong table".to_string());
-    }
-    let targets: TargettablesForUpdate = targettables.into();
-    let targets_bindings = targets.get_bindings();
-
-    let mut target_names = match targets {
-        TargettablesForUpdate::Table(table) => vec![table.to_string()],
-        TargettablesForUpdate::SurrealId(_) => targets_bindings
-            .iter()
-            .map(|b| format!("${}", b.get_param()))
-            .collect::<Vec<_>>(),
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    let targets = match targettables {
+        TargettablesForUpdate::Table(table) => {
+            let table = table.to_string();
+            if &table != &table_name.to_string() {
+                errors.push(format!(
+                    "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
+                ));
+            }
+            table
+        }
+        TargettablesForUpdate::SurrealId(id) => {
+            if !id
+                .to_string()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                errors.push(format!(
+                    "id - {id} does not belong to {table_name} table from the surreal model struct provided"
+                ));
+            }
+            let binding = Binding::new(id);
+            let param = binding.get_param_dollarised();
+            bindings.push(binding);
+            param
+        }
     };
 
     CreateBySettingStatement::<T> {
-        target: target_names
-            .pop()
-            .expect("Table or record id must exist here. this is a bug"),
+        target: targets,
         content: None,
         set: Vec::new(),
         return_type: None,
         timeout: None,
         parallel: false,
-        bindings: targets_bindings,
+        bindings,
         errors,
         __model_return_type: PhantomData,
     }
