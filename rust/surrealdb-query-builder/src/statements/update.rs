@@ -16,30 +16,56 @@ use crate::{
         SurrealdbModel,
     },
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    ReturnableDefault, ReturnableStandard,
+    ErrorList, ReturnableDefault, ReturnableStandard,
 };
 
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
-    // query is run using one of the run methods.
     let table_name = T::table_name();
     let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        panic!("You're trying to update into the wrong table");
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    let param = match targettables {
+        TargettablesForUpdate::Table(table) => {
+            let table = table.to_string();
+            if &table != &table_name.to_string() {
+                errors.push(format!(
+                    "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
+                ));
+            }
+            table
+        }
+        TargettablesForUpdate::SurrealId(id) => {
+            if !id
+                .to_string()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                errors.push(format!(
+                    "id - {id} does not belong to {table_name} table from the surreal model struct provided"
+                ));
+            }
+            let binding = Binding::new(id);
+            let param = binding.get_param_dollarised();
+            bindings.push(binding);
+            param
+        }
+    };
+
+    UpdateStatement {
+        target: param,
+        content: None,
+        merge: None,
+        set: Vec::new(),
+        where_: None,
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        bindings,
+        errors,
+        __model_return_type: PhantomData,
     }
-    // let errors: String = connection.get_errors();
-    let mut builder = UpdateStatement::<T>::new();
-    builder.update(targettables)
 }
 
 pub struct UpdateStatement<T>
@@ -54,6 +80,7 @@ where
     return_type: Option<ReturnType>,
     timeout: Option<String>,
     bindings: BindingsList,
+    errors: ErrorList,
     parallel: bool,
     __model_return_type: PhantomData<T>,
 }
@@ -108,55 +135,10 @@ impl From<sql::Table> for TargettablesForUpdate {
     }
 }
 
-impl Parametric for TargettablesForUpdate {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            TargettablesForUpdate::Table(table) => {
-                // Table binding does not seem to work right now. skip it first
-                let binding = Binding::new(table.to_owned());
-                vec![binding]
-            }
-            TargettablesForUpdate::SurrealId(id) => vec![Binding::new(id.to_owned())],
-        }
-    }
-}
-
 impl<T> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new() -> Self {
-        Self {
-            target: "".into(),
-            content: None,
-            merge: None,
-            set: Vec::new(),
-            where_: None,
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            bindings: vec![],
-            __model_return_type: PhantomData,
-        }
-    }
-
-    pub fn update(mut self, targettables: impl Into<TargettablesForUpdate>) -> Self {
-        let targets: TargettablesForUpdate = targettables.into();
-        let targets_bindings = targets.get_bindings();
-
-        // TODO: Do all the parametization here when writing tests for this function
-        let target_names = match targets {
-            TargettablesForUpdate::Table(table) => vec![table.to_string()],
-            TargettablesForUpdate::SurrealId(_) => targets_bindings
-                .iter()
-                .map(|b| format!("{}", b.get_param_dollarised()))
-                .collect::<Vec<_>>(),
-        };
-        self.update_bindings(targets_bindings);
-        self.target.extend(target_names);
-        self
-    }
-
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
