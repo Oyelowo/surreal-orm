@@ -27,19 +27,23 @@ use surrealdb::{
 use std::fmt::{Debug, Display};
 use surrealdb_orm::{
     cond,
+    functions::*,
     statements::{
-        define_field, define_table, for_, order, select, value, DefineFieldStatement,
+        define_field, define_table, for_, order, select, DefineFieldStatement,
         DefineTableStatement, For, PermissionType, SelectStatement,
     },
-    All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable, RecordId,
-    Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject, Table, NONE,
+    value, All, CrudType, Field, FieldType, Filter, LinkMany, LinkOne, LinkSelf, Operatable,
+    RecordId, Relate, SurrealId, SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject,
+    Table, NONE,
 };
 
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
 fn gama() -> SelectStatement {
+    crypto::argon2::compare!("Rer", "Erer");
     // All
+
     select(All)
 }
 fn full() -> u32 {
@@ -139,9 +143,9 @@ fn define_age() -> DefineFieldStatement {
         .type_(String)
         .value("example@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions_for(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
-        .permissions_for(
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions(
             &[
                 for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
