@@ -87,9 +87,9 @@ fn define_student() -> DefineTableStatement {
                 .start(5),
         )
         .schemafull()
-        .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-        .permissions_for(&[
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+        .permissions(&[
             for_(&[Create, Delete]).where_(name.is("Oyedayo")),
             for_(Update).where_(age.less_than_or_equal(130)),
         ]);
