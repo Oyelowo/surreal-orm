@@ -5,17 +5,10 @@
  * Licensed under the MIT license
  */
 
-use std::{
-    fmt::{self, Display},
-    ops::Deref,
-};
-
-use insta::{assert_debug_snapshot, assert_display_snapshot};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use surrealdb::sql::{self, statements::DefineStatement};
+use std::fmt::{self, Display};
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::Table,
 };
 
@@ -42,64 +35,6 @@ use super::{for_::PermissionType, select::SelectStatement};
 // 		| FOR update @expression
 // 		| FOR delete @expression
 // 	] ]
-// Example usage
-// The following expression shows the simplest way to use the DEFINE TABLE statement.
-//
-// -- Declare the name of a table.
-// DEFINE TABLE reading;
-// The following example uses the DROP portion of the DEFINE TABLE statement. This would be like telling the database to drop any table that has the given name and replace it with a new one of the same name.
-//
-// -- Drop the table if it exists and create a new one with the same name.
-// DEFINE TABLE reading DROP;
-// The following example demonstrates the SCHEMAFULL portion of the DEFINE TABLE statement. When a table is defined as schemafull, the database strictly enforces any schema definitions that are specified using the DEFINE TABLE statement. New fields can not be added to a SCHEMAFULL table unless they are defined via the DEFINE FIELD statement.
-//
-// -- Create schemafull user table.
-// DEFINE TABLE user SCHEMAFULL;
-
-// -- Create schemaless user table.
-// DEFINE TABLE user SCHEMALESS;
-//
-// -- Define a table as a view which aggregates data from the reading table
-// DEFINE TABLE temperatures_by_month AS
-// 	SELECT
-// 		count() AS total,
-// 		time::month(recorded_at) AS month,
-// 		math::mean(temperature) AS average_temp
-// 	FROM reading
-// 	GROUP BY city
-// ;
-//
-// -- SEE IT IN ACTION
-// -- 1: Add a new temperature reading with some basic attributes
-// CREATE reading SET
-// 	temperature = 27.4,
-// 	recorded_at = time::now(),
-// 	city = 'London',
-// 	location = (-0.118092, 51.509865)
-// ;
-//
-// -- 2: Query the projection
-// SELECT * FROM temperatures_by_month;
-// The following shows how to set table level PERMISSIONS using the DEFINE TABLE statement. This allows you to set independent permissions for selecting, creating, updating, and deleting data.
-//
-// -- Specify access permissions for the 'post' table
-// DEFINE TABLE post SCHEMALESS
-// 	PERMISSIONS
-// 		FOR select
-// 			-- Published posts can be selected
-// 			WHERE published = true
-// 			-- A user can select all their own posts
-// 			OR user = $auth.id
-// 		FOR create, update
-// 			-- A user can create or update their own posts
-// 			WHERE user = $auth.id
-// 		FOR delete
-// 			-- A user can delete their own posts
-// 			WHERE user = $auth.id
-// 			-- Or an admin can delete any posts
-// 			OR $auth.admin = true
-// ;
-//
 
 /// Define the API for the Table builder
 pub struct DefineTableStatement {
@@ -132,33 +67,27 @@ pub struct DefineTableStatement {
 /// use std::time::Duration;
 ///
 /// let name = Field::new("name");
-/// let user_table = Table::from("user");
+/// let user = Table::from("user");
 /// let age = Field::new("age");
 /// let country = Field::new("country");
-/// let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
-///
-/// let statement = define_table(user_table)
+/// let fake_id = SurrealId::try_from("user:oyedayo").unwrap();
+/// let statement = define_table(user)
 ///     .drop()
 ///     .as_(
 ///         select(All)
-///             .from(fake_id2)
+///             .from(fake_id)
 ///             .where_(country.is("INDONESIA"))
 ///             .order_by(order(&age).numeric().desc())
 ///             .limit(20)
 ///             .start(5),
 ///     )
 ///     .schemafull()
-///     .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-///     .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-///     .permissions_for(&[
+///     .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+///     .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+///     .permissions(&[
 ///         for_(&[Create, Delete]).where_(name.is("Oyedayo")),
 ///         for_(Update).where_(age.less_than_or_equal(130)),
 ///     ]);
-///
-/// assert_eq!(
-///     statement.to_string(),
-///     "DEFINE TABLE user DROP SCHEMAFULL AS \n\tSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC DESC LIMIT 20 START AT 5;\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR create, delete\n\tWHERE name IS $_param_00000000\nFOR update\n\tWHERE age <= $_param_00000000;".to_string()
-/// );
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
@@ -177,21 +106,50 @@ pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
 }
 
 impl DefineTableStatement {
+    /// Drop the table if it exists and create a new one with the same name.
     pub fn drop(mut self) -> Self {
         self.drop = Some(true);
         self
     }
 
+    /// Make table scehmafull
     pub fn schemafull(mut self) -> Self {
         self.schema_type = Some(SchemaType::Schemafull);
         self
     }
 
+    /// Make table scehmaless.
     pub fn schemaless(mut self) -> Self {
         self.schema_type = Some(SchemaType::Schemaless);
         self
     }
 
+    /// Select from existing table.
+    ///
+    /// Examples:
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::crypto, statements::{define_table, for_, order, select}};
+    /// # use CrudType::*;
+    /// # use std::time::Duration;
+    /// # let name = Field::new("name");
+    /// # let user = Table::from("user");
+    /// # let age = Field::new("age");
+    /// # let country = Field::new("country");
+    /// # let fake_id = SurrealId::try_from("user:oyedayo").unwrap();
+    ///   let statement = define_table(user)
+    ///     .as_(
+    ///         select(All)
+    ///             .from(fake_id)
+    ///             .where_(country.is("INDONESIA"))
+    ///             .order_by(order(&age).numeric().desc())
+    ///             .limit(20)
+    ///             .start(5),
+    ///     );
+    ///
+    /// assert!(!statement.build().is_empty());
+    /// ```
     pub fn as_(mut self, select_statement: impl Into<SelectStatement>) -> Self {
         let statement: SelectStatement = select_statement.into();
         self.as_ = Some(statement.to_string());
@@ -199,17 +157,47 @@ impl DefineTableStatement {
         self
     }
 
+    /// Set permission as NONE
     pub fn permissions_none(mut self) -> Self {
         self.permissions_none = Some(true);
         self
     }
 
+    /// Set permission as FULL
     pub fn permissions_full(mut self) -> Self {
         self.permissions_full = Some(true);
         self
     }
 
-    pub fn permissions_for(mut self, fors: impl Into<PermissionType>) -> Self {
+    /// set specific permissions for the table with constraint for certain table access types.
+    /// Events include type inluding CREATE, UPDATE, SELECT and DELETE.
+    /// Additional permission chaining accumulates
+    ///
+    ///  Examples:
+    ///  
+    /// ```rust
+    ///     # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, CrudType::*, statements::{define_table, for_}};
+    /// # use CrudType::*;
+    /// # use std::time::Duration;
+    /// # let name = Field::new("name");
+    /// # let user = Table::from("user");
+    /// # let age = Field::new("age");
+    /// # let statement = define_table(user);
+    /// // You can create perimssion for a single event
+    /// let statement = statement.permissions(for_(Select).where_(age.greater_than_or_equal(18)));
+    ///
+    /// // Even multiple
+    /// let statement = statement.permissions(for_(&[Create, Update]).where_(name.is("Oyedayo")));
+    ///
+    /// // Multiples multples
+    /// let statement = statement.permissions(&[
+    ///     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+    ///     for_(Update).where_(age.less_than_or_equal(130)),
+    /// ]);
+    ///
+    /// ```
+    pub fn permissions(mut self, fors: impl Into<PermissionType>) -> Self {
         use PermissionType::*;
         let fors: PermissionType = fors.into();
         match fors {
@@ -370,9 +358,9 @@ mod tests {
                     .start(5),
             )
             .schemafull()
-            .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-            .permissions_for(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-            .permissions_for(&[
+            .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions(&[
                 for_(&[Create, Delete]).where_(name.is("Oyedayo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
             ]);
