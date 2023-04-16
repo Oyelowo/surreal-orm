@@ -82,6 +82,8 @@ pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
     })
 }
 
+/// Builder struct for a `FOR` statement which is typeically used in DEFINE TABLE and DEFINE FIELD
+/// statements for setting more granular permissions
 #[derive(Clone, Debug)]
 pub struct For(ForData);
 
