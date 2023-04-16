@@ -135,7 +135,7 @@ where
     /// ```rust,ignore
     /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// assert_eq!(query.to_raw().to_string(), "30000".to_string());
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: sql::Value = duration.into().into();

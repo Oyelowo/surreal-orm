@@ -723,7 +723,7 @@ impl SelectStatement {
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = Filter::new(condition);
-        self.where_ = Some(condition.to_string());
+        self.where_ = Some(condition.build());
         self
     }
 
