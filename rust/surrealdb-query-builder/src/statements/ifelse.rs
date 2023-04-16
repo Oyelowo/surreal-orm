@@ -166,13 +166,6 @@ struct FlowStatementData {
     else_data: ExpressionContent,
 }
 
-impl FlowStatementData {
-    fn update_if(mut self, condition: Filter) -> Self {
-        self.if_data.condition = condition;
-        self
-    }
-}
-
 #[derive(Default)]
 struct Flows {
     conditions: Vec<Filter>,
