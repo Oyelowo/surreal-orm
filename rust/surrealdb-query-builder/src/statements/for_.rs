@@ -128,8 +128,6 @@ impl Display for For {
     }
 }
 
-pub struct NONE;
-
 /// Permission types which can be a a single For statement
 /// list of `for` statements
 #[derive(Clone, Debug)]
