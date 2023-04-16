@@ -154,10 +154,6 @@ impl Display for ExpressionContent {
 }
 
 impl ExpressionContent {
-    fn empty() -> Self {
-        Self("".into())
-    }
-
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
