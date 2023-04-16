@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::{marker::PhantomData, time::Duration};
+use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
