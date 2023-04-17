@@ -316,9 +316,9 @@ impl Buildable for End {
             ));
         }
 
-        // if !&self.flow_data.else_data.is_empty() {
-        output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data.build()));
-        // }
+        if !&self.flow_data.else_data.is_empty() {
+            output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data.build()));
+        }
 
         output.push_str("\nEND");
 
@@ -356,11 +356,15 @@ mod tests {
         assert_eq!(if_statement1.get_bindings().len(), 3);
         assert_eq!(
             if_statement1.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t_param_00000003\nEND"
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                END"
         );
         assert_eq!(
             if_statement1.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t'Valid'\nEND"
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                END"
         );
     }
 
@@ -372,9 +376,18 @@ mod tests {
             .else_("Invalid")
             .end();
         assert_eq!(if_statement2.get_bindings().len(), 4);
+
         assert_eq!(
-            format!("{if_statement2}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement2.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE\n\t$_param_00000004\n\
+                END"
+        );
+
+        assert_eq!(
+            if_statement2.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE\n\t'Invalid'\nEND"
         );
     }
 
@@ -389,10 +402,16 @@ mod tests {
             .then("The Alien!")
             .end();
 
-        assert_eq!(if_statement.get_bindings().len(), 3);
+        assert_eq!(if_statement.get_bindings().len(), 5);
+
         assert_eq!(
-            format!("{if_statement}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nEND"
+        if_statement.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t$_param_00000003\nELSE IF name ~ $_param_00000004 THEN\n\t$_param_00000005\nEND"
+        );
+
+        assert_eq!(
+        if_statement.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t'The Alien!'\nEND"
         );
     }
 
@@ -407,10 +426,27 @@ mod tests {
             .then("The Apple!")
             .else_("The Mango!")
             .end();
-        assert_eq!(if_statement4.get_bindings().len(), 3);
+        assert_eq!(if_statement4.get_bindings().len(), 6);
+
         assert_eq!(
-            format!("{if_statement4}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement4.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                $_param_00000005\n\
+                ELSE\n\t$_param_00000006\n\
+                END"
+        );
+
+        assert_eq!(
+            if_statement4.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                'The Apple!'\n\
+                ELSE\n\t\
+                'The Mango!'\n\
+                END"
         );
     }
 
@@ -428,10 +464,30 @@ mod tests {
             .then("Cold")
             .else_("Hot")
             .end();
-        assert_eq!(if_statement5.get_bindings().len(), 3);
+
+        assert_eq!(if_statement5.get_bindings().len(), 9);
+
         assert_eq!(
-            format!("{if_statement5}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement5.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                $_param_00000005\n\
+                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) THEN\n\t\
+                $_param_00000008\nELSE\n\t$_param_00000009\nEND"
+        );
+
+        assert_eq!(
+            if_statement5.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                'The Alien!'\n\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\t\
+                'Cold'\n\
+                ELSE\n\t\
+                'Hot'\n\
+                END"
         );
     }
 
