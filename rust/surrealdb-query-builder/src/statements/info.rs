@@ -159,7 +159,7 @@ impl fmt::Display for InfoStatement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::traits::{Buildable, Erroneous, Parametric, Queryable};
+    use crate::traits::Buildable;
 
     #[test]
     fn test_info_for_kv_build() {
