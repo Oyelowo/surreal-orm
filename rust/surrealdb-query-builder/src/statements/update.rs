@@ -23,10 +23,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
-        SurrealdbModel,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
     Conditional, ErrorList, ReturnableDefault, ReturnableStandard,
 };
