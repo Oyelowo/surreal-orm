@@ -86,31 +86,31 @@ where
     /// Set the return type to `None`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::None);
+    /// statement.return_type(ReturnType::None);
     /// ```
     ///
     /// Set the return type to `Before`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Before);
+    /// statement.return_type(ReturnType::Before);
     /// ```
     ///
     /// Set the return type to `After`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::After);
+    /// statement.return_type(ReturnType::After);
     /// ```
     ///
     /// Set the return type to `Diff`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Diff);
+    /// statement.return_type(ReturnType::Diff);
     /// ```
     ///
     /// Set the return type to a projection of specific fields:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Projections(vec![...]));
+    /// statement.return_type(ReturnType::Projections(vec![...]));
     /// ```
     pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();

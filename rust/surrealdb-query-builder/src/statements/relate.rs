@@ -5,22 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::{fmt::Display, marker::PhantomData};
-
-use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql::{self, Operator};
-
-use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable,
-        SurrealdbEdge,
-    },
-    types::{
-        Database, DurationLike, Namespace, ReturnType, Scope, Table, TableIndex, Token, Updateables,
-    },
-    ReturnableDefault, ReturnableStandard,
-};
-
+// Statement syntax
 // RELATE @from -> @table -> @with
 // 	[ CONTENT @value
 // 	  | SET @field = @value ...
@@ -29,7 +14,46 @@ use crate::{
 // 	[ TIMEOUT @duration ]
 // 	[ PARALLEL ]
 // ;
+use std::marker::PhantomData;
 
+use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::sql;
+
+use crate::{
+    traits::{
+        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable,
+        SurrealdbEdge,
+    },
+    types::{DurationLike, ReturnType, Updateables},
+    ReturnableDefault, ReturnableStandard,
+};
+
+/// Creates a new RELATE statement.
+///
+/// # Arguments
+///
+/// * `connection` - built using `with` method on a node. e.g `Student::with(..).writes(..).book(..)`
+/// # Examples
+///
+/// ```rust, ignore
+/// // Add a graph edge between two specific records setting a field on the edge
+/// relate(Student::with(student_id).writes__(Empty).book(book_id))
+///     .set(updater(score).equals(5));
+///     
+/// // Instead of specifying record data using the SET clause,
+/// // it is also possible to use the CONTENT keyword to specify the record data using a SurrealQL object.
+/// relate(Student::with(student_id).writes__(Empty).book(book_id))
+///     .content(write);
+/// // Generates e.g RELATE student:1->writes->book:2 CONTENT {...}
+///
+/// // Add a graph edge between multiple specific students and books
+/// relate(
+///     Student::with(select(All).from(Student::table_name()))
+///         .writes__(Empty)
+///         .book(select(All).from(Book::table_name()))
+/// ).content(write)
+/// // Generates e.g RELATE (select * from student)->writes->(select * from book) CONTENT {...}
+/// ```
 pub fn relate<T>(connection: impl std::fmt::Display + Parametric + Erroneous) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
@@ -48,6 +72,7 @@ where
     }
 }
 
+/// Relate statement initialization builder
 #[derive(Debug, Clone)]
 pub struct RelateStatement<T>
 where
@@ -68,6 +93,7 @@ impl<T> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
+    /// Set a serailizable surrealdb edge model. It must implement the SurrealdbEdge trait.
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
@@ -76,6 +102,35 @@ where
         self
     }
 
+    /// This updates records on the edge field.
+    /// This clause also allows setting, incrementing and decrementing numeric values, and adding or removing values from arrays.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, ignore
+    /// // set a field number. Generates  =
+    /// updater(score).equals(5)
+    ///
+    /// // increment a field number. Generates  +=
+    /// updater(score).increment_by(5)
+    /// // or alias
+    /// updater(score).plus_equal(5)
+    ///
+    /// // decrement a field number. Generates  -=
+    /// updater(score).decrement_by(5)
+    /// // or alias
+    /// updater(score).minus_equal(5)
+    ///
+    /// // add to an array. Generates  +=
+    /// updater(friends_names).append("Oyelowo")
+    /// // or alias
+    /// updater(friends_names).plus_equal("Oyelowo")
+    ///
+    /// // remove value from an array. Generates  -=
+    /// updater(friends_names).remove("Oyedayo")
+    /// // or alias
+    /// updater(friends_names).minus_equal("Oyedayo")
+    /// ```
     pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
         let settable: Updateables = settables.into();
         self.bindings.extend(settable.get_bindings());
@@ -88,7 +143,44 @@ where
         self
     }
 
-    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -98,45 +190,28 @@ where
     ///
     /// # Arguments
     ///
-    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    /// * `duration` - a value that can represent a duration for the timeout. This can be one of the following:
+    ///
+    ///   * `Duration` - a standard Rust `Duration` value.
+    ///
+    ///   * `Field` - an identifier for a specific field in the query, represented by an `Idiom` value.
+    ///
+    ///   * `Param` - a named parameter in the query, represented by a `Param` value.
     ///
     /// # Examples
     ///
-    /// ```
-    /// use surrealdb_orm::select;
+    /// ```rust,ignore
+    /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// let mut query_builder = SelectStatement::new();
-    /// query_builder.timeout("5s");
-    /// ```
-    ///
-    /// ---
-    ///
-    /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use surrealdb_orm::select;
-    ///
-    /// let mut query_builder = SelectStatement::new();
-    /// query_builder.parallel();
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: sql::Value = duration.into().into();
-        // let duration = sql::Duration::from(duration);
         self.timeout = Some(duration.to_string());
         self
     }
 
     /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use surrealdb_orm::select;
-    ///
-    /// select(All).parallel();
-    /// ```
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -177,38 +252,30 @@ where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     fn build(&self) -> String {
-        let mut query = String::new();
-
-        if !&self.relation.is_empty() {
-            query += &format!("RELATE {} ", self.relation);
-        }
+        let mut query = format!("RELATE {} ", self.relation);
 
         if let Some(param) = &self.content_param {
-            query += &format!("CONTENT {} ", param);
+            query = format!("{query} CONTENT {param} ");
         }
 
         if !&self.set.is_empty() {
-            query += "SET ";
             let set_vec = self.set.join(", ");
-            query += &set_vec;
-            query += " ";
+            query = format!("{query} SET {set_vec} ");
         }
 
         if let Some(return_type) = &self.return_type {
-            query += format!("{return_type}").as_str();
+            query = format!("{query} {return_type}");
         }
 
         if let Some(timeout) = &self.timeout {
-            query += &format!("TIMEOUT {} ", timeout);
+            query = format!("{query} TIMEOUT {timeout}");
         }
 
         if self.parallel {
-            query += "PARALLEL ";
+            query = format!("{query} PARALLEL");
         }
 
-        query += ";";
-
-        query
+        format!("{query};")
     }
 }
 
@@ -228,22 +295,4 @@ where
 }
 
 #[test]
-#[cfg(feature = "mock")]
-fn test_query_builder() {
-    // let query = RelateStatement::new()
-    //     // .from("from")
-    //     // .table("table")
-    //     // .with("with")
-    //     // .content("content")
-    //     // .set("field1", "value1")
-    //     // .set("field2", "value2")
-    //     // .return_(Return::Projections(vec!["projection1", "projection2"]))
-    //     // .timeout(Duration::from_secs(30))
-    //     .parallel()
-    //     .build();
-    //
-    // assert_eq!(
-    //     query,
-    //     "RELATE from -> table -> with CONTENT content SET field1 = value1, field2 = value2 RETURN projection1, projection2 TIMEOUT 30000 PARALLEL ;"
-    // );
-}
+fn test_query_builder() {}
