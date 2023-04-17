@@ -46,21 +46,38 @@ use crate::{
 
 /// Creates a new `Order` instance with the specified database field.
 ///
+/// To sort records, SurrealDB allows ordering on multiple fields and nested fields. Use the ORDER
+/// BY clause to specify a comma-separated list of field names which should be used to order the
+/// resulting records. The ASC and DESC keywords can be used to specify whether results should be
+/// sorted in an ascending or descending manner. The COLLATE keyword can be used to use unicode
+/// collation when ordering text in string values, ensuring that different cases, and different
+/// languages are sorted in a consistent manner. Finally the NUMERIC can be used to correctly sort
+/// text which contains numeric values.
+///
 /// # Arguments
 ///
 /// * `field` - A reference to a `Field` instance to be used as the ordering field.
 ///
 /// # Example
 ///
-/// ```
-/// use my_crate::{Order, Field};
-///
-/// let id_field = Field::new("id");
-/// let order = Order::new(&id_field);
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::{order, select}};
+/// # let age = Field::new("age");
+/// # let score = Field::new("score");
+/// # let name = Field::new("name");
+/// jj
+/// order(age).numeric().asc();
+/// order(score).rand().desc();
+/// order(name).collate().desc();
 /// ```
 pub fn order(field: impl Into<Field>) -> Order {
     let field: Field = field.into();
-    Order::new(&field)
+    Order {
+        field: field.clone(),
+        direction: None,
+        option: None,
+    }
 }
 
 /// Represents an ordering field, direction, and options for a database query.
@@ -102,8 +119,11 @@ impl Parametric for Orderables {
     }
 }
 
+/// an order or list of orders
 pub enum Orderables {
+    /// Single order
     Order(Order),
+    /// Multiple orders
     OrdersList(Vec<Order>),
 }
 
@@ -135,105 +155,31 @@ impl From<Orderables> for Vec<Order> {
 }
 
 impl Order {
-    /// Creates a new `Order` instance with the specified database field.
-    ///
-    /// # Arguments
-    ///
-    /// * `field` - A reference to a `Field` instance to be used as the ordering field.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_crate::{Order, Field};
-    ///
-    /// let id_field = Field::new("id");
-    /// let order = Order::new(&id_field);
-    /// ```
-    pub fn new(field: &Field) -> Self {
-        Order {
-            field: field.clone(),
-            direction: None,
-            option: None,
-        }
-    }
-
     /// Sets the direction of the ordering to ascending.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_crate::{Order, Field, OrderDirection};
-    ///
-    /// let id_field = Field::new("id");
-    /// let order = Order::new(&id_field).asc();
-    /// assert_eq!(order.direction, Some(OrderDirection::Asc));
-    /// ```
     pub fn asc(mut self) -> Self {
         self.direction = Some(OrderDirection::Asc);
         self
     }
 
     /// Sets the direction of the ordering to descending.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_crate::{Order, Field, OrderDirection};
-    ///
-    /// let id_field = Field::new("id");
-    /// let order = Order::new(&id_field).desc();
-    /// assert_eq!(order.direction, Some(OrderDirection::Desc));
-    /// ```
     pub fn desc(mut self) -> Self {
         self.direction = Some(OrderDirection::Desc);
         self
     }
 
     /// Sets the ordering option to random.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_crate::{Order, Field, OrderOption};
-    ///
-    /// let id_field = Field::new("id");
-    /// let order = Order::new(&id_field).rand();
-    /// assert_eq!(order.option, Some(OrderOption::Rand));
-    /// ```
     pub fn rand(mut self) -> Self {
         self.option = Some(OrderOption::Rand);
         self
     }
 
     /// Sets the ordering option to collate.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_crate::{Order, Field, OrderOption};
-    ///
-    /// let name_field = Field::new("name");
-    /// let order = Order::new(&name_field).collate();
-    /// assert_eq!(order.option, Some(OrderOption::Collate));
-    /// ```
     pub fn collate(mut self) -> Self {
         self.option = Some(OrderOption::Collate);
         self
     }
 
     /// Sets the ordering option to sort the values numerically instead of as strings.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use my_cool_database::query::{Order, Field};
-    ///
-    /// let field = Field::new("age", "users");
-    /// let order = Order::new(&field).numeric();
-    ///
-    /// assert_eq!(order.field.name(), "age");
-    /// assert_eq!(order.option.unwrap(), OrderOption::Numeric);
-    /// ```
     pub fn numeric(mut self) -> Self {
         self.option = Some(OrderOption::Numeric);
         self
@@ -437,9 +383,12 @@ impl From<SelectStatement> for TargettablesForSelect {
     }
 }
 
-#[derive(Clone)]
+/// Single field or multiple fields to split by
+#[derive(Clone, Debug)]
 pub enum Splittables {
+    /// single field to split by
     Field(Field),
+    /// Multiple fields to split by
     Fields(Vec<Field>),
 }
 
@@ -482,11 +431,14 @@ impl From<Vec<&Field>> for Splittables {
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
+/// Items that can be selected
 #[derive(Debug, Clone)]
 pub enum Selectables {
+    /// *
     All,
-    AllWithRelations,
+    /// A single field
     Field(Field),
+    /// Multiple fields
     Fields(Vec<Field>),
 }
 
@@ -496,7 +448,6 @@ impl Buildable for Selectables {
             Selectables::All => vec!["*".to_string()],
             // TODO: include all relations, graph strings automatically. To be generated by the
             // macro system.
-            Selectables::AllWithRelations => vec!["*".into()],
             Selectables::Field(f) => vec![format!("{f}")],
             Selectables::Fields(fields) => {
                 fields.iter().map(|f| format!("{f}")).collect::<Vec<_>>()
@@ -571,7 +522,6 @@ impl Parametric for Selectables {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Selectables::All => vec![],
-            Selectables::AllWithRelations => vec![],
             Selectables::Field(f) => f.get_bindings(),
             Selectables::Fields(fields) => {
                 fields.into_iter().flat_map(|f| f.get_bindings()).collect()
@@ -689,17 +639,28 @@ impl SelectStatement {
     ///
     /// # Arguments
     ///
-    /// * `table_name` - The name of the table to select from.
+    /// * `targettables` - which can include tables, records, edges, subqueries, paramaters, arrays, objects, and other values.
     ///
     /// # Example
     ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::{order, select}};
+    /// # let user = Table::new("user");
+    /// # let user_id1 = SurrealId::try_from("user:1").unwrap();
+    ///  //  Can select from a table name
+    ///  select(All).from(user);
+    ///
+    ///  //  Can also select from an id
+    ///  select(All).from(user_id1);
+    ///
+    ///  //  or select fromj a subquery
+    ///  select(All).from(select(All).from(alien));
+    ///
     /// ```
-    /// use query_builder::{QueryBuilder, Field};
-    ///
-    /// let mut builder = QueryBuilder::select();
-    /// builder.from("users");
-    ///
-    /// assert_eq!(builder.to_string(), "SELECT * FROM users");
+    /// ```rust, ignore
+    ///  // or a list of tables, ids or subqueries
+    ///  select(All).from(array![user, user_id, select(All).from(alien)]);
     /// ```
     pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> Self {
         let targets: TargettablesForSelect = targettables.into();
