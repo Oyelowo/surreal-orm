@@ -168,15 +168,15 @@ impl fmt::Display for TransactionCompletion {
 
 #[cfg(test)]
 mod tests {
-    use select::order;
-
-    use crate::{statements::select, *};
+    use crate::{
+        statements::{order, select},
+        *,
+    };
 
     use super::*;
 
     #[test]
     fn test_transaction_commit() {
-        let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -207,22 +207,14 @@ mod tests {
             .query(statement2)
             .commit_transaction();
 
-        assert_eq!(transaction.get_bindings().len(), 5);
+        assert_eq!(transaction.get_bindings().len(), 10);
 
-        assert_eq!(
-        transaction.fine_tune_params(),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
-        );
-
-        assert_eq!(
-        transaction.to_raw().build(),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
-        );
+        insta::assert_display_snapshot!(transaction.fine_tune_params());
+        insta::assert_display_snapshot!(transaction.to_raw().build());
     }
 
     #[test]
     fn test_transaction_cancel() {
-        let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -253,16 +245,9 @@ mod tests {
             .query(statement2)
             .cancel_transaction();
 
-        assert_eq!(transaction.get_bindings().len(), 5);
+        assert_eq!(transaction.get_bindings().len(), 10);
 
-        assert_eq!(
-        transaction.fine_tune_params(),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
-        );
-
-        assert_eq!(
-        transaction.to_raw().build(),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
-        );
+        insta::assert_display_snapshot!(transaction.fine_tune_params());
+        insta::assert_display_snapshot!(transaction.to_raw().build());
     }
 }
