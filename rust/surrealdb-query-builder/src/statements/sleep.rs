@@ -13,7 +13,7 @@ use crate::{
     traits::BindingsList,
     traits::{Buildable, Erroneous, Parametric, Queryable},
     types::DurationLike,
-    Binding, ErrorList,
+    Binding,
 };
 
 /// Creates a SLEEP statement.
