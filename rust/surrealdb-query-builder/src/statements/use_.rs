@@ -12,22 +12,45 @@ use crate::{
     types::{Database, Namespace},
 };
 
+/// Creates a USE statement.
+/// The USE statement specifies a namespace and / or a database to use for the subsequent SurrealQL statements.
+///
+/// Examples
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use std::time::Duration;
+/// use surrealdb_orm::{*, statements::use_};
+///
+/// // Switch to the test Namespace
+/// use_().database(Database::from("test".to_string()));
+///
+/// // Switch to the test Namespace
+/// use_().namespace(Namespace::from("test".to_string()));
+///
+/// // Switch to the test Namespace and test database
+/// use_()
+///     .database(Database::from("test".to_string()))
+///     .namespace(Namespace::from("test".to_string()));
 pub fn use_() -> UseStatement {
     UseStatement::default()
 }
 
-#[derive(Default)]
+/// Use statement builder
+#[derive(Default, Clone)]
 pub struct UseStatement {
     namespace: Option<Namespace>,
     database: Option<Database>,
 }
 
 impl UseStatement {
+    /// Switch to the Namespace
     pub fn namespace(mut self, namespace: impl Into<Namespace>) -> Self {
         self.namespace = Some(namespace.into());
         self
     }
 
+    /// Switch to the Database
     pub fn database(mut self, database: impl Into<Database>) -> Self {
         self.database = Some(database.into());
         self
