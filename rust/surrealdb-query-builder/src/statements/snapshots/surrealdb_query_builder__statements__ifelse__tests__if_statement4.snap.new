@@ -1,0 +1,62 @@
+---
+source: surrealdb-query-builder/src/statements/ifelse.rs
+assertion_line: 355
+expression: if_statement4.get_bindings()
+---
+[
+    Binding {
+        param: "_param_d2dc4af9",
+        value: Number(
+            Int(
+                18,
+            ),
+        ),
+        original_inline_name: "_param_d2dc4af9",
+        raw_string: "18",
+        description: None,
+    },
+    Binding {
+        param: "_param_aaba8146",
+        value: Number(
+            Int(
+                120,
+            ),
+        ),
+        original_inline_name: "_param_aaba8146",
+        raw_string: "120",
+        description: None,
+    },
+    Binding {
+        param: "_param_6df2d246",
+        value: Strand(
+            Strand(
+                "Valid",
+            ),
+        ),
+        original_inline_name: "_param_6df2d246",
+        raw_string: "Valid",
+        description: None,
+    },
+    Binding {
+        param: "_param_61175756",
+        value: Strand(
+            Strand(
+                "Oyelowo Oyedayo",
+            ),
+        ),
+        original_inline_name: "_param_61175756",
+        raw_string: "'Oyelowo Oyedayo'",
+        description: None,
+    },
+    Binding {
+        param: "_param_493ef501",
+        value: Strand(
+            Strand(
+                "The Apple!",
+            ),
+        ),
+        original_inline_name: "_param_493ef501",
+        raw_string: "The Apple!",
+        description: None,
+    },
+]

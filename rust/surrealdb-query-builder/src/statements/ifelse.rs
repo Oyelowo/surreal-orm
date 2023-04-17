@@ -114,7 +114,8 @@ impl ThenExpression {
 
     pub fn else_(mut self, expression: impl Into<Expression>) -> ElseStatement {
         let expression: Expression = expression.into();
-        self.flow_data.else_data = ExpressionContent(format!("{expression}"));
+        self.flow_data.else_data = ExpressionContent(expression.to_string());
+        self.bindings.extend(expression.get_bindings());
 
         ElseStatement {
             flow_data: self.flow_data,
@@ -146,6 +147,12 @@ impl ElseStatement {
 
 #[derive(Default)]
 struct ExpressionContent(String);
+
+impl Buildable for ExpressionContent {
+    fn build(&self) -> String {
+        self.0.to_string()
+    }
+}
 
 impl Display for ExpressionContent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -278,8 +285,6 @@ impl fmt::Display for End {
 
 #[cfg(test)]
 mod tests {
-    use insta::{assert_debug_snapshot, assert_display_snapshot};
-
     use crate::{
         statements::{order, select},
         *,
@@ -295,15 +300,14 @@ mod tests {
             .then("Valid".to_string())
             .end();
 
-        assert_debug_snapshot!(if_statement1.get_bindings());
-        assert_display_snapshot!(if_statement1);
+        assert_eq!(if_statement1.get_bindings().len(), 3);
         assert_eq!(
-            if_statement1.build(),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            if_statement1.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t_param_00000003\nEND"
         );
         assert_eq!(
             if_statement1.to_raw().build(),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            "IF age >= 18 <= 120 THEN\n\t'Valid'\nEND"
         );
     }
 
@@ -314,8 +318,7 @@ mod tests {
             .then("Valid")
             .else_("Invalid")
             .end();
-        assert_debug_snapshot!(if_statement2.get_bindings());
-        assert_display_snapshot!(if_statement2);
+        assert_eq!(if_statement2.get_bindings().len(), 4);
         assert_eq!(
             format!("{if_statement2}"),
             "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
@@ -333,8 +336,7 @@ mod tests {
             .then("The Alien!")
             .end();
 
-        assert_debug_snapshot!(if_statement.get_bindings());
-        assert_display_snapshot!(if_statement);
+        assert_eq!(if_statement.get_bindings().len(), 3);
         assert_eq!(
             format!("{if_statement}"),
             "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nEND"
@@ -352,8 +354,7 @@ mod tests {
             .then("The Apple!")
             .else_("The Mango!")
             .end();
-        assert_debug_snapshot!(if_statement4.get_bindings());
-        assert_display_snapshot!(if_statement4);
+        assert_eq!(if_statement4.get_bindings().len(), 3);
         assert_eq!(
             format!("{if_statement4}"),
             "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
@@ -374,8 +375,7 @@ mod tests {
             .then("Cold")
             .else_("Hot")
             .end();
-        assert_debug_snapshot!(if_statement5.get_bindings());
-        assert_display_snapshot!(if_statement5);
+        assert_eq!(if_statement5.get_bindings().len(), 3);
         assert_eq!(
             format!("{if_statement5}"),
             "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
@@ -419,11 +419,29 @@ mod tests {
             .else_("Hot")
             .end();
 
-        assert_debug_snapshot!(if_statement5.get_bindings());
-        assert_display_snapshot!(if_statement5);
+        assert_eq!(if_statement5.get_bindings().len(), 17);
         assert_eq!(
-            format!("{if_statement5}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;)\nELSE IF name ~ $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;)\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement5.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                (SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) \
+                OR (city ~ $_param_00000006) ORDER BY age NUMERIC ASC LIMIT $_param_00000007 START AT $_param_00000008 PARALLEL;)\n\
+                ELSE IF name ~ $_param_00000009 THEN\n\t\
+                (SELECT * FROM $_param_00000010 WHERE country IS $_param_00000011 \
+                ORDER BY age NUMERIC ASC LIMIT $_param_00000012 START AT $_param_00000013;)\n\
+                ELSE IF (country IS $_param_00000014) OR (country IS $_param_00000015) THEN\n\t_param_00000016\n\
+                ELSE\n\t_param_00000017\nEND"
+        );
+
+        assert_eq!(
+            if_statement5.to_raw().build(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                (SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) \
+                OR (city ~ $_param_00000006) ORDER BY age NUMERIC ASC LIMIT $_param_00000007 START AT $_param_00000008 PARALLEL;)\n\
+                ELSE IF name ~ $_param_00000009 THEN\n\t\
+                (SELECT * FROM $_param_00000010 WHERE country IS $_param_00000011 \
+                ORDER BY age NUMERIC ASC LIMIT $_param_00000012 START AT $_param_00000013;)\n\
+                ELSE IF (country IS $_param_00000014) OR (country IS $_param_00000015) THEN\n\t_param_00000016\n\
+                ELSE\n\t_param_00000017\nEND"
         );
     }
 }

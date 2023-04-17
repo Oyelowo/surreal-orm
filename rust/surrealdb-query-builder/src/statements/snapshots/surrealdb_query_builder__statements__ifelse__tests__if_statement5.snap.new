@@ -1,0 +1,95 @@
+---
+source: surrealdb-query-builder/src/statements/ifelse.rs
+assertion_line: 373
+expression: if_statement5.get_bindings()
+---
+[
+    Binding {
+        param: "_param_c6d1a886",
+        value: Number(
+            Int(
+                18,
+            ),
+        ),
+        original_inline_name: "_param_c6d1a886",
+        raw_string: "18",
+        description: None,
+    },
+    Binding {
+        param: "_param_d07f0923",
+        value: Number(
+            Int(
+                120,
+            ),
+        ),
+        original_inline_name: "_param_d07f0923",
+        raw_string: "120",
+        description: None,
+    },
+    Binding {
+        param: "_param_fc847a37",
+        value: Strand(
+            Strand(
+                "Valid",
+            ),
+        ),
+        original_inline_name: "_param_fc847a37",
+        raw_string: "Valid",
+        description: None,
+    },
+    Binding {
+        param: "_param_d9e8c525",
+        value: Strand(
+            Strand(
+                "Oyelowo Oyedayo",
+            ),
+        ),
+        original_inline_name: "_param_d9e8c525",
+        raw_string: "'Oyelowo Oyedayo'",
+        description: None,
+    },
+    Binding {
+        param: "_param_be1a2fc4",
+        value: Strand(
+            Strand(
+                "The Alien!",
+            ),
+        ),
+        original_inline_name: "_param_be1a2fc4",
+        raw_string: "The Alien!",
+        description: None,
+    },
+    Binding {
+        param: "_param_f0c175b3",
+        value: Strand(
+            Strand(
+                "Canada",
+            ),
+        ),
+        original_inline_name: "_param_f0c175b3",
+        raw_string: "'Canada'",
+        description: None,
+    },
+    Binding {
+        param: "_param_a1915cd4",
+        value: Strand(
+            Strand(
+                "Norway",
+            ),
+        ),
+        original_inline_name: "_param_a1915cd4",
+        raw_string: "'Norway'",
+        description: None,
+    },
+    Binding {
+        param: "_param_3f5cdcad",
+        value: Strand(
+            Strand(
+                "Cold",
+            ),
+        ),
+        original_inline_name: "_param_3f5cdcad",
+        raw_string: "Cold",
+        description: None,
+    },
+]
