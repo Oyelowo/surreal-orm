@@ -27,7 +27,10 @@ use crate::{
 use super::SelectStatement;
 
 /// Insert statement initialization builder
-pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbNode> {
+pub struct InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     on_duplicate_key_update: Vec<String>,
     // You can select values to copy data from an existing table into a new one
     select_query_string: Option<String>,
@@ -168,9 +171,10 @@ where
     }
 }
 
-fn create_bindings_for_node<T: SurrealdbNode + DeserializeOwned + Serialize>(
-    node: &T,
-) -> BindingsList {
+fn create_bindings_for_node<T>(node: &T) -> BindingsList
+where
+    T: SurrealdbNode + DeserializeOwned + Serialize,
+{
     let value = node;
     let field_names = T::get_serializable_field_names();
 
@@ -184,7 +188,10 @@ fn create_bindings_for_node<T: SurrealdbNode + DeserializeOwned + Serialize>(
         .collect::<Vec<_>>()
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
+impl<T> InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     /// Generates ON DUPLICATE KEY UPDATE clause.
     /// This updates records which already exist by specifying an ON DUPLICATE KEY UPDATE clause.
     /// This clause also allows incrementing and decrementing numeric values, and adding or removing values from arrays.
@@ -224,7 +231,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> InsertStatement<T> {
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> Buildable for InsertStatement<T> {
+impl<T> Buildable for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn build(&self) -> String {
         if self.bindings.is_empty() {
             return "".to_string();
@@ -265,7 +275,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Buildable for InsertStatem
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for InsertStatement<T> {
+impl<T> Parametric for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
