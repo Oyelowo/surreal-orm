@@ -172,7 +172,6 @@ fn create_bindings_for_node<T: SurrealdbNode + DeserializeOwned + Serialize>(
     node: &T,
 ) -> BindingsList {
     let value = node;
-    // let fields_names = get_field_names(value);
     let field_names = T::get_serializable_field_names();
 
     field_names
