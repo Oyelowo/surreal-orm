@@ -21,12 +21,12 @@ use crate::{
 /// info_for().kv().build();
 pub fn info_for() -> InfoStatementInit {
     InfoStatementInit {
-        level: SurrealLevel::Kv,
+        level: InfoLevel::Kv,
     }
 }
 
-// Enum representing the different levels of the SurrealDB system
-enum SurrealLevel {
+/// Enum representing the different levels of the SurrealDB system
+enum InfoLevel {
     Kv,
     Namespace,
     Database,
@@ -36,7 +36,7 @@ enum SurrealLevel {
 
 /// Information statement initialization builder
 pub struct InfoStatementInit {
-    level: SurrealLevel,
+    level: InfoLevel,
 }
 
 impl InfoStatementInit {
@@ -50,7 +50,7 @@ impl InfoStatementInit {
     /// use surrealdb_orm::{*, statements::info_for};
     /// info_for().kv().build();
     pub fn kv(mut self) -> InfoStatement {
-        self.level = SurrealLevel::Kv;
+        self.level = InfoLevel::Kv;
         self.into()
     }
 
@@ -65,7 +65,7 @@ impl InfoStatementInit {
     /// use surrealdb_orm::{*, statements::info_for};
     /// info_for().namespace().build();
     pub fn namespace(mut self) -> InfoStatement {
-        self.level = SurrealLevel::Namespace;
+        self.level = InfoLevel::Namespace;
         self.into()
     }
 
@@ -80,7 +80,7 @@ impl InfoStatementInit {
     /// use surrealdb_orm::{*, statements::info_for};
     /// info_for().database().build();
     pub fn database(mut self) -> InfoStatement {
-        self.level = SurrealLevel::Database;
+        self.level = InfoLevel::Database;
         self.into()
     }
 
@@ -97,7 +97,7 @@ impl InfoStatementInit {
     /// use surrealdb_orm::{*, statements::info_for};
     ///  info_for().scope("test_scope").build();
     pub fn scope(mut self, scope: impl Into<Scope>) -> InfoStatement {
-        self.level = SurrealLevel::Scope(scope.into());
+        self.level = InfoLevel::Scope(scope.into());
         self.into()
     }
 
@@ -114,7 +114,7 @@ impl InfoStatementInit {
     /// use surrealdb_orm::{*, statements::info_for};
     ///  info_for().table("test_table").build();
     pub fn table(mut self, table: impl Into<Table>) -> InfoStatement {
-        self.level = SurrealLevel::Table(table.into());
+        self.level = InfoLevel::Table(table.into());
         self.into()
     }
 }
@@ -141,11 +141,11 @@ impl Parametric for InfoStatement {
 impl Buildable for InfoStatement {
     fn build(&self) -> String {
         match &self.0.level {
-            SurrealLevel::Kv => "INFO FOR KV;".to_string(),
-            SurrealLevel::Namespace => "INFO FOR NS;".to_string(),
-            SurrealLevel::Database => "INFO FOR DB;".to_string(),
-            SurrealLevel::Scope(scope) => format!("INFO FOR SCOPE {};", scope),
-            SurrealLevel::Table(table) => format!("INFO FOR TABLE {};", table),
+            InfoLevel::Kv => "INFO FOR KV;".to_string(),
+            InfoLevel::Namespace => "INFO FOR NS;".to_string(),
+            InfoLevel::Database => "INFO FOR DB;".to_string(),
+            InfoLevel::Scope(scope) => format!("INFO FOR SCOPE {};", scope),
+            InfoLevel::Table(table) => format!("INFO FOR TABLE {};", table),
         }
     }
 }
