@@ -5,6 +5,26 @@
  * Licensed under the MIT license
  */
 
+/*
+ * Syntax from specs:https://surrealdb.com/docs/surrealql/statements/select
+ * SELECT @projections
+    FROM @targets
+    [  @condition ]
+    [ SPLIT [ AT ] @field ... ]
+    [ GROUP [ BY ] @field ... ]
+    [ ORDER [ BY ]
+        @field [
+            RAND()
+            | COLLATE
+            | NUMERIC
+        ] [ ASC | DESC ] ...
+    ] ]
+    [ LIMIT [ BY ] @limit ]
+    [ START [ AT ] @start ]
+    [ FETCH @field ... ]
+    [ TIMEOUT @duration ]
+    [ PARALLEL ]
+; */
 use std::{
     borrow::{Borrow, Cow},
     env,
@@ -611,20 +631,40 @@ impl From<Selectables> for SelectStatement {
     }
 }
 
-/// Add a wildcard projection to the query.
+/// Creates a SELECT statement.
 ///
-/// # Example
+/// The SELECT statement can be used for selecting and querying data in a database.
+/// Each SELECT statement supports selecting from multiple targets, which can include
+/// tables, records, edges, subqueries, paramaters, arrays, objects, and other values.
 ///
-/// # Arguments
+/// Examples
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::{order, select}};
+/// # let name = Field::new("name");
+/// # let age = Field::new("age");
+/// # let country = Field::new("country");
+/// # let city = Field::new("city");
+/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 ///
-/// * `table_name` - The name of the table to select from.
+/// let select1 = select(All)
+///     .from(fake_id)
+///     .where_(cond(city.is("Prince Edward Island"))
+///                 .and(city.is("NewFoundland"))
+///                 .or(city.like("Toronto"))
+///     )
+///     .order_by(order(&age).numeric())
+///     .limit(153)
+///     .start(10)
+///     .parallel();
 ///
-/// ```
-/// use surrealdb::QueryBuilder;
-///
-/// let mut query_builder = QueryBuilder::new();
-/// query_builder.select(selectables);
-/// ```
+/// let select2 = select(All)
+///     .from(fake_id2)
+///     .where_(country.is("INDONESIA"))
+///     .order_by(order(&age).numeric())
+///     .limit(20)
+///     .start(5);
 pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
     let selectables: Selectables = selectables.into();
 
@@ -711,15 +751,27 @@ impl SelectStatement {
     ///
     /// # Example
     ///
-    /// ```
-    /// use query_builder::{QueryBuilder, Field, Filter};
+    /// Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::{order, select}};
+    /// # let name = Field::new("name");
+    /// # let age = Field::new("age");
+    /// # let country = Field::new("country");
+    /// # let city = Field::new("city");
+    /// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+    /// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+    /// // Supports simpler where clause without `cond` helper function
+    /// # let select2 = select(All)
+    /// #   .from(fake_id2)
+    ///     .where_(country.is("INDONESIA"));
     ///
-    /// let mut builder = QueryBuilder::select();
-    /// let condition = Filter::from(("age", ">", 18));
-    /// builder._(condition);
-    ///
-    /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
-    /// ```
+    /// // Supports more complex where clause using `cond` helper function
+    /// # let select1 = select(All)
+    ///     .where_(cond(city.is("Prince Edward Island"))
+    ///                 .and(city.is("NewFoundland"))
+    ///                 .or(city.like("Toronto"))
+    ///     );
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = Filter::new(condition);
@@ -735,46 +787,45 @@ impl SelectStatement {
         self
     }
 
-    /// Adds a field or multiple fields to the `SPLIT BY` clause of the SQL query.
+    /// Adds a field or multiple fields to the `SPLIT BY` clause of the query.
+    /// As SurrealDB supports arrays and nested fields within arrays,
+    /// it is possible to split the result on a specific field name,
+    /// returning each value in an array as a separate value, along with the record content itself.
+    /// This is useful in data analysis contexts.
     ///
     /// # Arguments
     ///
     /// * `splittables` - The name of the field or array or vector of fields to add to the `SPLIT BY` clause.
     ///
-    /// # Example: For single field
-    ///
-    /// ```
-    /// use query_builder::{QueryBuilder, Field};
-    ///
-    /// let mut builder = QueryBuilder::select();
-    /// let country = Field::new("country");
-    /// builder.split(country);
-    ///
-    /// assert_eq!(builder.to_string(), "SELECT * SPLIT BY country");
-    ///
-    /// ```
-    ///
     /// # Examples: For multiple fields
     ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::{order, select}};
+    /// # let user = Table::new("user");
+    /// # let country = Table::new("country");
+    /// # let emails = Field::new("emails");
+    /// # let cities = Field::new("cities");
+    // // Split the results by each value in an array
+    ///  select(All)
+    ///     .from(user)
+    ///     .split(emails);
+    ///
     /// ```
-    ///
-    /// let age = Field::new("age");
-    /// let gender = Field::new("gender");
-    /// query = query.split(&[age, gender]);
-    ///
-    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table SPLIT age, gender");
+    /// ```rust, ignore
+    /// // Split the results by each value in a nested array
+    ///  select(All)
+    ///     .from(country)
+    ///     .split(Country::schema().locations.cities);
     /// ```
     pub fn split(mut self, splittables: impl Into<Splittables>) -> Self {
         let fields: Splittables = splittables.into();
-        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Splittables::Field(one_field) => vec![one_field],
             Splittables::Fields(many_fields) => many_fields,
         };
 
-        // self.split
-        //     .extend(fields.iter().map(ToString::to_string).collect::<Vec<_>>());
         fields.iter().for_each(|f| {
             self.split.push(f.to_string());
         });
@@ -782,6 +833,9 @@ impl SelectStatement {
     }
 
     /// Sets the GROUP BY clause for the query.
+    /// SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions.
+    /// In SurrealDB, every field which appears in the field projections of the select statement
+    /// (and which is not an aggregate function), must also be present in the GROUP BY clause.
     ///
     /// # Arguments
     ///
@@ -790,22 +844,36 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```rust
-    /// # use query_builder::{QueryBuilder, Field};
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.group_by(Field::new("age"));
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::{order, select}, functions::{count, mathj}};
+    /// # let user = Table::new("user");
+    /// # let country = Field::new("country");
+    /// # let age = Field::new("age");
+    /// # let gender = Field::new("gender");
+    /// # let city = Field::new("city");
+    /// # let total = AliasNma::new("total");
+    ///  
+    ///  // Group records by a single field
+    ///  select(All)
+    ///     .from(user)
+    ///     .group_by(country);
+    ///  
+    ///  // Group results by a multiple fields
+    ///  select(&[gender, country, city])
+    ///     .from(user)
+    ///     .group_by(&[gender, country, city]);
+    ///  
+    /// // Group results with aggregate functions
+    ///  select(array![count!().__as__(total), math::sum(age), gender, country])
+    ///     .from(user)
+    ///     .group_by(&[gender, country]);
     /// ```
-    ///
-    ///
-    /// # Examples: For multiple fields
-    ///
+    /// ```rust, ignore
+    /// -- Group results by a nested field
+    /// let settings = Article::schem();
+    /// SELECT settings.published FROM article GROUP BY settings.published;
     /// ```
-    ///
-    /// let age = Field::new("age");
-    /// let gender = Field::new("gender");
-    /// query = query.group_by(&[age, gender]);
-    ///
-    /// assert_eq!(query.build(), "SELECT *, age, gender FROM table GROUP BY age, gender");
-    /// ```
+
     pub fn group_by(mut self, groupables: impl Into<Groupables>) -> Self {
         let fields: Groupables = groupables.into();
         // self.update_bindings(fields.get_bindings());
@@ -826,21 +894,40 @@ impl SelectStatement {
     /// Sets the ORDER BY clause for the query. Multiple values can also be set within same call.
     /// Repeated calls are accumulated
     ///
+    /// To sort records, SurrealDB allows ordering on multiple fields and nested fields.
+    /// Use the ORDER BY clause to specify a comma-separated list of field names which
+    /// should be used to order the resulting records. The ASC and DESC keywords can be
+    /// used to specify whether results should be sorted in an ascending or descending manner.
+    /// The COLLATE keyword can be used to use unicode collation when ordering text in string values,
+    /// ensuring that different cases, and different languages are sorted in a consistent manner.
+    /// Finally the NUMERIC can be used to correctly sort text which contains numeric values.
+    ///
     /// # Arguments
     ///
-    /// * `orderables` - The field and direction to order by.
+    /// * `orderables` - The field(s) and direction to order by.
     ///
     /// # Example
     ///
     /// ```rust
-    /// # use query_builder::{QueryBuilder, Order, Direction, Field};
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.order_by(Order::new(Field::new("age"), Direction::Ascending));
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::{order, select}};
+    /// # let user = Table::new("user");
+    /// # let country = Field::new("country");
+    /// // Order by single field
+    /// select(All)
+    ///     .from(user)
+    ///     .order_by(order(age).numeric().desc());
     ///
-    /// query_builder.order(&[
-    ///     Order::new(Field::new("age"), Direction::Ascending),
-    ///     Order::new(Field::new("name"), Direction::Descending),
-    /// ]);
+    /// // Order by multiple fields by using a list. Vector and `array!` helper also work
+    /// select(All)
+    ///     .from(user)
+    ///     .order_by(&[order(age).numeric().desc(), order(city).rand().asc()]);
+    ///     
+    /// // Order by multiple fields by chainging to accumulate
+    /// select(All)
+    ///     .from(user)
+    ///     .order_by(order(age).numeric().desc());
+    ///     .order_by(order(state).collate().asc());
     /// ```
     pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
         let orderables: Orderables = orderables.into();
@@ -852,6 +939,9 @@ impl SelectStatement {
     }
 
     /// Sets the LIMIT clause for the query.
+    /// To limit the number of records returned, use the LIMIT clause.
+    ///
+    /// When using the LIMIT clause, it is possible to paginate results by using the START clause to start from a specific record from the result set.
     ///
     /// # Arguments
     ///
@@ -860,9 +950,18 @@ impl SelectStatement {
     /// # Example
     ///
     /// ```rust
-    /// # use query_builder::QueryBuilder;
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.limit(10);
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::select};
+    /// # let user = Table::new("user");
+    /// select(All)
+    ///     .from(user)
+    ///     .limit(100);
+    ///
+    /// // When using the LIMIT clause, it is possible to paginate results by using the START clause to start from a specific record from the result set.
+    /// select(All)
+    ///     .from(user)
+    ///     .start(50)
+    ///     .limit(50);
     /// ```
     pub fn limit(mut self, limit: impl Into<crate::NumberLike>) -> Self {
         let limit: crate::NumberLike = limit.into();
@@ -887,33 +986,16 @@ impl SelectStatement {
     ///
     /// # Example
     ///
-    /// ```
-    /// use my_cool_library::QueryBuilder;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::select};
+    /// # let user = Table::new("user");
     ///
-    /// let query = QueryBuilder::new()
+    /// // When using the LIMIT clause, it is possible to paginate results by using the START clause to start from a specific record from the result set.
+    /// select(All)
+    ///     .from(user)
     ///     .start(50)
-    ///     .fetch("id")
-    ///     .fetch("name")
-    ///     .from("users")
-    ///     .build();
-    /// ```
-    ///
-    /// # Output
-    ///
-    /// The `start` method returns a mutable reference to the QueryBuilder instance it was called on,
-    /// allowing further method chaining.
-    ///
-    /// ```
-    /// use my_cool_library::QueryBuilder;
-    ///
-    /// let query = QueryBuilder::new()
-    ///     .start(50)
-    ///     .fetch("id")
-    ///     .fetch("name")
-    ///     .from("users")
-    ///     .build();
-    ///
-    /// assert_eq!(query, "SELECT id, name FROM users OFFSET 50");
+    ///     .limit(50);
     /// ```
     pub fn start(mut self, start: impl Into<crate::NumberLike>) -> Self {
         let start: crate::NumberLike = start.into();
@@ -931,27 +1013,51 @@ impl SelectStatement {
     }
 
     /// Adds a field or many fields to the list of fields to fetch in the current query.
+    /// You can add as list in a single `fetch` call or chain to accumulate fields to fetch.
     ///
+    /// One of the most powerful functions in SurrealDB is the related records and graph connections.
+    /// Instead of pulling data from multiple tables and merging that data together,
+    /// SurrealDB allows you to traverse related records efficiently without needing to use JOINs.
+    /// To fetch and replace records with the remote record data, use the FETCH clause to specify the fields
+    /// and nested fields which should be fetched in-place, and returned in the final statement response output.
     /// # Arguments
     ///
     /// * `fetchables` - A reference to a field/fields to be fetched in the query.
     ///
     /// # Example
     ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, statements::select};
+    /// # let user = Table::new("user");
+    /// # let account = Field::new("account");
+    /// # let friend = Field::new("friend");
+    ///
+    /// // Fetch single field
+    /// select(All)
+    ///     .from(user)
+    ///     .fetch(account);
+    ///
+    /// // Fetch multiple field using a list
+    /// select(All)
+    ///     .from(user)
+    ///     .fetch(&[account, friend]);
+    ///
+    /// // Fetch multiple field by chaining fetch method calls
+    /// select(All)
+    ///     .from(user)
+    ///     .fetch(account)
+    ///     .fetch(friend);
     /// ```
-    /// use surrealdb_macros::QueryBuilder;
-    ///
-    /// let query = QueryBuilder::new()
-    ///     .fetch("friend")
-    ///     .fetch(&["friend", "book"])
-    ///     .from(vec!["fiend", "book"])
-    ///     .build();
-    ///
-    /// assert_eq!(query, "FETCH friend, book");
+    /// ```rust, ignore
+    /// let account = Person::schema().account;
+    /// select(All)
+    ///     .from(user)
+    ///     // Fetch nested field
+    ///     .fetch(&[account, account.users]);
     /// ```
     pub fn fetch(mut self, fetchables: impl Into<Fetchables>) -> Self {
         let fields: Fetchables = fetchables.into();
-        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Fetchables::Field(one_field) => vec![one_field],
@@ -968,28 +1074,20 @@ impl SelectStatement {
     ///
     /// # Arguments
     ///
-    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    /// * `duration` - a value that can represent a duration for the timeout. This can be one of the following:
+    ///
+    ///   * `Duration` - a standard Rust `Duration` value.
+    ///
+    ///   * `Field` - an identifier for a specific field in the query, represented by an `Idiom` value.
+    ///
+    ///   * `Param` - a named parameter in the query, represented by a `Param` value.
     ///
     /// # Examples
     ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// ```rust,ignore
+    /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.timeout("5s");
-    /// ```
-    ///
-    /// ---
-    ///
-    /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: sql::Value = duration.into().into();
@@ -999,47 +1097,16 @@ impl SelectStatement {
     }
 
     /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
-    /// ```
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
     }
 }
-/*
- * Syntax from specs:https://surrealdb.com/docs/surrealql/statements/select
- * SELECT @projections
-    FROM @targets
-    [  @condition ]
-    [ SPLIT [ AT ] @field ... ]
-    [ GROUP [ BY ] @field ... ]
-    [ ORDER [ BY ]
-        @field [
-            RAND()
-            | COLLATE
-            | NUMERIC
-        ] [ ASC | DESC ] ...
-    ] ]
-    [ LIMIT [ BY ] @limit ]
-    [ START [ AT ] @start ]
-    [ FETCH @field ... ]
-    [ TIMEOUT @duration ]
-    [ PARALLEL ]
-; */
 impl Display for SelectStatement {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.build())
     }
 }
-
-// impl  Runnable  for SelectStatement  T: Serialize + DeserializeOwned {}
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
