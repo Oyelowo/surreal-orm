@@ -51,7 +51,7 @@ impl Buildable for LetStatement {
         let mut query = format!("LET {}", self.get_param());
 
         if let Some(value) = &self.value {
-            query.push_str(&format!(" = {value};"));
+            query = format!("{query} = {};", value.build());
         }
 
         query

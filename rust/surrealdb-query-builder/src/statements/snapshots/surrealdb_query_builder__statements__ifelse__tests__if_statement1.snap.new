@@ -1,8 +1,0 @@
----
-source: surrealdb-query-builder/src/statements/ifelse.rs
-assertion_line: 299
-expression: if_statement1
----
-IF age >= $_param_444ea908 <= $_param_25697e52 THEN
-	_param_6979e176
-END
