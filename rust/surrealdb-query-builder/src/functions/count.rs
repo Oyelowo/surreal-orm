@@ -88,10 +88,10 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 #[macro_export]
 macro_rules! count {
     ( $countable:expr ) => {
-        crate::functions::count::count_fn($countable)
+        $crate::functions::count::count_fn($countable)
     };
     () => {
-        crate::functions::count::count_fn(crate::types::Empty)
+        $crate::functions::count::count_fn(crate::types::Empty)
     };
 }
 pub use count;
@@ -215,7 +215,8 @@ fn test_count_macro_with_complex_field_filter_operation_aliased() {
     let email = Field::new("email");
     let age = Field::new("age");
     let student_count = AliasName::new("student_count");
-    let result = count!(cond(age.greater_than(15)).and(email.like("oyelowo@example.com"))).__as__(student_count);
+    let result = count!(cond(age.greater_than(15)).and(email.like("oyelowo@example.com")))
+        .__as__(student_count);
     assert_eq!(
         result.fine_tune_params(),
         "count((age > $_param_00000001) AND (email ~ $_param_00000002)) AS student_count"

@@ -66,7 +66,7 @@ use crate::{
 /// # let age = Field::new("age");
 /// # let score = Field::new("score");
 /// # let name = Field::new("name");
-/// jj
+///
 /// order(age).numeric().asc();
 /// order(score).rand().desc();
 /// order(name).collate().desc();
@@ -647,6 +647,7 @@ impl SelectStatement {
     /// # use surrealdb_query_builder as surrealdb_orm;
     /// # use surrealdb_orm::{*, statements::{order, select}};
     /// # let user = Table::new("user");
+    /// # let alien = Table::new("alien");
     /// # let user_id1 = SurrealId::try_from("user:1").unwrap();
     ///  //  Can select from a table name
     ///  select(All).from(user);
@@ -806,13 +807,13 @@ impl SelectStatement {
     ///
     /// ```rust
     /// # use surrealdb_query_builder as surrealdb_orm;
-    /// # use surrealdb_orm::{*, statements::{order, select}, functions::{count, mathj}};
+    /// # use surrealdb_orm::{*, statements::{order, select}, functions::{count, math}};
     /// # let user = Table::new("user");
     /// # let country = Field::new("country");
     /// # let age = Field::new("age");
     /// # let gender = Field::new("gender");
     /// # let city = Field::new("city");
-    /// # let total = AliasNma::new("total");
+    /// # let total = AliasName::new("total");
     ///  
     ///  // Group records by a single field
     ///  select(All)
@@ -820,12 +821,12 @@ impl SelectStatement {
     ///     .group_by(country);
     ///  
     ///  // Group results by a multiple fields
-    ///  select(&[gender, country, city])
+    ///  select(array![gender, country, city])
     ///     .from(user)
     ///     .group_by(&[gender, country, city]);
     ///  
     /// // Group results with aggregate functions
-    ///  select(array![count!().__as__(total), math::sum(age), gender, country])
+    ///  select(array![count!().__as__(total), math::sum!(age), gender, country])
     ///     .from(user)
     ///     .group_by(&[gender, country]);
     /// ```
@@ -873,21 +874,28 @@ impl SelectStatement {
     /// # use surrealdb_query_builder as surrealdb_orm;
     /// # use surrealdb_orm::{*, statements::{order, select}};
     /// # let user = Table::new("user");
+    /// # let age = Field::new("age");
     /// # let country = Field::new("country");
+    /// # let city = Field::new("city");
+    /// # let state = Field::new("state");
     /// // Order by single field
     /// select(All)
     ///     .from(user)
     ///     .order_by(order(age).numeric().desc());
     ///
+    /// # let user = Table::new("user");
+    /// # let age = Field::new("age");
     /// // Order by multiple fields by using a list. Vector and `array!` helper also work
     /// select(All)
     ///     .from(user)
     ///     .order_by(&[order(age).numeric().desc(), order(city).rand().asc()]);
     ///     
+    /// # let user = Table::new("user");
+    /// # let age = Field::new("age");
     /// // Order by multiple fields by chainging to accumulate
     /// select(All)
     ///     .from(user)
-    ///     .order_by(order(age).numeric().desc());
+    ///     .order_by(order(age).numeric().desc())
     ///     .order_by(order(state).collate().asc());
     /// ```
     pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
@@ -919,6 +927,7 @@ impl SelectStatement {
     ///     .limit(100);
     ///
     /// // When using the LIMIT clause, it is possible to paginate results by using the START clause to start from a specific record from the result set.
+    /// # let user = Table::new("user");
     /// select(All)
     ///     .from(user)
     ///     .start(50)
@@ -1000,11 +1009,16 @@ impl SelectStatement {
     ///     .fetch(account);
     ///
     /// // Fetch multiple field using a list
+    /// # let user = Table::new("user");
+    /// # let account = Field::new("account");
     /// select(All)
     ///     .from(user)
     ///     .fetch(&[account, friend]);
     ///
     /// // Fetch multiple field by chaining fetch method calls
+    /// # let user = Table::new("user");
+    /// # let account = Field::new("account");
+    /// # let friend = Field::new("friend");
     /// select(All)
     ///     .from(user)
     ///     .fetch(account)

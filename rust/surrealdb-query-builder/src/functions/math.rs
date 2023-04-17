@@ -171,7 +171,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
             #[macro_export]
             macro_rules!  [<math_ $function_name>] {
                 ( $value:expr ) => {
-                    crate::functions::math::[<$function_name _fn>]($value)
+                    $crate::functions::math::[<$function_name _fn>]($value)
                 };
             }
             pub use [<math_ $function_name>] as [<$function_name>];
