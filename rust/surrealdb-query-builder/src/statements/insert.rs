@@ -237,18 +237,16 @@ where
 {
     fn build(&self) -> String {
         if self.bindings.is_empty() {
-            return "".to_string();
+            return "".into();
         }
 
-        let field_names = T::get_serializable_field_names();
-
-        let mut query = String::new();
-        query.push_str("INSERT INTO ");
-        query.push_str(&T::table_name());
+        let mut query = format!("INSERT INTO {}", &T::table_name());
 
         if let Some(query_select) = &self.select_query_string {
             query = format!("{query} ({})", &query_select.trim_end_matches(";"));
         } else {
+            let field_names = T::get_serializable_field_names();
+
             let placeholders = self
                 .bindings
                 .iter()
@@ -270,8 +268,7 @@ where
             query = format!("{query}  ON DUPLICATE KEY UPDATE {updates_str}",);
         }
 
-        query.push_str(";");
-        query
+        format!("{query};")
     }
 }
 
