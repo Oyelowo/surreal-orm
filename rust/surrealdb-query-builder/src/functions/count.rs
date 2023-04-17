@@ -88,10 +88,10 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 #[macro_export]
 macro_rules! count {
     ( $countable:expr ) => {
-        $crate::functions::count::count_fn($countable)
+        $crate::functions::count_fn($countable)
     };
     () => {
-        $crate::functions::count::count_fn(crate::types::Empty)
+        $crate::functions::count_fn($crate::Empty)
     };
 }
 pub use count;

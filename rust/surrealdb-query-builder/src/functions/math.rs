@@ -164,7 +164,7 @@ create_test_for_fn_with_single_arg!("sqrt");
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_name: expr) => {
         paste::paste! {
-            fn [<$function_name _fn>](number: impl Into<ArrayLike>) -> Function {
+            pub fn [<$function_name _fn>](number: impl Into<ArrayLike>) -> Function {
                 create_fn_with_single_array_arg(number, $function_name)
             }
 
