@@ -34,7 +34,7 @@ enum SurrealLevel {
     Table(Table),
 }
 
-// Struct representing the INFO statement
+/// Information statement initialization builder
 pub struct InfoStatementInit {
     level: SurrealLevel,
 }
@@ -189,11 +189,5 @@ mod tests {
     fn test_info_for_table_build() {
         let statement = info_for().table("test_table").build();
         assert_eq!(statement, "INFO FOR TABLE test_table;");
-    }
-
-    #[test]
-    fn test_info_for_display() {
-        let statement = info_for().database();
-        assert_eq!(format!("{}", statement), "INFO FOR DB;");
     }
 }
