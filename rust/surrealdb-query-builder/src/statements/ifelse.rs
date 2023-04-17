@@ -22,12 +22,6 @@ use crate::{
     types::Filter,
 };
 
-// impl Into<ExpressionContent> for Expression {
-//     fn into(self) -> ExpressionContent {
-//         let expression: Expression = self.into();
-//         ExpressionContent(format!("{expression}"))
-//     }
-// }
 /// Creates an IF ELSE statement with compile-time valid transition.
 /// The IF ELSE statement can be used as a main statement, or within a parent statement,
 /// to return a value depending on whether a condition, or a series of conditions match.
@@ -149,7 +143,7 @@ impl ThenExpression {
         }
     }
 
-    pub fn end(mut self) -> End {
+    pub fn end(self) -> End {
         End {
             flow_data: self.flow_data,
             bindings: self.bindings,
@@ -163,7 +157,7 @@ pub struct ElseIfStatement {
 }
 
 impl ElseStatement {
-    pub fn end(mut self) -> End {
+    pub fn end(self) -> End {
         End {
             flow_data: self.flow_data,
             bindings: self.bindings,
@@ -217,15 +211,6 @@ struct Flow {
     expression: Option<ExpressionContent>,
 }
 
-// impl Flow {
-//     fn new() -> Self {
-//         Self {
-//             condition: Filter::default(),
-//             expression: ExpressionContent(""),
-//         }
-//     }
-// }
-
 pub struct ElseStatement {
     flow_data: FlowStatementData,
     bindings: BindingsList,
@@ -264,11 +249,6 @@ impl IfStatement {
         let bindings = vec![if_condition.get_bindings(), expression.get_bindings()].concat();
 
         let mut flow_data = FlowStatementData::default();
-        // let flow_data = FlowStatementData {
-        //     if_data: Flow::default(),
-        //     else_if_data: Flows::default(),
-        //     else_data: (),
-        // };
         flow_data.if_data.condition = Some(if_condition);
         flow_data.if_data.expression = Some(ExpressionContent(expression.build()));
 
