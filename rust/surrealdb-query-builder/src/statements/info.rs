@@ -8,7 +8,7 @@
 use std::fmt;
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     Scope, Table,
 };
 
