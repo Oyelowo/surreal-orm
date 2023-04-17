@@ -1110,32 +1110,27 @@ impl Display for SelectStatement {
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
-        let mut query = String::new();
-
-        query = format!(
+        let mut query = format!(
             "SELECT {} FROM {}",
             self.projections,
             self.targets.join(", ")
         );
 
         if let Some(condition) = &self.where_ {
-            query.push_str(" WHERE ");
-            query.push_str(&condition);
+            query = format!("{query} WHERE {condition}");
         }
 
         if !self.split.is_empty() {
-            query.push_str(" SPLIT ");
-            query.push_str(&self.split.join(", "));
+            query = format!("{query} SPLIT  {}", &self.split.join(", "));
         }
 
         if !self.group_by.is_empty() {
-            query.push_str(" GROUP BY ");
-            query.push_str(&self.group_by.join(", "));
+            query = format!("{query} GROUP BY  {}", &self.group_by.join(", "));
         }
 
         if !self.order_by.is_empty() {
-            query.push_str(" ORDER BY ");
-            query.push_str(
+            query = format!(
+                "{query} ORDER  BY  {}",
                 &self
                     .order_by
                     .iter()
@@ -1146,31 +1141,26 @@ impl Buildable for SelectStatement {
         }
 
         if let Some(limit_value) = &self.limit {
-            query.push_str(" LIMIT ");
-            query.push_str(&limit_value.to_string());
+            query = format!("{query} LIMIT {}", limit_value);
         }
 
         if let Some(start_value) = &self.start {
-            query.push_str(" START AT ");
-            query.push_str(&start_value.to_string());
+            query = format!("{query} START AT {}", start_value);
         }
 
         if !self.fetch.is_empty() {
-            query.push_str(" FETCH ");
-            query.push_str(&self.fetch.join(", "));
+            query = format!("{query} FETCH {}", &self.fetch.join(", "));
         }
 
         if let Some(timeout_value) = &self.timeout {
-            query.push_str(" TIMEOUT ");
-            query.push_str(&timeout_value.to_string());
+            query = format!("{query} TIMEOUT  {}", timeout_value);
         }
 
         if self.parallel {
-            query.push_str(" PARALLEL");
+            query = format!("{query} PARALLEL");
         }
 
-        query.push(';');
-        query
+        format!("{query};")
     }
 }
 
