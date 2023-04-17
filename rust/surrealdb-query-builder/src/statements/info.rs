@@ -22,7 +22,6 @@ use crate::{
 pub fn info_for() -> InfoStatementInit {
     InfoStatementInit {
         level: SurrealLevel::Kv,
-        errors: vec![],
     }
 }
 
@@ -38,7 +37,6 @@ enum SurrealLevel {
 // Struct representing the INFO statement
 pub struct InfoStatementInit {
     level: SurrealLevel,
-    errors: ErrorList,
 }
 
 impl InfoStatementInit {
