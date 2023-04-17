@@ -231,7 +231,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Buildable for InsertStatem
             return "".to_string();
         }
 
-        let bindings = self.bindings.as_slice();
         let field_names = T::get_serializable_field_names();
 
         let mut query = String::new();
