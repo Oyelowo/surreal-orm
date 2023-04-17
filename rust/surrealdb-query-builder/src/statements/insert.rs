@@ -272,19 +272,6 @@ impl<T: Serialize + DeserializeOwned + SurrealdbNode> Parametric for InsertState
     }
 }
 
-// fn get_field_names<T>(value: &T) -> Vec<String>
-// where
-//     T: serde::Serialize,
-// {
-//     serde_json::to_value(value)
-//         .unwrap()
-//         .as_object()
-//         .unwrap()
-//         .keys()
-//         .map(ToString::to_string)
-//         .collect()
-// }
-
 fn get_field_value<T: Serialize>(
     value: &T,
     field_name: &str,
