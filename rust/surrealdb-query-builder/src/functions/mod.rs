@@ -12,7 +12,7 @@ mod count;
 pub use count::*;
 pub mod crypto;
 pub mod geo;
-// pub mod http;
+pub mod http;
 // pub mod math;
 // pub mod parse;
 // pub mod rand;

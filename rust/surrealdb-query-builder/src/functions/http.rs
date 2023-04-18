@@ -23,6 +23,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, Buildable, ToRaw},
     types::{Field, Function, ObjectLike, Param, StrandLike},
+    Parametric,
 };
 
 pub type Url = StrandLike;
@@ -32,25 +33,18 @@ fn create_fn_with_two_args(
     custom_headers: Option<impl Into<ObjectLike>>,
     method: &str,
 ) -> Function {
-    let url: sql::Value = url.into().into();
-    let url_binding = Binding::new(url);
-    let url_parametized = url_binding.get_param_dollarised();
-
-    let mut all_bindings = vec![url_binding];
+    let url: Url = url.into();
+    let mut all_bindings = url.get_bindings();
 
     let string = match custom_headers {
         None => {
-            format!("http::{method}({})", &url_parametized)
+            format!("http::{method}({})", &url.build())
         }
         Some(headers) => {
-            let header_binding = Binding::new(headers.into());
-            let header_parametized = header_binding.get_param_dollarised();
-            all_bindings.push(header_binding);
+            let headers: ObjectLike = headers.into();
+            all_bindings.extend(headers.get_bindings());
 
-            format!(
-                "http::{method}({}, {})",
-                url_parametized, header_parametized
-            )
+            format!("http::{method}({}, {})", url.build(), headers.build())
         }
     };
 
@@ -66,45 +60,30 @@ fn create_fn_with_three_args(
     custom_headers: Option<impl Into<ObjectLike>>,
     method: &str,
 ) -> Function {
-    let url: sql::Value = url.into().into();
-    let url_binding = Binding::new(url);
-    let url_parametized = url_binding.get_param_dollarised();
-
-    let mut all_bindings = vec![url_binding];
+    let url: Url = url.into();
+    let mut all_bindings = url.get_bindings();
 
     let string = match request_body {
         None => {
-            let header_binding = Binding::new(sql::Object::default());
-            let header_parametized = header_binding.get_param_dollarised();
-            all_bindings.push(header_binding);
-
-            format!(
-                "http::{method}({}, {}",
-                &url_parametized, header_parametized
-            )
+            format!("http::{method}({}, {{ }}", &url.build())
         }
         Some(body) => {
-            let body_binding = Binding::new(body.into());
-            let body_parametized = body_binding.get_param_dollarised();
-            all_bindings.push(body_binding);
+            let body: ObjectLike = body.into();
+            all_bindings.extend(body.get_bindings());
 
-            format!("http::{method}({}, {}", url_parametized, body_parametized)
+            format!("http::{method}({}, {}", url.build(), body.build())
         }
     };
 
     let string = match custom_headers {
         None => {
-            let header_binding = Binding::new(sql::Object::default());
-            let header_parametized = header_binding.get_param_dollarised();
-            all_bindings.push(header_binding);
-            format!("{string}, {})", header_parametized)
+            format!("{string}, {{ }})")
         }
         Some(headers) => {
-            let header_binding = Binding::new(headers.into());
-            let header_parametized = header_binding.get_param_dollarised();
-            all_bindings.push(header_binding);
+            let headers: ObjectLike = headers.into();
+            all_bindings.extend(headers.get_bindings());
 
-            format!("{string}, {})", header_parametized)
+            format!("{string}, {})", headers.build())
         }
     };
 
@@ -124,10 +103,10 @@ macro_rules! create_fn_with_url_and_head {
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, None as Option<ObjectLike>)
+                   $crate::functions::http::[<$function_name _fn>]($url, None as Option<ObjectLike>)
                };
                ( $url:expr, $custom_headers:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, Some($custom_headers))
+                   $crate::functions::http::[<$function_name _fn>]($url, Some($custom_headers))
                };
            }
            pub use [<http_ $function_name>] as [<$function_name>];
@@ -138,7 +117,7 @@ macro_rules! create_fn_with_url_and_head {
                 let result = [<$function_name _fn>]("https://codebreather.com", None as Option<ObjectLike>);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com')", $function_name)
                 );
             }
@@ -149,7 +128,7 @@ macro_rules! create_fn_with_url_and_head {
 
                 let result = [<$function_name _fn>](homepage, None as Option<ObjectLike>);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("http::{}(homepage)", $function_name));
             }
 
             #[test]
@@ -161,7 +140,7 @@ macro_rules! create_fn_with_url_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com', {})", $function_name, "{ \"x-my-header\": 'some unique string' }")
                 );
             }
@@ -176,7 +155,7 @@ macro_rules! create_fn_with_url_and_head {
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
                 );
-                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage, headers)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("http::{}(homepage, headers)", $function_name));
             }
 
             // Macro version
@@ -185,7 +164,7 @@ macro_rules! create_fn_with_url_and_head {
                 let result = [<$function_name>]!("https://codebreather.com");
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com')", $function_name)
                 );
             }
@@ -196,7 +175,7 @@ macro_rules! create_fn_with_url_and_head {
 
                 let result = [<$function_name>]!(homepage);
                 assert_eq!(result.fine_tune_params(), format!("http::{}($_param_00000001)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("http::{}(homepage)", $function_name));
             }
 
             #[test]
@@ -208,7 +187,7 @@ macro_rules! create_fn_with_url_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com', {})", $function_name, "{ \"x-my-header\": 'some unique string' }")
                 );
             }
@@ -223,7 +202,7 @@ macro_rules! create_fn_with_url_and_head {
                     result.fine_tune_params(),
                     format!("http::{}($_param_00000001, $_param_00000002)", $function_name)
                 );
-                assert_eq!(result.to_raw().to_string(), format!("http::{}(homepage, headers)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("http::{}(homepage, headers)", $function_name));
             }
 
         }
@@ -248,10 +227,10 @@ macro_rules! create_fn_with_3args_url_body_and_head {
            #[macro_export]
            macro_rules! [<http_ $function_name>] {
                ( $url:expr, $request_body:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body), None as Option<ObjectLike>)
+                   $crate::functions::http::[<$function_name _fn>]($url, Some($request_body), None as Option<ObjectLike>)
                };
                ( $url:expr, $request_body:expr, $custom_headers:expr ) => {
-                   crate::functions::http::[<$function_name _fn>]($url, Some($request_body) ,Some($custom_headers))
+                   $crate::functions::http::[<$function_name _fn>]($url, Some($request_body) ,Some($custom_headers))
                };
            }
            pub use [<http_ $function_name>] as [<$function_name>];
@@ -267,7 +246,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com', {}, {})", $function_name, "{  }", "{  }")
                 );
             }
@@ -284,7 +263,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}(homepage, request_body, headers)", $function_name)
                 );
             }
@@ -301,7 +280,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}($homepage, $request_body, $headers)", $function_name)
                 );
             }
@@ -321,7 +300,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!(
                         "http::{}('https://codebreather.com', {}, {})",
                         $function_name,
@@ -341,7 +320,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com', body, {})", $function_name, "{  }")
                 );
             }
@@ -355,7 +334,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}('https://codebreather.com', {}, {})", $function_name, "{  }", "{  }")
                 );
             }
@@ -372,7 +351,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}(homepage, request_body, headers)", $function_name)
                 );
             }
@@ -389,7 +368,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("http::{}($homepage, $request_body, $headers)", $function_name)
                 );
             }
@@ -409,7 +388,7 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                     format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!(
                         "http::{}('https://codebreather.com', {}, {})",
                         $function_name,
