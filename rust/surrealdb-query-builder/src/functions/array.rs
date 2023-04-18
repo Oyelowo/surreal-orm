@@ -51,7 +51,7 @@ macro_rules! create_fn_with_two_array_args {
             #[macro_export]
             macro_rules! [<array_ $function_name>] {
                 ( $arr1:expr, $arr2:expr ) => {
-                    crate::functions::array::[<$function_name _fn>]($arr1, $arr2)
+                    $crate::functions::array::[<$function_name _fn>]($arr1, $arr2)
                 };
             }
             pub use [<array_ $function_name>] as [<$function_name>];
@@ -72,69 +72,72 @@ macro_rules! create_fn_with_two_array_args {
                 );
             }
 
-            // #[test]
-            // fn [<test $function_name _fn_on_same_element_types>]() {
-            //     let arr1 = $crate::arr![1, 2, 3];
-            //     let arr2 = $crate::arr![4, 5, 6];
-            //     let result = $crate::functions::array::[<$function_name _fn>](arr1, arr2);
-            //     assert_eq!(
-            //         result.fine_tune_params(),
-            //         format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
-            //     );
-            //
-            //     assert_eq!(
-            //         result.to_raw().to_string(),
-            //         format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
-            //     );
-            // }
-            //
-            // #[test]
-            // fn [<test $function_name _macro_on_array_macro_on_diverse_array>]() {
-            //     let age = Field::new("age");
-            //     let arr1 = $crate::arr![1, "Oyelowo", age];
-            //     let arr2 = $crate::arr![4, "dayo", 6];
-            //     let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
-            //     assert_eq!(
-            //         result.fine_tune_params(),
-            //         format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
-            //     );
-            //     assert_eq!(
-            //         result.to_raw().to_string(),
-            //         format!("array::{}([1, 'Oyelowo', age], [4, 'dayo', 6])", $function_name)
-            //     );
-            // }
-            //
-            // #[test]
-            // fn [<test $function_name _macro_on_same_element_types>]() {
-            //     let arr1 = $crate::arr![1, 2, 3];
-            //     let arr2 = $crate::arr![4, 5, 6];
-            //     let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
-            //     assert_eq!(
-            //         result.fine_tune_params(),
-            //         format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
-            //     );
-            //
-            //     assert_eq!(
-            //         result.to_raw().to_string(),
-            //         format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
-            //     );
-            // }
-            //
-            // #[test]
-            // fn [<test $function_name _macro_on_fields>]() {
-            //     let students_ages = Field::new("students_ages");
-            //     let teachers_ages = Field::new("teachers_ages");
-            //     let result = crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
-            //     assert_eq!(
-            //         result.fine_tune_params(),
-            //         format!("array::{}($_param_00000001, $_param_00000002)", $function_name)
-            //     );
-            //
-            //     assert_eq!(
-            //         result.to_raw().to_string(),
-            //         format!("array::{}(students_ages, teachers_ages)", $function_name)
-            //     );
-            // }
+            #[test]
+            fn [<test $function_name _fn_on_same_element_types>]() {
+                let arr1 = $crate::arr![1, 2, 3];
+                let arr2 = $crate::arr![4, 5, 6];
+                let result = $crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003], \
+                        [$_param_00000004, $_param_00000005, $_param_00000006])", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().build(),
+                    format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_array_macro_on_diverse_array>]() {
+                let age = Field::new("age");
+                let arr1 = $crate::arr![1, "Oyelowo", age];
+                let arr2 = $crate::arr![4, "dayo", 6];
+                let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}([$_param_00000001, $_param_00000002, age], \
+                        [$_param_00000003, $_param_00000004, $_param_00000005])", $function_name)
+                );
+                assert_eq!(
+                    result.to_raw().build(),
+                    format!("array::{}([1, 'Oyelowo', age], [4, 'dayo', 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_same_element_types>]() {
+                let arr1 = $crate::arr![1, 2, 3];
+                let arr2 = $crate::arr![4, 5, 6];
+                let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003], \
+                        [$_param_00000004, $_param_00000005, $_param_00000006])", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().build(),
+                    format!("array::{}([1, 2, 3], [4, 5, 6])", $function_name)
+                );
+            }
+
+            #[test]
+            fn [<test $function_name _macro_on_fields>]() {
+                let students_ages = Field::new("students_ages");
+                let teachers_ages = Field::new("teachers_ages");
+                let result = crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
+                assert_eq!(
+                    result.fine_tune_params(),
+                    format!("array::{}(students_ages, teachers_ages)", $function_name)
+                );
+
+                assert_eq!(
+                    result.to_raw().build(),
+                    format!("array::{}(students_ages, teachers_ages)", $function_name)
+                );
+            }
         }
     };
 }
@@ -157,7 +160,7 @@ pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
 #[macro_export]
 macro_rules! array_distinct_fn {
     ( $arr:expr ) => {
-        crate::functions::array::distinct_fn($arr)
+        $crate::functions::array::distinct_fn($arr)
     };
 }
 pub use array_distinct_fn as distinct;
@@ -216,19 +219,19 @@ pub fn sort_fn(arr: impl Into<ArrayLike>, ordering: Ordering) -> Function {
 #[macro_export]
 macro_rules! array_sort {
     ( $arr:expr, "asc" ) => {
-        crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::Asc)
+        $crate::functions::array::sort_fn($arr, $crate::functions::array::Ordering::Asc)
     };
     ( $arr:expr, "desc" ) => {
-        crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::Desc)
+        $crate::functions::array::sort_fn($arr, $crate::functions::array::Ordering::Desc)
     };
     ( $arr:expr, false ) => {
-        crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::False)
+        $crate::functions::array::sort_fn($arr, $crate::functions::array::Ordering::False)
     };
     ( $arr:expr, $ordering:expr ) => {
-        crate::functions::array::sort_fn($arr, $ordering)
+        $crate::functions::array::sort_fn($arr, $ordering)
     };
     ( $arr:expr ) => {
-        crate::functions::array::sort_fn($arr, crate::functions::array::Ordering::Empty)
+        $crate::functions::array::sort_fn($arr, $crate::functions::array::Ordering::Empty)
     };
 }
 pub use array_sort as sort;
@@ -252,7 +255,7 @@ pub mod sort {
     #[macro_export]
     macro_rules! array_sort_asc_fn {
         ( $arr:expr ) => {
-            crate::functions::array::sort::asc_fn($arr)
+            $crate::functions::array::sort::asc_fn($arr)
         };
     }
     pub use array_sort_asc_fn as asc;
@@ -269,7 +272,7 @@ pub mod sort {
     #[macro_export]
     macro_rules! array_sort_desc_fn {
         ( $arr:expr ) => {
-            crate::functions::array::sort::desc_fn($arr)
+            $crate::functions::array::sort::desc_fn($arr)
         };
     }
     pub use array_sort_desc_fn as desc;
