@@ -315,17 +315,20 @@ fn test_distinct_macro_with_mixed_array_parametization() {
     );
 }
 
-// #[test]
-// fn test_len_on_diverse_array_custom_array_function() {
-//     let email = Field::new("email");
-//     let arr = arr![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
-//     let result = len_fn(arr);
-//     assert_eq!(result.fine_tune_params(), "array::len($_param_00000001)");
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
-//     );
-// }
+#[test]
+fn test_len_on_diverse_array_custom_array_function() {
+    let email = Field::new("email");
+    let arr = arr![1, 21, "4334", "Oyelowo", email];
+    let result = len_fn(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::len([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, email])"
+    );
+    assert_eq!(
+        result.to_raw().to_string(),
+        "array::len([1, 21, '4334', 'Oyelowo', email])"
+    );
+}
 //
 // #[test]
 // fn test_len_macro_on_diverse_array_custom_array_function() {
