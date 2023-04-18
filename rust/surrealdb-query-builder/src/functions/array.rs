@@ -325,160 +325,153 @@ fn test_len_on_diverse_array_custom_array_function() {
         "array::len([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, email])"
     );
     assert_eq!(
+        result.to_raw().build(),
+        "array::len([1, 21, '4334', 'Oyelowo', email])"
+    );
+}
+
+#[test]
+fn test_len_macro_on_diverse_array_custom_array_function() {
+    let email = Field::new("email");
+    let arr = arr![1, 21, "4334", "Oyelowo", email];
+    let result = len!(arr);
+    assert_eq!(result.fine_tune_params(),
+        "array::len([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, email])");
+    assert_eq!(
         result.to_raw().to_string(),
         "array::len([1, 21, '4334', 'Oyelowo', email])"
     );
 }
-//
-// #[test]
-// fn test_len_macro_on_diverse_array_custom_array_function() {
-//     let email = Field::new("email");
-//     let arr = arr![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
-//     let result = len!(arr);
-//     assert_eq!(result.fine_tune_params(), "array::len($_param_00000001)");
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "array::len([1, 2, 3, 4, 5, '4334', 'Oyelowo', email])"
-//     );
-// }
-//
-// #[test]
-// fn test_sort() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort_fn(arr.clone(), Ordering::Asc);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'asc')"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
-//
-//     let result = sort_fn(arr.clone(), Ordering::Desc);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'desc')"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "array::sort([3, 2, 1], 'desc')"
-//     );
-//
-//     let result = sort_fn(arr.clone(), Ordering::Empty);
-//     assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
-//
-//     let result = sort_fn(arr.clone(), Ordering::False);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, false)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
-// }
-//
-// #[test]
-// fn test_sort_macro_ordering_type() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort!(arr.clone(), Ordering::Asc);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'asc')"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
-//
-//     let result = sort!(arr.clone(), Ordering::Desc);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'desc')"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "array::sort([3, 2, 1], 'desc')"
-//     );
-//
-//     let result = sort!(arr.clone(), Ordering::Empty);
-//     assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
-//
-//     let result = sort!(arr.clone(), Ordering::False);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, false)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
-// }
-//
-// #[test]
-// fn test_sort_macro() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort!(arr.clone(), "asc");
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'asc')"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
-//
-//     let result = sort!(arr.clone(), "desc");
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, 'desc')"
-//     );
-//     assert_eq!(
-//         result.to_raw().to_string(),
-//         "array::sort([3, 2, 1], 'desc')"
-//     );
-//
-//     // Without ordering
-//     let result = sort!(arr.clone());
-//     assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1])");
-//
-//     let result = sort!(arr.clone(), false);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort($_param_00000001, false)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], false)");
-// }
-//
-// #[test]
-// fn test_sort_asc() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort::asc_fn(arr);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort::asc($_param_00000001)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort::asc([3, 2, 1])");
-// }
-//
-// #[test]
-// fn test_sort_asc_macro() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort::asc!(arr);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort::asc($_param_00000001)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort::asc([3, 2, 1])");
-// }
-//
-// #[test]
-// fn test_sort_desc() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort::desc_fn(arr);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort::desc($_param_00000001)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort::desc([3, 2, 1])");
-// }
-//
-// #[test]
-// fn test_sort_desc_macro() {
-//     let arr = arr![3, 2, 1];
-//     let result = sort::desc!(arr);
-//     assert_eq!(
-//         result.fine_tune_params(),
-//         "array::sort::desc($_param_00000001)"
-//     );
-//     assert_eq!(result.to_raw().to_string(), "array::sort::desc([3, 2, 1])");
-// }
+
+#[test]
+fn test_sort() {
+    // Mono vector should use a single param
+    let arr = vec![3, 2, 1];
+    let result = sort_fn(arr.clone(), Ordering::Asc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'asc')"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], 'asc')");
+
+    let result = sort_fn(arr.clone(), Ordering::Desc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'desc')"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], 'desc')");
+
+    let result = sort_fn(arr.clone(), Ordering::Empty);
+    assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1])");
+
+    let result = sort_fn(arr.clone(), Ordering::False);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, false)"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], false)");
+}
+
+#[test]
+fn test_sort_macro_ordering_type() {
+    let arr = vec![3, 2, 1];
+    let result = sort!(arr.clone(), Ordering::Asc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'asc')"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], 'asc')");
+
+    let result = sort!(arr.clone(), Ordering::Desc);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'desc')"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], 'desc')");
+
+    let result = sort!(arr.clone(), Ordering::Empty);
+    assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1])");
+
+    let result = sort!(arr.clone(), Ordering::False);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, false)"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], false)");
+}
+
+#[test]
+fn test_sort_macro() {
+    let arr = vec![3, 2, 1];
+    let result = sort!(arr.clone(), "asc");
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'asc')"
+    );
+    assert_eq!(result.to_raw().to_string(), "array::sort([3, 2, 1], 'asc')");
+
+    let result = sort!(arr.clone(), "desc");
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, 'desc')"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], 'desc')");
+
+    // Without ordering
+    let result = sort!(arr.clone());
+    assert_eq!(result.fine_tune_params(), "array::sort($_param_00000001)");
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1])");
+
+    let result = sort!(arr.clone(), false);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort($_param_00000001, false)"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort([3, 2, 1], false)");
+}
+
+#[test]
+fn test_sort_asc() {
+    let arr = vec![3, 2, 1];
+    let result = sort::asc_fn(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::asc($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort::asc([3, 2, 1])");
+}
+
+#[test]
+fn test_sort_asc_macro() {
+    let arr = arr![3, 2, 1];
+    let result = sort::asc!(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::asc([$_param_00000001, $_param_00000002, $_param_00000003])"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort::asc([3, 2, 1])");
+}
+
+#[test]
+fn test_sort_desc() {
+    let arr = vec![3, 2, 1];
+    let result = sort::desc_fn(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::desc($_param_00000001)"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort::desc([3, 2, 1])");
+}
+
+#[test]
+fn test_sort_desc_macro() {
+    let arr = arr![3, 2, 1];
+    let result = sort::desc!(arr);
+    assert_eq!(
+        result.fine_tune_params(),
+        "array::sort::desc([$_param_00000001, $_param_00000002, $_param_00000003])"
+    );
+    assert_eq!(result.to_raw().build(), "array::sort::desc([3, 2, 1])");
+}
