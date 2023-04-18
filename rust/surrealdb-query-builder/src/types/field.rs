@@ -32,24 +32,26 @@ use super::Idiomx;
 /// ```
 #[derive(Debug, Clone)]
 pub struct Field {
-    name: sql::Idiom,
+    // name: sql::Idiom,
+    name: String,
     bindings: BindingsList,
     graph_string: String,
 }
 
 impl Field {
-    pub fn new(value: impl Into<Idiomx>) -> Self {
-        let value: sql::Idiom = value.into().into();
+    pub fn new(value: impl Into<String>) -> Self {
+        // let value: sql::Idiom = value.into().into();
         // let binding = Binding::new(sql::Value::from(value.clone()));
         // let graph_string = format!("{}", &binding.get_param_dollarised());
         // let bindings = vec![binding];
         // TODO: Check if surrealdb drive supports binding field param idiom. IF so, I can just
         // parametize everything. Otherwise, I can leave fields out of parametization
         // Update: This is checked and seems true
+        let value: String = value.into();
         Self {
             name: value.clone(),
             bindings: vec![],
-            graph_string: value.to_string(),
+            graph_string: value,
         }
     }
 
@@ -162,8 +164,7 @@ impl From<&Self> for Field {
 
 impl From<&str> for Field {
     fn from(value: &str) -> Self {
-        let value: sql::Idiom = value.to_string().into();
-        Self::new(Idiomx::new(value))
+        Self::new(value.to_string())
     }
 }
 
