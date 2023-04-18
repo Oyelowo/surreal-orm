@@ -45,6 +45,7 @@ use crate::{
     types::{All, DurationLike, Field, Filter, SurrealId, Table},
     AliasName,
     Aliasable,
+    NumberLike,
     Operatable,
     ReturnableSelect,
     ToRaw,
@@ -961,8 +962,8 @@ impl SelectStatement {
     ///     .start(50)
     ///     .limit(50);
     /// ```
-    pub fn limit(mut self, limit: impl Into<crate::NumberLike>) -> Self {
-        let limit: crate::NumberLike = limit.into();
+    pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
+        let limit: NumberLike = limit.into();
         self.limit = Some(limit.build());
         self.update_bindings(limit.get_bindings());
         self
@@ -987,8 +988,8 @@ impl SelectStatement {
     ///     .start(50)
     ///     .limit(50);
     /// ```
-    pub fn start(mut self, start: impl Into<crate::NumberLike>) -> Self {
-        let start: crate::NumberLike = start.into();
+    pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
+        let start: NumberLike = start.into();
         self.limit = Some(start.build());
         self.update_bindings(start.get_bindings());
         self

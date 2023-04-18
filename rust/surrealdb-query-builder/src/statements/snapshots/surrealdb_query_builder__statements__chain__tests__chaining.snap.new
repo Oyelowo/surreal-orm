@@ -1,0 +1,8 @@
+---
+source: surrealdb-query-builder/src/statements/chain.rs
+assertion_line: 163
+expression: transaction.fine_tune_params()
+---
+SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT $_param_00000005 PARALLEL;
+SELECT * FROM $_param_00000006 WHERE country IS $_param_00000007 ORDER BY age NUMERIC ASC LIMIT $_param_00000008;
+SELECT * FROM $_param_00000009;

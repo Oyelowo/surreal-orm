@@ -80,7 +80,7 @@ macro_rules! create_value_like_struct {
 
             impl $crate::Buildable for [<$sql_type_name Like>] {
                 fn build(&self) -> String {
-                    self.0.string.to_string()
+                    self.0.build()
                 }
             }
             // macro_rules! impl_geometry_like_from {
@@ -165,13 +165,23 @@ impl Buildable for ArrayLike {
         self.0.build()
     }
 }
-impl<T: Into<Array>> From<T> for ArrayLike {
-    fn from(value: T) -> Self {
-        let value: Array = value.into();
-        let value: sql::Array = value.into();
+impl<T: Into<sql::Value>> From<Vec<T>> for ArrayLike {
+    fn from(value: Vec<T>) -> Self {
+        // let value: Array = value.into();
+        let value = value
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<sql::Value>>();
         Self(value.into())
     }
 }
+// impl<T: Into<Array>> From<T> for ArrayLike {
+//     fn from(value: T) -> Self {
+//         let value: Array = value.into();
+//         let value: sql::Array = value.into();
+//         Self(value.into())
+//     }
+// }
 
 impl From<Field> for ArrayLike {
     fn from(val: Field) -> Self {
@@ -202,9 +212,12 @@ impl From<sql::Array> for Array {
         Self(value)
     }
 }
-impl From<Vec<Valuex>> for Array {
+impl From<Vec<Valuex>> for ArrayLike {
     fn from(value: Vec<Valuex>) -> Self {
-        todo!()
+        Self(Valuex {
+            string: format!("[{}]", value.build()),
+            bindings: value.get_bindings(),
+        })
     }
 }
 //
