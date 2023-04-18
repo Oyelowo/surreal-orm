@@ -11,7 +11,7 @@ pub mod array;
 mod count;
 pub use count::*;
 pub mod crypto;
-// pub mod geo;
+pub mod geo;
 // pub mod http;
 // pub mod math;
 // pub mod parse;
