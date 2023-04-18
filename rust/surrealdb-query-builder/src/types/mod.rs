@@ -58,6 +58,8 @@ pub use value::*;
 pub use valuex::*;
 
 use surrealdb::sql;
+
+use crate::{BindingsList, Buildable, Parametric};
 macro_rules! create_value_like_struct {
     ($sql_type_name:expr) => {
         paste::paste! {
@@ -144,7 +146,78 @@ macro_rules! create_value_like_struct {
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
-create_value_like_struct!("Array");
+// create_value_like_struct!("Array");
+#[derive(Debug, Clone)]
+pub struct ArrayLike(Valuex);
+impl From<ArrayLike> for Valuex {
+    fn from(val: ArrayLike) -> Self {
+        val.0
+    }
+}
+impl Parametric for ArrayLike {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+impl Buildable for ArrayLike {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+impl<T: Into<Array>> From<T> for ArrayLike {
+    fn from(value: T) -> Self {
+        let value: Array = value.into();
+        let value: sql::Array = value.into();
+        Self(value.into())
+    }
+}
+
+impl From<Field> for ArrayLike {
+    fn from(val: Field) -> Self {
+        Self(val.into())
+    }
+}
+impl From<Param> for ArrayLike {
+    fn from(val: Param) -> Self {
+        Self(val.into())
+    }
+}
+impl From<&Field> for ArrayLike {
+    fn from(val: &Field) -> Self {
+        Self(val.clone().into())
+    }
+}
+
+struct Array(sql::Array);
+
+impl From<Array> for sql::Array {
+    fn from(value: Array) -> Self {
+        value.0
+    }
+}
+
+impl From<sql::Array> for Array {
+    fn from(value: sql::Array) -> Self {
+        Self(value)
+    }
+}
+impl From<Vec<Valuex>> for Array {
+    fn from(value: Vec<Valuex>) -> Self {
+        todo!()
+    }
+}
+//
+// impl Into<Array> for sql::Array {
+//     fn into(self) -> Array {
+//         todo!()
+//     }
+// }
+// impl<T: Into<Array>> From<Vec<Valuex>> for T {
+//     fn from(value: Vec<Valuex>) -> Self {
+//         todo!()
+//     }
+// }
 // create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
