@@ -20,11 +20,12 @@ pub struct Alias {
     graph_string: String,
 }
 
-impl From<Alias> for sql::Value {
-    fn from(value: Alias) -> Self {
-        sql::Idiom::from(value.build()).into()
-    }
-}
+// impl From<Alias> for sql::Value {
+//     fn from(value: Alias) -> Self {
+//         // sql::Idiom::from(value.build()).into()
+//         s
+//     }
+// }
 
 impl Erroneous for Alias {
     fn get_errors(&self) -> ErrorList {

@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
+use crate::Buildable;
+
 use super::{Field, Param};
 
 #[derive(Debug, Clone, Copy)]
@@ -33,25 +35,25 @@ impl Display for Interval {
     }
 }
 
-pub struct IntervalLike(sql::Value);
+pub struct IntervalLike(String);
 
 impl From<Field> for IntervalLike {
     fn from(value: Field) -> Self {
-        Self(value.into())
+        Self(value.build())
     }
 }
 
 impl From<Param> for IntervalLike {
     fn from(value: Param) -> Self {
-        Self(value.into())
+        Self(value.build())
     }
 }
 
-impl From<IntervalLike> for sql::Value {
-    fn from(value: IntervalLike) -> Self {
-        value.0
-    }
-}
+// impl From<IntervalLike> for sql::Value {
+//     fn from(value: IntervalLike) -> Self {
+//         value.0
+//     }
+// }
 
 impl From<Interval> for IntervalLike {
     fn from(value: Interval) -> Self {

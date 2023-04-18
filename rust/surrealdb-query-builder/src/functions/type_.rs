@@ -117,10 +117,12 @@ macro_rules! type_point {
 }
 
 pub use type_point as point;
+use crate::Mana;
 
-fn thing_fn(point1: impl Into<TableLike>, point2: impl Into<sql::Value>) -> Function {
+fn thing_fn(point1: impl Into<TableLike>, point2: impl Mana) -> Function {
     let point1_binding = Binding::new(point1.into());
-    let point2_binding = Binding::new(point2.into());
+    let point2_binding = point2.get_bindings().first.unwrap();
+    /* let point2_binding = Binding::new(point2.into()); */
     let query_string = format!(
         "type::thing({}, {})",
         point1_binding.get_param_dollarised(),

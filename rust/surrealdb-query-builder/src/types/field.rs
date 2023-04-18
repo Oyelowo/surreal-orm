@@ -102,17 +102,17 @@ impl From<&Field> for Idiomx {
     }
 }
 
-impl From<&mut Field> for sql::Value {
-    fn from(value: &mut Field) -> Self {
-        Self::Idiom(value.name.to_string().into())
-    }
-}
+// impl From<&mut Field> for sql::Value {
+//     fn from(value: &mut Field) -> Self {
+//         Self::Idiom(value.name.to_string().into())
+//     }
+// }
 
-impl Into<sql::Value> for &Field {
-    fn into(self) -> Value {
-        sql::Value::from(self.name.clone()).into()
-    }
-}
+// impl Into<sql::Value> for &Field {
+//     fn into(self) -> Value {
+//         sql::Value::from(self.name.clone()).into()
+//     }
+// }
 
 impl Into<sql::Idiom> for Field {
     fn into(self) -> sql::Idiom {
@@ -120,12 +120,12 @@ impl Into<sql::Idiom> for Field {
     }
 }
 
-impl From<Field> for sql::Value {
-    fn from(val: Field) -> Self {
-        let idiom = sql::Idiom::from(val.name);
-        sql::Value::from(idiom)
-    }
-}
+// impl From<Field> for sql::Value {
+//     fn from(val: Field) -> Self {
+//         let idiom = sql::Idiom::from(val.name);
+//         sql::Value::from(idiom)
+//     }
+// }
 
 impl<'a> From<Cow<'a, Self>> for Field {
     fn from(value: Cow<'a, Field>) -> Self {

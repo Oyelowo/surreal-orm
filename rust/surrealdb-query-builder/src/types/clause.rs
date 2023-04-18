@@ -7,10 +7,10 @@
 
 use std::ops::Deref;
 
-use surrealdb::sql;
+use surrealdb::sql::{self, Ident};
 
 use crate::{
-    array,
+    array, count,
     statements::{
         select::{select, Selectables},
         SelectStatement,
@@ -19,7 +19,7 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
     types::{cond, Param, Table},
-    ErrorList, Operation, Tables,
+    Alias, AliasName, Aliasable, ErrorList, Function, Operation, Tables,
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -485,7 +485,6 @@ impl From<&SelectStatement> for Clause {
 pub struct Empty;
 
 pub use Empty as E;
-
 impl Operatable for Empty {}
 
 impl Buildable for Empty {

@@ -11,7 +11,7 @@ use surrealdb::sql;
 
 use crate::{
     types::{ArrayLike, GeometryLike, NumberLike, Ordinal},
-    Aliasable,
+    Aliasable, Valuablex,
 };
 
 use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
@@ -1074,24 +1074,25 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        let lower_bound: Ordinal = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} < {} < {}",
-            lower_bound_binding.get_param_dollarised(),
-            self.build(),
-            upper_bound_binding.get_param_dollarised()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Operation {
-            query_string: condition,
-            bindings: updated_params,
-        }
+        // let lower_bound: Ordinal = lower_bound.into();
+        // let upper_bound: Ordinal = upper_bound.into();
+        // let lower_bound_binding = Binding::new(lower_bound);
+        // let upper_bound_binding = Binding::new(upper_bound);
+        // let condition = format!(
+        //     "{} < {} < {}",
+        //     lower_bound_binding.get_param_dollarised(),
+        //     self.build(),
+        //     upper_bound_binding.get_param_dollarised()
+        // );
+        //
+        // let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        // let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        // let updated_params = [lower_updated_params, upper_updated_params].concat();
+        // Operation {
+        //     query_string: condition,
+        //     bindings: updated_params,
+        // }
+        todo!()
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -1113,24 +1114,25 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        let lower_bound: Ordinal = lower_bound.into();
-        let upper_bound: Ordinal = upper_bound.into();
-        let lower_bound_binding = Binding::new(lower_bound);
-        let upper_bound_binding = Binding::new(upper_bound);
-        let condition = format!(
-            "{} <= {} <= {}",
-            lower_bound_binding.get_param_dollarised(),
-            self.build(),
-            upper_bound_binding.get_param_dollarised()
-        );
-
-        let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        let updated_params = [lower_updated_params, upper_updated_params].concat();
-        Operation {
-            query_string: condition,
-            bindings: updated_params,
-        }
+        // let lower_bound: Ordinal = lower_bound.into();
+        // let upper_bound: Ordinal = upper_bound.into();
+        // let lower_bound_binding = Binding::new(lower_bound);
+        // let upper_bound_binding = Binding::new(upper_bound);
+        // let condition = format!(
+        //     "{} <= {} <= {}",
+        //     lower_bound_binding.get_param_dollarised(),
+        //     self.build(),
+        //     upper_bound_binding.get_param_dollarised()
+        // );
+        //
+        // let lower_updated_params = self.__update_bindings(lower_bound_binding);
+        // let upper_updated_params = self.__update_bindings(upper_bound_binding);
+        // let updated_params = [lower_updated_params, upper_updated_params].concat();
+        // Operation {
+        //     query_string: condition,
+        //     bindings: updated_params,
+        // }
+        todo!()
     }
 
     fn ____________update_many_bindings<'bi>(
@@ -1174,18 +1176,18 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
 
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
-        T: Into<ValueLike>,
+        // T: Into<ValueLike>,
+        T: Valuablex,
     {
-        let value: ValueLike = value.into();
-        let binding = Binding::new(value);
-        let condition = format!(
-            "{} {} {}",
-            self.build(),
-            operator,
-            &binding.get_param_dollarised()
-        );
-        let updated_bindings = self.__update_bindings(binding);
-
+        // let value: ValueLike = value.into();
+        // let binding = Binding::new(value);
+        let value = value.tona();
+        let condition = format!("{} {} {}", self.build(), operator, &value.build());
+        let updated_bindings = [
+            self.get_bindings().as_slice(),
+            value.get_bindings().as_slice(),
+        ]
+        .concat();
         Operation {
             query_string: condition,
             bindings: updated_bindings,

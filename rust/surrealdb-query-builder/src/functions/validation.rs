@@ -24,9 +24,9 @@
 
 use surrealdb::sql;
 
-use crate::{traits::Binding, types::Function};
+use crate::{traits::Binding, types::Function, Mana};
 
-fn create_validation_function(value: impl Into<sql::Value>, function_name: &str) -> Function {
+fn create_validation_function(value: impl Mana, function_name: &str) -> Function {
     let binding = Binding::new(value);
 
     Function {
@@ -38,7 +38,7 @@ fn create_validation_function(value: impl Into<sql::Value>, function_name: &str)
 macro_rules! create_validation_with_tests {
     ($function_name: expr) => {
         paste::paste! {
-            pub fn [<$function_name _fn>](value: impl Into<sql::Value>) -> Function {
+            pub fn [<$function_name _fn>](value: impl $crate::Mana) -> Function {
                 super::create_validation_function(value, $function_name)
             }
 

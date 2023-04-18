@@ -28,6 +28,7 @@ pub(crate) mod strand;
 pub(crate) mod surreal_id;
 pub(crate) mod token_target;
 pub(crate) mod value;
+pub(crate) mod valuex;
 
 pub use alias::*;
 pub use array::*;
@@ -54,6 +55,7 @@ pub use strand::*;
 pub use surreal_id::*;
 pub use token_target::*;
 pub use value::*;
+pub use valuex::*;
 
 use surrealdb::sql;
 macro_rules! create_value_like_struct {

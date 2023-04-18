@@ -38,10 +38,16 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Value};
 
 use crate::{
+    array,
     cond,
+    // functions::math,
     traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
     types::{All, DurationLike, Field, Filter, SurrealId, Table},
-    AliasName, Aliasable, Operatable, ReturnableSelect, ToRaw,
+    AliasName,
+    Aliasable,
+    Operatable,
+    ReturnableSelect,
+    ToRaw,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -442,6 +448,25 @@ pub enum Selectables {
     Fields(Vec<Field>),
 }
 
+trait Selectables2 {
+    fn build_select(&self) -> String;
+}
+
+impl Selectables2 for Field {
+    fn build_select(&self) -> String {
+        self.build()
+    }
+}
+
+impl Selectables2 for Vec<Field> {
+    fn build_select(&self) -> String {
+        self.into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
 impl Buildable for Selectables {
     fn build(&self) -> String {
         let fields = match self {
@@ -489,6 +514,12 @@ impl From<All> for Selectables {
     }
 }
 
+impl<'a, const N: usize> From<&[Field; N]> for Selectables {
+    fn from(value: &[Field; N]) -> Self {
+        Self::Fields(value.to_vec())
+    }
+}
+
 impl<'a, const N: usize> From<&[&Field; N]> for Selectables {
     fn from(value: &[&Field; N]) -> Self {
         Self::Fields(value.map(Into::into).to_vec())
@@ -500,6 +531,7 @@ impl From<Vec<&Field>> for Selectables {
         Self::Fields(value.into_iter().map(ToOwned::to_owned).collect())
     }
 }
+
 impl From<Vec<Field>> for Selectables {
     fn from(value: Vec<Field>) -> Self {
         Self::Fields(value)
@@ -821,7 +853,7 @@ impl SelectStatement {
     ///     .group_by(country);
     ///  
     ///  // Group results by a multiple fields
-    ///  select(array![gender, country, city])
+    ///  select(&[gender, country, city])
     ///     .from(user)
     ///     .group_by(&[gender, country, city]);
     ///  
@@ -835,18 +867,14 @@ impl SelectStatement {
     /// let settings = Article::schem();
     /// SELECT settings.published FROM article GROUP BY settings.published;
     /// ```
-
     pub fn group_by(mut self, groupables: impl Into<Groupables>) -> Self {
         let fields: Groupables = groupables.into();
-        // self.update_bindings(fields.get_bindings());
 
         let fields = match fields {
             Groupables::Field(one_field) => vec![one_field],
             Groupables::Fields(many_fields) => many_fields,
         };
 
-        // self.split
-        //     .extend(fields.iter().map(ToString::to_string).collect::<Vec<_>>());
         fields.iter().for_each(|f| {
             self.group_by.push(f.to_string());
         });
