@@ -25,7 +25,7 @@ use crate::{
         SurrealdbEdge,
     },
     types::{DurationLike, ReturnType, Updateables},
-    ReturnableDefault, ReturnableStandard,
+    ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new RELATE statement.
@@ -206,8 +206,8 @@ where
     /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 

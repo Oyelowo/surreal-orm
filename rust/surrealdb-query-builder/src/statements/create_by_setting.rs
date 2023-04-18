@@ -16,7 +16,7 @@ use crate::{
         ReturnableStandard, SurrealdbNode,
     },
     types::{DurationLike, ReturnType, Updateables},
-    ErrorList,
+    ErrorList, ToRaw,
 };
 
 use super::update::TargettablesForUpdate;
@@ -234,8 +234,8 @@ where
     /// assert_eq!(query.to_raw().to_string(), "30000".to_string());
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 
