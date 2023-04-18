@@ -180,7 +180,7 @@ fn test_area_with_field() {
     let result = area_fn(city);
 
     assert_eq!(result.fine_tune_params(), "geo::area(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::area(city)");
+    assert_eq!(result.to_raw().build(), "geo::area(city)");
 }
 //
 #[test]
@@ -207,7 +207,7 @@ fn test_area_with_raw_polygon() {
         "geo::area($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::area({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
     );
 }
@@ -233,7 +233,7 @@ fn test_area_macro_with_raw_polygon() {
     let result = area!(poly);
     assert_eq!(result.fine_tune_params(), "geo::area($_param_00000001)");
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::area({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
     );
 }
@@ -243,7 +243,7 @@ fn test_area_macro_with_fields() {
     let poly = Field::new("poly");
     let result = area!(poly);
     assert_eq!(result.fine_tune_params(), "geo::area(poly)");
-    assert_eq!(result.to_raw().to_string(), "geo::area(poly)");
+    assert_eq!(result.to_raw().build(), "geo::area(poly)");
 }
 
 #[test]
@@ -251,7 +251,7 @@ fn test_area_macro_with_params() {
     let poly = Param::new("poly");
     let result = area!(poly);
     assert_eq!(result.fine_tune_params(), "geo::area($poly)");
-    assert_eq!(result.to_raw().to_string(), "geo::area($poly)");
+    assert_eq!(result.to_raw().build(), "geo::area($poly)");
 }
 
 #[test]
@@ -271,7 +271,7 @@ fn test_bearing_with_raw_points() {
         "geo::bearing($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::bearing((40.02, 116.34), (80.02, 103.19))"
     );
 }
@@ -290,7 +290,7 @@ fn test_bearing_with_raw_point_with_field() {
         "geo::bearing(hometown, $_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::bearing(hometown, (80.02, 103.19))"
     );
 }
@@ -312,7 +312,7 @@ fn test_bearing_macro_with_raw_points() {
         "geo::bearing($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::bearing((40.02, 116.34), (80.02, 103.19))"
     );
 }
@@ -331,7 +331,7 @@ fn test_bearing_macro_with_raw_point_with_field() {
         "geo::bearing(hometown, $_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::bearing(hometown, (80.02, 103.19))"
     );
 }
@@ -346,10 +346,7 @@ fn test_bearing_macro_with_raw_params() {
         result.fine_tune_params(),
         "geo::bearing($hometown, $point2)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::bearing($hometown, $point2)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::bearing($hometown, $point2)");
 }
 
 #[test]
@@ -358,7 +355,7 @@ fn test_centroid_with_field() {
     let result = centroid_fn(city);
 
     assert_eq!(result.fine_tune_params(), "geo::centroid(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::centroid(city)");
+    assert_eq!(result.to_raw().build(), "geo::centroid(city)");
 }
 
 #[test]
@@ -385,7 +382,7 @@ fn test_centroid_with_raw_polygon() {
         "geo::centroid($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
     );
 }
@@ -396,7 +393,7 @@ fn test_centroid_macro_with_field() {
     let result = centroid!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::centroid(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::centroid(city)");
+    assert_eq!(result.to_raw().build(), "geo::centroid(city)");
 }
 
 #[test]
@@ -405,7 +402,7 @@ fn test_centroid_macro_with_param() {
     let result = centroid!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::centroid($city)");
-    assert_eq!(result.to_raw().to_string(), "geo::centroid($city)");
+    assert_eq!(result.to_raw().build(), "geo::centroid($city)");
 }
 
 #[test]
@@ -429,7 +426,7 @@ fn test_centroid_macro_with_raw_polygon() {
     let result = centroid!(poly);
     assert_eq!(result.fine_tune_params(), "geo::centroid($_param_00000001)");
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })"
     );
 }
@@ -451,7 +448,7 @@ fn test_distance_with_raw_points() {
         "geo::distance($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::distance((40.02, 116.34), (80.02, 103.19))"
     );
 }
@@ -470,7 +467,7 @@ fn test_distance_with_raw_point_with_field() {
         "geo::distance(hometown, $_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::distance(hometown, (80.02, 103.19))"
     );
 }
@@ -482,10 +479,7 @@ fn test_distance_with_only_fields() {
 
     let result = distance_fn(hometown, yukon);
     assert_eq!(result.fine_tune_params(), "geo::distance(hometown, yukon)");
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::distance(hometown, yukon)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::distance(hometown, yukon)");
 }
 
 #[test]
@@ -505,7 +499,7 @@ fn test_distance_macro_with_raw_points() {
         "geo::distance($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::distance((40.02, 116.34), (80.02, 103.19))"
     );
 }
@@ -524,7 +518,7 @@ fn test_distance_macro_with_raw_point_with_field() {
         "geo::distance(hometown, $_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::distance(hometown, (80.02, 103.19))"
     );
 }
@@ -536,10 +530,7 @@ fn test_distance_macro_with_only_fields() {
 
     let result = distance!(hometown, yukon);
     assert_eq!(result.fine_tune_params(), "geo::distance(hometown, yukon)");
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::distance(hometown, yukon)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::distance(hometown, yukon)");
 }
 
 #[test]
@@ -552,10 +543,7 @@ fn test_distance_macro_with_only_params() {
         result.fine_tune_params(),
         "geo::distance($hometown, $yukon)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::distance($hometown, $yukon)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::distance($hometown, $yukon)");
 }
 
 #[test]
@@ -564,7 +552,7 @@ fn test_hash_decode_with_field() {
     let result = hash::decode_fn(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::decode(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::decode(city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::decode(city)");
 }
 
 #[test]
@@ -574,10 +562,7 @@ fn test_hash_decode_with_string() {
         result.fine_tune_params(),
         "geo::hash::decode($_param_00000001)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::hash::decode('mpuxk4s24f51')"
-    );
+    assert_eq!(result.to_raw().build(), "geo::hash::decode('mpuxk4s24f51')");
 }
 
 #[test]
@@ -586,7 +571,7 @@ fn test_hash_decode_macro_with_field() {
     let result = hash::decode!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::decode(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::decode(city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::decode(city)");
 }
 
 #[test]
@@ -595,7 +580,7 @@ fn test_hash_decode_macro_with_param() {
     let result = hash::decode!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::decode($city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::decode($city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::decode($city)");
 }
 
 #[test]
@@ -605,10 +590,7 @@ fn test_hash_decode_macro_with_string() {
         result.fine_tune_params(),
         "geo::hash::decode($_param_00000001)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::hash::decode('mpuxk4s24f51')"
-    );
+    assert_eq!(result.to_raw().build(), "geo::hash::decode('mpuxk4s24f51')");
 }
 
 #[test]
@@ -617,7 +599,7 @@ fn test_hash_encode_with_field_and_empty_accuracy() {
     let result = hash::encode_fn(city, None as Option<NumberLike>);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
 }
 
 #[test]
@@ -630,10 +612,7 @@ fn test_hash_encode_with_field_and_field_accuracy() {
         result.fine_tune_params(),
         "geo::hash::encode(city, accuracy)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::hash::encode(city, accuracy)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city, accuracy)");
 }
 
 #[test]
@@ -645,7 +624,7 @@ fn test_hash_encode_with_field_and_number_accuracy() {
         result.fine_tune_params(),
         "geo::hash::encode(city, $_param_00000001)"
     );
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city, 5)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city, 5)");
 }
 
 #[test]
@@ -661,7 +640,7 @@ fn test_hash_encode_with_point() {
         "geo::hash::encode($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::hash::encode((40.02, 116.34), 5)"
     );
 }
@@ -672,7 +651,7 @@ fn test_hash_encode_macro_with_field_and_empty_accuracy_not_mentioned_at_all() {
     let result = hash::encode!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
 }
 
 #[test]
@@ -681,7 +660,7 @@ fn test_hash_encode_macro_with_field_and_empty_accuracy() {
     let result = hash::encode!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
 }
 
 #[test]
@@ -694,10 +673,7 @@ fn test_hash_encode_macro_with_field_and_field_accuracy() {
         result.fine_tune_params(),
         "geo::hash::encode(city, accuracy)"
     );
-    assert_eq!(
-        result.to_raw().to_string(),
-        "geo::hash::encode(city, accuracy)"
-    );
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city, accuracy)");
 }
 
 #[test]
@@ -706,7 +682,7 @@ fn test_hash_encode_macro_with_param_and_no_accuracy_listed() {
     let result = hash::encode!(city);
 
     assert_eq!(result.fine_tune_params(), "geo::hash::encode($city)");
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode($city)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode($city)");
 }
 
 #[test]
@@ -718,7 +694,7 @@ fn test_hash_encode_macros_with_field_and_number_accuracy() {
         result.fine_tune_params(),
         "geo::hash::encode(city, $_param_00000001)"
     );
-    assert_eq!(result.to_raw().to_string(), "geo::hash::encode(city, 5)");
+    assert_eq!(result.to_raw().build(), "geo::hash::encode(city, 5)");
 }
 
 #[test]
@@ -734,7 +710,7 @@ fn test_hash_encode_macro_with_point() {
         "geo::hash::encode($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "geo::hash::encode((40.02, 116.34), 5)"
     );
 }
