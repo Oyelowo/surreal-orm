@@ -1,7 +1,7 @@
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
-use crate::{Binding, Buildable, Valuablex, Valuex};
+use crate::{Binding, Buildable, Valuex};
 
 use super::Field;
 
@@ -13,10 +13,10 @@ pub enum Ordinal {
     // Field(sql::Value),
 }
 
-impl Valuablex for Ordinal {
-    fn tona(self) -> crate::Valuex {
+impl From<Ordinal> for Valuex {
+    fn from(value: Ordinal) -> Self {
         let mut bindings = vec![];
-        let string = match self {
+        let string = match value {
             Ordinal::Datetime(d) => {
                 let binding = Binding::new(d);
                 let param = binding.get_param_dollarised();

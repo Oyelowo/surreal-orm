@@ -30,6 +30,7 @@ use crate::{
         DatetimeLike, DurationLike, Field, Function, NumberLike, Param, StrandLike, Table,
         TableLike,
     },
+    Parametric,
 };
 
 macro_rules! create_type {
@@ -116,22 +117,25 @@ macro_rules! type_point {
     };
 }
 
+use crate::Valuex;
 pub use type_point as point;
-use crate::Mana;
 
-fn thing_fn(point1: impl Into<TableLike>, point2: impl Mana) -> Function {
+fn thing_fn(point1: impl Into<TableLike>, point2: impl Into<Valuex>) -> Function {
     let point1_binding = Binding::new(point1.into());
-    let point2_binding = point2.get_bindings().first.unwrap();
+    let point2: Valuex = point2.into();
     /* let point2_binding = Binding::new(point2.into()); */
     let query_string = format!(
         "type::thing({}, {})",
         point1_binding.get_param_dollarised(),
-        point2_binding.get_param_dollarised()
+        point2.build()
     );
 
+    let mut bindings = vec![point1_binding];
+    bindings.extend(point2.get_bindings());
+    // let point2_binding = point2.get_bindings();
     Function {
         query_string,
-        bindings: vec![point1_binding, point2_binding],
+        bindings,
     }
 }
 
@@ -223,8 +227,6 @@ fn test_point_macro_with_plain_values() {
 fn test_point_macro_with_fields() {
     let home = Field::new("home");
     let away = Field::new("away");
-    let result = point!(home, away);
-
     assert_eq!(
         result.fine_tune_params(),
         "type::point($_param_00000001, $_param_00000002)"
@@ -256,3 +258,5 @@ fn test_thing_macro_with_datetime_field() {
     );
     assert_eq!(result.to_raw().to_string(), "type::thing(table, id)");
 }
+
+

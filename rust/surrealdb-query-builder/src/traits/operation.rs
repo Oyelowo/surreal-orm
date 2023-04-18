@@ -11,7 +11,7 @@ use surrealdb::sql;
 
 use crate::{
     types::{ArrayLike, GeometryLike, NumberLike, Ordinal},
-    Aliasable, Valuablex,
+    Aliasable, Valuex,
 };
 
 use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
@@ -1177,11 +1177,12 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
         // T: Into<ValueLike>,
-        T: Valuablex,
+        T: Into<Valuex>,
     {
         // let value: ValueLike = value.into();
+        let value: Valuex = value.into();
         // let binding = Binding::new(value);
-        let value = value.tona();
+        // let value = value.tona();
         let condition = format!("{} {} {}", self.build(), operator, &value.build());
         let updated_bindings = [
             self.get_bindings().as_slice(),
