@@ -252,7 +252,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     fn build(&self) -> String {
-        let mut query = format!("RELATE {} ", self.relation);
+        let mut query = format!("RELATE {}", self.relation);
 
         if let Some(param) = &self.content_param {
             query = format!("{query} CONTENT {param} ");

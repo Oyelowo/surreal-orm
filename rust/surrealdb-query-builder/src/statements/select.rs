@@ -1096,21 +1096,21 @@ impl Buildable for SelectStatement {
         }
 
         if !self.split.is_empty() {
-            query = format!("{query} SPLIT  {}", &self.split.join(", "));
+            query = format!("{query} SPLIT {}", &self.split.join(", "));
         }
 
         if !self.group_by.is_empty() {
-            query = format!("{query} GROUP BY  {}", &self.group_by.join(", "));
+            query = format!("{query} GROUP BY {}", &self.group_by.join(", "));
         }
 
         if !self.order_by.is_empty() {
             query = format!(
-                "{query} ORDER  BY  {}",
+                "{query} ORDER BY {}",
                 &self
                     .order_by
                     .iter()
-                    .map(|o| format!("{o}"))
-                    .collect::<Vec<String>>()
+                    .map(|o| o.to_string())
+                    .collect::<Vec<_>>()
                     .join(", "),
             );
         }
@@ -1128,7 +1128,7 @@ impl Buildable for SelectStatement {
         }
 
         if let Some(timeout_value) = &self.timeout {
-            query = format!("{query} TIMEOUT  {}", timeout_value);
+            query = format!("{query} TIMEOUT {}", timeout_value);
         }
 
         if self.parallel {
