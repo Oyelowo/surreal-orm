@@ -1,5 +1,5 @@
 use crate::{
-    count, Alias, AliasName, Aliasable, Binding, BindingsList, Buildable, Field, Function,
+    count, Alias, AliasName, Aliasable, Binding, BindingsList, Buildable, Field, Function, Param,
     Parametric, Table, ToRaw,
 };
 
@@ -40,6 +40,15 @@ impl Buildable for Vec<Valuex> {
 
 impl From<Field> for Valuex {
     fn from(value: Field) -> Self {
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        }
+    }
+}
+
+impl From<Param> for Valuex {
+    fn from(value: Param) -> Self {
         Self {
             string: value.build(),
             bindings: value.get_bindings(),

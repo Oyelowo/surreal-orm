@@ -7,13 +7,10 @@
 
 use std::fmt::Display;
 
-use surrealdb::sql;
-
 use crate::{
     traits::BindingsList,
     traits::{Buildable, Erroneous, Parametric, Queryable},
     types::DurationLike,
-    Binding,
 };
 
 /// Creates a SLEEP statement.
@@ -27,12 +24,11 @@ use crate::{
 ///
 /// sleep(Duration::from_secs(43));
 pub fn sleep(duration: impl Into<DurationLike>) -> SleepStatement {
-    let duration: sql::Value = duration.into().into();
-    let binding = Binding::new(duration).with_description("Duration of sleep");
+    let duration: DurationLike = duration.into();
 
     SleepStatement {
-        duration: binding.get_param_dollarised(),
-        bindings: vec![binding],
+        duration: duration.build(),
+        bindings: duration.get_bindings(),
     }
 }
 

@@ -340,10 +340,8 @@ impl Clause {
             All => format!("[*]"),
             Last => format!("[$]"),
             Index(index) => {
-                let index_bindings = Binding::new(index.clone().0.to_value());
-                let param_string = format!("{}", index_bindings.get_param_dollarised());
-                bindings = vec![index_bindings];
-                format!("[{param_string}]")
+                bindings = index.get_bindings();
+                index.build()
             }
             AnyEdgeFilter(edge_tables) => {
                 bindings = edge_tables.get_bindings();
@@ -548,6 +546,14 @@ impl std::fmt::Display for Last {
 #[derive(Debug, Clone)]
 pub struct Index(NumberLike);
 
+impl Deref for Index {
+    type Target = NumberLike;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl From<Index> for Clause {
     fn from(value: Index) -> Self {
         Self::new(ClauseType::Index(value))
@@ -560,7 +566,7 @@ pub fn index(index: impl Into<NumberLike>) -> Index {
 
 impl std::fmt::Display for Index {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0.clone().to_value()))
+        write!(f, "{}", self.0.build())
     }
 }
 

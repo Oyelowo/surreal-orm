@@ -48,7 +48,6 @@ fn create_array_helper(
 macro_rules! create_fn_with_two_array_args {
     ($function_name:expr) => {
         paste::paste! {
-
             pub fn [<$function_name _fn>](arr1: impl Into<ArrayLike>, arr2: impl Into<ArrayLike>) -> Function {
                 create_array_helper(arr1, arr2, $function_name)
             }
@@ -64,9 +63,9 @@ macro_rules! create_fn_with_two_array_args {
             #[test]
             fn [<test $function_name fn_on_array_macro_on_diverse_array>]() {
                 let age = Field::new("age");
-                let arr1 = array![1, "Oyelowo", age];
-                let arr2 = array![4, "dayo", 6];
-                let result = crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                let arr1 = $crate::arr![1, "Oyelowo", age];
+                let arr2 = $crate::arr![4, "dayo", 6];
+                let result = $crate::functions::array::[<$function_name _fn>](arr1, arr2);
                 assert_eq!(
                     result.fine_tune_params(),
                     format!("array::{}($_param_00000001, $_param_00000002)", $function_name)

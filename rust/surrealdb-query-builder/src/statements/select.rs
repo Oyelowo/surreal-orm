@@ -963,16 +963,8 @@ impl SelectStatement {
     /// ```
     pub fn limit(mut self, limit: impl Into<crate::NumberLike>) -> Self {
         let limit: crate::NumberLike = limit.into();
-        match limit {
-            crate::NumberLike::Number(n) => {
-                let binding = Binding::new(n);
-                self.limit = Some(binding.get_param_dollarised());
-                self.update_bindings(vec![binding]);
-            }
-            crate::NumberLike::Field(_) | crate::NumberLike::Param(_) => {
-                self.limit = Some(limit.to_value().to_raw_string());
-            } // crate::NumberLike::Param(_) => todo!(),
-        };
+        self.limit = Some(limit.build());
+        self.update_bindings(limit.get_bindings());
         self
     }
 
@@ -997,16 +989,8 @@ impl SelectStatement {
     /// ```
     pub fn start(mut self, start: impl Into<crate::NumberLike>) -> Self {
         let start: crate::NumberLike = start.into();
-        match start {
-            crate::NumberLike::Number(n) => {
-                let binding = Binding::new(n);
-                self.start = Some(binding.get_param_dollarised());
-                self.update_bindings(vec![binding]);
-            }
-            crate::NumberLike::Field(_) | crate::NumberLike::Param(_) => {
-                self.start = Some(start.to_value().to_raw_string());
-            }
-        };
+        self.limit = Some(start.build());
+        self.update_bindings(start.get_bindings());
         self
     }
 
@@ -1093,9 +1077,8 @@ impl SelectStatement {
     /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        // let duration = sql::Duration::from(duration);
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 

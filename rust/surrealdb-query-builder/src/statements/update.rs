@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, ErrorList, ReturnableDefault, ReturnableStandard,
+    Conditional, ErrorList, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -334,9 +334,8 @@ where
     /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        // let duration: sql::Duration = duration.into();
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 
