@@ -3,14 +3,6 @@ use crate::{
     Parametric, Table, ToRaw,
 };
 
-// pub trait Valuablex {
-//     fn tona(self) -> Valuex;
-// }
-// impl<T: Into<sql::Value>> Parametric for T {
-//     fn get_bindings(&self) -> BindingsList {
-//         todo!()
-//     }
-// }
 #[derive(Debug, Clone)]
 pub struct Valuex {
     pub(crate) string: String,
@@ -23,54 +15,29 @@ impl Parametric for Valuex {
     }
 }
 
+impl Parametric for Vec<Valuex> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|m| m.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
 impl Buildable for Valuex {
     fn build(&self) -> String {
         self.string.to_string()
     }
 }
 
-// impl<T: Into<sql::Value>> Valuablex for T {
-//     fn tona(self) -> Valuex {
-//         let value: sql::Value = self.into();
-//         let binding = Binding::new(value);
-//
-//         Valuex {
-//             string: binding.get_param_dollarised(),
-//             bindings: vec![binding],
-//         }
-//     }
-// }
+impl Buildable for Vec<Valuex> {
+    fn build(&self) -> String {
+        self.into_iter()
+            .map(|m| m.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
 
-// impl<T: Into<sql::Values>> Mana for T {
-//     fn tona(self) -> Oja {
-//         let value: sql::Value = self.into();
-//         let binding = Binding::new(value);
-//
-//         Oja {
-//             string: value.to_string(),
-//             bindings: vec![binding],
-//         }
-//     }
-// }
-// impl<T: Into<sql::Value>> Buildable for T {
-//     fn build(&self) -> std::string::String {
-//         let value: sql::Value = self.to_owned().into();
-//         value.to_string()
-//     }
-// }
-// impl Valuablex for Alias {
-//     fn tona(self) -> Valuex {
-//         Valuex {
-//             string: self.build(),
-//             bindings: self.get_bindings(),
-//         }
-//     }
-// }
-// impl Mana for std::time::Duration {
-//     fn tona(self) -> String {
-//         sql::Duration(self).to_string()
-//     }
-// }
 impl From<Field> for Valuex {
     fn from(value: Field) -> Self {
         Self {
@@ -95,34 +62,6 @@ impl From<Function> for Valuex {
             bindings: value.get_bindings(),
         }
     }
-}
-
-// impl Valuablex for Alias {
-//     fn tona(self) -> Alias {
-//         Valuex {
-//             string: self.build(),
-//             bindings: self.get_bindings(),
-//         }
-//     }
-// }
-// impl Valuablex for Field {
-//     fn tona(self) -> Valuex {
-//         Valuex {
-//             string: self.build(),
-//             bindings: self.get_bindings(),
-//         }
-//     }
-// }
-// impl Valuablex for Function {
-//     fn tona(self) -> Valuex {
-//         Valuex {
-//             string: self.build(),
-//             bindings: self.get_bindings(),
-//         }
-//     }
-// }
-pub fn val(val: impl Into<sql::Value>) -> sql::Value {
-    val.into()
 }
 
 impl<T: Into<sql::Value>> From<T> for Valuex {

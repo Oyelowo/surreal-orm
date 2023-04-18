@@ -1,7 +1,7 @@
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
-use crate::{Binding, Buildable, Valuex};
+use crate::{Binding, Buildable, Parametric, Valuex};
 
 use super::Field;
 
@@ -29,11 +29,15 @@ impl From<Ordinal> for Valuex {
                 bindings.push(binding);
                 param
             }
-            Ordinal::Field(f) => f.build(),
+            Ordinal::Field(f) => {
+                bindings.extend(f.get_bindings());
+                f.build()
+            }
         };
         Valuex { string, bindings }
     }
 }
+
 impl From<sql::Datetime> for Ordinal {
     fn from(value: sql::Datetime) -> Self {
         Self::Datetime(value.into())
