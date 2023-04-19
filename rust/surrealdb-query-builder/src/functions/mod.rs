@@ -19,7 +19,7 @@ pub mod rand;
 pub mod script;
 pub mod session;
 pub mod sleep;
-// pub mod string;
+pub mod string;
 // pub mod time;
 // pub mod type_;
 // pub mod validation;
