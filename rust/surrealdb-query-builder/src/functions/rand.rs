@@ -21,9 +21,9 @@
 
 use surrealdb::sql;
 
-use crate::array;
 use crate::traits::{Binding, Buildable, ToRaw};
 use crate::types::{Field, Function, NumberLike};
+use crate::{array, Parametric};
 
 pub fn rand_fn() -> Function {
     let query_string = format!("rand()");
@@ -49,12 +49,12 @@ pub(crate) fn create_fn_with_single_num_arg(
     number: impl Into<NumberLike>,
     function_name: &str,
 ) -> Function {
-    let binding = Binding::new(number.into());
-    let query_string = format!("rand::{function_name}({})", binding.get_param_dollarised());
+    let number: NumberLike = number.into();
+    let query_string = format!("rand::{function_name}({})", number.build());
 
     Function {
         query_string,
-        bindings: vec![binding],
+        bindings: number.get_bindings(),
     }
 }
 
@@ -62,6 +62,7 @@ pub mod rand {
     use crate::{
         traits::Binding,
         types::{Function, NumberLike},
+        Buildable, Parametric,
     };
 
     use super::create_fn_with_single_num_arg;
@@ -144,17 +145,12 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into());
-                let to_binding = Binding::new(to.into());
+                let from: NumberLike = from.into();
+                let to: NumberLike = to.into();
 
-                let query_string = format!(
-                    "rand::float({}, {})",
-                    from_binding.get_param_dollarised(),
-                    to_binding.get_param_dollarised()
-                );
-
-                bindings = vec![from_binding, to_binding];
-                query_string
+                bindings.extend(from.get_bindings());
+                bindings.extend(to.get_bindings());
+                format!("rand::float({}, {})", from.build(), to.build())
             }
             _ => format!("rand::float()"),
         };
@@ -188,17 +184,12 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into());
-                let to_binding = Binding::new(to.into());
+                let from: NumberLike = from.into();
+                let to: NumberLike = to.into();
 
-                let query_string = format!(
-                    "rand::int({}, {})",
-                    from_binding.get_param_dollarised(),
-                    to_binding.get_param_dollarised()
-                );
-
-                bindings = vec![from_binding, to_binding];
-                query_string
+                bindings.extend(from.get_bindings());
+                bindings.extend(to.get_bindings());
+                format!("rand::int({}, {})", from.build(), to.build())
             }
             _ => format!("rand::int()"),
         };
@@ -231,16 +222,12 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into());
-                let to_binding = Binding::new(to.into());
+                let from: NumberLike = from.into();
+                let to: NumberLike = to.into();
+                let query_string = format!("rand::time({}, {})", from.build(), to.build());
 
-                let query_string = format!(
-                    "rand::time({}, {})",
-                    from_binding.get_param_dollarised(),
-                    to_binding.get_param_dollarised()
-                );
-
-                bindings = vec![from_binding, to_binding];
+                bindings.extend(from.get_bindings());
+                bindings.extend(to.get_bindings());
                 query_string
             }
             _ => format!("rand::time()"),
@@ -274,26 +261,19 @@ pub mod rand {
 
         let query_string = match (from, to) {
             (Some(length), None) => {
-                let length_binding = Binding::new(length.into());
+                let length: NumberLike = length.into();
 
-                let query_string =
-                    format!("rand::string({})", length_binding.get_param_dollarised(),);
-
-                bindings = vec![length_binding];
-                query_string
+                bindings.extend(length.get_bindings());
+                format!("rand::string({})", length.build())
             }
             (Some(from), Some(to)) => {
-                let from_binding = Binding::new(from.into());
-                let to_binding = Binding::new(to.into());
+                let from: NumberLike = from.into();
+                let to: NumberLike = to.into();
 
-                let query_string = format!(
-                    "rand::string({}, {})",
-                    from_binding.get_param_dollarised(),
-                    to_binding.get_param_dollarised()
-                );
+                bindings.extend(from.get_bindings());
+                bindings.extend(to.get_bindings());
 
-                bindings = vec![from_binding, to_binding];
-                query_string
+                format!("rand::string({}, {})", from.build(), to.build())
             }
             _ => format!("rand::string()"),
         };
@@ -328,12 +308,12 @@ pub mod rand {
                 bindings: vec![],
             },
             Some(length) => {
-                let binding = Binding::new(length.into());
-                let query_string = format!("rand::guid({})", binding.get_param_dollarised());
+                let length: NumberLike = length.into();
+                let query_string = format!("rand::guid({})", length.build());
 
                 Function {
                     query_string,
-                    bindings: vec![binding],
+                    bindings: length.get_bindings(),
                 }
             }
         }
