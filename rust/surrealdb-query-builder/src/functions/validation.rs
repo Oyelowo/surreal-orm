@@ -22,23 +22,21 @@
 // is::uuid()	Checks whether a value is a UUID
 //
 
-use surrealdb::sql;
-
-use crate::{traits::Binding, types::Function, Valuex};
+use crate::{types::Function, Buildable, Parametric, Valuex};
 
 fn create_validation_function(value: impl Into<Valuex>, function_name: &str) -> Function {
-    let binding = Binding::new(value);
+    let value: Valuex = value.into();
 
     Function {
-        query_string: format!("is::{function_name}({})", binding.get_param_dollarised()),
-        bindings: vec![binding],
+        query_string: format!("is::{function_name}({})", value.build()),
+        bindings: value.get_bindings(),
     }
 }
 
 macro_rules! create_validation_with_tests {
     ($function_name: expr) => {
         paste::paste! {
-            pub fn [<$function_name _fn>](value: impl Into<$crate::Valuex>) -> Function {
+            pub fn [<$function_name _fn>](value: impl Into<$crate::Valuex>) -> $crate::Function {
                 super::create_validation_function(value, $function_name)
             }
 
@@ -55,7 +53,7 @@ macro_rules! create_validation_with_tests {
                 let username = Field::new("username");
                 let result = [<$function_name _fn>](username);
 
-                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
                 }
 
@@ -89,7 +87,7 @@ macro_rules! create_validation_with_tests {
                 let username = Field::new("username");
                 let result = [<$function_name>]!(username);
 
-                assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
+                assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
                 assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
             }
 
@@ -125,7 +123,6 @@ pub mod is {
     use surrealdb::sql;
 
     use crate::traits::{Binding, Buildable, ToRaw};
-
     use crate::types::{Field, Function};
 
     create_validation_with_tests!("alphanum");
