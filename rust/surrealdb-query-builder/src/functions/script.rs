@@ -17,9 +17,8 @@
 //
 //
 
-use crate::traits::ToRaw;
-
-use crate::types::{Function, Param};
+use crate::{Buildable, ToRaw};
+use crate::{Function, Param};
 
 fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> Function {
     let query_string = format!(
@@ -27,7 +26,7 @@ fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>) -> 
         args.into_iter()
             .map(|a| {
                 let a: Param = a.into();
-                let a = a.to_string();
+                let a = a.build();
                 a
             })
             .collect::<Vec<_>>()
@@ -52,45 +51,50 @@ macro_rules! function {
 }
 pub use function;
 
-#[test]
-fn test_function_without_args() {
-    let f2 = function!((), {
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_function_without_args() {
+        let f2 = function!((), {
         return [1,2,3].map(v => v * 10);
     });
-    assert_eq!(f2.to_string(), "function() { return [1, 2, 3].map(v => v * 10) ; }");
-    assert_eq!(
-        f2.to_raw().to_string(),
-        "function() { return [1, 2, 3].map(v => v * 10) ; }"
-    );
-}
+        assert_eq!(f2.build(), "function() { return [1, 2, 3].map(v => v * 10) ; }");
+        assert_eq!(
+            f2.to_raw().build(),
+            "function() { return [1, 2, 3].map(v => v * 10) ; }"
+        );
+    }
 
-#[test]
-fn test_function_with_args() {
-    let name = Param::new("name");
-    let id = Param::new("id");
+    #[test]
+    fn test_function_with_args() {
+        let name = Param::new("name");
+        let id = Param::new("id");
 
-    let f2 = function!((name, id), {
+        let f2 = function!((name, id), {
         return [1,2,3].map(v => v * 10 * $name * $id);
     });
-    assert_eq!(
-        f2.to_string(),
-        "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
-    );
-    assert_eq!(
-        f2.to_raw().to_string(),
-        "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
-    );
-}
+        assert_eq!(
+            f2.build(),
+            "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
+        );
+        assert_eq!(
+            f2.to_raw().build(),
+            "function($name, $id) { return [1, 2, 3].map(v => v * 10 * $name * $id) ; }"
+        );
+    }
 
-#[test]
-fn test_function_with_args_code_str() {
-    let name = Param::new("name");
-    let id = Param::new("id");
+    #[test]
+    fn test_function_with_args_code_str() {
+        let name = Param::new("name");
+        let id = Param::new("id");
 
-    let f2 = function!(
-        (name, id),
-        "{ return [1,2,3].map(v => v * 10 * $name * $id) ; }"
-    );
-    insta::assert_display_snapshot!(f2);
-    insta::assert_display_snapshot!(f2.to_raw());
+        let f2 = function!(
+            (name, id),
+            "{ return [1,2,3].map(v => v * 10 * $name * $id) ; }"
+        );
+        insta::assert_display_snapshot!(f2);
+        insta::assert_display_snapshot!(f2.to_raw());
+    }
 }

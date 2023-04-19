@@ -16,7 +16,7 @@ pub mod http;
 pub mod math;
 pub mod parse;
 pub mod rand;
-// pub mod script;
+pub mod script;
 // pub mod session;
 // pub mod sleep;
 // pub mod string;
