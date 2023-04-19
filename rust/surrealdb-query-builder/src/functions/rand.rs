@@ -23,7 +23,7 @@ use surrealdb::sql;
 
 use crate::traits::{Binding, Buildable, ToRaw};
 use crate::types::{Field, Function, NumberLike};
-use crate::{array, Parametric};
+use crate::{arr, array, Parametric};
 
 pub fn rand_fn() -> Function {
     let query_string = format!("rand()");
@@ -62,7 +62,7 @@ pub mod rand {
     use crate::{
         traits::Binding,
         types::{Function, NumberLike},
-        Buildable, Parametric,
+        Buildable, Parametric, Valuex,
     };
 
     use super::create_fn_with_single_num_arg;
@@ -104,16 +104,15 @@ pub mod rand {
 
     pub use rand_uuid as uuid;
 
-    pub fn enum_fn<T: Into<sql::Value>>(values: Vec<T>) -> Function {
+    pub fn enum_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
         let mut bindings = vec![];
 
         let values = values
             .into_iter()
             .map(|v| {
-                let binding = Binding::new(v.into());
-                let string = binding.get_param_dollarised();
-                bindings.push(binding);
-                string
+                let v: Valuex = v.into();
+                bindings.extend(v.get_bindings());
+                v.build()
             })
             .collect::<Vec<_>>();
 
@@ -386,7 +385,7 @@ fn test_rand_enum_macro() {
 
 #[test]
 fn test_rand_enum_macro_with_array() {
-    let result = rand::enum_!(array!["one", "two", 3, 4.15385, "five", true]);
+    let result = rand::enum_!(arr!["one", "two", 3, 4.15385, "five", true]);
     assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
     assert_eq!(
         result.to_raw().build(),
@@ -431,7 +430,7 @@ macro_rules! create_test_for_fn_with_two_args {
                     let end = Field::new("end");
 
                     let result = rand::[< $function_ident _fn>](Some(start), Some(end));
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}(start, end)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(start, end)", $function_ident));
                 }
 
@@ -441,7 +440,7 @@ macro_rules! create_test_for_fn_with_two_args {
                     let end = Field::new("end");
 
                     let result = rand::[< $function_ident>]!(start, end);
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
+                    assert_eq!(result.fine_tune_params(), format!("rand::{}(start, end)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(start, end)", $function_ident));
                 }
             }
@@ -463,7 +462,7 @@ fn test_rand_string_macro_with_one_arg_length() {
 fn test_rand_string_macro_with_one_arg_field() {
     let length_of_name = Field::new("length_of_name");
     let result = rand::string!(length_of_name);
-    assert_eq!(result.fine_tune_params(), "rand::string($_param_00000001)");
+    assert_eq!(result.fine_tune_params(), "rand::string(length_of_name)");
     assert_eq!(result.to_raw().build(), "rand::string(length_of_name)");
 }
 
@@ -501,7 +500,7 @@ fn test_rand_guid_fn_with_field_input() {
     let length = Field::new("length");
 
     let result = rand::guid_fn(Some(length));
-    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.fine_tune_params(), "rand::guid(length)");
     assert_eq!(result.to_raw().build(), "rand::guid(length)");
 }
 
@@ -510,6 +509,6 @@ fn test_rand_guid_macro_with_field_input() {
     let length = Field::new("length");
 
     let result = rand::guid!(length);
-    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+    assert_eq!(result.fine_tune_params(), "rand::guid(length)");
     assert_eq!(result.to_raw().build(), "rand::guid(length)");
 }
