@@ -990,7 +990,7 @@ impl SelectStatement {
     /// ```
     pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
         let start: NumberLike = start.into();
-        self.limit = Some(start.build());
+        self.start = Some(start.build());
         self.update_bindings(start.get_bindings());
         self
     }
