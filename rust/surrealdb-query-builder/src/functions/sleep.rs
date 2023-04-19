@@ -11,28 +11,26 @@
 // Function	Description
 // sleep(@duration)	Delays or pauses in the execution of a query or a batch of queries.
 
-use core::time;
-
-use surrealdb::sql;
+use std::time;
 
 use crate::traits::{Binding, Buildable, ToRaw};
+use crate::Parametric;
 
 use crate::types::{DurationLike, Field, Function};
 
 fn sleep_fn(duration: impl Into<DurationLike>) -> Function {
-    let value: sql::Value = duration.into().into();
-    let binding = Binding::new(value);
+    let duration: DurationLike = duration.into();
 
     Function {
-        query_string: format!("sleep({})", binding.get_param_dollarised()),
-        bindings: vec![binding],
+        query_string: format!("sleep({})", duration.build()),
+        bindings: duration.get_bindings(),
     }
 }
 
 #[macro_export]
 macro_rules! sleep {
     ( $duration:expr ) => {
-        crate::functions::sleep::sleep_fn($duration)
+        $crate::functions::sleep::sleep_fn($duration)
     };
 }
 
@@ -43,7 +41,7 @@ fn test_sleep_fn_with_field_data() {
     let waiting_time = Field::new("waiting_time");
     let result = sleep_fn(waiting_time);
 
-    assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
+    assert_eq!(result.fine_tune_params(), "sleep(waiting_time)");
     assert_eq!(result.to_raw().to_string(), "sleep(waiting_time)");
 }
 
@@ -67,7 +65,7 @@ fn test_sleep_macro_with_field_data() {
     let waiting_time = Field::new("waiting_time");
     let result = sleep!(waiting_time);
 
-    assert_eq!(result.fine_tune_params(), "sleep($_param_00000001)");
+    assert_eq!(result.fine_tune_params(), "sleep(waiting_time)");
     assert_eq!(result.to_raw().to_string(), "sleep(waiting_time)");
 }
 

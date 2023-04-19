@@ -18,7 +18,7 @@ pub mod parse;
 pub mod rand;
 pub mod script;
 pub mod session;
-// pub mod sleep;
+pub mod sleep;
 // pub mod string;
 // pub mod time;
 // pub mod type_;
