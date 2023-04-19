@@ -49,6 +49,7 @@ use crate::{
     Operatable,
     ReturnableSelect,
     ToRaw,
+    Valuex,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -449,6 +450,96 @@ pub enum Selectables {
     Fields(Vec<Field>),
 }
 
+pub struct Selecta(Valuex);
+
+impl From<Vec<Valuex>> for Selecta {
+    fn from(value: Vec<Valuex>) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<&All> for Selecta {
+    fn from(_value: &All) -> Self {
+        Self(Valuex {
+            string: "*".into(),
+            bindings: vec![],
+        })
+    }
+}
+
+impl From<All> for Selecta {
+    fn from(_value: All) -> Self {
+        Self(Valuex {
+            string: "*".into(),
+            bindings: vec![],
+        })
+    }
+}
+
+impl<'a, const N: usize> From<&[Field; N]> for Selecta {
+    fn from(value: &[Field; N]) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl<'a, const N: usize> From<&[&Field; N]> for Selecta {
+    fn from(value: &[&Field; N]) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<Vec<&Field>> for Selecta {
+    fn from(value: Vec<&Field>) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<Vec<Field>> for Selecta {
+    fn from(value: Vec<Field>) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<Field> for Selecta {
+    fn from(value: Field) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<&Field> for Selecta {
+    fn from(value: &Field) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+impl Deref for Selecta {
+    type Target = Valuex;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 trait Selectables2 {
     fn build_select(&self) -> String;
 }
@@ -648,8 +739,8 @@ impl From<Selectables> for SelectStatement {
 ///     .order_by(order(&age).numeric())
 ///     .limit(20)
 ///     .start(5);
-pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
-    let selectables: Selectables = selectables.into();
+pub fn select(selectables: impl Into<Selecta>) -> SelectStatement {
+    let selectables: Selecta = selectables.into();
 
     SelectStatement {
         projections: selectables.build(),
@@ -859,7 +950,7 @@ impl SelectStatement {
     ///     .group_by(&[gender, country, city]);
     ///  
     /// // Group results with aggregate functions
-    ///  select(array![count!().__as__(total), math::sum!(age), gender, country])
+    ///  select(arr![count!().__as__(total), math::sum!(age), gender, country])
     ///     .from(user)
     ///     .group_by(&[gender, country]);
     /// ```
