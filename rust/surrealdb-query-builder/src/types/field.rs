@@ -97,6 +97,77 @@ impl Buildable for Field {
         self.graph_string.to_string()
     }
 }
+impl Buildable for Vec<Field> {
+    fn build(&self) -> String {
+        self.into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl Buildable for Vec<&Field> {
+    fn build(&self) -> String {
+        self.into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Buildable for &[Field; N] {
+    fn build(&self) -> String {
+        self.to_vec()
+            .into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Buildable for &[&Field; N] {
+    fn build(&self) -> String {
+        self.to_vec()
+            .into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Parametric for &[Field; N] {
+    fn get_bindings(&self) -> BindingsList {
+        self.to_vec()
+            .into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl<'a, const N: usize> Parametric for &[&Field; N] {
+    fn get_bindings(&self) -> BindingsList {
+        self.to_vec()
+            .into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl Parametric for Vec<Field> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl Parametric for Vec<&Field> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
 
 impl From<&Field> for Idiomx {
     fn from(value: &Field) -> Self {
