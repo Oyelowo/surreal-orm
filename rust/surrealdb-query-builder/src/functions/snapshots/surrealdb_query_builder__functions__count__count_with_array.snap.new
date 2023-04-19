@@ -1,8 +1,0 @@
----
-source: surrealdb-query-builder/src/functions/count.rs
-assertion_line: 161
-expression: result.clone().to_raw()
----
-Raw(
-    "count([1, 2, 3, 4, 5, '4334', 'Oyelowo'])",
-)
