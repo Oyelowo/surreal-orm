@@ -100,12 +100,7 @@ impl From<Expression> for IfElseExpression {
 
 impl Buildable for IfElseExpression {
     fn build(&self) -> String {
-        match self.0 {
-            Expression::SelectStatement(_) => {
-                format!("( {} )", self.0.build().trim_end_matches(";"))
-            }
-            Expression::Value(_) => self.0.build(),
-        }
+        self.0.build()
     }
 }
 
