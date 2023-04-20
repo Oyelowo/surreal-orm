@@ -26,29 +26,49 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
+use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Table, TableIndex};
 
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{Database, Namespace, Scope, Table, TableIndex, Token},
-};
-
+/// Remove index statement
+///
+/// # Arguments
+/// * `index` - The name of the index to be removed. Can be a string or a TableIndex type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_index};
+/// # let user = Table::new("user");
+/// # let party = TableIndex::new("party");
+///
+/// let statement = remove_index(party).on_table(user);
+/// assert_eq!(statement.build(), "REMOVE INDEX party ON TABLE user;");
+/// ```
 pub fn remove_index(index: impl Into<TableIndex>) -> RemoveIndexStatement {
-    RemoveIndexStatement::new(index)
+    RemoveIndexStatement {
+        index: index.into(),
+        table: None,
+    }
 }
+
+/// Remove index statement
 pub struct RemoveIndexStatement {
     index: TableIndex,
     table: Option<Table>,
 }
 
 impl RemoveIndexStatement {
-    fn new(index: impl Into<TableIndex>) -> Self {
-        Self {
-            index: index.into(),
-            table: None,
-        }
-    }
-
+    /// Set the table to remove the index from
+    /// # Arguments
+    ///
+    /// * `table` - The name of the table to remove the index from. Can be a string or a Table type.
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::remove_index};
+    /// # let user = Table::new("user");
+    /// # let party = TableIndex::new("party");
+    ///  remove_index(party).on_table(user);
+    /// ```
     pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into());
         self
@@ -57,11 +77,11 @@ impl RemoveIndexStatement {
 
 impl Buildable for RemoveIndexStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE INDEX {}", self.index);
+        let mut query = format!("REMOVE INDEX {}", self.index);
         if let Some(table) = &self.table {
-            let query = format!("{} ON TABLE {}", query, table);
+            query = format!("{} ON TABLE {}", query, table);
         }
-        query
+        format!("{};", query)
     }
 }
 
@@ -81,6 +101,17 @@ impl Erroneous for RemoveIndexStatement {}
 
 impl Queryable for RemoveIndexStatement {}
 
-#[test]
-#[cfg(feature = "mock")]
-fn test() {}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::TableIndex;
+
+    #[test]
+    fn test_remove_index() {
+        let user = Table::new("user");
+        let party = TableIndex::new("party");
+
+        let statement = remove_index(party).on_table(user);
+        assert_eq!(statement.build(), "REMOVE INDEX party ON TABLE user;");
+    }
+}

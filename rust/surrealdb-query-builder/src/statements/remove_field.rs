@@ -26,28 +26,51 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{Database, Field, Namespace, Scope, Table, TableIndex, Token},
-};
+use crate::{BindingsList, Buildable, Erroneous, Field, Parametric, Queryable, Table};
 
+/// Remove field statement
+///
+/// # Arguments
+/// * `field` - The name of the field to be removed. Can be a string or a Field type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_field};
+/// # let user = Table::new("user");
+/// # let name = Field::new("name");
+///
+/// let statement = remove_field(name).on_table(user);
+/// assert_eq!(statement.build(), "REMOVE FIELD name ON TABLE user;");
+/// ```
 pub fn remove_field(field: impl Into<Field>) -> RemoveFieldStatement {
-    RemoveFieldStatement::new(field)
+    RemoveFieldStatement {
+        field: field.into(),
+        table: None,
+    }
 }
+
+/// Remove field statement
 pub struct RemoveFieldStatement {
     field: Field,
     table: Option<Table>,
 }
 
 impl RemoveFieldStatement {
-    fn new(field: impl Into<Field>) -> Self {
-        Self {
-            field: field.into(),
-            table: None,
-        }
-    }
-
-    fn on_table(mut self, table: impl Into<Table>) -> Self {
+    /// Set the table to remove the field from
+    /// # Arguments
+    ///
+    /// * `table` - The name of the table to remove the field from. Can be a string or a Table type.
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::remove_field};
+    /// # let user = Table::new("user");
+    /// # let name = Field::new("name");
+    ///
+    /// let statement = remove_field(name).on_table(user);
+    /// assert_eq!(statement.build(), "REMOVE FIELD name ON TABLE user;");
+    pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into());
         self
     }
@@ -55,11 +78,11 @@ impl RemoveFieldStatement {
 
 impl Buildable for RemoveFieldStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE FIELD {}", self.field);
+        let mut query = format!("REMOVE FIELD {}", self.field);
         if let Some(table) = &self.table {
-            let query = format!("{} ON TABLE {}", query, table);
+            query = format!("{} ON TABLE {}", query, table);
         }
-        query
+        format!("{};", query)
     }
 }
 
@@ -78,3 +101,18 @@ impl Parametric for RemoveFieldStatement {
 impl Erroneous for RemoveFieldStatement {}
 
 impl Queryable for RemoveFieldStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::{Field, Table};
+
+    #[test]
+    fn test_remove_field() {
+        let user = Table::new("user");
+        let name = Field::new("name");
+
+        let statement = remove_field(name).on_table(user);
+        assert_eq!(statement.build(), "REMOVE FIELD name ON TABLE user;");
+    }
+}

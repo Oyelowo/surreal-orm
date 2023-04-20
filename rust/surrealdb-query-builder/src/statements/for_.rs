@@ -210,8 +210,7 @@ impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    use crate::{traits::Operatable, types::Field};
+    use crate::{Field, Operatable};
 
     #[test]
     fn test_define_for_statement_state_machine() {

@@ -31,23 +31,34 @@ use crate::{
     types::Namespace,
 };
 
+/// Remove namespace statement
+///
+/// # Arguments
+///
+/// * `namespace` - The name of the namespace to be removed. Can be a string or a Namespace type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_namespace};
+///
+/// # let namespace = Namespace::new("namespace");
+/// let statement = remove_namespace(namespace);
+/// assert_eq!(statement.build(), "REMOVE NAMESPACE namespace;");
+/// ```
 pub fn remove_namespace(namespace: impl Into<Namespace>) -> RemoveNamespaceStatement {
-    RemoveNamespaceStatement::new(namespace)
+    let namespace = namespace.into();
+    RemoveNamespaceStatement { namespace }
 }
+
+/// Remove namespace statement
 pub struct RemoveNamespaceStatement {
     namespace: Namespace,
 }
 
-impl RemoveNamespaceStatement {
-    fn new(namespace: impl Into<Namespace>) -> Self {
-        let namespace = namespace.into();
-        Self { namespace }
-    }
-}
-
 impl Buildable for RemoveNamespaceStatement {
     fn build(&self) -> String {
-        format!("REMOVE NAMESPACE {}", self.namespace)
+        format!("REMOVE NAMESPACE {};", self.namespace)
     }
 }
 
@@ -66,3 +77,15 @@ impl Parametric for RemoveNamespaceStatement {
 impl Erroneous for RemoveNamespaceStatement {}
 
 impl Queryable for RemoveNamespaceStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_namespace() {
+        let namespace = Namespace::new("namespace");
+        let statement = remove_namespace(namespace);
+        assert_eq!(statement.build(), "REMOVE NAMESPACE namespace;");
+    }
+}

@@ -217,7 +217,7 @@ where
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        self.content = Some(binding.get_param().to_owned());
+        self.content = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
         self
     }
@@ -226,7 +226,7 @@ where
     pub fn merge(mut self, merge: impl Serialize) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        self.merge = Some(binding.get_param().to_owned());
+        self.merge = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
         self
     }

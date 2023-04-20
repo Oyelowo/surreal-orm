@@ -26,37 +26,82 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::Login,
-};
+use crate::{BindingsList, Buildable, Erroneous, Login, Parametric, Queryable};
 
 use super::NamespaceOrDatabase;
 
-pub fn remove_login(login: impl Into<Login>) -> RemoveLoginStatement {
-    RemoveLoginStatement::new(login)
+/// Remove login statement
+///
+/// # Arguments
+///
+/// * `login` - The name of the login to be removed. Can be a string or a Login type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_login};
+/// # let username = Login::new("username");
+/// let statement = remove_login(username).on_namespace();
+/// assert_eq!(statement.build(), "REMOVE LOGIN username ON NAMESPACE;");
+/// ```
+pub fn remove_login(login: impl Into<Login>) -> RemoveLoginStatementInit {
+    RemoveLoginStatementInit {
+        login: login.into(),
+        on: None,
+    }
 }
-pub struct RemoveLoginStatement {
+
+pub struct RemoveLoginStatementInit {
     login: Login,
     on: Option<NamespaceOrDatabase>,
 }
 
-impl RemoveLoginStatement {
-    fn new(login: impl Into<Login>) -> Self {
-        Self {
-            login: login.into(),
-            on: None,
-        }
-    }
-
-    pub fn on_namespace(mut self) -> Self {
+impl RemoveLoginStatementInit {
+    /// Remove login on namespace
+    /// ```rust
+    ///
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::remove_login};
+    ///
+    /// let username = Login::new("username");
+    /// let statement = remove_login(username).on_namespace();
+    /// assert_eq!(statement.build(), "REMOVE LOGIN username ON NAMESPACE;");
+    /// ```
+    pub fn on_namespace(mut self) -> RemoveLoginStatement {
         self.on = Some(NamespaceOrDatabase::Namespace);
-        self
+        self.into()
     }
 
-    pub fn on_database(mut self) -> Self {
+    /// Remove login on database
+    /// ```rust
+    ///
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::remove_login};
+    ///
+    /// let username = Login::new("username");
+    /// let statement = remove_login(username).on_database();
+    /// assert_eq!(statement.build(), "REMOVE LOGIN username ON DATABASE;");
+    /// ```
+    pub fn on_database(mut self) -> RemoveLoginStatement {
         self.on = Some(NamespaceOrDatabase::Database);
-        self
+        self.into()
+    }
+}
+
+/// Remove login statement
+pub struct RemoveLoginStatement(RemoveLoginStatementInit);
+
+impl From<RemoveLoginStatementInit> for RemoveLoginStatement {
+    fn from(init: RemoveLoginStatementInit) -> Self {
+        Self(init)
+    }
+}
+
+impl std::ops::Deref for RemoveLoginStatement {
+    type Target = RemoveLoginStatementInit;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -67,7 +112,8 @@ impl Buildable for RemoveLoginStatement {
         if let Some(on) = &self.on {
             query = format!("{} ON {}", query, on);
         }
-        query
+
+        format!("{};", query)
     }
 }
 
@@ -86,3 +132,22 @@ impl Parametric for RemoveLoginStatement {
 impl Erroneous for RemoveLoginStatement {}
 
 impl Queryable for RemoveLoginStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn remove_login_on_namespace() {
+        let login = Login::new("login");
+        let statement = remove_login(login).on_namespace();
+        assert_eq!(statement.build(), "REMOVE LOGIN login ON NAMESPACE;");
+    }
+
+    #[test]
+    fn remove_login_on_database() {
+        let login = Login::new("login");
+        let statement = remove_login(login).on_database();
+        assert_eq!(statement.build(), "REMOVE LOGIN login ON DATABASE;");
+    }
+}
