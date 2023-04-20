@@ -12,6 +12,7 @@ enum CoordinateValue {
     String((String, String)),
 }
 
+/// Wrapper around native surrealdb geometry type. Improves the deserialization.
 #[derive(Debug, Clone, Serialize)]
 pub struct Geometry(pub sql::Geometry);
 

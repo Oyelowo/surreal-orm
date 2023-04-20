@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     traits::{BindingsList, Buildable, Parametric},
-    Aliasable, Erroneous, ErrorList,
+    Aliasable, Erroneous,
 };
 
 /// Represents a subquery function.
