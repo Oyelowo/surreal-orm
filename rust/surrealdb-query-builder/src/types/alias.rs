@@ -11,21 +11,15 @@ use surrealdb::sql;
 
 use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric};
 
+/// An alias for a table or a field/column or even a statement. You usually do not instantiate this
+/// yourself.
 #[derive(Debug, Clone)]
 pub struct Alias {
     name: AliasName,
-    aliased: sql::Ident,
     bindings: BindingsList,
     errors: ErrorList,
     graph_string: String,
 }
-
-// impl From<Alias> for sql::Value {
-//     fn from(value: Alias) -> Self {
-//         // sql::Idiom::from(value.build()).into()
-//         s
-//     }
-// }
 
 impl Erroneous for Alias {
     fn get_errors(&self) -> ErrorList {
@@ -46,25 +40,13 @@ impl Buildable for Alias {
 }
 
 impl Alias {
-    // pub fn new(
-    //     name: AliasName,
-    //     aliased: sql::Ident,
-    //     bindings: BindingsList,
-    //     graph_string: String,
-    // ) -> Self {
-    //     Self {
-    //         name,
-    //         aliased,
-    //         bindings,
-    //         graph_string,
-    //     }
-    // }
-
+    /// Get the alias name.
     pub fn get_alias_name(self) -> AliasName {
         self.name
     }
 }
 
+/// The name of an alias.
 #[derive(Debug, Clone)]
 pub struct AliasName(sql::Ident);
 
@@ -75,6 +57,7 @@ impl From<&str> for AliasName {
 }
 
 impl AliasName {
+    /// Create a new alias name.
     pub fn new(name: impl Into<sql::Ident>) -> Self {
         Self(name.into())
     }
@@ -94,23 +77,51 @@ impl Display for AliasName {
     }
 }
 
+/// A trait for aliasing a statement or a field/column.
 pub trait Aliasable
 where
     Self: Parametric + Buildable + Erroneous,
 {
+    /// Alias the current statement or field/column.
+    ///
+    /// # Arguments
+    /// * `alias` - The alias name for the field/column or statement.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::*};
+    /// # let name =  Field::new("name");
+    /// let moniker =  AliasName::new("moniker");
+    /// assert_eq!(name.__as__(moniker).build(), "name AS moniker");
+    ///    
+    /// # let name =  Field::new("name");
+    /// assert_eq!(name.__as__("moniker").build(), "name AS moniker");
+    ///
+    /// # let users =  Table::new("users");
+    /// # let selected_users =  AliasName::new("selected_users");
+    /// let select = select(All).from(users).__as__(selected_users);
+    /// assert_eq!(
+    ///    select.build(),
+    ///    "(SELECT * FROM users) AS selected_users"
+    ///    );
+    /// ```
     fn __as__(&self, alias: impl Into<AliasName>) -> Alias {
         let alias: AliasName = alias.into();
         let graph_string = format!("{} AS {}", self.build_aliasable(), &alias);
 
         Alias {
             name: alias,
-            aliased: self.build().into(),
             bindings: self.get_bindings(),
             errors: self.get_errors(),
             graph_string,
         }
     }
 
+    /// builds current statement or field/column. This is useful for
+    /// modifying the original build mostly slightly. e.g we can wrap select
+    /// statement and trim the end semi-column.
     fn build_aliasable(&self) -> String {
         self.build()
     }
