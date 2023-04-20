@@ -7,9 +7,7 @@
 
 use std::{borrow::Cow, fmt::Display};
 
-use crate::traits::{
-    Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Operation, Parametric,
-};
+use crate::{Binding, BindingsList, Buildable, Conditional, Erroneous, Operation, Parametric};
 
 use super::Empty;
 
@@ -80,7 +78,7 @@ impl Filter {
     ///     .or(title.equal("Professor"));
     /// ```
     pub fn or(self, filter: Operation) -> Self {
-        let precendence = self._______bracket_if_not_already();
+        let precendence = self.bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
         let ref filter = filter.build();
@@ -109,7 +107,7 @@ impl Filter {
     ///     .and(title.equal("Professor"));
     /// ```
     pub fn and(self, filter: impl Buildable + Parametric) -> Self {
-        let precendence = self._______bracket_if_not_already();
+        let precendence = self.bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
         let ref filter = filter.build();
@@ -144,7 +142,7 @@ impl Filter {
     }
 
     /// Wraps this `Filter` instance in a set of brackets if it isn't already wrapped.
-    fn _______bracket_if_not_already(&self) -> impl Display {
+    fn bracket_if_not_already(&self) -> impl Display {
         let filter = self.to_string();
         match (filter.starts_with('('), filter.ends_with(')')) {
             (true, true) => format!("{self}"),
@@ -213,5 +211,43 @@ impl Parametric for Filter {
 impl std::fmt::Display for Filter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Field, Operatable, ToRaw};
+
+    use super::*;
+
+    #[test]
+    fn test_filter() {
+        let age = Field::new("age");
+        let title = Field::new("title");
+
+        let filter = cond(age.greater_than(18))
+            .or(title.equal("Professor"))
+            .and(age.less_than(100));
+
+        assert_eq!(
+            filter.to_raw().build(),
+            "(age > 18) OR (title = 'Professor') AND (age < 100)"
+        );
+    }
+
+    #[test]
+    fn test_filter_bracketed() {
+        let age = Field::new("age");
+        let title = Field::new("title");
+
+        let filter = cond(age.greater_than(18))
+            .or(title.equal("Professor"))
+            .and(age.less_than(100));
+
+        let bracketed_filter = filter.bracketed();
+        assert_eq!(
+            bracketed_filter.to_raw().build(),
+            "((age > 18) OR (title = 'Professor') AND (age < 100))"
+        );
     }
 }
