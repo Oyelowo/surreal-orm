@@ -107,7 +107,6 @@ impl Queryable for RemoveEventStatement {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::Database;
 
     #[test]
     fn test_remove_event() {

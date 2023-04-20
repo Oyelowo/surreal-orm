@@ -31,7 +31,7 @@ use crate::{
     types::Database,
 };
 
-/// Demove database statement.
+/// Remove database statement.
 ///
 /// # Arguments
 ///
@@ -39,7 +39,8 @@ use crate::{
 ///
 /// # Example
 /// ```rust
-///  use surrealdb_query_builder::{*, statements::remove_database};
+/// # use surrealdb_query_builder as surrealdb_orm;
+///  use surrealdb_orm::{*, statements::remove_database};
 ///  assert_eq!(
 ///          remove_database("codebreather").build(),
 ///          "REMOVE DATABASE codebreather;"
