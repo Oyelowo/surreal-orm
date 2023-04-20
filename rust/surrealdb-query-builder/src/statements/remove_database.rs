@@ -31,9 +31,37 @@ use crate::{
     types::Database,
 };
 
+/// Demove database statement.
+///
+/// # Arguments
+///
+/// * `database` - The name of the database to be removed.
+///
+/// # Example
+/// ```rust
+///  use surrealdb_query_builder::{*, statements::remove_database};
+///  assert_eq!(
+///          remove_database("codebreather").build(),
+///          "REMOVE DATABASE codebreather;"
+///      );
+///
+///  let codebreather = Database::new("codebreather");
+///  assert_eq!(
+///          remove_database(codebreather).build(),
+///          "REMOVE DATABASE codebreather;"
+///      );
+///  
+///  let codebreather = Database::new("codebreather");
+///  assert_eq!(
+///          remove_database(codebreather).to_raw().build(),
+///          "REMOVE DATABASE codebreather;"
+///      );
+/// ```
 pub fn remove_database(database: impl Into<Database>) -> RemoveDatabaseStatement {
     RemoveDatabaseStatement::new(database)
 }
+
+/// A statement for removing a database.
 pub struct RemoveDatabaseStatement {
     database: Database,
 }
@@ -48,7 +76,7 @@ impl RemoveDatabaseStatement {
 
 impl Buildable for RemoveDatabaseStatement {
     fn build(&self) -> String {
-        format!("REMOVE DATABASE {}", self.database)
+        format!("REMOVE DATABASE {};", self.database)
     }
 }
 
@@ -67,3 +95,16 @@ impl Parametric for RemoveDatabaseStatement {
 impl Erroneous for RemoveDatabaseStatement {}
 
 impl Queryable for RemoveDatabaseStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_statement() {
+        assert_eq!(
+            remove_database("oyelowo").build(),
+            "REMOVE DATABASE oyelowo;"
+        );
+    }
+}

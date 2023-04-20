@@ -77,7 +77,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_let_statement() {
+    fn test_define_statement() {
         assert_eq!(
             define_database("oyelowo").build(),
             "DEFINE DATABASE oyelowo;"
