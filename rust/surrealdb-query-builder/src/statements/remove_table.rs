@@ -26,10 +26,7 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::Table,
-};
+use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Table};
 
 /// Remove table statement
 ///
