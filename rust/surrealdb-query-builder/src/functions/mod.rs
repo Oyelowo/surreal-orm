@@ -8,7 +8,8 @@
 //! This is it
 
 pub mod array;
-pub mod count;
+mod count;
+pub use count::*;
 pub mod crypto;
 pub mod geo;
 pub mod http;

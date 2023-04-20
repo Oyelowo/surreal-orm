@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use surrealdb::sql;
+
 use crate::{
     traits::{BindingsList, Buildable, Parametric},
     Aliasable, Erroneous, ErrorList,
@@ -26,7 +28,7 @@ impl Display for Function {
 
 impl Buildable for Function {
     fn build(&self) -> String {
-        self.query_string.clone()
+        self.query_string.to_string()
     }
 }
 

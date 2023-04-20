@@ -20,13 +20,9 @@
 // crypto::scrypt::compare()	Compares an scrypt hash to a password
 // crypto::scrypt::generate()	Generates a new scrypt hashed password
 
-use surrealdb::sql;
-
 use crate::{
-    statements::let_,
-    traits::{Binding, Buildable, ToRaw},
-    types::{Field, Function, Param},
-    StrandLike,
+    statements::let_, traits::Buildable, types::Function, Field, Param, Parametric, StrandLike,
+    ToRaw,
 };
 
 pub(crate) fn create_fn_with_single_value(
@@ -34,31 +30,11 @@ pub(crate) fn create_fn_with_single_value(
     function_suffix: &str,
 ) -> Function {
     let value: StrandLike = value.into();
-    let mut bindings = vec![];
-    let (value_bindings, param) = bind_value(value);
-
-    bindings.extend(value_bindings);
 
     Function {
-        query_string: format!("crypto::{function_suffix}({})", param),
-        bindings,
+        query_string: format!("crypto::{function_suffix}({})", value.build()),
+        bindings: value.get_bindings(),
     }
-}
-
-fn bind_value(value: StrandLike) -> (Vec<Binding>, String) {
-    let mut bindings = vec![];
-
-    let param = match value {
-        StrandLike::Strand(string) => {
-            let binding = Binding::new(string);
-            let param = binding.get_param_dollarised();
-            bindings.push(binding);
-            param
-        }
-        StrandLike::Field(field) => field.to_string(),
-        StrandLike::Param(param) => param.to_string(),
-    };
-    (bindings, param)
 }
 
 pub(crate) fn create_fn_with_two_values(
@@ -69,13 +45,15 @@ pub(crate) fn create_fn_with_two_values(
     let value1: StrandLike = value1.into();
     let value2: StrandLike = value2.into();
     let mut bindings = vec![];
-    let (bindings1, param1) = bind_value(value1);
-    let (bindings2, param2) = bind_value(value2);
-    bindings.extend(bindings1);
-    bindings.extend(bindings2);
+    bindings.extend(value1.get_bindings());
+    bindings.extend(value2.get_bindings());
 
     Function {
-        query_string: format!("crypto::{function_suffix}({}, {})", param1, param2),
+        query_string: format!(
+            "crypto::{function_suffix}({}, {})",
+            value1.build(),
+            value2.build()
+        ),
         bindings,
     }
 }
@@ -83,14 +61,14 @@ pub(crate) fn create_fn_with_two_values(
 macro_rules! create_fn_with_single_arg_value {
     ($function_name: expr) => {
         paste::paste! {
-            pub fn [<$function_name _fn>](value: impl Into<crate::StrandLike>) -> Function {
+            pub fn [<$function_name _fn>](value: impl Into<$crate::StrandLike>) -> $crate::Function {
                 create_fn_with_single_value(value, $function_name)
             }
 
             #[macro_export]
             macro_rules! [<cryto_ $function_name>] {
                 ( $value:expr ) => {
-                    crate::functions::crypto::[<$function_name _fn>]($value)
+                    $crate::functions::crypto::[<$function_name _fn>]($value)
                 };
             }
             pub use [<cryto_ $function_name>] as [<$function_name>];
@@ -99,30 +77,30 @@ macro_rules! create_fn_with_single_arg_value {
             fn [<test_ $function_name>]() {
                 let result = [<$function_name _fn>]("Oyelowo");
                 assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("crypto::{}('Oyelowo')", $function_name));
+                assert_eq!(result.to_raw().build(), format!("crypto::{}('Oyelowo')", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _with_macro>]() {
                 let result = [<$function_name>]!("Oyelowo");
                 assert_eq!(result.fine_tune_params(), format!("crypto::{}($_param_00000001)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("crypto::{}('Oyelowo')", $function_name));
+                assert_eq!(result.to_raw().build(), format!("crypto::{}('Oyelowo')", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _with_field>]() {
-                let title = Field::new("title");
+                let title = $crate::Field::new("title");
                 let result = [<$function_name _fn>](title);
                 assert_eq!(result.fine_tune_params(), format!("crypto::{}(title)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("crypto::{}(title)", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _macro_with_field>]() {
-                let title = Field::new("title");
+                let title = $crate::Field::new("title");
                 let result = [<$function_name>]!(title);
                 assert_eq!(result.fine_tune_params(), format!("crypto::{}(title)", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("crypto::{}(title)", $function_name));
+                assert_eq!(result.to_raw().build(), format!("crypto::{}(title)", $function_name));
             }
         }
     };
@@ -232,7 +210,7 @@ fn test_argon2_compare() {
         "crypto::argon2::compare($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::compare('Oyelowo', 'Oyedayo')"
     );
 }
@@ -248,7 +226,7 @@ fn test_argon2_compare_with_param() {
         "crypto::argon2::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::compare($hash, $pass)"
     );
 }
@@ -261,7 +239,7 @@ fn test_argon2_generate() {
         "crypto::argon2::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::generate('Oyelowo')"
     );
 }
@@ -274,7 +252,7 @@ fn test_argon2_compare_macro_with_raw_values() {
         "crypto::argon2::compare($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::compare('$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA', 'the strongest password')"
     );
 }
@@ -290,7 +268,7 @@ fn test_argon2_compare_macro_with_fields() {
         "crypto::argon2::compare(hash, pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::compare(hash, pass)"
     );
 }
@@ -306,7 +284,7 @@ fn test_argon2_compare_macro_with_param() {
         "crypto::argon2::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::compare($hash, $pass)"
     );
 }
@@ -319,7 +297,7 @@ fn test_argon2_generate_fn() {
         "crypto::argon2::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::argon2::generate('Oyelowo')"
     );
 }
@@ -336,7 +314,7 @@ fn test_pbkdf2_compare_with_param() {
         "crypto::pbkdf2::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::compare($hash, $pass)"
     );
 }
@@ -349,7 +327,7 @@ fn test_pbkdf2_generate() {
         "crypto::pbkdf2::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::generate('Oyelowo')"
     );
 }
@@ -362,7 +340,7 @@ fn test_pbkdf2_compare_macro_with_raw_values() {
         "crypto::pbkdf2::compare($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::compare('$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA', 'the strongest password')"
     );
 }
@@ -378,7 +356,7 @@ fn test_pbkdf2_compare_macro_with_fields() {
         "crypto::pbkdf2::compare(hash, pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::compare(hash, pass)"
     );
 }
@@ -394,7 +372,7 @@ fn test_pbkdf2_compare_macro_with_param() {
         "crypto::pbkdf2::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::compare($hash, $pass)"
     );
 }
@@ -407,7 +385,7 @@ fn test_pbkdf2_generate_fn() {
         "crypto::pbkdf2::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::pbkdf2::generate('Oyelowo')"
     );
 }
@@ -423,7 +401,7 @@ fn test_scrypt_compare_with_param() {
         "crypto::scrypt::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::compare($hash, $pass)"
     );
 }
@@ -436,7 +414,7 @@ fn test_scrypt_generate() {
         "crypto::scrypt::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::generate('Oyelowo')"
     );
 }
@@ -449,7 +427,7 @@ fn test_scrypt_compare_macro_with_raw_values() {
         "crypto::scrypt::compare($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::compare('$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA', 'the strongest password')"
     );
 }
@@ -465,7 +443,7 @@ fn test_scrypt_compare_macro_with_fields() {
         "crypto::scrypt::compare(hash, pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::compare(hash, pass)"
     );
 }
@@ -481,7 +459,7 @@ fn test_scrypt_compare_macro_with_param() {
         "crypto::scrypt::compare($hash, $pass)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::compare($hash, $pass)"
     );
 }
@@ -494,7 +472,7 @@ fn test_scrypt_generate_fn() {
         "crypto::scrypt::generate($_param_00000001)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "crypto::scrypt::generate('Oyelowo')"
     );
 }

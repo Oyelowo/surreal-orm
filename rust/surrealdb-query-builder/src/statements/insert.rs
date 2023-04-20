@@ -5,80 +5,139 @@
  * Licensed under the MIT license
  */
 
-use std::{
-    collections::HashMap,
-    fmt::{format, Display},
-    marker::PhantomData,
-};
+// Statement syntax
+// INSERT [ IGNORE ] INTO @what
+// 	[ @value
+// 	  | (@fields) VALUES (@values)
+// 		[ ON DUPLICATE KEY UPDATE @field = @value ... ]
+// 	]
+// ;
+use std::{fmt::Display, marker::PhantomData};
 
-use async_trait::async_trait;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use serde_json::{json, Value};
-use surrealdb::{
-    engine::local::Db,
-    method::Query,
-    opt::QueryResult,
-    sql::{self, Operator},
-    Response, Surreal,
-};
+use serde::{de::DeserializeOwned, Serialize};
+use serde_json::json;
+use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
-        SurrealdbModel,
-    },
-    types::{expression::Expression, Updateables},
-    ReturnableDefault, ReturnableStandard,
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbNode},
+    types::Updateables,
+    ReturnableDefault,
 };
 
 use super::SelectStatement;
 
-pub struct InsertStatement<T: Serialize + DeserializeOwned + SurrealdbModel> {
-    node_type: PhantomData<T>,
+/// Insert statement initialization builder
+pub struct InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     on_duplicate_key_update: Vec<String>,
-    bindings: BindingsList,
     // You can select values to copy data from an existing table into a new one
     select_query_string: Option<String>,
+    bindings: BindingsList,
+    node_type: PhantomData<T>,
 }
 
+/// Creates a new INSERT SQL statement for a given type.
+///
+/// The INSERT statement can be used to insert or update data into the database, using the same statement syntax as the traditional SQL Insert statement.
+///
+/// # Arguments
+///
+/// * `insertables` - a single or list of serializable surrealdb nodes or a select statement to
+/// copy from another table.
+/// # Examples
+///
+/// ```rust, ignore
+/// // You can insert a single object
+/// insert(User{
+///         name: "Oyelowo".to_string(),
+///         age: 192
+///     });
+///
+/// // You can also insert a list of object
+/// insert(vec![
+///     User{
+///         name: "Oyelowo".to_string(),
+///         age: 192
+///     },
+///     User{
+///         name: "Oyedayo".to_string(),
+///         age: 192
+///     },
+/// ]);
+///     
+/// // You can also insert from another table. This is good for copying into a new table:
+/// insert(select(All)
+///         .from(Company::table_name())
+///         .where_(age.greater(18))
+/// );
+/// ```
 pub fn insert<T>(insertables: impl Into<Insertables<T>>) -> InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    let mut builder = InsertStatement::<T>::new();
     let insertables: Insertables<T> = insertables.into();
-    builder.insert(insertables)
+    let mut select_query = None;
+
+    let bindings = match insertables {
+        Insertables::Node(node) => {
+            let bindings = create_bindings_for_node(&node);
+            bindings
+        }
+        Insertables::Nodes(nodes) => nodes
+            .into_iter()
+            .flat_map(|n| create_bindings_for_node(&n))
+            .collect::<Vec<_>>(),
+        Insertables::FromQuery(query) => {
+            let bindings = query.get_bindings();
+            select_query = Some(query.build());
+            bindings
+        }
+    };
+
+    InsertStatement::<T> {
+        bindings,
+        select_query_string: select_query,
+        on_duplicate_key_update: vec![],
+        node_type: PhantomData,
+    }
 }
 
-impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
-impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 
 impl<T> ReturnableDefault<T> for InsertStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealdbModel
+    T: Serialize + DeserializeOwned + SurrealdbNode
 {
 }
 
 impl<T> Display for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
     }
 }
 
+/// Things that can be inserted including a single or list of surrealdb nodes or a select statement
+/// when copying from a table to another table.
 pub enum Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
+    /// A single surrealdb node
     Node(T),
+    /// A list of surrealdb node
     Nodes(Vec<T>),
+    /// A select statement
     FromQuery(SelectStatement),
 }
 
 impl<T> From<Vec<T>> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: Vec<T>) -> Self {
         Self::Nodes(value)
@@ -87,7 +146,7 @@ where
 
 impl<T> From<T> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: T) -> Self {
         Self::Node(value)
@@ -96,7 +155,7 @@ where
 
 impl<T> From<SelectStatement> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: SelectStatement) -> Self {
         Self::FromQuery(value)
@@ -105,73 +164,61 @@ where
 
 impl<T> From<&SelectStatement> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealdbModel,
+    T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: &SelectStatement) -> Self {
         Self::FromQuery(value.to_owned())
     }
 }
 
-impl<T: SurrealdbModel + DeserializeOwned + Serialize> Parametric for T {
-    fn get_bindings(&self) -> BindingsList {
-        let value = self;
-        // let fields_names = get_field_names(value);
-        let field_names = T::get_serializable_field_names();
+fn create_bindings_for_node<T>(node: &T) -> BindingsList
+where
+    T: SurrealdbNode + DeserializeOwned + Serialize,
+{
+    let value = node;
+    let field_names = T::get_serializable_field_names();
 
-        field_names
-            .into_iter()
-            .map(|field_name| {
-                let field_value = get_field_value(value, &field_name)
-                    .expect("Unable to get value name. This should never happen!");
-                Binding::new(field_value).with_name(field_name.into())
-            })
-            .collect::<Vec<_>>()
-    }
+    field_names
+        .into_iter()
+        .map(|field_name| {
+            let field_value = get_field_value(value, &field_name)
+                .expect("Unable to get value name. This should never happen!");
+            Binding::new(field_value).with_name(field_name.into())
+        })
+        .collect::<Vec<_>>()
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for Insertables<T> {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            Insertables::Node(node) => node.get_bindings(),
-            Insertables::Nodes(nodes) => nodes
-                .into_iter()
-                .flat_map(|n| n.get_bindings())
-                .collect::<Vec<_>>(),
-            Insertables::FromQuery(query) => query.get_bindings(),
-        }
-    }
-}
-
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
-    pub fn new() -> Self {
-        Self {
-            on_duplicate_key_update: vec![],
-            bindings: vec![],
-            node_type: PhantomData,
-            select_query_string: None,
-        }
-    }
-
-    pub fn insert<V: Into<Insertables<T>>>(mut self, value: V) -> Self {
-        let value: Insertables<T> = value.into();
-        if let Insertables::FromQuery(query_select) = &value {
-            self.select_query_string = Some(format!("{query_select}"));
-        }
-
-        // I am handling deriving other values params later during actual query building
-        // since we can derive that by chunking the bindings by the number of serialized fields
-        // which I am able to derive at compile time. Call me zeus Oyelowo! haha!
-        // Leaving this here for posteriy
-        // let xx = match value {
-        //     Insertables::Node(n) => [],
-        //     Insertables::Nodes(_) => todo!(),
-        //     Insertables::FromQuery(_) => todo!(),
-        // };
-        let bindings = value.get_bindings();
-        self.bindings.extend(bindings);
-        self
-    }
-
+impl<T> InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    /// Generates ON DUPLICATE KEY UPDATE clause.
+    /// This updates records which already exist by specifying an ON DUPLICATE KEY UPDATE clause.
+    /// This clause also allows incrementing and decrementing numeric values, and adding or removing values from arrays.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, ignore
+    /// // increment a field number. Generates  +=
+    /// updater(score).increment_by(5)
+    /// // or alias
+    /// updater(score).plus_equal(5)
+    ///
+    /// // decrement a field number. Generates  -=
+    /// updater(score).decrement_by(5)
+    /// // or alias
+    /// updater(score).minus_equal(5)
+    ///
+    /// // add to an array. Generates  +=
+    /// updater(friends_names).append("Oyelowo")
+    /// // or alias
+    /// updater(friends_names).plus_equal("Oyelowo")
+    ///
+    /// // remove value from an array. Generates  -=
+    /// updater(friends_names).remove("Oyedayo")
+    /// // or alias
+    /// updater(friends_names).minus_equal("Oyedayo")
+    /// ```
     pub fn on_duplicate_key_update(mut self, updateables: impl Into<Updateables>) -> Self {
         let updates: Updateables = updateables.into();
         self.bindings.extend(updates.get_bindings());
@@ -184,39 +231,26 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> InsertStatement<T> {
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertStatement<T> {
-    // fn build(&self) -> String {}
+impl<T> Buildable for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn build(&self) -> String {
         if self.bindings.is_empty() {
-            return "".to_string();
+            return "".into();
         }
 
-        let bindings = self.bindings.as_slice();
-        let field_names = T::get_serializable_field_names();
-        // let field_names = bindings
-        //     .iter()
-        //     .map(|b| b.get_original_name().to_owned())
-        //     .collect::<Vec<_>>();
-
-        let mut query = String::new();
-        query.push_str("INSERT INTO ");
-        query.push_str(&T::table_name());
+        let mut query = format!("INSERT INTO {}", &T::table_name());
 
         if let Some(query_select) = &self.select_query_string {
-            query.push_str(" (");
-            query.push_str(&query_select.trim_end_matches(";"));
-            query.push_str(")");
+            query = format!("{query} ({})", &query_select.trim_end_matches(";"));
         } else {
-            query.push_str(" (");
-            query.push_str(&field_names.join(", "));
-            query.push_str(") ");
-
-            query.push_str("VALUES ");
+            let field_names = T::get_serializable_field_names();
 
             let placeholders = self
                 .bindings
                 .iter()
-                .map(|b| format!("${}", b.get_param()))
+                .map(|b| format!("{}", b.get_param_dollarised()))
                 .collect::<Vec<_>>()
                 .chunks_exact(field_names.len())
                 .map(|fields_values_params_list| {
@@ -224,42 +258,27 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for InsertState
                 })
                 .collect::<Vec<_>>()
                 .join(", ");
-            // .join(", ");
 
-            // query.push_str(" (");
-            query.push_str(&placeholders);
-            // query.push_str(") ");
+            let field_names = &field_names.join(", ");
+            query = format!("{query} ({field_names}) VALUES {placeholders}",);
         }
 
         if !&self.on_duplicate_key_update.is_empty() {
             let updates_str = self.on_duplicate_key_update.join(", ");
-
-            query.push_str(" ON DUPLICATE KEY UPDATE ");
-            query.push_str(&updates_str);
+            query = format!("{query}  ON DUPLICATE KEY UPDATE {updates_str}",);
         }
 
-        query.push_str(";");
-        query
+        format!("{query};")
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for InsertStatement<T> {
+impl<T> Parametric for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
-}
-
-fn get_field_names<T>(value: &T) -> Vec<String>
-where
-    T: serde::Serialize,
-{
-    serde_json::to_value(value)
-        .unwrap()
-        .as_object()
-        .unwrap()
-        .keys()
-        .map(ToString::to_string)
-        .collect()
 }
 
 fn get_field_value<T: Serialize>(
@@ -270,6 +289,5 @@ where
     T: serde::Serialize,
 {
     let whole_struct = json!(value);
-    // TODO: Improve error handling
     Ok(sql::json(&whole_struct[field_name].to_string())?)
 }

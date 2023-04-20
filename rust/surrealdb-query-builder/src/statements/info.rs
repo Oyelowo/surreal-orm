@@ -8,58 +8,123 @@
 use std::fmt;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Runnable,
-        SurrealdbModel,
-    },
-    types::{expression::Expression, Updateables},
+    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
+    Scope, Table,
 };
 
-pub fn info_for() -> InfoStatement {
-    InfoStatement::new()
+/// Creates statement for INFO for KV(i.e system), NAMESPACE, DATABASE, SCOPE, or TABLE.
+///
+/// Examples
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::info_for};
+/// info_for().kv().build();
+pub fn info_for() -> InfoStatementInit {
+    InfoStatementInit {
+        level: InfoLevel::Kv,
+    }
 }
 
-// Enum representing the different levels of the SurrealDB system
-enum SurrealLevel {
+/// Enum representing the different levels of the SurrealDB system
+enum InfoLevel {
     Kv,
     Namespace,
     Database,
-    Scope(String),
-    Table(String),
+    Scope(Scope),
+    Table(Table),
 }
 
-// Struct representing the INFO statement
-pub struct InfoStatement {
-    level: SurrealLevel,
-    errors: ErrorList,
+/// Information statement initialization builder
+pub struct InfoStatementInit {
+    level: InfoLevel,
 }
 
-impl InfoStatement {
-    fn new() -> Self {
-        InfoStatement {
-            level: SurrealLevel::Kv,
-            errors: vec![],
-        }
+impl InfoStatementInit {
+    /// Creates statement for INFO for the KV(i.e system).
+    /// The top-level KV command returns information regarding the namespaces which
+    /// exists within the SurrealDB system.
+    /// You must be authenticated as a top-level root user to execute this comman
+    /// Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::info_for};
+    /// info_for().kv().build();
+    pub fn kv(mut self) -> InfoStatement {
+        self.level = InfoLevel::Kv;
+        self.into()
     }
 
-    pub fn namespace(mut self) -> Self {
-        self.level = SurrealLevel::Namespace;
-        self
+    /// Creates statement for INFO for NAMESPACE.
+    /// The NS or NAMESPACE command returns information regarding the logins, tokens, and databases under a specific Namespace.
+    ///
+    /// You must be authenticated as a top-level root user, or a namespace user to execute this command.
+    /// You must have a NAMESPACE selected before running this command.
+    /// Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::info_for};
+    /// info_for().namespace().build();
+    pub fn namespace(mut self) -> InfoStatement {
+        self.level = InfoLevel::Namespace;
+        self.into()
     }
 
-    pub fn database(mut self) -> Self {
-        self.level = SurrealLevel::Database;
-        self
+    /// Creates statement for INFO for DATABASE.
+    /// The DB or DATABASE command returns information regarding the logins, tokens, and scopes, and tables under a specific Database.
+    ///
+    /// You must be authenticated as a top-level root user, a namespace user, or a database user to execute this command.
+    /// You must have a NAMESPACE and a DATABASE selected before running this command.
+    /// Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::info_for};
+    /// info_for().database().build();
+    pub fn database(mut self) -> InfoStatement {
+        self.level = InfoLevel::Database;
+        self.into()
     }
 
-    pub fn scope(mut self, scope: &str) -> Self {
-        self.level = SurrealLevel::Scope(scope.to_string());
-        self
+    /// Creates statement for INFO for SCOPE.
+    /// The SCOPE command returns information regarding the tokens configured under a specific Scope.
+    ///
+    /// You must be authenticated as a top-level root user, a namespace user, or a database user to execute this command.
+    /// You must have a NAMESPACE and a DATABASE selected before running this command.
+    ///
+    /// Examples
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::info_for};
+    ///  info_for().scope("test_scope").build();
+    pub fn scope(mut self, scope: impl Into<Scope>) -> InfoStatement {
+        self.level = InfoLevel::Scope(scope.into());
+        self.into()
     }
 
-    pub fn table(mut self, table: &str) -> Self {
-        self.level = SurrealLevel::Table(table.to_string());
-        self
+    /// Creates statement for INFO for TABLE.
+    /// The TABLE command returns information regarding the events, fields, indexes, and foreign table configurations on a specific Table.
+    ///
+    /// You must be authenticated as a top-level root user, a namespace user, or a database user to execute this command.
+    /// You must have a NAMESPACE and a DATABASE selected before running this command.
+    ///
+    /// Examples
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::info_for};
+    ///  info_for().table("test_table").build();
+    pub fn table(mut self, table: impl Into<Table>) -> InfoStatement {
+        self.level = InfoLevel::Table(table.into());
+        self.into()
+    }
+}
+
+/// Information statement builder
+pub struct InfoStatement(InfoStatementInit);
+
+impl From<InfoStatementInit> for InfoStatement {
+    fn from(value: InfoStatementInit) -> Self {
+        Self(value)
     }
 }
 
@@ -75,12 +140,12 @@ impl Parametric for InfoStatement {
 
 impl Buildable for InfoStatement {
     fn build(&self) -> String {
-        match &self.level {
-            SurrealLevel::Kv => "INFO FOR KV;".to_string(),
-            SurrealLevel::Namespace => "INFO FOR NS;".to_string(),
-            SurrealLevel::Database => "INFO FOR DB;".to_string(),
-            SurrealLevel::Scope(scope) => format!("INFO FOR SCOPE {};", scope),
-            SurrealLevel::Table(table) => format!("INFO FOR TABLE {};", table),
+        match &self.0.level {
+            InfoLevel::Kv => "INFO FOR KV;".to_string(),
+            InfoLevel::Namespace => "INFO FOR NS;".to_string(),
+            InfoLevel::Database => "INFO FOR DB;".to_string(),
+            InfoLevel::Scope(scope) => format!("INFO FOR SCOPE {};", scope),
+            InfoLevel::Table(table) => format!("INFO FOR TABLE {};", table),
         }
     }
 }
@@ -91,11 +156,38 @@ impl fmt::Display for InfoStatement {
     }
 }
 
-// Example usage
-fn main() {
-    let statement = InfoStatement::new().database().build();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::traits::Buildable;
 
-    println!("{}", statement);
+    #[test]
+    fn test_info_for_kv_build() {
+        let statement = info_for().kv().build();
+        assert_eq!(statement, "INFO FOR KV;");
+    }
 
-    // Output: "INFO FOR DB;"
+    #[test]
+    fn test_info_for_namespace_build() {
+        let statement = info_for().namespace().build();
+        assert_eq!(statement, "INFO FOR NS;");
+    }
+
+    #[test]
+    fn test_info_for_database_build() {
+        let statement = info_for().database().build();
+        assert_eq!(statement, "INFO FOR DB;");
+    }
+
+    #[test]
+    fn test_info_for_scope_build() {
+        let statement = info_for().scope("test_scope").build();
+        assert_eq!(statement, "INFO FOR SCOPE test_scope;");
+    }
+
+    #[test]
+    fn test_info_for_table_build() {
+        let statement = info_for().table("test_table").build();
+        assert_eq!(statement, "INFO FOR TABLE test_table;");
+    }
 }

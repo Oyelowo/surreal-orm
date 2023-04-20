@@ -7,30 +7,40 @@
 
 use std::fmt::Display;
 
-use surrealdb::sql;
-
 use crate::{
     traits::BindingsList,
     traits::{Buildable, Erroneous, Parametric, Queryable},
     types::DurationLike,
 };
 
+/// Creates a SLEEP statement.
+///
+/// Examples
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use std::time::Duration;
+/// use surrealdb_orm::{*, statements::sleep};
+///
+/// sleep(Duration::from_secs(43));
 pub fn sleep(duration: impl Into<DurationLike>) -> SleepStatement {
-    SleepStatement::new(duration)
-}
+    let duration: DurationLike = duration.into();
 
-pub struct SleepStatement(String);
-
-impl SleepStatement {
-    fn new(duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        // let duration = sql::Duration::from(duration);
-        Self(duration.to_string())
+    SleepStatement {
+        duration: duration.build(),
+        bindings: duration.get_bindings(),
     }
 }
+
+/// Sleep statement initialization builder
+pub struct SleepStatement {
+    duration: String,
+    bindings: BindingsList,
+}
+
 impl Buildable for SleepStatement {
     fn build(&self) -> String {
-        format!("SLEEP {};", self.0)
+        format!("SLEEP {};", self.duration)
     }
 }
 
@@ -39,7 +49,7 @@ impl Erroneous for SleepStatement {}
 
 impl Parametric for SleepStatement {
     fn get_bindings(&self) -> BindingsList {
-        vec![]
+        self.bindings.to_vec()
     }
 }
 
@@ -51,13 +61,17 @@ impl Display for SleepStatement {
 
 #[cfg(test)]
 mod tests {
-
     use std::time::Duration;
+
+    use crate::ToRaw;
 
     use super::*;
 
     #[test]
     fn test_sleep_statement() {
-        assert_eq!(sleep(Duration::from_secs(43)).build(), "SLEEP 43s;");
+        let statement = sleep(Duration::from_secs(43));
+        assert_eq!(statement.fine_tune_params(), "SLEEP $_param_00000001;");
+        assert_eq!(statement.to_raw().build(), "SLEEP 43s;");
+        assert_eq!(statement.get_bindings().len(), 1);
     }
 }

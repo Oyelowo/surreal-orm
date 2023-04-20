@@ -13,7 +13,58 @@ use crate::{
     traits::{BindingsList, Parametric},
     traits::{Buildable, Erroneous, Queryable},
 };
-
+/// Creates a Transaction statement starting with BEGIN TRANSACTION and ends with COMMIT
+/// TRANSACTION or END TRANSACTION.
+///
+/// Transactions
+/// Each statement within SurrealDB is run within its own transaction.
+/// If a set of changes need to be made together, then groups of statements can be run
+/// together as a single transaction, either succeeding as a whole,
+/// or failing without leaving any residual data modifications.
+///
+/// Starting a transaction
+/// The BEGIN TRANSACTION statement can be used to run a group of statements together,
+/// either succeeding as a whole, or failing. If all of the statements within a transaction succeed,
+/// and the transaction is successful, then all of the data modifications made during the transaction
+/// are committed and become a permanent part of the database. If a transaction encounters errors
+/// and must be cancelled or rolled back, then any data modification made within the transaction is rolledback,
+/// and will not be visible within the database.
+///
+/// Example
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use std::time::Duration;
+/// use surrealdb_orm::{*, statements::{begin_transaction, order, select}};
+/// # let name = Field::new("name");
+/// # let age = Field::new("age");
+/// # let country = Field::new("country");
+/// # let city = Field::new("city");
+/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+///
+/// let statement1 = select(All)
+///     .from(fake_id)
+///     .where_(cond(city.is("Prince Edward Island"))
+///             .and(city.is("NewFoundland"))
+///             .or(city.like("Toronto")),
+///     )
+///     .order_by(order(&age).numeric())
+///     .limit(153)
+///     .start(10)
+///     .parallel();
+///
+/// let statement2 = select(All)
+///     .from(fake_id2)
+///     .where_(country.is("INDONESIA"))
+///     .order_by(order(&age).numeric())
+///     .limit(20)
+///     .start(5);
+///
+/// let transaction = begin_transaction()
+///     .query(statement1)
+///     .query(statement2)
+///     .commit_transaction();
 pub fn begin_transaction() -> QueryTransaction {
     BeginTransactionStatement::new()
 }
@@ -23,20 +74,21 @@ pub struct QueryTransaction {
 }
 
 impl QueryTransaction {
+    /// takes a statement as an argument
     pub fn query(mut self, query: impl Queryable + Parametric + Display) -> Self {
         self.data.bindings.extend(query.get_bindings());
         self.data.queries.push(query.to_string());
         self
     }
 
-    pub fn commit_transaction(mut self) -> TransactionCompletion {
+    pub fn commit_transaction(self) -> TransactionCompletion {
         let mut transaction = TransactionCompletion { data: self.data };
         transaction.data.transaction_completion_type =
             Some(TranctionCompletionType::CommitTransaction);
         transaction
     }
 
-    pub fn cancel_transaction(mut self) -> TransactionCompletion {
+    pub fn cancel_transaction(self) -> TransactionCompletion {
         let mut transaction = TransactionCompletion { data: self.data };
         transaction.data.transaction_completion_type =
             Some(TranctionCompletionType::CancelTransaction);
@@ -44,6 +96,7 @@ impl QueryTransaction {
     }
 }
 
+/// Transaction statement initialization builder
 pub struct BeginTransactionStatement;
 
 impl BeginTransactionStatement {
@@ -114,20 +167,16 @@ impl fmt::Display for TransactionCompletion {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
     use crate::{
-        filter::cond,
-        query_select::{order, select},
-        sql::{All, SurrealId},
-        Field, Operatable,
+        statements::{order, select},
+        *,
     };
 
     use super::*;
 
     #[test]
     fn test_transaction_commit() {
-        let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -136,11 +185,11 @@ mod tests {
 
         let statement1 = select(All)
             .from(fake_id)
-            .where_(cond(
-                city.is("Prince Edward Island")
+            .where_(
+                cond(city.is("Prince Edward Island"))
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
-            ))
+            )
             .order_by(order(&age).numeric())
             .limit(153)
             .start(10)
@@ -158,17 +207,14 @@ mod tests {
             .query(statement2)
             .commit_transaction();
 
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
-        assert_eq!(
-            format!("{transaction:#}"),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCOMMIT TRANSACTION\n\t"
-        );
+        assert_eq!(transaction.get_bindings().len(), 10);
+
+        insta::assert_display_snapshot!(transaction.fine_tune_params());
+        insta::assert_display_snapshot!(transaction.to_raw().build());
     }
 
     #[test]
     fn test_transaction_cancel() {
-        let name = Field::new("name");
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
@@ -177,11 +223,11 @@ mod tests {
 
         let statement1 = select(All)
             .from(fake_id)
-            .where_(cond(
-                city.is("Prince Edward Island")
+            .where_(
+                cond(city.is("Prince Edward Island"))
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
-            ))
+            )
             .order_by(order(&age).numeric())
             .limit(153)
             .start(10)
@@ -199,11 +245,9 @@ mod tests {
             .query(statement2)
             .cancel_transaction();
 
-        assert_debug_snapshot!(transaction.get_bindings());
-        assert_display_snapshot!(transaction);
-        assert_eq!(
-            format!("{transaction:#}"),
-"BEGIN TRANSACTION\n\nSELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;\n\nSELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;\n\nCANCEL TRANSACTION\n\t"
-        );
+        assert_eq!(transaction.get_bindings().len(), 10);
+
+        insta::assert_display_snapshot!(transaction.fine_tune_params());
+        insta::assert_display_snapshot!(transaction.to_raw().build());
     }
 }

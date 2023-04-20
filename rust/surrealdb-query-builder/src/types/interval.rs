@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use surrealdb::sql;
 
+use crate::{Buildable, StrandLike, Valuex};
+
 use super::{Field, Param};
 
 #[derive(Debug, Clone, Copy)]
@@ -33,28 +35,8 @@ impl Display for Interval {
     }
 }
 
-pub struct IntervalLike(sql::Value);
-
-impl From<Field> for IntervalLike {
-    fn from(value: Field) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<Param> for IntervalLike {
-    fn from(value: Param) -> Self {
-        Self(value.into())
-    }
-}
-
-impl From<IntervalLike> for sql::Value {
-    fn from(value: IntervalLike) -> Self {
-        value.0
-    }
-}
-
-impl From<Interval> for IntervalLike {
+impl From<Interval> for StrandLike {
     fn from(value: Interval) -> Self {
-        Self(value.to_string().into())
+        value.to_string().into()
     }
 }

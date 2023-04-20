@@ -7,10 +7,10 @@
 
 use std::ops::Deref;
 
-use surrealdb::sql;
+use surrealdb::sql::{self, Ident};
 
 use crate::{
-    array,
+    array, count,
     statements::{
         select::{select, Selectables},
         SelectStatement,
@@ -19,7 +19,7 @@ use crate::{
         Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric, ToRaw,
     },
     types::{cond, Param, Table},
-    ErrorList, Operation, Tables,
+    Alias, AliasName, Aliasable, ErrorList, Function, Operation, Tables,
 };
 
 use super::{Field, Filter, NumberLike, SurrealId};
@@ -340,10 +340,8 @@ impl Clause {
             All => format!("[*]"),
             Last => format!("[$]"),
             Index(index) => {
-                let index_bindings = Binding::new(index.clone().0.to_value());
-                let param_string = format!("{}", index_bindings.get_param_dollarised());
-                bindings = vec![index_bindings];
-                format!("[{param_string}]")
+                bindings = index.get_bindings();
+                index.build()
             }
             AnyEdgeFilter(edge_tables) => {
                 bindings = edge_tables.get_bindings();
@@ -481,8 +479,10 @@ impl From<&SelectStatement> for Clause {
     }
 }
 
+/// Use when you want an empty space. Also aliased as `E`.
 pub struct Empty;
 
+pub use Empty as E;
 impl Operatable for Empty {}
 
 impl Buildable for Empty {
@@ -514,7 +514,6 @@ impl Parametric for Empty {
         vec![]
     }
 }
-
 pub struct All;
 
 impl From<All> for Clause {
@@ -531,7 +530,7 @@ impl From<Last> for Clause {
 
 impl std::fmt::Display for All {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("*"))
+        write!(f, "*")
     }
 }
 
@@ -539,13 +538,21 @@ pub struct Last;
 
 impl std::fmt::Display for Last {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("*"))
+        write!(f, "$")
     }
 }
 
 // pub struct Index(u128);
 #[derive(Debug, Clone)]
 pub struct Index(NumberLike);
+
+impl Deref for Index {
+    type Target = NumberLike;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl From<Index> for Clause {
     fn from(value: Index) -> Self {
@@ -559,7 +566,7 @@ pub fn index(index: impl Into<NumberLike>) -> Index {
 
 impl std::fmt::Display for Index {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.0.clone().to_value()))
+        write!(f, "{}", self.0.build())
     }
 }
 

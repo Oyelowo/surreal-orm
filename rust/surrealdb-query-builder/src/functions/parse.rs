@@ -23,18 +23,19 @@ use surrealdb::sql;
 use crate::{
     traits::Binding,
     types::{Field, Function, Param, StrandLike},
+    Buildable, Parametric,
 };
 
 fn create_fn_with_single_string_arg(
-    number: impl Into<StrandLike>,
+    string: impl Into<StrandLike>,
     function_name: &str,
 ) -> Function {
-    let binding = Binding::new(number.into());
-    let query_string = format!("parse::{function_name}({})", binding.get_param_dollarised());
+    let string: StrandLike = string.into();
+    let query_string = format!("parse::{function_name}({})", string.build());
 
     Function {
         query_string,
-        bindings: vec![binding],
+        bindings: string.get_bindings(),
     }
 }
 
@@ -49,7 +50,7 @@ macro_rules! create_test_for_fn_with_single_arg {
             #[macro_export]
             macro_rules! [<parse_ $module_name _ $function_name>] {
                 ( $value:expr ) => {
-                    crate::functions::parse::[<$module_name>]::[<$function_name _fn>]($value)
+                    $crate::functions::parse::[<$module_name>]::[<$function_name _fn>]($value)
                 };
             }
 
@@ -61,8 +62,8 @@ macro_rules! create_test_for_fn_with_single_arg {
                 let result = [<$function_name _fn>](field);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
-                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
-                assert_eq!(result.to_raw().to_string(), format!("{}(field)", function_path));
+                assert_eq!(result.fine_tune_params(), format!("{}(field)", function_path));
+                assert_eq!(result.to_raw().build(), format!("{}(field)", function_path));
             }
 
             #[test]
@@ -70,7 +71,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 let result = [<$function_name _fn>]($arg);
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
                 assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
-                assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
+                assert_eq!(result.to_raw().build(), format!("{}('{}')", function_path, $arg));
             }
 
             #[test]
@@ -79,8 +80,8 @@ macro_rules! create_test_for_fn_with_single_arg {
                 let result = [<$function_name>]!(field);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
-                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
-                assert_eq!(result.to_raw().to_string(), format!("{}(field)", function_path));
+                assert_eq!(result.fine_tune_params(), format!("{}(field)", function_path));
+                assert_eq!(result.to_raw().build(), format!("{}(field)", function_path));
             }
 
             #[test]
@@ -89,8 +90,8 @@ macro_rules! create_test_for_fn_with_single_arg {
                 let result = [<$function_name>]!(param);
 
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
-                assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
-                assert_eq!(result.to_raw().to_string(), format!("{}($param)", function_path));
+                assert_eq!(result.fine_tune_params(), format!("{}($param)", function_path));
+                assert_eq!(result.to_raw().build(), format!("{}($param)", function_path));
             }
 
             #[test]
@@ -98,7 +99,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 let result = [<$function_name>]!($arg);
                 let function_path = format!("parse::{}::{}", $module_name, $function_name);
                 assert_eq!(result.fine_tune_params(), format!("{}($_param_00000001)", function_path));
-                assert_eq!(result.to_raw().to_string(), format!("{}('{}')", function_path, $arg));
+                assert_eq!(result.to_raw().build(), format!("{}('{}')", function_path, $arg));
             }
 
         }

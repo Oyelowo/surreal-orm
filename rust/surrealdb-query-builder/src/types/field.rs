@@ -32,24 +32,26 @@ use super::Idiomx;
 /// ```
 #[derive(Debug, Clone)]
 pub struct Field {
-    name: sql::Idiom,
+    // name: sql::Idiom,
+    name: String,
     bindings: BindingsList,
     graph_string: String,
 }
 
 impl Field {
-    pub fn new(value: impl Into<Idiomx>) -> Self {
-        let value: sql::Idiom = value.into().into();
+    pub fn new(value: impl Into<String>) -> Self {
+        // let value: sql::Idiom = value.into().into();
         // let binding = Binding::new(sql::Value::from(value.clone()));
         // let graph_string = format!("{}", &binding.get_param_dollarised());
         // let bindings = vec![binding];
         // TODO: Check if surrealdb drive supports binding field param idiom. IF so, I can just
         // parametize everything. Otherwise, I can leave fields out of parametization
         // Update: This is checked and seems true
+        let value: String = value.into();
         Self {
             name: value.clone(),
             bindings: vec![],
-            graph_string: value.to_string(),
+            graph_string: value,
         }
     }
 
@@ -95,6 +97,77 @@ impl Buildable for Field {
         self.graph_string.to_string()
     }
 }
+impl Buildable for Vec<Field> {
+    fn build(&self) -> String {
+        self.into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl Buildable for Vec<&Field> {
+    fn build(&self) -> String {
+        self.into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Buildable for &[Field; N] {
+    fn build(&self) -> String {
+        self.to_vec()
+            .into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Buildable for &[&Field; N] {
+    fn build(&self) -> String {
+        self.to_vec()
+            .into_iter()
+            .map(|f| f.build())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+
+impl<'a, const N: usize> Parametric for &[Field; N] {
+    fn get_bindings(&self) -> BindingsList {
+        self.to_vec()
+            .into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl<'a, const N: usize> Parametric for &[&Field; N] {
+    fn get_bindings(&self) -> BindingsList {
+        self.to_vec()
+            .into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl Parametric for Vec<Field> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl Parametric for Vec<&Field> {
+    fn get_bindings(&self) -> BindingsList {
+        self.into_iter()
+            .flat_map(|f| f.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
 
 impl From<&Field> for Idiomx {
     fn from(value: &Field) -> Self {
@@ -102,17 +175,17 @@ impl From<&Field> for Idiomx {
     }
 }
 
-impl From<&mut Field> for sql::Value {
-    fn from(value: &mut Field) -> Self {
-        Self::Idiom(value.name.to_string().into())
-    }
-}
+// impl From<&mut Field> for sql::Value {
+//     fn from(value: &mut Field) -> Self {
+//         Self::Idiom(value.name.to_string().into())
+//     }
+// }
 
-impl Into<sql::Value> for &Field {
-    fn into(self) -> Value {
-        sql::Value::from(self.name.clone()).into()
-    }
-}
+// impl Into<sql::Value> for &Field {
+//     fn into(self) -> Value {
+//         sql::Value::from(self.name.clone()).into()
+//     }
+// }
 
 impl Into<sql::Idiom> for Field {
     fn into(self) -> sql::Idiom {
@@ -120,12 +193,12 @@ impl Into<sql::Idiom> for Field {
     }
 }
 
-impl From<Field> for sql::Value {
-    fn from(val: Field) -> Self {
-        let idiom = sql::Idiom::from(val.name);
-        sql::Value::from(idiom)
-    }
-}
+// impl From<Field> for sql::Value {
+//     fn from(val: Field) -> Self {
+//         let idiom = sql::Idiom::from(val.name);
+//         sql::Value::from(idiom)
+//     }
+// }
 
 impl<'a> From<Cow<'a, Self>> for Field {
     fn from(value: Cow<'a, Field>) -> Self {
@@ -162,8 +235,7 @@ impl From<&Self> for Field {
 
 impl From<&str> for Field {
     fn from(value: &str) -> Self {
-        let value: sql::Idiom = value.to_string().into();
-        Self::new(Idiomx::new(value))
+        Self::new(value.to_string())
     }
 }
 

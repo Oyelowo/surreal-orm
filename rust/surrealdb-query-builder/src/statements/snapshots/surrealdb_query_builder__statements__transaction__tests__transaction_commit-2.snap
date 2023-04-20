@@ -1,7 +1,12 @@
 ---
-source: surrealdb-query-builder/src/statements/chain.rs
-expression: transaction.to_raw().to_string()
+source: surrealdb-query-builder/src/statements/transaction.rs
+expression: transaction.to_raw().build()
 ---
+BEGIN TRANSACTION
+
 SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 10 PARALLEL;
+
 SELECT * FROM user:oyedayo WHERE country IS 'INDONESIA' ORDER BY age NUMERIC ASC LIMIT 5;
-SELECT * FROM user:4;
+
+COMMIT TRANSACTION
+	

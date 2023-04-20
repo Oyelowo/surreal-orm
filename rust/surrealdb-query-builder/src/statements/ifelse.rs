@@ -5,21 +5,114 @@
  * Licensed under the MIT license
  */
 
+// Statement syntax
+// IF @condition THEN
+// 	@expression
+// [ ELSE IF @condition THEN
+// 	@expression ... ]
+// [ ELSE
+// 	@expression ]
+// END
+
 use std::fmt::{self, Display};
 
 use crate::{
+    expression::Expression,
     traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
-    types::{expression::Expression, Filter},
+    types::Filter,
 };
 
-impl Into<ExpressionContent> for Expression {
-    fn into(self) -> ExpressionContent {
-        let expression: Expression = self.into();
-        ExpressionContent(format!("{expression}"))
-    }
-}
+/// Creates an IF ELSE statement with compile-time valid transition.
+/// The IF ELSE statement can be used as a main statement, or within a parent statement,
+/// to return a value depending on whether a condition, or a series of conditions match.
+/// The statement allows for multiple ELSE IF expressions, and a final ELSE expression,
+/// with no limit to the number of ELSE IF conditional expressions.
+///
+/// Examples
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::{if_, order, select}};
+///         # let age = Field::new("age");
+/// // Can create simple if statement
+/// if_(age.greater_than_or_equal(18))
+///     .then("Valid".to_string())
+///     .end();
+///
+/// // A bit complex if else statement
+/// # let age = Field::new("age");
+/// # let name = Field::new("name");
+/// # let country = Field::new("country");
+/// if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+///     .then("Valid")
+///     .else_if(name.like("Oyelowo Oyedayo"))
+///     .then("The Alien!")
+///     .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+///     .then("Cold")
+///     .else_("Hot")
+///     .end();
+///
+/// // And even with nested statements
+/// # let name = Field::new("name");
+/// # let age = Field::new("age");
+/// # let country = Field::new("country");
+/// # let city = Field::new("city");
+/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+///
+/// let select1 = select(All)
+///     .from(fake_id)
+///     .where_(cond(city.is("Prince Edward Island"))
+///                 .and(city.is("NewFoundland"))
+///                 .or(city.like("Toronto"))
+///     )
+///     .order_by(order(&age).numeric())
+///     .limit(153)
+///     .start(10)
+///     .parallel();
+///
+/// let select2 = select(All)
+///     .from(fake_id2)
+///     .where_(country.is("INDONESIA"))
+///     .order_by(order(&age).numeric())
+///     .limit(20)
+///     .start(5);
+///
+///  if_(cond(age.greater_than_or_equal(18)).and(age.less_than_or_equal(120)))
+///     .then(select1)
+///     .else_if(name.like("Oyelowo Oyedayo"))
+///     .then(select2)
+///     .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+///     .then("Cold")
+///     .else_("Hot")
+///     .end();
+///
 pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
+}
+
+pub struct IfElseExpression(Expression);
+
+impl From<Expression> for IfElseExpression {
+    fn from(value: Expression) -> Self {
+        Self(value)
+    }
+}
+
+impl Buildable for IfElseExpression {
+    fn build(&self) -> String {
+        match self.0 {
+            Expression::SelectStatement(_) => {
+                format!("( {} )", self.0.build().trim_end_matches(";"))
+            }
+            Expression::Value(_) => self.0.build(),
+        }
+    }
+}
+
+impl Parametric for IfElseExpression {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.get_bindings()
+    }
 }
 
 pub struct ThenExpression {
@@ -40,8 +133,9 @@ impl ThenExpression {
     }
 
     pub fn else_(mut self, expression: impl Into<Expression>) -> ElseStatement {
-        let expression: Expression = expression.into();
-        self.flow_data.else_data = ExpressionContent(format!("{expression}"));
+        let expression: IfElseExpression = expression.into().into();
+        self.flow_data.else_data = ExpressionContent::new(expression.build());
+        self.bindings.extend(expression.get_bindings());
 
         ElseStatement {
             flow_data: self.flow_data,
@@ -49,7 +143,7 @@ impl ThenExpression {
         }
     }
 
-    pub fn end(mut self) -> End {
+    pub fn end(self) -> End {
         End {
             flow_data: self.flow_data,
             bindings: self.bindings,
@@ -63,7 +157,7 @@ pub struct ElseIfStatement {
 }
 
 impl ElseStatement {
-    pub fn end(mut self) -> End {
+    pub fn end(self) -> End {
         End {
             flow_data: self.flow_data,
             bindings: self.bindings,
@@ -74,17 +168,25 @@ impl ElseStatement {
 #[derive(Default)]
 struct ExpressionContent(String);
 
+impl ExpressionContent {
+    pub fn new(expr: impl Into<String>) -> Self {
+        Self(expr.into())
+    }
+}
+
+impl Buildable for ExpressionContent {
+    fn build(&self) -> String {
+        self.0.to_string()
+    }
+}
+
 impl Display for ExpressionContent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.build())
     }
 }
 
 impl ExpressionContent {
-    fn empty() -> Self {
-        Self("".into())
-    }
-
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -96,30 +198,17 @@ struct FlowStatementData {
     else_if_data: Flows,
     else_data: ExpressionContent,
 }
-// enum FlowStatementData {
-//     If(Flow),
-//     ElseIfs(Vec<Flow>),
-//     Else(ExpressionContent),
-//     End,
-// }
-
-impl FlowStatementData {
-    fn update_if(mut self, condition: Filter) -> Self {
-        self.if_data.condition = condition;
-        self
-    }
-}
 
 #[derive(Default)]
 struct Flows {
     conditions: Vec<Filter>,
-    expressions: Vec<ExpressionContent>,
+    expressions: Vec<IfElseExpression>,
 }
 
 #[derive(Default)]
 struct Flow {
-    condition: Filter,
-    expression: ExpressionContent,
+    condition: Option<Filter>,
+    expression: Option<ExpressionContent>,
 }
 
 pub struct ElseStatement {
@@ -129,13 +218,9 @@ pub struct ElseStatement {
 
 impl ElseIfStatement {
     pub fn then(mut self, expression: impl Into<Expression>) -> ThenExpression {
-        let expression: Expression = expression.into();
-        self.flow_data
-            .else_if_data
-            .expressions
-            .push(ExpressionContent(format!("{expression}")));
-
+        let expression: IfElseExpression = expression.into().into();
         self.bindings.extend(expression.get_bindings());
+        self.flow_data.else_if_data.expressions.push(expression);
 
         ThenExpression {
             flow_data: self.flow_data,
@@ -144,6 +229,7 @@ impl ElseIfStatement {
     }
 }
 
+/// if flow builder
 pub struct IfStatement {
     condition: Filter,
 }
@@ -155,15 +241,16 @@ impl IfStatement {
         }
     }
 
+    /// Can be a select statment or any other valid surrealdb Value
     pub fn then(self, expression: impl Into<Expression>) -> ThenExpression {
         let if_condition = self.condition;
 
-        let expression: Expression = expression.into();
+        let expression: IfElseExpression = expression.into().into();
         let bindings = vec![if_condition.get_bindings(), expression.get_bindings()].concat();
 
         let mut flow_data = FlowStatementData::default();
-        flow_data.if_data.condition = if_condition;
-        flow_data.if_data.expression = expression.into();
+        flow_data.if_data.condition = Some(if_condition);
+        flow_data.if_data.expression = Some(ExpressionContent(expression.build()));
 
         ThenExpression {
             flow_data,
@@ -189,19 +276,28 @@ impl Buildable for End {
         let mut output = String::new();
         output.push_str(&format!(
             "IF {} THEN\n\t{}",
-            self.flow_data.if_data.condition, self.flow_data.if_data.expression
+            self.flow_data
+                .if_data
+                .condition
+                .as_ref()
+                .expect("condition must be provided"),
+            self.flow_data
+                .if_data
+                .expression
+                .as_ref()
+                .expect("expression must be provided")
         ));
 
         for i in 0..self.flow_data.else_if_data.conditions.len() {
             output.push_str(&format!(
                 "\nELSE IF {} THEN\n\t{}",
-                self.flow_data.else_if_data.conditions[i],
-                self.flow_data.else_if_data.expressions[i]
+                self.flow_data.else_if_data.conditions[i].build(),
+                self.flow_data.else_if_data.expressions[i].build()
             ));
         }
 
         if !&self.flow_data.else_data.is_empty() {
-            output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data));
+            output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data.build()));
         }
 
         output.push_str("\nEND");
@@ -219,13 +315,12 @@ impl fmt::Display for End {
 }
 
 #[cfg(test)]
-#[cfg(feature = "mock")]
 mod tests {
+    use insta::assert_display_snapshot;
+
     use crate::{
-        filter::cond,
-        query_select::{order, select},
-        sql::{All, SurrealId},
-        Field, Operatable,
+        statements::{order, select},
+        *,
     };
 
     use super::*;
@@ -238,11 +333,18 @@ mod tests {
             .then("Valid".to_string())
             .end();
 
-        assert_debug_snapshot!(if_statement1.get_bindings());
-        assert_display_snapshot!(if_statement1);
+        assert_eq!(if_statement1.get_bindings().len(), 3);
         assert_eq!(
-            format!("{if_statement1}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nEND"
+            if_statement1.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                END"
+        );
+        assert_eq!(
+            if_statement1.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                END"
         );
     }
 
@@ -253,11 +355,19 @@ mod tests {
             .then("Valid")
             .else_("Invalid")
             .end();
-        assert_debug_snapshot!(if_statement2.get_bindings());
-        assert_display_snapshot!(if_statement2);
+        assert_eq!(if_statement2.get_bindings().len(), 4);
+
         assert_eq!(
-            format!("{if_statement2}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement2.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE\n\t$_param_00000004\n\
+                END"
+        );
+
+        assert_eq!(
+            if_statement2.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE\n\t'Invalid'\nEND"
         );
     }
 
@@ -272,11 +382,16 @@ mod tests {
             .then("The Alien!")
             .end();
 
-        assert_debug_snapshot!(if_statement.get_bindings());
-        assert_display_snapshot!(if_statement);
+        assert_eq!(if_statement.get_bindings().len(), 5);
+
         assert_eq!(
-            format!("{if_statement}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nEND"
+        if_statement.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t$_param_00000003\nELSE IF name ~ $_param_00000004 THEN\n\t$_param_00000005\nEND"
+        );
+
+        assert_eq!(
+        if_statement.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t'The Alien!'\nEND"
         );
     }
 
@@ -291,11 +406,27 @@ mod tests {
             .then("The Apple!")
             .else_("The Mango!")
             .end();
-        assert_debug_snapshot!(if_statement4.get_bindings());
-        assert_display_snapshot!(if_statement4);
+        assert_eq!(if_statement4.get_bindings().len(), 6);
+
         assert_eq!(
-            format!("{if_statement4}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement4.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                $_param_00000005\n\
+                ELSE\n\t$_param_00000006\n\
+                END"
+        );
+
+        assert_eq!(
+            if_statement4.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                'The Apple!'\n\
+                ELSE\n\t\
+                'The Mango!'\n\
+                END"
         );
     }
 
@@ -313,11 +444,30 @@ mod tests {
             .then("Cold")
             .else_("Hot")
             .end();
-        assert_debug_snapshot!(if_statement5.get_bindings());
-        assert_display_snapshot!(if_statement5);
+
+        assert_eq!(if_statement5.get_bindings().len(), 9);
+
         assert_eq!(
-            format!("{if_statement5}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t_param_00000000\nELSE IF name ~ $_param_00000000 THEN\n\t_param_00000000\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement5.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                $_param_00000003\n\
+                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                $_param_00000005\n\
+                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) THEN\n\t\
+                $_param_00000008\nELSE\n\t$_param_00000009\nEND"
+        );
+
+        assert_eq!(
+            if_statement5.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                'Valid'\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                'The Alien!'\n\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\t\
+                'Cold'\n\
+                ELSE\n\t\
+                'Hot'\n\
+                END"
         );
     }
 
@@ -332,11 +482,11 @@ mod tests {
 
         let statement1 = select(All)
             .from(fake_id)
-            .where_(cond(
-                city.is("Prince Edward Island")
+            .where_(
+                cond(city.is("Prince Edward Island"))
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
-            ))
+            )
             .order_by(order(&age).numeric())
             .limit(153)
             .start(10)
@@ -358,11 +508,30 @@ mod tests {
             .else_("Hot")
             .end();
 
-        assert_debug_snapshot!(if_statement5.get_bindings());
-        assert_display_snapshot!(if_statement5);
+        assert_eq!(if_statement5.get_bindings().len(), 17);
+        assert_display_snapshot!(if_statement5.fine_tune_params());
+        assert_display_snapshot!(if_statement5.to_raw().build());
         assert_eq!(
-            format!("{if_statement5}"),
-            "IF age >= $_param_00000000 <= $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE city IS $_param_00000000 AND $_param_00000000 OR $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;)\nELSE IF name ~ $_param_00000000 THEN\n\t(SELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;)\nELSE IF (country IS $_param_00000000) OR (country IS $_param_00000000) THEN\n\t_param_00000000\nELSE\n\t_param_00000000\nEND"
+            if_statement5.fine_tune_params(),
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+                ( SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) OR (city ~ $_param_00000006) ORDER BY age NUMERIC ASC LIMIT $_param_00000007 START AT $_param_00000008 PARALLEL )\n\
+                ELSE IF name ~ $_param_00000009 THEN\n\t\
+                ( SELECT * FROM $_param_00000010 WHERE country IS $_param_00000011 ORDER BY age NUMERIC ASC LIMIT $_param_00000012 START AT $_param_00000013 )\n\
+                ELSE IF (country IS $_param_00000014) OR (country IS $_param_00000015) THEN\n\t$_param_00000016\n\
+                ELSE\n\t\
+                $_param_00000017\n\
+                END"
+        );
+
+        assert_eq!(
+            if_statement5.to_raw().build(),
+            "IF age >= 18 <= 120 THEN\n\t\
+                ( SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL )\nELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t( SELECT * FROM user:oyedayo WHERE country IS 'INDONESIA' ORDER BY age NUMERIC ASC LIMIT 20 START AT 5 )\n\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\t\
+                'Cold'\n\
+                ELSE\n\t\
+                'Hot'\n\
+                END"
         );
     }
 }

@@ -56,11 +56,11 @@ impl From<Param> for sql::Param {
     }
 }
 
-impl From<Param> for sql::Value {
-    fn from(value: Param) -> Self {
-        value.param.into()
-    }
-}
+// impl From<Param> for sql::Value {
+//     fn from(value: Param) -> Self {
+//         value.param.into()
+//     }
+// }
 
 impl Erroneous for Param {
     fn get_errors(&self) -> Vec<String> {

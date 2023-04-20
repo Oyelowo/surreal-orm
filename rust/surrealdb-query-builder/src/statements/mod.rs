@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use std::fmt::Display;
 
 pub(crate) mod chain;
 pub(crate) mod create;

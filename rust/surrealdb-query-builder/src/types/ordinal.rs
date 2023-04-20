@@ -1,14 +1,43 @@
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
+use crate::{Binding, Buildable, Parametric, Valuex};
+
 use super::Field;
 
-#[derive(serde::Serialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub enum Ordinal {
     Datetime(sql::Datetime),
     Number(sql::Number),
-    Field(sql::Value),
+    Field(Field),
+    // Field(sql::Value),
 }
+
+impl From<Ordinal> for Valuex {
+    fn from(value: Ordinal) -> Self {
+        let mut bindings = vec![];
+        let string = match value {
+            Ordinal::Datetime(d) => {
+                let binding = Binding::new(d);
+                let param = binding.get_param_dollarised();
+                bindings.push(binding);
+                param
+            }
+            Ordinal::Number(n) => {
+                let binding = Binding::new(n);
+                let param = binding.get_param_dollarised();
+                bindings.push(binding);
+                param
+            }
+            Ordinal::Field(f) => {
+                bindings.extend(f.get_bindings());
+                f.build()
+            }
+        };
+        Valuex { string, bindings }
+    }
+}
+
 impl From<sql::Datetime> for Ordinal {
     fn from(value: sql::Datetime) -> Self {
         Self::Datetime(value.into())
@@ -46,16 +75,16 @@ impl From<&Field> for Ordinal {
         Ordinal::Field(val.into())
     }
 }
-impl From<Ordinal> for sql::Value {
-    fn from(val: Ordinal) -> Self {
-        match val {
-            Ordinal::Datetime(n) => n.into(),
-            Ordinal::Number(n) => n.into(),
-            Ordinal::Field(f) => f.into(),
-        }
-    }
-}
-
+// impl From<Ordinal> for sql::Value {
+//     fn from(val: Ordinal) -> Self {
+//         match val {
+//             Ordinal::Datetime(n) => n.into(),
+//             Ordinal::Number(n) => n.into(),
+//             Ordinal::Field(f) => f.into(),
+//         }
+//     }
+// }
+//
 impl From<sql::Number> for Ordinal {
     fn from(val: sql::Number) -> Self {
         Ordinal::Number(val)

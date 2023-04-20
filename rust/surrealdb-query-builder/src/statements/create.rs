@@ -16,7 +16,7 @@ use crate::{
         ReturnableStandard, SurrealdbNode,
     },
     types::{DurationLike, ReturnType},
-    ErrorList,
+    ErrorList, ToRaw,
 };
 
 /// Creates a new CREATE SQL statement for a given type.
@@ -86,31 +86,31 @@ where
     /// Set the return type to `None`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::None);
+    /// statement.return_type(ReturnType::None);
     /// ```
     ///
     /// Set the return type to `Before`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Before);
+    /// statement.return_type(ReturnType::Before);
     /// ```
     ///
     /// Set the return type to `After`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::After);
+    /// statement.return_type(ReturnType::After);
     /// ```
     ///
     /// Set the return type to `Diff`:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Diff);
+    /// statement.return_type(ReturnType::Diff);
     /// ```
     ///
     /// Set the return type to a projection of specific fields:
     ///
     /// ```rust,ignore
-    /// query.return_type(ReturnType::Projections(vec![...]));
+    /// statement.return_type(ReturnType::Projections(vec![...]));
     /// ```
     pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
@@ -135,11 +135,11 @@ where
     /// ```rust,ignore
     /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// assert_eq!(query.to_raw().to_string(), "30000".to_string());
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 

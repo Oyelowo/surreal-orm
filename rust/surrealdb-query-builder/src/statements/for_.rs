@@ -1,11 +1,8 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Parametric, Queryable,
-        Raw, Runnable, SurrealdbModel, ToRaw,
-    },
-    types::{expression::Expression, CrudType, Filter, Updateables},
+    traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable, Raw, ToRaw},
+    types::{CrudType, Filter},
 };
 
 #[derive(Clone, Debug)]
@@ -57,6 +54,26 @@ impl ForStart {
     }
 }
 
+/// For statement is typically used within DEFINE TABLE and DEFINE FIELD for create
+/// more granular permissions.
+///
+/// Examples:
+///
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::for_};
+/// use CrudType::*;
+///
+/// # let name = Field::new("name");
+/// # let country = Field::new("country");
+///  // You can create for a single crud operation
+/// let statement = for_(Create).where_(name.like("Oyelowo"));
+///  
+///  // You can also create for a  list of crud operations
+/// let statement = for_(&[Create, Delete, Select, Update]).where_(country.like("Canada"));
+///
+/// assert!(!statement.build().is_empty());
+/// ```
 pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
     ForStart(ForData {
         crud_types: for_crud_types.into().into(),
@@ -65,6 +82,8 @@ pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
     })
 }
 
+/// Builder struct for a `FOR` statement which is typeically used in DEFINE TABLE and DEFINE FIELD
+/// statements for setting more granular permissions
 #[derive(Clone, Debug)]
 pub struct For(ForData);
 
@@ -109,13 +128,17 @@ impl Display for For {
     }
 }
 
-pub struct NONE;
-
-#[derive(Clone)]
+/// Permission types which can be a a single For statement
+/// list of `for` statements
+#[derive(Clone, Debug)]
 pub enum PermissionType {
+    /// Single `for` statement
     For(For),
+    /// List of `for` statements
     Fors(Vec<For>),
+    /// Single Raw statement
     RawStatement(Raw),
+    /// List of Raw statements
     RawStatementList(Vec<Raw>),
 }
 
@@ -126,7 +149,7 @@ impl ToRaw for PermissionType {
             PermissionType::Fors(for_many) => Raw::new(
                 for_many
                     .into_iter()
-                    .map(|f| f.to_raw().to_string())
+                    .map(|f| f.to_raw().build())
                     .collect::<Vec<_>>()
                     .join(", "),
             ),
@@ -134,7 +157,7 @@ impl ToRaw for PermissionType {
             PermissionType::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()
-                    .map(|f| f.to_raw().to_string())
+                    .map(|f| f.to_raw().build())
                     .collect::<Vec<_>>()
                     .join(", "),
             ),
@@ -188,13 +211,7 @@ impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
 mod tests {
     use super::*;
 
-    use crate::{
-        statements::{order, select},
-        traits::Operatable,
-        types::Field,
-    };
-
-    use super::*;
+    use crate::{traits::Operatable, types::Field};
 
     #[test]
     fn test_define_for_statement_state_machine() {
@@ -203,14 +220,12 @@ mod tests {
         let for_res = for_(CrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
             for_res.fine_tune_params(),
-            "FOR create\n\tWHERE name ~ $_param_00000001".to_string()
+            "FOR create\n\tWHERE name ~ $_param_00000001"
         );
         assert_eq!(
-            for_res.to_raw().to_string(),
-            "FOR create\n\tWHERE name ~ 'Oyelowo'".to_string()
+            for_res.to_raw().build(),
+            "FOR create\n\tWHERE name ~ 'Oyelowo'"
         );
-        // insta::assert_display_snapshot!(for_res);
-        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 
     #[test]
@@ -221,13 +236,12 @@ mod tests {
         let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
             for_res.fine_tune_params(),
-            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001".to_string()
+            "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001"
         );
+
         assert_eq!(
-            for_res.to_raw().to_string(),
-            "FOR create, delete, select, update\n\tWHERE name IS 'Oyedayo'".to_string()
+            for_res.to_raw().build(),
+            "FOR create, delete, select, update\n\tWHERE name IS 'Oyedayo'"
         );
-        // insta::assert_display_snapshot!(for_res);
-        // insta::assert_debug_snapshot!(for_res.get_bindings());
     }
 }

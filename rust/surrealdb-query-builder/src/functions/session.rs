@@ -29,10 +29,10 @@ macro_rules! create_function {
     ($function_name: expr) => {
         paste::paste! {
 
-            fn [<$function_name _fn>]() -> Function {
+            fn [<$function_name _fn>]() -> $crate::Function {
                 let query_string = format!("{}()", $function_name);
 
-                Function {
+                $crate::Function {
                     query_string,
                     bindings: vec![],
                 }
@@ -41,7 +41,7 @@ macro_rules! create_function {
             #[macro_export]
             macro_rules! [<session_ $function_name>] {
                 () => {
-                    crate::functions::session::[<$function_name _fn>]()
+                    $crate::functions::session::[<$function_name _fn>]()
                 };
             }
 
@@ -51,14 +51,14 @@ macro_rules! create_function {
             fn [<test_ $function_name _fn>]() {
                 let result = [<$function_name _fn>]();
                 assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("{}()", $function_name));
+                assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
             }
 
             #[test]
             fn [<test_ $function_name _macro>]() {
                 let result = [<$function_name>]!();
                 assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
-                assert_eq!(result.to_raw().to_string(), format!("{}()", $function_name));
+                assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
             }
         }
     };

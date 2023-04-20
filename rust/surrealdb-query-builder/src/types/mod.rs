@@ -28,6 +28,7 @@ pub(crate) mod strand;
 pub(crate) mod surreal_id;
 pub(crate) mod token_target;
 pub(crate) mod value;
+pub(crate) mod valuex;
 
 pub use alias::*;
 pub use array::*;
@@ -54,25 +55,32 @@ pub use strand::*;
 pub use surreal_id::*;
 pub use token_target::*;
 pub use value::*;
+pub use valuex::*;
 
 use surrealdb::sql;
+
+use crate::{BindingsList, Buildable, Parametric};
 macro_rules! create_value_like_struct {
     ($sql_type_name:expr) => {
         paste::paste! {
-            #[derive(serde::Serialize, Debug, Clone)]
-            pub enum [<$sql_type_name Like>] {
-                [<$sql_type_name>](sql::[<$sql_type_name>]),
-                Field(sql::Idiom),
-                Param(sql::Param),
+            #[derive(Debug, Clone)]
+            pub struct [<$sql_type_name Like>]($crate::Valuex);
+
+            impl From<[<$sql_type_name Like>]> for $crate::Valuex {
+                fn from(val: [<$sql_type_name Like>]) -> Self {
+                    val.0
+                }
             }
 
-            impl [<$sql_type_name Like>] {
-                pub fn to_value(self) -> sql::Value {
-                    match self {
-                        [<$sql_type_name Like>]::[<$sql_type_name>](g) => g.into(),
-                        [<$sql_type_name Like>]::Field(f) => f.into(),
-                        [<$sql_type_name Like>]::Param(p) => p.into(),
-                    }
+            impl $crate::Parametric for [<$sql_type_name Like>] {
+                fn get_bindings(&self) -> $crate::BindingsList {
+                    self.0.bindings.to_vec()
+                }
+            }
+
+            impl $crate::Buildable for [<$sql_type_name Like>] {
+                fn build(&self) -> String {
+                    self.0.build()
                 }
             }
             // macro_rules! impl_geometry_like_from {
@@ -97,7 +105,8 @@ macro_rules! create_value_like_struct {
             impl<T: Into<sql::[<$sql_type_name>]>> From<T> for [<$sql_type_name Like>] {
                 fn from(value: T) -> Self {
                     let value: sql::[<$sql_type_name>] = value.into();
-                    Self::[<$sql_type_name>](value.into())
+                    let value: sql::Value = value.into();
+                    Self(value.into())
                 }
             }
 
@@ -114,35 +123,19 @@ macro_rules! create_value_like_struct {
             // }
             impl From<Field> for [<$sql_type_name Like>] {
                 fn from(val: Field) -> Self {
-                    [<$sql_type_name Like>]::Field(val.into())
+                    [<$sql_type_name Like>](val.into())
                 }
             }
 
             impl From<Param> for [<$sql_type_name Like>] {
                 fn from(val: Param) -> Self {
-                    [<$sql_type_name Like>]::Param(val.clone().into())
+                    [<$sql_type_name Like>](val.into())
                 }
             }
 
             impl From<&Field> for [<$sql_type_name Like>] {
                 fn from(val: &Field) -> Self {
-                    [<$sql_type_name Like>]::Field(val.clone().into())
-                }
-            }
-
-            // impl From<sql::Value> for [<$sql_type_name Like>] {
-            //     fn from(value: sql::Value) -> [<$sql_type_name Like>] {
-            //         Self::[<$sql_type_name>](value)
-            //     }
-            // }
-
-            impl From<[<$sql_type_name Like>]> for sql::Value {
-                fn from(val: [<$sql_type_name Like>]) -> sql::Value {
-                    match val {
-                        [<$sql_type_name Like>]::[<$sql_type_name>](g) => g.into(),
-                        [<$sql_type_name Like>]::Field(f) => f.into(),
-                        [<$sql_type_name Like>]::Param(p) => p.into(),
-                    }
+                    [<$sql_type_name Like>](val.clone().into())
                 }
             }
         }
@@ -153,7 +146,91 @@ macro_rules! create_value_like_struct {
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
-create_value_like_struct!("Array");
+// create_value_like_struct!("Array");
+#[derive(Debug, Clone)]
+pub struct ArrayLike(Valuex);
+impl From<ArrayLike> for Valuex {
+    fn from(val: ArrayLike) -> Self {
+        val.0
+    }
+}
+impl Parametric for ArrayLike {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+impl Buildable for ArrayLike {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+impl<T: Into<sql::Value>> From<Vec<T>> for ArrayLike {
+    fn from(value: Vec<T>) -> Self {
+        // let value: Array = value.into();
+        let value = value
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<sql::Value>>();
+        Self(value.into())
+    }
+}
+// impl<T: Into<Array>> From<T> for ArrayLike {
+//     fn from(value: T) -> Self {
+//         let value: Array = value.into();
+//         let value: sql::Array = value.into();
+//         Self(value.into())
+//     }
+// }
+
+impl From<Field> for ArrayLike {
+    fn from(val: Field) -> Self {
+        Self(val.into())
+    }
+}
+impl From<Param> for ArrayLike {
+    fn from(val: Param) -> Self {
+        Self(val.into())
+    }
+}
+impl From<&Field> for ArrayLike {
+    fn from(val: &Field) -> Self {
+        Self(val.clone().into())
+    }
+}
+
+struct Array(sql::Array);
+
+impl From<Array> for sql::Array {
+    fn from(value: Array) -> Self {
+        value.0
+    }
+}
+
+impl From<sql::Array> for Array {
+    fn from(value: sql::Array) -> Self {
+        Self(value)
+    }
+}
+impl From<Vec<Valuex>> for ArrayLike {
+    fn from(value: Vec<Valuex>) -> Self {
+        Self(Valuex {
+            string: format!("[{}]", value.build()),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+//
+// impl Into<Array> for sql::Array {
+//     fn into(self) -> Array {
+//         todo!()
+//     }
+// }
+// impl<T: Into<Array>> From<Vec<Valuex>> for T {
+//     fn from(value: Vec<Valuex>) -> Self {
+//         todo!()
+//     }
+// }
 // create_value_like_struct!("Idiom");
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");

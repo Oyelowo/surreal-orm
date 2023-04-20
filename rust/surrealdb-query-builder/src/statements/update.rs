@@ -5,43 +5,135 @@
  * Licensed under the MIT license
  */
 
+// Statement syntax
+// UPDATE @targets
+// 	[ CONTENT @value
+// 	  | MERGE @value
+// 	  | PATCH @value
+// 	  | SET @field = @value ...
+// 	]
+// 	[ WHERE @condition ]
+// 	[ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
+// 	[ TIMEOUT @duration ]
+// 	[ PARALLEL ]
+// ;
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Runnable,
-        SurrealdbModel,
-    },
+    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    ReturnableDefault, ReturnableStandard,
+    Conditional, ErrorList, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
+/// Creates a new UPDATE statement.
+/// The UPDATE statement can be used to update or modify records in the database.
+
+///
+/// # Arguments
+///
+/// * `connection` - built using `with` method on a node. e.g `Student::with(..).writes(..).book(..)`
+/// # Examples
+///
+/// ```rust, ignore
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use std::time::Duration;
+/// use surrealdb_orm::{*, statements::update};
+///
+/// // Update using set method
+/// update::<User>(user)
+///     .set(updater(score).equal(5))
+///     .where_(age.greater_than(18));
+///
+/// // Update many records that match the filter using content method in user table
+/// update::<User>(user)
+///     .content(
+///          User {
+///             team: "Codebreather",
+///             ...
+///          }
+///     ).where_(cond(age.greater_than(18)).and(name.like("codebreather"));
+///     
+/// // Update many records that match the filter using merge method in user table
+/// update::<User>(user)
+///     .merge(
+///          UserDocument {
+///             hobbies: vec!["music production", "problem solving", "rust"],
+///             ...
+///          }
+///     ).where_(cond(age.greater_than(18)).and(name.like("codebreather"));
+///
+/// // Update specific record using content method
+/// update::<User>(user1)
+///     .content(
+///          User {
+///             name: "Oyelowo".into(),
+///             age: 198,
+///             ...
+///          }
+///     );
+///     
+/// // Update using content method
+/// update::<User>(user2)
+///     .merge(
+///          UserDocument {
+///             hobbies: vec!["music production", "problem solving", "rust"],
+///             ...
+///          }
+///     );
+/// ```
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    // TODO: Pass this to UpdateStatement constructor and gather the errors to be handled when
-    // query is run using one of the run methods.
     let table_name = T::table_name();
     let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        panic!("You're trying to update into the wrong table");
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    let param = match targettables {
+        TargettablesForUpdate::Table(table) => {
+            let table = table.to_string();
+            if &table != &table_name.to_string() {
+                errors.push(format!(
+                    "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
+                ));
+            }
+            table
+        }
+        TargettablesForUpdate::SurrealId(id) => {
+            if !id
+                .to_string()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                errors.push(format!(
+                    "id - {id} does not belong to {table_name} table from the surreal model struct provided"
+                ));
+            }
+            let binding = Binding::new(id);
+            let param = binding.get_param_dollarised();
+            bindings.push(binding);
+            param
+        }
+    };
+
+    UpdateStatement {
+        target: param,
+        content: None,
+        merge: None,
+        set: vec![],
+        where_: None,
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        bindings,
+        errors,
+        __model_return_type: PhantomData,
     }
-    // let errors: String = connection.get_errors();
-    let mut builder = UpdateStatement::<T>::new();
-    builder.update(targettables)
 }
 
+/// Update statement builder
 pub struct UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
@@ -54,12 +146,20 @@ where
     return_type: Option<ReturnType>,
     timeout: Option<String>,
     bindings: BindingsList,
+    errors: ErrorList,
     parallel: bool,
     __model_return_type: PhantomData<T>,
 }
 
 impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
-impl<T> Erroneous for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+impl<T> Erroneous for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 pub enum TargettablesForUpdate {
     Table(sql::Table),
@@ -108,55 +208,12 @@ impl From<sql::Table> for TargettablesForUpdate {
     }
 }
 
-impl Parametric for TargettablesForUpdate {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            TargettablesForUpdate::Table(table) => {
-                // Table binding does not seem to work right now. skip it first
-                let binding = Binding::new(table.to_owned());
-                vec![binding]
-            }
-            TargettablesForUpdate::SurrealId(id) => vec![Binding::new(id.to_owned())],
-        }
-    }
-}
-
 impl<T> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new() -> Self {
-        Self {
-            target: "".into(),
-            content: None,
-            merge: None,
-            set: Vec::new(),
-            where_: None,
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            bindings: vec![],
-            __model_return_type: PhantomData,
-        }
-    }
-
-    pub fn update(mut self, targettables: impl Into<TargettablesForUpdate>) -> Self {
-        let targets: TargettablesForUpdate = targettables.into();
-        let targets_bindings = targets.get_bindings();
-
-        // TODO: Do all the parametization here when writing tests for this function
-        let target_names = match targets {
-            TargettablesForUpdate::Table(table) => vec![table.to_string()],
-            TargettablesForUpdate::SurrealId(_) => targets_bindings
-                .iter()
-                .map(|b| format!("{}", b.get_param_dollarised()))
-                .collect::<Vec<_>>(),
-        };
-        self.update_bindings(targets_bindings);
-        self.target.extend(target_names);
-        self
-    }
-
+    /// Specify the full record data using the CONTENT keyword. The content must be serializable
+    /// and implement SurrealdbModel trait.
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
@@ -165,6 +222,7 @@ where
         self
     }
 
+    /// merge-update only specific fields by using the MERGE keyword and specifying only the fields which are to be updated.
     pub fn merge(mut self, merge: impl Serialize) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
@@ -173,6 +231,7 @@ where
         self
     }
 
+    /// When specifying fields to update using the SET clause, it is possible to increment and decrement numeric values, and add or remove values from arrays. To increment a numeric value, or to add an item to an array, use the += operator. To decrement a numeric value, or to remove an value from an array, use the -= operator.
     pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
         let settable: Updateables = settables.into();
         self.bindings.extend(settable.get_bindings());
@@ -185,27 +244,25 @@ where
         self
     }
 
-    /// Adds a condition to the `` clause of the SQL query.
+    /// Adds a condition to the `` clause of the query.
     ///
     /// # Arguments
     ///
-    /// * `condition` - A reference to a filter condition.
+    /// * `condition` - Filter for the query.
     ///
     /// # Example
     ///
-    /// ```
-    /// use query_builder::{QueryBuilder, Field, Filter};
+    /// ```rust, ignore
+    /// // You can use a simple filter without the `cond` helper function
+    /// .where_(age.greater_than_or_equal(18)
     ///
-    /// let mut builder = QueryBuilder::select();
-    /// let condition = Filter::from(("age", ">", 18));
-    /// builder._(condition);
-    ///
-    /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
+    /// // or with the `cond` helper function for multiple `AND` or `OR` conditions
+    /// .where_(cond(age.greater_than_or_equal(18)).and(age.less_than_or_equal(90)))
     /// ```
-    pub fn where_(mut self, condition: impl Into<Filter> + Parametric + Clone) -> Self {
+    pub fn where_(mut self, condition: impl Conditional) -> Self {
         self.update_bindings(condition.get_bindings());
-        let condition: Filter = condition.into();
-        self.where_ = Some(condition.to_string());
+        let condition = Filter::new(condition);
+        self.where_ = Some(condition.build());
         self
     }
 
@@ -214,7 +271,44 @@ where
         self
     }
 
-    pub fn return_(mut self, return_type: impl Into<ReturnType>) -> Self {
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
         self.return_type = Some(return_type);
         self
@@ -224,46 +318,28 @@ where
     ///
     /// # Arguments
     ///
-    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    /// * `duration` - a value that can represent a duration for the timeout. This can be one of the following:
+    ///
+    ///   * `Duration` - a standard Rust `Duration` value.
+    ///
+    ///   * `Field` - an identifier for a specific field in the query, represented by an `Idiom` value.
+    ///
+    ///   * `Param` - a named parameter in the query, represented by a `Param` value.
     ///
     /// # Examples
     ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// ```rust,ignore
+    /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.timeout("5s");
-    /// ```
-    ///
-    /// ---
-    ///
-    /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        // let duration: sql::Duration = duration.into();
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 
     /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.parallel();
-    /// ```
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -275,44 +351,34 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn build(&self) -> String {
-        let mut query = String::new();
-
-        query.push_str("UPDATE ");
-        query.push_str(self.target.as_str());
+        let mut query = format!("UPDATE {}", self.target);
 
         if let Some(content) = &self.content {
-            query.push_str(" CONTENT ");
-            query.push_str(&content);
+            query = format!("{query} CONTENT  {content}",);
         } else if let Some(merge) = &self.merge {
-            query.push_str(" MERGE ");
-            query.push_str(merge);
+            query = format!("{query} MERGE {merge}");
         } else if !self.set.is_empty() {
-            query.push_str(" SET ");
-            query += "SET ";
             let set_vec = self.set.join(", ");
-            query += &set_vec;
-            query += " ";
+            query = format!("{query} SET {set_vec}");
         }
 
         if let Some(condition) = &self.where_ {
-            query.push_str(" WHERE ");
-            query.push_str(condition.as_str());
+            query = format!("{query} WHERE {condition}");
         }
 
         if let Some(return_type) = &self.return_type {
-            query += format!("{return_type}").as_str();
+            query = format!("{query} {return_type}");
         }
 
         if let Some(timeout) = &self.timeout {
-            query.push_str(" TIMEOUT ");
-            query.push_str(timeout);
+            query = format!("{query} TIMEOUT {timeout}");
         }
 
         if self.parallel {
             query.push_str(" PARALLEL");
         }
 
-        query
+        format!("{query};")
     }
 }
 
@@ -321,7 +387,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.build()))
+        write!(f, "{}", self.build())
     }
 }
 

@@ -29,7 +29,8 @@ use std::{fmt::Display, str::FromStr};
 
 use crate::{
     traits::{Binding, Buildable, ToRaw},
-    types::{DatetimeLike, DurationLike, Field, Function, Interval, IntervalLike, Param},
+    types::{DatetimeLike, DurationLike, Field, Function, Interval, Param},
+    StrandLike,
 };
 
 use surrealdb::sql;
@@ -46,7 +47,7 @@ pub fn now_fn() -> Function {
 #[macro_export]
 macro_rules! now {
     () => {
-        crate::functions::time::now_fn()
+        $crate::functions::time::now_fn()
     };
 }
 
@@ -55,21 +56,23 @@ pub use now;
 macro_rules! create_time_fn_with_single_datetime_arg {
     ($function_name: expr) => {
         paste::paste! {
-            #[allow(dead_code)]
-            fn [<$function_name _fn>](datetime: impl Into<DatetimeLike>) -> Function {
-                let binding = Binding::new(datetime.into());
-                let query_string = format!("time::{}({})", $function_name, binding.get_param_dollarised());
+            use $crate::Buildable as _;
+            use $crate::Parametric as _;
 
-                Function {
+            fn [<$function_name _fn>](datetime: impl Into<$crate::DatetimeLike>) -> $crate::Function {
+                let datetime: $crate::DatetimeLike = datetime.into();
+                let query_string = format!("time::{}({})", $function_name, datetime.build());
+
+                $crate::Function {
                     query_string,
-                    bindings: vec![binding],
+                    bindings: datetime.get_bindings(),
                 }
             }
 
             #[macro_export]
             macro_rules! [<time_ $function_name>] {
                 ( $datetime:expr ) => {
-                    crate::functions::time::[<$function_name _fn>]($datetime)
+                    $crate::functions::time::[<$function_name _fn>]($datetime)
                 };
             }
 
@@ -77,11 +80,11 @@ macro_rules! create_time_fn_with_single_datetime_arg {
 
             #[test]
             fn [<test_ $function_name _macro_with_datetime_field>]() {
-                let rebirth_date = Field::new("rebirth_date");
+                let rebirth_date = $crate::Field::new("rebirth_date");
                 let result = day!(rebirth_date);
 
-                assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
-                assert_eq!(result.to_raw().to_string(), "time::day(rebirth_date)");
+                assert_eq!(result.fine_tune_params(), "time::day(rebirth_date)");
+                assert_eq!(result.to_raw().build(), "time::day(rebirth_date)");
             }
 
             #[test]
@@ -93,7 +96,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                 let result = day!(dt);
                 assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     "time::day('1970-01-01T00:01:01Z')"
                 );
             }
@@ -114,94 +117,88 @@ create_time_fn_with_single_datetime_arg!("yday");
 create_time_fn_with_single_datetime_arg!("year");
 
 fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
-    let datetime_binding = Binding::new(datetime.into());
-    let duration_binding = Binding::new(duration.into());
-    let query_string = format!(
-        "time::floor({}, {})",
-        datetime_binding.get_param_dollarised(),
-        duration_binding.get_param_dollarised()
-    );
+    let datetime: DatetimeLike = datetime.into();
+    let duration: DurationLike = duration.into();
+    let mut bindings = datetime.get_bindings();
+    bindings.extend(duration.get_bindings());
+
+    let query_string = format!("time::floor({}, {})", datetime.build(), duration.build(),);
 
     Function {
         query_string,
-        bindings: vec![datetime_binding, duration_binding],
+        bindings,
     }
 }
 
 #[macro_export]
 macro_rules! time_floor {
     ( $datetime:expr, $duration:expr ) => {
-        crate::functions::time::floor_fn($datetime, $duration)
+        $crate::functions::time::floor_fn($datetime, $duration)
     };
 }
 
 pub use time_floor as floor;
 
 fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
-    let datetime_binding = Binding::new(datetime.into());
-    let duration_binding = Binding::new(duration.into());
-    let query_string = format!(
-        "time::round({}, {})",
-        datetime_binding.get_param_dollarised(),
-        duration_binding.get_param_dollarised()
-    );
+    let datetime: DatetimeLike = datetime.into();
+    let duration: DurationLike = duration.into();
+    let mut bindings = datetime.get_bindings();
+    bindings.extend(duration.get_bindings());
 
     Function {
-        query_string,
-        bindings: vec![datetime_binding, duration_binding],
+        query_string: format!("time::round({}, {})", datetime.build(), duration.build()),
+        bindings,
     }
 }
 
 #[macro_export]
 macro_rules! time_round {
     ( $datetime:expr, $duration:expr ) => {
-        crate::functions::time::round_fn($datetime, $duration)
+        $crate::functions::time::round_fn($datetime, $duration)
     };
 }
 
 pub use time_round as round;
 
-fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<IntervalLike>) -> Function {
-    let datetime_binding = Binding::new(datetime.into());
-    let interval_binding = Binding::new(interval.into());
+fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLike>) -> Function {
+    let datetime: DatetimeLike = datetime.into();
+    let interval: StrandLike = interval.into();
+    let mut bindings = datetime.get_bindings();
+    bindings.extend(interval.get_bindings());
 
-    let query_string = format!(
-        "time::floor({}, {})",
-        datetime_binding.get_param_dollarised(),
-        interval_binding.get_param_dollarised()
-    );
+    let query_string = format!("time::floor({}, {})", datetime.build(), interval.build());
 
     Function {
         query_string,
-        bindings: vec![datetime_binding, interval_binding],
+        bindings,
     }
 }
-// ::<crate::functions::time::IntervalOrField>
+// ::<$crate::functions::time::IntervalOrField>
 #[macro_export]
 macro_rules! time_group {
     ( $datetime:expr, "year" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Year)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Year)
     };
     ( $datetime:expr, "month" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Month)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Month)
     };
     ( $datetime:expr, "week" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Week)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Week)
     };
     ( $datetime:expr, "day" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Day)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Day)
     };
     ( $datetime:expr, "hour" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Hour)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Hour)
     };
     ( $datetime:expr, "minute" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Minute)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Minute)
     };
     ( $datetime:expr, "second" ) => {
-        crate::functions::time::group_fn($datetime, Interval::Second)
+        $crate::functions::time::group_fn($datetime, $crate::Interval::Second)
     };
     ( $datetime:expr, $interval:expr ) => {
-        crate::functions::time::group_fn($datetime, IntervalLike::from($interval))
+        $crate::functions::time::group_fn($datetime, $crate::StrandLike::from($interval))
     };
 }
 
@@ -215,10 +212,10 @@ fn test_floor_macro_with_datetime_field() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::floor($_param_00000001, $_param_00000002)"
+        "time::floor(rebirth_date, duration)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::floor(rebirth_date, duration)"
     );
 }
@@ -236,7 +233,7 @@ fn test_floor_macro_with_plain_datetime_and_duration() {
         "time::floor($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::floor('1970-01-01T00:01:01Z', 1w)"
     );
 }
@@ -249,10 +246,10 @@ fn test_round_macro_with_datetime_field() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::round($_param_00000001, $_param_00000002)"
+        "time::round(rebirth_date, duration)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::round(rebirth_date, duration)"
     );
 }
@@ -270,7 +267,7 @@ fn test_round_macro_with_plain_datetime_and_duration() {
         "time::round($_param_00000001, $_param_00000002)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::round('1970-01-01T00:01:01Z', 1w)"
     );
 }
@@ -283,10 +280,10 @@ fn test_group_macro_with_datetime_field() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::floor($_param_00000001, $_param_00000002)"
+        "time::floor(rebirth_date, duration)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::floor(rebirth_date, duration)"
     );
 }
@@ -299,10 +296,10 @@ fn test_group_macro_with_datetime_params() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::floor($_param_00000001, $_param_00000002)"
+        "time::floor($rebirth_date, $duration)"
     );
     assert_eq!(
-        result.to_raw().to_string(),
+        result.to_raw().build(),
         "time::floor($rebirth_date, $duration)"
     );
 }
@@ -322,7 +319,7 @@ macro_rules! test_group_with_interval {
                     "time::floor($_param_00000001, $_param_00000002)"
                 );
                 assert_eq!(
-                    result.to_raw().to_string(),
+                    result.to_raw().build(),
                     format!("time::floor('1970-01-01T00:01:01Z', '{}')", $interval)
                 );
             }
@@ -350,12 +347,12 @@ test_group_with_interval!(second_with_enum, Interval::Second);
 fn test_now_fn() {
     let result = now_fn();
     assert_eq!(result.fine_tune_params(), "now()");
-    assert_eq!(result.to_raw().to_string(), "now()");
+    assert_eq!(result.to_raw().build(), "now()");
 }
 
 #[test]
 fn test_now_macro() {
     let result = now!();
     assert_eq!(result.fine_tune_params(), "now()");
-    assert_eq!(result.to_raw().to_string(), "now()");
+    assert_eq!(result.to_raw().build(), "now()");
 }

@@ -5,15 +5,14 @@
  * Licensed under the MIT license
  */
 
-use std::{marker::PhantomData, time::Duration};
+use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
 
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType},
-    ReturnableDefault, ReturnableStandard,
+    Binding, Conditional, ErrorList, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 use super::update::TargettablesForUpdate;
@@ -28,29 +27,69 @@ DELETE @targets
 ;
 */
 
+/// Creates a new DELETE statement.
+/// The DELETE statement can be used to delete records from the database.
+///
+/// # Argument: `table or id`
+///
+/// # Examples
+///
+/// ```rust, ignore
+/// delete(user)
+/// .where_(age.less_than(18)); // simple filtering on a field
+///
+/// delete(user)
+/// .where_(cond(age.greater_than(18)) // Or more complex filtering with `cond` helper
+///         .and(age.less_than(80)));
+/// ```
 pub fn delete<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    // TODO: Pass this to DeleteStatement constructor and gather the errors to be handled when
-    // query is run using one of the run methods.
     let table_name = T::table_name();
     let targettables: TargettablesForUpdate = targettables.into();
-    if !targettables
-        .get_bindings()
-        .first()
-        .unwrap()
-        .get_value()
-        .to_raw_string()
-        .starts_with(&table_name.to_string())
-    {
-        panic!("You're trying to update into the wrong table");
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    let param = match targettables {
+        TargettablesForUpdate::Table(table) => {
+            let table = table.to_string();
+            if &table != &table_name.to_string() {
+                errors.push(format!(
+                    "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
+                ));
+            }
+            table
+        }
+        TargettablesForUpdate::SurrealId(id) => {
+            if !id
+                .to_string()
+                .starts_with(format!("{table_name}:").as_str())
+            {
+                errors.push(format!(
+                    "id - {id} does not belong to {table_name} table from the surreal model struct provided"
+                ));
+            }
+            let binding = Binding::new(id);
+            let param = binding.get_param_dollarised();
+            bindings.push(binding);
+            param
+        }
+    };
+
+    DeleteStatement::<T> {
+        target: param,
+        where_: None,
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        bindings,
+        errors,
+        __model_return_type: PhantomData,
     }
-    // let errors: String = connection.get_errors();
-    DeleteStatement::<T>::new(targettables)
 }
 
-#[derive(Debug)]
+/// Define the API for delete Statement
+#[derive(Debug, Clone)]
 pub struct DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
@@ -61,62 +100,47 @@ where
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
+    errors: ErrorList,
     __model_return_type: PhantomData<T>,
 }
 
 impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
-impl<T> Erroneous for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> Erroneous for DeleteStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> DeleteStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
-    pub fn new(targettables: impl Into<TargettablesForUpdate>) -> Self {
-        let targets: TargettablesForUpdate = targettables.into();
-        let targets_bindings = targets.get_bindings();
-
-        let mut target_names = match targets {
-            TargettablesForUpdate::Table(table) => vec![table.to_string()],
-            TargettablesForUpdate::SurrealId(_) => targets_bindings
-                .iter()
-                .map(|b| format!("${}", b.get_param()))
-                .collect::<Vec<_>>(),
-        };
-
-        Self {
-            target: target_names
-                .pop()
-                .expect("Table or record id must exist here. this is a bug"),
-            where_: None,
-            return_type: None,
-            timeout: None,
-            parallel: false,
-            bindings: targets_bindings,
-            __model_return_type: PhantomData,
-        }
-    }
-
-    /// Adds a condition to the `` clause of the SQL query.
+    /// Adds a condition to the delete statement.
     ///
     /// # Arguments
     ///
-    /// * `condition` - A reference to a filter condition.
+    /// * `condition` - conditional statement.
     ///
-    /// # Example
+    /// Examples:
     ///
+    /// ```rust, ignore
+    /// # delete(user)
+    /// // simple filtering on a field
+    /// .where_(age.less_than(18));
+    ///
+    /// // Or more complex filtering with `cond` helper
+    /// # delete(user)
+    /// .where_(cond(age.greater_than(18))
+    ///         .and(age.less_than(80)));
     /// ```
-    /// use query_builder::{QueryBuilder, Field, Filter};
-    ///
-    /// let mut builder = QueryBuilder::select();
-    /// let condition = Filter::from(("age", ">", 18));
-    /// builder._(condition);
-    ///
-    /// assert_eq!(builder.to_string(), "SELECT *  age > 18");
-    /// ```
-    pub fn where_(mut self, condition: impl Into<Filter> + Parametric + Clone) -> Self {
+    pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
-        let condition: Filter = condition.into();
-        self.where_ = Some(condition.to_string());
+        let condition = Filter::new(condition);
+        self.where_ = Some(condition.build());
         self
     }
 
@@ -125,40 +149,75 @@ where
         self
     }
 
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// query.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
+        let return_type = return_type.into();
+        self.return_type = Some(return_type);
+        self
+    }
+
     /// Sets the timeout duration for the query.
     ///
     /// # Arguments
     ///
-    /// * `duration` - a string slice that specifies the timeout duration. It can be expressed in any format that the database driver supports.
+    /// * `duration` - a value that can represent a duration for the timeout. This can be one of the following:
+    ///
+    ///   * `Duration` - a standard Rust `Duration` value.
+    ///
+    ///   * `Field` - table field.
+    ///
+    ///   * `Param` - a named parameter in the query, represented by a `Param` value.
     ///
     /// # Examples
     ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
+    /// ```rust,ignore
+    /// let query = query.timeout(Duration::from_secs(30));
     ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.timeout("5s");
-    /// ```
-    ///
-    /// ---
-    ///
-    /// Indicates that the query should be executed in parallel.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use my_db_client::{Query, QueryBuilder};
-    ///
-    /// let mut query_builder = QueryBuilder::new();
-    /// query_builder.timeout();
+    /// assert_eq!(query.to_raw().to_string(), "30s");
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
-        let duration: sql::Value = duration.into().into();
-        // let duration = sql::Duration::from(duration);
-        self.timeout = Some(duration.to_string());
+        let duration: DurationLike = duration.into();
+        self.timeout = Some(duration.to_raw().build());
         self
     }
 
+    /// Indicates that the query should be executed in parallel.
     pub fn parallel(mut self) -> Self {
         self.parallel = true;
         self
@@ -170,22 +229,25 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn build(&self) -> String {
-        let mut query = format!("DELETE {};", self.target);
+        let mut query = format!("DELETE {}", self.target);
+
         if let Some(condition) = &self.where_ {
-            query += format!("{} WHERE {};", query, condition).as_str();
+            query = format!("{query} WHERE {}", condition);
         }
+
         if let Some(return_type) = &self.return_type {
-            query += format!("{return_type}").as_str();
+            query = format!("{query} {return_type}");
         }
+
         if let Some(timeout) = &self.timeout {
-            query.push_str(" TIMEOUT ");
-            query.push_str(timeout);
+            query = format!("{query} TIMEOUT {timeout}");
         }
 
         if self.parallel {
-            query.push_str(" PARALLEL");
+            query = format!("{query} PARALLEL");
         }
-        query
+
+        format!("{query};")
     }
 }
 
@@ -223,6 +285,4 @@ where
 }
 
 #[test]
-fn test_query_builder() {
-    assert_eq!(2, 2);
-}
+fn test_query_builder() {}

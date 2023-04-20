@@ -1,0 +1,13 @@
+---
+source: surrealdb-query-builder/src/statements/ifelse.rs
+expression: if_statement5.fine_tune_params()
+---
+IF age >= $_param_00000001 <= $_param_00000002 THEN
+	( SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) OR (city ~ $_param_00000006) ORDER BY age NUMERIC ASC LIMIT $_param_00000007 PARALLEL )
+ELSE IF name ~ $_param_00000008 THEN
+	( SELECT * FROM $_param_00000009 WHERE country IS $_param_00000010 ORDER BY age NUMERIC ASC LIMIT $_param_00000011 )
+ELSE IF (country IS $_param_00000012) OR (country IS $_param_00000013) THEN
+	$_param_00000014
+ELSE
+	$_param_00000015
+END

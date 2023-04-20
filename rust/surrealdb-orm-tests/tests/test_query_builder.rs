@@ -146,7 +146,7 @@ fn should_not_contain_error_when_invalid_id_use_in_connection() {
 
     let x = relate(Student::with(&student_id).writes__(Empty).book(&book_id))
         .content(write.clone())
-        .return_(ReturnType::Before)
+        .return_type(ReturnType::Before)
         .parallel();
 
     assert_eq!(x.get_errors().len(), 0);
@@ -257,7 +257,7 @@ fn should_contain_error_when_invalid_id_use_in_connection() {
     // two errors
     let x = relate(Student::with(&book_id).writes__(Empty).book(&student_id))
         .content(write.clone())
-        .return_(ReturnType::Before)
+        .return_type(ReturnType::Before)
         .parallel();
 
     assert_eq!(x.get_errors().len(), 2);
@@ -287,8 +287,7 @@ async fn relate_query() -> surrealdb_orm::Result<()> {
         ..Default::default()
     };
 
-    let relate_simple =
-        relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
+    let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
         "RELATE student:1->writes->book:2 CONTENT { in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } } ;"
