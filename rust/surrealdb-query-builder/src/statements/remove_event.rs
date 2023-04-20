@@ -6,8 +6,6 @@
  */
 
 /*
- *
- *
 REMOVE statement
 
 Statement syntax
@@ -31,23 +29,51 @@ use crate::{
     types::{Event, Table},
 };
 
+/// Remove event statement
+///
+/// # Arguments
+///
+/// * `event` - The name of the event to be removed. Can be a string or an Event type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_event};
+/// # let user = Table::new("user");
+/// # let party = Event::new("party");
+///
+/// let statement = remove_event(party).on_table(user);
+/// assert_eq!(statement.build(), "REMOVE EVENT party ON TABLE user;");
+/// ```
 pub fn remove_event(event: impl Into<Event>) -> RemoveEventStatement {
-    RemoveEventStatement::new(event)
+    RemoveEventStatement {
+        table: None,
+        event: event.into(),
+    }
 }
+
+/// Remove event statement
 pub struct RemoveEventStatement {
     event: Event,
     table: Option<Table>,
 }
 
 impl RemoveEventStatement {
-    fn new(event: impl Into<Event>) -> Self {
-        Self {
-            table: None,
-            event: event.into(),
-        }
-    }
-
-    fn on_table(mut self, table: impl Into<Table>) -> Self {
+    /// Set the table to remove the event from.
+    ///
+    /// # Arguments
+    /// * `table` - The name of the table to remove the event from. Can be a string or a Table type.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::remove_event};
+    /// # let user = Table::new("user");
+    /// # let party = Event::new("party");
+    ///
+    /// remove_event(party).on_table(user);
+    /// ```
+    pub fn on_table(mut self, table: impl Into<Table>) -> Self {
         self.table = Some(table.into());
         self
     }
@@ -55,11 +81,11 @@ impl RemoveEventStatement {
 
 impl Buildable for RemoveEventStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE EVENT {}", self.event);
+        let mut query = format!("REMOVE EVENT {}", self.event);
         if let Some(table) = &self.table {
-            let query = format!("{} ON TABLE {}", query, table);
+            query = format!("{query} ON TABLE {}", table);
         }
-        query
+        format!("{};", query)
     }
 }
 impl Display for RemoveEventStatement {
@@ -77,3 +103,18 @@ impl Parametric for RemoveEventStatement {
 impl Erroneous for RemoveEventStatement {}
 
 impl Queryable for RemoveEventStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::Database;
+
+    #[test]
+    fn test_remove_event() {
+        let user = Table::new("user");
+        let party = Event::new("party");
+
+        let statement = remove_event(party).on_table(user);
+        assert_eq!(statement.build(), "REMOVE EVENT party ON TABLE user;");
+    }
+}
