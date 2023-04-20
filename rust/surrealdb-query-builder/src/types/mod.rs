@@ -235,7 +235,6 @@ impl From<Vec<Valuex>> for ArrayLike {
 create_value_like_struct!("Duration");
 create_value_like_struct!("Datetime");
 create_value_like_struct!("Table");
-create_value_like_struct!("Value");
 create_value_like_struct!("Object");
 
 // impl<T> From<T> for ArrayLike

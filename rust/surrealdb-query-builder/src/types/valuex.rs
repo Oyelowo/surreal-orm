@@ -1,6 +1,8 @@
+use surrealdb::sql;
+
 use crate::{
-    count, Alias, AliasName, Aliasable, Binding, BindingsList, Buildable, Field, Function, Param,
-    Parametric, Table, ToRaw,
+    count, statements::SelectStatement, Alias, AliasName, Aliasable, Binding, BindingsList,
+    Buildable, Field, Function, Param, Parametric, Table, ToRaw,
 };
 
 #[derive(Debug, Clone)]
@@ -82,6 +84,7 @@ impl From<Alias> for Valuex {
         }
     }
 }
+
 impl From<Function> for Valuex {
     fn from(value: Function) -> Self {
         Valuex {
@@ -102,6 +105,7 @@ impl<T: Into<sql::Value>> From<T> for Valuex {
         }
     }
 }
+
 #[macro_export]
 macro_rules! arr {
     ($( $val:expr ),*) => {{
@@ -111,50 +115,37 @@ macro_rules! arr {
     }};
 }
 
-pub use arr;
-use surrealdb::sql;
+#[cfg(test)]
+mod tests {
+    use surrealdb::sql;
 
-#[test]
-fn erer() {
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Part::from(Ident::from("nana as po"))]).into();
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Part::from(Ident::from(
-    //     "count() AS pa",
-    // ))])
-    // .into();
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Pjrt::Value(Ident::from(
-    //     "count() AS pa",
-    // ))])
-    // .into();
-    // xx.to_raw_string()
-    // let xx: sql::Value = Ident::from("nana as po").into();
-    // SELECT count() AS total, math::sum(age), gender, country FROM person GROUP BY gender, country;
-    // assert_eq!(xx.as_raw_string(), "rere");
-    let user = Table::new("user");
-    let country = Field::new("country");
-    let age = Field::new("age");
-    let gender = Field::new("gender");
-    let city = Field::new("city");
-    let total = AliasName::new("total");
-    let totall = AliasName::new("total");
-    let mut mm = arr![
-        1,
-        2,
-        3,
-        count!().__as__(total),
-        // math::sum!(age),
-        gender,
-        country,
-        54,
-        sql::Duration(std::time::Duration::from_secs(43))
-    ];
-    mm.push(34.into());
-    // assert_eq!(count!().__as__(totall).tona(), "rere");
-    assert_eq!(
-        mm.into_iter()
-            .map(|m| m.to_raw().build())
-            // .map(|m| m.build())
-            .collect::<Vec<_>>()
-            .join(", "),
-        "rere"
-    );
+    use crate::{functions::math, *};
+
+    #[test]
+    fn erer() {
+        let country = Field::new("country");
+        let age = Field::new("age");
+        let gender = Field::new("gender");
+        let total = AliasName::new("total");
+        let mut mm = arr![
+            1,
+            2,
+            3,
+            count!().__as__(total),
+            math::sum!(age),
+            gender,
+            country,
+            54,
+            sql::Duration(std::time::Duration::from_secs(43))
+        ];
+        mm.push(34.into());
+        // assert_eq!(count!().__as__(totall).tona(), "rere");
+        assert_eq!(
+            mm.into_iter()
+                .map(|m| m.to_raw().build())
+                .collect::<Vec<_>>()
+                .join(", "),
+            "1, 2, 3, count() AS total, math::sum(age), gender, country, 54, 43s, 34"
+        );
+    }
 }
