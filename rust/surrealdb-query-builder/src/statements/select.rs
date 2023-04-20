@@ -26,29 +26,15 @@
     [ PARALLEL ]
 ; */
 use std::{
-    borrow::{Borrow, Cow},
-    env,
     fmt::{Display, Formatter, Result as FmtResult},
-    marker::PhantomData,
     ops::Deref,
 };
 
-use regex::Replacer;
-use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql::{self, Value};
+use surrealdb::sql;
 
 use crate::{
-    cond,
-    // functions::math,
-    traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
-    types::{All, DurationLike, Field, Filter, SurrealId, Table},
-    AliasName,
-    Aliasable,
-    NumberLike,
-    Operatable,
-    ReturnableSelect,
-    ToRaw,
-    Valuex,
+    Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, Field,
+    Filter, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId, Table, ToRaw, Valuex,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -1298,32 +1284,38 @@ impl Buildable for SelectStatement {
     }
 }
 
-#[test]
-fn test_statement_with_alias() {
-    let canadian_cities = AliasName::new("legal_age");
-    let age = Field::new("age");
-    let city = Field::new("city");
-    let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-    let statement = select(All)
-        .from(fake_id)
-        .where_(
-            cond(city.is("Prince Edward Island"))
-                .and(city.is("NewFoundland"))
-                .or(city.like("Toronto")),
-        )
-        .order_by(order(&age).numeric())
-        .limit(153)
-        .start(10)
-        .parallel();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::*;
 
-    let statement_aliased = statement.__as__(canadian_cities);
+    #[test]
+    fn test_statement_with_alias() {
+        let canadian_cities = AliasName::new("legal_age");
+        let age = Field::new("age");
+        let city = Field::new("city");
+        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let statement = select(All)
+            .from(fake_id)
+            .where_(
+                cond(city.is("Prince Edward Island"))
+                    .and(city.is("NewFoundland"))
+                    .or(city.like("Toronto")),
+            )
+            .order_by(order(&age).numeric())
+            .limit(153)
+            .start(10)
+            .parallel();
 
-    assert_eq!(
+        let statement_aliased = statement.__as__(canadian_cities);
+
+        assert_eq!(
         statement_aliased.fine_tune_params(),
         "(SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT $_param_00000005 START AT $_param_00000006 PARALLEL) AS legal_age"
     );
-    assert_eq!(
+        assert_eq!(
         statement_aliased.to_raw().to_string(),
         "(SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
     );
+    }
 }
