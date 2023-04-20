@@ -26,16 +26,30 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::Scope,
 };
 
+/// Remove scope statement
+///
+/// # Arguments
+///
+/// * `scope` - The name of the scope to be removed. Can be a string or a Scope type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_scope};
+/// # let scope = Scope::new("scope");
+/// let statement = remove_scope(scope);
+/// assert_eq!(statement.build(), "REMOVE SCOPE scope;");
+/// ```
 pub fn remove_scope(scope: impl Into<Scope>) -> RemoveScopeStatement {
     RemoveScopeStatement::new(scope)
 }
+
+/// Remove scope statement
 pub struct RemoveScopeStatement {
     scope: Scope,
 }
@@ -59,12 +73,24 @@ impl Parametric for RemoveScopeStatement {
 
 impl Buildable for RemoveScopeStatement {
     fn build(&self) -> String {
-        format!("REMOVE SCOPE {}", self.scope)
+        format!("REMOVE SCOPE {};", self.scope)
     }
 }
 
 impl Display for RemoveScopeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_scope() {
+        let scope = Scope::new("scope");
+        let statement = remove_scope(scope);
+        assert_eq!(statement.build(), "REMOVE SCOPE scope;");
     }
 }
