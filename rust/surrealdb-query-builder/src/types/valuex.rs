@@ -38,6 +38,24 @@ impl Buildable for Vec<Valuex> {
     }
 }
 
+// impl AsRef<Valuex> for Field {
+//     fn as_ref(&self) -> &Valuex {
+//         Valuex {
+//             string: self.build(),
+//             bindings: self.get_bindings(),
+//         }
+//     }
+// }
+
+impl From<&Field> for Valuex {
+    fn from(value: &Field) -> Self {
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        }
+    }
+}
+
 impl From<Field> for Valuex {
     fn from(value: Field) -> Self {
         Self {

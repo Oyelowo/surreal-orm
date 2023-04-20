@@ -38,7 +38,6 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Value};
 
 use crate::{
-    array,
     cond,
     // functions::math,
     traits::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
@@ -709,12 +708,12 @@ impl From<Selectables> for SelectStatement {
 ///
 /// The SELECT statement can be used for selecting and querying data in a database.
 /// Each SELECT statement supports selecting from multiple targets, which can include
-/// tables, records, edges, subqueries, paramaters, arrays, objects, and other values.
+/// tables, records, edges, subqueries, paramaters, s, objects, and other values.
 ///
 /// Examples
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// use surrealdb_orm::{*, statements::{order, select}};
+/// use surrealdb_orm::{*, statements::{order, select}, functions::{math}};
 /// # let name = Field::new("name");
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
@@ -722,7 +721,7 @@ impl From<Selectables> for SelectStatement {
 /// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
 /// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
 ///
-/// let select1 = select(All)
+///  select(All)
 ///     .from(fake_id)
 ///     .where_(cond(city.is("Prince Edward Island"))
 ///                 .and(city.is("NewFoundland"))
@@ -733,12 +732,47 @@ impl From<Selectables> for SelectStatement {
 ///     .start(10)
 ///     .parallel();
 ///
-/// let select2 = select(All)
+///  select(All)
 ///     .from(fake_id2)
 ///     .where_(country.is("INDONESIA"))
 ///     .order_by(order(&age).numeric())
 ///     .limit(20)
 ///     .start(5);
+///
+///  // Selecting heterogenous types e.g field, alias and all
+///  # let user = Table::new("user");
+///  # let country = Field::new("country");
+///  # let gender = Field::new("gender");
+///  # let total = AliasName::new("total");
+///  select(arr![count!().__as__(total), math::sum!(age), &gender, &country])
+///     .from(user)
+///     .group_by(&[gender, country]);
+///  
+///  // Select reference of reference
+///  # let user = Table::new("user");
+///  # let country = Field::new("country");
+///  # let age = Field::new("age");
+///  # let gender = Field::new("gender");
+///  # let city = Field::new("city");
+///  select(&[&gender, &country, &city])
+///     .from(user)
+///     .group_by(&[gender, country, city]);
+///  
+///  // Select reference of owned types
+///  # let user = Table::new("user");
+///  # let country = Field::new("country");
+///  # let gender = Field::new("gender");
+///  # let city = Field::new("city");
+///  select(&[gender, country, city])
+///     .from(user);
+///     
+///  // Select vector of homogenous fields
+///  # let user = Table::new("user");
+///  # let country = Field::new("country");
+///  # let gender = Field::new("gender");
+///  select(vec![gender, country])
+///     .from(user);
+/// ```
 pub fn select(selectables: impl Into<Selecta>) -> SelectStatement {
     let selectables: Selecta = selectables.into();
 
@@ -763,7 +797,7 @@ impl SelectStatement {
     ///
     /// # Arguments
     ///
-    /// * `targettables` - which can include tables, records, edges, subqueries, paramaters, arrays, objects, and other values.
+    /// * `targettables` - which can include tables, records, edges, subqueries, paramaters, s, objects, and other values.
     ///
     /// # Example
     ///
@@ -785,7 +819,7 @@ impl SelectStatement {
     /// ```
     /// ```rust, ignore
     ///  // or a list of tables, ids or subqueries
-    ///  select(All).from(array![user, user_id, select(All).from(alien)]);
+    ///  select(All).from(![user, user_id, select(All).from(alien)]);
     /// ```
     pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> Self {
         let targets: TargettablesForSelect = targettables.into();
@@ -874,14 +908,14 @@ impl SelectStatement {
     }
 
     /// Adds a field or multiple fields to the `SPLIT BY` clause of the query.
-    /// As SurrealDB supports arrays and nested fields within arrays,
+    /// As SurrealDB supports s and nested fields within arrays,
     /// it is possible to split the result on a specific field name,
-    /// returning each value in an array as a separate value, along with the record content itself.
+    /// returning each value in an  as a separate value, along with the record content itself.
     /// This is useful in data analysis contexts.
     ///
     /// # Arguments
     ///
-    /// * `splittables` - The name of the field or array or vector of fields to add to the `SPLIT BY` clause.
+    /// * `splittables` - The name of the field or  or vector of fields to add to the `SPLIT BY` clause.
     ///
     /// # Examples: For multiple fields
     ///
@@ -892,14 +926,14 @@ impl SelectStatement {
     /// # let country = Table::new("country");
     /// # let emails = Field::new("emails");
     /// # let cities = Field::new("cities");
-    // // Split the results by each value in an array
+    // // Split the results by each value in an
     ///  select(All)
     ///     .from(user)
     ///     .split(emails);
     ///
     /// ```
     /// ```rust, ignore
-    /// // Split the results by each value in a nested array
+    /// // Split the results by each value in a nested
     ///  select(All)
     ///     .from(country)
     ///     .split(Country::schema().locations.cities);
@@ -934,30 +968,52 @@ impl SelectStatement {
     /// # use surrealdb_orm::{*, statements::{order, select}, functions::{count, math}};
     /// # let user = Table::new("user");
     /// # let country = Field::new("country");
-    /// # let age = Field::new("age");
-    /// # let gender = Field::new("gender");
-    /// # let city = Field::new("city");
-    /// # let total = AliasName::new("total");
     ///  
     ///  // Group records by a single field
     ///  select(All)
     ///     .from(user)
     ///     .group_by(country);
     ///  
-    ///  // Group results by a multiple fields
-    ///  select(&[gender, country, city])
+    /// // Group results by list borrowed list of referenced fields
+    /// # let user = Table::new("user");
+    /// # let country = Field::new("country");
+    /// # let age = Field::new("age");
+    /// # let gender = Field::new("gender");
+    /// # let city = Field::new("city");
+    ///  select(All)
+    ///     .from(user)
+    ///     .group_by(&[&gender, &country, &city]);
+    ///  
+    /// // Group results by list borrowed list of owned fields
+    /// # let user = Table::new("user");
+    ///  select(All)
     ///     .from(user)
     ///     .group_by(&[gender, country, city]);
-    ///  
+    ///     
+    /// # let user = Table::new("user");
+    /// # let country = Field::new("country");
+    /// # let gender = Field::new("gender");
+    /// # let total = AliasName::new("total");
     /// // Group results with aggregate functions
-    ///  select(arr![count!().__as__(total), math::sum!(age), gender, country])
+    ///  select(All)
     ///     .from(user)
-    ///     .group_by(&[gender, country]);
+    ///     .group_by(vec![gender, country]);
+    ///
+    /// // Group results by chaining
+    /// # let user = Table::new("user");
+    /// # let country = Field::new("country");
+    /// # let gender = Field::new("gender");
+    /// select(All)
+    ///     .from(user)
+    ///     .group_by(gender)
+    ///     .group_by(country);
     /// ```
     /// ```rust, ignore
-    /// -- Group results by a nested field
+    /// // Group results by a nested field
     /// let settings = Article::schem();
-    /// SELECT settings.published FROM article GROUP BY settings.published;
+    /// select(settings.published)
+    ///     .from(article)
+    ///     .group_by(settings.published);
     /// ```
     pub fn group_by(mut self, groupables: impl Into<Groupables>) -> Self {
         let fields: Groupables = groupables.into();
@@ -1005,7 +1061,7 @@ impl SelectStatement {
     ///
     /// # let user = Table::new("user");
     /// # let age = Field::new("age");
-    /// // Order by multiple fields by using a list. Vector and `array!` helper also work
+    /// // Order by multiple fields by using a list. Vector and `!` helper also work
     /// select(All)
     ///     .from(user)
     ///     .order_by(&[order(age).numeric().desc(), order(city).rand().asc()]);
