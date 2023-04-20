@@ -24,7 +24,7 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{BindingsList, Buildable, Erroneous, Namespace, Parametric, Queryable, Token};
+use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Token};
 
 use super::NamespaceOrDatabase;
 
