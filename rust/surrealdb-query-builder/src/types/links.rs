@@ -5,17 +5,19 @@
  * Licensed under the MIT license
  */
 
-use std::ops::{Deref, DerefMut};
-
 use serde::{Deserialize, Serialize};
 
 use crate::{SurrealId, SurrealdbNode};
 
+/// A reference to foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Reference<V: SurrealdbNode> {
+    /// the id of the foreign node. The defualt if foreign node is not fetched
     Id(SurrealId),
+    /// the fetched value of the foreign node
     FetchedValue(V),
+    /// null if foreign node does not exist
     Null,
 }
 
@@ -36,6 +38,7 @@ where
         )
     }
 
+    /// returns the id of the foreign node if it exists
     pub fn get_id(&self) -> Option<&SurrealId> {
         match &self {
             Self::Id(v) => Some(v),
@@ -43,6 +46,7 @@ where
         }
     }
 
+    /// returns a referenced value of the foreign node if it exists and has been fetched
     pub fn value(&self) -> Option<&V> {
         match &self {
             Self::FetchedValue(v) => Some(v),
@@ -50,6 +54,7 @@ where
         }
     }
 
+    /// returns an owned value of the foreign node if it exists and has been fetched
     pub fn value_owned(self) -> Option<V> {
         match self {
             Self::FetchedValue(v) => Some(v),
@@ -149,6 +154,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
     }
 }
 
+/// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
@@ -157,16 +163,20 @@ impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
 
 impl<V: SurrealdbNode> LinkOne<V> {
+    /// returns nothing. Useful for satisfying types when instantiating a struct
+    /// and you dont want the field be serialized
     pub fn null() -> LinkOne<V> {
         LinkOne(Reference::Null)
     }
 }
 
-// Use boxing to break reference cycle
+/// a reference to current struct as foreign node in a one-to-one relationship which can be either an ID or a fetched value itself or null.
+/// It is similar to `LinkOne` is boxed to avoid infinite recursion.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
 
 impl<V: SurrealdbNode> LinkSelf<V> {
+    /// returns nothing. Useful for satisfying types when instantiating a struct
     pub fn null() -> Self {
         Self(Reference::Null.into())
     }
@@ -213,17 +223,17 @@ macro_rules! impl_utils_for_ref_vec {
     };
 }
 
-/// Returns either:
-/// the foreign values if fetched
-/// id keys of the foreign Field if not fetched
+/// ~eference to a foreign node in a simple direct one-to-many relationship
+/// Returns either the foreign values if fetched, id keys of the foreign Field if not fetched,
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);
-// implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
+implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 
+/// reference to a foreign node in a one-to-many relationship via an edge
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Relate<V: SurrealdbNode>(Vec<Reference<V>>);
 
