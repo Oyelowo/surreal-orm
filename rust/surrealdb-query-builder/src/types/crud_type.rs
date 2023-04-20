@@ -1,10 +1,22 @@
+/*cond,
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::fmt::{self, Display};
 
+/// CRUD operation type
 #[derive(Clone, Copy, Debug)]
 pub enum CrudType {
+    /// Creates a new record in the database
     Create,
+    /// Retrieves existing records from the database
     Select,
+    /// Updates existing records in the database
     Update,
+    /// Deletes existing records from the database
     Delete,
 }
 
