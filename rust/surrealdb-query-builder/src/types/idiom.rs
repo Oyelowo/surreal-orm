@@ -10,13 +10,7 @@ use std::{
     ops::Deref,
 };
 
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing};
-
-use crate::{
-    errors::SurrealdbOrmError,
-    traits::{Conditional, Erroneous, Parametric},
-};
+use surrealdb::sql;
 
 /// Surrealdb namespace
 #[derive(Debug, Clone)]
@@ -115,18 +109,11 @@ impl From<Tables> for Vec<Table> {
     }
 }
 
-// impl Deref for Tables {
-//     type Target = Vec<Table>;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-
 macro_rules! impl_new_for_all {
     ($($types_:ty),*) => {
         $(
         impl $types_ {
+            /// Create instance of type
             pub fn new(name: impl Into<String>) -> Self {
                 Self(name.into().into())
             }
@@ -180,6 +167,7 @@ macro_rules! impl_display_for_all {
 }
 impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, TableIndex);
 
+/// Wrapper around Surrealdb idiom. X suffix stands for extra.
 pub struct Idiomx(sql::Idiom);
 
 impl Display for Idiomx {
@@ -189,6 +177,7 @@ impl Display for Idiomx {
 }
 
 impl Idiomx {
+    /// Create a new idiom
     pub fn new(name: sql::Idiom) -> Self {
         Self(name)
     }
