@@ -31,24 +31,34 @@ use crate::{
     types::Table,
 };
 
+/// Remove table statement
+///
+/// # Arguments
+///
+/// * `table` - The name of the table to be removed. Can be a string or a Table type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_table};
+/// # let table = Table::new("table");
+/// let statement = remove_table(table);
+/// assert_eq!(statement.build(), "REMOVE TABLE table;");
+/// ```
 pub fn remove_table(table: impl Into<Table>) -> RemoveTableStatement {
-    RemoveTableStatement::new(table)
+    RemoveTableStatement {
+        table: table.into(),
+    }
 }
+
+/// Remove table statement
 pub struct RemoveTableStatement {
     table: Table,
 }
 
-impl RemoveTableStatement {
-    fn new(table: impl Into<Table>) -> Self {
-        Self {
-            table: table.into(),
-        }
-    }
-}
-
 impl Buildable for RemoveTableStatement {
     fn build(&self) -> String {
-        format!("REMOVE TABLE {}", self.table)
+        format!("REMOVE TABLE {};", self.table)
     }
 }
 
@@ -67,3 +77,15 @@ impl Parametric for RemoveTableStatement {
 impl Erroneous for RemoveTableStatement {}
 
 impl Queryable for RemoveTableStatement {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_table() {
+        let table = Table::new("table");
+        let statement = remove_table(table);
+        assert_eq!(statement.build(), "REMOVE TABLE table;");
+    }
+}
