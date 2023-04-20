@@ -260,3 +260,10 @@ create_value_like_struct!("Object");
 //         )
 //     }
 // }
+//
+
+#[derive(Debug, Clone)]
+pub struct NULL;
+
+#[derive(Debug, Clone)]
+pub struct NONE;

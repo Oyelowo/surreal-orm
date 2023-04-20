@@ -2,7 +2,7 @@ use surrealdb::sql;
 
 use crate::{
     count, statements::SelectStatement, Alias, AliasName, Aliasable, Binding, BindingsList,
-    Buildable, Field, Function, Param, Parametric, Table, ToRaw,
+    Buildable, Field, Function, Param, Parametric, Table, ToRaw, NONE, NULL,
 };
 
 #[derive(Debug, Clone)]
@@ -81,6 +81,24 @@ impl From<Alias> for Valuex {
         Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+        }
+    }
+}
+
+impl From<NULL> for Valuex {
+    fn from(_value: NULL) -> Self {
+        Valuex {
+            string: "NULL".to_string(),
+            bindings: vec![],
+        }
+    }
+}
+
+impl From<NONE> for Valuex {
+    fn from(_value: NONE) -> Self {
+        Valuex {
+            string: "NONE".to_string(),
+            bindings: vec![],
         }
     }
 }

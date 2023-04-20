@@ -301,24 +301,3 @@ impl<T: Into<sql::Array>> From<T> for ArrayCustom {
         Self(value.into().into())
     }
 }
-
-// Should probably delete
-// impl From<Field> for ArrayCustom {
-//     fn from(value: Field) -> Self {
-//         Self(value.into())
-//     }
-// }
-
-pub struct NONE;
-
-impl From<NONE> for sql::Value {
-    fn from(value: NONE) -> Self {
-        sql::Value::Idiom(value.to_string().into())
-    }
-}
-
-impl Display for NONE {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "NONE")
-    }
-}
