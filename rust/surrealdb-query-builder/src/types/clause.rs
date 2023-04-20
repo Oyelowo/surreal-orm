@@ -303,7 +303,6 @@ impl Clause {
         let query_string = match &kind {
             Empty => "".into(),
             Where(filter) => {
-                // bindings.extend(filter.get_bindings());
                 bindings = filter.get_bindings();
                 errors = filter.get_errors();
                 format!("[WHERE {filter}]")
@@ -341,7 +340,6 @@ impl Clause {
             bindings,
             arrow: None,
             model_or_field_name: None,
-            // edge_table_name: None,
             errors,
         }
     }
