@@ -3,8 +3,6 @@ use std::ops::Deref;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
-use super::{Field, Param};
-
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum CoordinateValue {
