@@ -26,7 +26,7 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::*;
+use crate::{BindingsList, Buildable, Erroneous, Field, Parametric, Queryable, Table};
 
 /// Remove field statement
 ///
