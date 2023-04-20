@@ -1,17 +1,15 @@
 use std::fmt::Display;
 
-use surrealdb::sql;
-
 use crate::{
     traits::{BindingsList, Buildable, Parametric},
     Aliasable, Erroneous, ErrorList,
 };
 
+/// Represents a subquery function.
 #[derive(Debug, Clone)]
 pub struct Function {
-    pub query_string: String,
-    pub bindings: BindingsList,
-    // pub errors: ErrorList,
+    pub(crate) query_string: String,
+    pub(crate) bindings: BindingsList,
 }
 
 impl Parametric for Function {
@@ -32,10 +30,6 @@ impl Buildable for Function {
     }
 }
 
-impl Erroneous for Function {
-    // fn get_errors(&self) -> ErrorList {
-    // self.errors.to_vec()
-    // }
-}
+impl Erroneous for Function {}
 
 impl Aliasable for Function {}
