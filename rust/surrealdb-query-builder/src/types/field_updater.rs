@@ -7,9 +7,7 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::{
-    BindingsList, Buildable, Parametric, Valuex,
-};
+use crate::{BindingsList, Buildable, Parametric, Valuex};
 
 use super::Field;
 
@@ -186,7 +184,7 @@ impl Updater {
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to add to the column.
+    /// * `value` - The value to add to the field or push to the field if it is an array.
     ///
     /// # Examples
     ///
@@ -206,7 +204,7 @@ impl Updater {
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to remove from the column.
+    /// * `value` - The value to subtract from the field or remove from the field if it is an array.
     ///
     /// # Examples
     ///
