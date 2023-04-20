@@ -1072,25 +1072,24 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        // let lower_bound: Ordinal = lower_bound.into();
-        // let upper_bound: Ordinal = upper_bound.into();
-        // let lower_bound_binding = Binding::new(lower_bound);
-        // let upper_bound_binding = Binding::new(upper_bound);
-        // let condition = format!(
-        //     "{} < {} < {}",
-        //     lower_bound_binding.get_param_dollarised(),
-        //     self.build(),
-        //     upper_bound_binding.get_param_dollarised()
-        // );
-        //
-        // let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        // let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        // let updated_params = [lower_updated_params, upper_updated_params].concat();
-        // Operation {
-        //     query_string: condition,
-        //     bindings: updated_params,
-        // }
-        todo!()
+        let lower_bound: Valuex = lower_bound.into().into();
+        let upper_bound: Valuex = upper_bound.into().into();
+        let condition = format!(
+            "{} < {} < {}",
+            lower_bound.build(),
+            self.build(),
+            upper_bound.build()
+        );
+
+        let lower_updated_params =
+            self.__update_bindings(lower_bound.get_bindings().pop().expect("Must be one"));
+        let upper_updated_params =
+            self.__update_bindings(upper_bound.get_bindings().pop().expect("Must be one"));
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_params,
+        }
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.
@@ -1112,27 +1111,27 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        // let lower_bound: Ordinal = lower_bound.into();
-        // let upper_bound: Ordinal = upper_bound.into();
-        // let lower_bound_binding = Binding::new(lower_bound);
-        // let upper_bound_binding = Binding::new(upper_bound);
-        // let condition = format!(
-        //     "{} <= {} <= {}",
-        //     lower_bound_binding.get_param_dollarised(),
-        //     self.build(),
-        //     upper_bound_binding.get_param_dollarised()
-        // );
-        //
-        // let lower_updated_params = self.__update_bindings(lower_bound_binding);
-        // let upper_updated_params = self.__update_bindings(upper_bound_binding);
-        // let updated_params = [lower_updated_params, upper_updated_params].concat();
-        // Operation {
-        //     query_string: condition,
-        //     bindings: updated_params,
-        // }
-        todo!()
+        let lower_bound: Valuex = lower_bound.into().into();
+        let upper_bound: Valuex = upper_bound.into().into();
+        let condition = format!(
+            "{} <= {} <= {}",
+            lower_bound.build(),
+            self.build(),
+            upper_bound.build()
+        );
+
+        let lower_updated_params =
+            self.__update_bindings(lower_bound.get_bindings().pop().expect("Must be one"));
+        let upper_updated_params =
+            self.__update_bindings(upper_bound.get_bindings().pop().expect("Must be one"));
+        let updated_params = [lower_updated_params, upper_updated_params].concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_params,
+        }
     }
 
+    /// Update the bindings of the current operation
     fn ____________update_many_bindings<'bi>(
         &self,
         bindings: impl Into<&'bi [Binding]>,
@@ -1147,40 +1146,18 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
             bindings: updated_params,
         }
     }
-    // fn ____________get_condition_string(&self) -> String;
-    //
-    // fn ____________update_condition_string(&mut self, condition_string: String) -> Operator;
-    //
-    // fn ____________update_many_bindings<'bi>(&self, bindings: impl Into<&'bi [Binding]>) -> Operator;
-    // let bindings: &'bi [Binding] = bindings.into();
-    // // println!("bindingszz {bindings:?}");
-    // // updated_params.extend_from_slice(&self.bindings[..]);
-    // // updated_params.extend_from_slice(&bindings[..]);
-    // let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
-    // Self {
-    //     condition_query_string: self.condition_query_string.to_string(),
-    //     bindings: updated_params,
-    //     field_name: self.field_name.clone(),
-    //     }
-    // }
 
+    /// Update the bindings of the current operation
     fn __update_bindings(&self, binding: Binding) -> Vec<Binding> {
-        // let mut updated_params = Vec::with_capacity(self.bindings.len() + 1);
-        // updated_params.extend(self.bindings.to_vec());
-        // updated_params.extend([binding]);
-        // updated_params
         [self.get_bindings().as_slice(), &[binding]].concat()
     }
 
+    /// generates operation query string
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
-        // T: Into<Valuex>,
         T: Into<Valuex>,
     {
-        // let value: Valuex = value.into();
         let value: Valuex = value.into();
-        // let binding = Binding::new(value);
-        // let value = value.tona();
         let condition = format!("{} {} {}", self.build(), operator, &value.build());
         let updated_bindings = [
             self.get_bindings().as_slice(),

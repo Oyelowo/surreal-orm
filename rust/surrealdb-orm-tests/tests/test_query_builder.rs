@@ -127,10 +127,10 @@ fn can_get_structs_relations() {
     assert_eq!(
         relations_aliases
             .into_iter()
-            .map(|r| r.to_raw().to_string())
+            .map(|r| r.to_raw().build())
             .collect::<Vec<_>>()
             .join(", "),
-        "`->writes->book` AS writtenBooks, `->writes->blog` AS blogsssss"
+        "->writes->book AS writtenBooks, ->writes->blog AS blogsssss"
     );
 }
 
