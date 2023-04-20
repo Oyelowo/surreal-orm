@@ -7,7 +7,9 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::traits::{Binding, BindingsList, Buildable, Parametric};
+use crate::{
+    BindingsList, Buildable, Parametric, Valuex,
+};
 
 use super::Field;
 
@@ -24,8 +26,13 @@ impl Parametric for Updater {
     }
 }
 
+/// A helper struct for generating setters used in various statements
 pub fn updater(field: impl Into<Field>) -> Updater {
-    Updater::new(field)
+    let field: Field = field.into();
+    Updater {
+        query_string: field.build(),
+        bindings: field.get_bindings(),
+    }
 }
 
 impl Buildable for Updater {
@@ -40,8 +47,11 @@ impl std::fmt::Display for Updater {
     }
 }
 
+/// Things that can be updated
 pub enum Updateables {
+    /// Single updater
     Updater(Updater),
+    /// Multiple updaters
     Updaters(Vec<Updater>),
 }
 
@@ -64,22 +74,6 @@ impl Parametric for Updateables {
 }
 
 impl Updater {
-    /// Creates a new `Updater` instance with the given column update string.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = score + 1".to_string());
-    /// ```
-    pub fn new(field: impl Into<Field>) -> Self {
-        let field: Field = field.into();
-        let bindings = vec![field.get_bindings()];
-        Self {
-            query_string: field.to_string(),
-            bindings: vec![],
-        }
-    }
     /// Sets a field name
     ///
     /// # Arguments
@@ -88,11 +82,13 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Setter;
-    /// let updater = Setter::new("score".to_string());
-    /// let updated_updater = updater.equal(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 2");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let score = Field::new("score");
+    /// let updated_updater = updater(score).equal(2);
+    /// assert_eq!(updated_updater.to_raw().build(), "score = 2");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "score = $_param_00000001");
     /// ```
     pub fn equal(&self, value: impl Into<sql::Value>) -> Self {
         let value: sql::Value = value.into();
@@ -108,11 +104,14 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score".to_string());
-    /// let updated_updater = updater.increment_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score += 2");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let score = Field::new("score");
+    /// let updated_updater = updater(score).increment_by(2);
+    /// assert_eq!(updated_updater.to_raw().build(), "score += 2");
+    ///
+    /// # assert_eq!(updated_updater.fine_tune_params(), "score += $_param_00000001");
     /// ```
     pub fn increment_by(&self, value: impl Into<sql::Number>) -> Self {
         let value: sql::Number = value.into();
@@ -128,11 +127,13 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags += 'rust'".to_string());
-    /// let updated_updater = updater.remove("python");
-    /// assert_eq!(updated_updater.to_string(), "tags += 'rust'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let tags = Field::new("tags");
+    /// let updated_updater = updater(tags).append("rust");
+    /// assert_eq!(updated_updater.to_raw().build(), "tags += 'rust'");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "tags += $_param_00000001");
     /// ```
     pub fn append(&self, value: impl Into<sql::Value>) -> Self {
         self.update_field(Operator::Inc, value)
@@ -147,11 +148,13 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score".to_string());
-    /// let updated_updater = updater.decrement_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score -= 2");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let score = Field::new("score");
+    /// let updated_updater = updater(score).decrement_by(2);
+    /// assert_eq!(updated_updater.to_raw().build(), "score -= 2");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "score -= $_param_00000001");
     /// ```
     pub fn decrement_by(&self, value: impl Into<sql::Number>) -> Self {
         let value: sql::Number = value.into();
@@ -167,11 +170,13 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags -= 'rust'".to_string());
-    /// let updated_updater = updater.remove("python");
-    /// assert_eq!(updated_updater.to_string(), "tags -= 'rust'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let tags = Field::new("tags");
+    /// let updated_updater = updater(tags).remove("rust");
+    /// assert_eq!(updated_updater.to_raw().build(), "tags -= 'rust'");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "tags -= $_param_00000001");
     /// ```
     pub fn remove(&self, value: impl Into<sql::Value>) -> Self {
         self.update_field(Operator::Dec, value)
@@ -185,11 +190,13 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
-    /// let updated_updater = updater.plus_equal(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let tags = Field::new("tags");
+    /// let updated_updater = updater(tags).plus_equal("rust");
+    /// assert_eq!(updated_updater.to_raw().build(), "tags += 'rust'");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "tags += $_param_00000001");
     /// ```
     pub fn plus_equal(&self, value: impl Into<sql::Value>) -> Self {
         self.update_field(Operator::Inc, value)
@@ -203,30 +210,31 @@ impl Updater {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("name = 'John'".to_string());
-    /// let updated_updater = updater.minus_equal("ohn");
-    /// assert_eq!(updated_updater.to_string(), "name = 'J'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let tags = Field::new("tags");
+    /// let updated_updater = updater(tags).minus_equal("rust");
+    /// assert_eq!(updated_updater.to_raw().build(), "tags -= 'rust'");
+    /// # assert_eq!(updated_updater.fine_tune_params(), "tags -= $_param_00000001");
     /// ```
     pub fn minus_equal(&self, value: impl Into<sql::Value>) -> Self {
         self.update_field(Operator::Dec, value)
     }
 
-    fn update_field(&self, operator: sql::Operator, value: impl Into<sql::Value>) -> Updater {
-        let value: sql::Value = value.into();
-        let binding = Binding::new(value);
-        let column_updater_string = format!("{self} {operator} {}", binding.get_param_dollarised());
+    fn update_field(&self, operator: sql::Operator, value: impl Into<Valuex>) -> Updater {
+        let value: Valuex = value.into();
+        let column_updater_string = format!("{self} {operator} {}", value.build());
         Self {
             query_string: column_updater_string,
-            bindings: vec![binding],
+            bindings: value.get_bindings(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::ToRaw;
+    use crate::ToRaw;
 
     use super::*;
 
@@ -238,7 +246,7 @@ mod tests {
             updated_updater.fine_tune_params(),
             "score += $_param_00000001"
         );
-        assert_eq!(updated_updater.to_raw().to_string(), "score += 5");
+        assert_eq!(updated_updater.to_raw().build(), "score += 5");
     }
 
     #[test]
@@ -249,7 +257,7 @@ mod tests {
             updated_updater.fine_tune_params(),
             "names += $_param_00000001"
         );
-        assert_eq!(updated_updater.to_raw().to_string(), "names += 'Oyelowo'");
+        assert_eq!(updated_updater.to_raw().build(), "names += 'Oyelowo'");
     }
 
     #[test]
@@ -260,7 +268,7 @@ mod tests {
             updated_updater.fine_tune_params(),
             "score -= $_param_00000001"
         );
-        assert_eq!(updated_updater.to_raw().to_string(), "score -= 5");
+        assert_eq!(updated_updater.to_raw().build(), "score -= 5");
     }
 
     #[test]
@@ -271,7 +279,7 @@ mod tests {
             updated_updater.fine_tune_params(),
             "names -= $_param_00000001"
         );
-        assert_eq!(updated_updater.to_raw().to_string(), "names -= 'Oyelowo'");
+        assert_eq!(updated_updater.to_raw().build(), "names -= 'Oyelowo'");
     }
 
     #[test]
@@ -292,6 +300,6 @@ mod tests {
             updated_updater.fine_tune_params(),
             "names -= $_param_00000001"
         );
-        assert_eq!(updated_updater.to_raw().to_string(), "names -= 'Oyelowo'");
+        assert_eq!(updated_updater.to_raw().build(), "names -= 'Oyelowo'");
     }
 }
