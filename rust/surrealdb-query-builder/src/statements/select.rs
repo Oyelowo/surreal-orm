@@ -693,8 +693,8 @@ impl SelectStatement {
                 .collect::<Vec<_>>(),
             // Should already be bound
             TargettablesForSelect::SubQuery(query) => {
-                let params = query.get_bindings();
-                vec![query.to_string()]
+                targets_bindings.extend(query.get_bindings());
+                vec![query.build()]
             }
             TargettablesForSelect::SurrealId(id) => {
                 let binding = Binding::new(id.to_owned());
