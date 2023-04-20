@@ -26,12 +26,7 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{Database, Namespace, Scope, Table, TableIndex, Token},
-};
+use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Table, TableIndex};
 
 /// Remove index statement
 ///
