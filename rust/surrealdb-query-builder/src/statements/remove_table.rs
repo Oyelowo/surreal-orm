@@ -6,8 +6,6 @@
  */
 
 /*
- *
- *
 REMOVE statement
 
 Statement syntax

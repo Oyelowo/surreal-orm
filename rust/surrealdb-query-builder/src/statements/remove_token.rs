@@ -6,8 +6,6 @@
  */
 
 /*
- *
- *
 REMOVE statement
 
 Statement syntax
@@ -26,37 +24,68 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{Namespace, Token},
-};
+use crate::{BindingsList, Buildable, Erroneous, Namespace, Parametric, Queryable, Token};
 
 use super::NamespaceOrDatabase;
 
-pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatement {
-    RemoveTokenStatement::new(token)
+/// Remove token statement
+///
+/// # Arguments
+///
+/// * `token` - The name of the token to be removed. Can be a string or a Token type.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::remove_token};
+/// let token = Token::new("token");
+/// let statement = remove_token(token).on_namespace();
+/// assert_eq!(statement.build(), "REMOVE TOKEN token ON NAMESPACE;");
+///
+/// let token = Token::new("token");
+/// let statement = remove_token(token).on_database();
+/// assert_eq!(statement.build(), "REMOVE TOKEN token ON DATABASE;");
+pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatementInit {
+    RemoveTokenStatementInit {
+        token: token.into(),
+        on: None,
+    }
 }
-pub struct RemoveTokenStatement {
+
+/// Remove token statement
+pub struct RemoveTokenStatementInit {
     token: Token,
     on: Option<NamespaceOrDatabase>,
 }
 
-impl RemoveTokenStatement {
-    fn new(token: impl Into<Token>) -> Self {
-        Self {
-            token: token.into(),
-            on: None,
-        }
-    }
+/// Remove token statement
+pub struct RemoveTokenStatement(RemoveTokenStatementInit);
 
-    pub fn on_namespace(mut self) -> Self {
+impl std::ops::Deref for RemoveTokenStatement {
+    type Target = RemoveTokenStatementInit;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<RemoveTokenStatementInit> for RemoveTokenStatement {
+    fn from(init: RemoveTokenStatementInit) -> Self {
+        Self(init)
+    }
+}
+
+impl RemoveTokenStatementInit {
+    /// Specify to remove the token from namespace
+    pub fn on_namespace(mut self) -> RemoveTokenStatement {
         self.on = Some(NamespaceOrDatabase::Namespace);
-        self
+        self.into()
     }
 
-    pub fn on_database(mut self) -> Self {
+    /// Specify to remove the token from database
+    pub fn on_database(mut self) -> RemoveTokenStatement {
         self.on = Some(NamespaceOrDatabase::Database);
-        self
+        self.into()
     }
 }
 
@@ -67,7 +96,7 @@ impl Buildable for RemoveTokenStatement {
         if let Some(on) = &self.on {
             query = format!("{} ON {}", query, on);
         }
-        query
+        format!("{};", query)
     }
 }
 impl Display for RemoveTokenStatement {
@@ -85,3 +114,22 @@ impl Parametric for RemoveTokenStatement {
 impl Erroneous for RemoveTokenStatement {}
 
 impl Queryable for RemoveTokenStatement {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn remove_token_on_namespace() {
+        let login = Token::new("login");
+        let statement = remove_token(login).on_namespace();
+        assert_eq!(statement.build(), "REMOVE TOKEN login ON NAMESPACE;");
+    }
+
+    #[test]
+    fn remove_token_on_database() {
+        let login = Token::new("login");
+        let statement = remove_token(login).on_database();
+        assert_eq!(statement.build(), "REMOVE TOKEN login ON DATABASE;");
+    }
+}
