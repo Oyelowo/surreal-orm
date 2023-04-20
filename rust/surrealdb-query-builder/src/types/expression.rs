@@ -7,6 +7,7 @@
 
 use crate::{statements::SelectStatement, Buildable, Parametric, Valuex};
 
+/// An expression is a value or statement that can be used within another query.
 #[derive(Clone, Debug)]
 pub struct Expression(Valuex);
 
