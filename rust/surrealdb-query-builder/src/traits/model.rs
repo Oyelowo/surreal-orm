@@ -6,7 +6,10 @@
  */
 
 use serde::Serialize;
-use surrealdb::opt::RecordId;
+use surrealdb::{
+    opt::RecordId,
+    sql::{Id, Thing, Uuid},
+};
 
 use crate::{
     types::{NodeClause, Table},
@@ -22,6 +25,15 @@ pub trait SurrealdbModel {
     fn get_serializable_field_names() -> Vec<&'static str>;
     fn define_table() -> Raw;
     fn define_fields() -> Vec<Raw>;
+
+    /// Create a new SurrealId from a string
+    fn create_id(id: impl Into<Id>) -> Thing {
+        Thing::from((Self::table_name().to_string(), id.into()))
+    }
+
+    fn create_uuid() -> Thing {
+        Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
+    }
 }
 
 pub trait SurrealdbNode: SurrealdbModel + Serialize {
