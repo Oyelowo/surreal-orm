@@ -84,16 +84,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to check for inequality
+    /// * `value` - The value to check for inequality. Could be `sql::Value`, `Field` or `Param`
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::{Field, DbQuery};
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// let query = age.not_equal(25);
+    /// assert_eq!(query.to_raw().build(), "age != 25");
     ///
-    /// let field = Field::new("age");
-    /// let query = field.not_equals(25);
-    /// assert_eq!(query.to_string(), "age != 25");
+    /// # let age = Field::new("age");
+    /// # let valid_age_field = Field::new("valid_age_field");
+    /// let query = age.not_equal(valid_age_field);
+    /// assert_eq!(query.to_raw().build(), "age != valid_age_field");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_param = Param::new("valid_age_param");
+    /// let query = age.not_equal(valid_age_param);
+    /// assert_eq!(query.to_raw().build(), "age != $valid_age_param");
     /// ```
     fn not_equal<T>(&self, value: T) -> Operation
     where
@@ -106,15 +116,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against.
+    /// * `value` - The value to compare against. Could be `sql::Value`, `Field` or `Param`
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// let query = age.exactly_equal(25);
+    /// assert_eq!(query.to_raw().build(), "age == 25");
     ///
-    /// let query = DbQuery::column("age").exactly_equal(42);
-    /// assert_eq!(query.to_string(), "age == 42");
+    /// # let age = Field::new("age");
+    /// # let valid_age_field = Field::new("valid_age_field");
+    /// let query = age.exactly_equal(valid_age_field);
+    /// assert_eq!(query.to_raw().build(), "age == valid_age_field");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_param = Param::new("valid_age_param");
+    /// let query = age.exactly_equal(valid_age_param);
+    /// assert_eq!(query.to_raw().build(), "age == $valid_age_param");
     /// ```
     fn exactly_equal<T>(&self, value: T) -> Operation
     where
@@ -128,16 +149,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Arguments
     ///
-    /// * `values` - An array of values to be checked for equality with the column.
+    /// * `values` - An array of values to be checked for equality with the column. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbColumn;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// let query = friends.any_equal("Alice");
+    /// assert_eq!(query.to_raw().build(), "friends ?= Alice");
     ///
-    /// let col = DbColumn::new("friends");
-    /// let query = col.any_equal("Alice");
-    /// assert_eq!(query.to_string(), friends ?= Alice)");
+    /// # let friends = Field::new("friends");
+    /// # let valid_friends_field = Field::new("valid_friends_field");
+    /// let query = friends.any_equal(valid_friends_field);
+    /// assert_eq!(query.to_raw().build(), "friends ?= valid_friends_field");
+    ///
+    /// # let friends = Field::new("friends");
+    /// # let valid_friends_param = Param::new("valid_friends_param");
+    /// let query = friends.any_equal(valid_friends_param);
+    /// assert_eq!(query.to_raw().build(), "friends ?= $valid_friends_param");
     /// ```
     fn any_equal<T>(&self, value: T) -> Operation
     where
@@ -146,20 +177,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AnyEqual, value)
     }
 
-    /// Check whether all values in an array is equals to another value.
+    /// `*=` Check whether all values in an array is equals to another value.
     ///
     /// # Arguments
     ///
-    /// * `values` - An array of values to be checked for equality with the column.
+    /// * `values` - An array of values to be checked for equality with the column. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbColumn;
-    ///
-    /// let col = DbColumn::new("friends");
-    /// let query = col.any_equal("Alice");
-    /// assert_eq!(query.to_string(), friends *= Alice)");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.all_equal("Alice");
     /// ```
     fn all_equal<T>(&self, value: T) -> Operation
     where
@@ -168,19 +198,20 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AllEqual, value)
     }
 
-    /// Compare two values for equality using fuzzy matching.
+    /// `~` Compare two values for equality using fuzzy matching.
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern to match against.
+    /// * `pattern` - The pattern to match against. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("name").like("A");
-    /// assert_eq!(query.to_string(), "name ~ 'A'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let name = Field::new("name");
+    /// let query = name.like("A");
+    /// assert_eq!(query.to_raw().build(), "name ~ 'A'");
     /// ```
     fn like<T>(&self, value: T) -> Operation
     where
@@ -189,19 +220,20 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Like, value.into())
     }
 
-    /// Compare two values for inequality using fuzzy matching.
+    /// `!~` Compare two values for inequality using fuzzy matching.
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern to match against.
+    /// * `pattern` - The pattern to match against. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("name").not_like("A");
-    /// assert_eq!(query.to_string(), "name !~ 'A'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let name = Field::new("name");
+    /// let query = name.not_like("A");
+    /// assert_eq!(query.to_raw().build(), "name !~ 'A'");
     /// ```
     fn not_like<T>(&self, value: T) -> Operation
     where
@@ -210,19 +242,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::NotLike, value)
     }
 
-    /// Check whether any value in a set is equal to a value using fuzzy matching
+    /// `?~` Check whether any value in a set is equal to a value using fuzzy matching
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern to match against.
+    /// * `pattern` - The pattern to match against. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("name").all_like("A");
-    /// assert_eq!(query.to_string(), "name ?~ 'A'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let name = Field::new("name");
+    /// name.any_like("A");
     /// ```
     fn any_like<T>(&self, value: T) -> Operation
     where
@@ -231,19 +263,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AnyLike, value)
     }
 
-    /// Check whether all values in a set are equal to a value using fuzzy matching.
+    /// `*~` Check whether all values in a set are equal to a value using fuzzy matching.
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern to match against.
+    /// * `pattern` - The pattern to match against. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::column("name").all_like("A");
-    /// assert_eq!(query.to_string(), "name *~ 'A'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let name = Field::new("name");
+    /// name.all_like("A");
     /// ```
     fn all_like<T>(&self, value: T) -> Operation
     where
@@ -252,19 +284,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AllLike, value)
     }
 
-    /// Check whether the value of the field is less than the given value.
+    /// `<` Check whether the value of the field is less than the given value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against the field.
+    /// * `value` - The value to compare against the field. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").less_than(30);
-    /// assert_eq!(query.to_string(), "age < 30");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.less_than(30);
     /// ```
     fn less_than<T>(&self, value: T) -> Operation
     where
@@ -274,19 +306,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::LessThan, value)
     }
 
-    /// Check whether the value of the field is less than or equal to the given value.
+    /// `<=` Check whether the value of the field is less than or equal to the given value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against the field.
+    /// * `value` - The value to compare against the field. Could be `sql::Value`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").less_than_or_equals(30);
-    /// assert_eq!(query.to_string(), "age <= 30");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.less_than_or_equal(30);
     /// ```
     fn less_than_or_equal<T>(&self, value: T) -> Operation
     where
@@ -296,19 +328,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::LessThanOrEqual, value)
     }
 
-    /// Check whether the value of the field is greater than the given value.
+    /// `>` Check whether the value of the field is greater than the given value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against the field.
+    /// * `value` - The value to compare against the field. Could be `sql::Number`, `sql::Geometry`, `sql::Datetime`, `sql::Duration`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").greater_than(18);
-    /// assert_eq!(query.to_string(), "age > 18");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.greater_than(30);
     /// ```
     fn greater_than<T>(&self, value: T) -> Operation
     where
@@ -318,19 +350,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::MoreThan, value)
     }
 
-    /// Check whether the value of the field is greater than or equal to the given value.
+    /// `>=` Check whether the value of the field is greater than or equal to the given value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compare against the field.
+    /// * `value` - The value to compare against the field. Could be `sql::Number`, `sql::Geometry`, `sql::Datetime`, `sql::Duration`, `Field` or `Param`.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::field("age").greater_than_or_equals(18);
-    /// assert_eq!(query.to_string(), "age >= 18");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.greater_than_or_equal(30);
     /// ```
     fn greater_than_or_equal<T>(&self, value: T) -> Operation
     where
