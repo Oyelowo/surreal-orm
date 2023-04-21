@@ -1,18 +1,33 @@
 use std::fmt::{self, Display};
 
+/// The type of token to create.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
+    /// EDDSA
     EDDSA,
+    /// ES256
     ES256,
+    /// ES384
     ES384,
+    /// ES512
     ES512,
+    /// HS256
     HS256,
+    /// HS384
     HS384,
+    /// HS512
     HS512,
+    /// PS256
     PS256,
+    /// PS384
     PS384,
+    /// PS512
     PS512,
+    /// RS256
     RS256,
+    /// RS384
     RS384,
+    /// RS512
     RS512,
 }
 
@@ -36,9 +51,14 @@ impl fmt::Display for TokenType {
     }
 }
 
+/// Token target
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenTarget {
+    /// Namespace
     Namespace,
+    /// Database
     Database,
+    /// Scope with its name
     Scope(String),
 }
 
@@ -50,5 +70,37 @@ impl Display for TokenTarget {
             TokenTarget::Scope(scope) => format!("SCOPE {}", scope),
         };
         write!(f, "{}", target_str)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_token_type_display() {
+        assert_eq!(format!("{}", TokenType::EDDSA), "EDDSA");
+        assert_eq!(format!("{}", TokenType::ES256), "ES256");
+        assert_eq!(format!("{}", TokenType::ES384), "ES384");
+        assert_eq!(format!("{}", TokenType::ES512), "ES512");
+        assert_eq!(format!("{}", TokenType::HS256), "HS256");
+        assert_eq!(format!("{}", TokenType::HS384), "HS384");
+        assert_eq!(format!("{}", TokenType::HS512), "HS512");
+        assert_eq!(format!("{}", TokenType::PS256), "PS256");
+        assert_eq!(format!("{}", TokenType::PS384), "PS384");
+        assert_eq!(format!("{}", TokenType::PS512), "PS512");
+        assert_eq!(format!("{}", TokenType::RS256), "RS256");
+        assert_eq!(format!("{}", TokenType::RS384), "RS384");
+        assert_eq!(format!("{}", TokenType::RS512), "RS512");
+    }
+
+    #[test]
+    fn test_token_target_display() {
+        assert_eq!(format!("{}", TokenTarget::Namespace), "NAMESPACE");
+        assert_eq!(format!("{}", TokenTarget::Database), "DATABASE");
+        assert_eq!(
+            format!("{}", TokenTarget::Scope("test".into())),
+            "SCOPE test"
+        );
     }
 }
