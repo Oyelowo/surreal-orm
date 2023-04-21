@@ -26,6 +26,7 @@ impl Binding {
         let value = value.into();
         let value_string = format!("{}", &value);
         let param_name = generate_param_name(&"param", value.clone());
+
         Binding {
             param: param_name.clone(),
             value,
