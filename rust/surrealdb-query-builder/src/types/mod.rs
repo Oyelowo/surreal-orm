@@ -25,7 +25,6 @@ pub(crate) mod params_standard;
 pub(crate) mod return_type;
 pub(crate) mod surreal_id;
 pub(crate) mod token_target;
-pub(crate) mod value;
 pub(crate) mod valuex;
 
 pub use alias::*;
@@ -50,7 +49,6 @@ pub use params_standard::*;
 pub use return_type::*;
 pub use surreal_id::*;
 pub use token_target::*;
-pub use value::*;
 pub use valuex::*;
 
 use surrealdb::sql;
