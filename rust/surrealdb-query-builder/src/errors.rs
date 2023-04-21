@@ -9,6 +9,7 @@ use std::fmt::Display;
 
 use thiserror::Error;
 
+/// The length of length of the returned list of items from the database
 #[derive(Debug, Clone, Copy)]
 pub struct ExpectedLength(u8);
 
@@ -24,6 +25,8 @@ impl From<u8> for ExpectedLength {
     }
 }
 
+/// The error type for the SurrealdbOrm
+#[allow(missing_docs)]
 #[derive(Error, Debug)]
 pub enum SurrealdbOrmError {
     #[error("there is an issue with one of your inputs while building the query.")]
@@ -42,4 +45,5 @@ pub enum SurrealdbOrmError {
     InvalidId(#[source] surrealdb::Error),
 }
 
-pub type Result<T> = std::result::Result<T, SurrealdbOrmError>;
+pub type SurrealdbOrmResult<T> = std::result::Result<T, SurrealdbOrmError>;
+

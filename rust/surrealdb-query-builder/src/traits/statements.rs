@@ -1,5 +1,5 @@
 use super::{Buildable, Parametric};
-use crate::{Field, Queryable, ReturnType, SurrealdbOrmError};
+use crate::{Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -14,7 +14,7 @@ where
     Self: Queryable,
 {
     /// Runs the statement against the database.
-    async fn run(&self, db: Surreal<Db>) -> crate::Result<surrealdb::Response> {
+    async fn run(&self, db: Surreal<Db>) -> SurrealdbOrmResult<surrealdb::Response> {
         let query_builder_error = self.get_errors();
         if !query_builder_error.is_empty() {
             return Err(SurrealdbOrmError::QueryBuilder(
@@ -41,19 +41,19 @@ where
     T: Serialize + DeserializeOwned,
 {
     /// Runs the statement against the database and returns the first result before the change.
-    async fn return_first_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_first_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::Before);
         query.return_first(db).await
     }
 
     /// Runs the statement against the database and returns the first result after the change.
-    async fn return_first_after(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_first_after(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::After);
         query.return_first(db).await
     }
 
     /// Runs the statement against the database and returns the first result of the change.
-    async fn return_first_diff(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_first_diff(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::Diff);
         query.return_first(db).await
     }
@@ -64,7 +64,7 @@ where
         self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> crate::Result<Option<T>> {
+    ) -> SurrealdbOrmResult<Option<T>> {
         let mut query = self;
         if let Some(projections) = projections {
             query = query.set_return_type(ReturnType::Projections(projections));
@@ -73,19 +73,19 @@ where
     }
 
     /// Runs the statement against the database and returns the one result before the change.
-    async fn return_one_before(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_one_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::Before);
         query.return_one(db).await
     }
 
     /// Runs the statement against the database and returns the one result after the change.
-    async fn return_one_after(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_one_after(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::After);
         query.return_one(db).await
     }
 
     /// Runs the statement against the database and returns the one result of the change.
-    async fn return_one_diff(self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_one_diff(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::Diff);
         query.return_one(db).await
     }
@@ -96,7 +96,7 @@ where
         self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> crate::Result<Option<T>> {
+    ) -> SurrealdbOrmResult<Option<T>> {
         let mut query = self;
         if let Some(projections) = projections {
             query = query.set_return_type(ReturnType::Projections(projections));
@@ -106,19 +106,19 @@ where
     }
 
     /// Runs the statement against the database and returns the many results before the change.
-    async fn return_many_before(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+    async fn return_many_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::Before);
         query.return_many(db).await
     }
 
     /// Runs the statement against the database and returns the many results after the change.
-    async fn return_many_after(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+    async fn return_many_after(self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::After);
         query.return_many(db).await
     }
 
     /// Runs the statement against the database and returns the many results of the change.
-    async fn return_many_diff(self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+    async fn return_many_diff(self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::Diff);
         query.return_many(db).await
     }
@@ -129,7 +129,7 @@ where
         self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> crate::Result<Vec<T>> {
+    ) -> SurrealdbOrmResult<Vec<T>> {
         let mut query = self;
         if let Some(projections) = projections {
             query = query.set_return_type(ReturnType::Projections(projections));
@@ -150,26 +150,26 @@ where
     T: Serialize + DeserializeOwned,
 {
     /// Runs the statement against the database and returns no result.
-    async fn return_none(&self, db: Surreal<Db>) -> crate::Result<()> {
+    async fn return_none(&self, db: Surreal<Db>) -> SurrealdbOrmResult<()> {
         self.run(db).await?;
         Ok(())
     }
 
     /// Runs the statement against the database and returns the first result.
-    async fn return_first(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_first(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let response = self.run(db).await?;
         get_first::<T>(response)
     }
 
     /// Runs the statement against the database and returns the one result.
-    async fn return_one(&self, db: Surreal<Db>) -> crate::Result<Option<T>> {
+    async fn return_one(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let response = self.run(db).await?;
         get_one::<T>(response)
     }
 
     /// Runs the statement against the database and returns the one result with custom specified
     /// return type.
-    async fn return_one_explicit<V>(&self, db: Surreal<Db>) -> crate::Result<Option<V>>
+    async fn return_one_explicit<V>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<V>>
     where
         V: Serialize + DeserializeOwned,
     {
@@ -178,14 +178,14 @@ where
     }
 
     /// Runs the statement against the database and returns the many results.
-    async fn return_many(&self, db: Surreal<Db>) -> crate::Result<Vec<T>> {
+    async fn return_many(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let response = self.run(db).await?;
         get_many::<T>(response)
     }
 
     /// Runs the statement against the database and returns the many results with custom
     /// specified.
-    async fn return_many_explicit<V>(&self, db: Surreal<Db>) -> crate::Result<Vec<V>>
+    async fn return_many_explicit<V>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<V>>
     where
         V: Serialize + DeserializeOwned,
     {
@@ -202,13 +202,13 @@ where
     Self: Parametric + Buildable,
 {
     /// Runs the statement against the database and returns no result.
-    async fn return_none(&self, db: Surreal<Db>) -> crate::Result<()> {
+    async fn return_none(&self, db: Surreal<Db>) -> SurrealdbOrmResult<()> {
         self.run(db).await?;
         Ok(())
     }
 
     /// Runs the statement against the database and returns the first result.
-    async fn return_first<T>(&self, db: Surreal<Db>) -> crate::Result<Option<T>>
+    async fn return_first<T>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>>
     where
         T: Serialize + DeserializeOwned,
     {
@@ -217,7 +217,7 @@ where
     }
 
     /// Runs the statement against the database and returns the one result.
-    async fn return_one<T>(&self, db: Surreal<Db>) -> crate::Result<Option<T>>
+    async fn return_one<T>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>>
     where
         T: Serialize + DeserializeOwned,
     {
@@ -235,7 +235,7 @@ where
     }
 
     /// Runs the statement against the database and returns the many results.
-    async fn return_many<T>(&self, db: Surreal<Db>) -> crate::Result<Vec<T>>
+    async fn return_many<T>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>>
     where
         T: Serialize + DeserializeOwned,
     {
@@ -244,7 +244,7 @@ where
     }
 }
 
-fn get_one<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
+fn get_one<T>(mut response: surrealdb::Response) -> SurrealdbOrmResult<Option<T>>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -257,7 +257,7 @@ where
     Ok(value.pop())
 }
 
-fn get_many<T>(mut response: surrealdb::Response) -> crate::Result<Vec<T>>
+fn get_many<T>(mut response: surrealdb::Response) -> SurrealdbOrmResult<Vec<T>>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -268,7 +268,7 @@ where
     Ok(value)
 }
 
-fn get_first<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
+fn get_first<T>(mut response: surrealdb::Response) -> SurrealdbOrmResult<Option<T>>
 where
     T: Serialize + DeserializeOwned,
 {
@@ -285,7 +285,7 @@ where
     Ok(value)
 }
 
-fn get_last<T>(mut response: surrealdb::Response) -> crate::Result<Option<T>>
+fn get_last<T>(mut response: surrealdb::Response) -> SurrealdbOrmResult<Option<T>>
 where
     T: Serialize + DeserializeOwned,
 {
