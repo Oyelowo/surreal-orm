@@ -9,10 +9,13 @@ use std::fmt::{Display, Formatter};
 
 use super::{BindingsList, Buildable, Erroneous, Parametric, Queryable};
 
+/// A raw query which can usually be converted into from a `Parametric` query.
+/// This is useful for debugging purposes.
 #[derive(Debug, Clone)]
 pub struct Raw(String);
 
 impl Raw {
+    /// Creates a new `Raw` query.
     pub fn new(query: impl Into<String>) -> Self {
         Self(query.into())
     }
@@ -28,22 +31,24 @@ impl Erroneous for Raw {}
 
 impl Queryable for Raw {}
 
-impl Display for Raw {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-
 impl Buildable for Raw {
     fn build(&self) -> String {
         self.0.to_string()
     }
 }
 
+impl Display for Raw {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
+    }
+}
+
+/// A trait to convert a `Parametric` query into a `Raw` query.
 pub trait ToRaw
 where
     Self: Sized,
 {
+    /// Converts a `Parametric` query into a `Raw` query.
     fn to_raw(&self) -> Raw;
 }
 
