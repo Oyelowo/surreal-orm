@@ -42,7 +42,7 @@ macro_rules! create_fn_with_two_array_args {
     ($(#[$attr:meta])* => $function_name:expr) => {
         paste::paste! {
             $(#[$attr])*
-            pub fn [<$function_name _fn>](arr1: impl Into<$crate::ArrayLike>, arr2: impl Into<$crate::ArrayLike>) -> Function {
+            pub fn [<$function_name _fn>](arr1: impl Into<$crate::ArrayLike>, arr2: impl Into<$crate::ArrayLike>) -> $crate::Function {
                 create_array_helper(arr1, arr2, $function_name)
             }
 
@@ -150,6 +150,10 @@ macro_rules! create_fn_with_two_array_args {
 create_fn_with_two_array_args!(
     /// "The array::combine function combines all values from two arrays together, returning an array of arrays.
     ///
+    ///   # Arguments
+    ///   * `arr1` - The first array to combine. A vector, field or param.
+    ///   * `arr2` - The second array to combine. A vector, field or param.
+    ///
     /// # Examples
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
@@ -171,6 +175,9 @@ create_fn_with_two_array_args!(
 create_fn_with_two_array_args!(
     /// The array::concat function merges two arrays together, returning an array which may contain duplicate values. If you want to remove duplicate values from the resulting array, then use the array::union() function
     ///
+    ///   # Arguments
+    ///   * `arr1` - The first array to concat. A vector, field or param.
+    ///   * `arr2` - The second array to concat. A vector, field or param.
     /// # Examples
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
@@ -193,6 +200,10 @@ create_fn_with_two_array_args!(
     /// The array::union function combines two arrays together, removing duplicate values, and returning a single array.
     /// # Examples
     ///
+    /// # Arguments
+    ///  * `arr1` -  A vector, field or param.
+    ///  * `arr2` -  A vector, field or param.
+    ///
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, functions::array};
@@ -212,6 +223,10 @@ create_fn_with_two_array_args!(
 create_fn_with_two_array_args!(
     /// The array::difference determines the difference between two arrays, returning a single array
     /// containing items which are not in both arrays.
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
     ///
     /// # Examples
     /// ```rust
@@ -235,7 +250,12 @@ create_fn_with_two_array_args!(
     /// The array::intersect function calculates the values which intersect two arrays, returning a
     /// single array containing the values which are in both arrays.
     ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
     /// # Examples
+    ///
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, functions::array};
@@ -253,7 +273,7 @@ create_fn_with_two_array_args!(
     "intersect"
 );
 
-/// Creates a function that returns the distinct elements of an array.
+/// The array::distinct function calculates the unique values in an array, returning a single array.
 pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: ArrayLike = arr.into();
 
@@ -263,14 +283,36 @@ pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
     }
 }
 
+/// The array::distinct function calculates the unique values in an array, returning a single
+/// array.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::distinct!(vec![1, 2, 3]);
+/// array::distinct!(&[1, 2, 3]);
+/// array::distinct!(own_goals);
+/// array::distinct!(goals);
+///
+/// // It is also aliased as array_distinct;
+/// array_distinct!(vec![1, 2, 3]);
+/// ```
 #[macro_export]
-macro_rules! array_distinct_fn {
+macro_rules! array_distinct {
     ( $arr:expr ) => {
         $crate::functions::array::distinct_fn($arr)
     };
 }
-pub use array_distinct_fn as distinct;
+pub use array_distinct as distinct;
 
+/// The array::len function calculates the length of an array, returning a number. This function
+/// includes all items when counting the number of items in the array. If you want to only count
+/// truthy values, then use the count() function.
 pub fn len_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: ArrayLike = arr.into();
 
@@ -280,18 +322,44 @@ pub fn len_fn(arr: impl Into<ArrayLike>) -> Function {
     }
 }
 
+/// The array::len function calculates the length of an array, returning a number.
+/// This function includes all items when counting the number of items in the array.
+/// If you want to only count truthy values, then use the count() function.
+///
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+///
+/// array::len!(vec![1, 2, 3]);
+/// array::len!(&[1, 2, 3]);
+/// array::len!(own_goals);
+/// array::len!(goals);
+/// // It is also aliased as array_len;
+/// array_len!(vec![1, 2, 3]);
+/// ```
 #[macro_export]
-macro_rules! array_len_fn {
+macro_rules! array_len {
     ( $arr:expr ) => {
         crate::functions::array::len_fn($arr)
     };
 }
-pub use array_len_fn as len;
+pub use array_len as len;
 
+/// The ordering of the array.
 pub enum Ordering {
+    /// Sort the array in ascending order.
     Asc,
+    /// Sort the array in descending order.
     Desc,
+    /// Do not sort the array.
     False,
+    /// Do not sort the array.
     Empty,
 }
 
@@ -310,6 +378,9 @@ impl Display for Ordering {
     }
 }
 
+/// The array::sort function calculates the length of an array, returning a number. This function
+/// includes all items when counting the number of items in the array. If you want to only count
+/// truthy values, then use the count() function.
 pub fn sort_fn(arr: impl Into<ArrayLike>, ordering: Ordering) -> Function {
     let arr: ArrayLike = arr.into();
     let query_string = match ordering {
@@ -321,7 +392,27 @@ pub fn sort_fn(arr: impl Into<ArrayLike>, ordering: Ordering) -> Function {
         bindings: arr.get_bindings(),
     }
 }
-
+/// The array::sort function calculates the length of an array, returning a number. This function
+/// includes all items when counting the number of items in the array. If you want to only count
+/// truthy values, then use the count() function.
+///
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `ordering` -  The ordering of the array.
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+///
+/// array::sort!(vec![1, 2, 3], "asc");
+/// array::sort!(&[1, 2, 3], "desc");
+/// array::sort!(own_goals, false);
+/// array::sort!(goals, array::Ordering::Empty);
+/// // It is also aliased as array_sort;
+/// array_sort!(vec![1, 2, 3], "asc");
+/// ```
 #[macro_export]
 macro_rules! array_sort {
     ( $arr:expr, "asc" ) => {
