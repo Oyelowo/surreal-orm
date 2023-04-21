@@ -6,7 +6,6 @@
  */
 
 pub(crate) mod alias;
-pub(crate) mod array;
 pub(crate) mod clause;
 pub(crate) mod crud_type;
 pub(crate) mod expression;
@@ -24,14 +23,12 @@ pub(crate) mod ordinal;
 pub(crate) mod param;
 pub(crate) mod params_standard;
 pub(crate) mod return_type;
-pub(crate) mod strand;
 pub(crate) mod surreal_id;
 pub(crate) mod token_target;
 pub(crate) mod value;
 pub(crate) mod valuex;
 
 pub use alias::*;
-pub use array::*;
 pub use clause::*;
 pub use crud_type::*;
 pub use field::*;
@@ -51,7 +48,6 @@ pub use param::*;
 pub use param::*;
 pub use params_standard::*;
 pub use return_type::*;
-pub use strand::*;
 pub use surreal_id::*;
 pub use token_target::*;
 pub use value::*;

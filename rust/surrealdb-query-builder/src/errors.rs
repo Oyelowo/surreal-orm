@@ -37,6 +37,9 @@ pub enum SurrealdbOrmError {
 
     #[error("Unable to parse data returned from the database. Check that all fields are complete and the types are able to deserialize surrealdb data types properly.")]
     Deserialization(#[source] surrealdb::Error),
+
+    #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'")]
+    InvalidId(#[source] surrealdb::Error),
 }
 
 pub type Result<T> = std::result::Result<T, SurrealdbOrmError>;
