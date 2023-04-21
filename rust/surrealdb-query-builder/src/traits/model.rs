@@ -5,18 +5,9 @@
  * Licensed under the MIT license
  */
 
+use crate::{Alias, NodeClause, Raw, Table};
 use serde::Serialize;
-use surrealdb::{
-    opt::RecordId,
-    sql::{Id, Thing, Uuid},
-};
-
-use crate::{
-    types::{NodeClause, Table},
-    Alias,
-};
-
-use super::Raw;
+use surrealdb::sql::{Id, Thing, Uuid};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
