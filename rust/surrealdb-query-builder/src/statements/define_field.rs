@@ -12,7 +12,7 @@ use surrealdb::sql;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, FieldType, Filter, Table},
-    Conditional,
+    Binding, Conditional,
 };
 
 use super::for_::PermissionType;
@@ -114,7 +114,9 @@ impl DefineFieldStatement {
     /// Set the default value for the field.
     pub fn value(mut self, default_value: impl Into<sql::Value>) -> Self {
         let value: sql::Value = default_value.into();
-        self.value = Some(value.to_string());
+        let binding = Binding::new(value);
+        self.value = Some(binding.get_param_dollarised());
+        self.bindings.push(binding);
         self
     }
 
@@ -144,6 +146,7 @@ impl DefineFieldStatement {
     ///                                 );
     pub fn assert(mut self, assertion: impl Conditional) -> Self {
         let assertion = Filter::new(assertion);
+        self.bindings.extend(assertion.get_bindings());
         self.assert = Some(assertion.build());
         self
     }
@@ -196,21 +199,25 @@ impl DefineFieldStatement {
         let fors: PermissionType = fors.into();
         match fors {
             For(one) => {
-                self.permissions_for.push(one.to_string());
+                self.permissions_for.push(one.build());
                 self.bindings.extend(one.get_bindings());
             }
             Fors(many) => many.iter().for_each(|f| {
-                self.permissions_for.push(f.to_string());
+                self.permissions_for.push(f.build());
                 self.bindings.extend(f.get_bindings());
             }),
             RawStatement(raw) => {
-                self.permissions_for.push(raw.to_string());
+                self.permissions_for.push(raw.build());
+                self.bindings.extend(raw.get_bindings());
             }
             RawStatementList(raw_list) => {
                 self.permissions_for.extend(
                     raw_list
                         .into_iter()
-                        .map(|r| r.to_string())
+                        .map(|r| {
+                            self.bindings.extend(r.get_bindings());
+                            r.build()
+                        })
                         .collect::<Vec<_>>(),
                 );
             }
@@ -270,7 +277,7 @@ impl Display for DefineFieldStatement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{cond, value, Operatable, NONE};
+    use crate::{cond, value, Operatable, ToRaw, NONE};
     use crate::{statements::for_, CrudType::*};
 
     #[test]
@@ -295,10 +302,27 @@ mod tests {
 
         assert_eq!(
             statement.fine_tune_params(),
-            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' ASSERT ($value IS NOT $_param_00000001) AND ($value ~ $_param_00000002)\nPERMISSIONS\nFOR select\n\tWHERE age >= $_param_00000003\nFOR create, update\n\tWHERE name IS $_param_00000004\nFOR create, delete\n\tWHERE name IS $_param_00000005\nFOR update\n\tWHERE age <= $_param_00000006;"
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR $_param_00000001 \
+                ASSERT ($value IS NOT NONE) AND ($value ~ $_param_00000002)\n\
+                PERMISSIONS\n\
+                FOR select\n\tWHERE age >= $_param_00000003\n\
+                FOR create, update\n\tWHERE name IS $_param_00000004\n\
+                FOR create, delete\n\tWHERE name IS $_param_00000005\n\
+                FOR update\n\tWHERE age <= $_param_00000006;"
+        );
+
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com' \
+                ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')\n\
+                PERMISSIONS\n\
+                FOR select\n\tWHERE age >= 18\n\
+                FOR create, update\n\tWHERE name IS 'Oyedayo'\n\
+                FOR create, delete\n\tWHERE name IS 'Oyedayo'\n\
+                FOR update\n\tWHERE age <= 130;"
         );
         insta::assert_display_snapshot!(statement.fine_tune_params());
-        assert_eq!(statement.get_bindings().len(), 4);
+        assert_eq!(statement.get_bindings().len(), 6);
     }
 
     #[test]
