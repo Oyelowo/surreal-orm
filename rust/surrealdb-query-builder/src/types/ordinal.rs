@@ -5,12 +5,17 @@ use crate::{Binding, Buildable, Parametric, Valuex};
 
 use super::Field;
 
+/// A value that cen be ordered
 #[derive(Debug, Clone)]
 pub enum Ordinal {
+    /// A datetime value
     Datetime(sql::Datetime),
+    /// A number value
     Number(sql::Number),
+    /// A field value
     Field(Field),
-    // Field(sql::Value),
+    /// A geometry value
+    Geometry(sql::Geometry),
 }
 
 impl From<Ordinal> for Valuex {
@@ -32,6 +37,12 @@ impl From<Ordinal> for Valuex {
             Ordinal::Field(f) => {
                 bindings.extend(f.get_bindings());
                 f.build()
+            }
+            Ordinal::Geometry(g) => {
+                let binding = Binding::new(g);
+                let param = binding.get_param_dollarised();
+                bindings.push(binding);
+                param
             }
         };
         Valuex { string, bindings }
@@ -60,6 +71,9 @@ macro_rules! impl_number_or_field_from {
     };
 }
 
+// Using this over generics because sql::Number, sql::Geeomtry also
+// impl<T: Into<sql::Number>> From<T> for Ordinal and that creates
+// a conflict and ambiguity with the From<sql::Number> for Ordinal impl.
 impl_number_or_field_from!(
     i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
@@ -75,38 +89,9 @@ impl From<&Field> for Ordinal {
         Ordinal::Field(val.into())
     }
 }
-// impl From<Ordinal> for sql::Value {
-//     fn from(val: Ordinal) -> Self {
-//         match val {
-//             Ordinal::Datetime(n) => n.into(),
-//             Ordinal::Number(n) => n.into(),
-//             Ordinal::Field(f) => f.into(),
-//         }
-//     }
-// }
-//
+
 impl From<sql::Number> for Ordinal {
     fn from(val: sql::Number) -> Self {
         Ordinal::Number(val)
     }
 }
-// impl<T: Into<sql::Number>> From<T> for Ordinal {
-//     fn from(value: T) -> Self {
-//         let value: sql::Number = value.into();
-//         Self::Number(value.into())
-//     }
-// }
-
-// impl<T: Into<sql::Datetime>> From<T> for Ordinal {
-//     fn from(value: T) -> Self {
-//         let value: sql::Datetime = value.into();
-//         Self::Datetime(value.into())
-//     }
-// }
-
-// impl<T: Into<Field>> From<T> for Ordinal {
-//     fn from(value: T) -> Self {
-//         let value: Field = value.into();
-//         Self::Field(value.into())
-//     }
-// }
