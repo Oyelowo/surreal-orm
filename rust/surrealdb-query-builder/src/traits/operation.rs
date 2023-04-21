@@ -777,21 +777,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::NotInside, value)
     }
 
-    /// Check whether all of multiple values are contained within another value.
+    /// `ALLINSIDE` or `⊆` Check whether all of multiple values are contained within another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("ages");
-    /// let new_query = query.not_inside([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let numbers = Field::new("numbers");
+    /// numbers.all_inside(&[10, 20, 10]);
     /// ```
     fn all_inside<T>(&self, value: T) -> Operation
     where
@@ -801,21 +799,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AllInside, value)
     }
 
-    /// Check whether any of multiple values are contained within another value.
+    /// `ANYINSIDE` or `⊂` Check whether any of multiple values are contained within another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.C
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("ages");
-    /// let new_query = query.not_inside([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts ANYINSIDE [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let numbers = Field::new("numbers");
+    /// numbers.any_inside(&[10, 20, 10]);
     /// ```
     fn any_inside<T>(&self, value: T) -> Operation
     where
@@ -825,21 +821,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::AllInside, value)
     }
 
-    /// Check whether none of multiple values are contained within another value.
+    /// `NONEINSIDE` or `⊄` Check whether none of multiple values are contained within another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("ages");
-    /// let new_query = query.none_inside([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts NONEINSIDE [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let numbers = Field::new("numbers");
+    /// numbers.none_inside(&[10, 20, 10]);
     /// ```
     fn none_inside<T>(&self, value: T) -> Operation
     where
@@ -849,29 +843,32 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::NoneInside, value)
     }
 
-    /// Check whether a geometry value is outside another geometry value.
+    /// `OUTSIDE` Check whether a geometry value is outside another geometry value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be Geometry, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// use geo::polygon;
     ///
-    /// let query = DbQuery::new("location");
-    /// let new_query = query.outside(polygon_variable);
+    /// let location = Field::new("location");
+    /// let polygon_variable = polygon!(
+    ///        exterior: [
+    ///        (x: -0.38314819, y: 51.37692386),
+    ///        (x: 0.1785278, y: 51.37692386),
     ///
-    /// assert_eq!(new_query.to_string(), "location OUTSIDE {
-    /// 	type: "Polygon",
-    /// 	coordinates: [[
-    /// 		[-0.38314819, 51.37692386], [0.1785278, 51.37692386],
-    /// 		[0.1785278, 51.61460570], [-0.38314819, 51.61460570],
-    /// 		[-0.38314819, 51.37692386]
-    /// 	]]
-    ///   };
-    /// ");
+    ///        (x: 0.1785278, y: 51.61460570),
+    ///        (x: -0.38314819, y: 51.61460570),
+    ///        (x: -0.38314819, y: 51.37692386),
+    ///        ],
+    ///        interiors: [],
+    ///     );
+    /// location.outside(polygon_variable);
     /// ```
     fn outside<T>(&self, value: T) -> Operation
     where
@@ -881,29 +878,32 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Outside, value)
     }
 
-    /// Check whether a geometry value intersects annother geometry value.
+    /// `INTERSECTS` Check whether a geometry value intersects annother geometry value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be Geometry, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// use geo::polygon;
     ///
-    /// let query = DbQuery::new("location");
-    /// let new_query = query.intersects(polygon_variable);
+    /// let location = Field::new("location");
+    /// let polygon_variable = polygon!(
+    ///        exterior: [
+    ///        (x: -0.38314819, y: 51.37692386),
+    ///        (x: 0.1785278, y: 51.37692386),
     ///
-    /// assert_eq!(new_query.to_string(), "location INTERSECTS {
-    /// 	type: "Polygon",
-    /// 	coordinates: [[
-    /// 		[-0.38314819, 51.37692386], [0.1785278, 51.37692386],
-    /// 		[0.1785278, 51.61460570], [-0.38314819, 51.61460570],
-    /// 		[-0.38314819, 51.37692386]
-    /// 	]]
-    ///   };
-    /// ");
+    ///        (x: 0.1785278, y: 51.61460570),
+    ///        (x: -0.38314819, y: 51.61460570),
+    ///        (x: -0.38314819, y: 51.37692386),
+    ///        ],
+    ///        interiors: [],
+    ///     );
+    /// location.instersects(polygon_variable);
     /// ```
     fn intersects<T>(&self, value: T) -> Operation
     where
@@ -1060,11 +1060,12 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
     ///
-    /// let query = DbQuery::field("age").between(18, 30);
-    /// assert_eq!(query.to_string(), "age < 18 AND age < 30");
+    ///
+    /// let age = Field::new("age");
+    /// age.between(18, 30);
     /// ```
     fn between<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
