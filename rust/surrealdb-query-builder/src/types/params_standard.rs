@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use crate::Param;
 
+/// stands for surrealdb native `$value`
 pub struct ValueParam(Param);
 
 impl Deref for ValueParam {
@@ -12,10 +13,12 @@ impl Deref for ValueParam {
     }
 }
 
+/// creates surrealdb native `$value`
 pub fn value() -> ValueParam {
     ValueParam(Param::new("value"))
 }
 
+/// stands for surrealdb native `$before`
 pub struct BeforeParam(Param);
 
 impl Deref for BeforeParam {
@@ -26,10 +29,12 @@ impl Deref for BeforeParam {
     }
 }
 
+/// creates surrealdb native `$before`
 pub fn before() -> BeforeParam {
     BeforeParam(Param::new("before"))
 }
 
+/// stands for surrealdb native `$after`
 pub struct AfterParam(Param);
 
 impl Deref for AfterParam {
@@ -40,6 +45,7 @@ impl Deref for AfterParam {
     }
 }
 
+/// creates surrealdb native `$after`
 pub fn after() -> AfterParam {
     AfterParam(Param::new("after"))
 }
