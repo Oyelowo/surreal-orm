@@ -39,12 +39,14 @@ fn create_array_helper(
 }
 
 macro_rules! create_fn_with_two_array_args {
-    ($function_name:expr) => {
+    ($(#[$attr:meta])* => $function_name:expr) => {
         paste::paste! {
+            $(#[$attr])*
             pub fn [<$function_name _fn>](arr1: impl Into<$crate::ArrayLike>, arr2: impl Into<$crate::ArrayLike>) -> Function {
                 create_array_helper(arr1, arr2, $function_name)
             }
 
+            $(#[$attr])*
             #[macro_export]
             macro_rules! [<array_ $function_name>] {
                 ( $arr1:expr, $arr2:expr ) => {
@@ -145,16 +147,111 @@ macro_rules! create_fn_with_two_array_args {
 }
 
 /// Creates a function that returns the elements of an array that are not present in another array.
-create_fn_with_two_array_args!("combine");
-/// Creates a function that returns the elements of an array that are not present in another
-/// array.
-create_fn_with_two_array_args!("concat");
-/// Creates a function that returns the elements of an array that are not present in another
-create_fn_with_two_array_args!("union");
-/// Creates a function that returns the elements of an array that are not present in another
-create_fn_with_two_array_args!("difference");
-/// Creates a function that returns the elements of an array that are present in another array.
-create_fn_with_two_array_args!("intersect");
+create_fn_with_two_array_args!(
+    /// "The array::combine function combines all values from two arrays together, returning an array of arrays.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::combine!(vec![1, 2, 3], vec![4, 5, 6])
+    /// array::combine!(own_goals, goals);
+    /// array::combine!(&[1, 2, 3], &[4, 5, 6])
+    ///
+    /// // It is also aliased as array_combine;
+    /// array_combine!(&[1, 2, 3], &[4, 5, 6])
+    /// ```
+=>
+    "combine"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::concat function merges two arrays together, returning an array which may contain duplicate values. If you want to remove duplicate values from the resulting array, then use the array::union() function
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::concat!(vec![1, 2, 3], vec![4, 5, 6]);
+    /// array::concat!(own_goals, goals);
+    /// array::concat!(&[1, 2, 3], &[4, 5, 6]);
+    ///
+    /// // It is also aliased as array_concat;
+    /// array_concat!(&[1, 2, 3], &[4, 5, 6]);
+    /// ```
+    =>
+    "concat"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::union function combines two arrays together, removing duplicate values, and returning a single array.
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::union!(vec![1, 2, 3], vec![4, 5, 6]);
+    /// array::union!(own_goals, goals);
+    /// array::union!(&[1, 2, 3], &[4, 5, 6]);
+    /// // It is also aliased as array_union;
+    /// array_union!(&[1, 2, 3], &[4, 5, 6]);
+    /// ```
+    =>
+    "union"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::difference determines the difference between two arrays, returning a single array
+    /// containing items which are not in both arrays.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::difference!(vec![1, 2, 3], vec![4, 5, 6]);
+    /// array::difference!(own_goals, goals);
+    /// array::difference!(&[1, 2, 3], &[4, 5, 6]);
+    ///
+    /// // It is also aliased as array_difference;
+    /// array_difference!(&[1, 2, 3], &[4, 5, 6]);
+    /// ```
+    =>
+    "difference"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::intersect function calculates the values which intersect two arrays, returning a
+    /// single array containing the values which are in both arrays.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::intersect!(vec![1, 2, 3], vec![4, 5, 6]);
+    /// array::intersect!(own_goals, goals);
+    /// array::intersect!(&[1, 2, 3], &[4, 5, 6]);
+    ///
+    /// // It is also aliased as array_intersect;
+    /// array_intersect!(&[1, 2, 3], &[4, 5, 6]);
+    /// ```
+    =>
+    "intersect"
+);
 
 /// Creates a function that returns the distinct elements of an array.
 pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
