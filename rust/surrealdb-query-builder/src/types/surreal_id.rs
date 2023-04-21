@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing, Id, Thing};
+use surrealdb::sql::{self, thing, Id, Thing, Uuid};
 
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
@@ -13,6 +13,14 @@ impl SurrealId {
     /// Create a new SurrealId from a string
     pub fn new<T: SurrealdbModel>(id: impl Into<Id>) -> Self {
         Self(Thing::from((T::table_name().to_string(), id.into())))
+    }
+
+    /// Create a new SurrealId from a uuid v4
+    pub fn new_uuid<T: SurrealdbModel>() -> Self {
+        Self(Thing::from((
+            T::table_name().to_string(),
+            Uuid::new_v4().to_string(),
+        )))
     }
 }
 
@@ -66,11 +74,9 @@ impl Into<sql::Value> for SurrealId {
 
 #[cfg(test)]
 mod tests {
-    use surrealdb::sql::Uuid;
-
-    use crate::Table;
-
     use super::*;
+    use crate::Table;
+    use surrealdb::sql::Uuid;
 
     struct TestUser;
     impl SurrealdbModel for TestUser {
@@ -89,6 +95,35 @@ mod tests {
         fn define_fields() -> Vec<crate::Raw> {
             unimplemented!()
         }
+    }
+
+    #[test]
+    fn test_create_id_with_model() {
+        let id = TestUser::create_id(1);
+        assert_eq!(id.to_string(), "user:1");
+    }
+
+    #[test]
+    fn test_create_id_string_with_model() {
+        let id = TestUser::create_id("oyelowo");
+        assert_eq!(id.to_string(), "user:oyelowo");
+    }
+
+    #[test]
+    fn test_create_id_uuid_with_model() {
+        let id = TestUser::create_id(Uuid::default());
+        assert_eq!(id.to_string().contains("user:"), true);
+        assert_eq!(
+            id.to_string(),
+            "user:⟨00000000-0000-0000-0000-000000000000⟩"
+        );
+    }
+
+    #[test]
+    fn test_create_uuid_with_model() {
+        let id = TestUser::create_uuid();
+        assert_eq!(id.to_string().contains("user:"), true);
+        assert_eq!(id.to_string().len(), 49);
     }
 
     #[test]
@@ -111,6 +146,13 @@ mod tests {
             id.to_string(),
             "user:⟨00000000-0000-0000-0000-000000000000⟩"
         );
+    }
+
+    #[test]
+    fn test_create_uuid() {
+        let id = SurrealId::new_uuid::<TestUser>();
+        assert_eq!(id.to_string().contains("user:"), true);
+        assert_eq!(id.to_string().len(), 49);
     }
 
     #[test]
