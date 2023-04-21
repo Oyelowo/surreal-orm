@@ -750,24 +750,25 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```rust
     /// # use surrealdb_query_builder as surrealdb_orm;
     /// # use surrealdb_orm::*;
+    /// # use surrealdb::sql;
     /// use geo::polygon;
     /// let point = Field::new("point");
-    /// let polygon = polygon!(
-    ///         exterior: [
-    ///             (x: -111., y: 45.),
-    ///             (x: -111., y: 41.),
-    ///             (x: -104., y: 41.),
-    ///             (x: -104., y: 45.),
-    ///         ],
-    ///         interiors: [
-    ///             [
-    ///                 (x: -110., y: 44.),
-    ///                 (x: -110., y: 42.43),
-    ///                 (x: -105., y: 42.),
-    ///                 (x: -105., y: 44.),
+    /// let polygon = sql::Geometry::from(polygon!(
+    ///             exterior: [
+    ///                 (x: -111., y: 45.),
+    ///                 (x: -111., y: 41.),
+    ///                 (x: -104., y: 41.),
+    ///                 (x: -104., y: 45.),
     ///             ],
-    ///         ],
-    ///     );
+    ///             interiors: [
+    ///                 [
+    ///                     (x: -110., y: 44.),
+    ///                     (x: -110., y: 42.43),
+    ///                     (x: -105., y: 42.),
+    ///                     (x: -105., y: 44.),
+    ///                 ],
+    ///             ],
+    ///         ));
     /// point.not_inside(polygon);
     /// ```
     fn not_inside<T>(&self, value: T) -> Operation
@@ -833,7 +834,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// # use surrealdb_query_builder as surrealdb_orm;
     /// # use surrealdb_orm::*;
     /// let numbers = Field::new("numbers");
-    /// numbers.none_inside(&[10, 20, 10]);
+    /// numbers.none_inside(vec![10, 20, 10]);
     /// ```
     fn none_inside<T>(&self, value: T) -> Operation
     where
@@ -903,7 +904,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///        ],
     ///        interiors: [],
     ///     );
-    /// location.instersects(polygon_variable);
+    /// location.intersects(polygon_variable);
     /// ```
     fn intersects<T>(&self, value: T) -> Operation
     where
