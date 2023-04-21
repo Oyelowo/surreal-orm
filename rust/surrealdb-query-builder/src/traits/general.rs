@@ -14,10 +14,9 @@ pub trait Buildable {
 
     /// Make query string param consistent. Useful in testing.
     fn fine_tune_params(&self) -> String {
-        // replace_params(&self.build())
         let mut count = 0;
         let re = regex::Regex::new(r"_param_[[:xdigit:]]+").unwrap();
-        re.replace_all(&self.build(), |caps: &regex::Captures<'_>| {
+        re.replace_all(&self.build(), |_caps: &regex::Captures<'_>| {
             count += 1;
             format!("_param_{:08}", count)
         })
