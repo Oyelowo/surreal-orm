@@ -8,6 +8,7 @@
 use serde::Serialize;
 use surrealdb::sql;
 
+#[doc(hidden)]
 #[derive(Debug, Clone, Serialize)]
 pub struct Binding {
     param: String,
@@ -17,6 +18,7 @@ pub struct Binding {
     description: Option<String>,
 }
 
+#[doc(hidden)]
 pub type BindingsList = Vec<Binding>;
 
 impl Binding {
@@ -79,14 +81,9 @@ impl From<sql::Value> for Binding {
     }
 }
 
-// impl From<(String, sql::Value)> for Binding {
-//     fn from(value: (String, Value)) -> Self {
-//         Self { field1: value }
-//     }
-// }
-
-/// Can have parameters which can be bound
+/// Can have parameters which can be bound. Includes the param and corresponding value
 pub trait Parametric {
+    /// Get the bindings
     fn get_bindings(&self) -> BindingsList;
 }
 
