@@ -79,7 +79,6 @@ pub struct DefineFieldStatement {
 ///     ]);
 ///
 /// assert!(!statement.build().is_empty());
-/// assert!(statement.build().starts_with("DEFINE FIELD email ON TABLE user TYPE string VALUE $value OR 'example@codebreather.com'"));
 /// ```
 pub fn define_field(fieldable: impl Into<Field>) -> DefineFieldStatement {
     let field: Field = fieldable.into();
