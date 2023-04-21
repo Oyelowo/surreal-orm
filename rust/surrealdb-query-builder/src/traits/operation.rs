@@ -372,21 +372,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::MoreThanOrEqual, value)
     }
 
-    /// Adds a value to the current query.
+    /// `+` Adds a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to be added to the current query.
+    /// * `value` - The value to be added to the current query. Could be `sql::Value`, `Field` or `Param
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age + 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.add(5);
     /// ```
     fn add<T>(&self, value: T) -> Operation
     where
@@ -395,21 +393,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Add, value)
     }
 
-    /// Subtracts a value to the current query.
+    /// `-` Subtracts a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to be subtract to the current query.
+    /// * `value` - The value to be subtract to the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age - 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.subtract(5);
     /// ```
     fn subtract<T>(&self, value: T) -> Operation
     where
@@ -418,21 +414,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Sub, value)
     }
 
-    /// Multiply a value to the current query.
+    /// `*` Multiply a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to be multiply to the current query.
+    /// * `value` - The value to be multiply to the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age * 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.multiply(5);
     /// ```
     fn multiply<T>(&self, value: T) -> Operation
     where
@@ -441,21 +435,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Mul, value)
     }
 
-    /// Divide a value to the current query.
+    /// `/` Divide a value to the current query.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to be divide to the current query.
+    /// * `value` - The value to be divide to the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age / 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.divide(5);
     /// ```
     fn divide<T>(&self, value: T) -> Operation
     where
@@ -464,21 +456,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Div, value)
     }
 
-    /// Checks whether two values are truthy.
+    /// `&&` Checks whether two values are truthy.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age && 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.truthy_and(5);
     /// ```
     fn truthy_and<T>(&self, value: T) -> Operation
     where
@@ -487,22 +477,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query("&&", value)
     }
 
-    /// Checks whether either of two values are truthy.
-
+    /// `||` Checks whether either of two values are truthy.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age || 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.truthy_or(5);
     /// ```
     fn truthy_or<T>(&self, value: T) -> Operation
     where
@@ -511,68 +498,62 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query("||", value)
     }
 
-    /// Checks whether two values are truthy.
+    /// `AND` Checks whether two values are truthy.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age AND 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.and(5);
     /// ```
     fn and<T>(&self, value: T) -> Operation
     where
         T: Into<Valuex>,
     {
-        self.generate_query(sql::Operator::And, value)
+        self.generate_query("AND", value)
     }
 
-    /// Checks whether either of two values are truthy.
+    /// `OR` Checks whether either of two values are truthy.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age OR 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.or(5);
     /// ```
     fn or<T>(&self, value: T) -> Operation
     where
         T: Into<Valuex>,
     {
         let value: Valuex = value.into();
-        self.generate_query(sql::Operator::Or, value)
+        self.generate_query("OR", value)
     }
 
-    /// Check whether two values are equal.
+    /// `IS` or `=` Check whether two values are equal.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age IS 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.is(5);
     /// ```
     fn is<T>(&self, value: T) -> Operation
     where
@@ -582,21 +563,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query("IS", value)
     }
 
-    /// Check whether two values are not equal.
+    /// `IS NOT` or `!=` Check whether two values are not equal.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age".to_string());
-    /// let new_query = query.add(5);
-    ///
-    /// assert_eq!(new_query.to_string(), "age IS NOT 5");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.is_not(5);
     /// ```
     fn is_not<T>(&self, value: T) -> Operation
     where
@@ -606,21 +585,22 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query("IS NOT", value)
     }
 
-    /// Check whether a value contains another value.
+    /// `CONTAINS` or `∋` Check whether a value contains another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.contains("Oyelowo");
     ///
-    /// let query = DbQuery::new("friends".to_string());
-    /// let new_query = query.contains("Oyelowo")
-    ///
-    /// assert_eq!(new_query.to_string(), "friends CONTAINS 'Oyelowo'");
+    /// # let polygon = Field::new("polygon");
+    /// polygon.contains("Oyelowo");
     /// ```
     fn contains<T>(&self, value: T) -> Operation
     where
@@ -630,21 +610,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Contain, value)
     }
 
-    /// Check whether a value does not contain another value.
+    /// `CONTAINSNOT` or `∌` Check whether a value does not contain another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be any `sql::Value`, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("friends".to_string());
-    /// let new_query = query.contains_not("Oyelowo")
-    ///
-    /// assert_eq!(new_query.to_string(), "friends CONTAINSNOT 'Oyelowo'");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.contains_not("Oyelowo");
     /// ```
     fn contains_not<T>(&self, value: T) -> Operation
     where
@@ -653,21 +631,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::NotContain, value)
     }
 
-    /// Check whether a value contains all of multiple values.
+    /// `CONTAINSALL` or `⊇` Check whether a value contains all of multiple values.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("number_counts");
-    /// let new_query = query.contains_all([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSALL [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.contains_all(&["Oyelowo", "Oyelowo"]);
     /// ```
     fn contains_all<T>(&self, value: T) -> Operation
     where
@@ -677,21 +653,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::ContainAll, value)
     }
 
-    /// Check whether a value contains any of multiple values.
+    /// `CONTAINSANY` or `⊃` Check whether a value contains any of multiple values.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("number_counts");
-    /// let new_query = query.contains_any([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSANY [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.contains_any(&["Oyelowo", "Oyelowo"]);
     /// ```
     fn contains_any<T>(&self, value: T) -> Operation
     where
@@ -701,21 +675,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::ContainAny, value)
     }
 
-    /// Check whether a value does not contain none of multiple values.
+    /// `CONTAINSNONE` or `⊅` Check whether a value does not contain none of multiple values.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be `Array, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("number_counts");
-    /// let new_query = query.contains_none([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts CONTAINSNONE [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let friends = Field::new("friends");
+    /// friends.contains_none(&["Oyelowo", "Oyelowo"]);
     /// ```
     fn contains_none<T>(&self, value: T) -> Operation
     where
@@ -725,21 +697,19 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::ContainNone, value)
     }
 
-    /// Check whether a value is contained within another value.
+    /// `INSIDE` or `∈` or `IN` Check whether a value is contained within another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be any supported surrealdb value, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
-    ///
-    /// let query = DbQuery::new("age");
-    /// let new_query = query.inside([10, 20, 10]);
-    ///
-    /// assert_eq!(new_query.to_string(), "number_counts INSIDE [10, 20, 10]");
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.inside(10);
     /// ```
     fn inside<T>(&self, value: T) -> Operation
     where
@@ -748,21 +718,57 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Inside, value)
     }
 
-    /// Check whether a value is not contained within another value.
+    /// `IN` or `∈` or `INSIDE` Check whether a value is contained within another value.
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to compared with the current query.
+    /// * `value` - The value to compared with the current query. Could be any supported surrealdb value, `Field` or `Param.
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.in_(10);
+    /// ```
+    fn in_<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Inside, value)
+    }
+
+    /// `NOTINSIDE` or `∉` or `NOT IN` Check whether a value is not contained within another value.
     ///
-    /// let query = DbQuery::new("age");
-    /// let new_query = query.not_inside([10, 20, 10]);
+    /// # Arguments
     ///
-    /// assert_eq!(new_query.to_string(), "number_counts NOTINSIDE [10, 20, 10]");
+    /// * `value` - The value to compared with the current query. Could be any supported surrealdb value, `Field` or `Param.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// use geo::polygon;
+    /// let point = Field::new("point");
+    /// let polygon = polygon!(
+    ///         exterior: [
+    ///             (x: -111., y: 45.),
+    ///             (x: -111., y: 41.),
+    ///             (x: -104., y: 41.),
+    ///             (x: -104., y: 45.),
+    ///         ],
+    ///         interiors: [
+    ///             [
+    ///                 (x: -110., y: 44.),
+    ///                 (x: -110., y: 42.43),
+    ///                 (x: -105., y: 42.),
+    ///                 (x: -105., y: 44.),
+    ///             ],
+    ///         ],
+    ///     );
+    /// point.not_inside(polygon);
     /// ```
     fn not_inside<T>(&self, value: T) -> Operation
     where
