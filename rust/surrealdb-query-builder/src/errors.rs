@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
