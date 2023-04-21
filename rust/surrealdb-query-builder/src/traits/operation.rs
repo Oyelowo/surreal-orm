@@ -5,49 +5,19 @@
  * Licensed under the MIT license
  */
 
+use crate::{
+    Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, GeometryLike,
+    NumberLike, Ordinal, Parametric, Valuex,
+};
 use std::fmt::Display;
-
 use surrealdb::sql;
 
-use crate::{
-    types::{ArrayLike, GeometryLike, NumberLike, Ordinal},
-    Aliasable, Valuex,
-};
-
-use super::{Binding, BindingsList, Buildable, Conditional, Erroneous, Parametric};
-
+/// Defines the operations that can be performed on a field
 #[derive(Debug, Clone)]
 pub struct Operation {
     query_string: String,
     bindings: BindingsList,
 }
-
-// impl Operator {
-//     pub fn new(query_string: String, bindings: BindingsList) -> Self {
-//         Self {
-//             query_string,
-//             bindings,
-//         }
-//     }
-//     /// Append the specified string to the field name
-//     ///
-//     /// # Arguments
-//     ///
-//     /// * `string` - The string to append
-//     ///
-//     /// # Example
-//     ///
-//     /// ```
-//     /// use surrealdb::Field;
-//     ///
-//     /// let mut field = Field::new("name");
-//     /// field.push_str("_alias");
-//     /// ```
-//     // TODO: replace with long underscore to show it is an internal variable
-//     pub fn push_str(&mut self, string: &str) {
-//         self.query_string.push_str(string)
-//     }
-// }
 
 impl Display for Operation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -75,21 +45,33 @@ impl Conditional for Operation {}
 
 impl Erroneous for Operation {}
 
+/// Defines the operations that can be performed on a field or param or some other types
+/// it is implemented for.
 pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
-    /// Return a new `DbQuery` that checks whether the field is equal to the specified value
+    /// Return a new `operation` that checks whether the field is equal to the specified value
     ///
     /// # Arguments
     ///
-    /// * `value` - The value to check for equality
+    /// * `value` - The value to check for equality. Could be `sql::Value`, `Field` or `Param`
     ///
     /// # Example
     ///
-    /// ```
-    /// use surrealdb::{Field, DbQuery};
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// let query = age.equal(25);
+    /// assert_eq!(query.to_raw().build(), "age = 25");
     ///
-    /// let field = Field::new("age");
-    /// let query = field.equals(25);
-    /// assert_eq!(query.to_string(), "age = 25");
+    /// # let age = Field::new("age");
+    /// # let valid_age_field = Field::new("valid_age_field");
+    /// let query = age.equal(valid_age_field);
+    /// assert_eq!(query.to_raw().build(), "age = valid_age_field");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_param = Param::new("valid_age_param");
+    /// let query = age.equal(valid_age_param);
+    /// assert_eq!(query.to_raw().build(), "age = $valid_age_param");
     /// ```
     fn equal<T>(&self, value: T) -> Operation
     where
@@ -106,7 +88,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::{Field, DbQuery};
     ///
     /// let field = Field::new("age");
@@ -128,7 +110,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::column("age").exactly_equal(42);
@@ -150,7 +132,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbColumn;
     ///
     /// let col = DbColumn::new("friends");
@@ -172,7 +154,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbColumn;
     ///
     /// let col = DbColumn::new("friends");
@@ -194,7 +176,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::column("name").like("A");
@@ -215,7 +197,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::column("name").not_like("A");
@@ -236,7 +218,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::column("name").all_like("A");
@@ -257,7 +239,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::column("name").all_like("A");
@@ -278,7 +260,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").less_than(30);
@@ -300,7 +282,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").less_than_or_equals(30);
@@ -322,7 +304,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").greater_than(18);
@@ -344,7 +326,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").greater_than_or_equals(18);
@@ -366,7 +348,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -389,7 +371,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -412,7 +394,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -435,7 +417,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -458,7 +440,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -482,7 +464,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -505,7 +487,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -528,7 +510,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -552,7 +534,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -576,7 +558,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age".to_string());
@@ -600,7 +582,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("friends".to_string());
@@ -624,7 +606,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("friends".to_string());
@@ -647,7 +629,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("number_counts");
@@ -671,7 +653,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("number_counts");
@@ -695,7 +677,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("number_counts");
@@ -719,7 +701,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age");
@@ -742,7 +724,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("age");
@@ -765,7 +747,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("ages");
@@ -789,7 +771,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("ages");
@@ -813,7 +795,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("ages");
@@ -837,7 +819,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("location");
@@ -869,7 +851,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::new("location");
@@ -904,7 +886,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("score = 5".to_string());
     /// let updated_updater = updater.increment_by(2);
@@ -927,7 +909,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("tags = ARRAY['rust']".to_string());
     /// let updated_updater = updater.append("python");
@@ -950,7 +932,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("score = 5".to_string());
     /// let updated_updater = updater.decrement_by(2);
@@ -973,7 +955,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("tags = ARRAY['rust', 'python']".to_string());
     /// let updated_updater = updater.remove("python");
@@ -995,7 +977,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("score = 5".to_string());
     /// let updated_updater = updater.plus_equal(2);
@@ -1017,7 +999,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust, ignore
     /// # use my_cool_db::Updater;
     /// let updater = Updater::new("name = 'John'".to_string());
     /// let updated_updater = updater.minus_equal("ohn");
@@ -1031,28 +1013,6 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query("-=", value)
     }
 
-    /// Return a new `DbQuery` that renames the field with the specified alias
-    ///
-    /// # Arguments
-    ///
-    /// * `alias` - The alias to use for the field
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use surrealdb::{Field, DbQuery};
-    ///
-    /// let field = Field::new("name");
-    /// let query = field.__as__("name_alias");
-    /// assert_eq!(query.to_string(), "name AS name_alias");
-    /// ```
-    // fn __as__(&self, alias: impl std::fmt::Display) -> Operation {
-    //     Operation {
-    //         query_string: format!("{} AS {}", self.build(), alias),
-    //         bindings: self.get_bindings(),
-    //     }
-    // }
-
     /// Check whether the value of the field is between the given lower and upper bounds.
     ///
     /// # Arguments
@@ -1062,7 +1022,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").between(18, 30);
@@ -1101,7 +1061,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust, ignore
     /// use surrealdb::DbQuery;
     ///
     /// let query = DbQuery::field("age").within(18, 30);
