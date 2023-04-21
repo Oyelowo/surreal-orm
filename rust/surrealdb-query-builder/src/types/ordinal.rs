@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
@@ -20,29 +27,22 @@ pub enum Ordinal {
 
 impl From<Ordinal> for Valuex {
     fn from(value: Ordinal) -> Self {
-        let mut bindings = vec![];
-        let string = match value {
+        let (string, bindings) = match value {
             Ordinal::Datetime(d) => {
                 let binding = Binding::new(d);
                 let param = binding.get_param_dollarised();
-                bindings.push(binding);
-                param
+                (param, vec![binding])
             }
             Ordinal::Number(n) => {
                 let binding = Binding::new(n);
                 let param = binding.get_param_dollarised();
-                bindings.push(binding);
-                param
+                (param, vec![binding])
             }
-            Ordinal::Field(f) => {
-                bindings.extend(f.get_bindings());
-                f.build()
-            }
+            Ordinal::Field(f) => (f.build(), f.get_bindings()),
             Ordinal::Geometry(g) => {
                 let binding = Binding::new(g);
                 let param = binding.get_param_dollarised();
-                bindings.push(binding);
-                param
+                (param, vec![binding])
             }
         };
         Valuex { string, bindings }
