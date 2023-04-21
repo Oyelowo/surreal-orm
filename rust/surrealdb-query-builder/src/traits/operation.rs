@@ -158,7 +158,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// # use surrealdb_orm::*;
     /// # let friends = Field::new("friends");
     /// let query = friends.any_equal("Alice");
-    /// assert_eq!(query.to_raw().build(), "friends ?= Alice");
+    /// assert_eq!(query.to_raw().build(), "friends ?= 'Alice'");
     ///
     /// # let friends = Field::new("friends");
     /// # let valid_friends_field = Field::new("valid_friends_field");
