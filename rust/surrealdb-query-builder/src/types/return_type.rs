@@ -1,10 +1,13 @@
 use std::fmt::{self, Display};
 
+use crate::Buildable;
+
 use super::Field;
 
 /// Return type
 #[derive(Debug, Clone)]
 pub enum ReturnType {
+    /// Return nothing
     None,
     /// Return previous state
     Before,
@@ -25,7 +28,7 @@ impl Display for ReturnType {
             ReturnType::Diff => "DIFF".to_string(),
             ReturnType::Projections(projections) => projections
                 .iter()
-                .map(ToString::to_string)
+                .map(|p| p.build())
                 .collect::<Vec<_>>()
                 .join(", "),
         };
@@ -60,5 +63,28 @@ impl<const N: usize> From<&[&Field; N]> for ReturnType {
                 .map(ToOwned::to_owned)
                 .collect::<Vec<_>>(),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_return_type() {
+        let return_type = ReturnType::None;
+        assert_eq!(return_type.to_string(), "RETURN NONE ");
+
+        let return_type = ReturnType::Before;
+        assert_eq!(return_type.to_string(), "RETURN BEFORE ");
+
+        let return_type = ReturnType::After;
+        assert_eq!(return_type.to_string(), "RETURN AFTER ");
+
+        let return_type = ReturnType::Diff;
+        assert_eq!(return_type.to_string(), "RETURN DIFF ");
+
+        let return_type = ReturnType::Projections(vec!["id".into(), "name".into()]);
+        assert_eq!(return_type.to_string(), "RETURN id, name ");
     }
 }

@@ -372,7 +372,7 @@ fn multiplication_tests1() {
     // let result = sql!(SELECT name WHERE age > 5);
     // let result = sql!(SELECT name WHERE age > 5);
 
-    insta::assert_display_snapshot!(replace_params(&query.to_string()));
+    insta::assert_display_snapshot!(&query.fine_tune_params());
     insta::assert_debug_snapshot!(replace_params(&format!("{:?}", query.get_bindings())));
     // assert_eq!(
     //     query.to_string().remove_extra_whitespace(),

@@ -10,39 +10,42 @@ use std::{
     ops::Deref,
 };
 
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing};
+use surrealdb::sql;
 
-use crate::{
-    errors::SurrealdbOrmError,
-    traits::{Conditional, Erroneous, Parametric},
-};
-
+/// Surrealdb namespace
 #[derive(Debug, Clone)]
 pub struct Namespace(sql::Idiom);
 
+/// Surrealdb database
 #[derive(Debug, Clone)]
 pub struct Database(sql::Idiom);
 
+/// Surrealdb login
 #[derive(Debug, Clone)]
 pub struct Login(sql::Idiom);
 
+/// Surrealdb token
 #[derive(Debug, Clone)]
 pub struct Token(sql::Idiom);
 
+/// Surrealdb scope
 #[derive(Debug, Clone)]
 pub struct Scope(sql::Idiom);
 
+/// Surrealdb table
 #[derive(Debug, Clone)]
 pub struct Table(sql::Table);
 
+/// Surrealdb event
 #[derive(Debug, Clone)]
 pub struct Event(sql::Idiom);
 
+/// Surrealdb table index
 #[derive(Debug, Clone)]
 pub struct TableIndex(sql::Idiom);
 
 impl Table {
+    /// Create a new table
     pub fn new(name: impl Into<sql::Table>) -> Self {
         Self(name.into())
     }
@@ -79,6 +82,7 @@ impl From<&Table> for Table {
     }
 }
 
+/// A collection of tables
 pub struct Tables(Vec<Table>);
 
 impl From<Vec<Table>> for Tables {
@@ -105,18 +109,11 @@ impl From<Tables> for Vec<Table> {
     }
 }
 
-// impl Deref for Tables {
-//     type Target = Vec<Table>;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-
 macro_rules! impl_new_for_all {
     ($($types_:ty),*) => {
         $(
         impl $types_ {
+            /// Create instance of type
             pub fn new(name: impl Into<String>) -> Self {
                 Self(name.into().into())
             }
@@ -165,19 +162,12 @@ macro_rules! impl_display_for_all {
             }
         }
 
-    //     impl<T> From<T> for $types_
-    //     where
-    //         T: Into<String>,
-    //     {
-    //         fn from(value: T) -> Self {
-    //             Self(value.into().into())
-    //         }
-    // }
     )*
     };
 }
 impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, TableIndex);
 
+/// Wrapper around Surrealdb idiom. X suffix stands for extra.
 pub struct Idiomx(sql::Idiom);
 
 impl Display for Idiomx {
@@ -187,16 +177,11 @@ impl Display for Idiomx {
 }
 
 impl Idiomx {
+    /// Create a new idiom
     pub fn new(name: sql::Idiom) -> Self {
         Self(name)
     }
 }
-
-// impl From<sql::Idiom> for Name {
-//     fn from(value: sql::Idiom) -> Self {
-//         todo!()
-//     }
-// }
 
 impl From<Idiomx> for sql::Idiom {
     fn from(value: Idiomx) -> Self {
@@ -216,109 +201,5 @@ where
 {
     fn from(value: T) -> Self {
         Self(value.into().into())
-    }
-}
-
-pub struct Duration(sql::Duration);
-
-impl From<self::Duration> for sql::Duration {
-    fn from(value: self::Duration) -> Self {
-        value.0
-    }
-}
-
-impl From<Duration> for sql::Value {
-    fn from(value: self::Duration) -> Self {
-        value.0.into()
-    }
-}
-impl From<sql::Duration> for self::Duration {
-    fn from(value: sql::Duration) -> Self {
-        Self(value)
-    }
-}
-
-impl From<&std::time::Duration> for Duration {
-    fn from(value: &std::time::Duration) -> Self {
-        Self(value.to_owned().into())
-    }
-}
-
-impl From<std::time::Duration> for Duration {
-    fn from(value: std::time::Duration) -> Self {
-        Self(value.into())
-    }
-}
-
-impl Deref for Duration {
-    type Target = sql::Duration;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct ArrayCustom(sql::Value);
-
-// impl From<ArrayCustom> for sql::Value {
-//     fn from(value: ArrayCustom) -> Self {
-//         todo!()
-//     }
-// }
-
-// impl From<Field> for ArrayCustom {
-//     fn from(value: Field) -> Self {
-//         Self(value.into())
-//     }
-// }
-//
-impl Display for ArrayCustom {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-// impl Parametric for ArrayCustom {
-//     fn get_bindings(&self) -> BindingsList {
-//         vec![Binding::new(self.0.clone())]
-//     }
-// }
-
-// impl Into<sql::Value> for ArrayCustom {
-//     fn into(self) -> sql::Value {
-//         self.0
-//     }
-// }
-// impl From<sql::Value> for ArrayCustom {
-//     fn from(value: sql::Value) -> Self {
-//         Self(value)
-//     }
-// }
-
-impl<T: Into<sql::Array>> From<T> for ArrayCustom {
-    fn from(value: T) -> Self {
-        Self(value.into().into())
-    }
-}
-
-// Should probably delete
-// impl From<Field> for ArrayCustom {
-//     fn from(value: Field) -> Self {
-//         Self(value.into())
-//     }
-// }
-
-pub struct NONE;
-
-impl From<NONE> for sql::Value {
-    fn from(value: NONE) -> Self {
-        sql::Value::Idiom(value.to_string().into())
-    }
-}
-
-impl Display for NONE {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "NONE")
     }
 }

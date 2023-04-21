@@ -125,12 +125,12 @@ mod tests {
 
         assert_eq!(
             statement.fine_tune_params(),
-            "LET $name = SELECT * FROM user;"
+            "LET $name = ( SELECT * FROM user );"
         );
 
         assert_eq!(
             statement.to_raw().build(),
-            "LET $name = SELECT * FROM user;"
+            "LET $name = ( SELECT * FROM user );"
         );
 
         assert_eq!(statement.get_param().build(), "$name");

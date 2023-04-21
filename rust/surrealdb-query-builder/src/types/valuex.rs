@@ -1,8 +1,11 @@
+use surrealdb::sql;
+
 use crate::{
-    count, Alias, AliasName, Aliasable, Binding, BindingsList, Buildable, Field, Function, Param,
-    Parametric, Table, ToRaw,
+    Alias, Binding, BindingsList, Buildable, Field, Function, Param, Parametric, NONE, NULL,
 };
 
+/// A value that can be used in a SQL statement. Serves as the bind and arbiter between
+/// `sql::Value` and the query building world.
 #[derive(Debug, Clone)]
 pub struct Valuex {
     pub(crate) string: String,
@@ -37,15 +40,6 @@ impl Buildable for Vec<Valuex> {
             .join(", ")
     }
 }
-
-// impl AsRef<Valuex> for Field {
-//     fn as_ref(&self) -> &Valuex {
-//         Valuex {
-//             string: self.build(),
-//             bindings: self.get_bindings(),
-//         }
-//     }
-// }
 
 impl From<&Field> for Valuex {
     fn from(value: &Field) -> Self {
@@ -82,6 +76,25 @@ impl From<Alias> for Valuex {
         }
     }
 }
+
+impl From<NULL> for Valuex {
+    fn from(_value: NULL) -> Self {
+        Valuex {
+            string: "NULL".to_string(),
+            bindings: vec![],
+        }
+    }
+}
+
+impl From<NONE> for Valuex {
+    fn from(_value: NONE) -> Self {
+        Valuex {
+            string: "NONE".to_string(),
+            bindings: vec![],
+        }
+    }
+}
+
 impl From<Function> for Valuex {
     fn from(value: Function) -> Self {
         Valuex {
@@ -102,6 +115,43 @@ impl<T: Into<sql::Value>> From<T> for Valuex {
         }
     }
 }
+
+/// A macro to create a heterogenous list of anything
+/// that can be converted into `Valuex` including all
+/// supported surrealdb types like numbers,
+/// dates, field, param, geometry etc, and statements.
+/// It creates Vec<Valuex>` from a list of values.
+///
+/// # Arguments
+/// * `$( $val:expr ),*` - A list of values that can be converted into `Valuex`
+/// # Example
+/// ```rust
+/// use surrealdb::sql;
+/// use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::{math, count}};
+/// let country = Field::new("country");
+/// let age = Field::new("age");
+/// let total = AliasName::new("total");
+///
+/// let values = arr![
+///         1,
+///         2,
+///         3,
+///         count!().__as__(total),
+///         math::sum!(age),
+///         country,
+///         54,
+///         sql::Duration(std::time::Duration::from_secs(43))
+///     ];
+///     
+///    assert_eq!(
+///         values.into_iter()
+///             .map(|v| v.to_raw().build())
+///             .collect::<Vec<_>>()
+///             .join(", "),
+///         "1, 2, 3, count() AS total, math::sum(age), country, 54, 43s"
+///    );
+///    ```
 #[macro_export]
 macro_rules! arr {
     ($( $val:expr ),*) => {{
@@ -111,50 +161,38 @@ macro_rules! arr {
     }};
 }
 
-pub use arr;
-use surrealdb::sql;
+#[cfg(test)]
+mod tests {
+    use surrealdb::sql;
 
-#[test]
-fn erer() {
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Part::from(Ident::from("nana as po"))]).into();
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Part::from(Ident::from(
-    //     "count() AS pa",
-    // ))])
-    // .into();
-    // let xx: sql::Value = sql::Idiom(vec![surrealdb::sql::Pjrt::Value(Ident::from(
-    //     "count() AS pa",
-    // ))])
-    // .into();
-    // xx.to_raw_string()
-    // let xx: sql::Value = Ident::from("nana as po").into();
-    // SELECT count() AS total, math::sum(age), gender, country FROM person GROUP BY gender, country;
-    // assert_eq!(xx.as_raw_string(), "rere");
-    let user = Table::new("user");
-    let country = Field::new("country");
-    let age = Field::new("age");
-    let gender = Field::new("gender");
-    let city = Field::new("city");
-    let total = AliasName::new("total");
-    let totall = AliasName::new("total");
-    let mut mm = arr![
-        1,
-        2,
-        3,
-        count!().__as__(total),
-        // math::sum!(age),
-        gender,
-        country,
-        54,
-        sql::Duration(std::time::Duration::from_secs(43))
-    ];
-    mm.push(34.into());
-    // assert_eq!(count!().__as__(totall).tona(), "rere");
-    assert_eq!(
-        mm.into_iter()
-            .map(|m| m.to_raw().build())
-            // .map(|m| m.build())
-            .collect::<Vec<_>>()
-            .join(", "),
-        "rere"
-    );
+    use crate::{functions::math, *};
+
+    #[test]
+    fn test_heterogeonous_array_values() {
+        let country = Field::new("country");
+        let age = Field::new("age");
+        let gender = Field::new("gender");
+        let total = AliasName::new("total");
+        let mut values = arr![
+            1,
+            2,
+            3,
+            count!().__as__(total),
+            math::sum!(age),
+            gender,
+            country,
+            54,
+            sql::Duration(std::time::Duration::from_secs(43))
+        ];
+        values.push(34.into());
+
+        assert_eq!(
+            values
+                .into_iter()
+                .map(|m| m.to_raw().build())
+                .collect::<Vec<_>>()
+                .join(", "),
+            "1, 2, 3, count() AS total, math::sum(age), gender, country, 54, 43s, 34"
+        );
+    }
 }

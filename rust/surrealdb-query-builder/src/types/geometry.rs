@@ -3,8 +3,6 @@ use std::ops::Deref;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
-use super::{Field, Param};
-
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum CoordinateValue {
@@ -12,6 +10,7 @@ enum CoordinateValue {
     String((String, String)),
 }
 
+/// Wrapper around native surrealdb geometry type. Improves the deserialization.
 #[derive(Debug, Clone, Serialize)]
 pub struct Geometry(pub sql::Geometry);
 

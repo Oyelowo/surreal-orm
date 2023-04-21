@@ -127,10 +127,10 @@ fn can_get_structs_relations() {
     assert_eq!(
         relations_aliases
             .into_iter()
-            .map(|r| r.to_raw().to_string())
+            .map(|r| r.to_raw().build())
             .collect::<Vec<_>>()
             .join(", "),
-        "`->writes->book` AS writtenBooks, `->writes->blog` AS blogsssss"
+        "->writes->book AS writtenBooks, ->writes->blog AS blogsssss"
     );
 }
 
@@ -271,7 +271,7 @@ fn should_contain_error_when_invalid_id_use_in_connection() {
 }
 
 #[tokio::test]
-async fn relate_query() -> surrealdb_orm::Result<()> {
+async fn relate_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
     use surrealdb::sql::Datetime;
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -318,7 +318,7 @@ async fn relate_query() -> surrealdb_orm::Result<()> {
 }
 
 #[tokio::test]
-async fn relate_query_with_sub_query() -> surrealdb_orm::Result<()> {
+async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test")
         .use_db("test")

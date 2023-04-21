@@ -5,15 +5,24 @@ use std::{
 
 use crate::Table;
 
+/// Geometry types supported by surrealdb
 #[derive(Debug, Clone)]
 pub enum GeometryType {
+    /// Define a field with any geometric type
     Feature,
+    /// Define a field with point geometric type
     Point,
+    /// Define a field with line geometric type
     Line,
+    /// Define a field with polygon geometric type
     Polygon,
+    /// Define a field with multipoint geometric type
     Multipoint,
+    /// Define a field with multiline geometric type
     Multiline,
+    /// Define a field with multpipolygon geometric type
     Multipolygon,
+    /// Define a field with collection of geometry types
     Collection,
 }
 
@@ -53,21 +62,41 @@ impl Display for GeometryType {
     }
 }
 
+/// Database field types supported by SurrealDB
 #[derive(Debug, Clone)]
 pub enum FieldType {
+    /// Use this when you explicitly don't want to specify the field's data type. The field will
+    /// allow any data type supported by SurrealDB.
     Any,
+    /// a list
     Array,
+    /// true of false
     Bool,
+    /// An ISO 8601 compliant data type that stores a date with time and time zone.
     DateTime,
+    /// Uses BigDecimal for storing any real number with arbitrary precision.
     Decimal,
+    /// Store a value representing a length of time. Can be added or subtracted from datetimes or
+    /// other durations.
     Duration,
+    /// Store a value in a 64 bit float.
     Float,
+    /// Store a value in a 64 bit integer.
     Int,
+    /// Store numbers without specifying the type. SurrealDB will detect the type of number and
+    /// store it using the minimal number of bytes. For numbers passed in as a string, this field
+    /// will store the number in a BigDecimal.
     Number,
+    /// Store formatted objects containing values of any supported type with no limit to object
+    /// depth or nesting.
     Object,
+    ///
     String,
+    /// Store a reference to another record. The record can belong to any table
     RecordAny,
+    /// Store a reference to another record. The value must be a Record ID.
     Record(Table),
+    /// RFC 7946 compliant data type for storing geometry in the GeoJson format.
     Geometry(Vec<GeometryType>),
 }
 

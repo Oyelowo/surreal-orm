@@ -1,19 +1,23 @@
 use std::fmt::Display;
 
-use surrealdb::sql;
+use crate::StrandLike;
 
-use crate::{Buildable, StrandLike, Valuex};
-
-use super::{Field, Param};
-
+/// Represents a time interval.
 #[derive(Debug, Clone, Copy)]
 pub enum Interval {
+    /// Year
     Year,
+    /// Month
     Month,
+    /// Week
     Week,
+    /// Day
     Day,
+    /// Hour
     Hour,
+    /// Minute
     Minute,
+    /// Second
     Second,
 }
 

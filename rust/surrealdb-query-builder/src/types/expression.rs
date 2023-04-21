@@ -5,84 +5,86 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::{self, Display};
+use crate::{statements::SelectStatement, Buildable, Parametric, Valuex};
 
-use surrealdb::sql;
-
-use crate::{
-    statements::SelectStatement,
-    traits::{Binding, BindingsList, Parametric},
-    Buildable,
-};
-
+/// An expression is a value or statement that can be used within another query.
 #[derive(Clone, Debug)]
-pub struct ValueWithBinding {
-    value: String,
-    binding: Binding,
-}
+pub struct Expression(Valuex);
 
-// impl Buildable for ValueWithBinding {
-//     fn build(&self) -> String {
-//         self.binding.to_vec
-//     }
-// }
-#[derive(Clone, Debug)]
-pub enum Expression {
-    SelectStatement(SelectStatement),
-    Value(ValueWithBinding),
-}
+impl std::ops::Deref for Expression {
+    type Target = Valuex;
 
-impl Buildable for Expression {
-    fn build(&self) -> String {
-        match self {
-            Expression::SelectStatement(s) => s.build().trim_end_matches(";").to_string(),
-            // Expression::SelectStatement(s) => format!("( {} )", s.build().trim_end_matches(";")),
-            Expression::Value(v) => v.binding.get_param_dollarised(),
-        }
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
-// impl Display for Expression {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let expression = match self {
-//             Expression::SelectStatement(s) => s.build(),
-//             // Expression::SelectStatement(s) => s.get_bindings().first().unwrap().get_raw(),
-//             Expression::Value(v) => {
-//                 // let bindings = self.get_bindings();
-//                 let bindings = v.to_string();
-//                 // assert_eq!(bindings.len(), 1);
-//                 format!("{}", self.get_bindings().first().expect("Param must have been generated for value. This is a bug. Please report here: ").get_param())
-//             }
-//         };
-//         write!(f, "{}", expression)
-//     }
-// }
-//
-impl Parametric for Expression {
-    fn get_bindings(&self) -> BindingsList {
-        match self {
-            Expression::SelectStatement(s) => s.get_bindings(),
-            Expression::Value(sql_value) => {
-                // let sql_value = sql::json(&serde_json::to_string(&v).unwrap()).unwrap();
-                // let sql_value: sql::Value = sql_value.to_owned();
-                vec![sql_value.binding.clone()]
-            }
-        }
+impl<T> From<T> for Expression
+where
+    T: Into<Valuex>,
+{
+    fn from(value: T) -> Self {
+        Expression(value.into())
     }
 }
 
 impl From<SelectStatement> for Expression {
-    fn from(value: SelectStatement) -> Self {
-        Self::SelectStatement(value)
+    fn from(select_statement: SelectStatement) -> Self {
+        Expression(Valuex {
+            // statement already bound
+            string: format!("( {} )", select_statement.build().trim_end_matches(";")),
+            bindings: select_statement.get_bindings(),
+        })
     }
 }
 
-impl<T: Into<sql::Value>> From<T> for Expression {
-    fn from(value: T) -> Self {
-        let binding = Binding::new(value.into());
-        Self::Value(ValueWithBinding {
-            value: binding.get_param_dollarised(),
-            binding,
-        })
+#[cfg(test)]
+mod tests {
+    use crate::{statements::select, All, Table, ToRaw, NULL};
+
+    use super::*;
+
+    #[test]
+    fn expression_from_select_statement() {
+        let users = Table::new("users");
+        let select_statement = select(All).from(users);
+        let expression = Expression::from(select_statement);
+        assert_eq!(expression.fine_tune_params(), "( SELECT * FROM users )");
+        assert_eq!(expression.to_raw().build(), "( SELECT * FROM users )");
+    }
+
+    #[test]
+    fn expression_from_string() {
+        let expression = Expression::from("hello");
+        assert_eq!(expression.fine_tune_params(), "$_param_00000001");
+        assert_eq!(expression.to_raw().build(), "'hello'");
+    }
+
+    #[test]
+    fn expression_from_integer() {
+        let expression = Expression::from(1);
+        assert_eq!(expression.fine_tune_params(), "$_param_00000001");
+        assert_eq!(expression.to_raw().build(), "1");
+    }
+
+    #[test]
+    fn expression_from_float() {
+        let expression = Expression::from(1.02);
+        assert_eq!(expression.fine_tune_params(), "$_param_00000001");
+        assert_eq!(expression.to_raw().build(), "1.02");
+    }
+
+    #[test]
+    fn expression_from_boolean() {
+        let expression = Expression::from(true);
+        assert_eq!(expression.fine_tune_params(), "$_param_00000001");
+        assert_eq!(expression.to_raw().build(), "true");
+    }
+
+    #[test]
+    fn expression_from_null() {
+        let expression = Expression::from(NULL);
+        assert_eq!(expression.fine_tune_params(), "NULL");
+        assert_eq!(expression.to_raw().build(), "NULL");
     }
 }

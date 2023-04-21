@@ -5,8 +5,6 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
-
 pub(crate) mod binding;
 pub(crate) mod general;
 pub(crate) mod model;
