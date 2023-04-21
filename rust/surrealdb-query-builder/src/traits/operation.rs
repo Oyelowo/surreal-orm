@@ -913,144 +913,6 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Intersects, value)
     }
 
-    // UPDATER METHODS
-    //
-    /// Returns a new `Updater` instance with the string to increment the column by the given value.
-    /// Alias for plus_equal but idiomatically for numbers
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to increment the column by.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
-    /// let updated_updater = updater.increment_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
-    /// ```
-    fn increment_by<T>(&self, value: T) -> Operation
-    where
-        T: Into<NumberLike>,
-    {
-        let value: NumberLike = value.into();
-        self.generate_query("+=", value)
-    }
-
-    /// Returns a new `Updater` instance with the string to append the given value to a column that stores an array.
-    /// Alias for plus_equal but idiomatically for an array
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to append to the column's array.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags = ARRAY['rust']".to_string());
-    /// let updated_updater = updater.append("python");
-    /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust', 'python']");
-    /// ```
-    fn append<T>(&self, value: T) -> Operation
-    where
-        T: Into<Valuex>,
-    {
-        let value: Valuex = value.into();
-        self.generate_query("+=", value)
-    }
-
-    /// Returns a new `Updater` instance with the string to decrement the column by the given value.
-    /// Alias for minus_equal but idiomatically for an number
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to decrement the column by.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
-    /// let updated_updater = updater.decrement_by(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 - 2");
-    /// ```
-    fn decrement_by<T>(&self, value: T) -> Operation
-    where
-        T: Into<NumberLike>,
-    {
-        let value: NumberLike = value.into();
-        self.generate_query("-=", value)
-    }
-
-    /// Returns a new `Updater` instance with the string to remove the given value from a column that stores an array.
-    /// Alias for minus_equal but idiomatically for an array
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to remove from the column's array.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("tags = ARRAY['rust', 'python']".to_string());
-    /// let updated_updater = updater.remove("python");
-    /// assert_eq!(updated_updater.to_string(), "tags = ARRAY['rust']");
-    /// ```
-    fn remove<T>(&self, value: T) -> Operation
-    where
-        T: Into<Valuex>,
-    {
-        let value: Valuex = value.into();
-        self.generate_query("-=", value)
-    }
-
-    /// Returns a new `Updater` instance with the string to add the given value to the column.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to add to the column.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("score = 5".to_string());
-    /// let updated_updater = updater.plus_equal(2);
-    /// assert_eq!(updated_updater.to_string(), "score = 5 + 2");
-    /// ```
-    fn plus_equal<T>(&self, value: T) -> Operation
-    where
-        T: Into<Valuex>,
-    {
-        let value: Valuex = value.into();
-        self.generate_query("+=", value)
-    }
-
-    /// Returns a new `Updater` instance with the string to remove the given value from the column.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The value to remove from the column.
-    ///
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// # use my_cool_db::Updater;
-    /// let updater = Updater::new("name = 'John'".to_string());
-    /// let updated_updater = updater.minus_equal("ohn");
-    /// assert_eq!(updated_updater.to_string(), "name = 'J'");
-    /// ```
-    fn minus_equal<T>(&self, value: T) -> Operation
-    where
-        T: Into<Valuex>,
-    {
-        let value: Valuex = value.into();
-        self.generate_query("-=", value)
-    }
-
     /// Check whether the value of the field is between the given lower and upper bounds.
     ///
     /// # Arguments
@@ -1062,7 +924,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// ```rust
     /// # use surrealdb_query_builder as surrealdb_orm;
-    ///
+    /// # use surrealdb_orm::*;
     ///
     /// let age = Field::new("age");
     /// age.between(18, 30);
@@ -1100,11 +962,12 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     ///
     /// # Example
     ///
-    /// ```rust, ignore
-    /// use surrealdb::DbQuery;
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
     ///
-    /// let query = DbQuery::field("age").within(18, 30);
-    /// assert_eq!(query.to_string(), "age <= 18 AND age <= 30");
+    /// let age = Field::new("age");
+    /// age.within(18, 30);
     /// ```
     fn within<T>(&self, lower_bound: T, upper_bound: T) -> Operation
     where
