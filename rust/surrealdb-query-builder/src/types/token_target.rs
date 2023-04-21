@@ -1,33 +1,21 @@
+#![allow(missing_docs)]
 use std::fmt::{self, Display};
 
-/// The type of token to create.
+#[allow(missing_docs)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
-    /// EDDSA
     EDDSA,
-    /// ES256
     ES256,
-    /// ES384
     ES384,
-    /// ES512
     ES512,
-    /// HS256
     HS256,
-    /// HS384
     HS384,
-    /// HS512
     HS512,
-    /// PS256
     PS256,
-    /// PS384
     PS384,
-    /// PS512
     PS512,
-    /// RS256
     RS256,
-    /// RS384
     RS384,
-    /// RS512
     RS512,
 }
 
@@ -51,14 +39,11 @@ impl fmt::Display for TokenType {
     }
 }
 
-/// Token target
+#[allow(missing_docs)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenTarget {
-    /// Namespace
     Namespace,
-    /// Database
     Database,
-    /// Scope with its name
     Scope(String),
 }
 
