@@ -7,7 +7,7 @@
 
 use crate::{
     Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, GeometryLike,
-    NumberLike, Ordinal, Parametric, Valuex,
+    Ordinal, Parametric, Valuex,
 };
 use std::fmt::Display;
 use surrealdb::sql;
@@ -999,9 +999,6 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         bindings: impl Into<&'bi [Binding]>,
     ) -> Operation {
         let bindings: &'bi [Binding] = bindings.into();
-        // println!("bindingszz {bindings:?}");
-        // updated_params.extend_from_slice(&self.bindings[..]);
-        // updated_params.extend_from_slice(&bindings[..]);
         let updated_params = [&self.get_bindings().as_slice(), bindings].concat();
         Operation {
             query_string: self.build(),
