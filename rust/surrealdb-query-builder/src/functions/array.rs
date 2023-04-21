@@ -440,6 +440,7 @@ pub mod sort {
 
     use super::Function;
 
+    /// The array::sort::asc function is a shorthand convenience function for the array::sort function, to sort values in an array in ascending order.
     pub fn asc_fn(arr: impl Into<ArrayLike>) -> Function {
         let arr: ArrayLike = arr.into();
 
@@ -449,14 +450,33 @@ pub mod sort {
         }
     }
 
+    /// The array::sort::asc function is a shorthand convenience function for the array::sort function, to sort values in an array in ascending order.
+    /// # Arguments
+    /// * `arr` -  A vector, field or param.
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    /// array::sort::asc!(vec![1, 2, 3]);
+    /// array::sort::asc!(&[1, 2, 3]);
+    /// array::sort::asc!(own_goals);
+    /// array::sort::asc!(goals);
+    ///
+    /// // It is also aliased as array_sort_asc;
+    /// array_sort_asc!(vec![1, 2, 3]);
+    /// ```
     #[macro_export]
-    macro_rules! array_sort_asc_fn {
+    macro_rules! array_sort_asc {
         ( $arr:expr ) => {
             $crate::functions::array::sort::asc_fn($arr)
         };
     }
-    pub use array_sort_asc_fn as asc;
+    pub use array_sort_asc as asc;
 
+    /// The array::sort::desc function is a shorthand convenience function for the array::sort
+    /// function, to sort values in an array in descending order.
     pub fn desc_fn(arr: impl Into<ArrayLike>) -> Function {
         let arr: ArrayLike = arr.into();
 
@@ -466,6 +486,22 @@ pub mod sort {
         }
     }
 
+    /// The array::sort::desc function is a shorthand convenience function for the array::sort function, to sort values in an array in descending order.
+    /// # Arguments
+    /// * `arr` -  A vector, field or param.
+    /// # Examples
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    /// array::sort::desc!(vec![1, 2, 3]);
+    /// array::sort::desc!(&[1, 2, 3]);
+    /// array::sort::desc!(own_goals);
+    /// array::sort::desc!(goals);
+    /// // It is also aliased as array_sort_desc;
+    /// array_sort_desc!(vec![1, 2, 3]);
+    /// ```
     #[macro_export]
     macro_rules! array_sort_desc_fn {
         ( $arr:expr ) => {
