@@ -108,7 +108,7 @@ macro_rules! create_test_for_fn_with_single_arg {
             // Obviously, if a field has stringified number that would work
             // during query execution
             $(#[$attr])*
-            fn [<$function_name _fn>](number: impl Into<NumberLike>) -> Function {
+            pub fn [<$function_name _fn>](number: impl Into<NumberLike>) -> Function {
                 create_fn_with_single_num_arg(number, $function_name)
             }
 
@@ -476,103 +476,212 @@ create_test_for_fn_with_single_array_arg!(
 => "median"
 );
 
-create_test_for_fn_with_single_array_arg!("median");
-create_test_for_fn_with_single_array_arg!("min");
-create_test_for_fn_with_single_array_arg!("product");
-create_test_for_fn_with_single_array_arg!("sum");
+create_test_for_fn_with_single_array_arg!(
+/// The math::mode function returns the mode of a set of numbers.
+/// This function is aliased as `math_mode!`.
+/// math::mode(number) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::mode([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 26.164
+///
+/// # Arguments
+/// * `number` - The number from which to calculate the mode. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+/// math::mode!(vec![1, 2, 3, 4, 5]);
+/// math::mode!(arr![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::mode!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::mode!(scores_param);
+/// ```
+=> "mode"
+);
 
-#[test]
-fn test_fixed_fn_with_field_data() {
-    let land_size = Field::new("land_size");
-    let decimal_place = Field::new("decimal_place");
-    let result = fixed_fn(land_size, decimal_place);
+create_test_for_fn_with_single_array_arg!(
+/// The math::min function returns the minimum number in a set of numbers.
+/// This function is aliased as `math_min!`.
+/// math::min(array) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::min([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 13.746189
+///
+/// # Arguments
+/// * `array` - The array of numbers from which to calculate the minimum. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+/// math::min!(vec![1, 2, 3, 4, 5]);
+/// math::min!(arr![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::min!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::min!(scores_param);
+/// ```
+=> "min"
+);
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed(land_size, decimal_place)"
-    );
+create_test_for_fn_with_single_array_arg!(
+/// The math::product function returns the product of a set of numbers.
+/// This function is aliased as `math_product!`.
+/// math::product(array) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::product([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 5619119.004884841504
+///
+/// # Arguments
+/// * `array` - The array of numbers from which to calculate the product. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+/// math::product!(vec![1, 2, 3, 4, 5]);
+/// math::product!(arr![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::product!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::product!(scores_param);
+/// ```
+=> "product"
+);
 
-    assert_eq!(
-        result.to_raw().build(),
-        "math::fixed(land_size, decimal_place)"
-    );
-}
+// The math::sum function returns the total sum of a set of numbers.
+//
+// math::sum(array) -> number
+// The following example shows this function, and its output, when used in a select statement:
+//
+// SELECT * FROM math::sum([26.164, 13.746189, 23, 16.4, 41.42]);
+// 120.730189
+create_test_for_fn_with_single_array_arg!(
+/// The math::sum function returns the total sum of a set of numbers.
+/// This function is aliased as `math_sum!`.
+/// math::sum(array) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::sum([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 120.730189
+///
+/// # Arguments
+/// * `array` - The array of numbers from which to calculate the sum. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+/// math::sum!(vec![1, 2, 3, 4, 5]);
+/// math::sum!(arr![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::sum!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::sum!(scores_param);
+/// ```
+=> "sum"
+);
 
-#[test]
-fn test_fixed_fn_with_raw_numbers() {
-    let result = fixed_fn(13.45423, 4);
-    let email = Field::new("email");
-    let arr = arr![1, 2, 3, 4, 5, "4334", "Oyelowo", email];
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::*;
+    #[test]
+    fn test_fixed_fn_with_field_data() {
+        let land_size = Field::new("land_size");
+        let decimal_place = Field::new("decimal_place");
+        let result = fixed_fn(land_size, decimal_place);
 
-#[test]
-fn test_fixed_fn_with_raw_number_with_field() {
-    let land_mass = Field::new("country.land_mass");
-    let result = fixed_fn(land_mass, 4);
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed(country.land_mass, $_param_00000001)"
-    );
-    assert_eq!(result.to_raw().build(), "math::fixed(country.land_mass, 4)");
-}
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed(land_size, decimal_place)"
+        );
 
-// Macro versions
-#[test]
-fn test_fixed_macro_with_field_data() {
-    let land_size = Field::new("land_size");
-    let decimal_place = Field::new("decimal_place");
-    let result = fixed!(land_size, decimal_place);
+        assert_eq!(
+            result.to_raw().build(),
+            "math::fixed(land_size, decimal_place)"
+        );
+    }
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed(land_size, decimal_place)"
-    );
+    #[test]
+    fn test_fixed_fn_with_raw_numbers() {
+        let result = fixed_fn(13.45423, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
+    }
 
-    assert_eq!(
-        result.to_raw().build(),
-        "math::fixed(land_size, decimal_place)"
-    );
-}
+    #[test]
+    fn test_fixed_fn_with_raw_number_with_field() {
+        let land_mass = Field::new("country.land_mass");
+        let result = fixed_fn(land_mass, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed(country.land_mass, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "math::fixed(country.land_mass, 4)");
+    }
 
-#[test]
-fn test_fixed_macro_with_params() {
-    let land_size = Param::new("land_size");
-    let decimal_place = Param::new("decimal_place");
-    let result = fixed!(land_size, decimal_place);
+    // Macro versions
+    #[test]
+    fn test_fixed_macro_with_field_data() {
+        let land_size = Field::new("land_size");
+        let decimal_place = Field::new("decimal_place");
+        let result = fixed!(land_size, decimal_place);
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed($land_size, $decimal_place)"
-    );
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed(land_size, decimal_place)"
+        );
 
-    assert_eq!(
-        result.to_raw().build(),
-        "math::fixed($land_size, $decimal_place)"
-    );
-}
+        assert_eq!(
+            result.to_raw().build(),
+            "math::fixed(land_size, decimal_place)"
+        );
+    }
 
-#[test]
-fn test_fixed_macro_with_raw_numbers() {
-    let result = fixed!(13.45423, 4);
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
-}
+    #[test]
+    fn test_fixed_macro_with_params() {
+        let land_size = Param::new("land_size");
+        let decimal_place = Param::new("decimal_place");
+        let result = fixed!(land_size, decimal_place);
 
-#[test]
-fn test_fixed_macro_with_raw_number_with_field() {
-    let land_mass = Field::new("country.land_mass");
-    let result = fixed!(land_mass, 4);
-    assert_eq!(
-        result.fine_tune_params(),
-        "math::fixed(country.land_mass, $_param_00000001)"
-    );
-    assert_eq!(result.to_raw().build(), "math::fixed(country.land_mass, 4)");
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed($land_size, $decimal_place)"
+        );
+
+        assert_eq!(
+            result.to_raw().build(),
+            "math::fixed($land_size, $decimal_place)"
+        );
+    }
+
+    #[test]
+    fn test_fixed_macro_with_raw_numbers() {
+        let result = fixed!(13.45423, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
+    }
+
+    #[test]
+    fn test_fixed_macro_with_raw_number_with_field() {
+        let land_mass = Field::new("country.land_mass");
+        let result = fixed!(land_mass, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "math::fixed(country.land_mass, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "math::fixed(country.land_mass, 4)");
+    }
 }
