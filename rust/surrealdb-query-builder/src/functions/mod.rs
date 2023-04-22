@@ -64,3 +64,5 @@ pub mod type_;
 /// This module contains the different types of functions for validating values.
 mod validation;
 pub use validation::is;
+
+pub mod meta;

@@ -110,6 +110,7 @@ macro_rules! create_value_like_struct {
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
+create_value_like_struct!("Thing");
 
 /// Represents the surrealdb Array value, or field, param which can all be used
 /// to represent the value itself within a query.
