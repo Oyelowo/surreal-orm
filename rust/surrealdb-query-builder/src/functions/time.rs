@@ -31,16 +31,9 @@
 // time::yday()	Extracts the yday as a number from a datetime
 // time::year()	Extracts the year as a number from a datetime
 
-use std::{fmt::Display, str::FromStr};
+use crate::{Buildable, DatetimeLike, DurationLike, Function, Parametric, StrandLike};
 
-use crate::{
-    traits::{Binding, Buildable, ToRaw},
-    types::{DatetimeLike, DurationLike, Field, Function, Interval, Param},
-    StrandLike,
-};
-
-use surrealdb::sql;
-
+/// The time::now function returns the current datetime as an ISO8601 timestamp.The time::now function returns the current datetime as an ISO8601 timestamp.
 pub fn now_fn() -> Function {
     let query_string = format!("now()");
 
@@ -50,6 +43,16 @@ pub fn now_fn() -> Function {
     }
 }
 
+/// The time::now function returns the current datetime as an ISO8601 timestamp.The time::now function returns the current datetime as an ISO8601 timestamp.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+///
+/// let result = time::now!();
+/// assert_eq!(result.to_raw().build(), "now()");
+/// ```
 #[macro_export]
 macro_rules! now {
     () => {
@@ -62,9 +65,6 @@ pub use now;
 macro_rules! create_time_fn_with_single_datetime_arg {
     ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
-            use $crate::Buildable as _;
-            use $crate::Parametric as _;
-
             $(#[$attr])*
             pub fn [<$function_name _fn>](datetime: impl Into<$crate::DatetimeLike>) -> $crate::Function {
                 let datetime: $crate::DatetimeLike = datetime.into();
@@ -86,28 +86,34 @@ macro_rules! create_time_fn_with_single_datetime_arg {
 
             pub use [<time_ $function_name>] as [<$function_name>];
 
-            #[test]
-            fn [<test_ $function_name _macro_with_datetime_field>]() {
-                let rebirth_date = $crate::Field::new("rebirth_date");
-                let result = day!(rebirth_date);
+            #[cfg(test)]
+            mod [<test_ $function_name _fn>] {
+                use $crate::*;
 
-                assert_eq!(result.fine_tune_params(), "time::day(rebirth_date)");
-                assert_eq!(result.to_raw().build(), "time::day(rebirth_date)");
+                #[test]
+                fn [<test_ $function_name _fn_with_datetime_field>]() {
+                    let rebirth_date = $crate::Field::new("rebirth_date");
+                    let result = [<time_ $function_name>]!(rebirth_date);
+
+                    assert_eq!(result.fine_tune_params(), format!("time::{}(rebirth_date)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("time::{}(rebirth_date)", $function_name));
+                }
+
+                #[test]
+                fn [<test_ $function_name _fn_with_plain_datetime>]() {
+                    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+                        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+                        chrono::Utc,
+                    );
+                    let result = [<time_ $function_name>]!(dt);
+                    assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_name));
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("time::{}('1970-01-01T00:01:01Z')", $function_name)
+                    );
+                }
             }
 
-            #[test]
-            fn [<test_ $function_name _macro_with_plain_datetime>]() {
-                let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-                    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                    chrono::Utc,
-                );
-                let result = day!(dt);
-                assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
-                assert_eq!(
-                    result.to_raw().build(),
-                    "time::day('1970-01-01T00:01:01Z')"
-                );
-            }
         }
     };
 }
@@ -818,155 +824,161 @@ macro_rules! time_group {
 
 pub use time_group as group;
 
-#[test]
-fn test_floor_macro_with_datetime_field() {
-    let rebirth_date = Field::new("rebirth_date");
-    let duration = Field::new("duration");
-    let result = floor!(rebirth_date, duration);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::*;
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::floor(rebirth_date, duration)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::floor(rebirth_date, duration)"
-    );
-}
+    #[test]
+    fn test_floor_macro_with_datetime_field() {
+        let rebirth_date = Field::new("rebirth_date");
+        let duration = Field::new("duration");
+        let result = floor!(rebirth_date, duration);
 
-#[test]
-fn test_floor_macro_with_plain_datetime_and_duration() {
-    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-        chrono::Utc,
-    );
-    let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
-    let result = floor!(dt, duration);
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::floor($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::floor('1970-01-01T00:01:01Z', 1w)"
-    );
-}
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::floor(rebirth_date, duration)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::floor(rebirth_date, duration)"
+        );
+    }
 
-#[test]
-fn test_round_macro_with_datetime_field() {
-    let rebirth_date = Field::new("rebirth_date");
-    let duration = Field::new("duration");
-    let result = round!(rebirth_date, duration);
+    #[test]
+    fn test_floor_macro_with_plain_datetime_and_duration() {
+        let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+            chrono::Utc,
+        );
+        let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
+        let result = floor!(dt, duration);
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::floor($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::floor('1970-01-01T00:01:01Z', 1w)"
+        );
+    }
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::round(rebirth_date, duration)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::round(rebirth_date, duration)"
-    );
-}
+    #[test]
+    fn test_round_macro_with_datetime_field() {
+        let rebirth_date = Field::new("rebirth_date");
+        let duration = Field::new("duration");
+        let result = round!(rebirth_date, duration);
 
-#[test]
-fn test_round_macro_with_plain_datetime_and_duration() {
-    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-        chrono::Utc,
-    );
-    let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
-    let result = round!(dt, duration);
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::round($_param_00000001, $_param_00000002)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::round('1970-01-01T00:01:01Z', 1w)"
-    );
-}
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::round(rebirth_date, duration)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::round(rebirth_date, duration)"
+        );
+    }
 
-#[test]
-fn test_group_macro_with_datetime_field() {
-    let rebirth_date = Field::new("rebirth_date");
-    let duration = Field::new("duration");
-    let result = group!(rebirth_date, duration);
+    #[test]
+    fn test_round_macro_with_plain_datetime_and_duration() {
+        let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+            chrono::Utc,
+        );
+        let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
+        let result = round!(dt, duration);
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::round($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::round('1970-01-01T00:01:01Z', 1w)"
+        );
+    }
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::group(rebirth_date, duration)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::group(rebirth_date, duration)"
-    );
-}
+    #[test]
+    fn test_group_macro_with_datetime_field() {
+        let rebirth_date = Field::new("rebirth_date");
+        let duration = Field::new("duration");
+        let result = group!(rebirth_date, duration);
 
-#[test]
-fn test_group_macro_with_datetime_params() {
-    let rebirth_date = Param::new("rebirth_date");
-    let duration = Param::new("duration");
-    let result = group!(rebirth_date, duration);
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::group(rebirth_date, duration)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::group(rebirth_date, duration)"
+        );
+    }
 
-    assert_eq!(
-        result.fine_tune_params(),
-        "time::group($rebirth_date, $duration)"
-    );
-    assert_eq!(
-        result.to_raw().build(),
-        "time::group($rebirth_date, $duration)"
-    );
-}
+    #[test]
+    fn test_group_macro_with_datetime_params() {
+        let rebirth_date = Param::new("rebirth_date");
+        let duration = Param::new("duration");
+        let result = group!(rebirth_date, duration);
 
-macro_rules! test_group_with_interval {
-    ($interval_name:ident, $interval: expr) => {
-        paste::paste! {
-            #[test]
-            fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
-                let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-                    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                    chrono::Utc,
-                );
-                let result = group!(dt, $interval);
-                assert_eq!(
-                    result.fine_tune_params(),
-                    "time::group($_param_00000001, $_param_00000002)"
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("time::group('1970-01-01T00:01:01Z', '{}')", $interval)
-                );
+        assert_eq!(
+            result.fine_tune_params(),
+            "time::group($rebirth_date, $duration)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "time::group($rebirth_date, $duration)"
+        );
+    }
+
+    macro_rules! test_group_with_interval {
+        ($interval_name:ident, $interval: expr) => {
+            paste::paste! {
+                #[test]
+                fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
+                    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+                        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+                        chrono::Utc,
+                    );
+                    let result = group!(dt, $interval);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        "time::group($_param_00000001, $_param_00000002)"
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("time::group('1970-01-01T00:01:01Z', '{}')", $interval)
+                    );
+                }
             }
-        }
-    };
-}
+        };
+    }
 
-test_group_with_interval!(year, "year");
-test_group_with_interval!(month, "month");
-test_group_with_interval!(week, "week");
-test_group_with_interval!(day, "day");
-test_group_with_interval!(hour, "hour");
-test_group_with_interval!(minute, "minute");
-test_group_with_interval!(second, "second");
+    test_group_with_interval!(year, "year");
+    test_group_with_interval!(month, "month");
+    test_group_with_interval!(week, "week");
+    test_group_with_interval!(day, "day");
+    test_group_with_interval!(hour, "hour");
+    test_group_with_interval!(minute, "minute");
+    test_group_with_interval!(second, "second");
 
-test_group_with_interval!(year_with_enum, Interval::Year);
-test_group_with_interval!(month_with_enum, Interval::Month);
-test_group_with_interval!(week_with_enum, Interval::Week);
-test_group_with_interval!(day_with_enum, Interval::Day);
-test_group_with_interval!(hour_with_enum, Interval::Hour);
-test_group_with_interval!(minute_with_enum, Interval::Minute);
-test_group_with_interval!(second_with_enum, Interval::Second);
+    test_group_with_interval!(year_with_enum, Interval::Year);
+    test_group_with_interval!(month_with_enum, Interval::Month);
+    test_group_with_interval!(week_with_enum, Interval::Week);
+    test_group_with_interval!(day_with_enum, Interval::Day);
+    test_group_with_interval!(hour_with_enum, Interval::Hour);
+    test_group_with_interval!(minute_with_enum, Interval::Minute);
+    test_group_with_interval!(second_with_enum, Interval::Second);
 
-#[test]
-fn test_now_fn() {
-    let result = now_fn();
-    assert_eq!(result.fine_tune_params(), "now()");
-    assert_eq!(result.to_raw().build(), "now()");
-}
+    #[test]
+    fn test_now_fn() {
+        let result = now_fn();
+        assert_eq!(result.fine_tune_params(), "now()");
+        assert_eq!(result.to_raw().build(), "now()");
+    }
 
-#[test]
-fn test_now_macro() {
-    let result = now!();
-    assert_eq!(result.fine_tune_params(), "now()");
-    assert_eq!(result.to_raw().build(), "now()");
+    #[test]
+    fn test_now_macro() {
+        let result = now!();
+        assert_eq!(result.fine_tune_params(), "now()");
+        assert_eq!(result.to_raw().build(), "now()");
+    }
 }
