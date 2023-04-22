@@ -488,6 +488,37 @@ create_fn_with_two_array_args!(
     "intersect"
 );
 
+create_fn_with_two_array_args!(
+    /// The array::complement function returns the complement of two arrays, returning a single array containing items which are not in the second array.
+    /// array::complement(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::complement([1,2,3,4], [3,4,5,6]);
+    /// [1,2]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::complement!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::complement!(own_goals, goals);
+    /// array::complement!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_complement;
+    /// array_complement!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "complement"
+);
+
 /// The array::distinct function calculates the unique values in an array, returning a single array.
 pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: ArrayLike = arr.into();
