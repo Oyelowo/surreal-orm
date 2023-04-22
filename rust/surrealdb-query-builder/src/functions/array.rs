@@ -761,6 +761,45 @@ macro_rules! array_flatten {
 }
 pub use array_flatten as flatten;
 
+#[cfg(test)]
+mod array_flatten_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_flatten() {
+        let result = array::flatten!(array![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::flatten($_param_00000001)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::flatten([[1, 2], [3, 4], 'SurrealDB', [5, 6]])"
+        );
+    }
+
+    #[test]
+    fn test_array_flatten_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::flatten!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::flatten(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::flatten(own_goals)");
+    }
+
+    #[test]
+    fn test_array_flatten_param() {
+        let goals = Param::new("goals");
+
+        let result = array::flatten!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::flatten($goals)");
+        assert_eq!(result.to_raw().build(), "array::flatten($goals)");
+    }
+}
+
 /// The array::group function flattens and returns the unique items in an array.
 ///
 /// array::group(array) -> array
