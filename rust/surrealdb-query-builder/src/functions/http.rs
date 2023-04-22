@@ -16,10 +16,9 @@
 // http::patch()	Perform a remote HTTP PATCH request
 // http::delete()	Perform a remote HTTP DELETE request
 
-use crate::{
-    Binding, Buildable, Field, Function, ObjectLike, Param, Parametric, StrandLike, ToRaw,
-};
+use crate::{Buildable, Function, ObjectLike, Parametric, StrandLike};
 
+/// Represents URL
 pub type Url = StrandLike;
 
 fn create_fn_with_two_args(
@@ -111,6 +110,7 @@ macro_rules! create_fn_with_url_and_head {
             #[cfg(test)]
             mod [<test_ $function_name>] {
                 use super::*;
+                use crate::*;
                 use std::collections::hash_map;
 
                 #[test]
@@ -339,164 +339,285 @@ macro_rules! create_fn_with_3args_url_body_and_head {
             pub use [<http_ $function_name>] as [<$function_name>];
 
 
-            #[test]
-            fn [<test_field_ $function_name _method_with_empty_body_and_headers>]() {
-                let result = [<$function_name _fn>]("https://codebreather.com", None as Option<ObjectLike>, None as Option<ObjectLike>);
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($_param_00000001, {{ }}, {{ }})", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}('https://codebreather.com', {{ }}, {{ }})", $function_name)
-                );
-            }
+            #[cfg(test)]
+            mod [<test_ $function_name>] {
+                use super::*;
+                use crate::*;
+                use std::collections::hash_map::HashMap;
 
-            #[test]
-            fn [<test_field_ $function_name _method_with_fields_as_args>]() {
-                let homepage = Field::new("homepage");
-                let request_body = Field::new("request_body");
-                let headers = Field::new("headers");
+                #[test]
+                fn [<test_field_ $function_name _method_with_empty_body_and_headers>]() {
+                    let result = [<$function_name _fn>]("https://codebreather.com", None as Option<ObjectLike>, None as Option<ObjectLike>);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($_param_00000001, {{ }}, {{ }})", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}('https://codebreather.com', {{ }}, {{ }})", $function_name)
+                    );
+                }
 
-                let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}(homepage, request_body, headers)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}(homepage, request_body, headers)", $function_name)
-                );
-            }
+                #[test]
+                fn [<test_field_ $function_name _method_with_fields_as_args>]() {
+                    let homepage = Field::new("homepage");
+                    let request_body = Field::new("request_body");
+                    let headers = Field::new("headers");
 
-            #[test]
-            fn [<test_field_ $function_name _method_with_params_as_args>]() {
-                let homepage = Param::new("homepage");
-                let request_body = Param::new("request_body");
-                let headers = Param::new("headers");
+                    let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}(homepage, request_body, headers)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}(homepage, request_body, headers)", $function_name)
+                    );
+                }
 
-                let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($homepage, $request_body, $headers)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}($homepage, $request_body, $headers)", $function_name)
-                );
-            }
+                #[test]
+                fn [<test_field_ $function_name _method_with_params_as_args>]() {
+                    let homepage = Param::new("homepage");
+                    let request_body = Param::new("request_body");
+                    let headers = Param::new("headers");
 
-            #[test]
-            fn [<test_ $function_name _method_with_body_and_custom_headers_as_plain_values>]() {
-                let body = HashMap::from([
-                    ("id".into(), 1.into()),
-                    ("body".into(), "This is some awesome thinking!".into()),
-                    ("postId".into(), 100.into()),
-                ]);
-                let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-                let result = [<$function_name _fn>]("https://codebreather.com", Some(body), Some(headers));
+                    let result = [<$function_name _fn>](homepage, Some(request_body), Some(headers));
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($homepage, $request_body, $headers)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}($homepage, $request_body, $headers)", $function_name)
+                    );
+                }
 
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!(
-                        "http::{}('https://codebreather.com', {}, {})",
-                        $function_name,
-                        "{ body: 'This is some awesome thinking!', id: 1, postId: 100 }",  "{ \"x-my-header\": 'some unique string' }" )
-                );
-            }
+                #[test]
+                fn [<test_ $function_name _method_with_body_and_custom_headers_as_plain_values>]() {
+                    let body = HashMap::from([
+                        ("id".into(), 1.into()),
+                        ("body".into(), "This is some awesome thinking!".into()),
+                        ("postId".into(), 100.into()),
+                    ]);
+                    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let result = [<$function_name _fn>]("https://codebreather.com", Some(body), Some(headers));
 
-            // Macro versions
-            #[test]
-            fn [<test_field_ $function_name _macro_method_with_no_custom_headers>]() {
-                let body = Field::new("body");
-                let result = [<$function_name>]!("https://codebreather.com", body);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!(
+                            "http::{}('https://codebreather.com', {}, {})",
+                            $function_name,
+                            "{ body: 'This is some awesome thinking!', id: 1, postId: 100 }",  "{ \"x-my-header\": 'some unique string' }" )
+                    );
+                }
 
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($_param_00000001, body, {{ }})", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}('https://codebreather.com', body, {{ }})", $function_name)
-                );
-            }
-            #[test]
-            fn [<test_field_ $function_name _macro_method_with_empty_body_and_headers>]() {
-                let result = [<$function_name>]!("https://codebreather.com", None, None);
+                // Macro versions
+                #[test]
+                fn [<test_field_ $function_name _macro_method_with_no_custom_headers>]() {
+                    let body = Field::new("body");
+                    let result = [<$function_name>]!("https://codebreather.com", body);
 
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}('https://codebreather.com', {{  }}, {{  }})", $function_name)
-                );
-            }
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($_param_00000001, body, {{ }})", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}('https://codebreather.com', body, {{ }})", $function_name)
+                    );
+                }
+                #[test]
+                fn [<test_field_ $function_name _macro_method_with_empty_body_and_headers>]() {
+                    let result = [<$function_name>]!("https://codebreather.com", None, None);
 
-            #[test]
-            fn [<test_field_ $function_name _macro_method_with_fields_as_args>]() {
-                let homepage = Field::new("homepage");
-                let request_body = Field::new("request_body");
-                let headers = Field::new("headers");
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}('https://codebreather.com', {{  }}, {{  }})", $function_name)
+                    );
+                }
 
-                let result = [<$function_name>]!(homepage, request_body, headers);
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}(homepage, request_body, headers)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}(homepage, request_body, headers)", $function_name)
-                );
-            }
+                #[test]
+                fn [<test_field_ $function_name _macro_method_with_fields_as_args>]() {
+                    let homepage = Field::new("homepage");
+                    let request_body = Field::new("request_body");
+                    let headers = Field::new("headers");
 
-            #[test]
-            fn [<test_field_ $function_name _macro_method_with_params_as_args>]() {
-                let homepage = Param::new("homepage");
-                let request_body = Param::new("request_body");
-                let headers = Param::new("headers");
+                    let result = [<$function_name>]!(homepage, request_body, headers);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}(homepage, request_body, headers)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}(homepage, request_body, headers)", $function_name)
+                    );
+                }
 
-                let result = [<$function_name>]!(homepage, request_body, headers);
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($homepage, $request_body, $headers)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!("http::{}($homepage, $request_body, $headers)", $function_name)
-                );
-            }
+                #[test]
+                fn [<test_field_ $function_name _macro_method_with_params_as_args>]() {
+                    let homepage = Param::new("homepage");
+                    let request_body = Param::new("request_body");
+                    let headers = Param::new("headers");
 
-            #[test]
-            fn [<test_ $function_name _macro_method_with_body_and_custom_headers_as_plain_values>]() {
-                let body = HashMap::from([
-                    ("id".into(), 1.into()),
-                    ("body".into(), "This is some awesome thinking!".into()),
-                    ("postId".into(), 100.into()),
-                ]);
-                let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
-                let result = [<$function_name>]!("https://codebreather.com", body, headers);
+                    let result = [<$function_name>]!(homepage, request_body, headers);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($homepage, $request_body, $headers)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("http::{}($homepage, $request_body, $headers)", $function_name)
+                    );
+                }
 
-                assert_eq!(
-                    result.fine_tune_params(),
-                    format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
-                );
-                assert_eq!(
-                    result.to_raw().build(),
-                    format!(
-                        "http::{}('https://codebreather.com', {}, {})",
-                        $function_name,
-                        "{ body: 'This is some awesome thinking!', id: 1, postId: 100 }",  "{ \"x-my-header\": 'some unique string' }" )
-                );
+                #[test]
+                fn [<test_ $function_name _macro_method_with_body_and_custom_headers_as_plain_values>]() {
+                    let body = HashMap::from([
+                        ("id".into(), 1.into()),
+                        ("body".into(), "This is some awesome thinking!".into()),
+                        ("postId".into(), 100.into()),
+                    ]);
+                    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let result = [<$function_name>]!("https://codebreather.com", body, headers);
+
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("http::{}($_param_00000001, $_param_00000002, $_param_00000003)", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!(
+                            "http::{}('https://codebreather.com', {}, {})",
+                            $function_name,
+                            "{ body: 'This is some awesome thinking!', id: 1, postId: 100 }",  "{ \"x-my-header\": 'some unique string' }" )
+                    );
+                }
             }
         }
     };
 }
-create_fn_with_3args_url_body_and_head!("post");
-create_fn_with_3args_url_body_and_head!("put");
-create_fn_with_3args_url_body_and_head!("patch");
+
+create_fn_with_3args_url_body_and_head!(
+    /// The http::post function performs a remote HTTP POST request. The first parameter is the URL of the remote endpoint,
+    /// and the second parameter is the value to use as the request body, which will be converted to JSON.
+    /// If the response does not return a 2XX status code, then the function will fail and return the error.
+    /// If the remote endpoint returns an application/json content-type, then the response is parsed and returned as a value,
+    /// otherwise the response is treated as text.
+    ///
+    /// Also aliased as `http__post`.
+    ///
+    /// http::post(string, object) -> value
+    /// If an object is given as the third argument, then this can be used to set the request headers.
+    ///
+    /// http::post(string, object, object) -> val
+    ///
+    /// # Arguments
+    /// * `url` - The URL of the remote endpoint. Can be a string or a field or a param.
+    /// * `body` - The value to use as the request body, which will be converted to JSON. Can be a object or a field or a param.
+    /// * `headers` - Optional. If an object is given as the third argument, then this can be used to set the request headers. Can be a object or a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::http};
+    /// use std::collections::hash_map::HashMap;
+    ///
+    /// let result = http::post("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// assert_eq!(result.to_raw().build(), "http::post('https://codebreather.com', { id: 1 }, {  })");
+    ///
+    /// let result = http::post("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, $_param_00000002, $_param_00000003)");
+    ///
+    /// let body_field = Field::new("body_field");
+    /// let headers_param = Param::new("headers_param");
+    /// let result = http::post("https://codebreather.com", body_field, headers_param);
+    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, body_field, $headers_param)");
+    /// assert_eq!(result.to_raw().build(), "http::post('https://codebreather.com', body_field, $headers_param)");
+    /// ```
+=> "post"
+);
+
+create_fn_with_3args_url_body_and_head!(
+    /// The http::put function performs a remote HTTP PUT request. The first parameter is the URL of the remote endpoint,
+    /// and the second parameter is the value to use as the request body, which will be converted to JSON.
+    /// If the response does not return a 2XX status code, then the function will fail and return the error.
+    /// If the remote endpoint returns an application/json content-type, then the response is parsed and returned as a value,
+    /// otherwise the response is treated as text.
+    ///
+    /// Also aliased as `http__put`.
+    ///
+    /// http::put(string, object) -> value
+    /// If an object is given as the third argument, then this can be used to set the request headers.
+    ///
+    /// http::put(string, object, object) -> value
+    ///
+    /// # Arguments
+    /// * `url` - The URL of the remote endpoint. Can be a string or a field or a param.
+    /// * `body` - The value to use as the request body, which will be converted to JSON. Can be a object or a field or a param.
+    /// * `headers` - Optional. If an object is given as the third argument, then this can be used to set the request headers. Can be a object or a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::http};
+    /// use std::collections::hash_map::HashMap;
+    ///
+    /// let result = http::put("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::put($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// assert_eq!(result.to_raw().build(), "http::put('https://codebreather.com', { id: 1 }, {  })");
+    ///
+    /// let result = http::put("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::put($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// ```
+=> "put"
+);
+
+// The http::patch function performs a remote HTTP PATCH request. The first parameter is the URL of the remote endpoint, and the second parameter is the value to use as the request body, which will be converted to JSON. If the response does not return a 2XX status code, then the function will fail and return the error. If the remote endpoint returns an application/json content-type, then the response is parsed and returned as a value, otherwise the response is treated as text.
+//
+// http::patch(string, object) -> value
+// If an object is given as the third argument, then this can be used to set the request headers.
+//
+// http::patch(string, object, object) -> value
+create_fn_with_3args_url_body_and_head!(
+    /// The http::patch function performs a remote HTTP PATCH request. The first parameter is the URL of the remote endpoint,
+    /// and the second parameter is the value to use as the request body, which will be converted to JSON.
+    /// If the response does not return a 2XX status code, then the function will fail and return the error.
+    /// If the remote endpoint returns an application/json content-type, then the response is parsed and returned as a value,
+    /// otherwise the response is treated as text.
+    ///
+    /// Also aliased as `http__patch`.
+    ///
+    /// http::patch(string, object) -> value
+    /// If an object is given as the third argument, then this can be used to set the request headers.
+    ///
+    /// http::patch(string, object, object) -> value
+    ///
+    /// # Arguments
+    /// * `url` - The URL of the remote endpoint. Can be a string or a field or a param.
+    /// * `body` - The value to use as the request body, which will be converted to JSON. Can be a object or a field or a param.
+    /// * `headers` - Optional. If an object is given as the third argument, then this can be used to set the request headers. Can be a object or a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::http};
+    /// use std::collections::hash_map::HashMap;
+    ///
+    /// let result = http::patch("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::patch($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// assert_eq!(result.to_raw().build(), "http::patch('https://codebreather.com', { id: 1 }, {  })");
+    ///
+    /// let result = http::patch("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
+    /// assert_eq!(result.fine_tune_params(), "http::patch($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// ```
+=> "patch"
+);
