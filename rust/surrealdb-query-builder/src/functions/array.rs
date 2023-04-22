@@ -678,6 +678,42 @@ macro_rules! array_distinct {
 }
 pub use array_distinct as distinct;
 
+#[cfg(test)]
+mod array_distinct_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_distinct() {
+        let result = array::distinct!(vec![1, 2, 3]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::distinct($_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::distinct([1, 2, 3])");
+    }
+
+    #[test]
+    fn test_array_distinct_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::distinct!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::distinct(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::distinct(own_goals)");
+    }
+
+    #[test]
+    fn test_array_distinct_param() {
+        let goals = Param::new("goals");
+
+        let result = array::distinct!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::distinct($goals)");
+        assert_eq!(result.to_raw().build(), "array::distinct($goals)");
+    }
+}
+
 /// The array::flatten flattens an array of arrays, returning a new array with all sub-array elements concatenated into it.
 ///
 /// array::flatten(array) -> array
