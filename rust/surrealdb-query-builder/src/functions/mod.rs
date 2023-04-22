@@ -65,4 +65,6 @@ pub mod type_;
 mod validation;
 pub use validation::is;
 
+/// This module contains the different types of functions for deriving metadata from
+/// surrealdb record id.
 pub mod meta;
