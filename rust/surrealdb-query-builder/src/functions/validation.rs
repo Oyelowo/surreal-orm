@@ -47,7 +47,7 @@ macro_rules! create_validation_with_tests {
             #[macro_export]
             macro_rules!  [<validation_is_ $function_name>]{
                 ( $geometry:expr ) => {
-                    $crate::functions::validation::is::[<$function_name _fn>]($geometry)
+                    $crate::functions::is::[<$function_name _fn>]($geometry)
                 };
             }
             pub use [<validation_is_ $function_name>] as [<$function_name>];

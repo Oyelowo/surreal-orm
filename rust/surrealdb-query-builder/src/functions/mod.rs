@@ -24,4 +24,5 @@ pub mod sleep;
 pub mod string;
 pub mod time;
 pub mod type_;
-pub mod validation;
+mod validation;
+pub use validation::is;

@@ -77,7 +77,6 @@ macro_rules! create_type {
 
 // The type::bool function converts a value into a bool, if the value is truthy.
 create_type!(
-
     /// The type::bool function converts a value into a bool, if the value is truthy.
     /// Also aliased as `type_bool!`
     ///
