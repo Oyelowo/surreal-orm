@@ -183,6 +183,60 @@ macro_rules! array_any {
 }
 pub use array_any as any;
 
+/// The array::append function appends a value to the end of an array.
+///
+/// array::append(array, value) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::append([1,2,3,4], 5);
+/// [1,2,3,4,5]
+pub fn append_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: Valuex = value.into();
+    let mut bindings = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    Function {
+        query_string: format!("array::append({}, {})", arr.build(), value.build()),
+        bindings,
+    }
+}
+
+/// The array::append function appends a value to the end of an array.
+///
+/// # Arguments
+/// * `arr` - The array to append to. Could be an array, `Field` or `Param`
+/// * `value` - The value to append. Could be a `Value`, `Field` or `Param`
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::append!(vec![1, 2, 3, 4, 5], 6);
+/// array::append!(&[1, 2, 3, 4, 5], 6);
+/// array::append!(arr![1, 2, 3, 4, 5], 6);
+///
+/// # let value_field = Field::new("value_field");
+/// # let value_param = Param::new("value_param");
+/// array::append!(vec![1, 2, 3, 4, 5], value_field);
+/// array::append!(vec![1, 2, 3, 4, 5], value_param);
+///
+/// # let numbers = Field::new("numbers");
+/// # let value = Field::new("value");
+/// let result = array::append(numbers, value);
+/// assert_eq!(
+///         result.to_raw().build(),
+///         "array::append(numbers, value)"
+///     );
+/// ```
+#[macro_export]
+macro_rules! array_append {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::append_fn($arr, $value)
+    };
+}
+pub use array_append as append;
+
 fn create_array_helper(
     arr1: impl Into<ArrayLike>,
     arr2: impl Into<ArrayLike>,
