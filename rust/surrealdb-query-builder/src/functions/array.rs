@@ -865,7 +865,60 @@ macro_rules! array_prepend {
 }
 pub use array_prepend as prepend;
 
+/// The array::push function appends a value to the end of an array.
+///
+/// array::push(array, value) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::push([1,2,3,4], 5);
+/// [1,2,3,4,5]
 /// The ordering of the array.
+pub fn push_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: Valuex = value.into();
+
+    Function {
+        query_string: format!("array::push({}, {})", arr.build(), value.build()),
+        bindings: arr
+            .get_bindings()
+            .into_iter()
+            .chain(value.get_bindings())
+            .collect(),
+    }
+}
+
+/// The array::push function appends a value to the end of an array.
+/// array::push(array, value) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::push([1,2,3,4], 5);
+/// [1,2,3,4,5]
+///
+/// # Arguments
+/// * `arr` -  An array, `Field` or `Param`
+/// * `value` -  A value, `Field` or `Param`
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::push!(vec![1, 2, 3], 4);
+/// array::push!(&[1, 2, 3], 4);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::push!(own_goals_field, 4);
+/// array::push!(goals_param, 4);
+/// // It is also aliased as array_push;
+/// array_push!(vec![1, 2, 3], 4);
+/// ```
+#[macro_export]
+macro_rules! array_push {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::push_fn($arr, $value)
+    };
+}
+pub use array_push as push;
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum Ordering {
     /// Sort the array in ascending order.
     Asc,
