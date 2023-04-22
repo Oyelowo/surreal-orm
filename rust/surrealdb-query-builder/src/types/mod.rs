@@ -50,7 +50,7 @@ pub use valuex::*;
 
 use surrealdb::sql;
 
-use crate::{BindingsList, Buildable, Parametric};
+use crate::{Binding, BindingsList, Buildable, Parametric};
 macro_rules! create_value_like_struct {
     ($sql_type_name:expr) => {
         paste::paste! {
@@ -110,6 +110,7 @@ macro_rules! create_value_like_struct {
 create_value_like_struct!("Number");
 create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
+create_value_like_struct!("Thing");
 
 /// Represents the surrealdb Array value, or field, param which can all be used
 /// to represent the value itself within a query.
@@ -189,6 +190,78 @@ impl From<Vec<Valuex>> for ArrayLike {
     fn from(value: Vec<Valuex>) -> Self {
         Self(Valuex {
             string: format!("[{}]", value.build()),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+/// Used to represent a list of arguments to a function
+pub struct ArgsList(Valuex);
+impl From<ArgsList> for Valuex {
+    fn from(val: ArgsList) -> Self {
+        val.0
+    }
+}
+impl Parametric for ArgsList {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+impl Buildable for ArgsList {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl<T: Into<sql::Value>> From<Vec<T>> for ArgsList {
+    fn from(value: Vec<T>) -> Self {
+        let (params, bindings): (Vec<_>, Vec<_>) = value
+            .into_iter()
+            .map(|v| {
+                let binding = Binding::new(v.into());
+                (binding.get_param_dollarised(), binding)
+            })
+            .unzip();
+
+        Self(Valuex {
+            string: params.join(", "),
+            bindings,
+        })
+    }
+}
+
+impl<'a, const N: usize, T> From<&[T; N]> for ArgsList
+where
+    T: Into<sql::Value> + Clone,
+{
+    fn from(value: &[T; N]) -> Self {
+        value.to_vec().into()
+    }
+}
+
+impl From<Field> for ArgsList {
+    fn from(val: Field) -> Self {
+        Self(val.into())
+    }
+}
+
+impl From<Param> for ArgsList {
+    fn from(val: Param) -> Self {
+        Self(val.into())
+    }
+}
+
+impl From<&Field> for ArgsList {
+    fn from(val: &Field) -> Self {
+        Self(val.clone().into())
+    }
+}
+
+impl From<Vec<Valuex>> for ArgsList {
+    fn from(value: Vec<Valuex>) -> Self {
+        Self(Valuex {
+            string: format!("{}", value.build()),
             bindings: value.get_bindings(),
         })
     }
