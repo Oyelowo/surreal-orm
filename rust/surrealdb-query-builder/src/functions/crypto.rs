@@ -308,7 +308,9 @@ pub mod pbkdf2 {
 
     /// The crypto::pbkdf2::generate function hashes and salts a password using the pbkdf2 hashing algorithm. Also aliased as `crypto_pbkdf2_generate!`.
     /// # Arguments
+    ///
     /// * `value` - The password value to be hashed and salted. Can also be a field or a param.
+    ///
     /// # Example
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
@@ -329,31 +331,71 @@ pub mod pbkdf2 {
     pub use crypto_pbkdf2_generate as generate;
 }
 
+/// This module contains functions for working with the scrypt hashing algorithm.
 pub mod scrypt {
-    use surrealdb::sql;
-
-    use crate::{types::Function, StrandLike};
-
     use super::{create_fn_with_single_value, create_fn_with_two_values};
+    use crate::{Function, StrandLike};
 
-    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
-        create_fn_with_two_values(value1, value2, "scrypt::compare")
+    /// The crypto::scrypt::compare function compares a hashed-and-salted scrypt password value
+    /// with an unhashed password value.
+    pub fn compare_fn(hash: impl Into<StrandLike>, pass: impl Into<StrandLike>) -> Function {
+        create_fn_with_two_values(hash, pass, "scrypt::compare")
     }
+
+    /// The crypto::scrypt::compare function compares a hashed-and-salted scrypt password value
+    /// with an unhashed password value. Also aliased as `crypto_scrypt_compare!`.
+    /// # Arguments
+    ///
+    /// * `hash` - The hashed password value. Can also be a field or a param.
+    /// * `pass` - The unhashed password value. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// let hash = let_("hash").equal("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// crypto::scrypt::compare!(hash.get_param(), pass.get_param());
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let result = crypto::scrypt::compare!(hash_field, "Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::scrypt::compare(hash_field, $_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::scrypt::compare(hash_field, 'Oyelowo')");
+    /// ```
     #[macro_export]
     macro_rules! crypto_scrypt_compare {
         ( $value1:expr,  $value2:expr ) => {
-            crate::functions::crypto::scrypt::compare_fn($value1, $value2)
+            $crate::functions::crypto::scrypt::compare_fn($value1, $value2)
         };
     }
     pub use crypto_scrypt_compare as compare;
 
+    ///  The crypto::scrypt::generate function hashes and salts a password using the scrypt hashing algorithm.
     pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "scrypt::generate")
     }
+
+    /// The crypto::scrypt::generate function hashes and salts a password using the scrypt hashing algorithm. Also aliased as `crypto_scrypt_generate!`.
+    /// # Arguments
+    ///
+    /// * `value` - The password value to be hashed and salted. Can also be a field or a param.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// crypto::scrypt::generate!("password from jupiter");
+    ///
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// let result = crypto::scrypt::generate!(pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::scrypt::generate($pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::scrypt::generate($pass)");
+    /// ```
     #[macro_export]
     macro_rules! crypto_scrypt_generate {
         ( $value1:expr) => {
-            crate::functions::crypto::scrypt::generate_fn($value1)
+            $crate::functions::crypto::scrypt::generate_fn($value1)
         };
     }
     pub use crypto_scrypt_generate as generate;
