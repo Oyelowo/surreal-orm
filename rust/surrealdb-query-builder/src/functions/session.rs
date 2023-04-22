@@ -17,19 +17,11 @@
 // session::sc()	Returns the current user's authentication scope
 //
 
-use surrealdb::sql;
-
-use crate::traits::{Binding, Buildable, ToRaw};
-
-use crate::types::{Function, NumberLike};
-
-use crate::array;
-
 macro_rules! create_function {
-    ($function_name: expr) => {
+    ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
-
-            fn [<$function_name _fn>]() -> $crate::Function {
+            $(#[$attr])*
+            pub fn [<$function_name _fn>]() -> $crate::Function {
                 let query_string = format!("{}()", $function_name);
 
                 $crate::Function {
@@ -38,6 +30,7 @@ macro_rules! create_function {
                 }
             }
 
+            $(#[$attr])*
             #[macro_export]
             macro_rules! [<session_ $function_name>] {
                 () => {
@@ -47,26 +40,109 @@ macro_rules! create_function {
 
             pub use [<session_ $function_name>] as [<$function_name>];
 
-            #[test]
-            fn [<test_ $function_name _fn>]() {
-                let result = [<$function_name _fn>]();
-                assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
-                assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
-            }
+            #[cfg(test)]
+            mod [<test_ $function_name>] {
+                use super::*;
+                use crate::*;
 
-            #[test]
-            fn [<test_ $function_name _macro>]() {
-                let result = [<$function_name>]!();
-                assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
-                assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
+                #[test]
+                fn [<test_ $function_name _fn>]() {
+                    let result = [<$function_name _fn>]();
+                    assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
+                }
+
+                #[test]
+                fn [<test_ $function_name _macro>]() {
+                    let result = [<$function_name>]!();
+                    assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
+                }
             }
         }
     };
 }
 
-create_function!("db");
-create_function!("id");
-create_function!("ip");
-create_function!("ns");
-create_function!("origin");
-create_function!("sc");
+create_function!(
+    /// Returns the currently selected database
+    /// Also aliased as `session_db!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::db!();
+    /// ```
+    =>
+"db");
+
+create_function!(
+    /// Returns the current user's session ID
+    /// Also aliased as `session_id!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::id!();
+    /// ```
+    =>
+"id");
+
+create_function!(
+    /// Returns the current user's session IP address
+    /// Also aliased as `session_ip!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::ip!();
+    /// ```
+    =>
+"ip");
+
+create_function!(
+    /// Returns the currently selected namespace
+    /// Also aliased as `session_ns!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::ns!();
+    /// ```
+    =>
+"ns");
+
+create_function!(
+    /// Returns the current user's HTTP origin
+    /// Also aliased as `session_origin!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::origin!();
+    /// ```
+    =>
+"origin");
+
+create_function!(
+    /// Returns the current user's authentication scope
+    /// Also aliased as `session_sc!
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::session};
+    ///
+    /// session::sc!();
+    /// ```
+    =>
+"sc");
