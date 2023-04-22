@@ -20,11 +20,7 @@
 // rand::uuid::v4() Generates and returns a random Version 4 UUID
 // rand::uuid::v7() Generates and returns a random Version 7 UUID
 
-use surrealdb::sql;
-
-use crate::traits::{Binding, Buildable, ToRaw};
-use crate::types::{Field, Function, NumberLike};
-use crate::{arr, array, Parametric};
+use crate::Function;
 
 /// The rand function generates a random float, between 0 and 1.
 ///
@@ -73,21 +69,6 @@ macro_rules! rand_rand {
 }
 
 pub use rand_rand as rand;
-
-struct NumEmpty(sql::Value);
-
-pub(crate) fn create_fn_with_single_num_arg(
-    number: impl Into<NumberLike>,
-    function_name: &str,
-) -> Function {
-    let number: NumberLike = number.into();
-    let query_string = format!("rand::{function_name}({})", number.build());
-
-    Function {
-        query_string,
-        bindings: number.get_bindings(),
-    }
-}
 
 /// This module contains functions that can be used when generating random data values.
 pub mod rand {
@@ -470,12 +451,15 @@ pub mod rand {
     macro_rules! rand_string {
         () => {
             $crate::functions::rand::rand::string_fn(
-                None as Option<NumberLike>,
-                None as Option<NumberLike>,
+                None as Option<$crate::NumberLike>,
+                None as Option<$crate::NumberLike>,
             )
         };
         ( $length:expr) => {
-            $crate::functions::rand::rand::string_fn(Some($length), None as Option<NumberLike>)
+            $crate::functions::rand::rand::string_fn(
+                Some($length),
+                None as Option<$crate::NumberLike>,
+            )
         };
         ( $from:expr, $to:expr ) => {
             $crate::functions::rand::rand::string_fn(Some($from), Some($to))
@@ -529,7 +513,7 @@ pub mod rand {
     #[macro_export]
     macro_rules! rand_guid {
         () => {
-            $crate::functions::rand::rand::guid_fn(None as Option<NumberLike>)
+            $crate::functions::rand::rand::guid_fn(None as Option<$crate::NumberLike>)
         };
         ( $length:expr ) => {
             $crate::functions::rand::rand::guid_fn(Some($length))
@@ -539,95 +523,259 @@ pub mod rand {
     pub use rand_guid as guid;
 }
 
-#[test]
-fn test_rand_fn() {
-    let result = rand_fn();
-    assert_eq!(result.fine_tune_params(), "rand()");
-    assert_eq!(result.to_raw().build(), "rand()");
+/// This module contains functions for generating versioned random uuids.
+pub mod uuid {
+    use super::*;
+
+    /// The rand::uuid::v4 function generates a random Version 4 UUID.
+    ///
+    /// rand::uuid::v4() -> uuid
+    pub fn v4_fn() -> Function {
+        Function {
+            query_string: "rand::uuid::v4()".into(),
+            bindings: vec![],
+        }
+    }
+
+    /// Generates a random Version 4 UUID.
+    /// The function is also aliased as `rand_uuid_v4!()`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    ///
+    /// assert_eq!(rand::uuid::v4!().to_raw().build(), "rand::uuid::v4()");
+    /// ```
+    #[macro_export]
+    macro_rules! rand_uuid_v4 {
+        () => {
+            $crate::functions::rand::uuid::v4_fn()
+        };
+    }
+
+    pub use rand_uuid_v4 as v4;
+
+    /// The rand::uuid::v7 function generates a random Version 7 UUID.
+    ///
+    /// rand::uuid::v7() -> uuid
+    pub fn v7_fn() -> Function {
+        Function {
+            query_string: "rand::uuid::v7()".into(),
+            bindings: vec![],
+        }
+    }
+
+    /// Generates a random Version 7 UUID.
+    /// The function is also aliased as `rand_uuid_v7!()`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    ///
+    /// assert_eq!(rand::uuid::v7!().to_raw().build(), "rand::uuid::v7()");
+    /// ```
+    #[macro_export]
+    macro_rules! rand_uuid_v7 {
+        () => {
+            $crate::functions::rand::uuid::v7_fn()
+        };
+    }
+
+    pub use rand_uuid_v7 as v7;
 }
 
-#[test]
-fn test_rand_macro() {
-    let result = rand_rand!();
-    assert_eq!(result.fine_tune_params(), "rand()");
-    assert_eq!(result.to_raw().build(), "rand()");
-}
+#[cfg(test)]
+mod tests {
+    use crate::{arr, Buildable, Field, NumberLike, ToRaw};
 
-#[test]
-fn test_rand_bool_fn() {
-    let result = rand::bool_fn();
-    assert_eq!(result.fine_tune_params(), "rand::bool()");
-    assert_eq!(result.to_raw().build(), "rand::bool()");
-}
+    use super::*;
 
-#[test]
-fn test_rand_bool_macro() {
-    let result = rand::bool!();
-    assert_eq!(result.fine_tune_params(), "rand::bool()");
-    assert_eq!(result.to_raw().build(), "rand::bool()");
-}
+    #[test]
+    fn test_rand_fn() {
+        let result = rand_fn();
+        assert_eq!(result.fine_tune_params(), "rand()");
+        assert_eq!(result.to_raw().build(), "rand()");
+    }
 
-#[test]
-fn test_rand_uuid_fn() {
-    let result = rand::uuid_fn();
-    assert_eq!(result.fine_tune_params(), "rand::uuid()");
-    assert_eq!(result.to_raw().build(), "rand::uuid()");
-}
+    #[test]
+    fn test_rand_macro() {
+        let result = rand_rand!();
+        assert_eq!(result.fine_tune_params(), "rand()");
+        assert_eq!(result.to_raw().build(), "rand()");
+    }
 
-#[test]
-fn test_rand_uuid() {
-    let result = rand::uuid!();
-    assert_eq!(result.fine_tune_params(), "rand::uuid()");
-    assert_eq!(result.to_raw().build(), "rand::uuid()");
-}
+    #[test]
+    fn test_rand_bool_fn() {
+        let result = rand::bool_fn();
+        assert_eq!(result.fine_tune_params(), "rand::bool()");
+        assert_eq!(result.to_raw().build(), "rand::bool()");
+    }
 
-#[test]
-fn test_rand_enum_macro() {
-    let result = rand::enum_!("one", "two", 3, 4.15385, "five", true);
-    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
-    assert_eq!(
-        result.to_raw().build(),
-        "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
-    );
-}
+    #[test]
+    fn test_rand_bool_macro() {
+        let result = super::rand::bool!();
+        assert_eq!(result.fine_tune_params(), "rand::bool()");
+        assert_eq!(result.to_raw().build(), "rand::bool()");
+    }
 
-#[test]
-fn test_rand_enum_macro_with_array() {
-    let result = rand::enum_!(arr!["one", "two", 3, 4.15385, "five", true]);
-    assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
-    assert_eq!(
-        result.to_raw().build(),
-        "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
-    );
+    #[test]
+    fn test_rand_uuid_fn() {
+        let result = rand::uuid_fn();
+        assert_eq!(result.fine_tune_params(), "rand::uuid()");
+        assert_eq!(result.to_raw().build(), "rand::uuid()");
+    }
+
+    #[test]
+    fn test_rand_uuid() {
+        let result = super::rand::uuid!();
+        assert_eq!(result.fine_tune_params(), "rand::uuid()");
+        assert_eq!(result.to_raw().build(), "rand::uuid()");
+    }
+
+    #[test]
+    fn test_rand_uuid_v4_fn() {
+        let result = crate::functions::rand::uuid::v4_fn();
+        assert_eq!(result.fine_tune_params(), "rand::uuid::v4()");
+        assert_eq!(result.to_raw().build(), "rand::uuid::v4()");
+    }
+
+    #[test]
+    fn test_rand_uuid_v4() {
+        let result = super::uuid::v4!();
+        assert_eq!(result.fine_tune_params(), "rand::uuid::v4()");
+        assert_eq!(result.to_raw().build(), "rand::uuid::v4()");
+    }
+
+    #[test]
+    fn test_rand_uuid_v7_fn() {
+        let result = super::uuid::v7_fn();
+        assert_eq!(result.fine_tune_params(), "rand::uuid::v7()");
+        assert_eq!(result.to_raw().build(), "rand::uuid::v7()");
+    }
+
+    #[test]
+    fn test_rand_uuid_v7() {
+        let result = super::uuid::v7!();
+        assert_eq!(result.fine_tune_params(), "rand::uuid::v7()");
+        assert_eq!(result.to_raw().build(), "rand::uuid::v7()");
+    }
+
+    #[test]
+    fn test_rand_enum_macro() {
+        let result = super::rand::enum_!("one", "two", 3, 4.15385, "five", true);
+        assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+        assert_eq!(
+            result.to_raw().build(),
+            "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+        );
+    }
+
+    #[test]
+    fn test_rand_enum_macro_with_array() {
+        let result = super::rand::enum_!(arr!["one", "two", 3, 4.15385, "five", true]);
+        assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
+        assert_eq!(
+            result.to_raw().build(),
+            "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+        );
+    }
+
+    #[test]
+    fn test_rand_string_macro_with_one_arg_length() {
+        let result = super::rand::string!(34);
+        assert_eq!(result.fine_tune_params(), "rand::string($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "rand::string(34)");
+    }
+
+    #[test]
+    fn test_rand_string_macro_with_one_arg_field() {
+        let length_of_name = Field::new("length_of_name");
+        let result = super::rand::string!(length_of_name);
+        assert_eq!(result.fine_tune_params(), "rand::string(length_of_name)");
+        assert_eq!(result.to_raw().build(), "rand::string(length_of_name)");
+    }
+
+    // Test Guid
+    #[test]
+    fn test_rand_guid_function_empty() {
+        let result = rand::guid_fn(None as Option<NumberLike>);
+        assert_eq!(result.fine_tune_params(), "rand::guid()");
+        assert_eq!(result.to_raw().build(), "rand::guid()");
+    }
+
+    #[test]
+    fn test_rand_guid_macro_empty() {
+        let result = super::rand::guid!();
+        assert_eq!(result.fine_tune_params(), "rand::guid()");
+        assert_eq!(result.to_raw().build(), "rand::guid()");
+    }
+
+    #[test]
+    fn test_rand_guid_macro_with_range() {
+        let result = super::rand::guid!(34);
+        assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "rand::guid(34)");
+    }
+
+    #[test]
+    fn test_rand_guid_macro_with_invalid_input() {
+        let result = super::rand::guid!("ere");
+        assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "rand::guid(0)");
+    }
+
+    #[test]
+    fn test_rand_guid_fn_with_field_input() {
+        let length = Field::new("length");
+
+        let result = rand::guid_fn(Some(length));
+        assert_eq!(result.fine_tune_params(), "rand::guid(length)");
+        assert_eq!(result.to_raw().build(), "rand::guid(length)");
+    }
+
+    #[test]
+    fn test_rand_guid_macro_with_field_input() {
+        let length = Field::new("length");
+
+        let result = super::rand::guid!(length);
+        assert_eq!(result.fine_tune_params(), "rand::guid(length)");
+        assert_eq!(result.to_raw().build(), "rand::guid(length)");
+    }
 }
 
 macro_rules! create_test_for_fn_with_two_args {
     ($function_ident: expr) => {
         paste::paste! {
+            #[cfg(test)]
+            mod [<test_ $function_ident _fn>] {
+                use crate::*;
+
                 #[test]
                 fn [<test_rand_ $function_ident _function_empty>]() {
-                    let result = rand::[< $function_ident _fn>](None as Option<NumberLike>, None as Option<NumberLike>);
+                    let result = super::rand::[< $function_ident _fn>](None as Option<$crate::NumberLike>, None as Option<$crate::NumberLike>);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}()", $function_ident));
                 }
 
                 #[test]
                 fn [<test_rand_ $function_ident _macro_empty>]() {
-                    let result = rand::[< $function_ident>]!();
+                    let result = super::rand::[< $function_ident>]!();
                     assert_eq!(result.fine_tune_params(), format!("rand::{}()", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}()", $function_ident));
                 }
 
                 #[test]
                 fn [<test_rand_ $function_ident _macro_with_range>]() {
-                    let result = rand::[< $function_ident>]!(34, 65);
+                    let result = super::rand::[< $function_ident>]!(34, 65);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(34, 65)", $function_ident));
                 }
 
                 #[test]
                 fn [<test_rand_ $function_ident macro_with_invalid_input>]() {
-                    let result = rand::[< $function_ident>]!(34, "ere");
+                    let result = super::rand::[< $function_ident>]!(34, "ere");
                     assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(34, 0)", $function_ident));
                 }
@@ -637,7 +785,7 @@ macro_rules! create_test_for_fn_with_two_args {
                     let start = Field::new("start");
                     let end = Field::new("end");
 
-                    let result = rand::[< $function_ident _fn>](Some(start), Some(end));
+                    let result = super::rand::[< $function_ident _fn>](Some(start), Some(end));
                     assert_eq!(result.fine_tune_params(), format!("rand::{}(start, end)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(start, end)", $function_ident));
                 }
@@ -647,76 +795,15 @@ macro_rules! create_test_for_fn_with_two_args {
                     let start = Field::new("start");
                     let end = Field::new("end");
 
-                    let result = rand::[< $function_ident>]!(start, end);
+                    let result = super::rand::[< $function_ident>]!(start, end);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}(start, end)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(start, end)", $function_ident));
                 }
             }
+        }
     };
 }
 create_test_for_fn_with_two_args!("float");
 create_test_for_fn_with_two_args!("int");
 create_test_for_fn_with_two_args!("string");
 create_test_for_fn_with_two_args!("time");
-
-#[test]
-fn test_rand_string_macro_with_one_arg_length() {
-    let result = rand::string!(34);
-    assert_eq!(result.fine_tune_params(), "rand::string($_param_00000001)");
-    assert_eq!(result.to_raw().build(), "rand::string(34)");
-}
-
-#[test]
-fn test_rand_string_macro_with_one_arg_field() {
-    let length_of_name = Field::new("length_of_name");
-    let result = rand::string!(length_of_name);
-    assert_eq!(result.fine_tune_params(), "rand::string(length_of_name)");
-    assert_eq!(result.to_raw().build(), "rand::string(length_of_name)");
-}
-
-// Test Guid
-#[test]
-fn test_rand_guid_function_empty() {
-    let result = rand::guid_fn(None as Option<NumberLike>);
-    assert_eq!(result.fine_tune_params(), "rand::guid()");
-    assert_eq!(result.to_raw().build(), "rand::guid()");
-}
-
-#[test]
-fn test_rand_guid_macro_empty() {
-    let result = rand::guid!();
-    assert_eq!(result.fine_tune_params(), "rand::guid()");
-    assert_eq!(result.to_raw().build(), "rand::guid()");
-}
-
-#[test]
-fn test_rand_guid_macro_with_range() {
-    let result = rand::guid!(34);
-    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
-    assert_eq!(result.to_raw().build(), "rand::guid(34)");
-}
-
-#[test]
-fn test_rand_guid_macro_with_invalid_input() {
-    let result = rand::guid!("ere");
-    assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
-    assert_eq!(result.to_raw().build(), "rand::guid(0)");
-}
-
-#[test]
-fn test_rand_guid_fn_with_field_input() {
-    let length = Field::new("length");
-
-    let result = rand::guid_fn(Some(length));
-    assert_eq!(result.fine_tune_params(), "rand::guid(length)");
-    assert_eq!(result.to_raw().build(), "rand::guid(length)");
-}
-
-#[test]
-fn test_rand_guid_macro_with_field_input() {
-    let length = Field::new("length");
-
-    let result = rand::guid!(length);
-    assert_eq!(result.fine_tune_params(), "rand::guid(length)");
-    assert_eq!(result.to_raw().build(), "rand::guid(length)");
-}
