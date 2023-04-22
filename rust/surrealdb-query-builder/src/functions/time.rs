@@ -66,7 +66,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
             use $crate::Parametric as _;
 
             $(#[$attr])*
-            fn [<$function_name _fn>](datetime: impl Into<$crate::DatetimeLike>) -> $crate::Function {
+            pub fn [<$function_name _fn>](datetime: impl Into<$crate::DatetimeLike>) -> $crate::Function {
                 let datetime: $crate::DatetimeLike = datetime.into();
                 let query_string = format!("time::{}({})", $function_name, datetime.build());
 
@@ -543,7 +543,7 @@ pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
 ///    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///    chrono::Utc,
 /// );
-/// let duration = chrono::Duration::seconds(10);
+/// let duration = std::time::Duration::from_secs(10);
 /// let result = time::floor!(dt, duration);
 /// assert_eq!(
 ///   result.to_raw().build(),
@@ -641,19 +641,6 @@ macro_rules! time_format {
 }
 pub use time_format as format_;
 
-/// The time::round function rounds a datetime up by a specific duration.
-pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
-    let datetime: DatetimeLike = datetime.into();
-    let duration: DurationLike = duration.into();
-    let mut bindings = datetime.get_bindings();
-    bindings.extend(duration.get_bindings());
-
-    Function {
-        query_string: format!("time::round({}, {})", datetime.build(), duration.build()),
-        bindings,
-    }
-}
-
 /// The time::timezone function returns the current local timezone offset in hours.
 ///
 /// time::timezone() -> string
@@ -690,6 +677,19 @@ macro_rules! time_timezone {
 pub use time_timezone as timezone;
 
 /// The time::round function rounds a datetime up by a specific duration.
+pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
+    let datetime: DatetimeLike = datetime.into();
+    let duration: DurationLike = duration.into();
+    let mut bindings = datetime.get_bindings();
+    bindings.extend(duration.get_bindings());
+
+    Function {
+        query_string: format!("time::round({}, {})", datetime.build(), duration.build()),
+        bindings,
+    }
+}
+
+/// The time::round function rounds a datetime up by a specific duration.
 ///
 /// The function is also aliased as `time_round!`.
 ///
@@ -705,7 +705,7 @@ pub use time_timezone as timezone;
 ///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///   chrono::Utc,
 /// );
-/// let duration = chrono::Duration::seconds(10);
+/// let duration = std::time::Duration::from_secs(10);
 /// let result = time::round!(dt, duration);
 /// assert_eq!(
 ///     result.to_raw().build(),
@@ -772,21 +772,21 @@ pub fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLik
 /// let result = time::group!(dt, "year");
 /// assert_eq!(
 ///    result.to_raw().build(),
-///    "time::group('1970-01-01T00:01:01Z', "year")"
+///    "time::group('1970-01-01T00:01:01Z', 'year')"
 /// );
 ///
 /// let rebirth_date = Field::new("rebirth_date");
 /// let result = time::group!(rebirth_date, "year");
 /// assert_eq!(
 ///   result.to_raw().build(),
-///   "time::group(rebirth_date, "year")"
+///   "time::group(rebirth_date, 'year')"
 /// );
 ///
 /// let param = Param::new("rebirth_date");
 /// let result = time::group!(param, "month");
 /// assert_eq!(
 ///     result.to_raw().build(),
-///     "time::group($rebirth_date, "month")"
+///     "time::group($rebirth_date, 'month')"
 ///  );
 #[macro_export]
 macro_rules! time_group {
@@ -894,11 +894,11 @@ fn test_group_macro_with_datetime_field() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::floor(rebirth_date, duration)"
+        "time::group(rebirth_date, duration)"
     );
     assert_eq!(
         result.to_raw().build(),
-        "time::floor(rebirth_date, duration)"
+        "time::group(rebirth_date, duration)"
     );
 }
 
@@ -910,11 +910,11 @@ fn test_group_macro_with_datetime_params() {
 
     assert_eq!(
         result.fine_tune_params(),
-        "time::floor($rebirth_date, $duration)"
+        "time::group($rebirth_date, $duration)"
     );
     assert_eq!(
         result.to_raw().build(),
-        "time::floor($rebirth_date, $duration)"
+        "time::group($rebirth_date, $duration)"
     );
 }
 
