@@ -1,7 +1,15 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use surrealdb::sql;
 
 use crate::{
-    Alias, Binding, BindingsList, Buildable, Field, Function, Param, Parametric, NONE, NULL,
+    Alias, Binding, BindingsList, Buildable, Field, Filter, Function, Operation, Param, Parametric,
+    E, NONE, NULL,
 };
 
 /// A value that can be used in a SQL statement. Serves as the bind and arbiter between
@@ -86,11 +94,38 @@ impl From<NULL> for Valuex {
     }
 }
 
+impl From<E> for Valuex {
+    fn from(_value: E) -> Self {
+        Valuex {
+            string: "".to_string(),
+            bindings: vec![],
+        }
+    }
+}
+
 impl From<NONE> for Valuex {
     fn from(_value: NONE) -> Self {
         Valuex {
             string: "NONE".to_string(),
             bindings: vec![],
+        }
+    }
+}
+
+impl From<Filter> for Valuex {
+    fn from(value: Filter) -> Self {
+        Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        }
+    }
+}
+
+impl From<Operation> for Valuex {
+    fn from(value: Operation) -> Self {
+        Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
         }
     }
 }

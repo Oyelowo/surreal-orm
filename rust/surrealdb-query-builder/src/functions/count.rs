@@ -1,51 +1,13 @@
-use crate::{
-    Binding, Buildable, Empty, Field, Filter, Function, Operation, Param, Parametric, Valuex,
-};
-use surrealdb::sql;
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+use crate::{Buildable, Function, Parametric, Valuex};
 // Count functions
 // These functions can be used when counting field values and expressions.
-
-#[allow(missing_docs)]
-#[derive(Debug, Clone)]
-pub enum CountArg {
-    Empty,
-    Field(Field),
-    Param(Param),
-    Operation(Operation),
-    Filter(Filter),
-    Array(sql::Array),
-    MixedArray(Vec<Valuex>),
-}
-
-impl From<Empty> for CountArg {
-    fn from(_value: Empty) -> Self {
-        CountArg::Empty
-    }
-}
-
-impl From<Field> for CountArg {
-    fn from(value: Field) -> Self {
-        CountArg::Field(value)
-    }
-}
-
-impl From<Operation> for CountArg {
-    fn from(value: Operation) -> Self {
-        CountArg::Operation(value)
-    }
-}
-
-impl From<Filter> for CountArg {
-    fn from(value: Filter) -> Self {
-        CountArg::Filter(value)
-    }
-}
-
-impl<T: Into<sql::Array>> From<T> for CountArg {
-    fn from(value: T) -> Self {
-        Self::Array(value.into())
-    }
-}
 
 /// count()
 /// Counts a row, or whether a given value is truthy
@@ -59,49 +21,12 @@ impl<T: Into<sql::Array>> From<T> for CountArg {
 ///
 /// count(array) -> number
 /// The following examples show this function, and its output, when used in a select statement:
-pub fn count_fn(countable: impl Into<CountArg>) -> Function {
-    let countable: CountArg = countable.into();
-    let mut bindings = vec![];
+pub fn count_fn(countable: impl Into<Valuex>) -> Function {
+    let countable: Valuex = countable.into();
 
-    let string = match countable {
-        CountArg::Empty => format!(""),
-        CountArg::Param(param) => {
-            bindings = param.get_bindings();
-            format!("{}", param)
-        }
-        CountArg::Field(field) => {
-            bindings = field.get_bindings();
-            format!("{}", field)
-        }
-        CountArg::Filter(filter) => {
-            bindings = filter.get_bindings();
-            format!("{}", filter)
-        }
-        CountArg::Array(array) => {
-            let array: sql::Value = sql::Value::from(array);
-            let array_binding = Binding::new(array);
-            let param = format!("{}", array_binding.get_param_dollarised());
-            bindings = vec![array_binding];
-            param
-        }
-        CountArg::Operation(op) => {
-            bindings = op.get_bindings();
-            // format!("{}", filter)
-            op.build()
-        }
-        CountArg::MixedArray(ma) => ma
-            .into_iter()
-            .map(|m| {
-                let b = m.get_bindings();
-                bindings.extend(b);
-                m.build()
-            })
-            .collect::<Vec<_>>()
-            .join(", "),
-    };
     Function {
-        query_string: format!("count({})", &string),
-        bindings,
+        query_string: format!("count({})", countable.build()),
+        bindings: countable.get_bindings(),
     }
 }
 
@@ -115,12 +40,14 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 ///
 /// # Examples
 /// ```rust
-/// # use surrealdv_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, functions::count};
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, functions::count, statements::let_};
 /// count!();
 ///
+/// # let email = Field::new("email");
 /// count!(email.greater_than(15));
 ///
+/// # let email = Field::new("email");
 /// count!(cond(email.greater_than(15)).and(email.less_than(20)));
 ///
 /// # let email = Field::new("email");
@@ -137,7 +64,7 @@ pub fn count_fn(countable: impl Into<CountArg>) -> Function {
 /// # let email_field = Field::new("email_field");
 /// count!(email_field);
 ///
-/// # let email_param = Param::new("email_param");
+/// let email_param = let_("email_param").equal("oyelowo@codebreather.com").get_param();
 /// count!(email_param);
 #[macro_export]
 macro_rules! count {
