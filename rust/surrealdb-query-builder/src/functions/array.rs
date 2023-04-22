@@ -850,6 +850,53 @@ macro_rules! array_group {
 }
 pub use array_group as group;
 
+#[cfg(test)]
+mod array_group_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_group() {
+        let result = array::group!(array![
+            1,
+            2,
+            3,
+            4,
+            array![3, 5, 6],
+            vec![2, 4, 5, 6],
+            7,
+            8,
+            8,
+            9
+        ]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::group($_param_00000001)");
+        assert_eq!(
+            result.to_raw().build(),
+            "array::group([1, 2, 3, 4, [3, 5, 6], [2, 4, 5, 6], 7, 8, 8, 9])"
+        );
+    }
+
+    #[test]
+    fn test_array_group_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::group!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::group(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::group(own_goals)");
+    }
+
+    #[test]
+    fn test_array_group_param() {
+        let goals = Param::new("goals");
+
+        let result = array::group!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::group($goals)");
+        assert_eq!(result.to_raw().build(), "array::group($goals)");
+    }
+}
+
 /// The array::insert function inserts a value into an array at a specific position.
 ///
 /// array::insert(array, value, number) -> array
