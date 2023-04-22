@@ -18,6 +18,8 @@
 //
 //
 
+use crate::{Buildable, Function, GeometryLike, Parametric};
+
 pub(crate) fn create_geo_with_single_arg(
     geometry: impl Into<GeometryLike>,
     fn_suffix: &str,
@@ -234,23 +236,14 @@ macro_rules! geo_distance {
 }
 pub use geo_distance as distance;
 
-use crate::{
-    traits::{Binding, Buildable, ToRaw},
-    types::{Field, Function, GeometryLike, NumberLike, Param},
-    Parametric,
-};
-
+/// This module contains functions for working with geohashes.
 pub mod hash {
-    use super::create_geo_with_single_arg;
-    use crate::{
-        traits::Binding,
-        types::{Function, GeometryLike, NumberLike, StrandLike},
-        Buildable, Parametric,
-    };
-    use surrealdb::sql;
+    use crate::{Buildable, Function, GeometryLike, NumberLike, Parametric, StrandLike};
 
+    /// represents a geohash
     pub type GeoHash = StrandLike;
 
+    /// The geo::hash::decode function converts a geohash into a geolocation point.
     pub fn decode_fn(geohash: impl Into<GeoHash>) -> Function {
         let string: GeoHash = geohash.into();
 
@@ -259,6 +252,26 @@ pub mod hash {
             bindings: string.get_bindings(),
         }
     }
+
+    /// The geo::hash::decode function converts a geohash into a geolocation point.
+    /// Also aliased as `geo_hash_decode!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `geohash` - The geohash to decode. This can be a string, field, or parameter.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::geo};
+    /// let geohash = "u4pruydqqvj";
+    /// let result = geo::hash::decode!(geohash);
+    /// assert_eq!(result.to_raw().build(), "geo::hash::decode('u4pruydqqvj')");
+    /// # let geohash_field = Field::new("geohash_field");
+    /// geo::hash::decode!(geohash_field);
+    /// # let geohash_param = Param::new("geohash_param");
+    /// geo::hash::decode!(geohash_param);
+    /// ```
     #[macro_export]
     macro_rules! geo_hash_decode {
         ( $geometry:expr ) => {
