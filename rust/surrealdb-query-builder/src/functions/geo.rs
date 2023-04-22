@@ -63,19 +63,26 @@ pub fn area_fn(geometry: impl Into<GeometryLike>) -> Function {
 /// ```rust
 /// # use surrealdb_query_builder as  surrealdb_orm;
 /// use surrealdb_orm::{*, functions::geo};
-/// use ::geo::{LineString, Polygon};
-/// let polygon = Polygon::new(
-///     LineString::from(vec![(0., 0.), (1., 1.), (1., 0.), (0., 0.)]),
-///     vec![LineString::from(vec![
-///         (0.1, 0.1),
-///         (0.9, 0.9),
-///         (0.9, 0.1),
-///         (0.1, 0.1),
-///     ])],
+/// use ::geo::{polygon};
+/// let polygon = polygon!(
+///     exterior: [
+///         (x: -111., y: 45.),
+///         (x: -111., y: 41.),
+///         (x: -104., y: 41.),
+///         (x: -104., y: 45.),
+///     ],
+///     interiors: [
+///         [
+///             (x: -110., y: 44.),
+///             (x: -110., y: 42.),
+///             (x: -105., y: 42.),
+///             (x: -105., y: 44.),
+///         ],
+///     ],
 /// );
 ///
 /// let result = geo::area!(polygon);
-/// assert_eq!(result.to_raw().build(), "geo::area({ type: 'Polygon', coordinates: [[[0, 0], [1, 1], [1, 0], [0, 0]], [[[0.1, 0.1], [0.9, 0.9], [0.9, 0.1], [0.1, 0.1]]]] })");
+/// assert_eq!(result.to_raw().build(), "geo::area({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })");
 ///
 /// # let geometry_field = Field::new("geometry_field");
 ///  geo::area!(geometry_field);
