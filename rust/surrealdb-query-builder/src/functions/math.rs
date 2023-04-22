@@ -436,7 +436,7 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
 ///
 /// math::mean!(vec![1, 2, 3, 4, 5]);
 /// math::mean!(arr![1, 2, 3, 4, 5]);
@@ -464,7 +464,8 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
+///
 /// math::median!(vec![1, 2, 3, 4, 5]);
 /// math::median!(arr![1, 2, 3, 4, 5]);
 /// math::median!(array![1, 2, 3, 4, 5]);
@@ -491,7 +492,8 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
+///
 /// math::mode!(vec![1, 2, 3, 4, 5]);
 /// math::mode!(arr![1, 2, 3, 4, 5]);
 /// let scores_field = Field::new("scores_field");
@@ -517,7 +519,8 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
+///
 /// math::min!(vec![1, 2, 3, 4, 5]);
 /// math::min!(arr![1, 2, 3, 4, 5]);
 /// let scores_field = Field::new("scores_field");
@@ -543,7 +546,8 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
+///
 /// math::product!(vec![1, 2, 3, 4, 5]);
 /// math::product!(arr![1, 2, 3, 4, 5]);
 /// let scores_field = Field::new("scores_field");
@@ -576,7 +580,8 @@ create_test_for_fn_with_single_array_arg!(
 /// # Example
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::{*, math};
+/// # use surrealdb_orm::{*, functions::math};
+///
 /// math::sum!(vec![1, 2, 3, 4, 5]);
 /// math::sum!(arr![1, 2, 3, 4, 5]);
 /// let scores_field = Field::new("scores_field");
