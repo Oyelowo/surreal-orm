@@ -966,6 +966,48 @@ macro_rules! array_insert {
 }
 pub use array_insert as insert;
 
+#[cfg(test)]
+mod array_insert_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_insert() {
+        let result = array::insert!(array![1, 2, 3, 4], 5, 2);
+        assert_eq!(result.get_bindings().len(), 3);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::insert($_param_00000001, $_param_00000002, $_param_00000003)"
+        );
+        assert_eq!(result.to_raw().build(), "array::insert([1, 2, 3, 4], 5, 2)");
+    }
+
+    #[test]
+    fn test_array_insert_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::insert!(own_goals, 5, 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::insert(own_goals, $_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::insert(own_goals, 5, 2)");
+    }
+
+    #[test]
+    fn test_array_insert_param() {
+        let goals = Param::new("goals");
+
+        let result = array::insert!(goals, 5, 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::insert($goals, $_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::insert($goals, 5, 2)");
+    }
+}
+
 /// The array::len function calculates the length of an array, returning a number. This function
 /// includes all items when counting the number of items in the array. If you want to only count
 /// truthy values, then use the count() function.
