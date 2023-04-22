@@ -11,14 +11,20 @@
 // Function	Description
 // time::day()	Extracts the day as a number from a datetime
 // time::floor()	Rounds a datetime down by a specific duration
+//
+// time::format() Outputs a datetime according to a specific format
+//
 // time::group()	Groups a datetime by a particular time interval
 // time::hour()	Extracts the hour as a number from a datetime
-// time::mins()	Extracts the minutes as a number from a datetime
+// time::minute()	Extracts the minutes as a number from a datetime
 // time::month()	Extracts the month as a number from a datetime
 // time::nano()	Returns the number of nanoseconds since the UNIX epoch
 // time::now()	Returns the current datetime
 // time::round()	Rounds a datetime up by a specific duration
-// time::secs()	Extracts the secs as a number from a datetime
+// time::second()	Extracts the secs as a number from a datetime
+//
+// time::timezone() Returns the current local timezone offset in hours
+
 // time::unix()	Returns the number of seconds since the UNIX epoch
 // time::wday()	Extracts the week day as a number from a datetime
 // time::week()	Extracts the week as a number from a datetime
@@ -54,11 +60,12 @@ macro_rules! now {
 pub use now;
 
 macro_rules! create_time_fn_with_single_datetime_arg {
-    ($function_name: expr) => {
+    ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
             use $crate::Buildable as _;
             use $crate::Parametric as _;
 
+            $(#[$attr])*
             fn [<$function_name _fn>](datetime: impl Into<$crate::DatetimeLike>) -> $crate::Function {
                 let datetime: $crate::DatetimeLike = datetime.into();
                 let query_string = format!("time::{}({})", $function_name, datetime.build());
@@ -69,6 +76,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                 }
             }
 
+            $(#[$attr])*
             #[macro_export]
             macro_rules! [<time_ $function_name>] {
                 ( $datetime:expr ) => {
@@ -104,19 +112,408 @@ macro_rules! create_time_fn_with_single_datetime_arg {
     };
 }
 
-create_time_fn_with_single_datetime_arg!("day");
-create_time_fn_with_single_datetime_arg!("hour");
-create_time_fn_with_single_datetime_arg!("mins");
-create_time_fn_with_single_datetime_arg!("month");
-create_time_fn_with_single_datetime_arg!("nano");
-create_time_fn_with_single_datetime_arg!("secs");
-create_time_fn_with_single_datetime_arg!("unix");
-create_time_fn_with_single_datetime_arg!("wday");
-create_time_fn_with_single_datetime_arg!("week");
-create_time_fn_with_single_datetime_arg!("yday");
-create_time_fn_with_single_datetime_arg!("year");
+create_time_fn_with_single_datetime_arg!(
+    /// The time::day function extracts the day as a number from a datetime.
+    /// The function is also aliased as `time_day!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the day from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::day!(dt);
+    /// assert_eq!(result.fine_tune_params(), "time::day($_param_00000001)");
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::day('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::day!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::day(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::day!(param);
+    /// assert_eq!(result.to_raw().build(), "time::day($rebirth_date)");
+    /// ```
+    =>
+    "day"
+);
 
-fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
+create_time_fn_with_single_datetime_arg!(
+    /// The time::hour function extracts the hour as a number from a datetime.
+    /// The function is also aliased as `time_hour!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the hour from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::hour!(dt);
+    /// assert_eq!(result.fine_tune_params(), "time::hour($_param_00000001)");
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::hour('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::hour!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::hour(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::hour!(param);
+    /// assert_eq!(result.to_raw().build(), "time::hour($rebirth_date)");
+    /// ```
+    =>
+    "hour"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::minute function extracts the minute as a number from a datetime.
+    /// The function is also aliased as `time_minute!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the minute from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::minute!(dt);
+    /// assert_eq!(result.fine_tune_params(), "time::minute($_param_00000001)");
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::minute('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::minute!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::minute(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::minute!(param);
+    /// assert_eq!(result.to_raw().build(), "time::minute($rebirth_date)");
+    /// ```
+    =>
+    "minute"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::month function extracts the month as a number from a datetime.
+    /// The function is also aliased as `time_month!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the month from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::month!(dt);
+    /// assert_eq!(result.fine_tune_params(), "time::month($_param_00000001)");
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::month('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::month!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::month(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::month!(param);
+    /// assert_eq!(result.to_raw().build(), "time::month($rebirth_date)");
+    /// ```
+    =>
+    "month"
+);
+
+// nano returns the number of nanoseconds since the UNIX epoch
+create_time_fn_with_single_datetime_arg!(
+    /// The time::nano returns the number of nanoseconds since the UNIX epoch.
+    /// The function is also aliased as `time_nano!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to derive nanoseconds since epoch from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::nano!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::nano('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::nano!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::nano(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::nano!(param);
+    /// assert_eq!(result.to_raw().build(), "time::nano($rebirth_date)");
+    /// ```
+    =>
+    "nano"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::second function extracts the second as a number from a datetime.
+    /// The function is also aliased as `time_second!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the second from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::second!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::second('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::second!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::second(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::second!(param);
+    /// assert_eq!(result.to_raw().build(), "time::second($rebirth_date)");
+    /// ```
+    =>
+    "second"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::unix function returns a datetime as an integer representing the number of seconds since the UNIX epoch.
+    /// The function is also aliased as `time_unix!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to derive seconds since epoch from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::unix!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::unix('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::unix!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::unix(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::unix!(param);
+    /// assert_eq!(result.to_raw().build(), "time::unix($rebirth_date)");
+    /// ```
+    =>
+    "unix"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::wday function extracts the week day as a number from a datetime.
+    /// The function is also aliased as `time_wday!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the week day from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::wday!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::wday('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::wday!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::wday(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::wday!(param);
+    /// assert_eq!(result.to_raw().build(), "time::wday($rebirth_date)");
+    /// ```
+    =>
+    "wday"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::week function extracts the week as a number from a datetime.
+    /// The function is also aliased as `time_week!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the week from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::week!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::week('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::week!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::week(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::week!(param);
+    /// assert_eq!(result.to_raw().build(), "time::week($rebirth_date)");
+    /// ```
+    =>
+    "week"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::yday function extracts the yday as a number from a datetime.
+    /// The function is also aliased as `time_yday!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the yday from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::yday!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::yday('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::yday!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::yday(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::yday!(param);
+    /// assert_eq!(result.to_raw().build(), "time::yday($rebirth_date)");
+    /// ```
+    =>
+    "yday"
+);
+
+create_time_fn_with_single_datetime_arg!(
+    /// The time::year function extracts the year as a number from a datetime.
+    /// The function is also aliased as `time_year!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The datetime to extract the year from. Could also be a field or a parameter representing a datetime.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::time};
+    ///
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::year!(dt);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::year('1970-01-01T00:01:01Z')"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::year!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::year(rebirth_date)");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::year!(param);
+    /// assert_eq!(result.to_raw().build(), "time::year($rebirth_date)");
+    /// ```
+    =>
+    "year"
+);
+
+pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
     let duration: DurationLike = duration.into();
     let mut bindings = datetime.get_bindings();
