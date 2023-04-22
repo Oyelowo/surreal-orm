@@ -321,8 +321,8 @@ pub mod is {
         /// # use surrealdb_query_builder as surreal_orm;
         /// use surreal_orm::{*, functions::is, statements::let_};
         ///
-        /// let result = is::latitude!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::latitude('oyelowo')");
+        /// let result = is::latitude!("-0.118092");
+        /// assert_eq!(result.to_raw().to_string(), "is::latitude('-0.118092')");
         ///
         /// let latitude_field = Field::new("latitude_field");
         /// let result = is::latitude!(latitude_field);
@@ -350,8 +350,8 @@ pub mod is {
         /// # use surrealdb_query_builder as surreal_orm;
         /// use surreal_orm::{*, functions::is, statements::let_};
         ///
-        /// let result = is::longitude!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::longitude('oyelowo')");
+        /// let result = is::longitude!("51.509865");
+        /// assert_eq!(result.to_raw().to_string(), "is::longitude('51.509865')");
         ///
         /// let longitude_field = Field::new("longitude_field");
         /// let result = is::longitude!(longitude_field);
@@ -450,5 +450,34 @@ pub mod is {
         /// ```
         =>
         "uuid"
+    );
+
+    create_validation_with_tests!(
+        /// The is::datetime function checks whether a value matches a datetime format.
+        /// Also aliased as `is_datetime!`
+        ///
+        /// # Arguments
+        ///
+        /// * `value` - The value to check. Could be a field or a parameter that represents the
+        /// value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surrealdb_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::is, statements::let_};
+        ///
+        /// let result = is::datetime!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "is::datetime('oyelowo')");
+        ///
+        /// let datetime_field = Field::new("datetime_field");
+        /// let result = is::datetime!(datetime_field);
+        /// assert_eq!(result.to_raw().to_string(), "is::datetime(datetime_field)");
+        ///
+        /// let datetime_param = let_("datetime_param").equal("oyelowo").get_param();
+        /// let result = is::datetime!(datetime_param);
+        /// assert_eq!(result.fine_tune_params(), "is::datetime($datetime_param)");
+        /// ```
+        =>
+        "datetime"
     );
 }
