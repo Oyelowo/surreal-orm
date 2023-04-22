@@ -254,15 +254,45 @@ pub mod argon2 {
     pub use crypto_argon2_generate as generate;
 }
 
+/// This module contains functions for working with the pbkdf2 hashing algorithm.
 pub mod pbkdf2 {
     use super::{create_fn_with_single_value, create_fn_with_two_values};
-    use crate::{types::Function, StrandLike};
-    use surrealdb::sql;
+    use crate::{Function, StrandLike};
 
-    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
-        create_fn_with_two_values(value1, value2, "pbkdf2::compare")
+    /// The crypto::pbkdf2::compare function compares a hashed-and-salted pbkdf2 password value
+    /// with an unhashed password value.
+    pub fn compare_fn(hash: impl Into<StrandLike>, pass: impl Into<StrandLike>) -> Function {
+        create_fn_with_two_values(hash, pass, "pbkdf2::compare")
     }
 
+    /// The crypto::pbkdf2::compare function compares a hashed-and-salted pbkdf2 password value
+    /// with an unhashed password value. Also aliased as `crypto_pbkdf2_compare!`.
+    /// # Arguments
+    /// * `hash` - The hashed password value. Can also be a field or a param.
+    /// * `pass` - The unhashed password value. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// let hash = let_("hash").equal("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
+    /// let pass = let_("pass").equal("this is a strong password");
+    ///
+    /// let result = crypto::pbkdf2::compare!(hash.get_param(), pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::compare($hash, $pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::compare($hash, $pass)");
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let result = crypto::pbkdf2::compare!(hash_field, "Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::compare(hash_field, $_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::compare(hash_field, 'Oyelowo')");
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let pass = let_("pass").equal("Oyelowo");
+    /// let result = crypto::pbkdf2::compare!(hash_field, pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::compare(hash_field, $pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::compare(hash_field, $pass)");
+    /// ```
     #[macro_export]
     macro_rules! crypto_pbkdf2_compare {
         ( $value1:expr,  $value2:expr ) => {
@@ -271,10 +301,25 @@ pub mod pbkdf2 {
     }
     pub use crypto_pbkdf2_compare as compare;
 
-    // Crypto generate function
+    /// The crypto::pbkdf2::generate function hashes and salts a password using the pbkdf2 hashing algorithm.
     pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "pbkdf2::generate")
     }
+
+    /// The crypto::pbkdf2::generate function hashes and salts a password using the pbkdf2 hashing algorithm. Also aliased as `crypto_pbkdf2_generate!`.
+    /// # Arguments
+    /// * `value` - The password value to be hashed and salted. Can also be a field or a param.
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// crypto::pbkdf2::generate!("password from jupiter");
+    ///
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// let result = crypto::pbkdf2::generate!(pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::generate($pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::generate($pass)");
+    /// ```
     #[macro_export]
     macro_rules! crypto_pbkdf2_generate {
         ( $value1:expr) => {
