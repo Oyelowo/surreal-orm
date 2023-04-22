@@ -224,9 +224,27 @@ pub mod argon2 {
     }
     pub use crypto_argon2_compare as compare;
 
+    /// The crypto::argon2::generate function hashes and salts a password using the argon2 hashing
+    /// algorithm.
     pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
         create_fn_with_single_value(value, "argon2::generate")
     }
+
+    /// The crypto::argon2::generate function hashes and salts a password using the argon2 hashing
+    /// algorithm. Also aliased as `crypto_argon2_generate!`.
+    /// # Arguments
+    ///
+    /// * `value` - The password value to be hashed and salted. Can also be a field or a param.
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// crypto::argon2::generate!("password from jupiter");
+    ///
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// let result = crypto::argon2::generate!(pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::argon2::generate($pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::argon2::generate($pass)");
     #[macro_export]
     macro_rules! crypto_argon2_generate {
         ( $value1:expr) => {
