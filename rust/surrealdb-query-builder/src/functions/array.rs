@@ -917,6 +917,57 @@ macro_rules! array_push {
     };
 }
 pub use array_push as push;
+/// The array::remove function removes an item from a specific position in an array.
+///
+/// array::remove(array, number) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::remove([1,2,3,4,5], 2);
+/// [1,2,4,5]
+pub fn remove_fn(arr: impl Into<ArrayLike>, number: impl Into<Valuex>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let number: Valuex = number.into();
+
+    Function {
+        query_string: format!("array::remove({}, {})", arr.build(), number.build()),
+        bindings: arr
+            .get_bindings()
+            .into_iter()
+            .chain(number.get_bindings())
+            .collect(),
+    }
+}
+
+/// The array::remove function removes an item from a specific position in an array.
+/// array::remove(array, number) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::remove([1,2,3,4,5], 2);
+/// [1,2,4,5]
+///
+/// # Arguments
+/// * `arr` -  An array, `Field` or `Param`
+/// * `number` -  A number, `Field` or `Param`
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::remove!(vec![1, 2, 3, 4, 5], 2);
+/// array::remove!(&[1, 2, 3, 4, 5], 2);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::remove!(own_goals_field, 2);
+/// array::remove!(goals_param, 2);
+/// // It is also aliased as array_remove;
+/// array_remove!(vec![1, 2, 3, 4, 5], 2);
+/// ```
+#[macro_export]
+macro_rules! array_remove {
+    ( $arr:expr, $number:expr ) => {
+        $crate::functions::array::remove_fn($arr, $number)
+    };
+}
+pub use array_remove as remove;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Ordering {
