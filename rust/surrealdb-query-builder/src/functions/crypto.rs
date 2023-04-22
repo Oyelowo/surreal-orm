@@ -20,10 +20,7 @@
 // crypto::scrypt::compare()	Compares an scrypt hash to a password
 // crypto::scrypt::generate()	Generates a new scrypt hashed password
 
-use crate::{
-    statements::let_, traits::Buildable, types::Function, Field, Param, Parametric, StrandLike,
-    ToRaw,
-};
+use crate::{statements::let_, Buildable, Field, Function, Param, Parametric, StrandLike, ToRaw};
 
 pub(crate) fn create_fn_with_single_value(
     value: impl Into<StrandLike>,
@@ -59,12 +56,14 @@ pub(crate) fn create_fn_with_two_values(
 }
 
 macro_rules! create_fn_with_single_arg_value {
-    ($function_name: expr) => {
+    ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
+            $(#[$attr])*
             pub fn [<$function_name _fn>](value: impl Into<$crate::StrandLike>) -> $crate::Function {
                 create_fn_with_single_value(value, $function_name)
             }
 
+            $(#[$attr])*
             #[macro_export]
             macro_rules! [<cryto_ $function_name>] {
                 ( $value:expr ) => {
@@ -105,21 +104,118 @@ macro_rules! create_fn_with_single_arg_value {
         }
     };
 }
-create_fn_with_single_arg_value!("md5");
-create_fn_with_single_arg_value!("sha1");
-create_fn_with_single_arg_value!("sha256");
-create_fn_with_single_arg_value!("sha512");
 
+create_fn_with_single_arg_value!(
+    /// The crypto::md5 function returns the md5 hash of the input valuee.
+    ///
+    /// # Arguments
+    /// * `value` - The value to be hashed. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::crypto};
+    ///
+    /// let result = crypto::md5!("Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::md5($_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::md5('Oyelowo')");
+    /// ```
+    => "md5"
+);
+
+create_fn_with_single_arg_value!(
+    /// The crypto::sha1 function returns the sha1 hash of the input value.
+    ///
+    /// # Arguments
+    /// * `value` - The value to be hashed. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::crypto};
+    ///
+    /// let result = crypto::sha1!("Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::sha1($_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::sha1('Oyelowo')");
+    /// ```
+    => "sha1"
+);
+
+create_fn_with_single_arg_value!(
+    /// The crypto::sha256 function returns the sha256 hash of the input value.
+    ///
+    /// # Arguments
+    /// * `value` - The value to be hashed. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::crypto};
+    ///
+    /// let result = crypto::sha256!("Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::sha256($_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::sha256('Oyelowo')");
+    /// ```
+    => "sha256"
+);
+
+create_fn_with_single_arg_value!(
+    /// The crypto::sha512 function returns the sha512 hash of the input value.
+    ///
+    /// # Arguments
+    /// * `value` - The value to be hashed. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::crypto};
+    ///
+    /// let result = crypto::sha512!("Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::sha512($_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::sha512('Oyelowo')");
+    /// ```
+    => "sha512"
+);
+
+/// This module contains functions for working with the argon2 hashing algorithm.
 pub mod argon2 {
-    use surrealdb::sql;
-
-    use crate::{types::Function, StrandLike};
-
     use super::{create_fn_with_single_value, create_fn_with_two_values};
+    use crate::{Function, StrandLike};
 
-    pub fn compare_fn(value1: impl Into<StrandLike>, value2: impl Into<StrandLike>) -> Function {
-        create_fn_with_two_values(value1, value2, "argon2::compare")
+    /// The crypto::argon2::compare function compares a hashed-and-salted argon2 password value with an unhashed password value.
+    pub fn compare_fn(hash: impl Into<StrandLike>, pass: impl Into<StrandLike>) -> Function {
+        create_fn_with_two_values(hash, pass, "argon2::compare")
     }
+
+    /// The crypto::argon2::compare function compares a hashed-and-salted argon2 password value with an unhashed password value.
+    /// Also aliased as `crypto_argon2_compare!`.
+    ///
+    /// # Arguments
+    /// * `hash` - The hashed password value. Can also be a field or a param.
+    /// * `pass` - The unhashed password value. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    /// let pass = let_("pass").equal("this is a strong password");
+    ///
+    /// let result = crypto::argon2::compare!(hash.get_param(), pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::argon2::compare($hash, $pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::argon2::compare($hash, $pass)");
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let result = crypto::argon2::compare!(hash_field, "Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::argon2::compare(hash_field, $_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::argon2::compare(hash_field, 'Oyelowo')");
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let pass = let_("pass").equal("Oyelowo");
+    /// let result = crypto::argon2::compare!(hash_field, pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::argon2::compare(hash_field, $pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::argon2::compare(hash_field, $pass)");
+    /// ```
     #[macro_export]
     macro_rules! crypto_argon2_compare {
         ( $value1:expr,  $value2:expr ) => {
