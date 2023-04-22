@@ -129,7 +129,7 @@ pub mod email {
         ///
         /// # Example
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         ///
         /// parse::email::host!("oyelowo@codebreather.com");
@@ -159,7 +159,7 @@ pub mod email {
         ///
         /// # Example
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         ///
         /// parse::email::user!("oyelowo@codebreather.com");
@@ -194,7 +194,7 @@ pub mod url {
         ///
         /// # Example
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::domain!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
@@ -224,7 +224,7 @@ pub mod url {
         ///
         /// # Example
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::fragment!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
@@ -254,7 +254,7 @@ pub mod url {
         /// # Example
         ///
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::host!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
@@ -283,7 +283,7 @@ pub mod url {
         /// # Example
         ///
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::path!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
@@ -312,7 +312,7 @@ pub mod url {
         /// # Example
         ///
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::port!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
@@ -341,7 +341,7 @@ pub mod url {
         ///
         /// # Example
         /// ```rust
-        /// # surrealdb_query_builder as surrealdb_orm;
+        /// # use surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         /// parse::url::query!("https://codebreather.com:443/topics?arg=value#fragment");
         /// # let url_field = Field::new("url_field");
