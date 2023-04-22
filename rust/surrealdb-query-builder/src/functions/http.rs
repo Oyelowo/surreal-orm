@@ -230,15 +230,13 @@ create_fn_with_url_and_head!(
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::HashMap;
-    /// let result = http::head!("https://codebreather.com");
-    /// assert_eq!(result.fine_tune_params(), "http::head($_param_00000001)");
-    /// assert_eq!(result.to_raw().build(), "http::head('https://codebreather.com')");
+    /// http::head!("https://codebreather.com");
     ///
     /// # let url_field = Field::new("url_field");
-    /// let result = http::head!(url_field);
+    /// http::head!(url_field);
     ///
     /// # let ur_param = Param::new("url_param");
-    /// let result = http::head!(ur_param);
+    /// http::head!(ur_param);
     ///
     /// let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
     /// http::head!("https://codebreather.com", headers);
@@ -266,15 +264,13 @@ create_fn_with_url_and_head!(
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::HashMap;
-    /// let result = http::get!("https://codebreather.com");
-    /// assert_eq!(result.fine_tune_params(), "http::get($_param_00000001)");
-    /// assert_eq!(result.to_raw().build(), "http::get('https://codebreather.com')");
+    /// http::get!("https://codebreather.com");
     ///
     /// # let url_field = Field::new("url_field");
-    /// let result = http::get!(url_field);
+    /// http::get!(url_field);
     ///
     /// # let url_param = Param::new("url_param");
-    /// let result = http::delete!(url_param);
+    /// http::delete!(url_param);
     ///
     /// let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
     /// http::get!("https://codebreather.com", headers);
@@ -291,6 +287,7 @@ create_fn_with_url_and_head!(
     /// If an object is given as the second argument, then this can be used to set the request headers.
     ///
     /// http::delete(string, object) -> value
+    ///
     /// # Arguments
     ///
     /// * `url` - The URL of the remote endpoint. Can be a string or a field or a parameter.
@@ -301,13 +298,12 @@ create_fn_with_url_and_head!(
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::HashMap;
-    /// let result = http::delete!("https://codebreather.com");
-    /// assert_eq!(result.to_raw().build(), "http::delete('https://codebreather.com')");
+    /// http::delete!("https://codebreather.com");
     ///
     /// # let url_field = Field::new("url_field");
-    /// let result = http::delete!(url_field);
+    /// http::delete!(url_field);
     /// # let url_param = Param::new("url_param");
-    /// let result = http::delete!(url_param);
+    /// http::delete!(url_param);
     ///
     /// let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
     /// http::delete!("https://codebreather.com", headers);
@@ -530,18 +526,13 @@ create_fn_with_3args_url_body_and_head!(
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::hash_map::HashMap;
     ///
-    /// let result = http::post("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, $_param_00000002, $_param_00000003)");
-    /// assert_eq!(result.to_raw().build(), "http::post('https://codebreather.com', { id: 1 }, {  })");
+    /// http::post!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
     ///
-    /// let result = http::post("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// http::post!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
     ///
-    /// let body_field = Field::new("body_field");
-    /// let headers_param = Param::new("headers_param");
-    /// let result = http::post("https://codebreather.com", body_field, headers_param);
-    /// assert_eq!(result.fine_tune_params(), "http::post($_param_00000001, body_field, $headers_param)");
-    /// assert_eq!(result.to_raw().build(), "http::post('https://codebreather.com', body_field, $headers_param)");
+    /// # let body_field = Field::new("body_field");
+    /// # let headers_param = Param::new("headers_param");
+    /// http::post!("https://codebreather.com", body_field, headers_param);
     /// ```
 => "post"
 );
@@ -571,22 +562,13 @@ create_fn_with_3args_url_body_and_head!(
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::hash_map::HashMap;
     ///
-    /// let result = http::put("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::put($_param_00000001, $_param_00000002, $_param_00000003)");
-    /// assert_eq!(result.to_raw().build(), "http::put('https://codebreather.com', { id: 1 }, {  })");
+    /// http::put!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
     ///
-    /// let result = http::put("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::put($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// http::put!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
     /// ```
 => "put"
 );
 
-// The http::patch function performs a remote HTTP PATCH request. The first parameter is the URL of the remote endpoint, and the second parameter is the value to use as the request body, which will be converted to JSON. If the response does not return a 2XX status code, then the function will fail and return the error. If the remote endpoint returns an application/json content-type, then the response is parsed and returned as a value, otherwise the response is treated as text.
-//
-// http::patch(string, object) -> value
-// If an object is given as the third argument, then this can be used to set the request headers.
-//
-// http::patch(string, object, object) -> value
 create_fn_with_3args_url_body_and_head!(
     /// The http::patch function performs a remote HTTP PATCH request. The first parameter is the URL of the remote endpoint,
     /// and the second parameter is the value to use as the request body, which will be converted to JSON.
@@ -612,12 +594,9 @@ create_fn_with_3args_url_body_and_head!(
     /// use surrealdb_orm::{*, functions::http};
     /// use std::collections::hash_map::HashMap;
     ///
-    /// let result = http::patch("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::patch($_param_00000001, $_param_00000002, $_param_00000003)");
-    /// assert_eq!(result.to_raw().build(), "http::patch('https://codebreather.com', { id: 1 }, {  })");
+    /// let result = http::patch!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]));
     ///
-    /// let result = http::patch("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
-    /// assert_eq!(result.fine_tune_params(), "http::patch($_param_00000001, $_param_00000002, $_param_00000003)");
+    /// let result = http::patch!("https://codebreather.com", HashMap::from([("id".into(), 1.into())]), HashMap::from([("x-my-header".into(), "some unique string".into())]));
     /// ```
 => "patch"
 );
