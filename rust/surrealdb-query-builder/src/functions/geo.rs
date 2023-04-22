@@ -280,6 +280,7 @@ pub mod hash {
     }
     pub use geo_hash_decode as decode;
 
+    /// The geo::hash::encode function converts a geolocation point into a geohash.
     pub fn encode_fn(
         geometry: impl Into<GeometryLike>,
         accuracy: Option<impl Into<NumberLike>>,
@@ -307,13 +308,39 @@ pub mod hash {
         }
     }
 
+    /// The geo::hash::encode function converts a geolocation point into a geohash.
+    /// Also aliased as `geo_hash_encode!`.
+    ///
+    /// # Arguments
+    /// * `geometry` - The geometry to encode. This can be a geometry, field, or parameter.
+    /// * `accuracy` - The accuracy of the geohash. This can be a number, field, or parameter.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::geo};
+    /// use ::geo::point;
+    /// let point = point! {
+    ///   x: 40.02f64,
+    ///   y: 116.34,
+    /// };
+    /// let result = geo::hash::encode!(point);
+    /// assert_eq!(result.to_raw().build(), "geo::hash::encode((40.02, 116.34))");
+    /// # let point_field = Field::new("point_field");
+    /// geo::hash::encode!(point_field);
+    /// # let point_param = Param::new("point_param");
+    /// geo::hash::encode!(point_param);
+    /// # let accuracy = 5;
+    /// geo::hash::encode!(point, accuracy);
+    /// # let accuracy_field = Field::new("accuracy_field");
+    /// geo::hash::encode!(point, accuracy_field);
+    /// # let accuracy_param = Param::new("accuracy_param");
+    /// geo::hash::encode!(point, accuracy_param);
+    /// ```
     #[macro_export]
     macro_rules! geo_hash_encode {
         ( $geometry:expr ) => {
-            $crate::functions::geo::hash::encode_fn(
-                $geometry,
-                None as Option<$crate::types::NumberLike>,
-            )
+            $crate::functions::geo::hash::encode_fn($geometry, None as Option<$crate::NumberLike>)
         };
         ( $geometry:expr, $accuracy:expr ) => {
             $crate::functions::geo::hash::encode_fn($geometry, Some($accuracy))
