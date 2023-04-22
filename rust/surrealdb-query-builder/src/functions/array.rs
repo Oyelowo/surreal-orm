@@ -969,6 +969,53 @@ macro_rules! array_remove {
 }
 pub use array_remove as remove;
 
+/// The array::reverse function appends a value to the end of an array.
+///
+/// array::reverse(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::reverse([1,2,3,4,5]);
+/// [5,4,3,2,1]
+pub fn reverse_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+
+    Function {
+        query_string: format!("array::reverse({})", arr.build()),
+        bindings: arr.get_bindings(),
+    }
+}
+
+/// The array::reverse function appends a value to the end of an array.
+/// array::reverse(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::reverse([1,2,3,4,5]);
+/// [5,4,3,2,1]
+///
+/// # Arguments
+/// * `arr` -  An array, `Field` or `Param`
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::reverse!(vec![1, 2, 3, 4, 5]);
+/// array::reverse!(&[1, 2, 3, 4, 5]);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+///     
+/// array::reverse!(own_goals_field);
+/// array::reverse!(goals_param);
+/// // It is also aliased as array_reverse;
+/// array_reverse!(vec![1, 2, 3, 4, 5]);
+/// ```
+#[macro_export]
+macro_rules! array_reverse {
+    ( $arr:expr ) => {
+        $crate::functions::array::reverse_fn($arr)
+    };
+}
+pub use array_reverse as reverse;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Ordering {
     /// Sort the array in ascending order.
