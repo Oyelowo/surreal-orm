@@ -654,6 +654,41 @@ pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
     }
 }
 
+/// The time::timezone function returns the current local timezone offset in hours.
+///
+/// time::timezone() -> string
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM time::timezone();
+/// "+05:30"
+pub fn timezone_fn() -> Function {
+    Function {
+        query_string: "time::timezone()".to_string(),
+        bindings: vec![],
+    }
+}
+
+/// The time::timezone function returns the current local timezone offset in hours.
+/// The function is also aliased as `time_timezone!`.
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+///
+/// let result = time::timezone!();
+/// assert_eq!(
+///    result.to_raw().build(),
+///    "time::timezone()"
+/// );
+/// ```
+#[macro_export]
+macro_rules! time_timezone {
+    () => {
+        $crate::functions::time::timezone_fn()
+    };
+}
+pub use time_timezone as timezone;
+
 /// The time::round function rounds a datetime up by a specific duration.
 ///
 /// The function is also aliased as `time_round!`.
