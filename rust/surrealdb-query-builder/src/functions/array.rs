@@ -97,7 +97,7 @@ macro_rules! create_fn_with_two_array_args {
                     let age = Field::new("age");
                     let arr1 = $crate::arr![1, "Oyelowo", age];
                     let arr2 = $crate::arr![4, "dayo", 6];
-                    let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                    let result = $crate::functions::array::[<$function_name>]!(arr1, arr2);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}([$_param_00000001, $_param_00000002, age], \
@@ -113,7 +113,7 @@ macro_rules! create_fn_with_two_array_args {
                 fn [<test $function_name _macro_on_same_element_types>]() {
                     let arr1 = $crate::arr![1, 2, 3];
                     let arr2 = $crate::arr![4, 5, 6];
-                    let result = crate::functions::array::[<$function_name>]!(arr1, arr2);
+                    let result = $crate::functions::array::[<$function_name>]!(arr1, arr2);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003], \
@@ -130,7 +130,7 @@ macro_rules! create_fn_with_two_array_args {
                 fn [<test $function_name _macro_on_fields>]() {
                     let students_ages = Field::new("students_ages");
                     let teachers_ages = Field::new("teachers_ages");
-                    let result = crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
+                    let result = $crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}(students_ages, teachers_ages)", $function_name)
@@ -161,12 +161,12 @@ create_fn_with_two_array_args!(
     /// let own_goals = Field::new("own_goals");
     /// let goals = Param::new("goals");
     ///
-    /// array::combine!(vec![1, 2, 3], vec![4, 5, 6])
+    /// array::combine!(vec![1, 2, 3], vec![4, 5, 6]);
     /// array::combine!(own_goals, goals);
-    /// array::combine!(&[1, 2, 3], &[4, 5, 6])
+    /// array::combine!(&[1, 2, 3], &[4, 5, 6]);
     ///
     /// // It is also aliased as array_combine;
-    /// array_combine!(&[1, 2, 3], &[4, 5, 6])
+    /// array_combine!(&[1, 2, 3], &[4, 5, 6]);
     /// ```
 =>
     "combine"
@@ -294,6 +294,7 @@ pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
 /// use surrealdb_orm::{*, functions::array};
 /// let own_goals = Field::new("own_goals");
 /// let goals = Param::new("goals");
+///
 /// array::distinct!(vec![1, 2, 3]);
 /// array::distinct!(&[1, 2, 3]);
 /// array::distinct!(own_goals);
@@ -346,7 +347,7 @@ pub fn len_fn(arr: impl Into<ArrayLike>) -> Function {
 #[macro_export]
 macro_rules! array_len {
     ( $arr:expr ) => {
-        crate::functions::array::len_fn($arr)
+        $crate::functions::array::len_fn($arr)
     };
 }
 pub use array_len as len;
@@ -503,12 +504,12 @@ pub mod sort {
     /// array_sort_desc!(vec![1, 2, 3]);
     /// ```
     #[macro_export]
-    macro_rules! array_sort_desc_fn {
+    macro_rules! array_sort_desc {
         ( $arr:expr ) => {
             $crate::functions::array::sort::desc_fn($arr)
         };
     }
-    pub use array_sort_desc_fn as desc;
+    pub use array_sort_desc as desc;
 }
 
 #[cfg(test)]
