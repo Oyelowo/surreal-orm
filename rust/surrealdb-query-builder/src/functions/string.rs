@@ -12,7 +12,7 @@
 // string::concat()	Concatenates strings together
 // string::endsWith()	Checks whether a string ends with another string
 // string::join()	Joins strings together with a delimiter
-// string::length()	Returns the length of a string
+// string::len()	Returns the length of a string
 // string::lowercase()	Converts a string to lowercase
 // string::repeat()	Repeats a string a number of times
 // string::replace()	Replaces an occurence of a string with another string
@@ -25,14 +25,7 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::{
-    arr,
-    traits::{Binding, Buildable, ToRaw},
-    Parametric, Valuex,
-};
-use surrealdb::sql;
-
-use crate::types::{Field, Function, NumberLike, StrandLike};
+use crate::{Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
 
 fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name: &str) -> Function {
     let value: StrandLike = value.into();
@@ -44,22 +37,64 @@ fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name:
     }
 }
 
-pub fn length_fn(string: impl Into<StrandLike>) -> Function {
+/// Returns length of a string
+pub fn len_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "length")
 }
 
+/// Returns length of a string.
+/// The macro function is also aliases as `string_len!`
+///
+/// # Arguments
+/// * `string` - The string to get the length of. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let len = string::len!("Oyelowo Oyedayo");
+/// assert_eq!(len.to_raw().build(), "string::length('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let len = string::len!(string_field);
+/// assert_eq!(len.to_raw().build(), "string::length(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let len = string::len!(string_param);
+/// assert_eq!(len.to_raw().build(), "string::length($string_param)");
+/// ```
 #[macro_export]
-macro_rules! string_length {
+macro_rules! string_len {
     ( $string:expr ) => {
-        $crate::functions::string::length_fn($string)
+        $crate::functions::string::len_fn($string)
     };
 }
-pub use string_length as length;
+pub use string_len as len;
 
+/// The string::lowercase function converts a string to lowercase.
 pub fn lowercase_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "lowercase")
 }
 
+/// The string::lowercase function converts a string to lowercase.
+/// The macro function is also aliases as `string_lowercase!`
+/// # Arguments
+/// * `string` - The string to convert to lowercase. Can be a string literal, a field or a parameter representing a string.
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let lowercase = string::lowercase!("Oyelowo Oyedayo");
+/// assert_eq!(lowercase.to_raw().build(), "string::lowercase('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let lowercase = string::lowercase!(string_field);
+/// assert_eq!(lowercase.to_raw().build(), "string::lowercase(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let lowercase = string::lowercase!(string_param);
+/// assert_eq!(lowercase.to_raw().build(), "string::lowercase($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_lowercase {
     ( $string:expr ) => {
@@ -69,10 +104,33 @@ macro_rules! string_lowercase {
 
 pub use string_lowercase as lowercase;
 
+/// The string::uppercase function converts a string to uppercase.
 pub fn uppercase_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "uppercase")
 }
 
+/// The string::uppercase function converts a string to uppercase.
+/// The macro function is also aliases as `string_uppercase!`
+///
+/// # Arguments
+///
+/// * `string` - The string to convert to uppercase. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let uppercase = string::uppercase!("Oyelowo Oyedayo");
+/// assert_eq!(uppercase.to_raw().build(), "string::uppercase('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let uppercase = string::uppercase!(string_field);
+/// assert_eq!(uppercase.to_raw().build(), "string::uppercase(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let uppercase = string::uppercase!(string_param);
+/// assert_eq!(uppercase.to_raw().build(), "string::uppercase($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_uppercase {
     ( $string:expr ) => {
@@ -81,10 +139,32 @@ macro_rules! string_uppercase {
 }
 pub use string_uppercase as uppercase;
 
+/// The string::words function splits a string into an array of separate words.
 pub fn words_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "words")
 }
 
+/// The string::words function splits a string into an array of separate words.
+/// The macro function is also aliases as `string_words!`
+///
+/// # Arguments
+/// * `string` - The string to split into words. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let words = string::words!("Oyelowo Oyedayo");
+/// assert_eq!(words.to_raw().build(), "string::words('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let words = string::words!(string_field);
+/// assert_eq!(words.to_raw().build(), "string::words(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let words = string::words!(string_param);
+/// assert_eq!(words.to_raw().build(), "string::words($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_words {
     ( $string:expr ) => {
@@ -93,10 +173,32 @@ macro_rules! string_words {
 }
 pub use string_words as words;
 
+/// The string::reverse function reverses a string.
 pub fn reverse_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "reverse")
 }
 
+/// The string::reverse function reverses a string.
+/// The macro function is also aliases as `string_reverse!`
+///
+/// # Arguments
+/// * `string` - The string to reverse. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let reverse = string::reverse!("Oyelowo Oyedayo");
+/// assert_eq!(reverse.to_raw().build(), "string::reverse('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let reverse = string::reverse!(string_field);
+/// assert_eq!(reverse.to_raw().build(), "string::reverse(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let reverse = string::reverse!(string_param);
+/// assert_eq!(reverse.to_raw().build(), "string::reverse($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_reverse {
     ( $string:expr ) => {
@@ -106,10 +208,32 @@ macro_rules! string_reverse {
 
 pub use string_reverse as reverse;
 
+/// The string::trim function removes leading and trailing whitespace from a string.
 pub fn trim_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "trim")
 }
 
+/// The string::trim function removes leading and trailing whitespace from a string.
+/// The macro function is also aliases as `string_trim!`
+///
+/// # Arguments
+/// * `string` - The string to trim. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let trim = string::trim!("Oyelowo Oyedayo");
+/// assert_eq!(trim.to_raw().build(), "string::trim('Oyelowo Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let trim = string::trim!(string_field);
+/// assert_eq!(trim.to_raw().build(), "string::trim(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let trim = string::trim!(string_param);
+/// assert_eq!(trim.to_raw().build(), "string::trim($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_trim {
     ( $string:expr ) => {
@@ -118,10 +242,32 @@ macro_rules! string_trim {
 }
 pub use string_trim as trim;
 
+/// The string::slug function converts a string into a human and URL-friendly string.
 pub fn slug_fn(string: impl Into<StrandLike>) -> Function {
     create_fn_with_single_string_arg(string, "slug")
 }
 
+/// The string::slug function converts a string into a human and URL-friendly string.
+/// The macro function is also aliases as `string_slug!`
+///
+/// # Arguments
+///
+/// * `string` - The string to convert into a slug. Can be a string literal, a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let slug = string::slug!("Oyelowo Oyedayo");
+/// assert_eq!(slug.to_raw().build(), "string::slug('Oyelowo Oyedayo')");
+/// let string_field = Field::new("string_field");
+/// let slug = string::slug!(string_field);
+/// assert_eq!(slug.to_raw().build(), "string::slug(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let slug = string::slug!(string_param);
+/// assert_eq!(slug.to_raw().build(), "string::slug($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_slug {
     ( $string:expr ) => {
@@ -131,6 +277,7 @@ macro_rules! string_slug {
 
 pub use string_slug as slug;
 
+/// The string::concat function concatenates strings together.
 pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -151,6 +298,31 @@ pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     }
 }
 
+/// The string::concat function concatenates strings together.
+/// The macro function is also aliases as `string_concat!`
+///
+/// # Arguments
+///
+/// * `values` - The strings to concatenate. Can be string literals, fields or parameters representing strings.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let concat = string::concat!("Oyelowo", "Oyedayo");
+/// assert_eq!(concat.to_raw().build(), "string::concat('Oyelowo', 'Oyedayo')");
+///
+/// let concat = string::concat!(vec!["Oyelowo", "Oyedayo"]);
+/// assert_eq!(concat.to_raw().build(), "string::concat('Oyelowo', 'Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let concat = string::concat!(string_field, "Oyedayo");
+/// assert_eq!(concat.to_raw().build(), "string::concat(string_field, 'Oyedayo')");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let concat = string::concat!(string_param, "Oyedayo");
+/// assert_eq!(concat.to_raw().build(), "string::concat($string_param, 'Oyedayo')");
+/// ```
 #[macro_export]
 macro_rules! string_concat {
         ( $val:expr ) => {
@@ -163,6 +335,7 @@ macro_rules! string_concat {
 
 pub use string_concat as concat;
 
+/// The string::join function joins strings together with a delimiter.
 pub fn join_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
@@ -183,6 +356,31 @@ pub fn join_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     }
 }
 
+/// The string::join function joins strings together with a delimiter.
+/// The macro function is also aliases as `string_join!`
+///
+/// # Arguments
+///
+/// * `values` - The strings to join. Can be string literals, fields or parameters representing strings.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let join = string::join!("Oyelowo", "Oyedayo");
+/// assert_eq!(join.to_raw().build(), "string::join('Oyelowo', 'Oyedayo')");
+///
+/// let join = string::join!(vec!["Oyelowo", "Oyedayo"]);
+/// assert_eq!(join.to_raw().build(), "string::join('Oyelowo', 'Oyedayo')");
+/// let string_field = Field::new("string_field");
+///
+/// let join = string::join!(string_field);
+/// assert_eq!(join.to_raw().build(), "string::join(string_field)");
+///
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let join = string::join!(string_param);
+/// assert_eq!(join.to_raw().build(), "string::join($string_param)");
+/// ```
 #[macro_export]
 macro_rules! string_join {
         ( $val:expr ) => {
@@ -195,6 +393,7 @@ macro_rules! string_join {
 
 pub use string_join as join;
 
+/// The string::endsWith function checks whether a string ends with another string.
 pub fn ends_with_fn(string: impl Into<StrandLike>, ending: impl Into<StrandLike>) -> Function {
     let string: StrandLike = string.into();
     let ending: StrandLike = ending.into();
@@ -210,6 +409,27 @@ pub fn ends_with_fn(string: impl Into<StrandLike>, ending: impl Into<StrandLike>
     }
 }
 
+/// The string::endsWith function checks whether a string ends with another string.
+/// The macro function is also aliases as `string_ends_with!`
+///
+/// # Arguments
+///
+/// * `string` - The string to check. Can be a string literal, field or parameter representing a string.
+/// * `ending` - The string to check for. Can be a string literal, field or parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::string, statements::let_};
+/// let ends_with = string::ends_with!("Oyelowo", "Oyedayo");
+/// assert_eq!(ends_with.to_raw().build(), "string::ends_with('Oyelowo', 'Oyedayo')");
+/// let string_field = Field::new("string_field");
+/// let ends_with = string::ends_with!(string_field, "Oyedayo");
+/// assert_eq!(ends_with.to_raw().build(), "string::ends_with(string_field, 'Oyedayo')");
+/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let ends_with = string::ends_with!(string_param, "Oyedayo");
+/// assert_eq!(ends_with.to_raw().build(), "string::ends_with($string_param, 'Oyedayo')");
+/// ```
 #[macro_export]
 macro_rules! string_ends_with {
     ( $string:expr, $ending: expr ) => {
