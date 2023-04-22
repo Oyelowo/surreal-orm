@@ -485,8 +485,6 @@ mod tests {
 
     #[test]
     fn test_argon2_compare() {
-        let hash = Param::new("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = Param::new("the strongest password");
         let result = argon2::compare_fn("Oyelowo", "Oyedayo");
         assert_eq!(
             result.fine_tune_params(),
