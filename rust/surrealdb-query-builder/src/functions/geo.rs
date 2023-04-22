@@ -142,10 +142,44 @@ macro_rules! geo_bearing {
 
 pub use geo_bearing as bearing;
 
+/// The geo::centroid function calculates the centroid between two geolocation points.
 pub fn centroid_fn(geometry: impl Into<GeometryLike>) -> Function {
     create_geo_with_single_arg(geometry, "centroid")
 }
 
+/// The geo::centroid function calculates the centroid between two geolocation points.
+/// Also aliased as `geo_centroid!`.
+///
+/// # Arguments
+///
+/// * `geometry` - The geometry to calculate the centroid of. This can be a geometry, field, or parameter.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::geo};
+/// use ::geo::polygon;
+/// let polygon = polygon!(
+///    exterior: [
+///         (x: -111., y: 45.),
+///         (x: -111., y: 41.),
+///         (x: -104., y: 41.),
+///         (x: -104., y: 45.),
+///    ],
+///    interiors: [[
+///         (x: -110., y: 44.),
+///         (x: -110., y: 42.),
+///         (x: -105., y: 42.),
+///         (x: -105., y: 44.),
+///    ]],
+/// );
+/// let result = geo::centroid!(polygon);
+/// assert_eq!(result.to_raw().build(), "geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], [-104, 45], [-111, 45]], [[[-110, 44], [-110, 42], [-105, 42], [-105, 44], [-110, 44]]]] })");
+/// # let geometry_field = Field::new("geometry_field");
+/// geo::centroid!(geometry_field);
+/// # let geometry_param = Param::new("geometry_param");
+/// geo::centroid!(geometry_param);
+/// ```
 #[macro_export]
 macro_rules! geo_centroid {
     ( $geometry:expr ) => {
