@@ -575,6 +575,72 @@ macro_rules! time_floor {
 
 pub use time_floor as floor;
 
+/// The time::format function outputs a datetime according to a specific format.
+///
+/// time::format(datetime, string) -> string
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM time::format("2021-11-01T08:30:17+00:00", "%Y-%m-%d");
+/// "2021-11-01"
+pub fn format_fn(datetime: impl Into<DatetimeLike>, format: impl Into<StrandLike>) -> Function {
+    let datetime: DatetimeLike = datetime.into();
+    let format: StrandLike = format.into();
+    let mut bindings = datetime.get_bindings();
+    bindings.extend(format.get_bindings());
+
+    let query_string = format!("time::format({}, {})", datetime.build(), format.build());
+
+    Function {
+        query_string,
+        bindings,
+    }
+}
+
+/// The time::format function outputs a datetime according to a specific format.
+/// The function is also aliased as `time_format!`.
+///
+/// # Arguments
+/// * `datetime` - The datetime to format. Could also be a field or a parameter representing a datetime.
+/// * `format` - The format to use. Could also be a field or a parameter representing a string.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+///   chrono::Utc,
+/// );
+/// let result = time::format_!(dt, "%Y-%m-%d");
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::format('1970-01-01T00:01:01Z', '%Y-%m-%d')"
+/// );
+///
+/// let rebirth_date = Field::new("rebirth_date");
+/// let format = Field::new("format");
+/// let result = time::format_!(rebirth_date, format);
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::format(rebirth_date, format)"
+/// );
+///
+/// let param = Param::new("rebirth_date");
+/// let format = Param::new("format");
+/// let result = time::format_!(param, format);
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::format($rebirth_date, $format)"
+/// );
+/// ```
+#[macro_export]
+macro_rules! time_format {
+    ( $datetime:expr, $format:expr ) => {
+        $crate::functions::time::format_fn($datetime, $format)
+    };
+}
+pub use time_format as format_;
+
 /// The time::round function rounds a datetime up by a specific duration.
 pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
