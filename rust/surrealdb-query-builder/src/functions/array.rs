@@ -158,7 +158,6 @@ macro_rules! array_all {
 pub use array_all as all;
 #[cfg(test)]
 mod all_tests {
-    use super::*;
     use crate::{functions::array, *};
 
     #[test]
@@ -465,7 +464,6 @@ macro_rules! create_fn_with_two_array_args {
     };
 }
 
-/// Creates a function that returns the elements of an array that are not present in another array.
 create_fn_with_two_array_args!(
     /// "The array::combine function combines all values from two arrays together, returning an array of arrays.
     ///
@@ -1598,11 +1596,7 @@ pub use array_sort as sort;
 
 /// This module contains functions for sorting arrays.
 pub mod sort {
-    use surrealdb::sql;
-
-    use crate::{traits::Binding, types::ArrayLike, Buildable, Parametric};
-
-    use super::Function;
+    use crate::*;
 
     /// The array::sort::asc function is a shorthand convenience function for the array::sort function, to sort values in an array in ascending order.
     pub fn asc_fn(arr: impl Into<ArrayLike>) -> Function {
