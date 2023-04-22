@@ -1049,6 +1049,39 @@ macro_rules! array_len {
 }
 pub use array_len as len;
 
+#[cfg(test)]
+mod array_len_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_len() {
+        let result = array::len!(vec![1, 2, 3]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::len($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "array::len([1, 2, 3])");
+    }
+
+    #[test]
+    fn test_array_len_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::len!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::len(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::len(own_goals)");
+    }
+
+    #[test]
+    fn test_array_len_param() {
+        let goals = Param::new("goals");
+
+        let result = array::len!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::len($goals)");
+        assert_eq!(result.to_raw().build(), "array::len($goals)");
+    }
+}
+
 /// The array::pop function removes a value from the end of an array and returns it.
 ///
 /// array::pop(array) -> array
@@ -1092,6 +1125,39 @@ macro_rules! array_pop {
     };
 }
 pub use array_pop as pop;
+
+#[cfg(test)]
+mod array_pop_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_pop() {
+        let result = array::pop!(vec![1, 2, 3]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::pop($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "array::pop([1, 2, 3])");
+    }
+
+    #[test]
+    fn test_array_pop_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::pop!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::pop(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::pop(own_goals)");
+    }
+
+    #[test]
+    fn test_array_pop_param() {
+        let goals = Param::new("goals");
+
+        let result = array::pop!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::pop($goals)");
+        assert_eq!(result.to_raw().build(), "array::pop($goals)");
+    }
+}
 
 /// The array::prepend function prepends a value to the end of an array.
 ///
@@ -1145,6 +1211,48 @@ macro_rules! array_prepend {
 }
 pub use array_prepend as prepend;
 
+#[cfg(test)]
+mod array_prepend_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_prepend() {
+        let result = array::prepend!(vec![1, 2, 3], 4);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::prepend($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::prepend([1, 2, 3], 4)");
+    }
+
+    #[test]
+    fn test_array_prepend_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::prepend!(own_goals, 4);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::prepend(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::prepend(own_goals, 4)");
+    }
+
+    #[test]
+    fn test_array_prepend_param() {
+        let goals = Param::new("goals");
+
+        let result = array::prepend!(goals, 4);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::prepend($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::prepend($goals, 4)");
+    }
+}
+
 /// The array::push function appends a value to the end of an array.
 ///
 /// array::push(array, value) -> array
@@ -1197,6 +1305,49 @@ macro_rules! array_push {
     };
 }
 pub use array_push as push;
+
+#[cfg(test)]
+mod array_push_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_push() {
+        let result = array::push!(vec![1, 2, 3], 4);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::push($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::push([1, 2, 3], 4)");
+    }
+
+    #[test]
+    fn test_array_push_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::push!(own_goals, 4);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::push(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::push(own_goals, 4)");
+    }
+
+    #[test]
+    fn test_array_push_param() {
+        let goals = Param::new("goals");
+
+        let result = array::push!(goals, 4);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::push($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::push($goals, 4)");
+    }
+}
+
 /// The array::remove function removes an item from a specific position in an array.
 ///
 /// array::remove(array, number) -> array
@@ -1249,6 +1400,48 @@ macro_rules! array_remove {
 }
 pub use array_remove as remove;
 
+#[cfg(test)]
+mod array_remove_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_remove() {
+        let result = array::remove!(vec![1, 2, 3, 4, 5], 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::remove($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::remove([1, 2, 3, 4, 5], 2)");
+    }
+
+    #[test]
+    fn test_array_remove_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::remove!(own_goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::remove(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::remove(own_goals, 2)");
+    }
+
+    #[test]
+    fn test_array_remove_param() {
+        let goals = Param::new("goals");
+
+        let result = array::remove!(goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::remove($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::remove($goals, 2)");
+    }
+}
+
 /// The array::reverse function appends a value to the end of an array.
 ///
 /// array::reverse(array) -> array
@@ -1295,6 +1488,42 @@ macro_rules! array_reverse {
     };
 }
 pub use array_reverse as reverse;
+
+#[cfg(test)]
+mod array_reverse_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_reverse() {
+        let result = array::reverse!(vec![1, 2, 3, 4, 5]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::reverse($_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::reverse([1, 2, 3, 4, 5])");
+    }
+
+    #[test]
+    fn test_array_reverse_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::reverse!(own_goals);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::reverse(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::reverse(own_goals)");
+    }
+
+    #[test]
+    fn test_array_reverse_param() {
+        let goals = Param::new("goals");
+
+        let result = array::reverse!(goals);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::reverse($goals)");
+        assert_eq!(result.to_raw().build(), "array::reverse($goals)");
+    }
+}
 
 /// The array::sort function sorts an array in ascending or descending order.
 #[derive(Debug, Clone, PartialEq)]
@@ -1379,6 +1608,7 @@ macro_rules! array_sort {
 }
 pub use array_sort as sort;
 
+/// This module contains functions for sorting arrays.
 pub mod sort {
     use surrealdb::sql;
 
