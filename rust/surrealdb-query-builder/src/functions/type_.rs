@@ -88,15 +88,15 @@ create_type!(
     /// ```
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::bool(1234);
+    /// let result = type_::bool!(1234);
     /// assert_eq!(result.to_raw().build(), "type::bool(1234)");
     ///
     /// let bool_field = Field::new("bool_field");
-    /// let result = type_::bool(bool_field);
+    /// let result = type_::bool!(bool_field);
     /// assert_eq!(result.to_raw().build(), "type::bool(bool_field)");
     ///
     /// let bool_param = Param::new("bool_param");
-    /// let result = type_::bool(bool_param);
+    /// let result = type_::bool!(bool_param);
     /// assert_eq!(result.to_raw().build(), "type::bool($bool_param)");
     /// ```
     => 
@@ -114,15 +114,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::datetime("2022-04-27T18:12:27+00:00");
-    /// assert_eq!(result.to_raw().build(), "type::datetime('2022-04-27T18:12:27+00:00')");
+    /// let result = type_::datetime!("2022-04-27T00:00:00Z");
+    /// assert_eq!(result.to_raw().build(), "type::datetime('2022-04-27T00:00:00Z')");
     ///
     /// let datetime_field = Field::new("datetime_field");
-    /// let result = type_::datetime(datetime_field);
+    /// let result = type_::datetime!(datetime_field);
     /// assert_eq!(result.to_raw().build(), "type::datetime(datetime_field)");
     ///
     /// let datetime_param = Param::new("datetime_param");
-    /// let result = type_::datetime(datetime_param);
+    /// let result = type_::datetime!(datetime_param);
     /// assert_eq!(result.to_raw().build(), "type::datetime($datetime_param)");
     /// ```
     =>
@@ -148,15 +148,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::duration("1h");
-    /// assert_eq!(result.to_raw().build(), "type::duration('1h')");
+    /// let result = type_::duration!("1h");
+    /// assert_eq!(result.to_raw().build(), "type::duration(1h)");
     ///
     /// let duration_field = Field::new("duration_field");
-    /// let result = type_::duration(duration_field);
+    /// let result = type_::duration!(duration_field);
     /// assert_eq!(result.to_raw().build(), "type::duration(duration_field)");
     ///
     /// let duration_param = Param::new("duration_param");
-    /// let result = type_::duration(duration_param);
+    /// let result = type_::duration!(duration_param);
     /// assert_eq!(result.to_raw().build(), "type::duration($duration_param)");
     /// ```
     =>
@@ -178,15 +178,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::float(1234);
+    /// let result = type_::float!(1234);
     /// assert_eq!(result.to_raw().build(), "type::float(1234)");
     ///
     /// let float_field = Field::new("float_field");
-    /// let result = type_::float(float_field);
+    /// let result = type_::float!(float_field);
     /// assert_eq!(result.to_raw().build(), "type::float(float_field)");
     ///
     /// let float_param = Param::new("float_param");
-    /// let result = type_::float(float_param);
+    /// let result = type_::float!(float_param);
     /// assert_eq!(result.to_raw().build(), "type::float($float_param)");
     /// ```
     =>
@@ -205,15 +205,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::int(1234);
+    /// let result = type_::int!(1234);
     /// assert_eq!(result.to_raw().build(), "type::int(1234)");
     ///
     /// let int_field = Field::new("int_field");
-    /// let result = type_::int(int_field);
+    /// let result = type_::int!(int_field);
     /// assert_eq!(result.to_raw().build(), "type::int(int_field)");
     ///
     /// let int_param = Param::new("int_param");
-    /// let result = type_::int(int_param);
+    /// let result = type_::int!(int_param);
     /// assert_eq!(result.to_raw().build(), "type::int($int_param)");
     /// ```
     =>
@@ -232,15 +232,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::string(1234);
+    /// let result = type_::string!(1234);
     /// assert_eq!(result.to_raw().build(), "type::string(1234)");
     ///
     /// let string_field = Field::new("string_field");
-    /// let result = type_::string(string_field);
+    /// let result = type_::string!(string_field);
     /// assert_eq!(result.to_raw().build(), "type::string(string_field)");
     ///
     /// let string_param = Param::new("string_param");
-    /// let result = type_::string(string_param);
+    /// let result = type_::string!(string_param);
     /// assert_eq!(result.to_raw().build(), "type::string($string_param)");
     /// ```
     =>
@@ -259,15 +259,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::string(1234);
+    /// let result = type_::string!(1234);
     /// assert_eq!(result.to_raw().build(), "type::string(1234)");
     ///
     /// let string_field = Field::new("string_field");
-    /// let result = type_::string(string_field);
+    /// let result = type_::string!(string_field);
     /// assert_eq!(result.to_raw().build(), "type::string(string_field)");
     ///
     /// let string_param = Param::new("string_param");
-    /// let result = type_::string(string_param);
+    /// let result = type_::string!(string_param);
     /// assert_eq!(result.to_raw().build(), "type::string($string_param)");
     /// ```
     =>
@@ -286,15 +286,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::regex(1234);
-    /// assert_eq!(result.to_raw().build(), "type::regex(1234)");
+    /// let result = type_::regex!("/[A-Z]{3}/");
+    /// assert_eq!(result.to_raw().build(), "type::regex('/[A-Z]{3}/')");
     ///
     /// let regex_field = Field::new("regex_field");
-    /// let result = type_::regex(regex_field);
+    /// let result = type_::regex!(regex_field);
     /// assert_eq!(result.to_raw().build(), "type::regex(regex_field)");
     ///
     /// let regex_param = Param::new("regex_param");
-    /// let result = type_::regex(regex_param);
+    /// let result = type_::regex!(regex_param);
     /// assert_eq!(result.to_raw().build(), "type::regex($regex_param)");
     /// ```
     =>
@@ -313,15 +313,15 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_, statements::let_};
-    /// let result = type_::table(1234);
-    /// assert_eq!(result.to_raw().build(), "type::table(1234)");
+    /// let result = type_::table!("user");
+    /// assert_eq!(result.to_raw().build(), "type::table(user)");
     ///
     /// let table_field = Field::new("table_field");
-    /// let result = type_::table(table_field);
+    /// let result = type_::table!(table_field);
     /// assert_eq!(result.to_raw().build(), "type::table(table_field)");
     ///
     /// let table_param = let_("table_param").equal("user").get_param();
-    /// let result = type_::table(table_param);
+    /// let result = type_::table!(table_param);
     /// assert_eq!(result.to_raw().build(), "type::table($table_param)");
     /// ```
     =>
@@ -356,17 +356,17 @@ pub fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) ->
 /// ```rust
 /// # use surrealdb_query_builder as surreal_orm;
 /// use surreal_orm::{*, functions::type_, statements::let_};
-/// let result = type_::point(1234, 1234);
+/// let result = type_::point!(1234, 1234);
 /// assert_eq!(result.to_raw().build(), "type::point(1234, 1234)");
 ///
 /// let point1_field = Field::new("point1_field");
 /// let point2_field = Field::new("point2_field");
-/// let result = type_::point(point1_field, point2_field);
+/// let result = type_::point!(point1_field, point2_field);
 /// assert_eq!(result.to_raw().build(), "type::point(point1_field, point2_field)");
 ///
 /// let point1_param = let_("point1_param").equal(1234).get_param();
 /// let point2_param = let_("point2_param").equal(1234).get_param();
-/// let result = type_::point(point1_param, point2_param);
+/// let result = type_::point!(point1_param, point2_param);
 /// assert_eq!(result.to_raw().build(), "type::point($point1_param, $point2_param)");
 /// ```
 #[macro_export]
@@ -406,17 +406,17 @@ pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<Valuex>) -> Functi
 /// ```rust
 /// # use surrealdb_query_builder as surreal_orm;
 /// use surreal_orm::{*, functions::type_, statements::let_};
-/// let result = type_::thing("user", 1234);
+/// let result = type_::thing!("user", 1234);
 /// assert_eq!(result.to_raw().build(), "type::thing(user, 1234)");
 ///
 /// let table_field = Field::new("table_field");
 /// let value_field = Field::new("value_field");
-/// let result = type_::thing(table_field, value_field);
+/// let result = type_::thing!(table_field, value_field);
 /// assert_eq!(result.to_raw().build(), "type::thing(table_field, value_field)");
 ///
 /// let table_param = let_("table_param").equal("user").get_param();
 /// let value_param = let_("value_param").equal(1234).get_param();
-/// let result = type_::thing(table_param, value_param);
+/// let result = type_::thing!(table_param, value_param);
 /// assert_eq!(result.to_raw().build(), "type::thing($table_param, $value_param)");
 /// ```
 #[macro_export]
