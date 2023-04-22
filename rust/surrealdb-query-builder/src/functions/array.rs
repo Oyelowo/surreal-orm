@@ -603,6 +603,57 @@ macro_rules! array_flatten {
 }
 pub use array_flatten as flatten;
 
+/// The array::group function flattens and returns the unique items in an array.
+///
+/// array::group(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::group([1, 2, 3, 4, [3,5,6], [2,4,5,6], 7, 8, 8, 9]);
+/// [1,2,3,4,5,6,7,8,9]
+pub fn group_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+
+    Function {
+        query_string: format!("array::group({})", arr.build()),
+        bindings: arr.get_bindings(),
+    }
+}
+
+/// The array::group function flattens and returns the unique items in an array.
+///
+/// array::group(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::group([1, 2, 3, 4, [3,5,6], [2,4,5,6], 7, 8, 8, 9]);
+/// [1,2,3,4,5,6,7,8,9]
+///
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::group!(arr![1, 2, 3, 4, arr![3, 5, 6], arr![2, 4, 5, 6], 7, 8, 8, 9]);
+/// array::group!(array![1, 2, 3, 4, &[3, 5, 6], &[2, 4, 5, 6], 7, 8, 8, 9]);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::group!(own_goals_field);
+/// array::group!(goals_param);
+/// // It is also aliased as array_group;
+/// array_group!(arr![1, 2, 3, 4, arr![3, 5, 6], arr![2, 4, 5, 6], 7, 8, 8, 9]);
+/// ```
+/// # Output
+/// ```json
+/// [1,2,3,4,5,6,7,8,9]
+/// ```
+#[macro_export]
+macro_rules! array_group {
+    ( $arr:expr ) => {
+        $crate::functions::array::group_fn($arr)
+    };
+}
+pub use array_group as group;
+
 /// The array::len function calculates the length of an array, returning a number. This function
 /// includes all items when counting the number of items in the array. If you want to only count
 /// truthy values, then use the count() function.
