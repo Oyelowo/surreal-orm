@@ -33,7 +33,6 @@ fn create_fn_with_single_string_arg(
     }
 }
 
-#[macro_use]
 macro_rules! create_test_for_fn_with_single_arg {
     ($(#[$attr:meta])* => $module_name:expr, $function_name:expr, $arg:expr) => {
         ::paste::paste! {
@@ -114,7 +113,7 @@ pub mod email {
 
     create_test_for_fn_with_single_arg!(
         /// The parse::email::host function parses and returns and email host from a valid email address.
-        /// This function is also aliased as `parse_email_host`.
+        /// This function is also aliased as `parse_email_host!`.
         ///
         /// parse::email::host(string) -> value
         /// The following example shows this function, and its output, when used in a select statement:
@@ -133,19 +132,19 @@ pub mod email {
         /// # surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         ///
-        /// parse::email::host("oyelowo@codebreather.com");
+        /// parse::email::host!("oyelowo@codebreather.com");
         ///
         /// # let email_field = Field::new("email_field");
-        /// parse::email::host(email_field);
+        /// parse::email::host!(email_field);
         ///
         /// # let email_param = Param::new("email_param");
-        /// parse::email::host(email_param);
+        /// parse::email::host!(email_param);
         /// ```
         => "email", "host", "oyelowo@codebreather.com");
 
     create_test_for_fn_with_single_arg!(
         /// The parse::email::user function parses and returns and email username from a valid email address.
-        /// This function is also aliased as `parse_email_user`.
+        /// This function is also aliased as `parse_email_user!`.
         ///
         /// parse::email::user(string) -> value
         /// The following example shows this function, and its output, when used in a select statement:
@@ -163,48 +162,194 @@ pub mod email {
         /// # surrealdb_query_builder as surrealdb_orm;
         /// use surrealdb_orm::{*, functions::parse};
         ///
-        /// parse::email::user("oyelowo@codebreather.com");
+        /// parse::email::user!("oyelowo@codebreather.com");
         ///
         /// # let email_field = Field::new("email_field");
-        /// parse::email::user(email_field);
+        /// parse::email::user!(email_field);
         ///
         /// # let email_param = Param::new("email_param");
-        /// parse::email::user(email_param);
+        /// parse::email::user!(email_param);
         /// ```
         =>
         "email", "user", "oyelowo@codebreather.com");
 }
 
+/// This module contains functions for parsing URLs
 pub mod url {
     use super::create_fn_with_single_string_arg;
-    use crate::types::{Function, StrandLike};
 
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::domain function parses and returns the domain from a valid URL.
+        /// This function is also aliased as `parse_url_domain!`.
+        ///
+        /// parse::url::domain(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::domain("https://codebreather.com:443/topics?arg=value#fragment");
+        /// codebreather.com
+        /// ```
+        ///
+        /// # Arguments
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        ///
+        /// # Example
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::domain!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::domain!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::domain!(url_param);
+        /// ```
+        =>
         "url",
         "domain",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
+
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::fragment function parses and returns the fragment from a valid URL.
+        /// This function is also aliased as `parse_url_fragment!`.
+        ///
+        /// parse::url::fragment(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::fragment("https://codebreather.com:443/topics?arg=value#fragment");
+        /// fragment
+        /// ```
+        ///
+        /// # Arguments
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        ///
+        /// # Example
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::fragment!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::fragment!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::fragment!(url_param);
+        /// ```
+        =>
         "url",
         "fragment",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
+
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::host function parses and returns the hostname from a valid URL.
+        /// This function is also aliased as `parse_url_host!`.
+        ///
+        /// parse::url::host(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::host("https://codebreather.com:443/topics?arg=value#fragment");
+        /// codebreather.com
+        /// ```
+        /// # Arguments
+        ///
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        /// # Example
+        ///
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::host!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::host!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::host!(url_param);
+        /// ```
+        =>
         "url",
         "host",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::path function parses and returns the path from a valid URL.
+        /// This function is also aliased as `parse_url_path!`.
+        /// parse::url::path(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::path("https://codebreather.com:443/topics?arg=value#fragment");
+        /// /topics
+        /// ```
+        /// # Arguments
+        ///
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        ///
+        /// # Example
+        ///
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::path!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::path!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::path!(url_param);
+        /// ```
+        =>
         "url",
         "path",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
+
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::port function parses and returns the port from a valid URL.
+        /// This function is also aliased as `parse_url_port!`.
+        /// parse::url::port(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::port("https://codebreather.com:443/topics?arg=value#fragment");
+        /// 443
+        /// ```
+        /// # Arguments
+        ///
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        /// # Example
+        ///
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::port!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::port!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::port!(url_param);
+        /// ```
+        =>
         "url",
         "port",
         "https://codebreather.com:443/topics?arg=value#fragment"
     );
+
     create_test_for_fn_with_single_arg!(
+        /// The parse::url::protocol function parses and returns the query from a valid URL.
+        /// This function is also aliased as `parse_url_query!`.
+        /// parse::url::protocol(string) -> value
+        /// The following example shows this function, and its output, when used in a select statement:
+        /// ```sql
+        /// SELECT * FROM parse::url::query("https://codebreather.com:443/topics?arg=value#fragment");
+        /// arg=value
+        /// ```
+        /// # Arguments
+        ///
+        /// * `string` - A valid URL. Can be a field or a parameter representing the URL.
+        ///
+        /// # Example
+        /// ```rust
+        /// # surrealdb_query_builder as surrealdb_orm;
+        /// use surrealdb_orm::{*, functions::parse};
+        /// parse::url::query!("https://codebreather.com:443/topics?arg=value#fragment");
+        /// # let url_field = Field::new("url_field");
+        /// parse::url::query!(url_field);
+        /// # let url_param = Param::new("url_param");
+        /// parse::url::query!(url_param);
+        /// ```
+        =>
         "url",
         "query",
         "https://codebreather.com:443/topics?arg=value#fragment"
