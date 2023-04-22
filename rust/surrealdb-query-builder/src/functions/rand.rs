@@ -17,7 +17,8 @@
 // rand::string()	Generates and returns a random string
 // rand::time()	Generates and returns a random datetime
 // rand::uuid()	Generates and returns a random UUID
-//
+// rand::uuid::v4() Generates and returns a random Version 4 UUID
+// rand::uuid::v7() Generates and returns a random Version 7 UUID
 
 use surrealdb::sql;
 
@@ -25,6 +26,27 @@ use crate::traits::{Binding, Buildable, ToRaw};
 use crate::types::{Field, Function, NumberLike};
 use crate::{arr, array, Parametric};
 
+/// The rand function generates a random float, between 0 and 1.
+///
+/// rand() -> number
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM rand();
+/// 0.7062321084863658
+/// The following example shows this function being used in a SELECT statement with an ORDER BY clause:
+///
+/// SELECT * FROM [{ age: 33 }, { age: 45 }, { age: 39 }] ORDER BY rand();
+/// [
+/// 	{
+/// 		age: 45
+/// 	},
+/// 	{
+/// 		age: 39
+/// 	},
+/// 	{
+/// 		age: 33
+/// 	}
+/// ]
 pub fn rand_fn() -> Function {
     let query_string = format!("rand()");
 
@@ -34,6 +56,15 @@ pub fn rand_fn() -> Function {
     }
 }
 
+/// The `rand` function generates a random float, between 0 and 1.
+///
+/// # Example
+/// ```rust
+/// use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, functions::rand};
+///
+/// assert_eq!(rand!().to_raw().build(), "rand()");
+/// ```
 #[macro_export]
 macro_rules! rand_rand {
     () => {
@@ -58,16 +89,11 @@ pub(crate) fn create_fn_with_single_num_arg(
     }
 }
 
+/// This module contains functions that can be used when generating random data values.
 pub mod rand {
-    use crate::{
-        traits::Binding,
-        types::{Function, NumberLike},
-        Buildable, Parametric, Valuex,
-    };
+    use crate::{Buildable, Function, NumberLike, Parametric, Valuex};
 
-    use super::create_fn_with_single_num_arg;
-    use surrealdb::sql;
-
+    /// The rand::bool function generates a random boolean value.
     pub fn bool_fn() -> Function {
         let query_string = format!("rand::bool()");
 
@@ -77,6 +103,15 @@ pub mod rand {
         }
     }
 
+    /// The `rand::bool!` function generates a random boolean value.
+    /// The function is also aliased as `rand_bool!()`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::bool!().to_raw().build(), "rand::bool()");
+    /// ```
     #[macro_export]
     macro_rules! rand_bool {
         () => {
@@ -86,6 +121,7 @@ pub mod rand {
 
     pub use rand_bool as bool;
 
+    /// The rand::uuid function generates a random UUID.
     pub fn uuid_fn() -> Function {
         let query_string = format!("rand::uuid()");
 
@@ -95,6 +131,15 @@ pub mod rand {
         }
     }
 
+    /// The `rand::uuid!` function generates a random UUID.
+    /// The function is also aliased as `rand_uuid!()`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::uuid!().to_raw().build(), "rand::uuid()");
+    /// ```
     #[macro_export]
     macro_rules! rand_uuid {
         () => {
@@ -104,6 +149,7 @@ pub mod rand {
 
     pub use rand_uuid as uuid;
 
+    /// The rand::enum function generates a random value, from a multitude of values.
     pub fn enum_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
         let mut bindings = vec![];
 
@@ -124,6 +170,16 @@ pub mod rand {
         }
     }
 
+    /// The `rand::enum_!` function generates a random value, from a multitude of values.
+    /// The function is also aliased as `rand_enum_!()`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::enum!(1, 2, 3).to_raw().build(), "rand::enum(1, 2, 3)");
+    /// assert_eq!(rand::enum!(arr![1, 2, 3]).to_raw().build(), "rand::enum(1, 2, 3)");
+    /// ```
     #[macro_export]
     macro_rules! rand_enum {
         ( $val:expr ) => {
@@ -136,6 +192,12 @@ pub mod rand {
 
     pub use rand_enum as enum_;
 
+    /// The rand::float function generates a random float, between 0 and 1.
+    ///
+    /// rand::float() -> float
+    /// If two numbers are provided, then the function generates a random float, between two numbers.
+    ///
+    /// rand::float(number, number) -> float
     pub fn float_fn(
         from: Option<impl Into<NumberLike>>,
         to: Option<impl Into<NumberLike>>,
@@ -160,6 +222,32 @@ pub mod rand {
         }
     }
 
+    /// The `rand::float!` function generates a random float, between 0 and 1 if no arguments are
+    /// provided, otherwise it generates a random float between the two numbers provided.
+    ///
+    /// The function is also aliased as `rand_float!()`.
+    /// If you want to specify a range, you can pass the range as arguments.
+    ///
+    /// # Arguments
+    /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::float!().to_raw().build(), "rand::float()");
+    /// assert_eq!(rand::float!(1, 2).to_raw().build(), "rand::float(1, 2)");
+    ///
+    /// # let minimum_field = Field::new("minimum_field");
+    /// # let maximum_field = Field::new("maximum_field");
+    /// assert_eq!(rand::float!(minimum_field, maximum_field).to_raw().build(), "rand::float(minimum_field, maximum_field)");
+    ///
+    /// # let minimum_param = Param::new("minimum_param");
+    /// # let maximum_param = Param::new("maximum_param");
+    /// assert_eq!(rand::float!(minimum_param, maximum_param).to_raw().build(), "rand::float($minimum_param, $maximum_param)");
     #[macro_export]
     macro_rules! rand_float {
         () => {
@@ -175,6 +263,13 @@ pub mod rand {
 
     pub use rand_float as float;
 
+    /// The rand::int function generates a random int.
+    ///
+    /// rand::int() -> int
+    /// If two numbers are provided, then the function generates a random int, between two numbers.
+    ///
+    /// rand::int(number, number) -> int
+    /// The following examples show this function, and its output, when used in a select statement:
     pub fn int_fn(
         from: Option<impl Into<NumberLike>>,
         to: Option<impl Into<NumberLike>>,
@@ -199,6 +294,30 @@ pub mod rand {
         }
     }
 
+    /// Generates a random integer if no arguments are provided, otherwise it generates a random
+    /// integer between the two numbers provided.
+    /// The function is also aliased as `rand_int!()`.
+    /// If you want to specify a range, you can pass the range as arguments.
+    ///
+    /// # Arguments
+    /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::int!().to_raw().build(), "rand::int()");
+    /// assert_eq!(rand::int!(1, 2).to_raw().build(), "rand::int(1, 2)");
+    /// # let minimum_field = Field::new("minimum_field");
+    /// # let maximum_field = Field::new("maximum_field");
+    /// assert_eq!(rand::int!(minimum_field, maximum_field).to_raw().build(), "rand::int(minimum_field, maximum_field)");
+    /// # let minimum_param = Param::new("minimum_param");
+    /// # let maximum_param = Param::new("maximum_param");
+    /// assert_eq!(rand::int!(minimum_param, maximum_param).to_raw().build(), "rand::int($minimum_param, $maximum_param)");
+    /// ```
     #[macro_export]
     macro_rules! rand_int {
         () => {
@@ -213,6 +332,12 @@ pub mod rand {
     }
     pub use rand_int as int;
 
+    /// The rand::time function generates a random datetime.
+    ///
+    /// rand::time() -> datetime
+    /// The rand::time function generates a random datetime, between two unix timestamps.
+    ///
+    /// rand::time(number, number) -> datetime
     pub fn time_fn(
         from: Option<impl Into<NumberLike>>,
         to: Option<impl Into<NumberLike>>,
@@ -238,6 +363,30 @@ pub mod rand {
         }
     }
 
+    /// Generates a random datetime if no arguments are provided, otherwise it generates a random
+    /// datetime between the two unix timestamps provided.
+    /// The function is also aliased as `rand_time!()`.
+    /// If you want to specify a range, you can pass the range as arguments.
+    ///
+    /// # Arguments
+    /// * `from` - The minimum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    /// * `to` - The maximum value of the range. Can be a number, field or parameter reprsenting
+    /// the number.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    /// assert_eq!(rand::time!().to_raw().build(), "rand::time()");
+    /// assert_eq!(rand::time!(1, 2).to_raw().build(), "rand::time(1, 2)");
+    /// # let minimum_field = Field::new("minimum_field");
+    /// # let maximum_field = Field::new("maximum_field");
+    /// assert_eq!(rand::time!(minimum_field, maximum_field).to_raw().build(), "rand::time(minimum_field, maximum_field)");
+    /// # let minimum_param = Param::new("minimum_param");
+    /// # let maximum_param = Param::new("maximum_param");
+    /// assert_eq!(rand::time!(minimum_param, maximum_param).to_raw().build(), "rand::time($minimum_param, $maximum_param)");
+    /// ```
     #[macro_export]
     macro_rules! rand_time {
         () => {
@@ -252,6 +401,13 @@ pub mod rand {
     }
     pub use rand_time as time;
 
+    /// The rand::string function generates a random string, with 32 characters.
+    ///
+    /// rand::string() -> string
+    /// The rand::string function generates a random string, with a specific length.
+    ///
+    /// rand::string(number) -> string
+    /// If two numbers are provided, then the function generates a random string, with a length between two numbers.
     pub fn string_fn(
         from: Option<impl Into<NumberLike>>,
         to: Option<impl Into<NumberLike>>,
@@ -283,6 +439,33 @@ pub mod rand {
         }
     }
 
+    /// Generates a random string if no arguments are provided. If one argument is provided, then it
+    /// generates a random string with the length provided. If two arguments are provided, then it
+    /// generates a random string with a length between the two numbers provided.
+    /// The function is also aliased as `rand_string!()`.
+    ///
+    /// # Arguments
+    /// * `from` - The length of the string if one argument is provided. If two arguments are
+    /// provided, then it is the minimum length of the string. Can be a number, field or parameter
+    /// reprsenting the number.
+    /// * `to` - The maximum length of the string. Can be a number, field or parameter reprsenting
+    /// the number.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    ///
+    /// assert_eq!(rand::string!().to_raw().build(), "rand::string()");
+    /// assert_eq!(rand::string!(1).to_raw().build(), "rand::string(1)");
+    /// assert_eq!(rand::string!(1, 2).to_raw().build(), "rand::string(1, 2)");
+    /// # let minimum_field = Field::new("minimum_field");
+    /// # let maximum_field = Field::new("maximum_field");
+    /// assert_eq!(rand::string!(minimum_field, maximum_field).to_raw().build(), "rand::string(minimum_field, maximum_field)");
+    /// # let minimum_param = Param::new("minimum_param");
+    /// # let maximum_param = Param::new("maximum_param");
+    /// assert_eq!(rand::string!(minimum_param, maximum_param).to_raw().build(), "rand::string($minimum_param, $maximum_param)");
+    /// ```
     #[macro_export]
     macro_rules! rand_string {
         () => {
@@ -300,6 +483,10 @@ pub mod rand {
     }
     pub use rand_string as string;
 
+    /// The rand::guid function generates a 20-character random guid.
+    ///
+    /// rand::guid() -> string
+    /// If a number is provided, then the function generates a random guid, with a specific length.
     pub fn guid_fn(length: Option<impl Into<NumberLike>>) -> Function {
         match length {
             None => Function {
@@ -318,6 +505,27 @@ pub mod rand {
         }
     }
 
+    /// Generates a random guid if no arguments are provided. If one argument is provided, then it
+    /// generates a random guid with the length provided.
+    /// The function is also aliased as `rand_guid!()`.
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - The length of the guid. Can be a number, field or parameter reprsenting the
+    /// number.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, functions::rand};
+    ///
+    /// assert_eq!(rand::guid!().to_raw().build(), "rand::guid()");
+    /// assert_eq!(rand::guid!(1).to_raw().build(), "rand::guid(1)");
+    /// # let length_field = Field::new("length_field");
+    /// assert_eq!(rand::guid!(length_field).to_raw().build(), "rand::guid(length_field)");
+    /// # let length_param = Param::new("length_param");
+    /// assert_eq!(rand::guid!(length_param).to_raw().build(), "rand::guid($length_param)");
+    /// ```
     #[macro_export]
     macro_rules! rand_guid {
         () => {
