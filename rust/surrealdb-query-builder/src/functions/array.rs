@@ -1016,6 +1016,7 @@ macro_rules! array_reverse {
 }
 pub use array_reverse as reverse;
 
+/// The array::sort function sorts an array in ascending or descending order.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Ordering {
     /// Sort the array in ascending order.
