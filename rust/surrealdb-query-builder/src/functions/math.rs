@@ -333,12 +333,14 @@ create_test_for_fn_with_single_arg!(
 );
 
 macro_rules! create_test_for_fn_with_single_array_arg {
-    ($function_name: expr) => {
+    ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
+            $(#[$attr])*
             pub fn [<$function_name _fn>](number: impl Into<ArrayLike>) -> Function {
                 create_fn_with_single_array_arg(number, $function_name)
             }
 
+            $(#[$attr])*
             #[macro_export]
             macro_rules!  [<math_ $function_name>] {
                 ( $value:expr ) => {
@@ -419,8 +421,61 @@ macro_rules! create_test_for_fn_with_single_array_arg {
     };
 }
 
-create_test_for_fn_with_single_array_arg!("max");
-create_test_for_fn_with_single_array_arg!("mean");
+create_test_for_fn_with_single_array_arg!(
+/// The math::mean function returns the average of a set of numbers.
+/// This function is aliased as `math_max!`.
+/// math::mean(number) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::mean([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 24.432838
+///
+/// # Arguments
+/// * `number` - The number to be averaged. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+///
+/// math::mean!(vec![1, 2, 3, 4, 5]);
+/// math::mean!(arr![1, 2, 3, 4, 5]);
+/// math::mean!(array![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::mean!(scores_field);
+///
+/// let scores_param = Param::new("scores_param");
+/// math::mean!(scores_param);
+/// ```
+=> "mean"
+);
+
+create_test_for_fn_with_single_array_arg!(
+/// The math::median function returns the median of a set of numbers.
+/// This function is aliased as `math_median!`.
+/// math::median(number) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::median([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 23
+/// # Arguments
+/// * `number` - The number from which to calculate the median. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// # use surrealdb_orm::{*, math};
+/// math::median!(vec![1, 2, 3, 4, 5]);
+/// math::median!(arr![1, 2, 3, 4, 5]);
+/// math::median!(array![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::median!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::median!(scores_param);
+/// ```
+=> "median"
+);
+
 create_test_for_fn_with_single_array_arg!("median");
 create_test_for_fn_with_single_array_arg!("min");
 create_test_for_fn_with_single_array_arg!("product");
