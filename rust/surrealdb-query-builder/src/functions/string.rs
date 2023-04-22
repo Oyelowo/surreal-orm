@@ -25,7 +25,7 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::{Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
+use crate::{ArgsList, ArrayLike, Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
 
 fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name: &str) -> Function {
     let value: StrandLike = value.into();
@@ -336,23 +336,13 @@ macro_rules! string_concat {
 pub use string_concat as concat;
 
 /// The string::join function joins strings together with a delimiter.
-pub fn join_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
-    let mut bindings = vec![];
-
-    let values = values
-        .into_iter()
-        .map(|v| {
-            let v: Valuex = v.into();
-            bindings.extend(v.get_bindings());
-            v.build()
-        })
-        .collect::<Vec<_>>();
-
-    let query_string = format!("string::join({})", values.join(", "));
+pub fn join_fn(values: impl Into<ArgsList>) -> Function {
+    let values: ArgsList = values.into();
+    let query_string = format!("string::join({})", values.build());
 
     Function {
         query_string,
-        bindings,
+        bindings: values.get_bindings(),
     }
 }
 
