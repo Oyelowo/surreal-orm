@@ -11,9 +11,7 @@
 // Function	Description
 // time::day()	Extracts the day as a number from a datetime
 // time::floor()	Rounds a datetime down by a specific duration
-//
 // time::format() Outputs a datetime according to a specific format
-//
 // time::group()	Groups a datetime by a particular time interval
 // time::hour()	Extracts the hour as a number from a datetime
 // time::minute()	Extracts the minutes as a number from a datetime
@@ -22,9 +20,7 @@
 // time::now()	Returns the current datetime
 // time::round()	Rounds a datetime up by a specific duration
 // time::second()	Extracts the secs as a number from a datetime
-//
 // time::timezone() Returns the current local timezone offset in hours
-
 // time::unix()	Returns the number of seconds since the UNIX epoch
 // time::wday()	Extracts the week day as a number from a datetime
 // time::week()	Extracts the week as a number from a datetime
