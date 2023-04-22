@@ -557,6 +557,52 @@ macro_rules! array_distinct {
 }
 pub use array_distinct as distinct;
 
+/// The array::flatten flattens an array of arrays, returning a new array with all sub-array elements concatenated into it.
+///
+/// array::flatten(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::flatten([ [1,2], [3, 4], 'SurrealDB', [5, 6, [7, 8]] ]);
+/// [1, 2, 3, 4, 'SurrealDB', 5, 6, [7, 8]]
+pub fn flatten_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+
+    Function {
+        query_string: format!("array::flatten({})", arr.build()),
+        bindings: arr.get_bindings(),
+    }
+}
+
+/// The array::flatten flattens an array of arrays, returning a new array with all sub-array
+/// elements concatenated into it.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6, vec![7, 8]]]);
+/// array::flatten!(array![&[1, 2], &[3, 4], "SurrealDB", &[5, 6, &[7, 8]]]);
+///
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::flatten!(own_goals_field);
+/// array::flatten!(goals_param);
+/// // It is also aliased as array_flatten;
+/// array_flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6, vec![7, 8]]]);
+/// ```
+/// # Output
+/// ```json
+/// [1, 2, 3, 4, "SurrealDB", 5, 6, [7, 8]]
+/// ```
+#[macro_export]
+macro_rules! array_flatten {
+    ( $arr:expr ) => {
+        $crate::functions::array::flatten_fn($arr)
+    };
+}
+pub use array_flatten as flatten;
+
 /// The array::len function calculates the length of an array, returning a number. This function
 /// includes all items when counting the number of items in the array. If you want to only count
 /// truthy values, then use the count() function.
