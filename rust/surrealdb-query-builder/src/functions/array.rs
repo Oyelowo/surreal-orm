@@ -1509,7 +1509,7 @@ mod array_reverse_tests {
         let own_goals = Field::new("own_goals");
 
         let result = array::reverse!(own_goals);
-        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.get_bindings().len(), 0);
         assert_eq!(result.fine_tune_params(), "array::reverse(own_goals)");
         assert_eq!(result.to_raw().build(), "array::reverse(own_goals)");
     }
@@ -1519,7 +1519,7 @@ mod array_reverse_tests {
         let goals = Param::new("goals");
 
         let result = array::reverse!(goals);
-        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.get_bindings().len(), 0);
         assert_eq!(result.fine_tune_params(), "array::reverse($goals)");
         assert_eq!(result.to_raw().build(), "array::reverse($goals)");
     }
