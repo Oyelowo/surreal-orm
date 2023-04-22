@@ -166,6 +166,30 @@ macro_rules! array_all {
     };
 }
 pub use array_all as all;
+#[cfg(test)]
+mod all_tests {
+    use super::*;
+    use crate::{functions::array, Param};
+
+    #[test]
+    fn test_all_with_values() {
+        let result = array::all!(vec![1, 2, 3, 4, 5]);
+
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::all($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "array::all([1, 2, 3, 4, 5])");
+    }
+
+    #[test]
+    fn test_all_with_field() {
+        let numbers = Field::new("numbers");
+        let result = array::all!(numbers);
+
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::all(numbers)");
+        assert_eq!(result.to_raw().build(), "array::all(numbers)");
+    }
+}
 
 /// The array::any function checks whether any array values are truthy.
 ///
@@ -211,6 +235,30 @@ macro_rules! array_any {
     };
 }
 pub use array_any as any;
+#[cfg(test)]
+mod any_tests {
+    use super::*;
+    use crate::{functions::array, Param};
+
+    #[test]
+    fn test_any_with_values() {
+        let result = array::any!(vec![1, 2, 3, 4, 5]);
+
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(result.fine_tune_params(), "array::any($_param_00000001)");
+        assert_eq!(result.to_raw().build(), "array::any([1, 2, 3, 4, 5])");
+    }
+
+    #[test]
+    fn test_any_with_field() {
+        let numbers = Field::new("numbers");
+        let result = array::any!(numbers);
+
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::any(numbers)");
+        assert_eq!(result.to_raw().build(), "array::any(numbers)");
+    }
+}
 
 /// The array::append function appends a value to the end of an array.
 ///
@@ -265,6 +313,45 @@ macro_rules! array_append {
     };
 }
 pub use array_append as append;
+#[cfg(test)]
+mod append_tests {
+    use super::*;
+    use crate::{functions::array, Param};
+
+    #[test]
+    fn test_append_with_values() {
+        let result = array::append!(vec![1, 2, 3, 4, 5], 6);
+
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::append($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::append([1, 2, 3, 4, 5], 6)");
+    }
+
+    #[test]
+    fn test_append_with_field() {
+        let numbers = Field::new("numbers");
+        let value = Field::new("value");
+        let result = array::append!(numbers, value);
+
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::append(numbers, value)");
+        assert_eq!(result.to_raw().build(), "array::append(numbers, value)");
+    }
+
+    #[test]
+    fn test_append_with_param() {
+        let numbers = Field::new("numbers");
+        let value = Param::new("value");
+        let result = array::append!(numbers, value);
+
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::append(numbers, $value)");
+        assert_eq!(result.to_raw().build(), "array::append(numbers, $value)");
+    }
+}
 
 fn create_array_helper(
     arr1: impl Into<ArrayLike>,
