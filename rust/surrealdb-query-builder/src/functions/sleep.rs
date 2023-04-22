@@ -11,7 +11,7 @@
 // Function	Description
 // sleep(@duration)	Delays or pauses in the execution of a query or a batch of queries.
 
-use crate::{Buildable, DurationLike, Field, Function, Parametric};
+use crate::{Buildable, DurationLike, Function, Parametric};
 
 /// The SLEEP function is used to introduce a delay or pause in the execution of a query or a batch
 /// of queries for a specific amount of time.
