@@ -25,7 +25,7 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::{ArgsList, ArrayLike, Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
+use crate::{ArgsList, Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
 
 fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name: &str) -> Function {
     let value: StrandLike = value.into();
