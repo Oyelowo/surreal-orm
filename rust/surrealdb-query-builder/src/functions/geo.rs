@@ -351,10 +351,9 @@ pub mod hash {
 
 #[cfg(test)]
 mod tests {
-    use geo::{point, polygon, Polygon};
-
     use super::*;
     use crate::*;
+    use geo::{point, polygon};
 
     #[test]
     fn test_area_with_field() {
