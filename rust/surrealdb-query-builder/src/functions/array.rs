@@ -464,6 +464,11 @@ create_fn_with_two_array_args!(
 create_fn_with_two_array_args!(
     /// The array::intersect function calculates the values which intersect two arrays, returning a
     /// single array containing the values which are in both arrays.
+    /// array::intersect(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::intersect([1,2,3,4], [3,4,5,6]);
+    /// [3,4]
     ///
     /// # Arguments
     /// * `arr1` -  A vector, field or param.
@@ -763,6 +768,50 @@ macro_rules! array_len {
     };
 }
 pub use array_len as len;
+
+/// The array::pop function removes a value from the end of an array and returns it.
+///
+/// array::pop(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::pop([1,2,3,4]);
+/// 4
+pub fn pop_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+
+    Function {
+        query_string: format!("array::pop({})", arr.build()),
+        bindings: arr.get_bindings(),
+    }
+}
+
+/// The array::pop function removes a value from the end of an array and returns it.
+/// array::pop(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::pop([1,2,3,4]);
+/// 4
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::pop!(vec![1, 2, 3]);
+/// array::pop!(&[1, 2, 3]);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::pop!(own_goals_field);
+/// array::pop!(goals_param);
+/// // It is also aliased as array_pop;
+/// array_pop!(vec![1, 2, 3]);
+/// ```
+#[macro_export]
+macro_rules! array_pop {
+    ( $arr:expr ) => {
+        $crate::functions::array::pop_fn($arr)
+    };
+}
+pub use array_pop as pop;
 
 /// The ordering of the array.
 pub enum Ordering {
