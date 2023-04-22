@@ -61,7 +61,6 @@ pub fn area_fn(geometry: impl Into<GeometryLike>) -> Function {
 /// # Example
 ///
 /// ```rust
-/// extern crate geo;
 /// # use surrealdb_query_builder as  surrealdb_orm;
 /// use surrealdb_orm::{*, functions::geo};
 /// use ::geo::{LineString, Polygon};
@@ -92,10 +91,41 @@ macro_rules! geo_area {
 
 pub use geo_area as area;
 
+/// The geo::bearing function calculates the bearing between two geolocation points.
 pub fn bearing_fn(point1: impl Into<GeometryLike>, point2: impl Into<GeometryLike>) -> Function {
     create_geo_fn_with_two_args(point1, point2, "bearing")
 }
 
+/// The geo::bearing function calculates the bearing between two geolocation points.
+/// Also aliased as `geo_bearing!`.
+///
+/// # Arguments
+///
+/// * `point1` - The first point to calculate the bearing from. This can be a geometry, field, or parameter.
+/// * `point2` - The second point to calculate the bearing to. This can be a geometry, field, or parameter.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::geo};
+/// use ::geo::point;
+/// let point1 = point! {
+///     x: 40.02f64,
+///     y: 116.34,
+/// };
+/// let point2 = point! {
+///     x: 40.02f64,
+///     y: 116.34,
+/// };
+/// let result = geo::bearing!(point1, point2);
+/// assert_eq!(result.to_raw().build(), "geo::bearing((40.02, 116.34), (40.02, 116.34))");
+/// # let point1_field = Field::new("point1_field");
+/// # let point2_field = Field::new("point2_field");
+/// geo::bearing!(point1_field, point2_field);
+/// # let point1_param = Param::new("point1_param");
+/// # let point2_param = Param::new("point2_param");
+/// geo::bearing!(point1_param, point2_param);
+/// ```
 #[macro_export]
 macro_rules! geo_bearing {
     ( $point1:expr,  $point2:expr ) => {
