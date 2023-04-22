@@ -77,7 +77,7 @@ pub fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
 ///
 /// let numbers = Field::new("numbers");
 /// let value = Param::new("value");
-/// let result = array::add(numbers, value);
+/// let result = array::add!(numbers, value);
 ///
 /// assert_eq!(
 ///    result.to_raw().build(),
@@ -151,8 +151,8 @@ pub fn all_fn(arr: impl Into<ArrayLike>) -> Function {
 /// array::all!(&[1, 2, 3, 4, 5]);
 /// array::all!(arr![1, 2, 3, 4, 5]);
 ///
-/// let numbers = Field::new("numbers");
-/// let result = array::all(numbers);
+/// # let numbers_field = Field::new("numbers");
+/// let result = array::all!(numbers_field);
 ///
 /// assert_eq!(
 ///   result.to_raw().build(),
@@ -198,7 +198,7 @@ pub fn any_fn(arr: impl Into<ArrayLike>) -> Function {
 /// array::any!(arr![1, 2, 3, 4, 5]);
 ///
 /// let numbers = Field::new("numbers");
-/// let result = array::any(numbers);
+/// let result = array::any!(numbers);
 /// assert_eq!(
 ///  result.to_raw().build(),
 ///  "array::any(numbers)"
@@ -252,7 +252,7 @@ pub fn append_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Functio
 ///
 /// # let numbers = Field::new("numbers");
 /// # let value = Field::new("value");
-/// let result = array::append(numbers, value);
+/// let result = array::append!(numbers, value);
 /// assert_eq!(
 ///         result.to_raw().build(),
 ///         "array::append(numbers, value)"
@@ -615,15 +615,16 @@ pub fn flatten_fn(arr: impl Into<ArrayLike>) -> Function {
 /// ```rust
 /// # use surrealdb_query_builder as  surrealdb_orm;
 /// use surrealdb_orm::{*, functions::array};
-/// array::flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6, vec![7, 8]]]);
-/// array::flatten!(array![&[1, 2], &[3, 4], "SurrealDB", &[5, 6, &[7, 8]]]);
+/// array::flatten!(array![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
+/// array::flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
 ///
 /// # let own_goals_field = Field::new("own_goals_field");
 /// # let goals_param = Param::new("goals_param");
 /// array::flatten!(own_goals_field);
 /// array::flatten!(goals_param);
 /// // It is also aliased as array_flatten;
-/// array_flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6, vec![7, 8]]]);
+/// array_flatten!(arr![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
+/// array_flatten!(array![vec![1, 2], vec![3, 4], "SurrealDB", vec![5, 6]]);
 /// ```
 /// # Output
 /// ```json
@@ -667,14 +668,13 @@ pub fn group_fn(arr: impl Into<ArrayLike>) -> Function {
 /// ```rust
 /// # use surrealdb_query_builder as  surrealdb_orm;
 /// use surrealdb_orm::{*, functions::array};
-/// array::group!(arr![1, 2, 3, 4, arr![3, 5, 6], arr![2, 4, 5, 6], 7, 8, 8, 9]);
-/// array::group!(array![1, 2, 3, 4, &[3, 5, 6], &[2, 4, 5, 6], 7, 8, 8, 9]);
+/// array::group!(array![1, 2, 3, 4, array![3, 5, 6], vec![2, 4, 5, 6], 7, 8, 8, 9]);
 /// # let own_goals_field = Field::new("own_goals_field");
 /// # let goals_param = Param::new("goals_param");
 /// array::group!(own_goals_field);
 /// array::group!(goals_param);
 /// // It is also aliased as array_group;
-/// array_group!(arr![1, 2, 3, 4, arr![3, 5, 6], arr![2, 4, 5, 6], 7, 8, 8, 9]);
+/// array_group!(arr![1, 2, 3, 4, vec![3, 5, 6], vec![2, 4, 5, 6], 7, 8, 8, 9]);
 /// ```
 /// # Output
 /// ```json
