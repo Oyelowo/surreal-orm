@@ -42,7 +42,7 @@
 
 use std::fmt::Display;
 
-use crate::{ArrayLike, Field, Function, Valuex};
+use crate::{ArrayLike, Field, Function, NumberLike, Valuex};
 use crate::{Binding, BindingsList, Buildable, Parametric, ToRaw};
 
 /// The array::add function adds an item to an array only if it doesn't exist.
@@ -653,6 +653,75 @@ macro_rules! array_group {
     };
 }
 pub use array_group as group;
+
+/// The array::insert function inserts a value into an array at a specific position.
+///
+/// array::insert(array, value, number) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::insert([1,2,3,4], 5, 2);
+/// [1,2,5,3,4]
+pub fn insert_fn(
+    arr: impl Into<ArrayLike>,
+    value: impl Into<Valuex>,
+    index: impl Into<NumberLike>,
+) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: Valuex = value.into();
+    let index: NumberLike = index.into();
+
+    Function {
+        query_string: format!(
+            "array::insert({}, {}, {})",
+            arr.build(),
+            value.build(),
+            index.build()
+        ),
+        bindings: arr
+            .get_bindings()
+            .into_iter()
+            .chain(value.get_bindings())
+            .chain(index.get_bindings())
+            .collect(),
+    }
+}
+
+/// The array::insert function inserts a value into an array at a specific position.
+/// array::insert(array, value, number) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::insert([1,2,3,4], 5, 2);
+/// [1,2,5,3,4]
+///
+/// # Arguments
+///
+/// * `arr` -  A vector, `Field`, `Param`
+/// * `value` -  A value, `Field`, `Param`
+/// * `index` -  A number, `Field`, `Param`
+///
+/// # Examples
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::insert!(arr![1, 2, 3, 4], 5, 2);
+/// array::insert!(array![1, 2, 3, 4], 5, 2);
+/// # let own_goals_field = Field::new("own_goals_field");
+/// # let goals_param = Param::new("goals_param");
+/// array::insert!(own_goals_field, 5, 2);
+/// array::insert!(goals_param, 5, 2);
+/// // It is also aliased as array_insert;
+/// array_insert!(arr![1, 2, 3, 4], 5, 2);
+/// ```
+/// # Output
+/// ```json
+/// [1,2,5,3,4]
+/// ```
+#[macro_export]
+macro_rules! array_insert {
+    ( $arr:expr, $value:expr, $index:expr ) => {
+        $crate::functions::array::insert_fn($arr, $value, $index)
+    };
+}
+pub use array_insert as insert;
 
 /// The array::len function calculates the length of an array, returning a number. This function
 /// includes all items when counting the number of items in the array. If you want to only count
