@@ -9,22 +9,16 @@
 // array::all() Checks whether all array values are truthy
 // array::any() Checks whether any array value is truthy
 // array::append() Appends an item to the end of an array
-//
 // array::combine()	Combines all values from two arrays together
-//
-//array::complement() Returns the complement of two arrays
-//
+// array::complement() Returns the complement of two arrays
 // array::concat()	Returns the merged values from two arrays
 // array::difference()	Returns the difference between two arrays
 // array::distinct()	Returns the unique items in an array
-//
-//array::flatten() Flattens multiple arrays into a single array
+// array::flatten() Flattens multiple arrays into a single array
 // array::group() Flattens and returns the unique items in an array
 // array::insert() Inserts an item at the end of an array, or in a specific position
-//
 // array::intersect()	Returns the values which intersect two arrays
 // array::len()	Returns the length of an array
-//
 // array::max() Returns the maximum item in an array
 // array::min() Returns the minimum item in an array
 // array::pop() Returns the last item from an array
@@ -32,18 +26,15 @@
 // array::push() Appends an item to the end of an array
 // array::remove() Removes an item at a specific position from an array
 // array::reverse() Reverses the sorting order of an array
-//
-//
 // array::sort()	Sorts the values in an array in ascending or descending order
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
 // array::union()
-// struct Function(String);
 
 use std::fmt::Display;
 
-use crate::{ArrayLike, Field, Function, NumberLike, Valuex};
-use crate::{Binding, BindingsList, Buildable, Parametric, ToRaw};
+use crate::{ArrayLike, Function, NumberLike, Valuex};
+use crate::{Buildable, Parametric};
 
 /// The array::add function adds an item to an array only if it doesn't exist.
 /// array::add(array, value) -> array
@@ -94,8 +85,7 @@ pub use array_add as add;
 
 #[cfg(test)]
 mod add_tests {
-    use super::*;
-    use crate::{functions::array, Param};
+    use crate::{functions::array, *};
 
     #[test]
     fn test_add_with_values() {
@@ -169,7 +159,7 @@ pub use array_all as all;
 #[cfg(test)]
 mod all_tests {
     use super::*;
-    use crate::{functions::array, Param};
+    use crate::{functions::array, *};
 
     #[test]
     fn test_all_with_values() {
@@ -237,8 +227,7 @@ macro_rules! array_any {
 pub use array_any as any;
 #[cfg(test)]
 mod any_tests {
-    use super::*;
-    use crate::{functions::array, Param};
+    use crate::{functions::array, *};
 
     #[test]
     fn test_any_with_values() {
@@ -315,8 +304,7 @@ macro_rules! array_append {
 pub use array_append as append;
 #[cfg(test)]
 mod append_tests {
-    use super::*;
-    use crate::{functions::array, Param};
+    use crate::{functions::array, *};
 
     #[test]
     fn test_append_with_values() {
@@ -388,14 +376,14 @@ macro_rules! create_fn_with_two_array_args {
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
-                use super::*;
+                use $crate::{functions::array, *};
 
                 #[test]
                 fn [<test $function_name fn_on_array_macro_on_diverse_array>]() {
                     let age = Field::new("age");
-                    let arr1 = $crate::arr![1, "Oyelowo", age];
-                    let arr2 = $crate::arr![4, "dayo", 6];
-                    let result = $crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                    let arr1 = arr![1, "Oyelowo", age];
+                    let arr2 = arr![4, "dayo", 6];
+                    let result = functions::array::[<$function_name _fn>](arr1, arr2);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}([$_param_00000001, $_param_00000002, age], [$_param_00000003, $_param_00000004, $_param_00000005])", $function_name)
@@ -408,9 +396,9 @@ macro_rules! create_fn_with_two_array_args {
 
                 #[test]
                 fn [<test $function_name _fn_on_same_element_types>]() {
-                    let arr1 = $crate::arr![1, 2, 3];
-                    let arr2 = $crate::arr![4, 5, 6];
-                    let result = $crate::functions::array::[<$function_name _fn>](arr1, arr2);
+                    let arr1 = arr![1, 2, 3];
+                    let arr2 = arr![4, 5, 6];
+                    let result = array::[<$function_name _fn>](arr1, arr2);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003], \
@@ -426,9 +414,9 @@ macro_rules! create_fn_with_two_array_args {
                 #[test]
                 fn [<test $function_name _macro_on_array_macro_on_diverse_array>]() {
                     let age = Field::new("age");
-                    let arr1 = $crate::arr![1, "Oyelowo", age];
-                    let arr2 = $crate::arr![4, "dayo", 6];
-                    let result = $crate::functions::array::[<$function_name>]!(arr1, arr2);
+                    let arr1 = arr![1, "Oyelowo", age];
+                    let arr2 = arr![4, "dayo", 6];
+                    let result = array::[<$function_name>]!(arr1, arr2);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}([$_param_00000001, $_param_00000002, age], \
@@ -461,7 +449,7 @@ macro_rules! create_fn_with_two_array_args {
                 fn [<test $function_name _macro_on_fields>]() {
                     let students_ages = Field::new("students_ages");
                     let teachers_ages = Field::new("teachers_ages");
-                    let result = $crate::functions::array::[<$function_name>]!(students_ages, teachers_ages);
+                    let result = array::[<$function_name>]!(students_ages, teachers_ages);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("array::{}(students_ages, teachers_ages)", $function_name)
@@ -1690,7 +1678,7 @@ pub mod sort {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::arr;
+    use crate::*;
 
     #[test]
     fn test_distinct() {
