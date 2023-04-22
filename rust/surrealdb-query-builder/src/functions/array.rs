@@ -138,6 +138,51 @@ macro_rules! array_all {
 }
 pub use array_all as all;
 
+/// The array::any function checks whether any array values are truthy.
+///
+/// array::any(array) -> bool
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::any([1, 2, 3, NONE, 'SurrealDB', 5]);
+/// true
+pub fn any_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let mut bindings = vec![];
+    bindings.extend(arr.get_bindings());
+    Function {
+        query_string: format!("array::any({})", arr.build()),
+        bindings,
+    }
+}
+
+/// The array::any function checks whether any array values are truthy.
+///
+/// # Arguments
+/// * `arr` - The array to check. Could be an array, `Field` or `Param`
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::any!(vec![1, 2, 3, 4, 5]);
+/// array::any!(&[1, 2, 3, 4, 5]);
+/// array::any!(arr![1, 2, 3, 4, 5]);
+///
+/// let numbers = Field::new("numbers");
+/// let result = array::any(numbers);
+/// assert_eq!(
+///  result.to_raw().build(),
+///  "array::any(numbers)"
+///  );
+///  ```
+#[macro_export]
+macro_rules! array_any {
+    ( $arr:expr ) => {
+        $crate::functions::array::any_fn($arr)
+    };
+}
+pub use array_any as any;
+
 fn create_array_helper(
     arr1: impl Into<ArrayLike>,
     arr2: impl Into<ArrayLike>,
