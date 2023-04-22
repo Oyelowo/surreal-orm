@@ -5,12 +5,35 @@
  * Licensed under the MIT license
  */
 
+// array::add() Adds an item to an array if it doesn't exist
+// array::all() Checks whether all array values are truthy
+// array::any() Checks whether any array value is truthy
+// array::append() Appends an item to the end of an array
+//
 // array::combine()	Combines all values from two arrays together
+//
+//array::complement() Returns the complement of two arrays
+//
 // array::concat()	Returns the merged values from two arrays
 // array::difference()	Returns the difference between two arrays
 // array::distinct()	Returns the unique items in an array
+//
+//array::flatten() Flattens multiple arrays into a single array
+// array::group() Flattens and returns the unique items in an array
+// array::insert() Inserts an item at the end of an array, or in a specific position
+//
 // array::intersect()	Returns the values which intersect two arrays
 // array::len()	Returns the length of an array
+//
+// array::max() Returns the maximum item in an array
+// array::min() Returns the minimum item in an array
+// array::pop() Returns the last item from an array
+// array::prepend() Prepends an item to the beginning of an array
+// array::push() Appends an item to the end of an array
+// array::remove() Removes an item at a specific position from an array
+// array::reverse() Reverses the sorting order of an array
+//
+//
 // array::sort()	Sorts the values in an array in ascending or descending order
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
@@ -19,8 +42,101 @@
 
 use std::fmt::Display;
 
-use crate::{ArrayLike, Field, Function};
+use crate::{ArrayLike, Field, Function, Valuex};
 use crate::{Binding, BindingsList, Buildable, Parametric, ToRaw};
+
+/// The array::add function adds an item to an array only if it doesn't exist.
+/// array::add(array, value) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::add(["one", "two"], "three");
+/// ["one", "two", "three"]
+fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: Valuex = value.into();
+    let mut bindings = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    Function {
+        query_string: format!("array::add({}, {})", arr.build(), value.build()),
+        bindings,
+    }
+}
+
+/// The array::add function adds an item to an array only if it doesn't exist.
+/// # Arguments
+/// * `arr` - The array to add the value to. Could be an array, `Field` or `Param`
+/// * `value` - The value to add to the array. any supported surrealdb value, `Field` or `Param`
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::add!(vec![1, 2, 3], 4);
+/// array::add!(&[1, 2, 3], 4);
+/// array::add!(arr![1, "oyelowo", 3], 4);
+///
+/// let numbers = Field::new("numbers");
+/// let value = Param::new("value");
+/// let result = array::add(numbers, value);
+///
+/// assert_eq!(
+///    result.to_raw().build(),
+///    "array::add(numbers, $value)"
+/// );
+/// ```
+#[macro_export]
+macro_rules! array_add {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::add_fn($arr, $value)
+    };
+}
+pub use array_add as add;
+
+/// The array::all function checks whether all array values are truthy.
+///
+/// array::all(array) -> bool
+/// The following example shows this function, and its output, when used in a select statement:
+///
+/// SELECT * FROM array::all([1, 2, 3, NONE, 'SurrealDB', 5]);
+/// false
+pub fn all_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let mut bindings = vec![];
+    bindings.extend(arr.get_bindings());
+    Function {
+        query_string: format!("array::all({})", arr.build()),
+        bindings,
+    }
+}
+
+/// The array::all function checks whether all array values are truthy.
+///
+/// # Arguments
+/// * `arr` - The array to check. Could be an array, `Field` or `Param`
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::array};
+/// array::all!(vec![1, 2, 3, 4, 5]);
+/// array::all!(&[1, 2, 3, 4, 5]);
+/// array::all!(arr![1, 2, 3, 4, 5]);
+///
+/// let numbers = Field::new("numbers");
+/// let result = array::all(numbers);
+///
+/// assert_eq!(
+///   result.to_raw().build(),
+///   "array::all(numbers)"
+///   );
+///   ```
+#[macro_export]
+macro_rules! array_all {
+    ( $arr:expr ) => {
+        $crate::functions::array::all_fn($arr)
+    };
+}
+pub use array_all as all;
 
 fn create_array_helper(
     arr1: impl Into<ArrayLike>,
