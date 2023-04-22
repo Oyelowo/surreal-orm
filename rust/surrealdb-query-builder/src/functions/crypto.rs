@@ -15,6 +15,8 @@
 // crypto::sha512()	Returns the sha512 hash of a value
 // crypto::argon2::compare()	Compares an argon2 hash to a password
 // crypto::argon2::generate()	Generates a new argon2 hashed password
+// crypto::bcrypt::compare() Compares an bcrypt hash to a password
+// crypto::bcrypt::generate() Generates a new bcrypt hashed password
 // crypto::pbkdf2::compare()	Compares an pbkdf2 hash to a password
 // crypto::pbkdf2::generate()	Generates a new pbkdf2 hashed password
 // crypto::scrypt::compare()	Compares an scrypt hash to a password
@@ -252,6 +254,75 @@ pub mod argon2 {
         };
     }
     pub use crypto_argon2_generate as generate;
+}
+
+/// This module contains functions for working with the bcrypt hashing algorithm.
+pub mod bcrypt {
+    use super::{create_fn_with_single_value, create_fn_with_two_values};
+    use crate::{Function, StrandLike};
+
+    /// The crypto::bcrypt::compare function compares a hashed-and-salted bcrypt password value with an unhashed password value.
+    pub fn compare_fn(hash: impl Into<StrandLike>, pass: impl Into<StrandLike>) -> Function {
+        create_fn_with_two_values(hash, pass, "bcrypt::compare")
+    }
+
+    /// The crypto::bcrypt::compare function compares a hashed-and-salted bcrypt password value with an unhashed password value.
+    /// Also aliased as `crypto_bcrypt_compare!`.
+    ///
+    /// # Arguments
+    /// * `hash` - The hashed password value. Can also be a field or a param.
+    /// * `pass` - The unhashed password value. Can also be a field or a param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// let hash = let_("hash").equal("bcrypt_hash");
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// let result = crypto::bcrypt::compare!(hash.get_param(), pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::bcrypt::compare($hash, $pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::bcrypt::compare($hash, $pass)");
+    ///
+    /// let hash_field = Field::new("hash_field");
+    /// let result = crypto::bcrypt::compare!(hash_field, "Oyelowo");
+    /// assert_eq!(result.fine_tune_params(), "crypto::bcrypt::compare(hash_field, $_param_00000001)");
+    /// assert_eq!(result.to_raw().build(), "crypto::bcrypt::compare(hash_field, 'Oyelowo')");
+    /// ```
+    #[macro_export]
+    macro_rules! crypto_bcrypt_compare {
+        ( $value1:expr,  $value2:expr ) => {
+            $crate::functions::crypto::bcrypt::compare_fn($value1, $value2)
+        };
+    }
+    pub use crypto_bcrypt_compare as compare;
+
+    /// The crypto::bcrypt::generate function hashes and salts a password using the bcrypt hashing algorithm.
+    pub fn generate_fn(value: impl Into<StrandLike>) -> Function {
+        create_fn_with_single_value(value, "bcrypt::generate")
+    }
+
+    /// The crypto::bcrypt::generate function hashes and salts a password using the bcrypt hashing algorithm.
+    /// Also aliased as `crypto_bcrypt_generate!`.
+    /// # Arguments
+    /// * `value` - The password value to be hashed and salted. Can also be a field or a param.
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as  surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::let_, functions::crypto};
+    /// crypto::bcrypt::generate!("password from jupiter");
+    ///
+    /// let pass = let_("pass").equal("this is a strong password");
+    /// let result = crypto::bcrypt::generate!(pass.get_param());
+    /// assert_eq!(result.fine_tune_params(), "crypto::bcrypt::generate($pass)");
+    /// assert_eq!(result.to_raw().build(), "crypto::bcrypt::generate($pass)");
+    /// ```
+    #[macro_export]
+    macro_rules! crypto_bcrypt_generate {
+        ( $value1:expr) => {
+            $crate::functions::crypto::bcrypt::generate_fn($value1)
+        };
+    }
+    pub use crypto_bcrypt_generate as generate;
 }
 
 /// This module contains functions for working with the pbkdf2 hashing algorithm.
