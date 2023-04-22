@@ -748,3 +748,92 @@ fn test_scrypt_generate_fn() {
         "crypto::scrypt::generate('Oyelowo')"
     );
 }
+
+// bcrypt
+// Create all tests for bcrypt
+#[test]
+fn test_bcrypt_compare_with_param() {
+    let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    let pass = let_("pass").equal("the strongest password");
+
+    let result = bcrypt::compare_fn(hash.get_param(), pass.get_param());
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::compare($hash, $pass)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::compare($hash, $pass)"
+    );
+}
+
+#[test]
+fn test_bcrypt_generate() {
+    let result = bcrypt::generate_fn("Oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::generate($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::generate('Oyelowo')"
+    );
+}
+
+#[test]
+fn test_bcrypt_compare_macro_with_raw_values() {
+    let result = bcrypt::compare!("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA", "the strongest password");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::compare($_param_00000001, $_param_00000002)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::compare('$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA', 'the strongest password')"
+    );
+}
+
+#[test]
+fn test_bcrypt_compare_macro_with_fields() {
+    let hash = Field::new("hash");
+    let pass = Field::new("pass");
+
+    let result = bcrypt::compare!(hash, pass);
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::compare(hash, pass)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::compare(hash, pass)"
+    );
+}
+
+#[test]
+fn test_bcrypt_compare_macro_with_param() {
+    let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    let pass = let_("pass").equal("the strongest password");
+
+    let result = bcrypt::compare!(hash.get_param(), pass.get_param());
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::compare($hash, $pass)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::compare($hash, $pass)"
+    );
+}
+
+#[test]
+fn test_bcrypt_generate_fn() {
+    let result = bcrypt::generate!("Oyelowo");
+    assert_eq!(
+        result.fine_tune_params(),
+        "crypto::bcrypt::generate($_param_00000001)"
+    );
+    assert_eq!(
+        result.to_raw().build(),
+        "crypto::bcrypt::generate('Oyelowo')"
+    );
+}
