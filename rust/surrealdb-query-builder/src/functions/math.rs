@@ -22,7 +22,7 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
-use crate::{Buildable,ArrayLike, Function, NumberLike, Parametric};
+use crate::{ArrayLike, Buildable, Function, NumberLike, Parametric};
 
 fn create_fn_with_single_num_arg(number: impl Into<NumberLike>, function_name: &str) -> Function {
     let number: NumberLike = number.into();
@@ -65,7 +65,32 @@ pub fn fixed_fn(number: impl Into<NumberLike>, decimal_place: impl Into<NumberLi
     }
 }
 
-
+/// The math::fixed function returns a number with the specified number of decimal places.
+/// Also aliased as `math_fixed`
+/// math::fixed(number, number) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::fixed(13.146572, 2);
+/// 13.15
+///
+/// # Arguments
+/// * `number` - The number to be rounded. This can be a number or a field or a parameter.
+/// * `decimal_place` - The number of decimal places to round to. This can be a number or a field or a parameter.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::math};
+///
+/// math::fixed!(13.146572, 2);
+/// # let score_field = Field::new("score_field");
+/// # math::fixed!(score_field, 2);
+///
+/// let score_param = Param::new("score_param");
+/// math::fixed!(score_param, 2);
+///
+/// let decimal_place_param = Param::new("decimal_place_param");
+/// math::fixed!(13.146572, decimal_place_param);
+/// ```
 #[macro_export]
 macro_rules! math_fixed {
     ( $number:expr, $decimal_place:expr ) => {
@@ -97,12 +122,12 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             pub use [<math_ $function_name>] as [<$function_name>];
 
-            
+
             #[cfg(test)]
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
-            
+
                 #[test]
                 fn [<test_ $function_name _fn_with_field_data >] () {
                     let temparate = Field::new("temperature");
