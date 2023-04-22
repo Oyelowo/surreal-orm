@@ -51,7 +51,7 @@ use crate::{Binding, BindingsList, Buildable, Parametric, ToRaw};
 ///
 /// SELECT * FROM array::add(["one", "two"], "three");
 /// ["one", "two", "three"]
-fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+pub fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
     let arr: ArrayLike = arr.into();
     let value: Valuex = value.into();
     let mut bindings = vec![];
@@ -91,6 +91,35 @@ macro_rules! array_add {
     };
 }
 pub use array_add as add;
+
+#[cfg(test)]
+mod add_tests {
+    use super::*;
+    use crate::{functions::array, Param};
+
+    #[test]
+    fn test_add_with_values() {
+        let result = array::add!(vec![1, 2, 3], 4);
+
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::add($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::add([1, 2, 3], 4)");
+    }
+
+    #[test]
+    fn test_add_with_field_and_param() {
+        let numbers = Field::new("numbers");
+        let value = Param::new("value");
+        let result = array::add!(numbers, value);
+
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::add(numbers, $value)");
+        assert_eq!(result.to_raw().build(), "array::add(numbers, $value)");
+    }
+}
 
 /// The array::all function checks whether all array values are truthy.
 ///
