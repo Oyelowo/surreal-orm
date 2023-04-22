@@ -188,11 +188,149 @@ macro_rules! create_test_for_fn_with_single_arg {
     };
 }
 
-create_test_for_fn_with_single_arg!("abs");
-create_test_for_fn_with_single_arg!("ceil");
-create_test_for_fn_with_single_arg!("floor");
-create_test_for_fn_with_single_arg!("round");
-create_test_for_fn_with_single_arg!("sqrt");
+create_test_for_fn_with_single_arg!(
+    /// The math::abs function returns the absolute value of a number.
+    /// The function is also aliased as `math_abs!`
+    ///
+    /// math::abs(number) -> number
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM math::abs(13.746189);
+    /// 13
+    ///
+    /// # Arguments
+    /// * `number` - The number to get the absolute value of. The number can be a positive or negative value. Can be a number or field or param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::math};
+    ///
+    /// math::abs!(45.23);
+    /// # let score_field = Field::new("score_field");
+    /// # math::abs!(score_field);
+    ///
+    /// # let score_param = Param::new("score_param");
+    /// # math::abs!(score_param);
+    /// ```
+=>
+    "abs"
+);
+
+create_test_for_fn_with_single_arg!(
+    /// The math::ceil function rounds a number up to the next largest integer.
+    /// The function is also aliased as `math_ceil!`
+    ///
+    /// math::ceil(number) -> number
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM math::ceil(13.146572);
+    /// 14
+    ///
+    /// # Arguments
+    /// * `number` - The number to round up. The number can be a positive or negative value. Can be a number or field or param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::math};
+    ///
+    /// math::ceil!(45.23);
+    /// # let score_field = Field::new("score_field");
+    /// # math::ceil!(score_field);
+    ///
+    /// # let score_param = Param::new("score_param");
+    /// # math::ceil!(score_param);
+    /// ```
+=>
+    "ceil"
+);
+
+create_test_for_fn_with_single_arg!(
+    /// The math::floor function rounds a number down to the next largest integer.
+    /// The function is also aliased as `math_floor!`
+    ///
+    /// math::floor(number) -> number
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM math::floor(13.746189);
+    /// 13
+    ///
+    /// # Arguments
+    /// * `number` - The number to round down. The number can be a positive or negative value. Can be a number or field or param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::math};
+    ///
+    /// math::floor!(45.23);
+    /// # let score_field = Field::new("score_field");
+    /// # math::floor!(score_field);
+    ///
+    /// # let score_param = Param::new("score_param");
+    /// # math::floor!(score_param);
+    /// ```
+=>
+    "floor"
+);
+
+create_test_for_fn_with_single_arg!(
+    /// The math::round function rounds a number up or down to the nearest integer.
+    /// The function is also aliased as `math_round!`
+    ///
+    /// math::round(number) -> number
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM math::round(13.53124);
+    /// 14
+    ///
+    /// # Arguments
+    /// * `number` - The number to round. The number can be a positive or negative value. Can be a number or field or param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::math};
+    ///
+    /// math::round!(45.23);
+    /// # let score_field = Field::new("score_field");
+    /// # math::round!(score_field);
+    ///
+    /// # let score_param = Param::new("score_param");
+    /// # math::round!(score_param);
+    /// ```
+=>
+    "round"
+);
+
+create_test_for_fn_with_single_arg!(
+    /// The math::sqrt function returns the square root of a number.
+    ///
+    /// math::sqrt(number) -> number
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM math::sqrt(15);
+    /// 3.872983346207417
+    ///
+    /// # Arguments
+    /// * `number` - The number to get the square root of. The number can be a positive or negative value. Can be a number or field or param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::{*, functions::math};
+    ///
+    /// math::sqrt!(45.23);
+    /// # let score_field = Field::new("score_field");
+    /// # math::sqrt!(score_field);
+    ///
+    /// # let score_param = Param::new("score_param");
+    /// # math::sqrt!(score_param);
+    /// ```
+=>
+    "sqrt"
+);
 
 macro_rules! create_test_for_fn_with_single_array_arg {
     ($function_name: expr) => {
