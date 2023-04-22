@@ -18,7 +18,7 @@ pub enum CountArg {
 }
 
 impl From<Empty> for CountArg {
-    fn from(value: Empty) -> Self {
+    fn from(_value: Empty) -> Self {
         CountArg::Empty
     }
 }
@@ -203,7 +203,6 @@ mod tests {
 
     #[test]
     fn test_count_with_array() {
-        let email = Field::new("email");
         let result = count_fn(array![1, 2, 3, 4, 5, "4334", "Oyelowo"]);
         assert_eq!(result.fine_tune_params(), "count($_param_00000001)");
         assert_eq!(
