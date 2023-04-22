@@ -154,8 +154,8 @@ pub fn enum_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
 /// ```rust
 /// use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, functions::rand};
-/// assert_eq!(rand::enum!(1, 2, 3).to_raw().build(), "rand::enum(1, 2, 3)");
-/// assert_eq!(rand::enum!(arr![1, 2, 3]).to_raw().build(), "rand::enum(1, 2, 3)");
+/// assert_eq!(rand::enum_!(1, 2, 3).to_raw().build(), "rand::enum(1, 2, 3)");
+/// assert_eq!(rand::enum_!(arr![1, 2, 3]).to_raw().build(), "rand::enum(1, 2, 3)");
 /// ```
 #[macro_export]
 macro_rules! rand_enum {

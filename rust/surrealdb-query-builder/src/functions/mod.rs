@@ -16,6 +16,7 @@ pub mod http;
 pub mod math;
 pub mod parse;
 pub mod rand;
+pub use self::rand::rand;
 mod script;
 pub use script::*;
 pub mod session;
