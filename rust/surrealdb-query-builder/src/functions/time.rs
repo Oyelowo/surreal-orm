@@ -513,6 +513,7 @@ create_time_fn_with_single_datetime_arg!(
     "year"
 );
 
+/// The time::floor function rounds a datetime down by a specific duration.
 pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
     let duration: DurationLike = duration.into();
@@ -527,6 +528,44 @@ pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
     }
 }
 
+/// The time::floor function rounds a datetime down by a specific duration.
+/// The function is also aliased as `time_floor!`.
+///
+/// # Arguments
+/// * `datetime` - The datetime to round down. Could also be a field or a parameter representing a datetime.
+/// * `duration` - The duration to round down by. Could also be a field or a parameter representing a duration.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+///    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+///    chrono::Utc,
+/// );
+/// let duration = chrono::Duration::seconds(10);
+/// let result = time::floor!(dt, duration);
+/// assert_eq!(
+///   result.to_raw().build(),
+///   "time::floor('1970-01-01T00:01:01Z', 10s)"
+/// );
+///
+/// let rebirth_date = Field::new("rebirth_date");
+/// let duration = Field::new("duration");
+/// let result = time::floor!(rebirth_date, duration);
+/// assert_eq!(
+///  result.to_raw().build(),
+///  "time::floor(rebirth_date, duration)"
+///  );
+///  
+///  let param = Param::new("rebirth_date");
+///  let duration = Param::new("duration");
+///  let result = time::floor!(param, duration);
+///  assert_eq!(
+///     result.to_raw().build(),
+///     "time::floor($rebirth_date, $duration)"
+///  );
+///  ```
 #[macro_export]
 macro_rules! time_floor {
     ( $datetime:expr, $duration:expr ) => {
@@ -536,7 +575,8 @@ macro_rules! time_floor {
 
 pub use time_floor as floor;
 
-fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
+/// The time::round function rounds a datetime up by a specific duration.
+pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
     let duration: DurationLike = duration.into();
     let mut bindings = datetime.get_bindings();
@@ -548,6 +588,43 @@ fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>
     }
 }
 
+/// The time::round function rounds a datetime up by a specific duration.
+///
+/// The function is also aliased as `time_round!`.
+///
+/// # Arguments
+///
+/// * `datetime` - The datetime to round up. Could also be a field or a parameter representing a datetime.
+/// * `duration` - The duration to round up by. Could also be a field or a parameter representing a duration.
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+///   chrono::Utc,
+/// );
+/// let duration = chrono::Duration::seconds(10);
+/// let result = time::round!(dt, duration);
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::round('1970-01-01T00:01:01Z', 10s)"
+/// );
+/// let rebirth_date = Field::new("rebirth_date");
+/// let duration = Field::new("duration");
+/// let result = time::round!(rebirth_date, duration);
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::round(rebirth_date, duration)"
+/// );
+/// let param = Param::new("rebirth_date");
+/// let duration = Param::new("duration");
+/// let result = time::round!(param, duration);
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::round($rebirth_date, $duration)"
+/// );
+/// ```
 #[macro_export]
 macro_rules! time_round {
     ( $datetime:expr, $duration:expr ) => {
@@ -557,20 +634,59 @@ macro_rules! time_round {
 
 pub use time_round as round;
 
-fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLike>) -> Function {
+/// The time::group function reduces and rounds a datetime down to a particular time interval. The
+/// second argument must be a string, and can be one of the following values: year, month, day,
+/// hour, minute, second.
+pub fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
     let interval: StrandLike = interval.into();
     let mut bindings = datetime.get_bindings();
     bindings.extend(interval.get_bindings());
 
-    let query_string = format!("time::floor({}, {})", datetime.build(), interval.build());
+    let query_string = format!("time::group({}, {})", datetime.build(), interval.build());
 
     Function {
         query_string,
         bindings,
     }
 }
-// ::<$crate::functions::time::IntervalOrField>
+
+/// The time::group function reduces and rounds a datetime down to a particular time interval. The
+/// second argument must be a string, and can be one of the following values: year, month, day,
+/// hour, minute, second.
+/// The function is also aliased as `time_group!`.
+///
+/// # Arguments
+/// * `datetime` - The datetime to round down. Could also be a field or a parameter representing a datetime.
+/// * `interval` - The interval to round down to. Should be one of the following: year, month, day, hour, minute, second.
+///
+/// # Example
+/// ```rust
+/// # use surrealdb_query_builder as  surrealdb_orm;
+/// use surrealdb_orm::{*, functions::time};
+/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+///     chrono::Utc,
+/// );
+/// let result = time::group!(dt, "year");
+/// assert_eq!(
+///    result.to_raw().build(),
+///    "time::group('1970-01-01T00:01:01Z', "year")"
+/// );
+///
+/// let rebirth_date = Field::new("rebirth_date");
+/// let result = time::group!(rebirth_date, "year");
+/// assert_eq!(
+///   result.to_raw().build(),
+///   "time::group(rebirth_date, "year")"
+/// );
+///
+/// let param = Param::new("rebirth_date");
+/// let result = time::group!(param, "month");
+/// assert_eq!(
+///     result.to_raw().build(),
+///     "time::group($rebirth_date, "month")"
+///  );
 #[macro_export]
 macro_rules! time_group {
     ( $datetime:expr, "year" ) => {
@@ -713,11 +829,11 @@ macro_rules! test_group_with_interval {
                 let result = group!(dt, $interval);
                 assert_eq!(
                     result.fine_tune_params(),
-                    "time::floor($_param_00000001, $_param_00000002)"
+                    "time::group($_param_00000001, $_param_00000002)"
                 );
                 assert_eq!(
                     result.to_raw().build(),
-                    format!("time::floor('1970-01-01T00:01:01Z', '{}')", $interval)
+                    format!("time::group('1970-01-01T00:01:01Z', '{}')", $interval)
                 );
             }
         }
