@@ -163,6 +163,7 @@ impl FromMeta for Relate {
 //
 // }
 
+#[allow(missing_docs)]
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -238,11 +239,11 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     content_assert_fn: Option<syn::Path>,
-    // #[darling(default)]
-    // skip_serializing_if: ::darling::util::Ignored,
+    #[darling(default)]
+    skip_serializing_if: ::darling::util::Ignored,
 
-    // #[darling(default)]
-    // with: ::darling::util::Ignored,
+    #[darling(default)]
+    with: ::darling::util::Ignored,
 
     // #[darling(default)]
     // default: ::darling::util::Ignored,
