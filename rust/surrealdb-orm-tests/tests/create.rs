@@ -1,3 +1,5 @@
+// TODO: Validate in SurrealdbNode and Edge if id, skip_serializing_if = "Option::is_none" must be
+// set and if relate, skip_serializing
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
@@ -10,6 +12,7 @@ use surrealdb::engine::local::Mem;
 use surrealdb::sql;
 use surrealdb::Surreal;
 use surrealdb_orm::statements::insert;
+use surrealdb_orm::statements::select;
 use surrealdb_orm::{statements::create, *};
 
 // Alien
@@ -17,7 +20,7 @@ use surrealdb_orm::{statements::create, *};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
-    #[surrealdb(skip_serializing)]
+    #[serde(skip_serializing)]
     id: Option<sql::Thing>,
     name: String,
     age: u8,
@@ -80,6 +83,8 @@ pub struct Planet {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
+    // #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     id: Option<sql::Thing>,
     name: String,
     created: DateTime<Utc>,
@@ -111,13 +116,6 @@ pub enum Shape {
     Triangle,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-struct TwoFields {
-    #[serde(skip_serializing)]
-    a: Option<String>,
-    b: String,
-}
-
 #[tokio::test]
 async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -128,6 +126,7 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         id: None,
         name: "Laser".to_string(),
         created: Utc::now(),
+        ..Default::default()
     };
 
     let space_ship = SpaceShip {
@@ -142,16 +141,34 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
-    let two_fields = TwoFields {
-        a: Some("a".to_string()),
-        b: "b".to_string(),
-    };
-    assert_eq!(
-        serde_json::to_string(&weapon).unwrap(),
-        r#"{"id":null,"type":"record(weapon)"}"#
-    );
-    // let created_weapon = create(weapon).return_one(db.clone()).await?;
-    // assert_eq!(created_weapon.unwrap().name, "Lase");
+    // let created_weapon = create(weapon.clone()).return_one(db.clone()).await?;
+    // let select1: Vec<Weapon> = select(All)
+    //     .from(Weapon::table_name())
+    //     .return_many(db.clone())
+    //     .await?;
+    // assert_eq!(select1.len(), 1);
+    //
+    // let created_weapon = create(weapon.clone()).return_one(db.clone()).await?;
+    // let select2: Vec<Weapon> = select(All)
+    //     .from(Weapon::table_name())
+    //     .return_many(db.clone())
+    //     .await?;
+    // assert_eq!(select2.len(), 2);
+
+    insert(vec![weapon.clone(), weapon.clone()])
+        .return_many(db.clone())
+        .await?;
+
+    let select2: Vec<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_many(db.clone())
+        .await?;
+
+    let select2: Vec<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_many(db.clone())
+        .await?;
+    assert_eq!(select2.len(), 4);
 
     // let inserted_space_ships = insert(vec![space_ship, space_ship2])
     //     .return_many(db.clone())
