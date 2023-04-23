@@ -1,0 +1,6 @@
+[book]
+authors = ["Oyelowo Oyelowo"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Surrealdb ORM"
