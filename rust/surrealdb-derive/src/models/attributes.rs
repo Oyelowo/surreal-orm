@@ -7,18 +7,15 @@
 
 use std::{ops::Deref, str::FromStr};
 
-use darling::{
-    ast::{self, Data},
-    util, FromDeriveInput, FromField, FromMeta, ToTokens,
-};
+use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta};
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{FieldType, LinkOne};
+use surrealdb_query_builder::FieldType;
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name, parse_lit_to_tokenstream,
-    relations::{NodeTableName, NodeTypeName},
+    relations::NodeTypeName,
     variables::VariablesModelMacro,
 };
 use quote::{format_ident, quote};
@@ -47,7 +44,7 @@ impl FromMeta for Rename {
             serialize: String,
 
             #[darling(default)]
-            deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
+            _deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
         }
 
         impl From<FullRename> for Rename {
@@ -165,6 +162,7 @@ impl FromMeta for Relate {
 //     value > 5
 //
 // }
+
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -240,12 +238,12 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     content_assert_fn: Option<syn::Path>,
+    // #[darling(default)]
+    // skip_serializing_if: ::darling::util::Ignored,
 
-    #[darling(default)]
-    skip_serializing_if: ::darling::util::Ignored,
+    // #[darling(default)]
+    // with: ::darling::util::Ignored,
 
-    #[darling(default)]
-    with: ::darling::util::Ignored,
     // #[darling(default)]
     // default: ::darling::util::Ignored,
 }
@@ -961,8 +959,8 @@ impl FromMeta for PermissionsFn {
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
     pub(crate) ident: syn::Ident,
-    pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
+    // pub(crate) attrs: Vec<syn::Attribute>,
+    // pub(crate) generics: syn::Generics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     pub data: Data<util::Ignored, self::MyFieldReceiver>,
@@ -1004,11 +1002,6 @@ pub struct TableDeriveAttributes {
 impl TableDeriveAttributes {
     pub fn get_table_definition_token(&self) -> TokenStream {
         let TableDeriveAttributes {
-            ident: ref struct_name_ident,
-            ref data,
-            ref rename_all,
-            ref table_name,
-            ref relax_table_name,
             ref drop,
             ref schemafull,
             ref as_,
@@ -1022,13 +1015,13 @@ impl TableDeriveAttributes {
 
         let crate_name = super::get_crate_name(false);
 
-        if ((define_fn.is_some() || define.is_some())
+        if (define_fn.is_some() || define.is_some())
             && (drop.is_some()
                 || as_.is_some()
                 || as_fn.is_some()
                 || schemafull.is_some()
                 || permissions.is_some()
-                || permissions_fn.is_some()))
+                || permissions_fn.is_some())
         {
             panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
@@ -1054,7 +1047,7 @@ impl TableDeriveAttributes {
             (None, None) => (),
         };
 
-        if let Some(drop) = drop {
+        if let Some(_drop) = drop {
             define_table_methods.push(quote!(.drop()))
         }
 
@@ -1070,7 +1063,7 @@ impl TableDeriveAttributes {
             (None, None) => (),
         };
 
-        if let Some(schemafull) = schemafull {
+        if let Some(_schemafull) = schemafull {
             define_table_methods.push(quote!(.schemafull()))
         }
 
