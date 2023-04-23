@@ -15,13 +15,11 @@
 use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::json;
-use surrealdb::sql;
 
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbNode},
     types::Updateables,
-    ReturnableDefault,
+    ErrorList, ReturnableDefault,
 };
 
 use super::SelectStatement;
@@ -37,6 +35,7 @@ where
     bindings: BindingsList,
     field_names: Vec<String>,
     node_type: PhantomData<T>,
+    errors: ErrorList,
 }
 
 /// Creates a new INSERT SQL statement for a given type.
@@ -79,21 +78,24 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     let mut field_names = vec![];
+    let mut errors = vec![];
     let insertables: Insertables<T> = insertables.into();
     let mut select_query = None;
 
     let bindings = match insertables {
         Insertables::Node(node) => {
-            let (fnms, bindings) = create_bindings_for_node(&node);
-            field_names = fnms;
-            bindings
+            let node_bindings = create_bindings_for_node(&node);
+            field_names = node_bindings.field_names;
+            errors = node_bindings.errors;
+            node_bindings.bindings
         }
         Insertables::Nodes(nodes) => nodes
             .into_iter()
             .flat_map(|n| {
-                let (fnms, bindings) = create_bindings_for_node(&n);
-                field_names = fnms;
-                bindings
+                let node_bindings = create_bindings_for_node(&n);
+                errors.extend(node_bindings.errors);
+                field_names = node_bindings.field_names;
+                node_bindings.bindings
             })
             .collect::<Vec<_>>(),
         Insertables::FromQuery(query) => {
@@ -108,13 +110,20 @@ where
         select_query_string: select_query,
         on_duplicate_key_update: vec![],
         field_names,
-
+        errors,
         node_type: PhantomData,
     }
 }
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
-impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Erroneous for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> ReturnableDefault<T> for InsertStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbNode
@@ -181,25 +190,52 @@ where
     }
 }
 
-fn create_bindings_for_node<T>(node: &T) -> (Vec<String>, BindingsList)
+struct NodeBindings {
+    field_names: Vec<String>,
+    bindings: BindingsList,
+    errors: Vec<String>,
+}
+fn create_bindings_for_node<T>(node: &T) -> NodeBindings
 where
     T: SurrealdbNode + DeserializeOwned + Serialize,
 {
-    let value = node;
-    // let field_names = T::get_serializable_field_names();
-    let field_names = get_field_names(&value);
+    let mut errors = vec![];
+    let value = serde_json::to_value(node).ok().map_or_else(
+        || {
+            errors.push("Unable to convert node to json".to_string());
+            serde_json::Value::Null
+        },
+        |v| v,
+    );
+    let object = value.as_object().map_or_else(
+        || {
+            errors.push("Unable to convert node to json object".to_string());
+            serde_json::Map::new()
+        },
+        |v| v.to_owned(),
+    );
 
-    let xx = field_names
+    let (field_names, bindings): (Vec<String>, BindingsList) = object
         .iter()
-        .map(|field_name| {
-            let field_value = get_field_value(value, &field_name)
-                .expect("Unable to get value name. This should never happen!");
-            dbg!(&field_value);
-            dbg!(&field_name);
-            dbg!(Binding::new(field_value).with_name(field_name.into()))
+        .map(|(key, value1)| {
+            let value = value1.as_str().map_or_else(
+                || {
+                    errors.push(format!("Unable to convert value to string for key {}", key));
+                    ""
+                },
+                |v| v,
+            );
+
+            let binding = Binding::new(value).with_name(key.into());
+            (key.to_string(), binding)
         })
-        .collect::<Vec<_>>();
-    (field_names, xx)
+        .unzip();
+
+    NodeBindings {
+        field_names,
+        bindings,
+        errors,
+    }
 }
 
 impl<T> InsertStatement<T>
@@ -293,28 +329,4 @@ where
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
-}
-
-fn get_field_value<T: Serialize>(
-    value: &T,
-    field_name: &str,
-) -> Result<surrealdb::sql::Value, String>
-where
-    T: serde::Serialize,
-{
-    let whole_struct = json!(value);
-    Ok(sql::json(&whole_struct[field_name].to_string())?)
-}
-
-fn get_field_names<T>(value: &T) -> Vec<String>
-where
-    T: serde::Serialize,
-{
-    serde_json::to_value(value)
-        .unwrap()
-        .as_object()
-        .unwrap()
-        .keys()
-        .map(ToString::to_string)
-        .collect()
 }
