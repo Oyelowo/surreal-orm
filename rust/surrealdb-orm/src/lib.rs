@@ -183,7 +183,15 @@
 #![recursion_limit = "256"]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-pub use surrealdb_derive::*;
+#[doc = include_str!("docs/surrealdb_edge.md")]
+pub use surrealdb_derive::SurrealdbEdge;
+
+#[doc = include_str!("docs/surrealdb_node.md")]
+pub use surrealdb_derive::SurrealdbNode;
+
+#[doc = include_str!("docs/surrealdb_object.md")]
+pub use surrealdb_derive::SurrealdbObject;
+
 pub use surrealdb_query_builder::*;
 
 #[test]
