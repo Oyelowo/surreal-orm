@@ -15,6 +15,7 @@
 use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::sql;
 
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbNode},
@@ -219,10 +220,10 @@ where
     let (field_names, bindings): (Vec<String>, BindingsList) = object
         .iter()
         .map(|(key, value1)| {
-            let value = value1.as_str().map_or_else(
+            let value = sql::json(&value1.to_string()).ok().map_or_else(
                 || {
-                    errors.push(format!("Unable to convert value to string for key {}", key));
-                    ""
+                    errors.push(format!("Unable to convert value to json {}", value1));
+                    sql::Value::Null
                 },
                 |v| v,
             );
