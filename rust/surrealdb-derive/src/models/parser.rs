@@ -15,16 +15,16 @@ use convert_case::{Case, Casing};
 use darling::{ast, util, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::parse_quote;
 
 use super::{
-    attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate, FieldTypeWrapper},
+    attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
     get_crate_name,
     relations::{EdgeDirection, RelateAttribute, RelationType, NodeTypeName},
-    variables::VariablesModelMacro, parse_lit_to_tokenstream, 
+    variables::VariablesModelMacro 
 };
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 struct NodeEdgeMetadata {
     /// Example value: writes
@@ -535,7 +535,6 @@ impl NodeEdgeMetadataStore {
         let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
         let relation_attributes = RelateAttribute::from(relation);
         let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
-        let ref edge_table_name_str = format!("{}", &edge_table_name);
         
         let ref destination_node_table_name =
             TokenStream::from(&relation_attributes.node_table_name);
@@ -660,7 +659,6 @@ impl NodeEdgeMetadataStore {
                     imports,
                     edge_name_as_method_ident,
                     edge_table_name,
-                    destination_node_name,
                     ..
             }: &NodeEdgeMetadata = value;
             
