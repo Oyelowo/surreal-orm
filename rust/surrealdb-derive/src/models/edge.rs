@@ -170,6 +170,7 @@ impl ToTokens for EdgeToken {
                     }
                 }
                 
+                #[allow(non_snake_case)]
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
                     use #crate_name::Parametric as _;

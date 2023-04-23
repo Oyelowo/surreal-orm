@@ -186,6 +186,7 @@ impl ToTokens for NodeToken{
                 }
             }
             
+            #[allow(non_snake_case)]
             pub mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
@@ -198,6 +199,7 @@ impl ToTokens for NodeToken{
                #( #imports_referenced_node_schema) *
                 
 
+                #[allow(non_snake_case)]
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *

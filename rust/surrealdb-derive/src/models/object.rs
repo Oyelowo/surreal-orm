@@ -105,6 +105,7 @@ impl ToTokens for ObjectToken{
                 }
             }
 
+            #[allow(non_snake_case)]
             pub mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
