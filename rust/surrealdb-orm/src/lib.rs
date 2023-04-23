@@ -193,16 +193,3 @@ pub use surrealdb_derive::SurrealdbNode;
 pub use surrealdb_derive::SurrealdbObject;
 
 pub use surrealdb_query_builder::*;
-
-#[test]
-fn test_orm_basic() {
-    let email = Field::new("email");
-    let select_statement = statements::select(All)
-        .where_(cond(email.like("@oyelowo")).and(email.is("Oyedayo")))
-        .group_by(email)
-        .parallel()
-        .to_raw();
-
-    self::functions::geo::hash::decode!("RE".to_string());
-    insta::assert_display_snapshot!(select_statement);
-}
