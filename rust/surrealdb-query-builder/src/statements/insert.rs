@@ -35,6 +35,7 @@ where
     // You can select values to copy data from an existing table into a new one
     select_query_string: Option<String>,
     bindings: BindingsList,
+    field_names: Vec<String>,
     node_type: PhantomData<T>,
 }
 
@@ -77,17 +78,23 @@ pub fn insert<T>(insertables: impl Into<Insertables<T>>) -> InsertStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
+    let mut field_names = vec![];
     let insertables: Insertables<T> = insertables.into();
     let mut select_query = None;
 
     let bindings = match insertables {
         Insertables::Node(node) => {
-            let bindings = create_bindings_for_node(&node);
+            let (fnms, bindings) = create_bindings_for_node(&node);
+            field_names = fnms;
             bindings
         }
         Insertables::Nodes(nodes) => nodes
             .into_iter()
-            .flat_map(|n| create_bindings_for_node(&n))
+            .flat_map(|n| {
+                let (fnms, bindings) = create_bindings_for_node(&n);
+                field_names = fnms;
+                bindings
+            })
             .collect::<Vec<_>>(),
         Insertables::FromQuery(query) => {
             let bindings = query.get_bindings();
@@ -100,6 +107,8 @@ where
         bindings,
         select_query_string: select_query,
         on_duplicate_key_update: vec![],
+        field_names,
+
         node_type: PhantomData,
     }
 }
@@ -123,6 +132,7 @@ where
 
 /// Things that can be inserted including a single or list of surrealdb nodes or a select statement
 /// when copying from a table to another table.
+#[derive(Debug)]
 pub enum Insertables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
@@ -171,21 +181,25 @@ where
     }
 }
 
-fn create_bindings_for_node<T>(node: &T) -> BindingsList
+fn create_bindings_for_node<T>(node: &T) -> (Vec<String>, BindingsList)
 where
     T: SurrealdbNode + DeserializeOwned + Serialize,
 {
     let value = node;
-    let field_names = T::get_serializable_field_names();
+    // let field_names = T::get_serializable_field_names();
+    let field_names = get_field_names(&value);
 
-    field_names
-        .into_iter()
+    let xx = field_names
+        .iter()
         .map(|field_name| {
             let field_value = get_field_value(value, &field_name)
                 .expect("Unable to get value name. This should never happen!");
-            Binding::new(field_value).with_name(field_name.into())
+            dbg!(&field_value);
+            dbg!(&field_name);
+            dbg!(Binding::new(field_value).with_name(field_name.into()))
         })
-        .collect::<Vec<_>>()
+        .collect::<Vec<_>>();
+    (field_names, xx)
 }
 
 impl<T> InsertStatement<T>
@@ -245,12 +259,12 @@ where
         if let Some(query_select) = &self.select_query_string {
             query = format!("{query} ({})", &query_select.trim_end_matches(";"));
         } else {
-            let field_names = T::get_serializable_field_names();
+            let field_names = self.field_names.clone();
 
             let placeholders = self
                 .bindings
                 .iter()
-                .map(|b| format!("{}", b.get_param_dollarised()))
+                .map(|b| b.get_param_dollarised())
                 .collect::<Vec<_>>()
                 .chunks_exact(field_names.len())
                 .map(|fields_values_params_list| {
@@ -290,4 +304,17 @@ where
 {
     let whole_struct = json!(value);
     Ok(sql::json(&whole_struct[field_name].to_string())?)
+}
+
+fn get_field_names<T>(value: &T) -> Vec<String>
+where
+    T: serde::Serialize,
+{
+    serde_json::to_value(value)
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(ToString::to_string)
+        .collect()
 }

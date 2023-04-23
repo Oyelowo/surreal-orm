@@ -130,6 +130,7 @@ impl ToTokens for EdgeToken {
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _, Raw};
                         
+                #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
@@ -145,11 +146,13 @@ impl ToTokens for EdgeToken {
                         record_id
                     }
                     
+                #[allow(non_snake_case)]
                 fn get_table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
                 }
         
+                #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbModel for #struct_name_ident<In, Out> {
                     fn table_name() -> #crate_name::Table {
                         #table_name_str.into()
