@@ -101,6 +101,7 @@ where
         Insertables::FromQuery(query) => {
             let bindings = query.get_bindings();
             select_query = Some(query.build());
+            errors.extend(query.get_errors());
             bindings
         }
     };
