@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+#![allow(dead_code)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
@@ -163,7 +165,6 @@ impl FromMeta for Relate {
 //
 // }
 
-#[allow(missing_docs)]
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -239,12 +240,12 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     content_assert_fn: Option<syn::Path>,
+
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
 
     #[darling(default)]
     with: ::darling::util::Ignored,
-
     // #[darling(default)]
     // default: ::darling::util::Ignored,
 }
@@ -567,7 +568,7 @@ impl ReferencedNodeMeta {
             } = field_receiver
             {
                 let field_name_normalized = field_name_normalized.as_str();
-                let struct_ident = format_ident!("{struct_name_ident_str}");
+                let _struct_ident = format_ident!("{struct_name_ident_str}");
 
                 if field_name_normalized == "id" {
                     define_field_methods
@@ -580,7 +581,7 @@ impl ReferencedNodeMeta {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
                             .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
-                } else if let Some(ref_node_type) = link_many {
+                } else if let Some(_ref_node_type) = link_many {
                     define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
                 }
             }
@@ -640,8 +641,8 @@ impl ReferencedNodeMeta {
         // Gather default values
         match field_receiver {
             MyFieldReceiver {
-                value: Some(value),
-                value_fn: Some(value_fn),
+                value: Some(_value),
+                value_fn: Some(_value_fn),
                 ..
             } => {
                 panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
@@ -886,11 +887,7 @@ impl NormalisedField {
                     field_ident_normalised.to_string(),
                 )
             };
-        let serialized_field_name_no_skip = if field_receiver.skip_serializing {
-            None
-        } else {
-            Some(field_ident_normalised_as_str.clone())
-        };
+
         Self {
             field_ident_normalised,
             field_ident_normalised_as_str,
@@ -909,10 +906,9 @@ impl Deref for FieldTypeWrapper {
 impl FromMeta for FieldTypeWrapper {
     fn from_string(value: &str) -> darling::Result<Self> {
         match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(value.to_string())),
+            Ok(f) => Ok(Self(f.to_string())),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
-        // assert_eq!(self.errors, vec![] as ErrorList);
     }
 }
 
