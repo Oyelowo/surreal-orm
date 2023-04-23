@@ -1,0 +1,1 @@
+# Rand functions
