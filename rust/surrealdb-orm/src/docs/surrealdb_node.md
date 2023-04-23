@@ -1,4 +1,6 @@
-# Struct Attributes
+# SurrealdbNode
+
+## Struct Attributes
 
 | Attribute        | Description                                                                                                                                                                                                                                                                                                                                                                          | Type               | Optional |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ | -------- |
@@ -14,7 +16,7 @@
 | define           | Generates a `DEFINE TABLE` statement for the table. This overrides other specific definitions to prevent confusion and collision. You can also invoke an external function directly rather than inlining the function e.g `define = "define_student()"`                                                                                                                              | inline code string | Y        |
 | define_fn        | Generates a `DEFINE TABLE` statement for the table. This overrides other specific definitions to prevent confusion and collision. Same as `define` attribute but expects the function name instead rather than invocation i.e `define_student` instead of `define_student()`. You can also invoke an external function directly rather than inlining the function e.g `define = "def |
 
-# Field Attributes
+## Field Attributes
 
 | Attribute         | Description                                                                                                                                                                                                                                                                                                                                                                  | Type                                          | Optional |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------- |
