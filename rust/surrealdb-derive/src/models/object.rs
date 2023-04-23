@@ -7,20 +7,18 @@
 
 #![allow(dead_code)]
 
-use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, ToTokens, util, ast};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::{str::FromStr, ops::Deref};
+use std::str::FromStr;
 
-use syn::{self, parse_macro_input, LitStr, Error, Data};
+use syn::{self, parse_macro_input};
 
 use super::{
-    attributes::{TableDeriveAttributes, MyFieldReceiver, Rename},
+    attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
-    errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro, parse_lit_to_tokenstream,
+    variables::VariablesModelMacro,
 };
 
 // #[derive(Debug, FromDeriveInput)]
@@ -53,9 +51,6 @@ impl ToTokens for ObjectToken{
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let binding = struct_name_ident.to_string();
-        let struct_name_ident_as_str = binding.as_str();
-        let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
@@ -77,47 +72,27 @@ impl ToTokens for ObjectToken{
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             static_assertions,
-            mut imports_referenced_node_schema,
+            imports_referenced_node_schema,
             connection_with_field_appended,
-             record_link_fields_methods,
-            node_edge_metadata,
+            record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
-            serialized_field_name_no_skip,
-            field_definitions,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
-        let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()
             .collect::<Vec<_>>();
 
-        let node_edge_metadata_static_assertions = node_edge_metadata.generate_static_assertions();
-
-        // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
-
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 
         
-        // #[derive(SurrealdbModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+        // #[derive(SurrealdbObject, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
-        // #[surrealdb(table_name = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
-        //     #[serde(skip_serializing_if = "Option::is_none")]
-        //     #[builder(default, setter(strip_option))]
-        //     id: Option<String>,
         //     first_name: String,
-        //
-        //     #[surrealdb(nest_object = "Book")]
-        //     course: LinkOne<Book>,
-        //
-        //     #[surrealdb(nest_array = "Book")]
-        //     #[serde(rename = "lowo")]
-        //     all_semester_courses: LinkMany<Book>,
-        //
-        //     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->Blog"))]
-        //     written_blogs: Relate<Blog>,
+        //     last_name: String,
+        //     age: u8,
         // }
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};

@@ -7,20 +7,19 @@
 
 #![allow(dead_code)]
 
-use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{str::FromStr, ops::Deref};
 
-use syn::{self, parse_macro_input, LitStr, Error};
+use syn::{self, parse_macro_input};
 
 use super::{
     attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
-    variables::VariablesModelMacro, parse_lit_to_tokenstream,
+    variables::VariablesModelMacro
 };
 
 #[derive(Debug, FromDeriveInput)]
@@ -43,14 +42,6 @@ impl ToTokens for NodeToken{
             rename_all,
             table_name,
             relax_table_name,
-            drop,
-            schemafull,
-            as_,
-            as_fn,
-            permissions,
-            permissions_fn,
-            define,
-            define_fn,
             ..
         } = &self.0;
 
@@ -62,9 +53,6 @@ impl ToTokens for NodeToken{
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let binding = struct_name_ident.to_string();
-        let struct_name_ident_as_str = binding.as_str();
-        let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
         let VariablesModelMacro {
@@ -87,7 +75,7 @@ impl ToTokens for NodeToken{
             aliases_struct_fields_types_kv,
             aliases_struct_fields_names_kv,
             static_assertions,
-            mut imports_referenced_node_schema,
+            imports_referenced_node_schema,
             connection_with_field_appended,
             record_link_fields_methods,
             node_edge_metadata,

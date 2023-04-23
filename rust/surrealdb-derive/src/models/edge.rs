@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
@@ -5,10 +7,8 @@
  * Licensed under the MIT license
  */
 
-#![allow(dead_code)]
 
-use convert_case::{Case, Casing};
-use darling::{ast, util, FromDeriveInput, ToTokens};
+use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{str::FromStr, ops::Deref};
@@ -16,7 +16,7 @@ use std::{str::FromStr, ops::Deref};
 use syn::{self, parse_macro_input};
 
 use super::{
-    attributes::{MyFieldReceiver, Rename, TableDeriveAttributes},
+    attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
     parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
@@ -67,7 +67,6 @@ impl ToTokens for EdgeToken {
         } = &self.0;
         let table_definitions = self.get_table_definition_token();
 
-        let expected_table_name = struct_name_ident.to_string().to_case(Case::Snake);
         let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
@@ -76,8 +75,6 @@ impl ToTokens for EdgeToken {
             CaseString::from_str(case.serialize.as_str()).expect("Invalid casing, The options are")
         });
 
-        let binding = struct_name_ident.to_string();
-        let struct_name_ident_as_str = binding.as_str();
         let schema_mod_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let crate_name = super::get_crate_name(false);
 
@@ -85,13 +82,11 @@ impl ToTokens for EdgeToken {
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________model,
-            schema_instance_edge_arrow_trimmed,
             schema_instance,
             ___________in_marker,
             ___________out_marker,
             ___________bindings,
             ____________update_many_bindings,
-            bindings,
             ___________errors,
         ..
         } = VariablesModelMacro::new();
@@ -107,7 +102,7 @@ impl ToTokens for EdgeToken {
             schema_struct_fields_names_kv,
             serialized_field_names_normalised,
             static_assertions,
-            mut imports_referenced_node_schema,
+            imports_referenced_node_schema,
             connection_with_field_appended,
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,

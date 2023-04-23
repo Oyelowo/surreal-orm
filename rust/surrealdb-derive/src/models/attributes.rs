@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+#![allow(dead_code)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
@@ -7,18 +9,15 @@
 
 use std::{ops::Deref, str::FromStr};
 
-use darling::{
-    ast::{self, Data},
-    util, FromDeriveInput, FromField, FromMeta, ToTokens,
-};
+use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta};
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{FieldType, LinkOne};
+use surrealdb_query_builder::FieldType;
 use syn::{Ident, Lit, LitStr, Path};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name, parse_lit_to_tokenstream,
-    relations::{NodeTableName, NodeTypeName},
+    relations::NodeTypeName,
     variables::VariablesModelMacro,
 };
 use quote::{format_ident, quote};
@@ -47,7 +46,7 @@ impl FromMeta for Rename {
             serialize: String,
 
             #[darling(default)]
-            deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
+            _deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
         }
 
         impl From<FullRename> for Rename {
@@ -165,6 +164,7 @@ impl FromMeta for Relate {
 //     value > 5
 //
 // }
+
 #[derive(Debug, FromField)]
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -568,7 +568,7 @@ impl ReferencedNodeMeta {
             } = field_receiver
             {
                 let field_name_normalized = field_name_normalized.as_str();
-                let struct_ident = format_ident!("{struct_name_ident_str}");
+                let _struct_ident = format_ident!("{struct_name_ident_str}");
 
                 if field_name_normalized == "id" {
                     define_field_methods
@@ -581,7 +581,7 @@ impl ReferencedNodeMeta {
                     let ref_node_type = format_ident!("{ref_node_type}");
                     define_field_methods
                             .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
-                } else if let Some(ref_node_type) = link_many {
+                } else if let Some(_ref_node_type) = link_many {
                     define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
                 }
             }
@@ -641,8 +641,8 @@ impl ReferencedNodeMeta {
         // Gather default values
         match field_receiver {
             MyFieldReceiver {
-                value: Some(value),
-                value_fn: Some(value_fn),
+                value: Some(_value),
+                value_fn: Some(_value_fn),
                 ..
             } => {
                 panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
@@ -887,11 +887,7 @@ impl NormalisedField {
                     field_ident_normalised.to_string(),
                 )
             };
-        let serialized_field_name_no_skip = if field_receiver.skip_serializing {
-            None
-        } else {
-            Some(field_ident_normalised_as_str.clone())
-        };
+
         Self {
             field_ident_normalised,
             field_ident_normalised_as_str,
@@ -910,10 +906,9 @@ impl Deref for FieldTypeWrapper {
 impl FromMeta for FieldTypeWrapper {
     fn from_string(value: &str) -> darling::Result<Self> {
         match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(value.to_string())),
+            Ok(f) => Ok(Self(f.to_string())),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
-        // assert_eq!(self.errors, vec![] as ErrorList);
     }
 }
 
@@ -961,8 +956,8 @@ impl FromMeta for PermissionsFn {
 #[darling(attributes(surrealdb, serde), forward_attrs(allow, doc, cfg))]
 pub struct TableDeriveAttributes {
     pub(crate) ident: syn::Ident,
-    pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: syn::Generics,
+    // pub(crate) attrs: Vec<syn::Attribute>,
+    // pub(crate) generics: syn::Generics,
     /// Receives the body of the struct or enum. We don't care about
     /// struct fields because we previously told darling we only accept structs.
     pub data: Data<util::Ignored, self::MyFieldReceiver>,
@@ -1004,11 +999,6 @@ pub struct TableDeriveAttributes {
 impl TableDeriveAttributes {
     pub fn get_table_definition_token(&self) -> TokenStream {
         let TableDeriveAttributes {
-            ident: ref struct_name_ident,
-            ref data,
-            ref rename_all,
-            ref table_name,
-            ref relax_table_name,
             ref drop,
             ref schemafull,
             ref as_,
@@ -1022,13 +1012,13 @@ impl TableDeriveAttributes {
 
         let crate_name = super::get_crate_name(false);
 
-        if ((define_fn.is_some() || define.is_some())
+        if (define_fn.is_some() || define.is_some())
             && (drop.is_some()
                 || as_.is_some()
                 || as_fn.is_some()
                 || schemafull.is_some()
                 || permissions.is_some()
-                || permissions_fn.is_some()))
+                || permissions_fn.is_some())
         {
             panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
@@ -1054,7 +1044,7 @@ impl TableDeriveAttributes {
             (None, None) => (),
         };
 
-        if let Some(drop) = drop {
+        if let Some(_drop) = drop {
             define_table_methods.push(quote!(.drop()))
         }
 
@@ -1070,7 +1060,7 @@ impl TableDeriveAttributes {
             (None, None) => (),
         };
 
-        if let Some(schemafull) = schemafull {
+        if let Some(_schemafull) = schemafull {
             define_table_methods.push(quote!(.schemafull()))
         }
 
