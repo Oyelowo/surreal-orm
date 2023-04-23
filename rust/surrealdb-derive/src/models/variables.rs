@@ -6,7 +6,6 @@
  */
 
 use quote::format_ident;
-use syn::Ident;
 
 pub(crate) struct VariablesModelMacro {
     /// This joins present model to the currently built graph.
@@ -27,11 +26,6 @@ pub(crate) struct VariablesModelMacro {
     pub ___________model: syn::Ident,
     pub ___________in_marker: syn::Ident,
     pub ___________out_marker: syn::Ident,
-    // Mainly used in edge schema to remove the start and end arrows for field access e.g
-    // when we have "->writes->", we may want writes.time_written in case we want to access
-    // a field on an edge itself because at the end of the day, an edge is a model or table
-    // in the database itself
-    pub schema_instance_edge_arrow_trimmed: syn::Ident,
 }
 
 impl VariablesModelMacro {
@@ -56,14 +50,11 @@ impl VariablesModelMacro {
         let schema_instance = format_ident!("schema_instance");
         let ___________in_marker = format_ident!("___________in_marker");
         let ___________out_marker = format_ident!("___________out_marker");
-        let schema_instance_edge_arrow_trimmed =
-            format_ident!("schema_instance_edge_arrow_trimmed");
 
         Self {
             ___________graph_traversal_string,
             schema_instance,
             ___________model,
-            schema_instance_edge_arrow_trimmed,
             ___________in_marker,
             ___________out_marker,
             ___________bindings,
@@ -74,9 +65,5 @@ impl VariablesModelMacro {
             __________connect_edge_to_graph_traversal_string,
             __________connect_object_to_graph_traversal_string,
         }
-    }
-
-    pub fn get_schema_alias(schema_name: &Ident) -> Ident {
-        format_ident!("{schema_name}Schema")
     }
 }
