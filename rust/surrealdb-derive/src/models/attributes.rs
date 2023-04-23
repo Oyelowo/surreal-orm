@@ -246,8 +246,8 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     with: ::darling::util::Ignored,
-    // #[darling(default)]
-    // default: ::darling::util::Ignored,
+    #[darling(default)]
+    default: ::darling::util::Ignored,
 }
 
 // #[derive(Debug, Clone)]
