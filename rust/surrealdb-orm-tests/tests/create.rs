@@ -244,7 +244,7 @@ async fn test_creation_with_returning_selected_fields() -> SurrealdbOrmResult<()
     }
     // Return only specified fields
     let created_ship = create(space_ship.clone())
-        .return_one_projections::<ReturnedSpaceShip>(db.clone(), Some(vec![name]))
+        .return_one_projections::<ReturnedSpaceShip>(db.clone(), arr![name])
         .await?;
 
     assert_eq!(created_ship.clone().unwrap().name, "SpaceShipCode");
@@ -395,6 +395,119 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
             [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
     );
     assert_eq!(created_alien.name, "Oyelowo");
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_create_fetch_record_links() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let space_ship = SpaceShip {
+        id: Some(SpaceShip::create_id("gbanda")),
+        name: "SpaceShip1".to_string(),
+        created: Utc::now(),
+    };
+
+    let space_ship2 = SpaceShip {
+        name: "SpaceShip2".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let space_ship3 = SpaceShip {
+        name: "Oyelowo".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let created_spaceship1 = create(space_ship.clone()).return_one(db.clone()).await?;
+    let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
+    let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
+
+    let point = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let unsaved_alien = Alien {
+        id: None,
+        name: "Oyelowo".to_string(),
+        age: 20,
+        created: Utc::now(),
+        line_polygon: territory.into(),
+        life_expectancy: Duration::from_secs(100),
+        territory_area: polygon.into(),
+        home: point.into(),
+        tags: vec!["tag1".into(), "tag2".into()],
+        ally: LinkSelf::null(),
+        weapon: LinkOne::null(),
+        space_ships: LinkMany::from(vec![
+            created_spaceship1.clone().unwrap(),
+            created_spaceship2.clone().unwrap(),
+            created_spaceship3.clone().unwrap(),
+        ]),
+        planets_to_visit: Relate::null(),
+    };
+
+    // Check fields value fetching
+    let alien = Alien::schema();
+
+    #[derive(Serialize, Deserialize)]
+    struct SpaceShipName {
+        name: Vec<String>,
+    }
+    assert_eq!(
+        alien.spaceShips(All).name.__as__("name").build(),
+        "spaceShips[*].name AS name"
+    );
+    let space_ship_names: Vec<SpaceShipName> = create(unsaved_alien.clone())
+        .return_many_projections(
+            db.clone(),
+            arr![alien.spaceShips(Empty).name.__as__("name")],
+        )
+        .await?;
+
+    ///
+    ///[{
+    ///spaceShips:{name" ["SpaceShips1", "SpaceShips2", "Oyelowo"]]"}
+    ///}]
+    assert_eq!(space_ship_names.len(), 3);
+    // assert_eq!(
+    //     created_alien
+    //         .space_ships
+    //         .iter()
+    //         .map(|x| x.get_id().unwrap().to_string())
+    //         .collect::<Vec<_>>(),
+    //     vec![
+    //         created_spaceship1.unwrap().id.unwrap().to_string(),
+    //         created_spaceship2.unwrap().id.unwrap().to_string(),
+    //         created_spaceship3.unwrap().id.unwrap().to_string(),
+    //     ]
+    // );
+    // assert!(created_alien.space_ships.values().is_none());
+    // assert_eq!(
+    //     created_alien
+    //         .space_ships
+    //         .iter()
+    //         .map(|x| x.clone().value().is_some())
+    //         .collect::<Vec<_>>(),
+    //     vec![false, false, false,]
+    // );
+    //
+    // assert_eq!(created_alien.age, 20);
+    // assert!(unsaved_alien.id.is_none());
+    // assert!(created_alien.id.is_some());
+    //
+    // assert_eq!(
+    //     created_alien.line_polygon.to_string(),
+    //     "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
+    //         [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
+    // );
+    // assert_eq!(created_alien.name, "Oyelowo");
 
     Ok(())
 }

@@ -1,5 +1,5 @@
 use super::{Buildable, Parametric};
-use crate::{Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult};
+use crate::{Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -60,18 +60,38 @@ where
 
     /// Runs the statement against the database and returns the first result of the change with the
     /// specified projections or list of fields.
-    async fn return_first_projections(
+    // async fn return_first_projections(
+    //     self,
+    //     db: Surreal<Db>,
+    //     projections: Option<Vec<Field>>,
+    // ) -> SurrealdbOrmResult<Option<T>> {
+    //     let mut query = self;
+    //     if let Some(projections) = projections {
+    //         query = query.set_return_type(ReturnType::Projections(projections));
+    //     }
+    //     query.return_first(db).await
+    // }
+
+    /// Runs the statement against the database and returns the one result of the change with the
+    /// specified projections or list of fields.
+    async fn return_first_projections<P>(
         self,
         db: Surreal<Db>,
-        projections: Option<Vec<Field>>,
-    ) -> SurrealdbOrmResult<Option<T>> {
+        projections: impl Send + Into<Vec<Valuex>>,
+        // projections: Vec<Valuex>,
+    ) -> SurrealdbOrmResult<Option<P>>
+    where
+        P: Serialize + DeserializeOwned,
+    {
         let mut query = self;
-        if let Some(projections) = projections {
-            query = query.set_return_type(ReturnType::Projections(projections));
-        }
-        query.return_first(db).await
-    }
+        // if let Some(projections) = projections {
+        let projections: Vec<Valuex> = projections.into();
+        query = query.set_return_type(ReturnType::Projections(projections));
+        // }
 
+        let response = query.run(db).await?;
+        get_first::<P>(response)
+    }
     /// Runs the statement against the database and returns the one result before the change.
     async fn return_one_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let query = self.set_return_type(ReturnType::Before);
@@ -95,18 +115,39 @@ where
     async fn return_one_projections<P>(
         self,
         db: Surreal<Db>,
-        projections: Option<Vec<Field>>,
+        projections: impl Send + Into<Vec<Valuex>>,
+        // projections: Vec<Valuex>,
     ) -> SurrealdbOrmResult<Option<P>>
     where
         P: Serialize + DeserializeOwned,
     {
         let mut query = self;
-        if let Some(projections) = projections {
-            query = query.set_return_type(ReturnType::Projections(projections));
-        }
+        // if let Some(projections) = projections {
+        let projections: Vec<Valuex> = projections.into();
+        query = query.set_return_type(ReturnType::Projections(projections));
+        // }
 
         let response = query.run(db).await?;
         get_one::<P>(response)
+    }
+
+    /// Runs the statement against the database and returns the many result of the change with the
+    /// specified projections or list of fields.
+    async fn return_many_projections<P>(
+        self,
+        db: Surreal<Db>,
+        // projections: Vec<Valuex>,
+        projections: impl Send + Into<Vec<Valuex>>,
+    ) -> SurrealdbOrmResult<Vec<P>>
+    where
+        P: Serialize + DeserializeOwned,
+    {
+        let mut query = self;
+        let projections: Vec<Valuex> = projections.into();
+        query = query.set_return_type(ReturnType::Projections(projections));
+
+        let response = query.run(db).await?;
+        get_many::<P>(response)
     }
 
     /// Runs the statement against the database and returns the one result. In addition, specified
@@ -119,7 +160,7 @@ where
         let mut query = self;
         if let Some(projections) = fields_to_fetch {
             query = query.set_return_type(ReturnType::Projections(
-                vec![Field::new("*")]
+                vec![Valuex::from(Field::new("*"))]
                     .into_iter()
                     .chain(
                         projections
@@ -154,18 +195,18 @@ where
 
     /// Runs the statement against the database and returns the many results of the change with the
     /// specified projections or list of fields.
-    async fn return_many_projections(
-        self,
-        db: Surreal<Db>,
-        projections: Option<Vec<Field>>,
-    ) -> SurrealdbOrmResult<Vec<T>> {
-        let mut query = self;
-        if let Some(projections) = projections {
-            query = query.set_return_type(ReturnType::Projections(projections));
-        }
-
-        query.return_many(db).await
-    }
+    // async fn return_many_projections(
+    //     self,
+    //     db: Surreal<Db>,
+    //     projections: Option<Vec<Field>>,
+    // ) -> SurrealdbOrmResult<Vec<T>> {
+    //     let mut query = self;
+    //     if let Some(projections) = projections {
+    //         query = query.set_return_type(ReturnType::Projections(projections));
+    //     }
+    //
+    //     query.return_many(db).await
+    // }
 
     /// Internal method to set the surrealdb return type of the statement.
     fn set_return_type(self, return_type: ReturnType) -> Self;
