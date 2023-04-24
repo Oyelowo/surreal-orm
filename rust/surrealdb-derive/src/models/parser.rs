@@ -119,7 +119,7 @@ struct NodeEdgeMetadata {
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
     /// list of fields names that are actually serialized and not skipped.
-    pub serialized_field_name_no_skip: Vec<String>,
+    pub serialized_field_name_no_skip: Vec<TokenStream>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -435,7 +435,7 @@ impl SchemaFieldsProperties {
                 
                 if !field_receiver.skip_serializing {
                     store.serialized_field_name_no_skip
-                        .push(field_ident_normalised_as_str.to_owned());
+                        .push(quote!(#crate_name::Field::new(field_ident_normalised_as_str)));
                 }
 
                 store 

@@ -171,7 +171,7 @@ impl ToTokens for NodeToken{
                     #table_name_str.into()
                 }
                 
-                fn get_serializable_field_names() -> Vec<&'static str> {
+                fn get_serializable_field_names() -> Vec<#crate_name::Field> {
                     return vec![#( #serialized_field_name_no_skip), *]
                 }
                 
