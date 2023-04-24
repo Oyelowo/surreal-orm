@@ -48,6 +48,12 @@ impl Field {
         }
     }
 
+    /// Adds bindings to the field
+    pub fn with_bindings(mut self, bindings: BindingsList) -> Self {
+        self.bindings = bindings;
+        self
+    }
+
     /// Sets field query graph. For building connection from node to node or node to edge.
     pub fn set_graph_string(mut self, connection_string: String) -> Self {
         self.graph_string = connection_string;

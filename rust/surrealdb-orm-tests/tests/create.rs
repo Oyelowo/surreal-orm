@@ -571,3 +571,101 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
 
     Ok(())
 }
+
+#[tokio::test]
+async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> SurrealdbOrmResult<()>
+{
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    let spaceship_id_1 = SpaceShip::create_id("spaceship1");
+    let spaceship_id_2 = SpaceShip::create_id("spaceship2");
+    let spaceship_id_3 = SpaceShip::create_id("spaceship3");
+
+    let space_ship1 = SpaceShip {
+        id: Some(spaceship_id_1),
+        name: "SpaceShip1".to_string(),
+        created: Utc::now(),
+    };
+
+    let space_ship2 = SpaceShip {
+        id: Some(spaceship_id_2),
+        name: "SpaceShip2".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let space_ship3 = SpaceShip {
+        id: Some(spaceship_id_3),
+        name: "Oyelowo".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let point = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let unsaved_alien = Alien {
+        id: None,
+        name: "Oyelowo".to_string(),
+        age: 20,
+        created: Utc::now(),
+        line_polygon: territory.into(),
+        life_expectancy: Duration::from_secs(100),
+        territory_area: polygon.into(),
+        home: point.into(),
+        tags: vec!["tag1".into(), "tag".into()],
+        ally: LinkSelf::null(),
+        weapon: LinkOne::null(),
+        // only 1 has been created
+        space_ships: LinkMany::from(vec![
+            space_ship1.clone(),
+            space_ship2.clone(),
+            space_ship3.clone(),
+        ]),
+        planets_to_visit: Relate::null(),
+    };
+
+    let alien::Alien { spaceShips, .. } = Alien::schema();
+
+    let created_alien_with_fetched_links = create(unsaved_alien.clone())
+        .return_one_and_fetch_links(db.clone(), vec![spaceShips])
+        .await?;
+
+    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+    // Hast not yet been saved.
+    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    assert!(alien_spaceships.values().is_none());
+    assert!(alien_spaceships.keys().is_none());
+
+    // the are now created, so the reference should be valid now.
+    let created_spaceship1 = create(space_ship1.clone()).return_one(db.clone()).await?;
+    let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
+    let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
+
+    let selected_aliens: Option<Alien> = select(All)
+        .from(Alien::table_name())
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert!(selected_aliens_spaceships.values().is_none());
+    assert!(selected_aliens_spaceships.keys().is_some());
+
+    let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
+        .from(Alien::table_name())
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert!(selected_aliens_spaceships.values().is_some());
+    assert!(selected_aliens_spaceships.keys().is_none());
+    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values().unwrap();
+
+    assert_eq!(selected_aliens_spaceships_values.len(), 3);
+    assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
+    assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
+    assert_eq!(selected_aliens_spaceships_values[2].name, "Oyelowo");
+    Ok(())
+}

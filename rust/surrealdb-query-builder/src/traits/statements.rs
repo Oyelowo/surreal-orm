@@ -1,5 +1,7 @@
 use super::{Buildable, Parametric};
-use crate::{Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult};
+use crate::{
+    AllGetter, Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult,
+};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -151,7 +153,7 @@ where
                         // array items and the second set of `.*` says that we want all fields of
                         // all the arrays. If you want only a specific index, you would do link[0].*
                         // to get all fields of the first link and link[0].name to get only the name.
-                        .map(|field| Field::new(format!("{}.*.*", field.build())))
+                        .map(|field| field.all().all())
                         .collect::<Vec<_>>(),
                 )
                 .collect::<Vec<_>>()
