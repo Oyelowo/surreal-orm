@@ -6,6 +6,7 @@
  */
 
 use serde::{Deserialize, Serialize};
+use surrealdb::sql;
 
 use crate::{SurrealId, SurrealdbNode};
 
@@ -154,6 +155,16 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
     }
 }
 
+impl<V: SurrealdbNode> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
+    fn from(model_vec: Vec<sql::Thing>) -> Self {
+        let xx = model_vec
+            .into_iter()
+            .map(|m| Reference::Id(m.into()))
+            .collect::<Vec<Reference<V>>>();
+
+        Self(xx)
+    }
+}
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
