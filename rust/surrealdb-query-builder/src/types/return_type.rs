@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-use crate::{Buildable, Valuex};
+use crate::{Buildable, Projections, Valuex};
 
 use super::Field;
 
@@ -16,7 +16,7 @@ pub enum ReturnType {
     /// Return the diff
     Diff,
     /// Return the listed fields/projection
-    Projections(Vec<Valuex>),
+    Projections(Projections),
 }
 
 impl Display for ReturnType {
@@ -26,20 +26,16 @@ impl Display for ReturnType {
             ReturnType::Before => "BEFORE".to_string(),
             ReturnType::After => "AFTER".to_string(),
             ReturnType::Diff => "DIFF".to_string(),
-            ReturnType::Projections(projections) => projections
-                .iter()
-                .map(|p| p.build())
-                .collect::<Vec<_>>()
-                .join(", "),
+            ReturnType::Projections(projections) => projections.build(),
         };
         write!(f, "RETURN {return_type} ")
     }
 }
-impl<T: Into<Vec<Valuex>>> From<T> for ReturnType {
-    fn from(value: T) -> Self {
-        Self::Projections(value.into())
-    }
-}
+// impl<T: Into<Vec<Valuex>>> From<T> for ReturnType {
+//     fn from(value: T) -> Self {
+//         Self::Projections(value.into())
+//     }
+// }
 // impl From<Vec<&Field>> for ReturnType {
 //     fn from(value: Vec<&Field>) -> Self {
 //         Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
@@ -88,7 +84,9 @@ mod tests {
         let return_type = ReturnType::Diff;
         assert_eq!(return_type.to_string(), "RETURN DIFF ");
 
-        let return_type = ReturnType::Projections(vec!["id".into(), "name".into()]);
+        let id = Field::new("id");
+        let name = Field::new("name");
+        let return_type = ReturnType::Projections(vec![id, name].into());
         assert_eq!(return_type.to_string(), "RETURN id, name ");
     }
 }

@@ -454,60 +454,40 @@ async fn test_create_fetch_record_links() -> SurrealdbOrmResult<()> {
     };
 
     // Check fields value fetching
-    let alien = Alien::schema();
+    let alien_schema = Alien::schema();
+    let age = Alien::schema().age;
+    let name = Alien::schema().name;
 
-    #[derive(Serialize, Deserialize)]
+    // We specify the exact fields we want from the returned projections(second argument).
+    #[derive(Serialize, Deserialize, Clone)]
     struct SpaceShipName {
-        alien_names: Vec<String>,
+        age: u8,
+        name: String,
+        // Alias the retrieved names from foreign tables space_ships returned as array of strings
+        aliens_spaceships_names_alias: Vec<String>,
     }
+
+    let aliens_spaceships_names_alias = alien_schema
+        .spaceShips(All)
+        .name
+        .__as__("aliens_spaceships_names_alias");
     assert_eq!(
-        alien.spaceShips(All).name.__as__("name").build(),
-        "spaceShips[*].name AS name"
+        aliens_spaceships_names_alias.build(),
+        "spaceShips[*].name AS aliens_spaceships_names_alias"
     );
+
     let space_ship_names: Option<SpaceShipName> = create(unsaved_alien.clone())
-        .return_one_projections(
-            db.clone(),
-            arr![alien.spaceShips(Empty).name.__as__("alien_names")],
-        )
+        .return_one_projections(db.clone(), arr![age, name, aliens_spaceships_names_alias])
         .await?;
 
-    ///
-    ///[{
-    ///spaceShips:{name" ["SpaceShips1", "SpaceShips2", "Oyelowo"]]"}
-    ///}]
-    assert_eq!(space_ship_names.unwrap().alien_names.len(), 3);
-    // assert_eq!(
-    //     created_alien
-    //         .space_ships
-    //         .iter()
-    //         .map(|x| x.get_id().unwrap().to_string())
-    //         .collect::<Vec<_>>(),
-    //     vec![
-    //         created_spaceship1.unwrap().id.unwrap().to_string(),
-    //         created_spaceship2.unwrap().id.unwrap().to_string(),
-    //         created_spaceship3.unwrap().id.unwrap().to_string(),
-    //     ]
-    // );
-    // assert!(created_alien.space_ships.values().is_none());
-    // assert_eq!(
-    //     created_alien
-    //         .space_ships
-    //         .iter()
-    //         .map(|x| x.clone().value().is_some())
-    //         .collect::<Vec<_>>(),
-    //     vec![false, false, false,]
-    // );
-    //
-    // assert_eq!(created_alien.age, 20);
-    // assert!(unsaved_alien.id.is_none());
-    // assert!(created_alien.id.is_some());
-    //
-    // assert_eq!(
-    //     created_alien.line_polygon.to_string(),
-    //     "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
-    //         [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
-    // );
-    // assert_eq!(created_alien.name, "Oyelowo");
+    let ref space_ship_names = space_ship_names.unwrap();
+    assert_eq!(space_ship_names.age, 20);
+    assert_eq!(space_ship_names.name, "Oyelowo");
+    assert_eq!(space_ship_names.aliens_spaceships_names_alias.len(), 3);
+    assert_eq!(
+        space_ship_names.aliens_spaceships_names_alias,
+        vec!["SpaceShip1", "SpaceShip2", "Oyelowo"]
+    );
 
     Ok(())
 }

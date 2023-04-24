@@ -1,5 +1,7 @@
 use super::{Buildable, Parametric};
-use crate::{All, Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex};
+use crate::{
+    All, Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex,
+};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -77,7 +79,7 @@ where
     async fn return_first_projections<P>(
         self,
         db: Surreal<Db>,
-        projections: impl Send + Into<Vec<Valuex>>,
+        projections: impl Send + Into<Projections>,
         // projections: Vec<Valuex>,
     ) -> SurrealdbOrmResult<Option<P>>
     where
@@ -85,7 +87,7 @@ where
     {
         let mut query = self;
         // if let Some(projections) = projections {
-        let projections: Vec<Valuex> = projections.into();
+        let projections: Projections = projections.into();
         query = query.set_return_type(ReturnType::Projections(projections));
         // }
 
@@ -115,7 +117,7 @@ where
     async fn return_one_projections<P>(
         self,
         db: Surreal<Db>,
-        projections: impl Send + Into<Vec<Valuex>>,
+        projections: impl Send + Into<Projections>,
         // projections: Vec<Valuex>,
     ) -> SurrealdbOrmResult<Option<P>>
     where
@@ -123,7 +125,7 @@ where
     {
         let mut query = self;
         // if let Some(projections) = projections {
-        let projections: Vec<Valuex> = projections.into();
+        let projections: Projections = projections.into();
         query = query.set_return_type(ReturnType::Projections(projections));
         // }
 
@@ -137,13 +139,13 @@ where
         self,
         db: Surreal<Db>,
         // projections: Vec<Valuex>,
-        projections: impl Send + Into<Vec<Valuex>>,
+        projections: impl Send + Into<Projections>,
     ) -> SurrealdbOrmResult<Vec<P>>
     where
         P: Serialize + DeserializeOwned,
     {
         let mut query = self;
-        let projections: Vec<Valuex> = projections.into();
+        let projections: Projections = projections.into();
         query = query.set_return_type(ReturnType::Projections(projections));
 
         let response = query.run(db).await?;
@@ -160,15 +162,16 @@ where
         let mut query = self;
         if let Some(projections) = fields_to_fetch {
             query = query.set_return_type(ReturnType::Projections(
-                vec![Valuex::from(All)]
+                vec![Field::new("*")]
                     .into_iter()
                     .chain(
                         projections
                             .into_iter()
-                            .map(|field| Field::new(format!("{}.*", field.build())).into())
+                            .map(|field| Field::new(format!("{}.*", field.build())))
                             .collect::<Vec<_>>(),
                     )
-                    .collect(),
+                    .collect::<Vec<_>>()
+                    .into(),
             ));
         }
 
