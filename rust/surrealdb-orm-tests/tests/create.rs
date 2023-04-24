@@ -239,6 +239,29 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
 
     assert_eq!(unsaved_alien.id.is_some(), false);
 
+    assert_eq!(
+        Alien::get_serializable_field_names()
+            .into_iter()
+            .map(|f| f.to_string())
+            .collect::<Vec<String>>(),
+        vec![
+            "id".to_string(),
+            "name".to_string(),
+            "age".to_string(),
+            "created".to_string(),
+            "linePolygon".to_string(),
+            "lifeExpectancy".to_string(),
+            "territoryArea".to_string(),
+            "home".to_string(),
+            "tags".to_string(),
+            "ally".to_string(),
+            "weapon".to_string(),
+            "spaceShips".to_string(),
+            "planetsToVisit".to_string(),
+            // "xplanetsToVisit".to_string(),
+        ]
+    );
+    assert_eq!(Alien::get_serializable_field_names().len(), 13);
     let created_alien = create(unsaved_alien.clone())
         .return_one_projections(
             db.clone(),

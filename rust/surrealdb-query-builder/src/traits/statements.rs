@@ -105,6 +105,31 @@ where
         query.return_one(db).await
     }
 
+    /// Runs the statement against the database and returns the one result. In addition, specified
+    /// fields' value are loaded. So, they return the value rather than the id if present.
+    async fn return_one_and_fetch_fields(
+        self,
+        db: Surreal<Db>,
+        fields_to_fetch: Option<Vec<Field>>,
+    ) -> SurrealdbOrmResult<Option<T>> {
+        let mut query = self;
+        if let Some(projections) = fields_to_fetch {
+            query = query.set_return_type(ReturnType::Projections(
+                vec![Field::new("*")]
+                    .into_iter()
+                    .chain(
+                        projections
+                            .into_iter()
+                            .map(|field| format!("{}.*", field.to_string()).into())
+                            .collect::<Vec<_>>(),
+                    )
+                    .collect(),
+            ));
+        }
+
+        query.return_one(db).await
+    }
+
     /// Runs the statement against the database and returns the many results before the change.
     async fn return_many_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::Before);
