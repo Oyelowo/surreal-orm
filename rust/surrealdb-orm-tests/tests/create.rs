@@ -225,6 +225,33 @@ async fn test_create_alien_with_id_specified_as_uuid() -> SurrealdbOrmResult<()>
 }
 
 #[tokio::test]
+async fn test_creation_with_returning_selected_fields() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let space_ship = SpaceShip {
+        id: Some(SpaceShip::create_uuid()),
+        name: "SpaceShipCode".to_string(),
+        created: Utc::now(),
+    };
+    // id specified before creation. Will be used by the database.
+    assert_eq!(space_ship.id.is_some(), true);
+    let spaceship::SpaceShip { name, .. } = SpaceShip::schema();
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+    struct ReturnedSpaceShip {
+        name: String,
+    }
+    // Return only specified fields
+    let created_ship = create(space_ship.clone())
+        .return_one_projections::<ReturnedSpaceShip>(db.clone(), Some(vec![name]))
+        .await?;
+
+    assert_eq!(created_ship.clone().unwrap().name, "SpaceShipCode");
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
@@ -309,7 +336,6 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
 
     assert_eq!(unsaved_alien.weapon.get_id().is_some(), true);
     assert_eq!(unsaved_alien.weapon.value().is_some(), false);
-
     assert_eq!(unsaved_alien.id.is_some(), false);
 
     assert_eq!(
