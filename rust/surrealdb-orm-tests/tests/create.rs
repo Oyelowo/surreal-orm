@@ -30,6 +30,7 @@ pub struct Alien {
     age: u8,
     created: DateTime<Utc>,
     life_expectancy: Duration,
+    line_polygon: sql::Geometry,
     territory_area: sql::Geometry,
     home: sql::Geometry,
     tags: Vec<String>,
@@ -154,7 +155,12 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
+    assert_eq!(weapon.clone().id.is_some(), false);
+
     let created_weapon = create(weapon.clone()).return_one(db.clone()).await?;
+
+    assert_eq!(created_weapon.unwrap().id.is_some(), true);
+
     let select1: Vec<Weapon> = select(All)
         .from(Weapon::table_name())
         .return_many(db.clone())
@@ -207,11 +213,12 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     };
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
-    let alien = Alien {
+    let unsaved_alien = Alien {
         id: None,
-        name: "John".to_string(),
+        name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
+        line_polygon: territory.into(),
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon.into(),
         home: point.into(),
@@ -222,9 +229,19 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         planets_to_visit: Relate::null(),
     };
 
-    let created_alien = create(alien).return_one(db.clone()).await?;
+    assert_eq!(unsaved_alien.id.is_some(), false);
 
-    assert_eq!(serde_json::to_string(&created_alien).unwrap(), "erer");
-    //
+    let created_alien = create(unsaved_alien.clone()).return_one(db.clone()).await?;
+    assert_eq!(unsaved_alien.id.is_some(), false);
+
+    assert_eq!(created_alien.clone().unwrap().age, 20);
+    assert_eq!(created_alien.clone().unwrap().id.is_some(), true);
+    assert_eq!(
+        created_alien.clone().unwrap().line_polygon.to_string(),
+        "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
+            [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
+    );
+    assert_eq!(created_alien.unwrap().name, "Oyelowo");
+
     Ok(())
 }
