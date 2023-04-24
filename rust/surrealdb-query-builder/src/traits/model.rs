@@ -15,7 +15,7 @@ pub trait SurrealdbModel {
     /// The name of the model/table
     fn table_name() -> Table;
     /// Get model's field names
-    fn get_serializable_field_names() -> Vec<&'static str>;
+    fn get_serializable_field_names() -> Vec<crate::Field>;
     /// Get model's table definition statement
     fn define_table() -> Raw;
     /// Get model's fields definitions statements as a list

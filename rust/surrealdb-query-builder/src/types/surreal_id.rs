@@ -75,7 +75,7 @@ impl Into<sql::Value> for SurrealId {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Table;
+    use crate::{Field, Table};
     use surrealdb::sql::Uuid;
 
     struct TestUser;
@@ -84,7 +84,7 @@ mod tests {
             "user".into()
         }
 
-        fn get_serializable_field_names() -> Vec<&'static str> {
+        fn get_serializable_field_names() -> Vec<Field> {
             unimplemented!()
         }
 
