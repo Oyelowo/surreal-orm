@@ -1,8 +1,5 @@
+use crate::{Buildable, Projections};
 use std::fmt::{self, Display};
-
-use crate::{Buildable, Projections, Valuex};
-
-use super::Field;
 
 /// Return type
 #[derive(Debug, Clone)]
@@ -31,44 +28,11 @@ impl Display for ReturnType {
         write!(f, "RETURN {return_type} ")
     }
 }
-// impl<T: Into<Vec<Valuex>>> From<T> for ReturnType {
-//     fn from(value: T) -> Self {
-//         Self::Projections(value.into())
-//     }
-// }
-// impl From<Vec<&Field>> for ReturnType {
-//     fn from(value: Vec<&Field>) -> Self {
-//         Self::Projections(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
-//     }
-// }
-//
-// impl From<Vec<Field>> for ReturnType {
-//     fn from(value: Vec<Field>) -> Self {
-//         Self::Projections(value)
-//     }
-// }
-//
-// impl<const N: usize> From<&[Field; N]> for ReturnType {
-//     fn from(value: &[Field; N]) -> Self {
-//         Self::Projections(value.to_vec())
-//     }
-// }
-//
-// impl<const N: usize> From<&[&Field; N]> for ReturnType {
-//     fn from(value: &[&Field; N]) -> Self {
-//         Self::Projections(
-//             value
-//                 .to_vec()
-//                 .into_iter()
-//                 .map(ToOwned::to_owned)
-//                 .collect::<Vec<_>>(),
-//         )
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::*;
 
     #[test]
     fn test_return_type() {

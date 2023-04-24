@@ -1,7 +1,5 @@
 use super::{Buildable, Parametric};
-use crate::{
-    All, Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex,
-};
+use crate::{Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};

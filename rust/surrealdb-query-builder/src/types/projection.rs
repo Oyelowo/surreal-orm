@@ -1,5 +1,7 @@
 use crate::{Alias, BindingsList, Buildable, Field, Function, Param, Parametric, Valuex};
 
+/// Used to represent a list of projections to access fields of a table or
+/// those of foreign tables and can even include filters.
 #[derive(Debug, Clone)]
 pub struct Projections(pub Vec<Valuex>);
 

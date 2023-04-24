@@ -5,12 +5,11 @@
  * Licensed under the MIT license
  */
 
-use surrealdb::sql;
-
 use crate::{
     Alias, All, Binding, BindingsList, Buildable, Field, Filter, Function, Operation, Param,
     Parametric, E, NONE, NULL,
 };
+use surrealdb::sql;
 
 /// A value that can be used in a SQL statement. Serves as the bind and arbiter between
 /// `sql::Value` and the query building world.
