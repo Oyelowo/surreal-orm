@@ -143,7 +143,15 @@ where
                 .chain(
                     fields_to_fetch
                         .into_iter()
-                        .map(|field| Field::new(format!("{}.*", field.build())))
+                        // We use double i.e `.*.*` to also work for fetching array of links since it
+                        // also works for a single link as well. If we do it once i.e `.*` then
+                        // it will not work for array of links but only for a single link fields
+                        // fetching.
+                        // For array of list, the first set of `.*` says that we want all
+                        // array items and the second set of `.*` says that we want all fields of
+                        // all the arrays. If you want only a specific index, you would do link[0].*
+                        // to get all fields of the first link and link[0].name to get only the name.
+                        .map(|field| Field::new(format!("{}.*.*", field.build())))
                         .collect::<Vec<_>>(),
                 )
                 .collect::<Vec<_>>()
