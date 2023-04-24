@@ -257,15 +257,13 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
-        // id: Some(Weapon::create_uuid()),
-        id: None,
         name: "Laser".to_string(),
         created: Utc::now(),
         ..Default::default()
     };
 
     let space_ship = SpaceShip {
-        id: None,
+        id: Some(SpaceShip::create_id("gbanda")),
         name: "SpaceShip1".to_string(),
         created: Utc::now(),
     };
@@ -308,8 +306,9 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     // weapon table should have two records after second creation
     assert_eq!(select2.len(), 2);
 
-    let inserted_space_ship_as_single_data_vec =
-        create(space_ship.clone()).return_many(db.clone()).await?;
+    let created_spaceship1 = create(space_ship.clone()).return_one(db.clone()).await?;
+    let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
+    let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
 
     let point = point! {
         x: 40.02f64,
@@ -327,16 +326,20 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         life_expectancy: Duration::from_secs(100),
         territory_area: polygon.into(),
         home: point.into(),
-        tags: vec!["tag1".to_string(), "tag2".to_string()],
+        tags: vec!["tag1".into(), "tag2".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::from(created_weapon.unwrap()),
-        space_ships: LinkMany::from(inserted_space_ship_as_single_data_vec),
+        space_ships: LinkMany::from(vec![
+            created_spaceship1.clone().unwrap(),
+            created_spaceship2.clone().unwrap(),
+            created_spaceship3.clone().unwrap(),
+        ]),
         planets_to_visit: Relate::null(),
     };
 
-    assert_eq!(unsaved_alien.weapon.get_id().is_some(), true);
-    assert_eq!(unsaved_alien.weapon.value().is_some(), false);
-    assert_eq!(unsaved_alien.id.is_some(), false);
+    assert!(unsaved_alien.weapon.get_id().is_some());
+    assert!(unsaved_alien.weapon.value().is_none());
+    assert!(unsaved_alien.id.is_none());
 
     // Check fields value fetching
     let weapon = Alien::schema().weapon;
@@ -346,25 +349,45 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
 
     let ref created_alien = created_alien.clone().unwrap();
     // id is none  because ally field is not created.
-    assert_eq!(created_alien.ally.get_id().is_some(), false);
+    assert!(created_alien.ally.get_id().is_none());
     // .value() is None because ally is not created.
-    assert_eq!(created_alien.ally.value().is_some(), false);
+    assert!(created_alien.ally.value().is_none());
 
     // Weapon is created at weapon field and also loaded.
     // get_id  is None because weapon is loaded.
-    assert_eq!(created_alien.weapon.get_id().is_some(), false);
+    assert!(created_alien.weapon.get_id().is_none());
     // .value() is Some because weapon is loaded.
-    assert_eq!(created_alien.weapon.value().is_some(), true);
+    assert!(created_alien.weapon.value().is_some());
 
     // Spaceships created at weapon field and also loaded.
-    // get_id  is None because weapon is loaded.
-    assert_eq!(created_alien.weapon.get_id().is_some(), false);
-    // .value() is Some because weapon is loaded.
-    assert_eq!(created_alien.weapon.value().is_some(), true);
+    assert_eq!(created_alien.space_ships.is_empty(), false);
+
+    assert_eq!(created_alien.space_ships.len(), 3);
+    assert_eq!(
+        created_alien
+            .space_ships
+            .iter()
+            .map(|x| x.get_id().unwrap().to_string())
+            .collect::<Vec<_>>(),
+        vec![
+            created_spaceship1.unwrap().id.unwrap().to_string(),
+            created_spaceship2.unwrap().id.unwrap().to_string(),
+            created_spaceship3.unwrap().id.unwrap().to_string(),
+        ]
+    );
+    assert!(created_alien.space_ships.values().is_none());
+    assert_eq!(
+        created_alien
+            .space_ships
+            .iter()
+            .map(|x| x.clone().value().is_some())
+            .collect::<Vec<_>>(),
+        vec![false, false, false,]
+    );
 
     assert_eq!(created_alien.age, 20);
-    assert_eq!(unsaved_alien.id.is_some(), false);
-    assert_eq!(created_alien.id.is_some(), true);
+    assert!(unsaved_alien.id.is_none());
+    assert!(created_alien.id.is_some());
 
     assert_eq!(
         created_alien.line_polygon.to_string(),
