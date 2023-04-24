@@ -92,17 +92,21 @@ where
 
     /// Runs the statement against the database and returns the one result of the change with the
     /// specified projections or list of fields.
-    async fn return_one_projections(
+    async fn return_one_projections<P>(
         self,
         db: Surreal<Db>,
         projections: Option<Vec<Field>>,
-    ) -> SurrealdbOrmResult<Option<T>> {
+    ) -> SurrealdbOrmResult<Option<P>>
+    where
+        P: Serialize + DeserializeOwned,
+    {
         let mut query = self;
         if let Some(projections) = projections {
             query = query.set_return_type(ReturnType::Projections(projections));
         }
 
-        query.return_one(db).await
+        let response = query.run(db).await?;
+        get_one::<P>(response)
     }
 
     /// Runs the statement against the database and returns the one result. In addition, specified
