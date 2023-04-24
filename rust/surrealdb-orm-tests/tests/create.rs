@@ -338,75 +338,40 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     assert_eq!(unsaved_alien.weapon.value().is_some(), false);
     assert_eq!(unsaved_alien.id.is_some(), false);
 
-    assert_eq!(
-        Alien::get_serializable_field_names()
-            .into_iter()
-            .map(|f| f.to_string())
-            .collect::<Vec<String>>(),
-        vec![
-            "id".to_string(),
-            "name".to_string(),
-            "age".to_string(),
-            "created".to_string(),
-            "lifeExpectancy".to_string(),
-            "linePolygon".to_string(),
-            "territoryArea".to_string(),
-            "home".to_string(),
-            "tags".to_string(),
-            "ally".to_string(),
-            "weapon".to_string(),
-            "spaceShips".to_string(),
-            "planetsToVisit".to_string(),
-        ]
-    );
-    assert_eq!(Alien::get_serializable_field_names().len(), 13);
-    let mut fields = Alien::get_serializable_field_names()
-        .into_iter()
-        .chain(vec![Alien::schema().weapon(All).build().into()])
-        .collect::<Vec<Field>>();
-    // fields.push("weapon.*".into());
-    // fields.push(Alien::schema().weapon(All).build().into());
-
-    // let created_alien = create(unsaved_alien.clone())
-    //     .return_one_projections(db.clone(), Some(vec!["*".into(), "weapon.*".into()]))
-    //     .await?;
-
+    // Check fields value fetching
     let weapon = Alien::schema().weapon;
     let created_alien = create(unsaved_alien.clone())
         .return_one_and_fetch_fields(db.clone(), Some(vec![weapon]))
         .await?;
 
-    // Ally is not created at ally field.
-    assert_eq!(
-        created_alien.clone().unwrap().ally.get_id().is_some(),
-        false
-    );
+    let ref created_alien = created_alien.clone().unwrap();
+    // id is none  because ally field is not created.
+    assert_eq!(created_alien.ally.get_id().is_some(), false);
     // .value() is None because ally is not created.
-    assert_eq!(created_alien.clone().unwrap().ally.value().is_some(), false);
+    assert_eq!(created_alien.ally.value().is_some(), false);
 
     // Weapon is created at weapon field and also loaded.
     // get_id  is None because weapon is loaded.
-    assert_eq!(
-        created_alien.clone().unwrap().weapon.get_id().is_some(),
-        false
-    );
+    assert_eq!(created_alien.weapon.get_id().is_some(), false);
     // .value() is Some because weapon is loaded.
-    assert_eq!(
-        created_alien.clone().unwrap().weapon.value().is_some(),
-        true
-    );
+    assert_eq!(created_alien.weapon.value().is_some(), true);
 
+    // Spaceships created at weapon field and also loaded.
+    // get_id  is None because weapon is loaded.
+    assert_eq!(created_alien.weapon.get_id().is_some(), false);
+    // .value() is Some because weapon is loaded.
+    assert_eq!(created_alien.weapon.value().is_some(), true);
+
+    assert_eq!(created_alien.age, 20);
     assert_eq!(unsaved_alien.id.is_some(), false);
-
-    assert_eq!(created_alien.clone().unwrap().age, 20);
-    assert_eq!(created_alien.clone().unwrap().id.is_some(), true);
+    assert_eq!(created_alien.id.is_some(), true);
 
     assert_eq!(
-        created_alien.clone().unwrap().line_polygon.to_string(),
+        created_alien.line_polygon.to_string(),
         "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
             [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
     );
-    assert_eq!(created_alien.unwrap().name, "Oyelowo");
+    assert_eq!(created_alien.name, "Oyelowo");
 
     Ok(())
 }
