@@ -131,26 +131,24 @@ where
 
     /// Runs the statement against the database and returns the one result. In addition, specified
     /// fields' value are loaded. So, they return the value rather than the id if present.
-    async fn return_one_and_fetch_fields(
+    async fn return_one_and_fetch_links(
         self,
         db: Surreal<Db>,
-        fields_to_fetch: Option<Vec<Field>>,
+        fields_to_fetch: Vec<Field>,
     ) -> SurrealdbOrmResult<Option<T>> {
         let mut query = self;
-        if let Some(projections) = fields_to_fetch {
-            query = query.set_return_type(ReturnType::Projections(
-                vec![Field::new("*")]
-                    .into_iter()
-                    .chain(
-                        projections
-                            .into_iter()
-                            .map(|field| Field::new(format!("{}.*", field.build())))
-                            .collect::<Vec<_>>(),
-                    )
-                    .collect::<Vec<_>>()
-                    .into(),
-            ));
-        }
+        query = query.set_return_type(ReturnType::Projections(
+            vec![Field::new("*")]
+                .into_iter()
+                .chain(
+                    fields_to_fetch
+                        .into_iter()
+                        .map(|field| Field::new(format!("{}.*", field.build())))
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>()
+                .into(),
+        ));
 
         query.return_one(db).await
     }
