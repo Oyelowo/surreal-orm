@@ -669,3 +669,77 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     assert_eq!(selected_aliens_spaceships_values[2].name, "Oyelowo");
     Ok(())
 }
+
+#[tokio::test]
+async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let spaceship_id_1 = SpaceShip::create_id("spaceship1");
+    let spaceship_id_2 = SpaceShip::create_id("spaceship2");
+    let spaceship_id_3 = SpaceShip::create_id("spaceship3");
+
+    let space_ship1 = SpaceShip {
+        id: Some(spaceship_id_1),
+        name: "SpaceShip1".to_string(),
+        created: Utc::now(),
+    };
+
+    let space_ship2 = SpaceShip {
+        id: Some(spaceship_id_2),
+        name: "SpaceShip2".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let space_ship3 = SpaceShip {
+        id: Some(spaceship_id_3),
+        name: "Oyelowo".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let created_spaceship1 = create(space_ship1.clone()).return_one(db.clone()).await?;
+    let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
+    let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
+    let point = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+    let unsaved_alien = Alien {
+        id: None,
+        name: "Oyelowo".to_string(),
+        age: 20,
+        created: DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc),
+        line_polygon: territory.into(),
+        life_expectancy: Duration::from_secs(100),
+        territory_area: polygon.into(),
+        home: point.into(),
+        tags: vec!["tag1".into(), "tag".into()],
+        ally: LinkSelf::null(),
+        weapon: LinkOne::null(),
+        // only 1 has been created
+        space_ships: LinkMany::from(vec![
+            created_spaceship1.unwrap().id.unwrap(),
+            created_spaceship2.unwrap().id.unwrap(),
+            created_spaceship3.unwrap().id.unwrap(),
+        ]),
+        planets_to_visit: Relate::null(),
+    };
+
+    let build = create(unsaved_alien);
+
+    assert_eq!(build.get_bindings().len(), 1);
+    insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value());
+    assert_eq!(
+        build.fine_tune_params(),
+        "CREATE alien CONTENT $_param_00000001;"
+    );
+    insta::assert_display_snapshot!(build.to_raw().build());
+    Ok(())
+}
