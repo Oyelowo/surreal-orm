@@ -1,5 +1,5 @@
 use super::{Buildable, Parametric};
-use crate::{Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex};
+use crate::{All, Field, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult, Valuex};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -160,12 +160,12 @@ where
         let mut query = self;
         if let Some(projections) = fields_to_fetch {
             query = query.set_return_type(ReturnType::Projections(
-                vec![Valuex::from(Field::new("*"))]
+                vec![Valuex::from(All)]
                     .into_iter()
                     .chain(
                         projections
                             .into_iter()
-                            .map(|field| format!("{}.*", field.to_string()).into())
+                            .map(|field| Field::new(format!("{}.*", field.build())).into())
                             .collect::<Vec<_>>(),
                     )
                     .collect(),

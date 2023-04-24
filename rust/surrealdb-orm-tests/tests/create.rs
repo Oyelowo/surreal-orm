@@ -458,16 +458,16 @@ async fn test_create_fetch_record_links() -> SurrealdbOrmResult<()> {
 
     #[derive(Serialize, Deserialize)]
     struct SpaceShipName {
-        name: Vec<String>,
+        alien_names: Vec<String>,
     }
     assert_eq!(
         alien.spaceShips(All).name.__as__("name").build(),
         "spaceShips[*].name AS name"
     );
-    let space_ship_names: Vec<SpaceShipName> = create(unsaved_alien.clone())
-        .return_many_projections(
+    let space_ship_names: Option<SpaceShipName> = create(unsaved_alien.clone())
+        .return_one_projections(
             db.clone(),
-            arr![alien.spaceShips(Empty).name.__as__("name")],
+            arr![alien.spaceShips(Empty).name.__as__("alien_names")],
         )
         .await?;
 
@@ -475,7 +475,7 @@ async fn test_create_fetch_record_links() -> SurrealdbOrmResult<()> {
     ///[{
     ///spaceShips:{name" ["SpaceShips1", "SpaceShips2", "Oyelowo"]]"}
     ///}]
-    assert_eq!(space_ship_names.len(), 3);
+    assert_eq!(space_ship_names.unwrap().alien_names.len(), 3);
     // assert_eq!(
     //     created_alien
     //         .space_ships
