@@ -207,8 +207,29 @@ macro_rules! impl_utils_for_ref_vec {
                 $ref_vec(vec![])
             }
 
+            /// Returns the number of values that are fetched and available and not null
+            pub fn values_truthy_count(&self) -> usize {
+                self.0
+                    .iter()
+                    .filter(|m| matches!(m, Reference::FetchedValue(_)))
+                    .count()
+            }
+
+            /// Returns the values that are fetched and available and not null
+            pub fn values_truthy(&self) -> Vec<&V> {
+                self.0
+                    .iter()
+                    // .filter(|m| matches!(m, Reference::FetchedValue(_)))
+                    .filter_map(|m| match m {
+                        Reference::FetchedValue(v) => Some(v),
+                        Reference::Id(_) => None,
+                        Reference::Null => None,
+                    })
+                    .collect::<Vec<_>>()
+            }
+
             /// Returns just the fully fetched values if fetched and available, otherwise, None
-            pub fn values(&self) -> Option<Vec<&V>> {
+            pub fn values(&self) -> Vec<Option<&V>> {
                 self.0
                     .iter()
                     .map(|m| match m {
@@ -216,11 +237,11 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(_) => None,
                         Reference::Null => None,
                     })
-                    .collect::<Option<Vec<_>>>()
+                    .collect::<Vec<Option<&V>>>()
             }
 
-            /// Returns just the keys of the foreign field if available, otherwise, None
-            pub fn keys(&self) -> Option<Vec<&SurrealId>> {
+            /// Returns just the keys of the foreign field. Some links may not exist
+            pub fn keys(&self) -> Vec<Option<&SurrealId>> {
                 self.0
                     .iter()
                     .map(|m| match m {
@@ -228,7 +249,19 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(id) => Some(id),
                         Reference::Null => None,
                     })
-                    .collect::<Option<Vec<_>>>()
+                    .collect::<Vec<Option<&SurrealId>>>()
+            }
+
+            /// Returns only the keys that exist
+            pub fn keys_truthy(&self) -> Vec<&SurrealId> {
+                self.0
+                    .iter()
+                    .filter_map(|m| match m {
+                        Reference::FetchedValue(_) => None,
+                        Reference::Id(id) => Some(id),
+                        Reference::Null => None,
+                    })
+                    .collect::<Vec<_>>()
             }
         }
     };

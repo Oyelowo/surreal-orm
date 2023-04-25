@@ -163,6 +163,32 @@ where
         query.return_one(db).await
     }
 
+    /// Return only the non-null loaded values of the linked fields.
+    async fn return_one_and_fetch_links_non_null(
+        self,
+        db: Surreal<Db>,
+        fields_to_fetch: Vec<Field>,
+    ) -> SurrealdbOrmResult<Option<T>> {
+        let mut query = self;
+        query = query.set_return_type(ReturnType::Projections(
+            vec![Field::new("*")]
+                .into_iter()
+                .chain(
+                    fields_to_fetch
+                        .into_iter()
+                        // Fetch only where the link is not null.
+                        .map(|field| {
+                            format!("{}[WHERE type::thing(id) IS NOT NULL].*", field).into()
+                        })
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>()
+                .into(),
+        ));
+
+        query.return_one(db).await
+    }
+
     /// Runs the statement against the database and returns the many results before the change.
     async fn return_many_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::Before);
