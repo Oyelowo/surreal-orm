@@ -227,7 +227,7 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     // Check fields value fetching
     let weapon = Alien::schema().weapon;
     let created_alien = insert(unsaved_alien.clone())
-        .return_one_and_fetch_links(db.clone(), vec![weapon])
+        .return_one_and_fetch_all_links(db.clone(), vec![weapon])
         .await?;
 
     let ref created_alien = created_alien.clone().unwrap();
@@ -432,7 +432,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = insert(unsaved_alien.clone())
-        .return_one_and_fetch_links(db.clone(), vec![spaceShips])
+        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -515,7 +515,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = insert(unsaved_alien.clone())
-        .return_one_and_fetch_links(db.clone(), vec![spaceShips])
+        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -760,7 +760,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = insert(unsaved_alien.clone())
-        .return_one_and_fetch_links(db.clone(), vec![spaceShips])
+        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -880,7 +880,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
 
     // Non-null links filter out null links
     let created_alien_with_fetched_links = insert(unsaved_alien.clone())
-        .return_one_and_fetch_links_non_null(db.clone(), vec![spaceShips])
+        .return_one_and_fetch_non_null_links(db.clone(), vec![spaceShips])
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -1025,7 +1025,8 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
 
     // Non-null links filter out null links
     let created_alien_with_fetched_links = insert(vec![unsaved_alien1, unsaved_alien2])
-        .return_many_and_fetch_links_non_null(db.clone(), vec![spaceShips])
+        .return_many_and_fetch_non_null_links(db.clone(), vec![spaceShips])
+        // .return_many_and_fetch_all_links_default(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links;

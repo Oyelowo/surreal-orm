@@ -214,7 +214,7 @@ where
     T: SurrealdbNode + DeserializeOwned + Serialize,
 {
     let mut errors = vec![];
-    let mut serialized_field_names = T::get_serializable_field_names();
+    let mut serialized_field_names = T::get_serializable_fields();
     serialized_field_names.sort_by(|a, b| a.build().cmp(&b.build()));
 
     let value = serde_json::to_value(node).ok().map_or_else(

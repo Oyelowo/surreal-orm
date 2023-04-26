@@ -80,7 +80,12 @@ impl ToTokens for NodeToken{
             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
-            serialized_field_name_no_skip,
+            serializable_fields,
+            linked_fields,
+            link_one_fields,
+            link_self_fields,
+            link_one_and_self_fields,
+            link_many_fields,
             field_definitions,
             fields_relations_aliased,
             ..
@@ -171,8 +176,28 @@ impl ToTokens for NodeToken{
                     #table_name_str.into()
                 }
                 
-                fn get_serializable_field_names() -> Vec<#crate_name::Field> {
-                    return vec![#( #serialized_field_name_no_skip), *]
+                fn get_serializable_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #serializable_fields), *]
+                }
+            
+                fn get_linked_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #linked_fields), *]
+                }
+            
+                fn get_link_one_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_one_fields), *]
+                }
+            
+                fn get_link_self_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_self_fields), *]
+                }
+                
+                fn get_link_one_and_self_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_one_and_self_fields), *]
+                }
+            
+                fn get_link_many_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_many_fields), *]
                 }
                 
                 fn define_table() -> #crate_name::Raw {

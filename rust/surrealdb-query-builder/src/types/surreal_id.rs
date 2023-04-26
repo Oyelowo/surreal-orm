@@ -84,7 +84,27 @@ mod tests {
             "user".into()
         }
 
-        fn get_serializable_field_names() -> Vec<Field> {
+        fn get_serializable_fields() -> Vec<Field> {
+            unimplemented!()
+        }
+
+        fn get_linked_fields() -> Vec<Field> {
+            unimplemented!()
+        }
+
+        fn get_link_one_fields() -> Vec<Field> {
+            unimplemented!()
+        }
+
+        fn get_link_self_fields() -> Vec<Field> {
+            unimplemented!()
+        }
+
+        fn get_link_one_and_self_fields() -> Vec<Field> {
+            unimplemented!()
+        }
+
+        fn get_link_many_fields() -> Vec<Field> {
             unimplemented!()
         }
 

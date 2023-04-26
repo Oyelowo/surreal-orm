@@ -119,7 +119,17 @@ struct NodeEdgeMetadata {
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
     /// list of fields names that are actually serialized and not skipped.
-    pub serialized_field_name_no_skip: Vec<TokenStream>,
+    pub serializable_fields: Vec<TokenStream>,
+    /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
+    pub linked_fields: Vec<TokenStream>,
+    /// The names of link_one fields
+    pub link_one_fields: Vec<TokenStream>,
+    /// The names of link_self fields
+    pub link_self_fields: Vec<TokenStream>,
+    /// The names of link_one and link_self fields
+    pub link_one_and_self_fields: Vec<TokenStream>,
+    /// The names of link_many fields
+    pub link_many_fields: Vec<TokenStream>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -337,6 +347,14 @@ impl SchemaFieldsProperties {
                         ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
+
+                let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
+                    if !field_receiver.skip_serializing && !field_receiver.skip {
+                        serializable_field_type.push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
+                    }
+                };
+
+                update_ser_field_type(&mut store.serializable_fields);
                 
                 let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
@@ -349,6 +367,10 @@ impl SchemaFieldsProperties {
                         
                     RelationType::LinkOne(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
+                        update_ser_field_type(&mut store.link_one_fields);
+                        update_ser_field_type(&mut store.link_one_and_self_fields);
+                        update_ser_field_type(&mut store.linked_fields);
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                         get_link_meta_with_defs(&node_object)
                     }
@@ -362,6 +384,9 @@ impl SchemaFieldsProperties {
                                    and the type is LinkSelf<{struct_name_ident}>. ");
                         }
                         
+                        update_ser_field_type(&mut store.link_self_fields);
+                        update_ser_field_type(&mut store.link_one_and_self_fields);
+                        update_ser_field_type(&mut store.linked_fields);
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         
                         get_link_meta_with_defs(&node_object)
@@ -369,8 +394,10 @@ impl SchemaFieldsProperties {
                     
                     RelationType::LinkMany(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
+                        update_ser_field_type(&mut store.link_many_fields);
+                        update_ser_field_type(&mut store.linked_fields);
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                    
                         get_link_meta_with_defs(&node_object)
                     }                    
                     
@@ -433,10 +460,6 @@ impl SchemaFieldsProperties {
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
                 
-                if !field_receiver.skip_serializing && !field_receiver.skip {
-                    store.serialized_field_name_no_skip
-                        .push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
-                }
 
                 store 
             });

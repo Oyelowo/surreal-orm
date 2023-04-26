@@ -1,7 +1,7 @@
 use super::{Buildable, Parametric};
 use crate::{
-    AllGetter, Field, Projections, Queryable, ReturnType, SurrealdbOrmError, SurrealdbOrmResult,
-    ToRaw,
+    AllGetter, Field, Projections, Queryable, ReturnType, SurrealdbModel, SurrealdbOrmError,
+    SurrealdbOrmResult, ToRaw,
 };
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
@@ -41,7 +41,7 @@ impl<Q> Runnable for Q where Q: Queryable {}
 pub trait ReturnableStandard<T>
 where
     Self: Parametric + Buildable + Sized + Send + Sync + ReturnableDefault<T> + Runnable,
-    T: Serialize + DeserializeOwned,
+    T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     /// Runs the statement against the database and returns the first result before the change.
     async fn return_first_before(self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
@@ -132,9 +132,39 @@ where
         get_many::<P>(response)
     }
 
+    /// fetch all links for all fields
+    async fn return_one_and_fetch_all_links_default(
+        self,
+        db: Surreal<Db>,
+    ) -> SurrealdbOrmResult<Option<T>> {
+        let mut query = self;
+        query = query.set_return_type(ReturnType::Projections(
+            vec![Field::new("*")]
+                .into_iter()
+                .chain(
+                    T::get_linked_fields()
+                        .into_iter()
+                        // We use double i.e `.*.*` to also work for fetching array of links since it
+                        // also works for a single link as well. If we do it once i.e `.*` then
+                        // it will not work for array of links but only for a single link fields
+                        // fetching.
+                        // For array of list, the first set of `.*` says that we want all
+                        // array items and the second set of `.*` says that we want all fields of
+                        // all the arrays. If you want only a specific index, you would do link[0].*
+                        // to get all fields of the first link and link[0].name to get only the name.
+                        .map(|field| field.all().all())
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>()
+                .into(),
+        ));
+
+        query.return_one(db).await
+    }
+
     /// Runs the statement against the database and returns the one result. In addition, specified
     /// fields' value are loaded. So, they return the value rather than the id if present.
-    async fn return_one_and_fetch_links(
+    async fn return_one_and_fetch_all_links(
         self,
         db: Surreal<Db>,
         fields_to_fetch: Vec<Field>,
@@ -164,8 +194,69 @@ where
         query.return_one(db).await
     }
 
+    /// Fetch all fields' links of all items in the returned array
+    async fn return_many_and_fetch_all_links_default(
+        self,
+        db: Surreal<Db>,
+    ) -> SurrealdbOrmResult<Vec<T>> {
+        let mut query = self;
+        query = query.set_return_type(ReturnType::Projections(
+            vec![Field::new("*")]
+                .into_iter()
+                .chain(
+                    T::get_linked_fields()
+                        .into_iter()
+                        // We use double i.e `.*.*` to also work for fetching array of links since it
+                        // also works for a single link as well. If we do it once i.e `.*` then
+                        // it will not work for array of links but only for a single link fields
+                        // fetching.
+                        // For array of list, the first set of `.*` says that we want all
+                        // array items and the second set of `.*` says that we want all fields of
+                        // all the arrays. If you want only a specific index, you would do link[0].*
+                        // to get all fields of the first link and link[0].name to get only the name.
+                        .map(|field| field.all().all())
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>()
+                .into(),
+        ));
+
+        query.return_many(db).await
+    }
+
+    /// Fetch all fields' links of all items in the returned array
+    async fn return_many_and_fetch_all_links(
+        self,
+        db: Surreal<Db>,
+        fields_to_fetch: Vec<Field>,
+    ) -> SurrealdbOrmResult<Vec<T>> {
+        let mut query = self;
+        query = query.set_return_type(ReturnType::Projections(
+            vec![Field::new("*")]
+                .into_iter()
+                .chain(
+                    fields_to_fetch
+                        .into_iter()
+                        // We use double i.e `.*.*` to also work for fetching array of links since it
+                        // also works for a single link as well. If we do it once i.e `.*` then
+                        // it will not work for array of links but only for a single link fields
+                        // fetching.
+                        // For array of list, the first set of `.*` says that we want all
+                        // array items and the second set of `.*` says that we want all fields of
+                        // all the arrays. If you want only a specific index, you would do link[0].*
+                        // to get all fields of the first link and link[0].name to get only the name.
+                        .map(|field| field.all().all())
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>()
+                .into(),
+        ));
+
+        query.return_many(db).await
+    }
+
     /// Return only the non-null loaded values of the linked fields.
-    async fn return_one_and_fetch_links_non_null(
+    async fn return_one_and_fetch_non_null_links(
         self,
         db: Surreal<Db>,
         fields_to_fetch: Vec<Field>,
@@ -193,7 +284,7 @@ where
     }
 
     /// Return only the non-null loaded values of the linked fields.
-    async fn return_many_and_fetch_links_non_null(
+    async fn return_many_and_fetch_non_null_links(
         self,
         db: Surreal<Db>,
         fields_to_fetch: Vec<Field>,
