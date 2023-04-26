@@ -45,7 +45,9 @@ pub enum SurrealdbOrmError {
 
     #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'")]
     InvalidId(#[source] surrealdb::Error),
+
+    #[error("The following fields could not be fetched as they are not linked to a foreign table: {0}. Please ensure that all fields provided are of types 'link_self', 'link_one' or 'link_many' to allow fetching of linked values from other tables.")]
+    FieldsUnfetchableNotARecordLink(String),
 }
 
 pub type SurrealdbOrmResult<T> = std::result::Result<T, SurrealdbOrmError>;
-

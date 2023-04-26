@@ -290,6 +290,22 @@ where
         fields_to_fetch: Vec<Field>,
     ) -> SurrealdbOrmResult<Vec<T>> {
         let mut query = self;
+        let result = fields_to_fetch
+            .iter()
+            .filter(|&n| {
+                !T::get_linked_fields()
+                    .iter()
+                    .any(|m| m.build() == *n.build())
+            })
+            .map(|n| n.build())
+            .collect::<Vec<_>>();
+
+        if !result.is_empty() {
+            return Err(SurrealdbOrmError::FieldsUnfetchableNotARecordLink(
+                result.join(", "),
+            ));
+        }
+
         query = query.set_return_type(ReturnType::Projections(
             vec![Field::new("*")]
                 .into_iter()

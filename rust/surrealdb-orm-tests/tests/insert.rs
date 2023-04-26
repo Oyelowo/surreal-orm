@@ -1021,14 +1021,41 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
+    let alien_schema::Alien {
+        spaceShips,
+        age,
+        created,
+        ..
+    } = Alien::schema();
 
-    // Non-null links filter out null links
+    // We are trying to fetch fields that are not linked fields type. Catch the error
+    let created_alien_with_fetched_links =
+        insert(vec![unsaved_alien1.clone(), unsaved_alien2.clone()])
+            .return_many_and_fetch_non_null_links(db.clone(), vec![spaceShips, age, created])
+            // .return_many_and_fetch_all_links_default(db.clone())
+            .await;
+    assert!(created_alien_with_fetched_links.is_err());
+    let expected: SurrealdbOrmResult<Vec<Alien>> = Err(
+        SurrealdbOrmError::FieldsUnfetchableNotARecordLink("age, create".to_string()),
+    );
+
+    assert_eq!(
+        created_alien_with_fetched_links.unwrap_err().to_string(),
+        "The following fields could not be fetched as they are not linked to a \
+            foreign table: age, created. Please ensure that all fields provided are of types \
+            'link_self', 'link_one' or 'link_many' to allow fetching of linked values from other tables."
+    );
+
+    let alien_schema::Alien {
+        spaceShips,
+        age,
+        created,
+        ..
+    } = Alien::schema();
     let created_alien_with_fetched_links = insert(vec![unsaved_alien1, unsaved_alien2])
         .return_many_and_fetch_non_null_links(db.clone(), vec![spaceShips])
         // .return_many_and_fetch_all_links_default(db.clone())
         .await?;
-
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links;
     // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links[0].space_ships;
