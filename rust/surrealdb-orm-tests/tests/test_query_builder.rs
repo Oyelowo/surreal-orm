@@ -25,7 +25,9 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
+use surrealdb_models::{
+    book_schema, student_schema, writes_schema, Book, Student, StudentWritesBook,
+};
 use surrealdb_orm::statements::{order, relate, select};
 use surrealdb_orm::*;
 use test_case::test_case;

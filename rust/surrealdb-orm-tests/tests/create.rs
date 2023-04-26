@@ -8,9 +8,11 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
-use surrealdb_models::SpaceShip;
-use surrealdb_orm::statements::select;
-use surrealdb_orm::{statements::create, *};
+use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
+use surrealdb_orm::{
+    statements::{create, select},
+    *,
+};
 
 #[tokio::test]
 async fn test_create_alien_with_id_not_specified_but_generated_by_the_database(
@@ -120,7 +122,7 @@ async fn test_creation_with_returning_selected_fields() -> SurrealdbOrmResult<()
     };
     // id specified before creation. Will be used by the database.
     assert_eq!(space_ship.id.is_some(), true);
-    let spaceship::SpaceShip { name, .. } = SpaceShip::schema();
+    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -430,7 +432,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
         planets_to_visit: Relate::null(),
     };
 
-    let alien::Alien { spaceShips, .. } = Alien::schema();
+    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
         .return_one_and_fetch_links(db.clone(), vec![spaceShips])
@@ -513,7 +515,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         planets_to_visit: Relate::null(),
     };
 
-    let alien::Alien { spaceShips, .. } = Alien::schema();
+    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
         .return_one_and_fetch_links(db.clone(), vec![spaceShips])
@@ -753,7 +755,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         planets_to_visit: Relate::null(),
     };
 
-    let alien::Alien { spaceShips, .. } = Alien::schema();
+    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
         .return_one_and_fetch_links(db.clone(), vec![spaceShips])
@@ -872,7 +874,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
         planets_to_visit: Relate::null(),
     };
 
-    let alien::Alien { spaceShips, .. } = Alien::schema();
+    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     // Non-null links filter out null links
     let created_alien_with_fetched_links = create(unsaved_alien.clone())

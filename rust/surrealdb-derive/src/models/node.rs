@@ -97,7 +97,7 @@ impl ToTokens for NodeToken{
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 

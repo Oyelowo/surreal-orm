@@ -24,7 +24,9 @@ use surrealdb::{
     sql::Id,
     Result, Surreal,
 };
-use surrealdb_models::{book, student, writes_schema, Book, Student, StudentWritesBook};
+use surrealdb_models::{
+    book_schema, student_schema, writes_schema, Book, Student, StudentWritesBook,
+};
 use surrealdb_orm::*;
 use surrealdb_orm::{
     array, cond,
@@ -165,7 +167,7 @@ fn replace_params(query: &str) -> String {
 
 #[test]
 fn multiplication_tests1() {
-    let student::Student {
+    let student_schema::Student {
         id,
         firstName,
         lastName,
@@ -180,7 +182,7 @@ fn multiplication_tests1() {
     let bk = &Book::schema();
     let wrt = &StudentWritesBook::schema();
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
-    let book::Book { content, .. } = Book::schema();
+    let book_schema::Book { content, .. } = Book::schema();
     // Student ===
     // ->writes->book as novel;
     // student:1->writes->book:2
@@ -254,7 +256,7 @@ fn multiplication_tests1() {
     }
     // age.and(firstName)
 
-    let book::Book { content, .. } = Book::schema();
+    let book_schema::Book { content, .. } = Book::schema();
 
     cond(
         content
