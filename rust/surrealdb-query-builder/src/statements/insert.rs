@@ -375,6 +375,10 @@ where
             query = format!("{query}  ON DUPLICATE KEY UPDATE {updates_str}",);
         }
 
+        if let Some(return_type) = &self.return_type {
+            query = format!("{query} {}", &return_type);
+        }
+
         format!("{query};")
     }
 }
