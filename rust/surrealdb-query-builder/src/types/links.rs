@@ -267,7 +267,7 @@ macro_rules! impl_utils_for_ref_vec {
     };
 }
 
-/// ~eference to a foreign node in a simple direct one-to-many relationship
+/// Reference to a foreign node in a simple direct one-to-many relationship
 /// Returns either the foreign values if fetched, id keys of the foreign Field if not fetched,
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]

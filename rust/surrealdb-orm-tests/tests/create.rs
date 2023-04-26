@@ -958,7 +958,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
-        // only 1 has been created
+        // only 2 has been created
         space_ships: LinkMany::from(vec![
             created_spaceship1.unwrap().clone(),
             created_spaceship2.unwrap().clone(),
@@ -975,11 +975,16 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    // Hast not yet been saved.
+    // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
-    // assert_eq!(alien_spaceships.iter().count(), 2);
+    assert_eq!(alien_spaceships.iter().count(), 3);
+    // Two present values and one null
+    assert_eq!(alien_spaceships.values().iter().count(), 3);
+    // Two present values
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
+    // array of 3 none keys
     assert_eq!(alien_spaceships.keys().len(), 3);
+    // no valid keys
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
     let selected_aliens: Option<Alien> = select(All)
