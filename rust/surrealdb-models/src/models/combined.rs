@@ -215,21 +215,20 @@ pub struct Student {
     #[serde(skip_serializing)]
     blogsssss: Relate<Blog>,
 }
-#[test]
-fn xama() {
-    assert_eq!(
-        format!(
-            "zz:{:?}",
-            Student::define_fields()
-                .into_iter()
-                .map(|f| f.to_string())
-                .collect::<Vec<_>>()
-        ),
-        "er".to_string()
-    );
-    assert_eq!(Student::define_table().to_string(), "re".to_string());
-}
-
+// #[test]
+// fn xama() {
+//     assert_eq!(
+//         format!(
+//             "zz:{:?}",
+//             Student::define_fields()
+//                 .into_iter()
+//                 .map(|f| f.to_string())
+//                 .collect::<Vec<_>>()
+//         ),
+//         "er".to_string()
+//     );
+//     assert_eq!(Student::define_table().to_string(), "re".to_string());
+// }
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
