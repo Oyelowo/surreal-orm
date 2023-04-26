@@ -20,7 +20,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbNode},
     types::Updateables,
-    ErrorList, ReturnableDefault,
+    ErrorList, ReturnType, ReturnableDefault, ReturnableStandard,
 };
 
 use super::SelectStatement;
@@ -31,6 +31,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     on_duplicate_key_update: Vec<String>,
+    return_type: Option<ReturnType>,
     // You can select values to copy data from an existing table into a new one
     select_query_string: Option<String>,
     bindings: BindingsList,
@@ -110,6 +111,7 @@ where
     InsertStatement::<T> {
         bindings,
         select_query_string: select_query,
+        return_type: None,
         on_duplicate_key_update: vec![],
         field_names,
         errors,
@@ -130,6 +132,16 @@ where
 impl<T> ReturnableDefault<T> for InsertStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbNode
 {
+}
+
+impl<T> ReturnableStandard<T> for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
+        self.return_type = Some(return_type);
+        self
+    }
 }
 
 impl<T> Display for InsertStatement<T>
@@ -279,6 +291,49 @@ where
             Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
         };
         self.on_duplicate_key_update.extend(updater_query);
+        self
+    }
+
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
+        let return_type = return_type.into();
+        self.return_type = Some(return_type);
         self
     }
 }
