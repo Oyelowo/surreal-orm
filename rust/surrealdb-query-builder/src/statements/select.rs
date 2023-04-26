@@ -1058,8 +1058,11 @@ impl SelectStatement {
             Fetchables::Fields(many_fields) => many_fields,
         };
 
+        // self.fetch
+        //     .extend(fields.iter().map(|f| f.build()).collect::<Vec<_>>());
         fields.iter().for_each(|f| {
-            self.group_by.push(f.to_string());
+            self.fetch.push(f.build());
+            self.bindings.extend(f.get_bindings());
         });
         self
     }
