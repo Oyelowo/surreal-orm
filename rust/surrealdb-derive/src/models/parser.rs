@@ -354,11 +354,39 @@ impl SchemaFieldsProperties {
                     }
                 };
 
+                let mut update_aliases_struct_fields_types_kv = || {
+                    store.aliases_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
+                    
+                    store.aliases_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                };
+            
+                
+                let mut update_field_names_fields_types_kv = || {
+                    store.schema_struct_fields_types_kv
+                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                    store.schema_struct_fields_names_kv
+                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                    
+                    store.schema_struct_fields_names_kv_empty
+                        .push(quote!(#field_ident_normalised: "".into(),));
+                    
+                    store.connection_with_field_appended
+                        .push(quote!(
+                                    #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
+                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
+                                            .#____________update_many_bindings(#bindings);
+                                ));
+
+                };
+
                 update_ser_field_type(&mut store.serializable_fields);
                 
                 let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
+                        update_aliases_struct_fields_types_kv();
                         let connection = relation.connection_model; 
                         store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
                             ReferencedNodeMeta::default()
@@ -370,6 +398,7 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_one_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                         get_link_meta_with_defs(&node_object)
@@ -387,6 +416,8 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_self_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         
                         get_link_meta_with_defs(&node_object)
@@ -396,6 +427,7 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                         get_link_meta_with_defs(&node_object)
@@ -404,6 +436,7 @@ impl SchemaFieldsProperties {
                     RelationType::NestObject(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        update_field_names_fields_types_kv();
                         
                         get_nested_meta_with_defs(&node_object)
                     },
@@ -411,11 +444,14 @@ impl SchemaFieldsProperties {
                     RelationType::NestArray(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
+                        update_field_names_fields_types_kv();
                         get_nested_meta_with_defs(&node_object)
                     },
-                        
-                    RelationType::None => ReferencedNodeMeta::default()
+                    RelationType::None => {
+                        update_field_names_fields_types_kv();
+                        ReferencedNodeMeta::default()
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                    }
                 };
                 
                 if !referenced_node_meta.field_definition.is_empty() {
@@ -431,30 +467,6 @@ impl SchemaFieldsProperties {
                 store.record_link_fields_methods
                     .push(referenced_node_meta.record_link_default_alias_as_method.into());
   
-                if let RelationType::Relate(_) =  relationship {
-                    store.aliases_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
-                    
-                    store.aliases_struct_fields_names_kv
-                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                }
-                else{
-                    store.schema_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
-                    store.schema_struct_fields_names_kv
-                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                    
-                    store.schema_struct_fields_names_kv_empty
-                        .push(quote!(#field_ident_normalised: "".into(),));
-                    
-                    store.connection_with_field_appended
-                        .push(quote!(
-                                    #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
-                                      .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
-                                            .#____________update_many_bindings(#bindings);
-                                ));
-
-                }
   
 
                 store.serialized_field_names_normalised
