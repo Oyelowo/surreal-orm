@@ -982,26 +982,48 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
     assert_eq!(alien_spaceships.keys().len(), 3);
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
-    // let selected_aliens: Option<Alien> = select(All)
-    //     .from(Alien::table_name())
-    //     .return_first(db.clone())
-    //     .await?;
-    // let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_none());
-    // assert!(selected_aliens_spaceships.keys().is_some());
-    //
-    // let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
-    //     .from(Alien::table_name())
-    //     .return_first(db.clone())
-    //     .await?;
-    // let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_some());
-    // assert!(selected_aliens_spaceships.keys().is_none());
-    // let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values().unwrap();
-    //
-    // assert_eq!(selected_aliens_spaceships_values.len(), 3);
-    // assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
-    // assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
-    // assert_eq!(selected_aliens_spaceships_values[2].name, "Oyelowo");
+    let selected_aliens: Option<Alien> = select(All)
+        .from(Alien::table_name())
+        .fetch(Alien::schema().spaceShips)
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert_eq!(selected_aliens_spaceships.values().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
+    assert_eq!(selected_aliens_spaceships.keys().len(), 3);
+    assert_eq!(
+        selected_aliens_spaceships
+            .keys()
+            .into_iter()
+            .filter(Option::is_none)
+            .collect::<Vec<_>>()
+            .len(),
+        3
+    );
+    assert_eq!(
+        selected_aliens_spaceships
+            .keys()
+            .into_iter()
+            .filter(Option::is_some)
+            .collect::<Vec<_>>()
+            .len(),
+        0
+    );
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
+
+    let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
+        .from(Alien::table_name())
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert_eq!(selected_aliens_spaceships.values().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
+    assert_eq!(selected_aliens_spaceships.keys().len(), 3);
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
+
+    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values_truthy();
+    assert_eq!(selected_aliens_spaceships_values.len(), 2);
+    assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
+    assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
     Ok(())
 }
