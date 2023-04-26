@@ -41,7 +41,6 @@ pub struct Alien {
 
     // This is a read only field
     #[surrealdb(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
-    // #[serde(skip_serializing)]
-    #[serde(default)]
+    #[serde(skip_serializing, default)]
     pub planets_to_visit: Relate<Planet>,
 }

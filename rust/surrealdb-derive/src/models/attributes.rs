@@ -203,6 +203,9 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     pub(crate) skip_serializing: bool,
 
+    #[darling(default)]
+    pub(crate) skip: bool,
+
     // #[darling(default)]
     // default: ::std::option::Option<syn::Expr>,
     #[darling(default, rename = "type")]

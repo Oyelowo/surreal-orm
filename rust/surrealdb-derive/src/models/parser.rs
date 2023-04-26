@@ -433,7 +433,7 @@ impl SchemaFieldsProperties {
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
                 
-                if !field_receiver.skip_serializing {
+                if !field_receiver.skip_serializing && !field_receiver.skip {
                     store.serialized_field_name_no_skip
                         .push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
                 }

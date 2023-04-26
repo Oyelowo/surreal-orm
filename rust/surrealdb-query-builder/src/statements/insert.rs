@@ -12,7 +12,7 @@
 // 		[ ON DUPLICATE KEY UPDATE @field = @value ... ]
 // 	]
 // ;
-use std::{fmt::Display, marker::PhantomData};
+use std::{collections::BTreeMap, fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -228,19 +228,29 @@ where
         },
         |v| v.to_owned(),
     );
+    let mut sorted_object: BTreeMap<String, serde_json::Value> = object.into_iter().collect();
+    if !sorted_object.contains_key("id") {
+        sorted_object.insert("id".to_string(), serde_json::Value::Null);
+    }
+    println!("sorted_object {:?}", sorted_object.clone());
 
-    let (field_names, bindings): (Vec<String>, BindingsList) = object
+    let (field_names, bindings): (Vec<String>, BindingsList) = sorted_object
         .iter()
         .map(|(key, value1)| {
             let value = sql::json(&value1.to_string()).ok().map_or_else(
                 || {
                     errors.push(format!("Unable to convert value to json {}", value1));
-                    sql::Value::Null
+                    sql::Value::None
                 },
                 |v| v,
             );
 
-            let binding = Binding::new(value).with_name(key.into());
+            let binding = if key == "id" && value1 == &serde_json::Value::Null {
+                Binding::new(sql::Value::None).with_name(key.into())
+            } else {
+                Binding::new(value).with_name(key.into())
+            };
+            // Binding::new(value).with_name(key.into());
             (key.to_string(), binding)
         })
         .unzip();
