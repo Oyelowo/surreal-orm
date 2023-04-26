@@ -1,21 +1,14 @@
 // TODO: Validate in SurrealdbNode and Edge if id, skip_serializing_if = "Option::is_none" must be
 // set and if relate, skip_serializing
-use std::time::Duration;
-
 use chrono::{DateTime, Utc};
 use geo::line_string;
 use geo::point;
 use geo::polygon;
-use geo::Coord;
-use geo::Line;
-use geo::LineString;
-use geo::Point;
-use geo::Polygon;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::sql;
 use surrealdb::Surreal;
-use surrealdb_orm::statements::insert;
 use surrealdb_orm::statements::select;
 use surrealdb_orm::{statements::create, *};
 
@@ -621,7 +614,6 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
-        // only 1 has been created
         space_ships: LinkMany::from(vec![
             space_ship1.clone(),
             space_ship2.clone(),
@@ -637,9 +629,11 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    // Reference keys exist but is null pointer as spaceships 1, 2 and 3 have not
-    // yet been created in space_ship table.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    // Reference ids exist, but we tried to fetch the keys before they were created.
+    // so, now we dont have either the keys nor the values since the values don't yet exist.
+    assert_eq!(alien_spaceships.keys_truthy().len(), 0);
+    assert_eq!(alien_spaceships.keys().len(), 3);
     assert_eq!(alien_spaceships.values().len(), 3);
     assert_eq!(alien_spaceships.values_truthy().len(), 0);
     assert_eq!(
@@ -655,16 +649,19 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
     // the are now created, so the reference should be valid now.
-    let created_spaceship1 = create(space_ship1.clone()).return_one(db.clone()).await?;
-    let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
-    let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
+    create(space_ship1.clone()).return_one(db.clone()).await?;
+    create(space_ship2.clone()).return_one(db.clone()).await?;
+    create(space_ship3.clone()).return_one(db.clone()).await?;
 
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_none());
+    // The spaceship values not fetched, so, only ids present
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 3);
+    assert_eq!(alien_spaceships.keys().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 0);
     assert_eq!(alien_spaceships.values().len(), 3);
     assert_eq!(
         alien_spaceships
@@ -692,7 +689,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_some());
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 3);
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(
         selected_aliens_spaceships
@@ -784,7 +781,6 @@ async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
-        // only 1 has been created
         space_ships: LinkMany::from(vec![
             created_spaceship1.unwrap().id.unwrap(),
             created_spaceship2.unwrap().id.unwrap(),
@@ -858,7 +854,6 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
-        // only 1 has been created
         space_ships: LinkMany::from(vec![
             created_spaceship1.unwrap().clone(),
             created_spaceship2.unwrap().clone(),
@@ -880,31 +875,52 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
     assert!(alien_spaceships.keys_truthy().is_empty());
 
-    // let selected_aliens: Option<Alien> = select(All)
-    //     .from(Alien::table_name())
-    //     .return_first(db.clone())
-    //     .await?;
-    // let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_none());
-    // assert!(selected_aliens_spaceships.keys().is_some());
-    //
-    // let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
-    //     .from(Alien::table_name())
-    //     .return_first(db.clone())
-    //     .await?;
-    // let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    // assert!(selected_aliens_spaceships.values().is_some());
-    // assert!(selected_aliens_spaceships.keys().is_none());
-    // let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values().unwrap();
-    //
-    // assert_eq!(selected_aliens_spaceships_values.len(), 3);
-    // assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
-    // assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
-    // assert_eq!(selected_aliens_spaceships_values[2].name, "Oyelowo");
+    let selected_aliens: Option<Alien> = select(All)
+        .from(Alien::table_name())
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert_eq!(selected_aliens_spaceships.values().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 0);
+    assert_eq!(selected_aliens_spaceships.values_truthy_count(), 0);
+    assert_eq!(selected_aliens_spaceships.keys().len(), 3);
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 3);
+
+    // We are fetching all fields and all values in space_ships array.
+    let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
+        .from(Alien::table_name())
+        .return_first(db.clone())
+        .await?;
+    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    assert_eq!(selected_aliens_spaceships.values().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
+    assert_eq!(selected_aliens_spaceships.values_truthy_count(), 2);
+    // Empty keys because we values have being fetched leaving [None, None, None]
+    assert_eq!(selected_aliens_spaceships.keys().len(), 3);
+    assert!(selected_aliens_spaceships.keys()[0].is_none());
+    assert!(selected_aliens_spaceships.keys()[1].is_none());
+    assert!(selected_aliens_spaceships.keys()[2].is_none());
+    // Nones have been filtered out.
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
+    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
+
+    assert_eq!(selected_aliens_spaceships_values.len(), 3);
+    assert_eq!(
+        selected_aliens_spaceships_values[0].unwrap().name,
+        "SpaceShip1"
+    );
+    assert_eq!(
+        selected_aliens_spaceships_values[1].unwrap().name,
+        "SpaceShip2"
+    );
+    assert!(selected_aliens_spaceships_values[2].is_none());
+
+    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values_truthy();
+    assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
+    assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
     Ok(())
 }
 
-// Returns the fields only if non null
 #[tokio::test]
 async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -942,7 +958,6 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
     // it will point to a table that does not exist
     let created_spaceship1 = create(space_ship1.clone()).return_one(db.clone()).await?;
     let created_spaceship2 = create(space_ship2.clone()).return_one(db.clone()).await?;
-    // let created_spaceship3 = create(space_ship3.clone()).return_one(db.clone()).await?;
 
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
@@ -958,7 +973,6 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
-        // only 2 has been created
         space_ships: LinkMany::from(vec![
             created_spaceship1.unwrap().clone(),
             created_spaceship2.unwrap().clone(),
@@ -969,7 +983,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
 
     let alien::Alien { spaceShips, .. } = Alien::schema();
 
-    /// Non-null links filter out null links
+    // Non-null links filter out null links
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
         .return_one_and_fetch_links_non_null(db.clone(), vec![spaceShips])
         .await?;
