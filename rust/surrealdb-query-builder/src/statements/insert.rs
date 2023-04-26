@@ -214,6 +214,9 @@ where
     T: SurrealdbNode + DeserializeOwned + Serialize,
 {
     let mut errors = vec![];
+    let mut serialized_field_names = T::get_serializable_field_names();
+    serialized_field_names.sort_by(|a, b| a.build().cmp(&b.build()));
+
     let value = serde_json::to_value(node).ok().map_or_else(
         || {
             errors.push("Unable to convert node to json".to_string());
@@ -228,15 +231,12 @@ where
         },
         |v| v.to_owned(),
     );
-    let mut sorted_object: BTreeMap<String, serde_json::Value> = object.into_iter().collect();
-    if !sorted_object.contains_key("id") {
-        sorted_object.insert("id".to_string(), serde_json::Value::Null);
-    }
-    println!("sorted_object {:?}", sorted_object.clone());
 
-    let (field_names, bindings): (Vec<String>, BindingsList) = sorted_object
+    let (field_names, bindings): (Vec<String>, BindingsList) = serialized_field_names
         .iter()
-        .map(|(key, value1)| {
+        .map(|key| {
+            let ref key = key.build();
+            let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
             let value = sql::json(&value1.to_string()).ok().map_or_else(
                 || {
                     errors.push(format!("Unable to convert value to json {}", value1));

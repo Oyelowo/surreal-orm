@@ -8,6 +8,7 @@ use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
+use surrealdb_orm::statements::order;
 use surrealdb_orm::{statements::select, *};
 
 #[tokio::test]
@@ -680,12 +681,12 @@ async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
 
     let build = insert(unsaved_alien);
 
-    assert_eq!(build.get_bindings().len(), 11);
+    assert_eq!(build.get_bindings().len(), 12);
     insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value());
     assert_eq!(
         build.fine_tune_params(),
-        "INSERT INTO alien (name, age, created, lifeExpectancy, linePolygon, \
-            territoryArea, home, tags, ally, weapon, spaceShips, planetsToVisit) VALUES \
+        "INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, linePolygon, \
+            name, spaceShips, tags, territoryArea, weapon) VALUES \
             ($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, \
             $_param_00000005, $_param_00000006, $_param_00000007, $_param_00000008, $_param_00000009, \
             $_param_00000010, $_param_00000011, $_param_00000012);"
@@ -1027,9 +1028,9 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
         .return_many_and_fetch_links_non_null(db.clone(), vec![spaceShips])
         .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+    let ref created_alien_with_fetched_links = created_alien_with_fetched_links;
     // Has not yet been saved.
-    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    let ref alien_spaceships = created_alien_with_fetched_links[0].space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
     // Two present values and one null
     assert_eq!(alien_spaceships.values().iter().count(), 3);
@@ -1040,15 +1041,18 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
     // no valid keys
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
+    let alien_schema::Alien { created, .. } = Alien::schema();
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
         .fetch(Alien::schema().spaceShips)
+        .order_by(order(created).desc())
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
-    assert_eq!(selected_aliens_spaceships.values().len(), 3);
-    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
-    assert_eq!(selected_aliens_spaceships.keys().len(), 3);
+    assert_eq!(selected_aliens_spaceships.values().len(), 2);
+    assert_eq!(selected_aliens_spaceships.values_truthy().len(), 1);
+    assert_eq!(selected_aliens_spaceships.keys().len(), 2);
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
     assert_eq!(
         selected_aliens_spaceships
             .keys()
@@ -1056,7 +1060,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
             .filter(Option::is_none)
             .collect::<Vec<_>>()
             .len(),
-        3
+        2
     );
     assert_eq!(
         selected_aliens_spaceships
@@ -1067,7 +1071,6 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
             .len(),
         0
     );
-    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
 
     let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
         .from(Alien::table_name())
