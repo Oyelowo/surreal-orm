@@ -1045,7 +1045,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
         .fetch(Alien::schema().spaceShips)
-        .order_by(order(created).desc())
+        .order_by(order(&created).desc())
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
@@ -1072,8 +1072,9 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
         0
     );
 
-    let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips(All).all()])
+    let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips.all().all()])
         .from(Alien::table_name())
+        .order_by(order(created).asc())
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
