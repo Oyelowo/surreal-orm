@@ -12,7 +12,7 @@
 // 		[ ON DUPLICATE KEY UPDATE @field = @value ... ]
 // 	]
 // ;
-use std::{collections::BTreeMap, fmt::Display, marker::PhantomData};
+use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -26,6 +26,7 @@ use crate::{
 use super::SelectStatement;
 
 /// Insert statement initialization builder
+#[derive(Debug, Clone)]
 pub struct InsertStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,

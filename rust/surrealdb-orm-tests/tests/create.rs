@@ -230,7 +230,7 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     // Check fields value fetching
     let weapon = Alien::schema().weapon;
     let created_alien = create(unsaved_alien.clone())
-        .load_links_values(vec![weapon])?
+        .load_links(vec![weapon])?
         .return_one(db.clone())
         .await?;
 
@@ -434,7 +434,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
     };
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .load_link_manys_non_null()?
+        .load_link_manys()?
         .return_one(db.clone())
         .await?;
 
@@ -516,7 +516,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     };
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .load_links()?
+        .load_all_links()?
         .return_one(db.clone())
         .await?;
 
@@ -766,7 +766,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .load_links_values(vec![spaceShips])?
+        .load_links(vec![spaceShips])?
         .return_one(db.clone())
         .await?;
 
@@ -886,20 +886,20 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
 
     // Non-null links filter out null links
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .load_link_manys_non_null()?
+        .load_link_manys()?
         .return_one(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
     // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
-    assert_eq!(alien_spaceships.iter().count(), 2);
+    assert_eq!(alien_spaceships.iter().count(), 3);
     // Two present values and one null
-    assert_eq!(alien_spaceships.values().iter().count(), 2);
+    assert_eq!(alien_spaceships.values().iter().count(), 3);
     // Two present values
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
     // array of 3 none keys
-    assert_eq!(alien_spaceships.keys().len(), 2);
+    assert_eq!(alien_spaceships.keys().len(), 3);
     // no valid keys
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 

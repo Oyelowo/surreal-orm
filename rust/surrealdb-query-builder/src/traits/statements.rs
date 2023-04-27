@@ -136,7 +136,7 @@ where
 
     /// Sets the return type to projections and fetches all records links.
     /// Defaults values to null for referenced records that do not exist.
-    fn load_links_values(self, linked_fields_to_fetch: Vec<Field>) -> SurrealdbOrmResult<Self> {
+    fn load_links(self, linked_fields_to_fetch: Vec<Field>) -> SurrealdbOrmResult<Self> {
         Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
         let projections = ReturnType::Projections(
             vec![Field::new("*")]
@@ -163,69 +163,66 @@ where
     }
 
     /// load links values and filter out null references.
-    fn load_links_values_non_null(
-        self,
-        linked_fields_to_fetch: Vec<Field>,
-    ) -> SurrealdbOrmResult<Self> {
-        Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
-        let projections = ReturnType::Projections(
-            vec![Field::new("*")]
-                .into_iter()
-                .chain(
-                    linked_fields_to_fetch
-                        .into_iter()
-                        // Fetch only where the link is not null.
-                        .map(|field| {
-                            // format!("{}[WHERE type::thing(id) IS NOT NONE].*", field).into()
-                            format!("{}[WHERE id].*", field).into()
-                        })
-                        .collect::<Vec<_>>(),
-                )
-                .collect::<Vec<_>>()
-                .into(),
-        );
-
-        Ok(self.set_return_type(projections))
-    }
-
+    // fn load_links_non_null(self, linked_fields_to_fetch: Vec<Field>) -> SurrealdbOrmResult<Self> {
+    //     Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
+    //     let projections = ReturnType::Projections(
+    //         vec![Field::new("*")]
+    //             .into_iter()
+    //             .chain(
+    //                 linked_fields_to_fetch
+    //                     .into_iter()
+    //                     // Fetch only where the link is not null.
+    //                     .map(|field| {
+    //                         // format!("{}[WHERE type::thing(id) IS NOT NONE].*", field).into()
+    //                         format!("{}[WHERE id].*", field).into()
+    //                     })
+    //                     .collect::<Vec<_>>(),
+    //             )
+    //             .collect::<Vec<_>>()
+    //             .into(),
+    //     );
+    //
+    //     Ok(self.set_return_type(projections))
+    // }
+    //
     /// Sets the return type to projections and fetches the all record links values.
     /// For link_one, link_self, it returns null if the link is null or the reference
     /// does not exist. For link_many, it returns None for items that are null or the reference
     /// do not exist.
-    fn load_links(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values(T::get_linked_fields())
+    fn load_all_links(self) -> SurrealdbOrmResult<Self> {
+        self.load_links(T::get_linked_fields())
     }
 
     /// Sets the return type to projections and fetches the all record links values.
     /// For link_one, link_self, it returns null if the link is null or the reference
     /// does not exist. For link_many, it returns filters out links that are null or that
-    /// point to reference that does not yet exist
-    fn load_links_non_null(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values_non_null(T::get_linked_fields())
-    }
+    // /// point to reference that does not yet exist
+    // fn load_all_links_non_null(self) -> SurrealdbOrmResult<Self> {
+    //     self.load_links_non_null(T::get_linked_fields())
+    // }
 
     /// Sets the return type to projections and fetches the all record links values
     /// for link_many fields including the null record links.
     fn load_link_manys(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values(T::get_link_many_fields())
+        self.load_links(T::get_link_many_fields())
     }
 
     /// Sets the return type to projections and fetches the all record links values
     /// for link_many fields excluding the null record links.
-    fn load_link_manys_non_null(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values_non_null(T::get_link_many_fields())
-    }
+    // fn load_link_manys_non_null(self) -> SurrealdbOrmResult<Self> {
+    //     self.load_links_non_null(T::get_link_many_fields())
+    // }
 
     /// Sets the return type to projections and fetches the all record links values
     /// for link_one fields. Defaults to null if the reference does not exist.
     fn load_link_ones(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values(T::get_link_one_fields())
+        self.load_links(T::get_link_one_fields())
     }
 
     /// Sets the return type to projections and fetches the all record links values
     /// for link_self fields. Defaults to null if the reference does not exist.
     fn load_line_selfs(self) -> SurrealdbOrmResult<Self> {
-        self.load_links_values(T::get_link_self_fields())
+        self.load_links(T::get_link_self_fields())
     }
 
     /// Runs the statement against the database and returns the one result.
