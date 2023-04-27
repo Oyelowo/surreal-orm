@@ -1161,10 +1161,15 @@ async fn test_insert_from_another_table() {
 
     assert_eq!(strong_weapons.len(), 150);
 
+    let strongweapon_schema::StrongWeapon { strength, .. } = StrongWeapon::schema();
+
     let strong_weapons_count: Vec<StrongWeapon> = select(All)
         .from(StrongWeapon::table_name())
+        .order_by(order(strength).desc())
         .return_many(db.clone())
         .await
         .unwrap();
+
     assert_eq!(strong_weapons_count.len(), 150);
+    assert_eq!(strong_weapons_count[0].strength, 949);
 }
