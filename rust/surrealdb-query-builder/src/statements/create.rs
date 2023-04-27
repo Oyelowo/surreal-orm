@@ -219,4 +219,8 @@ where
         self.return_type = Some(return_type);
         self
     }
+
+    fn get_return_type(&self) -> ReturnType {
+        self.return_type.clone().unwrap_or(ReturnType::None)
+    }
 }
