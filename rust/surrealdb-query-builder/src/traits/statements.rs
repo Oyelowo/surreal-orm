@@ -23,6 +23,7 @@ where
                 query_builder_error.join(". \n"),
             ));
         }
+
         let query = self.build();
         let query = db.query(query);
         let query = self.get_bindings().iter().fold(query, |acc, val| {

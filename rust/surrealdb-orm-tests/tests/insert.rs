@@ -5,7 +5,9 @@ use geo::polygon;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
+use surrealdb::sql;
 use surrealdb::Surreal;
+use surrealdb_models::weapon_schema;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
 use surrealdb_orm::statements::order;
@@ -1106,4 +1108,63 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
     assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
     assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
     Ok(())
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "strong_weapon")]
+pub struct StrongWeapon {
+    // #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<sql::Thing>,
+    pub name: String,
+    pub strength: u64,
+    pub created: DateTime<Utc>,
+}
+
+#[tokio::test]
+async fn test_insert_from_another_table() {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    // Weapon
+    let weapons = (0..1000)
+        .into_iter()
+        .map(|i| Weapon {
+            name: format!("Weapon{}", i),
+            created: Utc::now(),
+            strength: i,
+            ..Default::default()
+        })
+        .collect::<Vec<_>>();
+
+    let created_weapons = insert(weapons).return_many(db.clone()).await.unwrap();
+    assert_eq!(created_weapons.len(), 1000);
+
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let strong_weapons = insert::<StrongWeapon>(
+        select(All)
+            .from(Weapon::table_name())
+            .where_(cond(strength.greater_than_or_equal(800)).and(strength.less_than(950))),
+    )
+    .return_many(db.clone())
+    .await
+    .unwrap();
+
+    assert_eq!(strong_weapons.len(), 150);
+
+    let strong_weapons: Vec<StrongWeapon> = select(All)
+        .from(StrongWeapon::table_name())
+        .return_many(db.clone())
+        .await
+        .unwrap();
+
+    assert_eq!(strong_weapons.len(), 150);
+
+    let strong_weapons_count: Vec<StrongWeapon> = select(All)
+        .from(StrongWeapon::table_name())
+        .return_many(db.clone())
+        .await
+        .unwrap();
+    assert_eq!(strong_weapons_count.len(), 150);
 }

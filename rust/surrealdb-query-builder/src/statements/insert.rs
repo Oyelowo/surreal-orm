@@ -358,9 +358,9 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn build(&self) -> String {
-        if self.bindings.is_empty() {
-            return "".into();
-        }
+        // if self.bindings.is_empty() {
+        //     return "".into();
+        // }
 
         let mut query = format!("INSERT INTO {}", &T::table_name());
 
