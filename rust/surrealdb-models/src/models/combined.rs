@@ -233,12 +233,13 @@ pub struct Student {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
+    #[serde(skip_serializing)]
     pub id: Option<SurrealId>,
 
-    #[serde(rename = "in")]
+    #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
+    #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
     pub time_written: Duration,
 }

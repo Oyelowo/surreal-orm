@@ -1114,7 +1114,6 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "strong_weapon")]
 pub struct StrongWeapon {
-    // #[serde(skip_serializing)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<sql::Thing>,
     pub name: String,
