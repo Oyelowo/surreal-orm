@@ -5,6 +5,14 @@ use crate::{Alias, BindingsList, Buildable, Field, Function, Param, Parametric, 
 #[derive(Debug, Clone)]
 pub struct Projections(pub Vec<Valuex>);
 
+impl std::ops::Deref for Projections {
+    type Target = Vec<Valuex>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl Parametric for Projections {
     fn get_bindings(&self) -> BindingsList {
         self.0

@@ -230,7 +230,8 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     // Check fields value fetching
     let weapon = Alien::schema().weapon;
     let created_alien = create(unsaved_alien.clone())
-        .return_one_and_fetch_all_links(db.clone(), vec![weapon])
+        .load_links_values(vec![weapon])?
+        .return_one(db.clone())
         .await?;
 
     let ref created_alien = created_alien.clone().unwrap();
@@ -432,10 +433,9 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
-
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
+        .load_link_manys_non_null()?
+        .return_one(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -515,10 +515,9 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
-
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
+        .load_links()?
+        .return_one(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
@@ -722,6 +721,15 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         ..Default::default()
     };
 
+    let weapon_1 = Weapon {
+        id: Some(Weapon::create_id("weapon1")),
+        name: "weapon1".to_string(),
+        created: Utc::now(),
+        strength: 55,
+    };
+
+    create(weapon_1.clone()).return_one(db.clone()).await?;
+
     let point = point! {
         x: 40.02f64,
         y: 116.34,
@@ -746,7 +754,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         home: point.into(),
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
-        weapon: LinkOne::null(),
+        weapon: LinkOne::from(weapon_1),
         space_ships: LinkMany::from(vec![
             created_spaceship1.unwrap().clone(),
             created_spaceship2.unwrap().clone(),
@@ -758,11 +766,12 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .return_one_and_fetch_all_links(db.clone(), vec![spaceShips])
+        .load_links_values(vec![spaceShips])?
+        .return_one(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    // Hast not yet been saved.
+    // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
@@ -772,6 +781,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
+
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 0);
@@ -874,23 +884,22 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
-
     // Non-null links filter out null links
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .return_one_and_fetch_non_null_links(db.clone(), vec![spaceShips])
+        .load_link_manys_non_null()?
+        .return_one(db.clone())
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
     // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
-    assert_eq!(alien_spaceships.iter().count(), 3);
+    assert_eq!(alien_spaceships.iter().count(), 2);
     // Two present values and one null
-    assert_eq!(alien_spaceships.values().iter().count(), 3);
+    assert_eq!(alien_spaceships.values().iter().count(), 2);
     // Two present values
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
     // array of 3 none keys
-    assert_eq!(alien_spaceships.keys().len(), 3);
+    assert_eq!(alien_spaceships.keys().len(), 2);
     // no valid keys
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
