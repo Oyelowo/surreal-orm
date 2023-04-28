@@ -133,7 +133,7 @@ impl ToTokens for EdgeToken {
         
 
         tokens.extend(quote!( 
-                use #crate_name::{ToRaw as _, Raw};
+                use #crate_name::{ToRaw as _};
                         
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {

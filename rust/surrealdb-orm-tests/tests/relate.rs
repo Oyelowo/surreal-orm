@@ -111,6 +111,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
 
     let write_blog = StudentWritesBlog {
         time_written: Duration::from_secs(47),
+        count: 24,
         ..Default::default()
     };
 
@@ -142,9 +143,8 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         "book:2"
     );
     assert_eq!(
-        // serde_jsonkresult.unwrap().time_written.to_string(),
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":343,\"nanos\":0}}"
+        "{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"count\":0}"
     );
 
     // Student 2 writes book1
@@ -177,13 +177,22 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     assert_eq!(
         // serde_jsonkresult.unwrap().time_written.to_string(),
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":923,\"nanos\":0}}"
+        "{\"timeWritten\":{\"secs\":923,\"nanos\":0},\"count\":0}"
     );
 
     // Student 2 writes blog1
+    let writes_schema::Writes { timeWritten, .. } = StudentWritesBlog::schema();
+    // Using the set method
     let relation = relate(Student::with(&student_id2).writes__(Empty).blog(&blog_id))
+        // .set(updater(timeWritten).equal(sql::Duration::from(Duration::from_secs(47))))
         .content(write_blog)
         .parallel();
+    let writes_schema::Writes { count, .. } = StudentWritesBlog::schema();
+    let relation =
+        relate::<StudentWritesBlog>(Student::with(&student_id2).writes__(Empty).blog(&blog_id))
+            .set(updater(count).increment_by(545))
+            .set(updater(timeWritten).equal(sql::Duration::from(Duration::from_secs(47))))
+            .parallel();
 
     assert_eq!(relation.get_errors().len(), 0);
     let errors: Vec<String> = vec![];
@@ -210,7 +219,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     assert_eq!(
         // serde_jsonkresult.unwrap().time_written.to_string(),
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":47,\"nanos\":0}}"
+        "{\"timeWritten\":{\"secs\":47,\"nanos\":0},\"count\":545}"
     );
 
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
@@ -373,7 +382,7 @@ async fn relate_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
     let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
-        "RELATE student:1->writes->book:2 CONTENT { timeWritten: { nanos: 0, secs: 343 } } ;"
+        "RELATE student:1->writes->book:2 CONTENT { count: 0, timeWritten: { nanos: 0, secs: 343 } } ;"
     );
 
     // // You can use return one method and it just returns the single object

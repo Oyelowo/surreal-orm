@@ -242,6 +242,7 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
     #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
     pub time_written: Duration,
+    pub count: i32,
 }
 
 pub type StudentWritesBook = Writes<Student, Book>;
