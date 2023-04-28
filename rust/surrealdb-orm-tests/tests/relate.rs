@@ -10,6 +10,7 @@ use regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use static_assertions::*;
+use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
 use surrealdb::sql;
@@ -20,8 +21,8 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{
-    book_schema, student_schema, writes_schema, Book, Student, StudentLiksBook, StudentWritesBlog,
-    StudentWritesBook,
+    book_schema, student_schema, writes_schema, Blog, Book, Student, StudentLiksBook,
+    StudentWritesBlog, StudentWritesBook,
 };
 use surrealdb_orm::statements::{order, relate, select};
 use surrealdb_orm::*;
@@ -94,11 +95,11 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let student_id1 = SurrealId::try_from("student:1").unwrap();
-    let student_id2 = SurrealId::try_from("student:2").unwrap();
-    let book_id1 = SurrealId::try_from("book:1").unwrap();
-    let book_id2 = SurrealId::try_from("book:2").unwrap();
-    let blog_id = SurrealId::try_from("blog:1").unwrap();
+    let student_id1 = Student::create_id("1");
+    let student_id2 = Student::create_id("2");
+    let book_id1 = Book::create_id("1");
+    let book_id2 = Book::create_id("2");
+    let blog_id = Blog::create_id("1");
 
     let write_book = StudentWritesBook {
         time_written: Duration::from_secs(343),
@@ -137,11 +138,11 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
 
     assert_eq!(
         result.clone().unwrap().in_.get_id().unwrap().to_string(),
-        "student:1"
+        "student:⟨1⟩"
     );
     assert_eq!(
         result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:2"
+        "book:⟨2⟩"
     );
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
@@ -169,11 +170,11 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
 
     assert_eq!(
         result.clone().unwrap().in_.get_id().unwrap().to_string(),
-        "student:2"
+        "student:⟨2⟩"
     );
     assert_eq!(
         result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:1"
+        "book:⟨1⟩"
     );
     assert_eq!(
         // serde_jsonkresult.unwrap().time_written.to_string(),
@@ -211,11 +212,11 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
 
     assert_eq!(
         result.clone().unwrap().in_.get_id().unwrap().to_string(),
-        "student:2"
+        "student:⟨2⟩"
     );
     assert_eq!(
         result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "blog:1"
+        "blog:⟨1⟩"
     );
     assert_eq!(
         // serde_jsonkresult.unwrap().time_written.to_string(),
@@ -233,24 +234,24 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
 
     assert_eq!(result.len(), 3);
     assert_eq!(result[0].time_written, Duration::from_secs(47));
-    assert_eq!(result[0].in_.get_id().unwrap().to_string(), "student:2");
-    assert_eq!(result[0].out.get_id().unwrap().to_string(), "blog:1");
+    assert_eq!(result[0].in_.get_id().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[0].out.get_id().unwrap().to_string(), "blog:⟨1⟩");
 
     assert_eq!(result[1].time_written, Duration::from_secs(343));
-    assert_eq!(result[1].in_.get_id().unwrap().to_string(), "student:1");
-    assert_eq!(result[1].out.get_id().unwrap().to_string(), "book:2");
+    assert_eq!(result[1].in_.get_id().unwrap().to_string(), "student:⟨1⟩");
+    assert_eq!(result[1].out.get_id().unwrap().to_string(), "book:⟨2⟩");
 
     assert_eq!(result[2].time_written, Duration::from_secs(923));
-    assert_eq!(result[2].in_.get_id().unwrap().to_string(), "student:2");
-    assert_eq!(result[2].out.get_id().unwrap().to_string(), "book:1");
+    assert_eq!(result[2].in_.get_id().unwrap().to_string(), "student:⟨2⟩");
+    assert_eq!(result[2].out.get_id().unwrap().to_string(), "book:⟨1⟩");
 
     Ok(())
 }
 
 #[test]
 fn test_relation_graph_with_alias() {
-    let student_id = SurrealId::try_from("student:1").unwrap();
-    let book_id = SurrealId::try_from("book:2").unwrap();
+    let student_id = Student::create_id("oyelowo");
+    let book_id = Book::create_id(vec!["The", "Alchemist"]);
 
     let aliased_connection = Student::with(student_id)
         .writes__(Empty)
@@ -264,7 +265,7 @@ fn test_relation_graph_with_alias() {
 
     assert_eq!(
         aliased_connection.clone().to_raw().build(),
-        "student:1->writes->book:2 AS writtenBooks"
+        "student:oyelowo->writes->book:['The', 'Alchemist'] AS writtenBooks"
     );
 
     assert_eq!(aliased_connection.get_errors().len(), 0);
@@ -278,8 +279,8 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
     // -- Select all 1st, 2nd, and 3rd level people who this specific person record knows, or likes, as separate outputs
     // SELECT ->knows->(? AS f1)->knows->(? AS f2)->(knows, likes AS e3 WHERE influencer = true)->(? AS f3) FROM person:tobie;
 
-    let student_id = SurrealId::try_from("student:1").unwrap();
-    let book_id = SurrealId::try_from("book:2").unwrap();
+    let student_id = Student::create_id("oyelowo");
+    let book_id = Book::create_id("2");
     let likes = StudentLiksBook::table_name();
     let writes = StudentWritesBook::table_name();
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
@@ -298,7 +299,7 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 
     assert_eq!(
        dbg!( aliased_connection.clone()).to_raw().build(),
-        "student:1->writes->writes->(writes, writes, likes  WHERE timeWritten <= 50)->book:2 AS writtenBooks"
+        "student:oyelowo->writes->writes->(writes, writes, likes  WHERE timeWritten <= 50)->book:⟨2⟩ AS writtenBooks"
     );
 
     assert_eq!(aliased_connection.get_errors().len(), 0);

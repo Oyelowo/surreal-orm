@@ -166,6 +166,18 @@ impl From<&SurrealId> for NodeClause {
     }
 }
 
+impl From<sql::Thing> for NodeClause {
+    fn from(value: sql::Thing) -> Self {
+        Self(Clause::new(ClauseType::Id(value.into())))
+    }
+}
+
+impl From<&sql::Thing> for NodeClause {
+    fn from(value: &sql::Thing) -> Self {
+        Self(Clause::new(ClauseType::Id(value.clone().into())))
+    }
+}
+
 impl<T> From<T> for NodeClause
 where
     T: Into<Clause>,
@@ -418,6 +430,7 @@ impl From<&SelectStatement> for Clause {
 
 /// Use when you want no space. Also aliased as `E`.
 pub struct Empty;
+use surrealdb::sql;
 pub use Empty as E;
 
 impl Operatable for Empty {}
