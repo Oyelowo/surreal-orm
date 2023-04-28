@@ -20,7 +20,8 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{
-    book_schema, student_schema, writes_schema, Book, Student, StudentWritesBlog, StudentWritesBook,
+    book_schema, student_schema, writes_schema, Book, Student, StudentLiksBook, StudentWritesBlog,
+    StudentWritesBook,
 };
 use surrealdb_orm::statements::{order, relate, select};
 use surrealdb_orm::*;
@@ -279,11 +280,9 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
 
     let student_id = SurrealId::try_from("student:1").unwrap();
     let book_id = SurrealId::try_from("book:2").unwrap();
-    let likes = Table::new("likes");
+    let likes = StudentLiksBook::table_name();
     let writes = StudentWritesBook::table_name();
-    let timeWritten = Field::new("timeWritten");
-
-    // let knows = Field::writes("influencer");
+    let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
 
     let aliased_connection = Student::with(student_id)
         .writes__(Empty)

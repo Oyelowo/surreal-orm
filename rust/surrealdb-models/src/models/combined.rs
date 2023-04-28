@@ -248,6 +248,22 @@ pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
 pub type StudentWritesBook = Writes<Student, Book>;
 pub type StudentWritesBlog = Writes<Student, Blog>;
 
+#[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "likes")]
+pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
+    #[builder(default, setter(strip_option))]
+    #[serde(skip_serializing)]
+    pub id: Option<SurrealId>,
+
+    #[serde(rename = "in", skip_serializing)]
+    pub in_: LinkOne<In>,
+    #[serde(skip_serializing)]
+    pub out: LinkOne<Out>,
+    pub likes_count: u128,
+}
+pub type StudentLiksBook = Likes<Student, Book>;
+
 #[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
