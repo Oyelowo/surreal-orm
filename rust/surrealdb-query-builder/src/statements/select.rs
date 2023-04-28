@@ -543,9 +543,16 @@ impl Deref for Selectables {
     }
 }
 
+#[derive(Debug, Clone)]
+enum SelectionType {
+    Select,
+    SelectValue,
+}
+
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
 pub struct SelectStatement {
+    selection_type: SelectionType,
     projections: String,
     targets: Vec<String>,
     where_: Option<String>,
@@ -661,6 +668,7 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
     let selectables: Selectables = selectables.into();
 
     SelectStatement {
+        selection_type: SelectionType::Select,
         projections: selectables.build(),
         targets: vec![],
         where_: None,
@@ -681,6 +689,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
     let selectables: Field = selectable_value.into();
 
     SelectStatement {
+        selection_type: SelectionType::SelectValue,
         projections: selectables.build(),
         targets: vec![],
         where_: None,
@@ -695,6 +704,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
         bindings: selectables.get_bindings(),
     }
 }
+
 impl SelectStatement {
     /// Specifies the table to select from.
     ///
@@ -1153,8 +1163,13 @@ impl Display for SelectStatement {
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
+        let select = match self.selection_type {
+            SelectionType::Select => "SELECT",
+            SelectionType::SelectValue => "SELECT VALUE",
+        };
+
         let mut query = format!(
-            "SELECT {} FROM {}",
+            "{select} {} FROM {}",
             self.projections,
             self.targets.join(", ")
         );
