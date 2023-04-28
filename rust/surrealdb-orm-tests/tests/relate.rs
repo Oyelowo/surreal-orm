@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use chrono::{DateTime, NaiveDateTime, Utc};
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
@@ -21,10 +22,11 @@ use surrealdb::{
     Result, Surreal,
 };
 use surrealdb_models::{
-    book_schema, student_schema, writes_schema, Blog, Book, Student, StudentLiksBook,
-    StudentWritesBlog, StudentWritesBook,
+    book_schema, company_schema, like_schema, student_schema, user_schema, writes_schema, Blog,
+    Book, Company, CompanyLikeUser, Student, StudentLiksBook, StudentWritesBlog, StudentWritesBook,
+    User,
 };
-use surrealdb_orm::statements::{order, relate, select};
+use surrealdb_orm::statements::{chain, create, insert, let_, order, relate, select, select_value};
 use surrealdb_orm::*;
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -244,6 +246,94 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     assert_eq!(result[2].time_written, Duration::from_secs(923));
     assert_eq!(result[2].in_.get_id().unwrap().to_string(), "student:⟨2⟩");
     assert_eq!(result[2].out.get_id().unwrap().to_string(), "book:⟨1⟩");
+
+    Ok(())
+}
+
+// -- Add a graph edge between multiple specific users and devs
+// LET $from = (SELECT users FROM company:surrealdb);
+// LET $devs = (SELECT * FROM user WHERE tags CONTAINS 'developer');
+// RELATE $from->like->$devs SET time.connected = time::now();
+//
+
+#[tokio::test]
+async fn relate_with_queries() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    // Create a bunch of users as deleoper
+    let generated_developers = (0..10)
+        .into_iter()
+        .map(|i| {
+            let user = User {
+                name: format!("user{}", i),
+                tags: vec!["developer".to_string()],
+                ..Default::default()
+            };
+            user
+        })
+        .collect::<Vec<_>>();
+
+    let oyelowo = User {
+        id: Some(User::create_id("oyelowo")),
+        name: "oyelowo".to_string(),
+        tags: vec!["developer".to_string()],
+        ..Default::default()
+    };
+    create(oyelowo).return_one(db.clone()).await?;
+    let devs = insert(generated_developers).return_many(db.clone()).await?;
+    let sample = devs.into_iter().take(2).collect::<Vec<_>>();
+
+    // Create company
+    let codebreather_coy = Company {
+        id: Some(Company::create_id("codebreather")),
+        name: "codebreather".to_string(),
+        users: LinkMany::from(sample),
+        ..Default::default()
+    };
+    let codebreather = create(codebreather_coy)
+        .return_one(db.clone())
+        .await?
+        .unwrap();
+
+    let user_schema::User { tags, .. } = User::schema();
+    let company_schema::Company { users, .. } = Company::schema();
+
+    // select users from company
+    let from_statement = select_value(users).from(codebreather.id.unwrap());
+    // select devs
+    let devs_statement = select(All)
+        .from(User::table_name())
+        .where_(tags.contains("developer"));
+
+    let time = CompanyLikeUser::schema().time(E);
+    let dt = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(61, 0).unwrap(), Utc);
+
+    // Relate fromstate -> like-> devs
+    let relation = relate::<CompanyLikeUser>(
+        Company::with(from_statement)
+            .like__(Empty)
+            .user(devs_statement),
+    )
+    .set(updater(time.connected).equal(sql::Datetime(dt)));
+
+    assert_eq!(relation.get_errors().len(), 0);
+
+    // Variable binding and deserialaization not yet working properly.
+    // TODO: Fix this. It should be possible to bind variables to the relation
+    // with subqueries and then deserialize the result.
+    // The problem is that the variable binding is not being deserialized properly
+    // so i cannot use the return methods for now. I am turning it back into
+    // a raw query for now.
+    let result = relation.to_raw().run(db.clone()).await?;
+    // Expected
+    // let result = relation.return_many().run(db.clone()).await?;
+
+    let result = select(All)
+        .from(CompanyLikeUser::table_name())
+        .return_many::<CompanyLikeUser>(db.clone())
+        .await?;
+    dbg!(&result);
+    assert_eq!(result.len(), 22);
 
     Ok(())
 }

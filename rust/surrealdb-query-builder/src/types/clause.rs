@@ -8,8 +8,9 @@
 use std::ops::Deref;
 
 use crate::{
-    statements::SelectStatement, Binding, BindingsList, Buildable, Conditional, Erroneous,
-    ErrorList, Operatable, Operation, Parametric, Table,
+    statements::{LetStatement, SelectStatement},
+    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
+    Param, Parametric, Table,
 };
 
 use super::{Filter, NumberLike, SurrealId};
@@ -40,6 +41,8 @@ pub enum ClauseType {
     SelectStatement(SelectStatement),
     /// Stands for a field e.g `person:oyelowo`. This is useful in a RELATE query.
     Id(SurrealId),
+    /// Stands for a parameter e.g `$name`
+    Param(Param),
     /// Used for filtering on multiple edges
     AnyEdgeFilter(AnyEdgeFilter),
 }
@@ -72,6 +75,7 @@ impl Buildable for Clause {
 
         let clause = match self.kind.clone() {
             ClauseType::SelectStatement(_q) => self.clone().query_string,
+            ClauseType::Param(p) => p.build(),
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!("({}, {})", connection_name, edge_filters.build(),)
             }
@@ -177,6 +181,29 @@ impl From<&sql::Thing> for NodeClause {
         Self(Clause::new(ClauseType::Id(value.clone().into())))
     }
 }
+
+impl From<Param> for NodeClause {
+    fn from(value: Param) -> Self {
+        Self(Clause::new(ClauseType::Param(value.clone())))
+    }
+}
+
+impl From<LetStatement> for NodeClause {
+    fn from(value: LetStatement) -> Self {
+        Self(Clause::new(ClauseType::Param(value.get_param())))
+    }
+}
+// impl From<Param> for Clause {
+//     fn from(value: Param) -> Self {
+//         Clause::new(ClauseType::Param(value.clone()))
+//     }
+// }
+//
+// impl From<LetStatement> for Clause {
+//     fn from(value: LetStatement) -> Self {
+//         Clause::new(ClauseType::Param(value.get_param()))
+//     }
+// }
 
 impl<T> From<T> for NodeClause
 where
@@ -318,6 +345,11 @@ impl Clause {
                 bindings = filter.get_bindings();
                 errors = filter.get_errors();
                 format!("[WHERE {filter}]")
+            }
+            Param(param) => {
+                bindings = param.get_bindings();
+                errors = param.get_errors();
+                format!("{}", param.build())
             }
             Id(surreal_id) => {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
@@ -621,7 +653,11 @@ pub fn any_other_edges(edges: impl Into<crate::Tables>) -> AnyEdgeFilter {
 
 #[cfg(test)]
 mod test {
-    use crate::{cond, statements::select, Field, Param, ToRaw};
+    use crate::{
+        cond,
+        statements::{let_, select},
+        Field, Param, ToRaw,
+    };
 
     use super::*;
 
@@ -657,6 +693,24 @@ mod test {
         let query_clause = Clause::from(select_statement);
         assert_eq!(query_clause.build(), "(SELECT * FROM students)");
         assert_eq!(query_clause.to_raw().build(), "(SELECT * FROM students)");
+    }
+
+    #[test]
+    fn test_display_clause_with_param() {
+        let table = Table::new("students");
+        let devs = let_("devs").equal(select(All).from(table));
+        let clause = NodeClause::from(devs.get_param());
+        assert_eq!(clause.build(), "$devs");
+        assert_eq!(clause.to_raw().build(), "$devs");
+    }
+
+    #[test]
+    fn test_display_clause_with_let_statement() {
+        let table = Table::new("students");
+        let devs = let_("devs").equal(select(All).from(table));
+        let clause = NodeClause::from(devs);
+        assert_eq!(clause.build(), "$devs");
+        assert_eq!(clause.to_raw().build(), "$devs");
     }
 
     #[test]

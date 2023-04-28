@@ -292,7 +292,7 @@ async fn relate_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
     let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
-        "RELATE student:1->writes->book:2 CONTENT { in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 343 } } ;"
+        "RELATE student:1->writes->book:2 CONTENT { count: 0, timeWritten: { nanos: 0, secs: 343 } } ;"
     );
 
     // // You can use return one method and it just returns the single object

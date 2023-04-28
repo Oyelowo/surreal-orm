@@ -18,6 +18,7 @@ where
     /// Runs the statement against the database.
     async fn run(&self, db: Surreal<Db>) -> SurrealdbOrmResult<surrealdb::Response> {
         let query_builder_error = self.get_errors();
+
         if !query_builder_error.is_empty() {
             return Err(SurrealdbOrmError::QueryBuilder(
                 query_builder_error.join(". \n"),

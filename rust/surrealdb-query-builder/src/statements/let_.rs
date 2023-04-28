@@ -38,6 +38,7 @@ pub fn let_(parameter: impl Into<Param>) -> LetStatement {
 }
 
 /// Let statement builder
+#[derive(Debug, Clone)]
 pub struct LetStatement {
     parameter: Param,
     value: Option<Expression>,
