@@ -1,0 +1,6 @@
+---
+source: surrealdb-orm-tests/tests/relate.rs
+assertion_line: 550
+expression: raw
+---
+RELATE $_param_9a7d0d70->writes->$_param_f81fcf37 CONTENT $_param_154703fb  PARALLEL;

@@ -326,8 +326,6 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
         .use_db("test")
         .await
         .expect("failed to use db");
-    let student_id = SurrealId::try_from("student:1").unwrap();
-    let book_id = SurrealId::try_from("book:2").unwrap();
 
     let write = StudentWritesBook {
         time_written: Duration::from_secs(52),
