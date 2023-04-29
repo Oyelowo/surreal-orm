@@ -299,6 +299,7 @@ where
     target: String,
     content: Option<String>,
     merge: Option<String>,
+    replace: Option<String>,
     set: Vec<String>,
     patch_ops: Vec<String>,
     where_: Option<String>,
@@ -386,6 +387,14 @@ where
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.merge = Some(binding.get_param_dollarised());
+        self.bindings.push(binding);
+        self
+    }
+
+    pub fn replace(mut self, merge: impl Serialize) -> Self {
+        let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+        self.replace = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
         self
     }
@@ -528,6 +537,8 @@ where
             query = format!("{query} CONTENT  {content}",);
         } else if let Some(merge) = &self.merge {
             query = format!("{query} MERGE {merge}");
+        } else if let Some(replace) = &self.replace {
+            query = format!("{query} REPLACE {replace}");
         } else if !self.set.is_empty() {
             let set_vec = self.set.join(", ");
             query = format!("{query} SET {set_vec}");
