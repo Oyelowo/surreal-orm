@@ -263,14 +263,8 @@ where
 
         let query = self.set_return_type(ReturnType::Projections(Projections(selected_fields)));
 
-        get_one::<T>(response).map(|r| {
-            r.ok_or_else(|| {
-                SurrealdbOrmError::RecordNotFound(format!(
-                    "No record found for query: {}",
-                    query.build()
-                ))
-            })
-        })?
+        get_one::<T>(response)
+            .map(|r| r.ok_or_else(|| SurrealdbOrmError::RecordNotFound(query.build())))?
     }
 
     /// Runs the statement against the database and returns the many results.
