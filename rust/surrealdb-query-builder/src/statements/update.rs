@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, ErrorList, ReturnableDefault, ReturnableStandard, ToRaw,
+    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -130,6 +130,133 @@ where
         bindings,
         errors,
         __model_return_type: PhantomData,
+    }
+}
+
+#[derive(Clone, Debug)]
+enum OpType {
+    /// Adds values along the path using JSON patch operation
+    Add,
+    /// Removes values along the path using JSON patch operation
+    Remove,
+    /// Replaces values along the path using JSON patch operation
+    Replace,
+    /// Moves values along the path using JSON patch operation
+    Change,
+}
+
+// [{ op: 'change', path: '/test/other', value: '@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n' }]
+// patch(name).add("Oyelowo");
+// patch(name).change("Oyelowo");
+// PatchOp::replace("/settings/active", false)
+// patch(name).replace("Oyelowo");
+// patch(name).remove();
+#[derive(Clone, Debug)]
+pub struct PatchOpInit {
+    path: String,
+    op: OpType,
+    value: Option<String>,
+    bindings: BindingsList,
+    errors: ErrorList,
+}
+
+struct PatchOp(PatchOpInit);
+
+impl Buildable for PatchOp {
+    fn build(&self) -> String {
+        todo!()
+    }
+}
+
+impl Parametric for PatchOp {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+impl Erroneous for PatchOp {
+    fn get_errors(&self) -> ErrorList {
+        self.0.errors.to_vec()
+    }
+}
+
+// impl std::ops::Deref for PatchOp {
+//     type Target = PatchOpInit;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+pub fn patch(path: impl Into<Field>) -> PatchOpInit {
+    let path: Field = path.into();
+    let path = path.build();
+    let path = path.split('.').collect::<Vec<&str>>();
+    // Check if any of the item in the array contains invalid identifier
+    // i.e not start with aplhabet, contains only alphanumeric and underscore
+    // if any of the item is invalid, return error
+    // Must be e.g name, name.first, name.first.second, so that we can easily replace `.` with `/`
+    let bad_path = path.iter().filter(|item| {
+        item.starts_with(|c: char| !c.is_alphabetic())
+            || item.chars().all(|c: char| c.is_alphanumeric() || c == '_')
+    });
+    let mut errors = vec![];
+    if bad_path.count() > 0 {
+        errors.push("The path you have provided is invalid. Make sure that there are no clauses or conditions included. Valid path include e.g name, name.first, name.first.second, etc.".to_string());
+    }
+
+    // .join("/");
+    PatchOpInit {
+        path: path.join("/"),
+        op: OpType::Add,
+        value: None,
+        bindings: vec![],
+        errors,
+    }
+}
+
+impl PatchOpInit {
+    fn add(self, value: impl Serialize) -> PatchOp {
+        let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+
+        PatchOp(Self {
+            op: OpType::Add,
+            value: Some(binding.get_param_dollarised()),
+            bindings: self.bindings.into_iter().chain(vec![binding]).collect(),
+            ..self
+        })
+    }
+
+    fn remove(self) -> PatchOp {
+        PatchOp(Self {
+            op: OpType::Remove,
+            ..self
+        })
+    }
+
+    fn replace(self, value: impl Serialize) -> PatchOp {
+        let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+
+        PatchOp(Self {
+            op: OpType::Replace,
+            value: Some(binding.get_param_dollarised()),
+            bindings: self.bindings.into_iter().chain(vec![binding]).collect(),
+            ..self
+        })
+    }
+
+    fn change(self, value: impl Serialize) -> PatchOp {
+        let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
+        let binding = Binding::new(sql_value);
+
+        PatchOp(Self {
+            op: OpType::Change,
+            value: Some(binding.get_param_dollarised()),
+            bindings: self.bindings.into_iter().chain(vec![binding]).collect(),
+            ..self
+        })
     }
 }
 
@@ -243,6 +370,8 @@ where
         self.set.extend(setter_query);
         self
     }
+
+    // [{ op: 'add', path: '/temp/test', value: true }]
 
     /// Adds a condition to the `` clause of the query.
     ///
