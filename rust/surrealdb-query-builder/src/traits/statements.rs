@@ -1,7 +1,7 @@
 use super::{Buildable, Parametric};
 use crate::{
     AllGetter, Field, Projections, Queryable, ReturnType, SurrealdbModel, SurrealdbOrmError,
-    SurrealdbOrmResult,
+    SurrealdbOrmResult, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -231,6 +231,46 @@ where
     async fn return_one(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>> {
         let response = self.run(db).await?;
         get_one::<T>(response)
+    }
+
+    /// Runs the statement against the database and returns the one result.
+    /// Returns an error if the result is not exactly one.
+    /// It does best effort to make sure all fields are selected
+    /// even if you select subset, it fills up the rest to make
+    /// sure you get the full record and can be properly deserialized.
+    async fn get_one(self, db: Surreal<Db>) -> SurrealdbOrmResult<T> {
+        let response = self.run(db).await?;
+        let returned_type = self.get_return_type();
+        let all = vec![Valuex::from(Field::new("*"))];
+        let selected_fields = match returned_type {
+            ReturnType::Projections(projections) => {
+                let fields = all
+                    .into_iter()
+                    .chain(
+                        projections
+                            .to_vec()
+                            .into_iter()
+                            .filter(|p| p.build().to_string() != "*")
+                            // .map(|v| v.build())
+                            // .map(|v| v.build())
+                            .collect::<Vec<_>>(),
+                    )
+                    .collect::<Vec<_>>();
+                fields
+            }
+            _ => all,
+        };
+
+        let query = self.set_return_type(ReturnType::Projections(Projections(selected_fields)));
+
+        get_one::<T>(response).map(|r| {
+            r.ok_or_else(|| {
+                SurrealdbOrmError::RecordNotFound(format!(
+                    "No record found for query: {}",
+                    query.build()
+                ))
+            })
+        })?
     }
 
     /// Runs the statement against the database and returns the many results.

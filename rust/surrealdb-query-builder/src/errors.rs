@@ -48,6 +48,9 @@ pub enum SurrealdbOrmError {
 
     #[error("The following fields could not be fetched as they are not linked to a foreign table: {0}. Please ensure that all fields provided are of types 'link_self', 'link_one' or 'link_many' to allow fetching of linked values from other tables.")]
     FieldsUnfetchableNotARecordLink(String),
+
+    #[error("No record returned. Check that all fields in this table are selected.")]
+    RecordNotFound(String),
 }
 
 pub type SurrealdbOrmResult<T> = std::result::Result<T, SurrealdbOrmError>;
