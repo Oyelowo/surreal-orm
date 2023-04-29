@@ -122,6 +122,7 @@ where
         target: param,
         content: None,
         merge: None,
+        replace: None,
         patch_ops: vec![],
         set: vec![],
         where_: None,
@@ -210,6 +211,24 @@ impl Erroneous for PatchOp {
     }
 }
 
+/// Json patch operation
+/// # Arguments
+/// * `path` - The path to the field to be patched. Use the same field operation
+/// you use in the library for accessing top level or nested fields. It automatically
+/// converts that to a valid json path to the field.
+///
+/// # Examples
+/// ```
+/// # use surrealdb_query_builder as surreal_orm;
+/// use surreal_orm::statements::{patch}
+/// let ref name = Field::new("name");
+/// let name_first = Field::new("name.first");
+///
+/// let patch_op = patch(name).add("Oyelowo");
+/// let patch_op = patch(name_first).change("Oyelowo");
+/// let patch_op = patch(name).replace("Oyelowo");
+/// let patch_op = patch(name).remove();
+/// ```
 pub fn patch(path: impl Into<Field>) -> PatchOpInit {
     let path: Field = path.into();
     let path = path.build();
@@ -242,10 +261,6 @@ pub fn patch(path: impl Into<Field>) -> PatchOpInit {
     }
 }
 
-// patch().add("/time").value("Oyelowo");
-// patch("/time").add("Oyelowo");
-// patch().replace("/time").value("Oyelowo");
-// patch("/time").replace("Oyelowo");
 impl PatchOpInit {
     pub fn add(self, value: impl Serialize) -> PatchOp {
         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
@@ -544,7 +559,7 @@ where
             query = format!("{query} SET {set_vec}");
         } else if !self.patch_ops.is_empty() {
             let patch_vec = self.patch_ops.join(", ");
-            query = format!("{query} PATCH {patch_vec}");
+            query = format!("{query} PATCH [{patch_vec}]");
         }
 
         if let Some(condition) = &self.where_ {
