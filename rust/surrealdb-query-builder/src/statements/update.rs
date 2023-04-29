@@ -17,7 +17,7 @@
 // 	[ TIMEOUT @duration ]
 // 	[ PARALLEL ]
 // ;
-use std::marker::PhantomData;
+use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -122,6 +122,7 @@ where
         target: param,
         content: None,
         merge: None,
+        patch_ops: vec![],
         set: vec![],
         where_: None,
         return_type: None,
@@ -144,6 +145,17 @@ enum OpType {
     /// Moves values along the path using JSON patch operation
     Change,
 }
+impl Display for OpType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let op = match self {
+            OpType::Add => "add",
+            OpType::Remove => "remove",
+            OpType::Replace => "replace",
+            OpType::Change => "change",
+        };
+        write!(f, "{}", op)
+    }
+}
 
 // [{ op: 'change', path: '/test/other', value: '@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n' }]
 // patch(name).add("Oyelowo");
@@ -160,11 +172,29 @@ pub struct PatchOpInit {
     errors: ErrorList,
 }
 
-struct PatchOp(PatchOpInit);
+///
+pub struct PatchOp(PatchOpInit);
+
+impl std::ops::Deref for PatchOp {
+    type Target = PatchOpInit;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl Buildable for PatchOp {
     fn build(&self) -> String {
-        todo!()
+        let mut patch = vec![];
+        let path = self.path.to_string();
+        let op = self.op.to_string();
+        let value = self.value.clone();
+        let value = match value {
+            Some(value) => format!(", value: {}", value),
+            None => "".to_string(),
+        };
+        patch.push(format!("{{ op: '{}', path: {}{} }}", op, path, value));
+        patch.join(", ")
     }
 }
 
@@ -180,14 +210,6 @@ impl Erroneous for PatchOp {
     }
 }
 
-// impl std::ops::Deref for PatchOp {
-//     type Target = PatchOpInit;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
-
 pub fn patch(path: impl Into<Field>) -> PatchOpInit {
     let path: Field = path.into();
     let path = path.build();
@@ -197,26 +219,35 @@ pub fn patch(path: impl Into<Field>) -> PatchOpInit {
     // if any of the item is invalid, return error
     // Must be e.g name, name.first, name.first.second, so that we can easily replace `.` with `/`
     let bad_path = path.iter().filter(|item| {
-        item.starts_with(|c: char| !c.is_alphabetic())
-            || item.chars().all(|c: char| c.is_alphanumeric() || c == '_')
+        item.starts_with(|c: char| !c.is_alphabetic() && c != '_')
+            || item
+                .chars()
+                .any(|c: char| !(c.is_alphanumeric() || c == '_'))
     });
+
     let mut errors = vec![];
     if bad_path.count() > 0 {
-        errors.push("The path you have provided is invalid. Make sure that there are no clauses or conditions included. Valid path include e.g name, name.first, name.first.second, etc.".to_string());
+        errors.push("The path you have provided is invalid. Make sure that there are no clauses or conditions included. Valid path include e.g name, name(E).first, name(E).first(E).second, etc.".to_string());
     }
 
-    // .join("/");
+    let path = format!("/{}", path.join("/"));
+    let path_binding = Binding::new(sql::Value::from(path));
+
     PatchOpInit {
-        path: path.join("/"),
+        path: path_binding.get_param_dollarised(),
         op: OpType::Add,
         value: None,
-        bindings: vec![],
+        bindings: vec![path_binding],
         errors,
     }
 }
 
+// patch().add("/time").value("Oyelowo");
+// patch("/time").add("Oyelowo");
+// patch().replace("/time").value("Oyelowo");
+// patch("/time").replace("Oyelowo");
 impl PatchOpInit {
-    fn add(self, value: impl Serialize) -> PatchOp {
+    pub fn add(self, value: impl Serialize) -> PatchOp {
         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
 
@@ -228,14 +259,14 @@ impl PatchOpInit {
         })
     }
 
-    fn remove(self) -> PatchOp {
+    pub fn remove(self) -> PatchOp {
         PatchOp(Self {
             op: OpType::Remove,
             ..self
         })
     }
 
-    fn replace(self, value: impl Serialize) -> PatchOp {
+    pub fn replace(self, value: impl Serialize) -> PatchOp {
         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
 
@@ -247,7 +278,7 @@ impl PatchOpInit {
         })
     }
 
-    fn change(self, value: impl Serialize) -> PatchOp {
+    pub fn change(self, value: impl Serialize) -> PatchOp {
         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
 
@@ -269,6 +300,7 @@ where
     content: Option<String>,
     merge: Option<String>,
     set: Vec<String>,
+    patch_ops: Vec<String>,
     where_: Option<String>,
     return_type: Option<ReturnType>,
     timeout: Option<String>,
@@ -372,6 +404,16 @@ where
     }
 
     // [{ op: 'add', path: '/temp/test', value: true }]
+    pub fn patch(mut self, patch_op: impl Into<Vec<PatchOp>>) -> Self {
+        let patch_op: Vec<PatchOp> = patch_op.into();
+        for patch_op in patch_op {
+            self.bindings.extend(patch_op.get_bindings());
+            self.errors.extend(patch_op.get_errors());
+            self.patch_ops.push(patch_op.build());
+        }
+
+        self
+    }
 
     /// Adds a condition to the `` clause of the query.
     ///
@@ -489,6 +531,9 @@ where
         } else if !self.set.is_empty() {
             let set_vec = self.set.join(", ");
             query = format!("{query} SET {set_vec}");
+        } else if !self.patch_ops.is_empty() {
+            let patch_vec = self.patch_ops.join(", ");
+            query = format!("{query} PATCH {patch_vec}");
         }
 
         if let Some(condition) = &self.where_ {
@@ -545,5 +590,160 @@ where
 
     fn get_return_type(&self) -> ReturnType {
         self.return_type.clone().unwrap_or(ReturnType::None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::patch;
+    use crate::*;
+
+    #[test]
+    fn can_build_patch_operation() {
+        let email = Field::new("email");
+
+        let patch_op = patch(email).add("oyelowo@example.com");
+        assert_eq!(patch_op.get_errors().len(), 0);
+        assert_eq!(patch_op.get_bindings().len(), 2);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'add', path: $_param_00000001, value: $_param_00000002 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'add', path: '/email', value: 'oyelowo@example.com' }"
+        );
+    }
+
+    #[test]
+    fn gathers_errors_when_invalid_path_is_provided() {
+        let email = Field::new("email[WHERE id = 1]");
+
+        let patch_op = patch(email).add("Lowo");
+
+        assert_eq!(patch_op.get_errors().len(), 1);
+        assert_eq!(
+            patch_op.get_errors().first().unwrap(),
+            "The path you have provided is invalid. \
+            Make sure that there are no clauses or conditions included. Valid path include \
+            e.g name, name(E).first, name(E).first(E).second, etc."
+        );
+        assert_eq!(patch_op.get_bindings().len(), 2);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'add', path: $_param_00000001, value: $_param_00000002 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'add', path: '/email[WHERE id = 1]', value: 'Lowo' }"
+        );
+    }
+
+    #[test]
+    fn gathers_error_when_clauses_uses() {
+        get_invalid_paths(Field::new("name[WHERE id = 1]"));
+        get_invalid_paths(Field::new("name[0]"));
+        get_invalid_paths(Field::new("name[1]"));
+        get_invalid_paths(Field::new("name[$]"));
+        get_invalid_paths(Field::new("name[*]"));
+        get_invalid_paths(Field::new("name->writes"));
+        get_invalid_paths(Field::new("name->writes->book"));
+        get_invalid_paths(Field::new("->writes->book"));
+        get_invalid_paths(Field::new("user:oye->write->blog:mars"));
+        get_invalid_paths(Field::new(
+            "->knows->person->(knows WHERE influencer = true)",
+        ));
+        get_invalid_paths(Field::new("5book"));
+        get_invalid_paths(Field::new("-book_"));
+        get_invalid_paths(Field::new("*book_"));
+        get_invalid_paths(Field::new("$book_"));
+        get_invalid_paths(Field::new("%book_"));
+        get_invalid_paths(Field::new("&book_"));
+        get_invalid_paths(Field::new("#book_"));
+        get_invalid_paths(Field::new("@book_"));
+        get_invalid_paths(Field::new("(book_"));
+        get_invalid_paths(Field::new(")book_"));
+        get_invalid_paths(Field::new("book*"));
+        get_invalid_paths(Field::new("bo$ok"));
+    }
+
+    fn get_invalid_paths(field: Field) {
+        let patch_op = patch(field).add("Lowo");
+
+        assert_eq!(patch_op.get_errors().len(), 1);
+        assert_eq!(
+            patch_op.get_errors().first().unwrap(),
+            "The path you have provided is invalid. \
+            Make sure that there are no clauses or conditions included. Valid path include \
+            e.g name, name(E).first, name(E).first(E).second, etc."
+        );
+    }
+
+    #[test]
+    fn can_build_add_operation() {
+        let name = Field::new("_name.first");
+
+        let patch_op = patch(name).add("Oyelowo");
+        assert_eq!(patch_op.get_errors().len(), 0);
+        assert_eq!(patch_op.get_bindings().len(), 2);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'add', path: $_param_00000001, value: $_param_00000002 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'add', path: '/_name/first', value: 'Oyelowo' }"
+        );
+    }
+
+    #[test]
+    fn can_build_change_operation() {
+        let name = Field::new("name.first");
+
+        let patch_op = patch(name).change("Oyelowo");
+        assert_eq!(patch_op.get_errors().len(), 0);
+        assert_eq!(patch_op.get_bindings().len(), 2);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'change', path: $_param_00000001, value: $_param_00000002 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'change', path: '/name/first', value: 'Oyelowo' }"
+        );
+    }
+
+    #[test]
+    fn can_build_remove_operation() {
+        let name = Field::new("name.first");
+
+        let patch_op = patch(name).remove();
+        assert_eq!(patch_op.get_errors().len(), 0);
+        assert_eq!(patch_op.get_bindings().len(), 1);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'remove', path: $_param_00000001 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'remove', path: '/name/first' }"
+        );
+    }
+
+    #[test]
+    fn can_build_replace_operation() {
+        let name = Field::new("name.first.title");
+
+        let patch_op = patch(name).replace("Alien");
+        assert_eq!(patch_op.get_errors().len(), 0);
+        assert_eq!(patch_op.get_bindings().len(), 2);
+        assert_eq!(
+            patch_op.fine_tune_params(),
+            "{ op: 'replace', path: $_param_00000001, value: $_param_00000002 }"
+        );
+        assert_eq!(
+            patch_op.to_raw().build(),
+            "{ op: 'replace', path: '/name/first/title', value: 'Alien' }"
+        );
     }
 }
