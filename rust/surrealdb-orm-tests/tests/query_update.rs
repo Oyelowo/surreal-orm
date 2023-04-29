@@ -409,31 +409,68 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 }
 
 #[tokio::test]
-async fn test_create_alien_with_id_not_specified_but_generated_by_the_database(
-) -> SurrealdbOrmResult<()> {
+async fn test_update_content() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
+        id: Some(Weapon::create_id("original_id")),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
         ..Default::default()
     };
     let weapon_to_update = Weapon {
-        name: "Laser".to_string(),
+        id: Some(Weapon::create_id("lowo")),
+        name: "Oyelowo".to_string(),
         created: Utc::now(),
-        strength: 20,
+        strength: 1000,
         ..Default::default()
     };
 
     // Create weapon
     let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    assert_eq!(created_weapon.name, "Laser");
+    assert_eq!(
+        created_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(created_weapon.strength, 20);
+    assert!(created_weapon.id.as_ref().is_some());
 
-    // let updated_weapon = update::<Weapon>(created_weapon.id.unwrap())
-    //     .content(weapon_to_update)
-    //     .return_one(db.clone())
-    //     .await?;
+    let get_selected_weapon = || async {
+        let selected_weapon: Option<Weapon> = select(All)
+            .from(Weapon::table_name())
+            .where_(
+                Weapon::schema()
+                    .id
+                    .equal(created_weapon.id.to_owned().unwrap()),
+            )
+            .return_one(db.clone())
+            .await
+            .unwrap();
+        selected_weapon
+    };
+    assert_eq!(get_selected_weapon().await.unwrap().name, "Laser");
+
+    let updated_weapon = update::<Weapon>(created_weapon.clone().id.unwrap())
+        .content(weapon_to_update)
+        .get_one(db.clone())
+        .await?;
+    assert_eq!(updated_weapon.name, "Oyelowo");
+    assert_eq!(updated_weapon.strength, 1000);
+    // Id must not be changed to weapon:lowo even if added in the update content
+    assert_eq!(
+        updated_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(get_selected_weapon().await.unwrap().name, "Oyelowo");
+    assert_eq!(get_selected_weapon().await.unwrap().strength, 1000);
+    // Id field must not be updated even if provided to an update statement.
+    assert_ne!(
+        get_selected_weapon().await.unwrap().id.unwrap().to_string(),
+        "weapon:lowo"
+    );
     //
     Ok(())
 }
