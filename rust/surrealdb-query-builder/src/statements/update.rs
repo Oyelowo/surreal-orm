@@ -642,6 +642,7 @@ mod tests {
     #[test]
     fn gathers_error_when_clauses_uses() {
         get_invalid_paths(Field::new("name[WHERE id = 1]"));
+        get_invalid_paths(Field::new("name[WHERE id = 1].first"));
         get_invalid_paths(Field::new("name[0]"));
         get_invalid_paths(Field::new("name[1]"));
         get_invalid_paths(Field::new("name[$]"));
