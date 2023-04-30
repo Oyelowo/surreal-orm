@@ -173,9 +173,7 @@ struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId<Company>,
     // id: String,
     // nam: Uuid,
     name: String,
@@ -318,7 +316,7 @@ async fn test_it() -> surrealdb::Result<()> {
 
     let companies = vec![
         Company {
-            id: None,
+            id: Company::create_uuid(),
             // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -340,7 +338,7 @@ async fn test_it() -> surrealdb::Result<()> {
             // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
-            id: None,
+            id: Company::create_uuid(),
             // id: "company:2".into(),
             name: "Apple Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -364,7 +362,7 @@ async fn test_it() -> surrealdb::Result<()> {
     // let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
     // let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     let xx = Company {
-        id: Some(RecordId::from(("company", "lowo")).into()),
+        id: Company::create_id("lowo"),
         // id: "company:1".into(),
         name: "Mana Inc.".to_string(),
         // founded: "1967-05-03".to_string(),
