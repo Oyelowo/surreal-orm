@@ -6,9 +6,27 @@ use surrealdb::sql::{self, thing, Id, Thing, Uuid};
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
 /// Wrapper around surrealdb::sql::Thing to extend its capabilities
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct SurrealId<T: SurrealdbModel>(sql::Thing, PhantomData<T>);
 
+impl<T: SurrealdbModel> Serialize for SurrealId<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+impl<'de, T: SurrealdbModel> Deserialize<'de> for SurrealId<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let thing = Thing::deserialize(deserializer)?;
+        Ok(SurrealId(thing, PhantomData))
+    }
+}
 impl<T: SurrealdbModel> Display for SurrealId<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())
