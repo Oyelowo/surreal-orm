@@ -23,13 +23,17 @@ async fn test_insert_alien_with_id_not_specified_but_generated_by_the_database(
         name: "SpaceShip1".to_string(),
         created: Utc::now(),
     };
-    assert_eq!(space_ship.id.to_string().starts_with("spaceship"), true);
+    assert_eq!(space_ship.id.to_string().starts_with("space_ship"), true);
 
     let created_ship = insert(space_ship.clone()).get_one(db.clone()).await?;
 
     // Id is generated after creation
     assert_eq!(
-        created_ship.clone().id.to_string().starts_with("spaceship"),
+        created_ship
+            .clone()
+            .id
+            .to_string()
+            .starts_with("space_ship"),
         true
     );
     assert!(created_ship
@@ -132,11 +136,13 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon {
+    let weapon = || Weapon {
         name: "Laser".to_string(),
         created: Utc::now(),
         ..Default::default()
     };
+    let weapon1 = weapon();
+    let weapon2 = weapon();
 
     let space_ship = SpaceShip {
         id: SpaceShip::create_id("gbanda"),
@@ -157,12 +163,12 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     };
 
     /////
-    assert_eq!(weapon.id.to_string().starts_with("weapon"), true);
+    assert_eq!(weapon1.id.to_string().starts_with("weapon"), true);
 
     // create first record to weapon table
-    let created_weapon = insert(weapon.clone()).get_one(db.clone()).await?;
+    let created_weapon = insert(weapon1.clone()).get_one(db.clone()).await?;
     // Id should be same as the default generated outside the database
-    assert_eq!(created_weapon.id.to_string(), weapon.id.to_string());
+    assert_eq!(created_weapon.id.to_string(), weapon1.id.to_string());
 
     let select1: Vec<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -172,7 +178,7 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     assert_eq!(select1.len(), 1);
 
     //  Create second record
-    let created_weapon = insert(weapon.clone()).return_one(db.clone()).await?;
+    let created_weapon = insert(weapon2).return_one(db.clone()).await?;
 
     let select2: Vec<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -649,7 +655,7 @@ async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let unsaved_alien = Alien {
-        id: Alien::create_uuid(),
+        id: Alien::create_id("oyelowo"),
         name: "Oyelowo".to_string(),
         age: 20,
         created: DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z")
