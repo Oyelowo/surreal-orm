@@ -119,7 +119,17 @@ struct NodeEdgeMetadata {
 #[derive(Default, Clone)]
 pub struct SchemaFieldsProperties {
     /// list of fields names that are actually serialized and not skipped.
-    pub serialized_field_name_no_skip: Vec<String>,
+    pub serializable_fields: Vec<TokenStream>,
+    /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
+    pub linked_fields: Vec<TokenStream>,
+    /// The names of link_one fields
+    pub link_one_fields: Vec<TokenStream>,
+    /// The names of link_self fields
+    pub link_self_fields: Vec<TokenStream>,
+    /// The names of link_one and link_self fields
+    pub link_one_and_self_fields: Vec<TokenStream>,
+    /// The names of link_many fields
+    pub link_many_fields: Vec<TokenStream>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
@@ -337,81 +347,23 @@ impl SchemaFieldsProperties {
                         ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
-                
-                let referenced_node_meta = match relationship.clone() {
-                    RelationType::Relate(relation) => {
-                            store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
-                        let connection = relation.connection_model; 
-                        store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
-                            ReferencedNodeMeta::default()
-                                
-                    },
-                        
-                    RelationType::LinkOne(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object)
+
+                let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
+                    if !field_receiver.skip_serializing && !field_receiver.skip {
+                        serializable_field_type.push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
                     }
-                    
-                    RelationType::LinkSelf(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        if node_object.to_string() != struct_name_ident.to_string() {
-                            panic!("The field - `{field_name_original}` - has a linkself \
-                                   attribute or type that is not pointing to the current struct. \
-                                   Make sure the field attribute is link_self=\"{struct_name_ident}\" \
-                                   and the type is LinkSelf<{struct_name_ident}>. ");
-                        }
-                        
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
-                        
-                        get_link_meta_with_defs(&node_object)
-                    }
-                    
-                    RelationType::LinkMany(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                    
-                        get_link_meta_with_defs(&node_object)
-                    }                    
-                    
-                    RelationType::NestObject(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
-                        
-                        get_nested_meta_with_defs(&node_object)
-                    },
-                        
-                    RelationType::NestArray(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
-                        get_nested_meta_with_defs(&node_object)
-                    },
-                        
-                    RelationType::None => ReferencedNodeMeta::default()
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                 };
-                
-                if !referenced_node_meta.field_definition.is_empty() {
-                    store.field_definitions.push(referenced_node_meta.field_definition);
-                }
-                
-                store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
-                store.static_assertions.extend(referenced_node_meta.field_type_validation_asserts);
-                
-                store.imports_referenced_node_schema
-                    .insert(referenced_node_meta.foreign_node_schema_import.into());
-                
-                store.record_link_fields_methods
-                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
-  
-                if let RelationType::Relate(_) =  relationship {
+
+                let mut update_aliases_struct_fields_types_kv = || {
                     store.aliases_struct_fields_types_kv
                         .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
                     
                     store.aliases_struct_fields_names_kv
                         .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                }
-                else{
+                };
+            
+                
+                let mut update_field_names_fields_types_kv = || {
                     store.schema_struct_fields_types_kv
                         .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
                     store.schema_struct_fields_names_kv
@@ -427,16 +379,99 @@ impl SchemaFieldsProperties {
                                             .#____________update_many_bindings(#bindings);
                                 ));
 
+                };
+
+                update_ser_field_type(&mut store.serializable_fields);
+                
+                let referenced_node_meta = match relationship.clone() {
+                    RelationType::Relate(relation) => {
+                            store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
+                        update_aliases_struct_fields_types_kv();
+                        let connection = relation.connection_model; 
+                        store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
+                            ReferencedNodeMeta::default()
+                                
+                    },
+                        
+                    RelationType::LinkOne(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        update_ser_field_type(&mut store.link_one_fields);
+                        update_ser_field_type(&mut store.link_one_and_self_fields);
+                        update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
+                        
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
+                        get_link_meta_with_defs(&node_object)
+                    }
+                    
+                    RelationType::LinkSelf(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        if node_object.to_string() != struct_name_ident.to_string() {
+                            panic!("The field - `{field_name_original}` - has a linkself \
+                                   attribute or type that is not pointing to the current struct. \
+                                   Make sure the field attribute is link_self=\"{struct_name_ident}\" \
+                                   and the type is LinkSelf<{struct_name_ident}>. ");
+                        }
+                        
+                        update_ser_field_type(&mut store.link_self_fields);
+                        update_ser_field_type(&mut store.link_one_and_self_fields);
+                        update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
+                        
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
+                        
+                        get_link_meta_with_defs(&node_object)
+                    }
+                    
+                    RelationType::LinkMany(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        update_ser_field_type(&mut store.link_many_fields);
+                        update_ser_field_type(&mut store.linked_fields);
+                        update_field_names_fields_types_kv();
+                        
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
+                        get_link_meta_with_defs(&node_object)
+                    }                    
+                    
+                    RelationType::NestObject(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        update_field_names_fields_types_kv();
+                        
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                        
+                    RelationType::NestArray(node_object) => {
+                        let foreign_node = format_ident!("{node_object}");
+                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
+                        update_field_names_fields_types_kv();
+                        get_nested_meta_with_defs(&node_object)
+                    },
+                    RelationType::None => {
+                        update_field_names_fields_types_kv();
+                        ReferencedNodeMeta::default()
+                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                    }
+                };
+                
+                if !referenced_node_meta.field_definition.is_empty() {
+                    store.field_definitions.push(referenced_node_meta.field_definition);
                 }
+                
+                store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
+                store.static_assertions.extend(referenced_node_meta.field_type_validation_asserts);
+                
+                store.imports_referenced_node_schema
+                    .insert(referenced_node_meta.foreign_node_schema_import.into());
+                
+                store.record_link_fields_methods
+                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
+  
   
 
                 store.serialized_field_names_normalised
                     .push(field_ident_normalised_as_str.to_owned());
                 
-                if !field_receiver.skip_serializing {
-                    store.serialized_field_name_no_skip
-                        .push(field_ident_normalised_as_str.to_owned());
-                }
 
                 store 
             });

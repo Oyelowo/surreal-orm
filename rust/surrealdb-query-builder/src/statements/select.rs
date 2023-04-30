@@ -34,7 +34,8 @@ use surrealdb::sql;
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, Field,
-    Filter, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId, Table, ToRaw, Valuex,
+    Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId, Table, ToRaw,
+    Valuex,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -229,6 +230,7 @@ pub enum TargettablesForSelect {
     SurrealIds(Vec<SurrealId>),
     // Should already be bound
     SubQuery(SelectStatement),
+    Function(Function),
 }
 
 impl From<Vec<sql::Table>> for TargettablesForSelect {
@@ -376,6 +378,12 @@ impl From<SelectStatement> for TargettablesForSelect {
     }
 }
 
+impl From<Function> for TargettablesForSelect {
+    fn from(value: Function) -> Self {
+        Self::Function(value.clone())
+    }
+}
+
 /// Single field or multiple fields to split by
 #[derive(Clone, Debug)]
 pub enum Splittables {
@@ -509,6 +517,24 @@ impl From<&Field> for Selectables {
     }
 }
 
+impl From<Function> for Selectables {
+    fn from(value: Function) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
+impl From<&Function> for Selectables {
+    fn from(value: &Function) -> Self {
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
+
 impl Deref for Selectables {
     type Target = Valuex;
 
@@ -517,9 +543,16 @@ impl Deref for Selectables {
     }
 }
 
+#[derive(Debug, Clone)]
+enum SelectionType {
+    Select,
+    SelectValue,
+}
+
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
 pub struct SelectStatement {
+    selection_type: SelectionType,
     projections: String,
     targets: Vec<String>,
     where_: Option<String>,
@@ -635,6 +668,28 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
     let selectables: Selectables = selectables.into();
 
     SelectStatement {
+        selection_type: SelectionType::Select,
+        projections: selectables.build(),
+        targets: vec![],
+        where_: None,
+        split: vec![],
+        group_by: vec![],
+        order_by: vec![],
+        limit: None,
+        start: None,
+        fetch: vec![],
+        timeout: None,
+        parallel: false,
+        bindings: selectables.get_bindings(),
+    }
+}
+
+/// Just like normal select statement but useful for selecting a single value out of the returned object.
+pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
+    let selectables: Field = selectable_value.into();
+
+    SelectStatement {
+        selection_type: SelectionType::SelectValue,
         projections: selectables.build(),
         targets: vec![],
         where_: None,
@@ -713,6 +768,10 @@ impl SelectStatement {
                     params.push(param);
                 });
                 params
+            }
+            TargettablesForSelect::Function(function) => {
+                targets_bindings.extend(function.get_bindings());
+                vec![function.build()]
             }
         };
 
@@ -1059,7 +1118,8 @@ impl SelectStatement {
         };
 
         fields.iter().for_each(|f| {
-            self.group_by.push(f.to_string());
+            self.fetch.push(f.build());
+            self.bindings.extend(f.get_bindings());
         });
         self
     }
@@ -1103,8 +1163,13 @@ impl Display for SelectStatement {
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
+        let select = match self.selection_type {
+            SelectionType::Select => "SELECT",
+            SelectionType::SelectValue => "SELECT VALUE",
+        };
+
         let mut query = format!(
-            "SELECT {} FROM {}",
+            "{select} {} FROM {}",
             self.projections,
             self.targets.join(", ")
         );

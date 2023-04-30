@@ -138,10 +138,10 @@ impl Erroneous for TransactionCompletion {}
 impl Buildable for TransactionCompletion {
     fn build(&self) -> String {
         let mut output = String::new();
-        output.push_str("BEGIN TRANSACTION\n");
+        output.push_str("BEGIN TRANSACTION;\n");
 
         self.data.queries.iter().for_each(|q| {
-            output.push_str(&format!("\n{}\n", q));
+            output.push_str(&format!("\n{};\n", q));
         });
 
         if let Some(completion_type) = &self.data.transaction_completion_type {
@@ -153,7 +153,7 @@ impl Buildable for TransactionCompletion {
                     sql::statements::CancelStatement.to_string()
                 }
             };
-            output.push_str(&format!("\n{}\n\t", com_type));
+            output.push_str(&format!("\n{};\n\t", com_type));
         }
 
         output

@@ -106,8 +106,13 @@ impl ToTokens for EdgeToken {
             connection_with_field_appended,
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
-            serialized_field_name_no_skip,
             field_definitions,
+            serializable_fields,
+            linked_fields,
+            link_one_fields,
+            link_self_fields,
+            link_one_and_self_fields,
+            link_many_fields,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // if serialized_field_names_normalised.conta("")
@@ -128,8 +133,9 @@ impl ToTokens for EdgeToken {
         
 
         tokens.extend(quote!( 
-                use #crate_name::{ToRaw as _, Raw};
+                use #crate_name::{ToRaw as _};
                         
+                #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
@@ -145,20 +151,42 @@ impl ToTokens for EdgeToken {
                         record_id
                     }
                     
+                #[allow(non_snake_case)]
                 fn get_table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
                 }
         
+                #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbModel for #struct_name_ident<In, Out> {
                     fn table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
                     
-                    fn get_serializable_field_names() -> Vec<&'static str> {
-                        return vec![#( #serialized_field_name_no_skip), *]
+                    fn get_serializable_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #serializable_fields), *]
+                    }
+                
+                    fn get_linked_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #linked_fields), *]
+                    }
+                
+                    fn get_link_one_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #link_one_fields), *]
+                    }
+                
+                    fn get_link_self_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #link_self_fields), *]
                     }
                     
+                    fn get_link_one_and_self_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #link_one_and_self_fields), *]
+                    }
+                
+                    fn get_link_many_fields() -> Vec<#crate_name::Field> {
+                        return vec![#( #link_many_fields), *]
+                    }
+                
                     fn define_table() -> #crate_name::Raw{
                         #table_definitions
                     }
@@ -170,6 +198,7 @@ impl ToTokens for EdgeToken {
                     }
                 }
                 
+                #[allow(non_snake_case)]
                 pub mod #module_name {
                     use #crate_name::SurrealdbNode;
                     use #crate_name::Parametric as _;

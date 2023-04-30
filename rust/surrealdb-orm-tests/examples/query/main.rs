@@ -636,7 +636,7 @@ async fn main() -> surrealdb::Result<()> {
     //     sql::json(&serde_json::to_string(&cc.to_string()).unwrap()).unwrap()
     // );
 
-    let company::Company { id, name, home, .. } = Company::schema();
+    let company_schema::Company { id, name, home, .. } = Company::schema();
     println!("xxxxvv {}", name.clone());
     let ref age = Field::new("age");
     let firstName = &name;

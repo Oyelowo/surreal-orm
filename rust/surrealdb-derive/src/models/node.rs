@@ -80,7 +80,12 @@ impl ToTokens for NodeToken{
             record_link_fields_methods,
             node_edge_metadata,
             schema_struct_fields_names_kv_empty,
-            serialized_field_name_no_skip,
+            serializable_fields,
+            linked_fields,
+            link_one_fields,
+            link_self_fields,
+            link_one_and_self_fields,
+            link_many_fields,
             field_definitions,
             fields_relations_aliased,
             ..
@@ -97,7 +102,7 @@ impl ToTokens for NodeToken{
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
 
@@ -171,8 +176,28 @@ impl ToTokens for NodeToken{
                     #table_name_str.into()
                 }
                 
-                fn get_serializable_field_names() -> Vec<&'static str> {
-                    return vec![#( #serialized_field_name_no_skip), *]
+                fn get_serializable_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #serializable_fields), *]
+                }
+            
+                fn get_linked_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #linked_fields), *]
+                }
+            
+                fn get_link_one_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_one_fields), *]
+                }
+            
+                fn get_link_self_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_self_fields), *]
+                }
+                
+                fn get_link_one_and_self_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_one_and_self_fields), *]
+                }
+            
+                fn get_link_many_fields() -> Vec<#crate_name::Field> {
+                    return vec![#( #link_many_fields), *]
                 }
                 
                 fn define_table() -> #crate_name::Raw {
@@ -186,6 +211,7 @@ impl ToTokens for NodeToken{
                 }
             }
             
+            #[allow(non_snake_case)]
             pub mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
@@ -198,6 +224,7 @@ impl ToTokens for NodeToken{
                #( #imports_referenced_node_schema) *
                 
 
+                #[allow(non_snake_case)]
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *

@@ -15,27 +15,30 @@
 use std::{fmt::Display, marker::PhantomData};
 
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::json;
 use surrealdb::sql;
 
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbNode},
     types::Updateables,
-    ReturnableDefault,
+    ErrorList, ReturnType, ReturnableDefault, ReturnableStandard,
 };
 
 use super::SelectStatement;
 
 /// Insert statement initialization builder
+#[derive(Debug, Clone)]
 pub struct InsertStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     on_duplicate_key_update: Vec<String>,
+    return_type: Option<ReturnType>,
     // You can select values to copy data from an existing table into a new one
     select_query_string: Option<String>,
     bindings: BindingsList,
+    field_names: Vec<String>,
     node_type: PhantomData<T>,
+    errors: ErrorList,
 }
 
 /// Creates a new INSERT SQL statement for a given type.
@@ -77,21 +80,31 @@ pub fn insert<T>(insertables: impl Into<Insertables<T>>) -> InsertStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
+    let mut field_names = vec![];
+    let mut errors = vec![];
     let insertables: Insertables<T> = insertables.into();
     let mut select_query = None;
 
     let bindings = match insertables {
         Insertables::Node(node) => {
-            let bindings = create_bindings_for_node(&node);
-            bindings
+            let node_bindings = create_bindings_for_node(&node);
+            field_names = node_bindings.field_names;
+            errors = node_bindings.errors;
+            node_bindings.bindings
         }
         Insertables::Nodes(nodes) => nodes
             .into_iter()
-            .flat_map(|n| create_bindings_for_node(&n))
+            .flat_map(|n| {
+                let node_bindings = create_bindings_for_node(&n);
+                errors.extend(node_bindings.errors);
+                field_names = node_bindings.field_names;
+                node_bindings.bindings
+            })
             .collect::<Vec<_>>(),
         Insertables::FromQuery(query) => {
             let bindings = query.get_bindings();
             select_query = Some(query.build());
+            errors.extend(query.get_errors());
             bindings
         }
     };
@@ -99,17 +112,41 @@ where
     InsertStatement::<T> {
         bindings,
         select_query_string: select_query,
+        return_type: None,
         on_duplicate_key_update: vec![],
+        field_names,
+        errors,
         node_type: PhantomData,
     }
 }
 
 impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
-impl<T> Erroneous for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Erroneous for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T> ReturnableDefault<T> for InsertStatement<T> where
     T: Serialize + DeserializeOwned + SurrealdbNode
 {
+}
+
+impl<T> ReturnableStandard<T> for InsertStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
+        self.return_type = Some(return_type);
+        self
+    }
+
+    fn get_return_type(&self) -> ReturnType {
+        self.return_type.clone().unwrap_or(ReturnType::None)
+    }
 }
 
 impl<T> Display for InsertStatement<T>
@@ -123,6 +160,7 @@ where
 
 /// Things that can be inserted including a single or list of surrealdb nodes or a select statement
 /// when copying from a table to another table.
+#[derive(Debug)]
 pub enum Insertables<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
@@ -171,21 +209,62 @@ where
     }
 }
 
-fn create_bindings_for_node<T>(node: &T) -> BindingsList
+struct NodeBindings {
+    field_names: Vec<String>,
+    bindings: BindingsList,
+    errors: Vec<String>,
+}
+fn create_bindings_for_node<T>(node: &T) -> NodeBindings
 where
     T: SurrealdbNode + DeserializeOwned + Serialize,
 {
-    let value = node;
-    let field_names = T::get_serializable_field_names();
+    let mut errors = vec![];
+    let mut serialized_field_names = T::get_serializable_fields();
+    serialized_field_names.sort_by(|a, b| a.build().cmp(&b.build()));
 
-    field_names
-        .into_iter()
-        .map(|field_name| {
-            let field_value = get_field_value(value, &field_name)
-                .expect("Unable to get value name. This should never happen!");
-            Binding::new(field_value).with_name(field_name.into())
+    let value = serde_json::to_value(node).ok().map_or_else(
+        || {
+            errors.push("Unable to convert node to json".to_string());
+            serde_json::Value::Null
+        },
+        |v| v,
+    );
+    let object = value.as_object().map_or_else(
+        || {
+            errors.push("Unable to convert node to json object".to_string());
+            serde_json::Map::new()
+        },
+        |v| v.to_owned(),
+    );
+
+    let (field_names, bindings): (Vec<String>, BindingsList) = serialized_field_names
+        .iter()
+        .map(|key| {
+            let ref key = key.build();
+            let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
+            let value = sql::json(&value1.to_string()).ok().map_or_else(
+                || {
+                    errors.push(format!("Unable to convert value to json {}", value1));
+                    sql::Value::None
+                },
+                |v| v,
+            );
+
+            let binding = if key == "id" && value1 == &serde_json::Value::Null {
+                Binding::new(sql::Value::None).with_name(key.into())
+            } else {
+                Binding::new(value).with_name(key.into())
+            };
+            // Binding::new(value).with_name(key.into());
+            (key.to_string(), binding)
         })
-        .collect::<Vec<_>>()
+        .unzip();
+
+    NodeBindings {
+        field_names,
+        bindings,
+        errors,
+    }
 }
 
 impl<T> InsertStatement<T>
@@ -229,6 +308,49 @@ where
         self.on_duplicate_key_update.extend(updater_query);
         self
     }
+
+    /// Sets the return type for the query.
+    ///
+    /// # Arguments
+    ///
+    /// * `return_type` - The type of return to set.
+    ///
+    /// # Examples
+    ///
+    /// Set the return type to `None`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::None);
+    /// ```
+    ///
+    /// Set the return type to `Before`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Before);
+    /// ```
+    ///
+    /// Set the return type to `After`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::After);
+    /// ```
+    ///
+    /// Set the return type to `Diff`:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Diff);
+    /// ```
+    ///
+    /// Set the return type to a projection of specific fields:
+    ///
+    /// ```rust,ignore
+    /// statement.return_type(ReturnType::Projections(vec![...]));
+    /// ```
+    pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
+        let return_type = return_type.into();
+        self.return_type = Some(return_type);
+        self
+    }
 }
 
 impl<T> Buildable for InsertStatement<T>
@@ -236,21 +358,21 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn build(&self) -> String {
-        if self.bindings.is_empty() {
-            return "".into();
-        }
+        // if self.bindings.is_empty() {
+        //     return "".into();
+        // }
 
         let mut query = format!("INSERT INTO {}", &T::table_name());
 
         if let Some(query_select) = &self.select_query_string {
             query = format!("{query} ({})", &query_select.trim_end_matches(";"));
         } else {
-            let field_names = T::get_serializable_field_names();
+            let field_names = self.field_names.clone();
 
             let placeholders = self
                 .bindings
                 .iter()
-                .map(|b| format!("{}", b.get_param_dollarised()))
+                .map(|b| b.get_param_dollarised())
                 .collect::<Vec<_>>()
                 .chunks_exact(field_names.len())
                 .map(|fields_values_params_list| {
@@ -268,6 +390,10 @@ where
             query = format!("{query}  ON DUPLICATE KEY UPDATE {updates_str}",);
         }
 
+        if let Some(return_type) = &self.return_type {
+            query = format!("{query} {}", &return_type);
+        }
+
         format!("{query};")
     }
 }
@@ -279,15 +405,4 @@ where
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
-}
-
-fn get_field_value<T: Serialize>(
-    value: &T,
-    field_name: &str,
-) -> Result<surrealdb::sql::Value, String>
-where
-    T: serde::Serialize,
-{
-    let whole_struct = json!(value);
-    Ok(sql::json(&whole_struct[field_name].to_string())?)
 }

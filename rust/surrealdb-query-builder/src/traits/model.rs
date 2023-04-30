@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, NodeClause, Raw, Table};
+use crate::{Alias, Field, NodeClause, Raw, Table};
 use serde::Serialize;
 use surrealdb::sql::{Id, Thing, Uuid};
 
@@ -14,8 +14,26 @@ use surrealdb::sql::{Id, Thing, Uuid};
 pub trait SurrealdbModel {
     /// The name of the model/table
     fn table_name() -> Table;
-    /// Get model's field names
-    fn get_serializable_field_names() -> Vec<&'static str>;
+
+    /// The name of the all fields that are serializable
+    /// and can potentially be written to the database.
+    fn get_serializable_fields() -> Vec<Field>;
+
+    /// The name of the all fields that are linked i.e line_one, line_many, or line_self.
+    fn get_linked_fields() -> Vec<Field>;
+
+    /// The names of link_one fields
+    fn get_link_one_fields() -> Vec<Field>;
+
+    /// The names of link_self fields
+    fn get_link_self_fields() -> Vec<Field>;
+
+    /// The names of link_one and link_self fields
+    fn get_link_one_and_self_fields() -> Vec<Field>;
+
+    /// The names of link_many fields
+    fn get_link_many_fields() -> Vec<Field>;
+
     /// Get model's table definition statement
     fn define_table() -> Raw;
     /// Get model's fields definitions statements as a list

@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use crate::Field;
+
 use super::{Erroneous, Parametric};
 
 /// A trait for building a query string
@@ -24,6 +26,22 @@ pub trait Buildable {
     }
 }
 
+/// Denoted by `.*`. Used for accessing all nested fields and arrays and links
+pub trait AllGetter {
+    /// Appends `.*` to the current string. Get all nested fields and arrays and links
+    fn all(&self) -> Field;
+}
+
+impl<B> AllGetter for B
+where
+    B: Buildable + Parametric,
+{
+    fn all(&self) -> Field {
+        let asteriked = format!("{}.*", self.build());
+        Field::new(asteriked.clone()).with_bindings(self.get_bindings())
+    }
+}
+
 /// Used for statements
 pub trait Queryable: Parametric + Buildable + Erroneous {}
 
@@ -34,3 +52,6 @@ pub trait Conditional: Parametric + Buildable + Erroneous {
         self.build()
     }
 }
+
+/// Used for marking a struct used in UPDATE MERGE statement.
+pub trait DataUpdater {}

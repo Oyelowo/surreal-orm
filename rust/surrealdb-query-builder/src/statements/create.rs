@@ -155,32 +155,25 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn build(&self) -> String {
-        let mut query = String::new();
-
-        query.push_str("CREATE ");
-        query.push_str(&self.target);
+        let mut query = format!("CREATE {}", &self.target);
 
         if !&self.content.is_empty() {
-            query.push_str(" CONTENT ");
-            query.push_str(&self.content);
+            query = format!("{query} CONTENT {}", &self.content);
         }
 
         if let Some(return_type) = &self.return_type {
-            query += format!("{return_type}").as_str();
+            query = format!("{query} {}", &return_type);
         }
 
         if let Some(timeout) = &self.timeout {
-            query.push_str(" TIMEOUT ");
-            query.push_str(&timeout);
+            query = format!("{query} TIMEOUT {}", &timeout);
         }
 
         if self.parallel {
-            query.push_str(" PARALLEL");
+            query = format!("{query} PARALLEL");
         }
 
-        query.push_str(";");
-
-        query
+        format!("{query};")
     }
 }
 
@@ -225,5 +218,9 @@ where
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);
         self
+    }
+
+    fn get_return_type(&self) -> ReturnType {
+        self.return_type.clone().unwrap_or(ReturnType::None)
     }
 }

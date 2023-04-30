@@ -31,21 +31,26 @@ impl From<u8> for ExpectedLength {
 #[allow(missing_docs)]
 #[derive(Error, Debug)]
 pub enum SurrealdbOrmError {
-    #[error("there is an issue with one of your inputs while building the query.")]
+    #[error("There is an issue with one of your inputs while building the query. {0}")]
     QueryBuilder(String),
 
     #[error("Expected at most {0}, but more returned")]
     TooManyItemsReturned(ExpectedLength),
 
-    #[error("Problem runnning query. Check that there is no issue with your query.")]
+    #[error("Problem runnning query. Check that there is no issue with your query. {0}")]
     QueryRun(#[source] surrealdb::Error),
 
-    #[error("Unable to parse data returned from the database. Check that all fields are complete and the types are able to deserialize surrealdb data types properly.")]
+    #[error("Unable to parse data returned from the database. Check that all fields are complete and the types are able to deserialize surrealdb data types properly. {0}")]
     Deserialization(#[source] surrealdb::Error),
 
-    #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'")]
+    #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'. {0}")]
     InvalidId(#[source] surrealdb::Error),
+
+    #[error("The following fields could not be fetched as they are not linked to a foreign table: {0}. Please ensure that all fields provided are of types 'link_self', 'link_one' or 'link_many' to allow fetching of linked values from other tables.")]
+    FieldsUnfetchableNotARecordLink(String),
+
+    #[error("No record returned from {0}. Check that all fields in this table are selected.")]
+    RecordNotFound(String),
 }
 
 pub type SurrealdbOrmResult<T> = std::result::Result<T, SurrealdbOrmError>;
-

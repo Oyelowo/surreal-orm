@@ -62,10 +62,10 @@ pub use remove_namespace::{remove_namespace, RemoveNamespaceStatement};
 pub use remove_scope::{remove_scope, RemoveScopeStatement};
 pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
-pub use select::{order, select, Order, Orderables, SelectStatement, Selectables, Splittables};
+pub use select::{order, select, select_value, Order, Orderables, SelectStatement, Selectables, Splittables};
 pub use sleep::{sleep, SleepStatement};
 pub use transaction::{begin_transaction, BeginTransactionStatement};
-pub use update::{update, UpdateStatement};
+pub use update::{patch, PatchOp, update, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
 pub(crate) enum NamespaceOrDatabase {
