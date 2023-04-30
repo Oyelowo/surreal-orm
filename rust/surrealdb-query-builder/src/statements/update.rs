@@ -158,12 +158,6 @@ impl Display for OpType {
     }
 }
 
-// [{ op: 'change', path: '/test/other', value: '@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n' }]
-// patch(name).add("Oyelowo");
-// patch(name).change("Oyelowo");
-// PatchOp::replace("/settings/active", false)
-// patch(name).replace("Oyelowo");
-// patch(name).remove();
 #[derive(Clone, Debug)]
 pub struct PatchOpInit {
     path: String,
@@ -430,7 +424,20 @@ where
         self
     }
 
-    // [{ op: 'add', path: '/temp/test', value: true }]
+    /// Specify the patch operations to be applied to the record using the PATCH keyword.
+    ///
+    /// # Arguments
+    /// * `patch_op` - A patch operation to be applied to the record. Use the `patch`
+    /// helper function.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surreal_orm;
+    /// use surreal_orm::{*, statements:patch};
+    /// // Typically, you would use the schema to get the field(e.g `User::schema().name(E).first`) but using this as an example.
+    /// let name = Field::new("name.first");
+    /// let patch_op = patch(name).change("Oyelowo");
+    /// assert_eq!(patch_op.to_raw().build(), "{ op: 'change', path: '/name/first', value: 'Oyelowo' }");
     pub fn patch(mut self, patch_op: impl Into<Vec<PatchOp>>) -> Self {
         let patch_op: Vec<PatchOp> = patch_op.into();
         for patch_op in patch_op {
@@ -629,7 +636,7 @@ mod tests {
 
     #[test]
     fn can_build_patch_operation() {
-        let email = Field::new("email");
+        let email = Field::new("_email");
 
         let patch_op = patch(email).add("oyelowo@example.com");
         assert_eq!(patch_op.get_errors().len(), 0);
@@ -640,7 +647,7 @@ mod tests {
         );
         assert_eq!(
             patch_op.to_raw().build(),
-            "{ op: 'add', path: '/email', value: 'oyelowo@example.com' }"
+            "{ op: 'add', path: '/_email', value: 'oyelowo@example.com' }"
         );
     }
 
@@ -676,7 +683,14 @@ mod tests {
         get_invalid_paths(Field::new("name[1]"));
         get_invalid_paths(Field::new("name[$]"));
         get_invalid_paths(Field::new("name[*]"));
+        get_invalid_paths(Field::new("name->"));
         get_invalid_paths(Field::new("name->writes"));
+        get_invalid_paths(Field::new("->writes"));
+        get_invalid_paths(Field::new("->"));
+        get_invalid_paths(Field::new("->->"));
+        get_invalid_paths(Field::new("-"));
+        get_invalid_paths(Field::new("_-"));
+        get_invalid_paths(Field::new("-something"));
         get_invalid_paths(Field::new("name->writes->book"));
         get_invalid_paths(Field::new("->writes->book"));
         get_invalid_paths(Field::new("user:oye->write->blog:mars"));
