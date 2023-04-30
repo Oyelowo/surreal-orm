@@ -744,6 +744,80 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
 }
 
 #[tokio::test]
+async fn test_update_single_id_patch_change() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let weapon = Weapon {
+        id: Some(Weapon::create_id("original_id")),
+        name: "test".to_string(),
+        created: Utc::now(),
+        strength: 20,
+        ..Default::default()
+    };
+
+    // Create weapon
+    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    assert_eq!(created_weapon.name, "test");
+    assert_eq!(
+        created_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(created_weapon.strength, 20);
+    assert!(created_weapon.id.as_ref().is_some());
+
+    let get_selected_weapon = || async {
+        let selected_weapon: Option<Weapon> = select(All)
+            .from(Weapon::table_name())
+            .where_(
+                Weapon::schema()
+                    .id
+                    .equal(created_weapon.id.to_owned().unwrap()),
+            )
+            .return_one(db.clone())
+            .await
+            .unwrap();
+        selected_weapon
+    };
+    assert_eq!(get_selected_weapon().await.unwrap().name, "test");
+
+    let weapon_schema::Weapon {
+        ref name,
+        ref strength,
+        ..
+    } = Weapon::schema();
+    let updated_weapon = update::<Weapon>(created_weapon.clone().id.unwrap())
+        .patch(vec![
+            patch(name).change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"),
+            patch(strength).replace(34),
+        ])
+        .get_one(db.clone())
+        .await?;
+    assert_eq!(updated_weapon.name, "text");
+    assert_eq!(updated_weapon.strength, 34);
+    // Id must not be changed to weapon:lowo even if added in the update content
+    assert_eq!(
+        updated_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(get_selected_weapon().await.unwrap().name, "text");
+    assert_eq!(get_selected_weapon().await.unwrap().strength, 34);
+    // Id field must not be updated even if provided to an update statement.
+    assert_ne!(
+        get_selected_weapon().await.unwrap().id.unwrap().to_string(),
+        "weapon:lowo"
+    );
+    let updated_weapon = update::<Weapon>(created_weapon.clone().id.unwrap())
+        .patch(patch(strength).replace(921))
+        .patch(patch(name).change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
+        .get_one(db.clone())
+        .await?;
+    assert_eq!(updated_weapon.name, "teot");
+    assert_eq!(updated_weapon.strength, 921);
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
