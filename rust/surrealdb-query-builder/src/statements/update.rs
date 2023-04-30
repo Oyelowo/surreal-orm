@@ -25,8 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, DataUpdater, ErrorList, Field, ReturnableDefault, ReturnableStandard, SurrealId2,
-    ToRaw,
+    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -339,7 +338,7 @@ where
 
 pub enum TargettablesForUpdate {
     Table(sql::Table),
-    SurrealId(SurrealId),
+    SurrealId(sql::Thing),
 }
 
 impl From<crate::Table> for TargettablesForUpdate {
@@ -366,23 +365,23 @@ impl From<sql::Thing> for TargettablesForUpdate {
     }
 }
 
-impl From<&SurrealId> for TargettablesForUpdate {
-    fn from(value: &SurrealId) -> Self {
+impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForUpdate {
+    fn from(value: &SurrealId<T>) -> Self {
         Self::SurrealId(value.to_owned())
     }
 }
 
-impl From<SurrealId> for TargettablesForUpdate {
-    fn from(value: SurrealId) -> Self {
+impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
+    fn from(value: SurrealId<T>) -> Self {
         Self::SurrealId(value)
     }
 }
 
-impl<T: SurrealdbModel> From<SurrealId2<T>> for TargettablesForUpdate {
-    fn from(value: SurrealId2<T>) -> Self {
-        Self::SurrealId(value.to_thing().into())
-    }
-}
+// impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
+//     fn from(value: SurrealId<T>) -> Self {
+//         Self::SurrealId(value.to_thing().into())
+//     }
+// }
 
 impl From<sql::Table> for TargettablesForUpdate {
     fn from(value: sql::Table) -> Self {
