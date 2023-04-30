@@ -315,25 +315,25 @@ impl<const N: usize> From<&[sql::Table; N]> for TargettablesForSelect {
 
 impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForSelect {
     fn from(value: &SurrealId<T>) -> Self {
-        Self::SurrealId(value.to_owned())
+        Self::SurrealId(value.to_thing())
     }
 }
 
 impl<const N: usize, T: SurrealdbModel> From<&[SurrealId<T>; N]> for TargettablesForSelect {
     fn from(value: &[SurrealId<T>; N]) -> Self {
-        Self::SurrealIds(value.to_vec())
+        Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
     }
 }
 
 impl<T: SurrealdbModel> From<Vec<&SurrealId<T>>> for TargettablesForSelect {
     fn from(value: Vec<&SurrealId<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<const N: usize, T: SurrealdbModel> From<&[&SurrealId<T>; N]> for TargettablesForSelect {
     fn from(value: &[&SurrealId<T>; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
+        Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -350,13 +350,13 @@ impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
 
 impl<T: SurrealdbModel> From<Vec<SurrealId<T>>> for TargettablesForSelect {
     fn from(value: Vec<SurrealId<T>>) -> Self {
-        Self::SurrealIds(value)
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
 impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForSelect {
     fn from(value: SurrealId<T>) -> Self {
-        Self::SurrealId(value)
+        Self::SurrealId(value.to_thing())
     }
 }
 
@@ -1232,7 +1232,7 @@ mod tests {
         let canadian_cities = AliasName::new("legal_age");
         let age = Field::new("age");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
         let statement = select(All)
             .from(fake_id)
             .where_(

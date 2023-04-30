@@ -50,6 +50,12 @@ impl<T: SurrealdbModel> From<SurrealId<T>> for sql::Thing {
     }
 }
 
+impl<T: SurrealdbModel> From<&SurrealId<T>> for sql::Thing {
+    fn from(value: &SurrealId<T>) -> Self {
+        value.0.clone()
+    }
+}
+
 impl<T: SurrealdbModel> Default for SurrealId<T> {
     fn default() -> Self {
         // Self(Default::default(), Default::default())
