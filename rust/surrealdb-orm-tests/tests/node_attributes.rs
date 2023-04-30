@@ -13,7 +13,7 @@ use surrealdb_orm::{statements::create, *};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
-    id: Option<sql::Thing>,
+    id: sql::Thing,
     name: String,
     age: u8,
     created: DateTime<Utc>,
@@ -41,7 +41,7 @@ pub struct Alien {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "visits")]
 pub struct Visits<In: SurrealdbNode, Out: SurrealdbNode> {
-    id: Option<sql::Thing>,
+    id: sql::Thing,
     #[serde(rename = "in")]
     in_: LinkOne<In>,
     out: LinkOne<Out>,
@@ -52,7 +52,7 @@ pub struct Visits<In: SurrealdbNode, Out: SurrealdbNode> {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "planet")]
 pub struct Planet {
-    id: Option<sql::Thing>,
+    id: sql::Thing,
     name: String,
     area: Polygon,
     population: u64,
@@ -64,7 +64,7 @@ pub struct Planet {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
-    id: Option<sql::Thing>,
+    id: sql::Thing,
     name: String,
     created: DateTime<Utc>,
 }
@@ -73,7 +73,7 @@ pub struct Weapon {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "space_ship")]
 pub struct SpaceShip {
-    id: Option<sql::Thing>,
+    id: sql::Thing,
     name: String,
     created: DateTime<Utc>,
 }

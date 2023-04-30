@@ -93,7 +93,7 @@ pub struct Bookk {
 }
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
-        id: Company::create_id2("lowo"),
+        id: Company::create_id("lowo"),
         nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
         name: "Mana Inc.".to_string(),
         founded: "1967-05-03".into(),
@@ -303,7 +303,8 @@ async fn geom_collection() -> surrealdb::Result<()> {
 async fn insert_many() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Some("company:1".try_into().unwrap()),
+            // id: Some("company:1".try_into().unwrap()),
+            id: Company::create_id("company:1").to_thing(),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
