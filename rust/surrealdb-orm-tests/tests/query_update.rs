@@ -886,3 +886,166 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     //
     Ok(())
 }
+
+#[tokio::test]
+async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let weapon_old = Weapon {
+        id: Some(WeaponOld::create_id("original_id")),
+        name: "Laser".to_string(),
+        created: Utc::now(),
+        strength: 20,
+        ..Default::default()
+    };
+    // Create weapon
+    let old_weapon = create(weapon_old).get_one(db.clone()).await?;
+    assert_eq!(old_weapon.name, "Laser");
+    assert_eq!(
+        old_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(old_weapon.strength, 20);
+    assert!(old_weapon.id.as_ref().is_some());
+    assert_eq!(
+        serde_json::to_value(&old_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+
+    let selected_weapon: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .where_(Weapon::schema().id.equal(old_weapon.id.to_owned().unwrap()))
+        .return_one(db.clone())
+        .await
+        .unwrap();
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(
+        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+
+    let weaponold_schema::WeaponOld {
+        ref bunchOfOtherFields,
+        ref nice,
+        ..
+    } = WeaponOld::schema();
+    let selected_weapon = select(All)
+        .from(WeaponOld::table_name())
+        .where_(Weapon::schema().id.equal(old_weapon.id.to_owned().unwrap()))
+        .return_one::<WeaponOld>(db.clone())
+        .await;
+
+    assert!(
+        selected_weapon.unwrap_err().to_string().contains(
+        "Unable to parse data returned from the database. \
+            Check that all fields are complete and the types are able to deserialize surrealdb data types properly.")
+    );
+
+    // bunchOfOtherFields is not string
+    let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id.unwrap())
+        .patch(patch(nice).add(true))
+        .patch(patch(bunchOfOtherFields).add("test"))
+        .return_one(db.clone())
+        .await;
+    assert!(
+        updated_weapon
+            .as_ref()
+            .unwrap_err()
+            .to_string()
+            .contains("expected i32"),
+        "Wrong type"
+    );
+    assert!(
+        updated_weapon.as_ref().unwrap_err().to_string().contains(
+            "Unable to parse data returned from the database. \
+            Check that all fields are complete and the types are able to deserialize surrealdb data types properly."
+        ),
+        "Should not be able to deserialize with old struct"
+    );
+
+    let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id.unwrap())
+        .patch(patch(nice).add(true))
+        .patch(patch(bunchOfOtherFields).add(45))
+        .return_one(db.clone())
+        .await?;
+
+    let selected_weapon: Option<WeaponOld> = select(All)
+        .from(WeaponOld::table_name())
+        .where_(
+            WeaponOld::schema()
+                .id
+                .equal(old_weapon.id.to_owned().unwrap()),
+        )
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+
+    // Only name should be updated
+    assert_eq!(updated_weapon.as_ref().unwrap().bunch_of_other_fields, 45);
+    assert_eq!(updated_weapon.as_ref().unwrap().nice, true);
+    assert_eq!(updated_weapon.as_ref().unwrap().strength, 20);
+    assert_eq!(updated_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(
+        updated_weapon
+            .as_ref()
+            .unwrap()
+            .id
+            .as_ref()
+            .unwrap()
+            .to_string(),
+        "weapon:original_id"
+    );
+
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(selected_weapon.as_ref().unwrap().nice, true);
+    assert_eq!(selected_weapon.as_ref().unwrap().bunch_of_other_fields, 45);
+    assert_eq!(
+        serde_json::to_value(&updated_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+    assert_eq!(
+        serde_json::to_value(&selected_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+    assert_ne!(
+        selected_weapon.unwrap().id.unwrap().to_string(),
+        "weapon:lowo"
+    );
+    //
+    Ok(())
+}
