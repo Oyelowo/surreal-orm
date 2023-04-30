@@ -166,7 +166,7 @@ impl<T: SurrealdbModel> From<SurrealId<T>> for NodeClause {
 
 impl<T: SurrealdbModel> From<&SurrealId<T>> for NodeClause {
     fn from(value: &SurrealId<T>) -> Self {
-        Self(Clause::new(ClauseType::Id(value.clone())))
+        Self(Clause::new(ClauseType::Id(value.clone().to_thing())))
     }
 }
 
@@ -681,7 +681,7 @@ mod test {
 
     #[test]
     fn test_display_clause_with_id_only_wors_with_node() {
-        let id_clause = NodeClause::from(SurrealId::try_from("student:5").unwrap());
+        let id_clause = NodeClause::from(sql::Thing::from(("student".to_string(), 5.to_string())));
         assert_eq!(id_clause.fine_tune_params(), "$_param_00000001");
         assert_eq!(id_clause.to_raw().build(), "student:5");
     }

@@ -25,7 +25,7 @@ use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
-use surrealdb_orm::SurrealId2;
+use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealdbModel;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
@@ -47,7 +47,7 @@ struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    id: SurrealId2<Company>,
+    id: SurrealId<Company>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -60,7 +60,7 @@ struct Company {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
-    id: SurrealId2<GenZCompany>,
+    id: SurrealId<GenZCompany>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -73,7 +73,7 @@ struct GenZCompany {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    id: SurrealId2<Book>,
+    id: SurrealId<Book>,
     // #[serde(default = "default_resource")]
     title: String,
     content: String,

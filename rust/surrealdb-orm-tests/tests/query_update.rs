@@ -26,7 +26,7 @@ fn create_test_alien(age: u8, name: String) -> Alien {
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     Alien {
-        id: SurrealId2::default(),
+        id: SurrealId::default(),
         name,
         age,
         created: Utc::now(),
