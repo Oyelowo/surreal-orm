@@ -160,9 +160,7 @@ fn define_age() -> DefineFieldStatement {
     // define_fn = "define_student"
 )]
 pub struct Student {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId2<Student>,
 
     first_name: String,
     last_name: String,
@@ -233,9 +231,7 @@ pub struct Student {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    #[builder(default, setter(strip_option))]
-    #[serde(skip_serializing)]
-    pub id: Option<SurrealId>,
+    pub id: SurrealId2<Writes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -252,9 +248,7 @@ pub type StudentWritesBlog = Writes<Student, Blog>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "likes")]
 pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
-    #[builder(default, setter(strip_option))]
-    #[serde(skip_serializing)]
-    pub id: Option<SurrealId>,
+    pub id: SurrealId2<Likes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -268,9 +262,7 @@ pub type StudentLiksBook = Likes<Student, Book>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId2<Book>,
     title: String,
     content: String,
 }
@@ -279,9 +271,7 @@ pub struct Book {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "blog")]
 pub struct Blog {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId2<Blog>,
     title: String,
     content: String,
 }

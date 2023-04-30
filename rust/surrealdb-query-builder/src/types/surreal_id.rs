@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::{self, thing, Id, Thing, Uuid};
@@ -9,6 +9,22 @@ use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SurrealId(sql::Thing);
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SurrealId2<T: SurrealdbModel>(sql::Thing, PhantomData<T>);
+
+impl<T: SurrealdbModel> From<SurrealId2<T>> for sql::Thing {
+    fn from(value: SurrealId2<T>) -> Self {
+        value.0
+    }
+}
+
+impl<T: SurrealdbModel> Default for SurrealId2<T> {
+    fn default() -> Self {
+        // Self(Default::default(), Default::default())
+        todo!()
+    }
+}
+
 impl SurrealId {
     /// Create a new SurrealId from a string
     pub fn new<T: SurrealdbModel>(id: impl Into<Id>) -> Self {
@@ -17,6 +33,14 @@ impl SurrealId {
 
     /// Create a new SurrealId from a uuid v4
     pub fn new_uuid<T: SurrealdbModel>() -> Self {
+        Self(Thing::from((
+            T::table_name().to_string(),
+            Uuid::new_v4().to_string(),
+        )))
+    }
+
+    /// Generates default id
+    pub fn default_id<T: SurrealdbModel>() -> Self {
         Self(Thing::from((
             T::table_name().to_string(),
             Uuid::new_v4().to_string(),
