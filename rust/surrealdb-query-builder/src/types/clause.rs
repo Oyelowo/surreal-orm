@@ -10,7 +10,7 @@ use std::ops::Deref;
 use crate::{
     statements::{LetStatement, SelectStatement},
     Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
-    Param, Parametric, Table,
+    Param, Parametric, SurrealdbModel, Table,
 };
 
 use super::{Filter, NumberLike, SurrealId};
@@ -40,7 +40,7 @@ pub enum ClauseType {
     /// Stands for a full Select statement
     SelectStatement(SelectStatement),
     /// Stands for a field e.g `person:oyelowo`. This is useful in a RELATE query.
-    Id(SurrealId),
+    Id(sql::Thing),
     /// Stands for a parameter e.g `$name`
     Param(Param),
     /// Used for filtering on multiple edges
@@ -158,14 +158,14 @@ impl NodeClause {
     }
 }
 
-impl From<SurrealId> for NodeClause {
-    fn from(value: SurrealId) -> Self {
+impl<T: SurrealdbModel> From<SurrealId<T>> for NodeClause {
+    fn from(value: SurrealId<T>) -> Self {
         Self(Clause::new(ClauseType::Id(value.clone())))
     }
 }
 
-impl From<&SurrealId> for NodeClause {
-    fn from(value: &SurrealId) -> Self {
+impl<T: SurrealdbModel> From<&SurrealId<T>> for NodeClause {
+    fn from(value: &SurrealId<T>) -> Self {
         Self(Clause::new(ClauseType::Id(value.clone())))
     }
 }
