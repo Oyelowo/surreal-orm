@@ -168,6 +168,8 @@ impl Erroneous for DefineEventStatement {}
 
 #[cfg(test)]
 mod tests {
+    use surrealdb::sql;
+
     use super::*;
     use crate::{statements::select, *};
 
@@ -175,7 +177,7 @@ mod tests {
     fn test_define_event_statement_state_machine() {
         let age = Field::new("age");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
         let user_table = Table::new("user");
         let email_event = Event::new("email");
 

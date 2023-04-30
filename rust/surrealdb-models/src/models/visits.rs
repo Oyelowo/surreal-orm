@@ -1,8 +1,7 @@
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql;
-use surrealdb_orm::{LinkOne, SurrealId, SurrealId, SurrealdbEdge, SurrealdbNode};
+use surrealdb_orm::{LinkOne, SurrealId, SurrealdbEdge, SurrealdbNode};
 
 use crate::{Alien, Planet};
 

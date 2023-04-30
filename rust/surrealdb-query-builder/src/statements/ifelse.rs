@@ -312,6 +312,7 @@ impl fmt::Display for End {
 #[cfg(test)]
 mod tests {
     use insta::assert_display_snapshot;
+    use surrealdb::sql;
 
     use crate::{
         statements::{order, select},
@@ -472,8 +473,8 @@ mod tests {
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
+        let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
 
         let statement1 = select(All)
             .from(fake_id)

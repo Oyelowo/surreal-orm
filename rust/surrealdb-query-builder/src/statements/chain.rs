@@ -127,15 +127,16 @@ mod tests {
     };
     use insta::assert_display_snapshot;
     use select::order;
+    use surrealdb::sql;
 
     #[test]
     fn test_chaining() {
         let age = Field::new("age");
         let country = Field::new("country");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
-        let fake_id3 = SurrealId::try_from("user:4").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
+        let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
+        let fake_id3 = sql::Thing::from(("user".to_string(), "4".to_string()));
 
         let statement1 = select(All)
             .from(fake_id)

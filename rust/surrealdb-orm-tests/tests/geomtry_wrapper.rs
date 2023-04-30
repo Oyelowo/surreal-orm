@@ -36,7 +36,7 @@ use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
     All, Geometry, Operatable, Parametric, ReturnableDefault, ReturnableStandard, Runnable,
-    SurrealId, SurrealdbNode,
+    SurrealdbNode,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

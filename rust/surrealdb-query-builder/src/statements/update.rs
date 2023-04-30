@@ -367,13 +367,13 @@ impl From<sql::Thing> for TargettablesForUpdate {
 
 impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForUpdate {
     fn from(value: &SurrealId<T>) -> Self {
-        Self::SurrealId(value.to_owned())
+        Self::SurrealId(value.to_owned().to_thing())
     }
 }
 
 impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
     fn from(value: SurrealId<T>) -> Self {
-        Self::SurrealId(value)
+        Self::SurrealId(value.to_thing())
     }
 }
 
