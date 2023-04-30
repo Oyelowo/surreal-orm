@@ -13,7 +13,7 @@ use crate::{AlienVisitsPlanet, Planet, SpaceShip, Weapon};
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<sql::Thing>,
+    pub id: sql::Thing,
     pub name: String,
     pub age: u8,
     pub created: DateTime<Utc>,

@@ -96,7 +96,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     /// }
     fn aliases() -> Self::Aliases;
     /// returns the key of the node aka id field
-    fn get_key<T: From<Thing>>(self) -> Option<T>;
+    fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the node
     fn get_table_name() -> Table;
     /// Useful in relate statement for attaching id or statement to a node
@@ -155,7 +155,7 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     /// returns the schema of the edge for generating graph strings e.g
     fn schema() -> Self::Schema;
     /// returns the key of the edge aka id field
-    fn get_key<T: From<Thing>>(self) -> Option<T>;
+    fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the edge
     fn get_table_name() -> Table;
 }

@@ -146,8 +146,8 @@ impl ToTokens for EdgeToken {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn get_key<T: From<#crate_name::RecordId>>(self) -> ::std::option::Option<T>{
-                        let record_id = self.id.map(|id| #crate_name::RecordId::from(id).into());
+                    fn get_id<T: From<#crate_name::RecordId>>(self) -> T {
+                        let record_id = #crate_name::RecordId::from(self.id).into();
                         record_id
                     }
                     

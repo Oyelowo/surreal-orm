@@ -32,11 +32,8 @@ where
     ///
     /// Panics if .
     pub fn from_model(model: impl SurrealdbNode) -> Self {
-        let x = model.get_key::<SurrealId>();
-        Self::Id(
-            x.expect("Id not found. Make sure Id exists for this model")
-                .to_owned(),
-        )
+        let id = model.get_id::<SurrealId>();
+        Self::Id(id)
     }
 
     /// returns the id of the foreign node if it exists
@@ -108,15 +105,9 @@ macro_rules! impl_from_model_for_ref_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
-                let x = model.get_key::<SurrealId>();
-                let xx = match x {
-                    Some(id) => {
-                        let bb = id.clone();
-                        Reference::Id(bb)
-                    }
-                    None => Reference::Null,
-                };
-                Self(xx.into())
+                let id = model.get_id::<SurrealId>();
+                let reference = Reference::Id(id.clone());
+                Self(reference.into())
             }
         }
 
@@ -124,11 +115,9 @@ macro_rules! impl_from_model_for_ref_type {
             for $reference_type
         {
             fn from(model: &$surrealdb_node_generics) -> Self {
-                let x = model.clone().get_key::<SurrealId>();
-                match x {
-                    Some(x) => Self(Reference::Id(x.to_owned()).into()),
-                    None => Self(Reference::Null.into()),
-                }
+                let id = model.clone().get_id::<SurrealId>();
+                let reference = Reference::Id(id.to_owned());
+                Self(reference.into())
             }
         }
     };
@@ -139,15 +128,8 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
         let xx = model_vec
             .into_iter()
             .map(|m| {
-                let x = m.get_key::<SurrealId>();
-                let xx = match x {
-                    Some(id) => {
-                        let bb = id.clone();
-                        Reference::Id(bb)
-                    }
-                    None => Reference::Null,
-                };
-                xx
+                let id = m.get_id::<SurrealId>();
+                Reference::Id(id.clone())
             })
             .collect::<Vec<Reference<V>>>();
 
