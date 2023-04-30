@@ -72,25 +72,13 @@ impl<T: SurrealdbModel> Erroneous for SurrealId<T> {
     }
 }
 
-impl<T: SurrealdbModel> ::std::fmt::Display for SurrealId<T> {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
 impl<T: SurrealdbModel> TryFrom<&str> for SurrealId<T> {
     type Error = SurrealdbOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         thing(&value.to_string())
-            .map(SurrealId)
+            .map(|v| SurrealId(v, PhantomData))
             .map_err(|e| SurrealdbOrmError::InvalidId(e.into()))
-    }
-}
-
-impl<T: SurrealdbModel> From<SurrealId<T>> for sql::Thing {
-    fn from(value: SurrealId<T>) -> Self {
-        value.0
     }
 }
 
@@ -112,7 +100,9 @@ mod tests {
     use crate::{Field, Table};
     use surrealdb::sql::Uuid;
 
+    #[derive(Debug, Clone, PartialEq, Eq)]
     struct TestUser;
+    type TestUserId = SurrealId<TestUser>;
     impl SurrealdbModel for TestUser {
         fn table_name() -> Table {
             "user".into()
@@ -182,19 +172,19 @@ mod tests {
 
     #[test]
     fn test_create_surreal_id() {
-        let id = SurrealId::new::<TestUser>(1);
+        let id = TestUserId::new(1);
         assert_eq!(id.to_string(), "user:1");
     }
 
     #[test]
     fn test_create_surreal_id_with_string() {
-        let id = SurrealId::new::<TestUser>("oyelowo");
+        let id = TestUserId::new("oyelowo");
         assert_eq!(id.to_string(), "user:oyelowo");
     }
 
     #[test]
     fn test_create_surreal_id_with_uuid() {
-        let id = SurrealId::new::<TestUser>(Uuid::default());
+        let id = TestUserId::new(Uuid::default());
         assert_eq!(id.to_string().contains("user:"), true);
         assert_eq!(
             id.to_string(),
@@ -204,32 +194,32 @@ mod tests {
 
     #[test]
     fn test_create_uuid() {
-        let id = SurrealId::new_uuid::<TestUser>();
+        let id = TestUserId::new_uuid();
         assert_eq!(id.to_string().contains("user:"), true);
         assert_eq!(id.to_string().len(), 49);
     }
 
     #[test]
     fn test_surreal_id() {
-        let id = SurrealId::try_from("table:1").unwrap();
+        let id = TestUserId::try_from("table:1").unwrap();
         assert_eq!(id.to_string(), "table:1");
     }
 
     #[test]
     fn test_surreal_id_from_string() {
-        let id = SurrealId::try_from("table:oyelowo").unwrap();
+        let id = TestUserId::try_from("table:oyelowo").unwrap();
         assert_eq!(id.to_string(), "table:oyelowo");
     }
 
     #[test]
     fn test_surreal_id_from_number() {
-        let id = SurrealId::try_from("table:1").unwrap();
+        let id = TestUserId::try_from("table:1").unwrap();
         assert_eq!(id.to_string(), "table:1");
     }
 
     #[test]
     fn test_surreal_id_from_str_err() {
-        let id = SurrealId::try_from("table1").unwrap_err();
+        let id = TestUserId::try_from("table1").unwrap_err();
         assert_eq!(
             id.to_string(),
             "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -239,7 +229,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err2() {
-        let id = SurrealId::try_from("table:").unwrap_err();
+        let id = TestUserId::try_from("table:").unwrap_err();
         assert_eq!(
             id.to_string(),
             "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -249,7 +239,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err3() {
-        let id = SurrealId::try_from("table:1:2").unwrap_err();
+        let id = TestUserId::try_from("table:1:2").unwrap_err();
         assert_eq!(
             id.to_string(),
             "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -259,7 +249,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err4() {
-        let id = SurrealId::try_from("table:1:2:3").unwrap_err();
+        let id = TestUserId::try_from("table:1:2:3").unwrap_err();
         assert_eq!(
             id.to_string(),
             "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
