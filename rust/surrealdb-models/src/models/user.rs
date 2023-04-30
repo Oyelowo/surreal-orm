@@ -2,14 +2,14 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SurrealId2, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, SurrealId, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "user")]
 pub struct User {
-    pub id: SurrealId2<User>,
+    pub id: SurrealId<User>,
     pub name: String,
     pub created: DateTime<Utc>,
     pub company: String,
@@ -20,7 +20,7 @@ pub struct User {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "like")]
 pub struct Like<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId2<Like<In, Out>>,
+    pub id: SurrealId<Like<In, Out>>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
@@ -34,7 +34,7 @@ pub type CompanyLikeUser = Like<Company, User>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 pub struct Company {
-    pub id: SurrealId2<Company>,
+    pub id: SurrealId<Company>,
     pub name: String,
     #[surrealdb(link_many = "User")]
     pub users: LinkMany<User>,

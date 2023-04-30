@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::DataUpdater;
-use surrealdb_orm::SurrealId2;
+use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealdbNode;
 
 // Weapon
@@ -10,7 +10,7 @@ use surrealdb_orm::SurrealdbNode;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
-    pub id: SurrealId2<Weapon>,
+    pub id: SurrealId<Weapon>,
     pub name: String,
     pub strength: u64,
     pub created: DateTime<Utc>,
@@ -20,7 +20,7 @@ pub struct Weapon {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon", relax_table_name)]
 pub struct WeaponOld {
-    pub id: SurrealId2<WeaponOld>,
+    pub id: SurrealId<WeaponOld>,
     pub name: String,
     pub strength: u64,
     pub nice: bool,

@@ -160,7 +160,7 @@ fn define_age() -> DefineFieldStatement {
     // define_fn = "define_student"
 )]
 pub struct Student {
-    id: SurrealId2<Student>,
+    id: SurrealId<Student>,
 
     first_name: String,
     last_name: String,
@@ -231,7 +231,7 @@ pub struct Student {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId2<Writes<In, Out>>,
+    pub id: SurrealId<Writes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -248,7 +248,7 @@ pub type StudentWritesBlog = Writes<Student, Blog>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "likes")]
 pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId2<Likes<In, Out>>,
+    pub id: SurrealId<Likes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -262,7 +262,7 @@ pub type StudentLiksBook = Likes<Student, Book>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    id: SurrealId2<Book>,
+    id: SurrealId<Book>,
     title: String,
     content: String,
 }
@@ -271,7 +271,7 @@ pub struct Book {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "blog")]
 pub struct Blog {
-    id: SurrealId2<Blog>,
+    id: SurrealId<Blog>,
     title: String,
     content: String,
 }

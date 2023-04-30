@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, Field, NodeClause, Raw, SurrealId2, Table};
+use crate::{Alias, Field, NodeClause, Raw, SurrealId, Table};
 use serde::Serialize;
 use surrealdb::sql::{Id, Thing, Uuid};
 
@@ -45,10 +45,10 @@ pub trait SurrealdbModel: Sized {
     }
 
     ///
-    fn create_id2(id: impl Into<Id>) -> SurrealId2<Self> {
+    fn create_id2(id: impl Into<Id>) -> SurrealId<Self> {
         // Thing::from((Self::table_name().to_string(), id.into()))
         // SurrealId2::cr
-        SurrealId2::new(id).into()
+        SurrealId::new(id).into()
     }
 
     /// Create a new surreal Thing/compound id from a Uuid
