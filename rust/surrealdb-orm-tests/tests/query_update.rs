@@ -7,6 +7,7 @@ use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 use surrealdb_models::weapon_schema;
+use surrealdb_models::WeaponOld;
 use surrealdb_models::WeaponUpdater;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
@@ -603,6 +604,138 @@ async fn test_update_single_id_merge() -> SurrealdbOrmResult<()> {
     // Id field must not be updated even if provided to an update statement.
     assert_ne!(
         get_selected_weapon().await.unwrap().id.unwrap().to_string(),
+        "weapon:lowo"
+    );
+    //
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    let weapon_old = WeaponOld {
+        id: Some(WeaponOld::create_id("original_id")),
+        name: "Laser".to_string(),
+        created: Utc::now(),
+        strength: 20,
+        bunch_of_other_fields: 34,
+        nice: false,
+        ..Default::default()
+    };
+    // Create old weapon
+    let old_weapon = create(weapon_old).get_one(db.clone()).await?;
+    assert_eq!(old_weapon.name, "Laser");
+    assert_eq!(
+        old_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(old_weapon.strength, 20);
+    assert!(old_weapon.id.as_ref().is_some());
+    assert_eq!(
+        serde_json::to_value(&old_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+
+    let selected_weapon: Option<WeaponOld> = select(All)
+        .from(WeaponOld::table_name())
+        .where_(
+            WeaponOld::schema()
+                .id
+                .equal(old_weapon.id.to_owned().unwrap()),
+        )
+        .return_one(db.clone())
+        .await
+        .unwrap();
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(
+        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+
+    // Will replace the whole weapon.
+    let weapon_to_update_with_new_fields = Weapon {
+        id: Some(Weapon::create_id("original_id")),
+        name: "Oyelowo".to_string(),
+        created: Utc::now(),
+        strength: 823,
+        ..Default::default()
+    };
+
+    // Fully replace weapon table with completely new object and data. This will remove all fields
+    // that are not present in the new object. This is a destructive operation.
+    let ref updated_weapon = update::<Weapon>(old_weapon.clone().id.unwrap())
+        .replace(weapon_to_update_with_new_fields)
+        .return_one(db.clone())
+        .await?;
+
+    let selected_weapon: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .where_(Weapon::schema().id.equal(old_weapon.id.to_owned().unwrap()))
+        .return_one(db.clone())
+        .await
+        .unwrap();
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Oyelowo");
+
+    // Only name should be updated
+    assert_eq!(updated_weapon.as_ref().unwrap().strength, 823);
+    assert_eq!(updated_weapon.as_ref().unwrap().name, "Oyelowo");
+    assert_eq!(
+        updated_weapon
+            .as_ref()
+            .unwrap()
+            .id
+            .as_ref()
+            .unwrap()
+            .to_string(),
+        "weapon:original_id"
+    );
+
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Oyelowo");
+    assert_eq!(
+        serde_json::to_value(&updated_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+    assert_eq!(
+        serde_json::to_value(&selected_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+    assert_ne!(
+        selected_weapon.unwrap().id.unwrap().to_string(),
         "weapon:lowo"
     );
     //

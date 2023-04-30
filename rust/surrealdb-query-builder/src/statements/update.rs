@@ -406,6 +406,9 @@ where
         self
     }
 
+    /// Caution!
+    /// Fully replaces weapon table with completely new object and data. This will remove all fields
+    /// that are not present in the new object. This is a destructive operation.
     pub fn replace(mut self, merge: impl Serialize) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
