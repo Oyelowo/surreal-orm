@@ -193,6 +193,12 @@ impl Buildable for PatchOp {
     }
 }
 
+impl From<PatchOp> for Vec<PatchOp> {
+    fn from(patch_op: PatchOp) -> Self {
+        vec![patch_op]
+    }
+}
+
 impl Parametric for PatchOp {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()

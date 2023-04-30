@@ -7,10 +7,12 @@ use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 use surrealdb_models::weapon_schema;
+use surrealdb_models::weaponold_schema;
 use surrealdb_models::WeaponOld;
 use surrealdb_models::WeaponUpdater;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
+use surrealdb_orm::statements::patch;
 use surrealdb_orm::statements::update;
 use surrealdb_orm::{
     statements::{create, select},
@@ -716,6 +718,149 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
     );
 
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Oyelowo");
+    assert_eq!(
+        serde_json::to_value(&updated_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+    assert_eq!(
+        serde_json::to_value(&selected_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec!["id", "name", "strength", "created"]
+    );
+    assert_ne!(
+        selected_weapon.unwrap().id.unwrap().to_string(),
+        "weapon:lowo"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    let weapon_old = WeaponOld {
+        id: Some(WeaponOld::create_id("original_id")),
+        name: "Laser".to_string(),
+        created: Utc::now(),
+        strength: 20,
+        bunch_of_other_fields: 34,
+        nice: false,
+        ..Default::default()
+    };
+    // Create old weapon
+    let old_weapon = create(weapon_old).get_one(db.clone()).await?;
+    assert_eq!(old_weapon.name, "Laser");
+    assert_eq!(
+        old_weapon.id.as_ref().unwrap().to_string(),
+        "weapon:original_id"
+    );
+    assert_eq!(old_weapon.strength, 20);
+    assert!(old_weapon.id.as_ref().is_some());
+    assert_eq!(
+        serde_json::to_value(&old_weapon)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+
+    let selected_weapon: Option<WeaponOld> = select(All)
+        .from(WeaponOld::table_name())
+        .where_(
+            WeaponOld::schema()
+                .id
+                .equal(old_weapon.id.to_owned().unwrap()),
+        )
+        .return_one(db.clone())
+        .await
+        .unwrap();
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(
+        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .collect::<Vec<&String>>(),
+        vec![
+            "id",
+            "name",
+            "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created"
+        ]
+    );
+
+    // Remove some fields from WeaponOld struct.
+    let weaponold_schema::WeaponOld {
+        ref bunchOfOtherFields,
+        ref nice,
+        ..
+    } = WeaponOld::schema();
+    // Deserializing with old struct should now cause error since there are fields missing.
+    let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id.unwrap())
+        .patch(patch(nice).remove())
+        .patch(patch(bunchOfOtherFields).remove())
+        .return_one(db.clone())
+        .await
+        .unwrap_err();
+    assert!(
+        updated_weapon_with_old.to_string().contains(
+        "Unable to parse data returned from the database. \
+            Check that all fields are complete and the types are able to deserialize surrealdb data types properly.")
+    );
+    assert!(updated_weapon_with_old
+        .to_string()
+        .contains("missing field `nice`"));
+
+    // that are not present in the new object. This is a destructive operation.
+    let ref updated_weapon = update::<Weapon>(old_weapon.clone().id.unwrap())
+        .patch(patch(nice).remove())
+        .patch(patch(bunchOfOtherFields).remove())
+        .return_one(db.clone())
+        .await?;
+
+    let selected_weapon: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .where_(Weapon::schema().id.equal(old_weapon.id.to_owned().unwrap()))
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
+
+    // Only name should be updated
+    assert_eq!(updated_weapon.as_ref().unwrap().strength, 20);
+    assert_eq!(updated_weapon.as_ref().unwrap().name, "Laser");
+    assert_eq!(
+        updated_weapon
+            .as_ref()
+            .unwrap()
+            .id
+            .as_ref()
+            .unwrap()
+            .to_string(),
+        "weapon:original_id"
+    );
+
+    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
         serde_json::to_value(&updated_weapon)
             .unwrap()
