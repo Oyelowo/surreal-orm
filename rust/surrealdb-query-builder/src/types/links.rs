@@ -257,6 +257,8 @@ macro_rules! impl_utils_for_ref_vec {
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
+// impl<V: SurrealdbNode> From<Vec<V>> for LinkMany<V> {}
+
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);
 implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);

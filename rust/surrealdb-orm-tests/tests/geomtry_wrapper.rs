@@ -82,15 +82,6 @@ pub struct Book {
 fn default_resource() -> sql::Thing {
     todo!()
 }
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "book")]
-pub struct Bookk {
-    id: sql::Thing,
-    // #[serde(default = "default_resource")]
-    title: String,
-    content: String,
-}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
         id: Company::create_id("lowo"),
@@ -303,8 +294,7 @@ async fn geom_collection() -> surrealdb::Result<()> {
 async fn insert_many() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            // id: Some("company:1".try_into().unwrap()),
-            id: Company::create_id("company:1").to_thing(),
+            id: Company::create_id("company:1"),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -320,7 +310,7 @@ async fn insert_many() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Some("company:2".try_into().unwrap()),
+            id: Company::create_id("company:2"),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -350,7 +340,7 @@ async fn insert_many() -> surrealdb::Result<()> {
 async fn insert_from_select_query() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Some("company:1".try_into().unwrap()),
+            id: Company::create_id("company:1"),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -366,7 +356,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Some("company:2".try_into().unwrap()),
+            id: Company::create_id("company:2"),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -403,35 +393,6 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     //     .unwrap();
     //
     let c = Company::schema();
-    let select_query = select(All)
-        .from(&SurrealId::try_from("company:2").unwrap())
-        .where_(c.tags.any_like("foo"))
-        .parallel();
-    // .return_one(db.clone())
-    // .await
-    // .unwrap();
-
-    dbg!(select_query.clone().get_bindings());
-    dbg!(select_query.clone().to_raw());
-    assert_eq!(
-        select_query.clone().fine_tune_params(),
-        "SELECT * FROM $_param_00000001 WHERE tags ?~ $_param_00000002 PARALLEL;"
-    );
-    // println!("BindSel {:?}", select_query.get_bindings());
-    let one_ = select_query
-        .return_one::<Company>(db.clone())
-        .await
-        .unwrap();
-    println!("SSSSSSS {:?}", one_);
-
-    println!(
-        "SSSSSSS {:?}",
-        select_query
-            .return_many::<Company>(db.clone())
-            .await
-            .unwrap()
-    );
-
     let ref select_query = select(All)
         .from(Company::get_table_name())
         .where_(c.tags.any_like("foo"))
