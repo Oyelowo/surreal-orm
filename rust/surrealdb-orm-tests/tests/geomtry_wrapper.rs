@@ -82,9 +82,18 @@ pub struct Book {
 fn default_resource() -> sql::Thing {
     todo!()
 }
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "book")]
+pub struct Bookk {
+    id: sql::Thing,
+    // #[serde(default = "default_resource")]
+    title: String,
+    content: String,
+}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
-        id: Company::create_id("lowo"),
+        id: Company::create_id2("lowo"),
         nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
         name: "Mana Inc.".to_string(),
         founded: "1967-05-03".into(),

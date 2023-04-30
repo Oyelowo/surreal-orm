@@ -15,7 +15,7 @@ use crate::{SurrealId, SurrealdbNode};
 #[serde(untagged)]
 pub enum Reference<V: SurrealdbNode> {
     /// the id of the foreign node. The defualt if foreign node is not fetched
-    Id(SurrealId),
+    Id(SurrealId<V>),
     /// the fetched value of the foreign node
     FetchedValue(V),
     /// null if foreign node does not exist
@@ -37,7 +37,7 @@ where
     }
 
     /// returns the id of the foreign node if it exists
-    pub fn get_id(&self) -> Option<&SurrealId> {
+    pub fn get_id(&self) -> Option<&SurrealId<V>> {
         match &self {
             Self::Id(v) => Some(v),
             _ => None,
@@ -223,7 +223,7 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns just the keys of the foreign field. Some links may not exist
-            pub fn keys(&self) -> Vec<Option<&SurrealId>> {
+            pub fn keys(&self) -> Vec<Option<&SurrealId<V>>> {
                 self.0
                     .iter()
                     .map(|m| match m {
@@ -235,7 +235,7 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns only the keys that exist
-            pub fn keys_truthy(&self) -> Vec<&SurrealId> {
+            pub fn keys_truthy(&self) -> Vec<&SurrealId<V>> {
                 self.0
                     .iter()
                     .filter_map(|m| match m {

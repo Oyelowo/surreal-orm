@@ -26,7 +26,7 @@ fn create_test_alien(age: u8, name: String) -> Alien {
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     Alien {
-        id: None,
+        id: SurrealId2::default(),
         name,
         age,
         created: Utc::now(),
@@ -50,8 +50,8 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
 
     let weapon = Weapon {
         name: "Laser".to_string(),
-        created: Utc::now(),
         strength: 0,
+        created: Utc::now(),
         ..Default::default()
     };
 
@@ -60,7 +60,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
     assert_eq!(created_weapon.as_ref().unwrap().strength, 0);
 
     // Increment by 5;
-    let ref id = created_weapon.unwrap().clone().id.unwrap();
+    let ref id = created_weapon.unwrap().clone().id;
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
 
     update::<Weapon>(id)
