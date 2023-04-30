@@ -67,24 +67,15 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let errors: Vec<String> = vec![];
     assert_eq!(relation.get_errors(), errors);
 
-    let result = relation.load_all_links()?.return_one(db.clone()).await?;
+    let result = relation.load_all_links()?.get_one(db.clone()).await?;
 
-    assert!(result
-        .clone()
-        .unwrap()
-        .id
-        .unwrap()
-        .to_string()
-        .starts_with("writes:"),);
+    assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().unwrap().in_.get_id().unwrap().to_string(),
+        result.clone().in_.get_id().unwrap().to_string(),
         "student:⟨1⟩"
     );
-    assert_eq!(
-        result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:⟨2⟩"
-    );
+    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
         "{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"count\":0}"
@@ -99,24 +90,15 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let errors: Vec<String> = vec![];
     assert_eq!(relation.get_errors(), errors);
 
-    let result = relation.load_all_links()?.return_one(db.clone()).await?;
+    let result = relation.load_all_links()?.get_one(db.clone()).await?;
 
-    assert!(result
-        .clone()
-        .unwrap()
-        .id
-        .unwrap()
-        .to_string()
-        .starts_with("writes:"),);
+    assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().unwrap().in_.get_id().unwrap().to_string(),
+        result.clone().in_.get_id().unwrap().to_string(),
         "student:⟨2⟩"
     );
-    assert_eq!(
-        result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:⟨1⟩"
-    );
+    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
         "{\"timeWritten\":{\"secs\":923,\"nanos\":0},\"count\":0}"
@@ -146,7 +128,6 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         .clone()
         .unwrap()
         .id
-        .unwrap()
         .to_string()
         .starts_with("writes:"));
 
@@ -210,18 +191,18 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         .collect::<Vec<_>>();
 
     let oyelowo = User {
-        id: Some(User::create_id("oyelowo")),
+        id: User::create_id("oyelowo"),
         name: "oyelowo".to_string(),
         tags: vec!["developer".to_string()],
         ..Default::default()
     };
-    create(oyelowo).return_one(db.clone()).await?;
+    create(oyelowo).return_one(db.clone()).await;
     let devs = insert(generated_developers).return_many(db.clone()).await?;
     let sample = devs.into_iter().take(2).collect::<Vec<_>>();
 
     // Create company
     let codebreather_coy = Company {
-        id: Some(Company::create_id("codebreather")),
+        id: Company::create_id("codebreather"),
         name: "codebreather".to_string(),
         users: LinkMany::from(sample),
         ..Default::default()
@@ -235,7 +216,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     let company_schema::Company { users, .. } = Company::schema();
 
     // select users from company
-    let from_statement = select_value(users).from(codebreather.id.unwrap());
+    let from_statement = select_value(users).from(codebreather.id);
     // select devs
     let devs_statement = select(All)
         .from(User::table_name())
