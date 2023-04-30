@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, ops::Deref};
+use std::{fmt::Display, marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::{self, thing, Id, Thing, Uuid};
@@ -7,48 +7,58 @@ use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
 /// Wrapper around surrealdb::sql::Thing to extend its capabilities
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct SurrealId(sql::Thing);
+pub struct SurrealId<T: SurrealdbModel>(sql::Thing, PhantomData<T>);
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct SurrealId2<T: SurrealdbModel>(sql::Thing, PhantomData<T>);
+impl<T: SurrealdbModel> Display for SurrealId<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
 
-impl<T: SurrealdbModel> From<SurrealId2<T>> for sql::Thing {
-    fn from(value: SurrealId2<T>) -> Self {
+impl<T: SurrealdbModel> SurrealId<T> {
+    /// Create a new SurrealId from a string
+    pub fn new(id: impl Into<Id>) -> Self {
+        Self(
+            Thing::from((T::table_name().to_string(), id.into())),
+            PhantomData,
+        )
+    }
+
+    pub fn new_uuid() -> Self {
+        Self(
+            Thing::from((T::table_name().to_string(), Uuid::new_v4().to_string())),
+            PhantomData,
+        )
+    }
+
+    /// Generates default id
+    pub fn default_id() -> Self {
+        Self(
+            Thing::from((T::table_name().to_string(), Uuid::new_v4().to_string())),
+            PhantomData,
+        )
+    }
+
+    pub fn to_thing(&self) -> Thing {
+        self.0.clone()
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealId<T>> for sql::Thing {
+    fn from(value: SurrealId<T>) -> Self {
         value.0
     }
 }
 
-impl<T: SurrealdbModel> Default for SurrealId2<T> {
+impl<T: SurrealdbModel> Default for SurrealId<T> {
     fn default() -> Self {
         // Self(Default::default(), Default::default())
-        todo!()
+        // todo!()
+        Self::default_id()
     }
 }
 
-impl SurrealId {
-    /// Create a new SurrealId from a string
-    pub fn new<T: SurrealdbModel>(id: impl Into<Id>) -> Self {
-        Self(Thing::from((T::table_name().to_string(), id.into())))
-    }
-
-    /// Create a new SurrealId from a uuid v4
-    pub fn new_uuid<T: SurrealdbModel>() -> Self {
-        Self(Thing::from((
-            T::table_name().to_string(),
-            Uuid::new_v4().to_string(),
-        )))
-    }
-
-    /// Generates default id
-    pub fn default_id<T: SurrealdbModel>() -> Self {
-        Self(Thing::from((
-            T::table_name().to_string(),
-            Uuid::new_v4().to_string(),
-        )))
-    }
-}
-
-impl Deref for SurrealId {
+impl<T: SurrealdbModel> Deref for SurrealId<T> {
     type Target = sql::Thing;
 
     fn deref(&self) -> &Self::Target {
@@ -56,19 +66,19 @@ impl Deref for SurrealId {
     }
 }
 
-impl Erroneous for SurrealId {
+impl<T: SurrealdbModel> Erroneous for SurrealId<T> {
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
 
-impl ::std::fmt::Display for SurrealId {
+impl<T: SurrealdbModel> ::std::fmt::Display for SurrealId<T> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl TryFrom<&str> for SurrealId {
+impl<T: SurrealdbModel> TryFrom<&str> for SurrealId<T> {
     type Error = SurrealdbOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -78,19 +88,19 @@ impl TryFrom<&str> for SurrealId {
     }
 }
 
-impl From<SurrealId> for sql::Thing {
-    fn from(value: SurrealId) -> Self {
+impl<T: SurrealdbModel> From<SurrealId<T>> for sql::Thing {
+    fn from(value: SurrealId<T>) -> Self {
         value.0
     }
 }
 
-impl From<sql::Thing> for SurrealId {
+impl<T: SurrealdbModel> From<sql::Thing> for SurrealId<T> {
     fn from(value: sql::Thing) -> Self {
-        Self(value)
+        Self(value, PhantomData)
     }
 }
 
-impl Into<sql::Value> for SurrealId {
+impl<T: SurrealdbModel> Into<sql::Value> for SurrealId<T> {
     fn into(self) -> sql::Value {
         self.0.into()
     }

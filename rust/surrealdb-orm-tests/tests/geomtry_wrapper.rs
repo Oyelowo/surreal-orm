@@ -25,6 +25,8 @@ use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
+use surrealdb_orm::SurrealId2;
+use surrealdb_orm::SurrealdbModel;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
@@ -45,9 +47,7 @@ struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId2<Company>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -60,9 +60,7 @@ struct Company {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId2<GenZCompany>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -75,15 +73,18 @@ struct GenZCompany {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    id: Option<SurrealId>,
+    id: SurrealId2<Book>,
+    // #[serde(default = "default_resource")]
     title: String,
     content: String,
 }
 
+fn default_resource() -> sql::Thing {
+    todo!()
+}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
-        id: Some(RecordId::from(("company", "lowo")).into()),
+        id: Company::create_id("lowo"),
         nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
         name: "Mana Inc.".to_string(),
         founded: "1967-05-03".into(),

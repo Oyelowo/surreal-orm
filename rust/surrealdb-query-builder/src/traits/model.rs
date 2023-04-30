@@ -5,13 +5,13 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, Field, NodeClause, Raw, Table};
+use crate::{Alias, Field, NodeClause, Raw, SurrealId2, Table};
 use serde::Serialize;
 use surrealdb::sql::{Id, Thing, Uuid};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
-pub trait SurrealdbModel {
+pub trait SurrealdbModel: Sized {
     /// The name of the model/table
     fn table_name() -> Table;
 
@@ -42,6 +42,13 @@ pub trait SurrealdbModel {
     /// Create a new SurrealId from a string
     fn create_id(id: impl Into<Id>) -> Thing {
         Thing::from((Self::table_name().to_string(), id.into()))
+    }
+
+    ///
+    fn create_id2(id: impl Into<Id>) -> SurrealId2<Self> {
+        // Thing::from((Self::table_name().to_string(), id.into()))
+        // SurrealId2::cr
+        SurrealId2::new(id).into()
     }
 
     /// Create a new surreal Thing/compound id from a Uuid
