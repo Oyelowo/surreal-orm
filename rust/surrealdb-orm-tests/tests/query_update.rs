@@ -744,7 +744,7 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
 }
 
 #[tokio::test]
-async fn test_update_single_id_patch_change() -> SurrealdbOrmResult<()> {
+async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
