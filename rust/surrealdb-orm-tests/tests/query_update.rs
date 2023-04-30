@@ -478,7 +478,7 @@ async fn test_update_single_id_content() -> SurrealdbOrmResult<()> {
 }
 
 #[tokio::test]
-async fn test_update_single_id_merge_no_skip() -> SurrealdbOrmResult<()> {
+async fn test_update_single_id_merge_no_fields_skip() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
@@ -545,7 +545,7 @@ async fn test_update_single_id_merge_no_skip() -> SurrealdbOrmResult<()> {
 }
 
 #[tokio::test]
-async fn test_update_single_id_merge() -> SurrealdbOrmResult<()> {
+async fn test_update_single_id_merge_skips_fields() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
