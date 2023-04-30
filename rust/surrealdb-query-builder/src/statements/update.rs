@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
+    Conditional, DataUpdater, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -387,6 +387,7 @@ impl<T> UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
+    /// Caution! Overrides all data even with default. Use with care. You may prefer `merge` with Updater instead e.g `UserUpdater`.
     /// Specify the full record data using the CONTENT keyword. The content must be serializable
     /// and implement SurrealdbModel trait.
     pub fn content(mut self, content: T) -> Self {

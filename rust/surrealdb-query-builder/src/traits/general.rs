@@ -52,3 +52,6 @@ pub trait Conditional: Parametric + Buildable + Erroneous {
         self.build()
     }
 }
+
+/// Used for marking a struct used in UPDATE MERGE statement.
+pub trait DataUpdater {}

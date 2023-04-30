@@ -37,12 +37,26 @@ impl Parametric for Operation {
     }
 }
 
+impl Buildable for &Operation {
+    fn build(&self) -> String {
+        self.query_string.to_string()
+    }
+}
+
+impl Parametric for &Operation {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
 impl Aliasable for Operation {}
 
 impl Operatable for Operation {}
 
 impl Conditional for Operation {}
+impl Conditional for &Operation {}
 
+impl Erroneous for &Operation {}
 impl Erroneous for Operation {}
 
 /// Defines the operations that can be performed on a field or param or some other types

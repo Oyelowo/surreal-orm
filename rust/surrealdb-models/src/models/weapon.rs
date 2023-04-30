@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
+use surrealdb_orm::DataUpdater;
 use surrealdb_orm::SurrealdbNode;
 
 // Weapon
@@ -32,7 +33,7 @@ pub struct WeaponOld {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct WeaponUpdater {
+pub struct WeaponNonNullUpdater {
     // #[serde(skip_serializing)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<Option<sql::Thing>>,

@@ -1,16 +1,15 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use geo::line_string;
 use geo::point;
 use geo::polygon;
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 use surrealdb_models::weapon_schema;
 use surrealdb_models::weaponold_schema;
+use surrealdb_models::WeaponNonNullUpdater;
 use surrealdb_models::WeaponOld;
-use surrealdb_models::WeaponUpdater;
-use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
+use surrealdb_models::{alien_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
 use surrealdb_orm::statements::patch;
 use surrealdb_orm::statements::update;
@@ -18,15 +17,6 @@ use surrealdb_orm::{
     statements::{create, select},
     *,
 };
-// -- Update all records in a table
-// UPDATE person SET skills += ['breathing'];
-//
-// -- Update or create a record with a specific numeric id
-// UPDATE person:100 SET name = 'Tobie', company = 'SurrealDB', skills = ['Rust', 'Go', 'JavaScript'];
-//
-// -- Update or create a record with a specific string id
-// UPDATE person:tobie SET name = 'Tobie', company = 'SurrealDB', skills = ['Rust', 'Go', 'JavaScript'];
-//
 
 fn create_test_alien(age: u8, name: String) -> Alien {
     let point = point! {
@@ -289,9 +279,7 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     // Try append
     let ref alien_id = created_alien.as_ref().unwrap().clone().id.unwrap();
     let alien_schema::Alien {
-        ref age,
         ref tags,
-        ref ally,
         ref weapon,
         ref spaceShips,
         ..
@@ -475,10 +463,164 @@ async fn test_update_single_id_content() -> SurrealdbOrmResult<()> {
         get_selected_weapon().await.unwrap().id.unwrap().to_string(),
         "weapon:lowo"
     );
-    //
     Ok(())
 }
 
+#[tokio::test]
+async fn test_update_content_with_filter() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let generated_weapons = (0..20)
+        .map(|x| {
+            let mut weapon = Weapon {
+                name: "Laser".to_string(),
+                created: Utc::now(),
+                strength: x,
+                ..Default::default()
+            };
+            weapon.id = Some(Weapon::create_id(&format!("weapon:{}", x)));
+            weapon
+        })
+        .collect::<Vec<Weapon>>();
+    insert(generated_weapons.clone()).run(db.clone()).await?;
+
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let ref filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
+
+    let get_selected_weapons = || async {
+        let selected_weapons: Vec<Weapon> = select(All)
+            .from(Weapon::table_name())
+            .where_(filter)
+            .return_many(db.clone())
+            .await
+            .unwrap();
+        selected_weapons
+    };
+    assert_eq!(get_selected_weapons().await.len(), 10);
+
+    // Test update with CONTENT keyoword and not using updater
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+        .content(Weapon {
+            name: "Oyelowo".to_string(),
+            created: Utc::now(),
+            // strength is overriden to zero by ..Default::default() because optional fields are
+            // not skipped if None
+            ..Default::default()
+        })
+        .where_(filter)
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(update_weapons_with_filter.len(), 10);
+    assert!(
+        update_weapons_with_filter
+            .iter()
+            .all(|x| x.name.to_string() == "Oyelowo"),
+        "All not equals Oyelowo"
+    );
+    assert!(
+        update_weapons_with_filter.iter().all(|x| x.strength == 0),
+        "All strength not equals 9"
+    );
+
+    assert_eq!(get_selected_weapons().await.len(), 0);
+
+    // Test update with CONTENT keyoword and using updater and default values which sets null
+    // values for Options
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+        .content(Weapon {
+            name: "Oyelowo".to_string(),
+            created: Utc::now(),
+            // strength is overriden to zero by ..Default::default() because optional fields are
+            // not skipped if None
+            ..Default::default()
+        })
+        .where_(filter)
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(update_weapons_with_filter.len(), 0);
+    assert!(
+        update_weapons_with_filter
+            .iter()
+            .all(|x| x.name.to_string() == "Oyelowo"),
+        "All not equals Oyelowo"
+    );
+    assert!(
+        update_weapons_with_filter.iter().all(|x| x.strength == 0),
+        "All strength not equals 9"
+    );
+
+    assert_eq!(get_selected_weapons().await.len(), 0);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_update_merge_with_filter() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let generated_weapons = (0..20)
+        .map(|x| {
+            let mut weapon = Weapon {
+                name: "Laser".to_string(),
+                created: Utc::now(),
+                strength: x,
+                ..Default::default()
+            };
+            weapon.id = Some(Weapon::create_id(&format!("weapon:{}", x)));
+            weapon
+        })
+        .collect::<Vec<Weapon>>();
+    insert(generated_weapons.clone()).run(db.clone()).await?;
+
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let ref filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
+
+    let get_selected_weapons = || async {
+        let selected_weapons: Vec<Weapon> = select(All)
+            .from(Weapon::table_name())
+            .where_(filter)
+            .return_many(db.clone())
+            .await
+            .unwrap();
+        selected_weapons
+    };
+    assert_eq!(get_selected_weapons().await.len(), 10);
+
+    // Test update with MERGE keyoword and using updater
+    let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
+        .merge(WeaponNonNullUpdater {
+            name: Some("Oyelowo".to_string()),
+            strength: Some(16),
+            ..Default::default()
+        })
+        .where_(filter)
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(update_weapons_with_filter.len(), 10);
+    assert!(
+        update_weapons_with_filter
+            .iter()
+            .all(|x| x.name.to_string() == "Oyelowo"),
+        "All not equals Oyelowo"
+    );
+    assert_eq!(
+        update_weapons_with_filter
+            .iter()
+            .filter(|x| x.strength == 16)
+            .collect::<Vec<&Weapon>>()
+            .len(),
+        10,
+    );
+
+    assert_eq!(get_selected_weapons().await.len(), 0);
+
+    Ok(())
+}
 #[tokio::test]
 async fn test_update_single_id_merge_no_fields_skip() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -559,7 +701,7 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
     // Will only override the name
-    let weapon_to_update = WeaponUpdater {
+    let weapon_to_update = WeaponNonNullUpdater {
         name: Some("Oyelowo".to_string()),
         ..Default::default()
     };

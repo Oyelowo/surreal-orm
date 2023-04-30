@@ -190,6 +190,24 @@ impl Buildable for Filter {
 
 impl Conditional for Filter {}
 
+impl Conditional for &Filter {}
+impl Buildable for &Filter {
+    fn build(&self) -> String {
+        self.query_string.to_string()
+    }
+}
+impl Erroneous for &Filter {
+    fn get_errors(&self) -> Vec<String> {
+        vec![]
+    }
+}
+
+impl Parametric for &Filter {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
 impl From<Empty> for Filter {
     fn from(_value: Empty) -> Self {
         Filter::new(Empty)
