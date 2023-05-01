@@ -68,6 +68,8 @@ pub trait SurrealdbModel: Sized {
 
 /// SurrealdbNode is a trait signifying a node in the graph
 pub trait SurrealdbNode: SurrealdbModel + Serialize {
+    /// For merge update of object
+    type NonNullUpdater;
     /// The type of the schema
     type Schema;
     /// The type of the aliases
@@ -178,6 +180,8 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
 
 /// SurrealdbObject is a trait signifying a nested object in the graph
 pub trait SurrealdbObject: Serialize {
+    /// For merge update of object
+    type NonNullUpdater;
     /// The type of the schema
     type Schema;
     /// returns the schema of a nested object.

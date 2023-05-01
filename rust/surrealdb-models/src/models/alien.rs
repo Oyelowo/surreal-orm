@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealId, SurrealdbNode};
 
-use crate::{AlienVisitsPlanet, Planet, SpaceShip, Weapon};
+use crate::{AlienVisitsPlanet, Planet, Rocket, RocketNonNullUpdater, SpaceShip, Weapon};
 
 // Alien
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
@@ -42,4 +42,31 @@ pub struct Alien {
     #[surrealdb(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
     #[serde(skip_serializing, default)]
     pub planets_to_visit: Relate<Planet>,
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "alien_2")]
+pub struct Alien2 {
+    pub id: SurrealId<Self>,
+    pub name: String,
+    pub age: u8,
+    pub created: DateTime<Utc>,
+    pub life_expectancy: Duration,
+    pub line_polygon: sql::Geometry,
+    pub territory_area: sql::Geometry,
+    pub home: sql::Geometry,
+    pub tags: Vec<String>,
+
+    #[surrealdb(nest_object = "Rocket")]
+    pub weapon: Rocket,
+
+    // Again, we dont have to provide the type attribute, it can auto detect
+    // #[serde(skip_serializing)]
+    #[surrealdb(
+        link_many = "SpaceShip",
+        type = "array",
+        content_type = "record(space_ship)"
+    )]
+    pub space_ships: LinkMany<SpaceShip>,
 }
