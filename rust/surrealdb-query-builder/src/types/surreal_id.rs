@@ -135,9 +135,11 @@ impl<T: SurrealdbModel> Into<sql::Value> for SurrealId<T> {
     }
 }
 
+/// For internal testing
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TestUser;
 #[allow(dead_code)]
+/// For internal testing
 pub type TestUserId = SurrealId<TestUser>;
 impl SurrealdbModel for TestUser {
     fn table_name() -> crate::Table {
