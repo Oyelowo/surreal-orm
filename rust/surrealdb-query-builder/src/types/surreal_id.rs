@@ -1,7 +1,7 @@
 use std::{fmt::Display, marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing, Id, Thing, Uuid};
+use surrealdb::sql::{self, thing, Id, Thing};
 
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
@@ -27,6 +27,7 @@ impl<'de, T: SurrealdbModel> Deserialize<'de> for SurrealId<T> {
         Ok(SurrealId(thing, PhantomData))
     }
 }
+
 impl<T: SurrealdbModel> Display for SurrealId<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())
@@ -42,21 +43,39 @@ impl<T: SurrealdbModel> SurrealId<T> {
         )
     }
 
-    pub fn new_uuid() -> Self {
+    /// Generates a new random nano id
+    pub fn rand() -> Self {
         Self(
-            Thing::from((T::table_name().to_string(), Uuid::new_v4().to_string())),
+            Thing::from((T::table_name().to_string(), sql::Id::rand())),
             PhantomData,
         )
     }
 
-    /// Generates default id
-    pub fn default_id() -> Self {
+    /// Generates a new ulid
+    pub fn ulid() -> Self {
         Self(
-            Thing::from((T::table_name().to_string(), Uuid::new_v4().to_string())),
+            Thing::from((T::table_name().to_string(), sql::Id::ulid())),
             PhantomData,
         )
     }
 
+    /// Generates a new uuid
+    pub fn uuid() -> Self {
+        Self(
+            Thing::from((T::table_name().to_string(), sql::Id::uuid())),
+            PhantomData,
+        )
+    }
+
+    /// Generates default id as nano random id used by surrealdb
+    pub fn default() -> Self {
+        Self(
+            Thing::from((T::table_name().to_string(), sql::Id::rand())),
+            PhantomData,
+        )
+    }
+
+    /// Returns the inner `sql::Thing`
     pub fn to_thing(&self) -> Thing {
         self.0.clone()
     }
@@ -76,9 +95,7 @@ impl<T: SurrealdbModel> From<&SurrealId<T>> for sql::Thing {
 
 impl<T: SurrealdbModel> Default for SurrealId<T> {
     fn default() -> Self {
-        // Self(Default::default(), Default::default())
-        // todo!()
-        Self::default_id()
+        Self::default()
     }
 }
 
@@ -218,7 +235,7 @@ mod tests {
 
     #[test]
     fn test_create_uuid() {
-        let id = TestUserId::new_uuid();
+        let id = TestUserId::uuid();
         assert_eq!(id.to_string().contains("user:"), true);
         assert_eq!(id.to_string().len(), 49);
     }
