@@ -76,9 +76,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         "student:⟨1⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
+    let id = result.clone().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"count\":0}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":343,\"nanos\":0}},\"count\":0}}")
     );
 
     // Student 2 writes book1
@@ -99,9 +100,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         "student:⟨2⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
+    let id = result.clone().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":923,\"nanos\":0},\"count\":0}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":923,\"nanos\":0}},\"count\":0}}")
     );
 
     // Student 2 writes blog1
@@ -139,9 +141,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         result.clone().unwrap().out.get_id().unwrap().to_string(),
         "blog:⟨1⟩"
     );
+    let id = result.clone().unwrap().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":47,\"nanos\":0},\"count\":545}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":47,\"nanos\":0}},\"count\":545}}")
     );
 
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
@@ -382,11 +385,12 @@ async fn relate_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
         time_written: Duration::from_secs(343),
         ..Default::default()
     };
+    let write_id = write.id.clone();
 
     let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
-        "RELATE student:oyelowo->writes->book:kivi CONTENT { count: 0, timeWritten: { nanos: 0, secs: 343 } } ;"
+        format!("RELATE student:oyelowo->writes->book:kivi CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 343 }} }} ;")
     );
 
     // // You can use return one method and it just returns the single object
@@ -463,7 +467,7 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
                 select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
             ),
     )
-    .content(write);
+    .content(write.clone());
 
     assert_eq!(statement.get_errors().len(), 0);
     assert_eq!(statement.get_bindings().len(), 1);
@@ -471,9 +475,10 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
         statement.fine_tune_params(),
         "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT $_param_00000001 ;"
     );
+    let write_id = write.get_id::<sql::Thing>();
     assert_eq!(
         statement.to_raw().build(),
-        "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT { count: 0, timeWritten: { nanos: 0, secs: 52 } } ;"
+        format!("RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 52 }} }} ;")
     );
 
     let result = statement.return_many(db.clone()).await?;

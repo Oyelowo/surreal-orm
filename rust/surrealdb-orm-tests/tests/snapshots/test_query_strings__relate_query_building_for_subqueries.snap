@@ -1,5 +1,5 @@
 ---
 source: surrealdb-orm-tests/tests/test_query_strings.rs
-expression: replace_params(&relation.build())
+expression: relation.fine_tune_params()
 ---
-"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_00000001) CONTENT $_param_00000002 ;"
+RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_00000001) CONTENT $_param_00000002 ;

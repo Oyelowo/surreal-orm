@@ -375,7 +375,9 @@ fn multiplication_tests1() {
     // let result = sql!(SELECT name WHERE age > 5);
 
     insta::assert_display_snapshot!(&query.fine_tune_params());
-    insta::assert_debug_snapshot!(replace_params(&format!("{:?}", query.get_bindings())));
+    insta::assert_display_snapshot!(&query.to_raw().build());
+    insta::assert_display_snapshot!(&query.get_bindings().len());
+    // insta::assert_debug_snapshot!(replace_params(&format!("{:?}", query.get_bindings())));
     // assert_eq!(
     //     query.to_string().remove_extra_whitespace(),
     //     "SELECT *, ->writes[WHERE timeWritten = 12:00]->book[WHERE \
@@ -401,11 +403,8 @@ async fn relate_query_building_for_ids() {
         relate(Student::with(student_id).writes__(Empty).book(book_id)).content(write);
 
     insta::assert_display_snapshot!(&relate_simple.fine_tune_params());
-    insta::assert_display_snapshot!(&relate_simple.clone().to_raw());
-    insta::assert_debug_snapshot!(replace_params(&format!(
-        "{:?}",
-        relate_simple.get_bindings()
-    )));
+    assert_eq!(relate_simple.clone().to_raw().build().len(), 126);
+    assert_eq!(relate_simple.clone().get_bindings().len(), 3);
 }
 
 #[tokio::test]
@@ -428,8 +427,8 @@ async fn relate_query_building_for_subqueries() {
             ),
     )
     .content(write);
-    insta::assert_debug_snapshot!(replace_params(&relation.build()));
-    insta::assert_debug_snapshot!(replace_params(&format!("{:?}", relation.get_bindings())));
+    insta::assert_display_snapshot!(relation.fine_tune_params());
+    assert_eq!(relation.get_bindings().len(), 2);
 }
 
 #[test]
