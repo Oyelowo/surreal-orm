@@ -3,7 +3,7 @@ use std::time::Duration;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealdbNode};
+use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealId, SurrealdbNode};
 
 use crate::{AlienVisitsPlanet, Planet, SpaceShip, Weapon};
 
@@ -12,8 +12,7 @@ use crate::{AlienVisitsPlanet, Planet, SpaceShip, Weapon};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<sql::Thing>,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub age: u8,
     pub created: DateTime<Utc>,

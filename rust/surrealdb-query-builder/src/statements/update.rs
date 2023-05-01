@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, DataUpdater, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
+    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -220,7 +220,7 @@ impl Erroneous for PatchOp {
 /// # Examples
 /// ```
 /// # use surrealdb_query_builder as surreal_orm;
-/// use surreal_orm::statements::{patch}
+/// use surreal_orm::{*, statements::{patch}};
 /// let ref name = Field::new("name");
 /// let name_first = Field::new("name.first");
 ///
@@ -338,7 +338,7 @@ where
 
 pub enum TargettablesForUpdate {
     Table(sql::Table),
-    SurrealId(SurrealId),
+    SurrealId(sql::Thing),
 }
 
 impl From<crate::Table> for TargettablesForUpdate {
@@ -365,17 +365,23 @@ impl From<sql::Thing> for TargettablesForUpdate {
     }
 }
 
-impl From<&SurrealId> for TargettablesForUpdate {
-    fn from(value: &SurrealId) -> Self {
-        Self::SurrealId(value.to_owned())
+impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForUpdate {
+    fn from(value: &SurrealId<T>) -> Self {
+        Self::SurrealId(value.to_owned().to_thing())
     }
 }
 
-impl From<SurrealId> for TargettablesForUpdate {
-    fn from(value: SurrealId) -> Self {
-        Self::SurrealId(value)
+impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
+    fn from(value: SurrealId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
     }
 }
+
+// impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
+//     fn from(value: SurrealId<T>) -> Self {
+//         Self::SurrealId(value.to_thing().into())
+//     }
+// }
 
 impl From<sql::Table> for TargettablesForUpdate {
     fn from(value: sql::Table) -> Self {
@@ -440,7 +446,7 @@ where
     /// # Example
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
-    /// use surreal_orm::{*, statements:patch};
+    /// use surreal_orm::{*, statements::patch};
     /// // Typically, you would use the schema to get the field(e.g `User::schema().name(E).first`) but using this as an example.
     /// let name = Field::new("name.first");
     /// let patch_op = patch(name).change("Oyelowo");

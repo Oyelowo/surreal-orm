@@ -67,27 +67,19 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let errors: Vec<String> = vec![];
     assert_eq!(relation.get_errors(), errors);
 
-    let result = relation.load_all_links()?.return_one(db.clone()).await?;
+    let result = relation.load_all_links()?.get_one(db.clone()).await?;
 
-    assert!(result
-        .clone()
-        .unwrap()
-        .id
-        .unwrap()
-        .to_string()
-        .starts_with("writes:"),);
+    assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().unwrap().in_.get_id().unwrap().to_string(),
+        result.clone().in_.get_id().unwrap().to_string(),
         "student:⟨1⟩"
     );
-    assert_eq!(
-        result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:⟨2⟩"
-    );
+    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
+    let id = result.clone().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"count\":0}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":343,\"nanos\":0}},\"count\":0}}")
     );
 
     // Student 2 writes book1
@@ -99,27 +91,19 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let errors: Vec<String> = vec![];
     assert_eq!(relation.get_errors(), errors);
 
-    let result = relation.load_all_links()?.return_one(db.clone()).await?;
+    let result = relation.load_all_links()?.get_one(db.clone()).await?;
 
-    assert!(result
-        .clone()
-        .unwrap()
-        .id
-        .unwrap()
-        .to_string()
-        .starts_with("writes:"),);
+    assert!(result.clone().id.to_string().starts_with("writes:"),);
 
     assert_eq!(
-        result.clone().unwrap().in_.get_id().unwrap().to_string(),
+        result.clone().in_.get_id().unwrap().to_string(),
         "student:⟨2⟩"
     );
-    assert_eq!(
-        result.clone().unwrap().out.get_id().unwrap().to_string(),
-        "book:⟨1⟩"
-    );
+    assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
+    let id = result.clone().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":923,\"nanos\":0},\"count\":0}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":923,\"nanos\":0}},\"count\":0}}")
     );
 
     // Student 2 writes blog1
@@ -146,7 +130,6 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         .clone()
         .unwrap()
         .id
-        .unwrap()
         .to_string()
         .starts_with("writes:"));
 
@@ -158,9 +141,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         result.clone().unwrap().out.get_id().unwrap().to_string(),
         "blog:⟨1⟩"
     );
+    let id = result.clone().unwrap().id.to_string();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        "{\"timeWritten\":{\"secs\":47,\"nanos\":0},\"count\":545}"
+        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":47,\"nanos\":0}},\"count\":545}}")
     );
 
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
@@ -210,18 +194,18 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         .collect::<Vec<_>>();
 
     let oyelowo = User {
-        id: Some(User::create_id("oyelowo")),
+        id: User::create_id("oyelowo"),
         name: "oyelowo".to_string(),
         tags: vec!["developer".to_string()],
         ..Default::default()
     };
-    create(oyelowo).return_one(db.clone()).await?;
+    create(oyelowo).return_one(db.clone()).await;
     let devs = insert(generated_developers).return_many(db.clone()).await?;
     let sample = devs.into_iter().take(2).collect::<Vec<_>>();
 
     // Create company
     let codebreather_coy = Company {
-        id: Some(Company::create_id("codebreather")),
+        id: Company::create_id("codebreather"),
         name: "codebreather".to_string(),
         users: LinkMany::from(sample),
         ..Default::default()
@@ -235,7 +219,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     let company_schema::Company { users, .. } = Company::schema();
 
     // select users from company
-    let from_statement = select_value(users).from(codebreather.id.unwrap());
+    let from_statement = select_value(users).from(codebreather.id);
     // select devs
     let devs_statement = select(All)
         .from(User::table_name())
@@ -401,11 +385,12 @@ async fn relate_query() -> surrealdb_orm::SurrealdbOrmResult<()> {
         time_written: Duration::from_secs(343),
         ..Default::default()
     };
+    let write_id = write.id.clone();
 
     let relate_simple = relate(Student::with(student_id).writes__(E).book(book_id)).content(write);
     assert_eq!(
         relate_simple.to_raw().build(),
-        "RELATE student:oyelowo->writes->book:kivi CONTENT { count: 0, timeWritten: { nanos: 0, secs: 343 } } ;"
+        format!("RELATE student:oyelowo->writes->book:kivi CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 343 }} }} ;")
     );
 
     // // You can use return one method and it just returns the single object
@@ -482,7 +467,7 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
                 select(All).from(Book::get_table_name()), // .where_(Book::schema().title.like("Oyelowo")),
             ),
     )
-    .content(write);
+    .content(write.clone());
 
     assert_eq!(statement.get_errors().len(), 0);
     assert_eq!(statement.get_bindings().len(), 1);
@@ -490,9 +475,10 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
         statement.fine_tune_params(),
         "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT $_param_00000001 ;"
     );
+    let write_id = write.get_id::<sql::Thing>();
     assert_eq!(
         statement.to_raw().build(),
-        "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT { count: 0, timeWritten: { nanos: 0, secs: 52 } } ;"
+        format!("RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 52 }} }} ;")
     );
 
     let result = statement.return_many(db.clone()).await?;

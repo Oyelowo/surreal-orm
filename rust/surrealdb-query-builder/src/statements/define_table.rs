@@ -70,7 +70,7 @@ pub struct DefineTableStatement {
 /// let user = Table::from("user");
 /// let age = Field::new("age");
 /// let country = Field::new("country");
-/// let fake_id = SurrealId::try_from("user:oyedayo").unwrap();
+/// let fake_id = TestUser::create_id("oyelowo");
 /// let statement = define_table(user)
 ///     .drop()
 ///     .as_(
@@ -137,7 +137,7 @@ impl DefineTableStatement {
     /// # let user = Table::from("user");
     /// # let age = Field::new("age");
     /// # let country = Field::new("country");
-    /// # let fake_id = SurrealId::try_from("user:oyedayo").unwrap();
+    /// # let fake_id = TestUser::create_id("oyedayo");
     ///   let statement = define_table(user)
     ///     .as_(
     ///         select(All)
@@ -303,6 +303,7 @@ mod tests {
         statements::{for_, order, select},
         *,
     };
+    use surrealdb::sql;
     use CrudType::*;
 
     #[test]
@@ -345,7 +346,7 @@ mod tests {
         let user_table = Table::from("user");
         let age = Field::new("age");
         let country = Field::new("country");
-        let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+        let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
 
         let statement = define_table(user_table)
             .drop()

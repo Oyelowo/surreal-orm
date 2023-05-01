@@ -8,9 +8,7 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    traits::{Buildable, Erroneous, Parametric, Queryable},
-    types::{Event, Filter, Table},
-    BindingsList, Conditional,
+    BindingsList, Buildable, Conditional, Erroneous, Event, Filter, Parametric, Queryable, Table,
 };
 
 // DEFINE EVENT statement
@@ -52,7 +50,7 @@ use surrealdb_orm::{*, statements::{define_event, select}};
 
 # let age = Field::new("age");
 # let city = Field::new("city");
-# let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+# let fake_id = TestUser::create_id("oyelowo");
 # let user_table = Table::new("user");
 # let email_event = Event::new("email");
  let query = define_event(email_event)
@@ -168,6 +166,8 @@ impl Erroneous for DefineEventStatement {}
 
 #[cfg(test)]
 mod tests {
+    use surrealdb::sql;
+
     use super::*;
     use crate::{statements::select, *};
 
@@ -175,7 +175,7 @@ mod tests {
     fn test_define_event_statement_state_machine() {
         let age = Field::new("age");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
         let user_table = Table::new("user");
         let email_event = Event::new("email");
 

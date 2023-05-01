@@ -34,8 +34,8 @@ use surrealdb::sql;
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, Field,
-    Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId, Table, ToRaw,
-    Valuex,
+    Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId,
+    SurrealdbModel, Table, ToRaw, Valuex,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -226,8 +226,8 @@ impl Display for OrderOption {
 pub enum TargettablesForSelect {
     Table(sql::Table),
     Tables(Vec<sql::Table>),
-    SurrealId(SurrealId),
-    SurrealIds(Vec<SurrealId>),
+    SurrealId(sql::Thing),
+    SurrealIds(Vec<sql::Thing>),
     // Should already be bound
     SubQuery(SelectStatement),
     Function(Function),
@@ -313,27 +313,27 @@ impl<const N: usize> From<&[sql::Table; N]> for TargettablesForSelect {
     }
 }
 
-impl From<&SurrealId> for TargettablesForSelect {
-    fn from(value: &SurrealId) -> Self {
-        Self::SurrealId(value.to_owned())
+impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForSelect {
+    fn from(value: &SurrealId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
     }
 }
 
-impl<const N: usize> From<&[SurrealId; N]> for TargettablesForSelect {
-    fn from(value: &[SurrealId; N]) -> Self {
-        Self::SurrealIds(value.to_vec())
+impl<const N: usize, T: SurrealdbModel> From<&[SurrealId<T>; N]> for TargettablesForSelect {
+    fn from(value: &[SurrealId<T>; N]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
     }
 }
 
-impl From<Vec<&SurrealId>> for TargettablesForSelect {
-    fn from(value: Vec<&SurrealId>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
+impl<T: SurrealdbModel> From<Vec<&SurrealId<T>>> for TargettablesForSelect {
+    fn from(value: Vec<&SurrealId<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize> From<&[&SurrealId; N]> for TargettablesForSelect {
-    fn from(value: &[&SurrealId; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
+impl<const N: usize, T: SurrealdbModel> From<&[&SurrealId<T>; N]> for TargettablesForSelect {
+    fn from(value: &[&SurrealId<T>; N]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -348,15 +348,15 @@ impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
     }
 }
 
-impl From<Vec<SurrealId>> for TargettablesForSelect {
-    fn from(value: Vec<SurrealId>) -> Self {
-        Self::SurrealIds(value)
+impl<T: SurrealdbModel> From<Vec<SurrealId<T>>> for TargettablesForSelect {
+    fn from(value: Vec<SurrealId<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl From<SurrealId> for TargettablesForSelect {
-    fn from(value: SurrealId) -> Self {
-        Self::SurrealId(value)
+impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForSelect {
+    fn from(value: SurrealId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
     }
 }
 
@@ -609,8 +609,8 @@ impl Parametric for SelectStatement {
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
 /// # let city = Field::new("city");
-/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+/// # let fake_id = TestUser::create_id("oyelowo");
+/// # let fake_id2 = TestUser::create_id("oyedayo");
 ///
 ///  select(All)
 ///     .from(fake_id)
@@ -719,7 +719,7 @@ impl SelectStatement {
     /// # use surrealdb_orm::{*, statements::{order, select}};
     /// # let user = Table::new("user");
     /// # let alien = Table::new("alien");
-    /// # let user_id1 = SurrealId::try_from("user:1").unwrap();
+    /// # let user_id1 = TestUser::create_id("oyelowo");
     ///  //  Can select from a table name
     ///  select(All).from(user);
     ///
@@ -796,8 +796,8 @@ impl SelectStatement {
     /// # let age = Field::new("age");
     /// # let country = Field::new("country");
     /// # let city = Field::new("city");
-    /// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-    /// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+    /// # let fake_id = TestUser::create_id("oyelowo");
+    /// # let fake_id2 = TestUser::create_id("oyedayo");
     /// // Supports simpler where clause without `cond` helper function
     /// # let select2 = select(All)
     /// #   .from(fake_id2)
@@ -1232,7 +1232,7 @@ mod tests {
         let canadian_cities = AliasName::new("legal_age");
         let age = Field::new("age");
         let city = Field::new("city");
-        let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+        let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
         let statement = select(All)
             .from(fake_id)
             .where_(

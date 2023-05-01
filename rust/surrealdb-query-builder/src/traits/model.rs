@@ -5,13 +5,13 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, Field, NodeClause, Raw, Table};
+use crate::{Alias, Field, NodeClause, Raw, SurrealId, Table};
 use serde::Serialize;
 use surrealdb::sql::{Id, Thing, Uuid};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
-pub trait SurrealdbModel {
+pub trait SurrealdbModel: Sized {
     /// The name of the model/table
     fn table_name() -> Table;
 
@@ -40,12 +40,28 @@ pub trait SurrealdbModel {
     fn define_fields() -> Vec<Raw>;
 
     /// Create a new SurrealId from a string
-    fn create_id(id: impl Into<Id>) -> Thing {
+    fn create_thing(id: impl Into<Id>) -> Thing {
         Thing::from((Self::table_name().to_string(), id.into()))
     }
 
+    ///
+    fn create_id(id: impl Into<Id>) -> SurrealId<Self> {
+        // Thing::from((Self::table_name().to_string(), id.into()))
+        // SurrealId2::cr
+        SurrealId::new(id).into()
+    }
+
     /// Create a new surreal Thing/compound id from a Uuid
-    fn create_uuid() -> Thing {
+    fn create_uuid() -> SurrealId<Self> {
+        SurrealId::new(Thing::from((
+            Self::table_name().to_string(),
+            Uuid::new_v4().to_string(),
+        )))
+        .into()
+    }
+
+    /// Create a new surreal Thing/compound id from a Uuid
+    fn create_thing_uuid() -> Thing {
         Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
     }
 }
@@ -96,7 +112,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     /// }
     fn aliases() -> Self::Aliases;
     /// returns the key of the node aka id field
-    fn get_key<T: From<Thing>>(self) -> Option<T>;
+    fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the node
     fn get_table_name() -> Table;
     /// Useful in relate statement for attaching id or statement to a node
@@ -155,7 +171,7 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     /// returns the schema of the edge for generating graph strings e.g
     fn schema() -> Self::Schema;
     /// returns the key of the edge aka id field
-    fn get_key<T: From<Thing>>(self) -> Option<T>;
+    fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the edge
     fn get_table_name() -> Table;
 }

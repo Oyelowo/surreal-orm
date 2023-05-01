@@ -5,17 +5,17 @@
  * Licensed under the MIT license
  */
 
+use crate::SurrealdbNode;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-
-use crate::{SurrealId, SurrealdbNode};
 
 /// A reference to foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Reference<V: SurrealdbNode> {
     /// the id of the foreign node. The defualt if foreign node is not fetched
-    Id(SurrealId),
+    Id(sql::Thing),
+    // Id(SurrealId<V>),
     /// the fetched value of the foreign node
     FetchedValue(V),
     /// null if foreign node does not exist
@@ -32,15 +32,12 @@ where
     ///
     /// Panics if .
     pub fn from_model(model: impl SurrealdbNode) -> Self {
-        let x = model.get_key::<SurrealId>();
-        Self::Id(
-            x.expect("Id not found. Make sure Id exists for this model")
-                .to_owned(),
-        )
+        let id = model.get_id();
+        Self::Id(id)
     }
 
     /// returns the id of the foreign node if it exists
-    pub fn get_id(&self) -> Option<&SurrealId> {
+    pub fn get_id(&self) -> Option<&sql::Thing> {
         match &self {
             Self::Id(v) => Some(v),
             _ => None,
@@ -108,15 +105,10 @@ macro_rules! impl_from_model_for_ref_type {
     ($surrealdb_node_generics:ty, $reference_type:ty) => {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
-                let x = model.get_key::<SurrealId>();
-                let xx = match x {
-                    Some(id) => {
-                        let bb = id.clone();
-                        Reference::Id(bb)
-                    }
-                    None => Reference::Null,
-                };
-                Self(xx.into())
+                // let id = model.get_id::<SurrealId<$surrealdb_node_generics>>();
+                let id: sql::Thing = model.get_id();
+                let reference = Reference::Id(id.clone());
+                Self(reference.into())
             }
         }
 
@@ -124,11 +116,9 @@ macro_rules! impl_from_model_for_ref_type {
             for $reference_type
         {
             fn from(model: &$surrealdb_node_generics) -> Self {
-                let x = model.clone().get_key::<SurrealId>();
-                match x {
-                    Some(x) => Self(Reference::Id(x.to_owned()).into()),
-                    None => Self(Reference::Null.into()),
-                }
+                let id: sql::Thing = model.clone().get_id();
+                let reference = Reference::Id(id.to_owned());
+                Self(reference.into())
             }
         }
     };
@@ -139,15 +129,8 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
         let xx = model_vec
             .into_iter()
             .map(|m| {
-                let x = m.get_key::<SurrealId>();
-                let xx = match x {
-                    Some(id) => {
-                        let bb = id.clone();
-                        Reference::Id(bb)
-                    }
-                    None => Reference::Null,
-                };
-                xx
+                let id: sql::Thing = m.get_id();
+                Reference::Id(id.clone())
             })
             .collect::<Vec<Reference<V>>>();
 
@@ -241,7 +224,7 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns just the keys of the foreign field. Some links may not exist
-            pub fn keys(&self) -> Vec<Option<&SurrealId>> {
+            pub fn keys(&self) -> Vec<Option<&sql::Thing>> {
                 self.0
                     .iter()
                     .map(|m| match m {
@@ -249,11 +232,11 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::Id(id) => Some(id),
                         Reference::Null => None,
                     })
-                    .collect::<Vec<Option<&SurrealId>>>()
+                    .collect::<Vec<Option<&sql::Thing>>>()
             }
 
             /// Returns only the keys that exist
-            pub fn keys_truthy(&self) -> Vec<&SurrealId> {
+            pub fn keys_truthy(&self) -> Vec<&sql::Thing> {
                 self.0
                     .iter()
                     .filter_map(|m| match m {
@@ -272,6 +255,8 @@ macro_rules! impl_utils_for_ref_vec {
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
+
+// impl<V: SurrealdbNode> From<Vec<V>> for LinkMany<V> {}
 
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);

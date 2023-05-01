@@ -25,6 +25,8 @@ use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
+use surrealdb_orm::SurrealId;
+use surrealdb_orm::SurrealdbModel;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
@@ -34,7 +36,7 @@ use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
     All, Geometry, Operatable, Parametric, ReturnableDefault, ReturnableStandard, Runnable,
-    SurrealId, SurrealdbNode,
+    SurrealdbNode,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -45,9 +47,7 @@ struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId<Company>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -60,9 +60,7 @@ struct Company {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    // #[builder(default, setter(strip_option))]
-    id: Option<SurrealId>,
+    id: SurrealId<GenZCompany>,
     nam: Uuid,
     name: String,
     founded: Datetime,
@@ -75,15 +73,18 @@ struct GenZCompany {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    id: Option<SurrealId>,
+    id: SurrealId<Book>,
+    // #[serde(default = "default_resource")]
     title: String,
     content: String,
 }
 
+fn default_resource() -> sql::Thing {
+    todo!()
+}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
-        id: Some(RecordId::from(("company", "lowo")).into()),
+        id: Company::create_id("lowo"),
         nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
         name: "Mana Inc.".to_string(),
         founded: "1967-05-03".into(),
@@ -293,7 +294,7 @@ async fn geom_collection() -> surrealdb::Result<()> {
 async fn insert_many() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Some("company:1".try_into().unwrap()),
+            id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -309,7 +310,7 @@ async fn insert_many() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Some("company:2".try_into().unwrap()),
+            id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -339,7 +340,7 @@ async fn insert_many() -> surrealdb::Result<()> {
 async fn insert_from_select_query() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Some("company:1".try_into().unwrap()),
+            id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -355,7 +356,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Some("company:2".try_into().unwrap()),
+            id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -392,35 +393,6 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     //     .unwrap();
     //
     let c = Company::schema();
-    let select_query = select(All)
-        .from(&SurrealId::try_from("company:2").unwrap())
-        .where_(c.tags.any_like("foo"))
-        .parallel();
-    // .return_one(db.clone())
-    // .await
-    // .unwrap();
-
-    dbg!(select_query.clone().get_bindings());
-    dbg!(select_query.clone().to_raw());
-    assert_eq!(
-        select_query.clone().fine_tune_params(),
-        "SELECT * FROM $_param_00000001 WHERE tags ?~ $_param_00000002 PARALLEL;"
-    );
-    // println!("BindSel {:?}", select_query.get_bindings());
-    let one_ = select_query
-        .return_one::<Company>(db.clone())
-        .await
-        .unwrap();
-    println!("SSSSSSS {:?}", one_);
-
-    println!(
-        "SSSSSSS {:?}",
-        select_query
-            .return_many::<Company>(db.clone())
-            .await
-            .unwrap()
-    );
-
     let ref select_query = select(All)
         .from(Company::get_table_name())
         .where_(c.tags.any_like("foo"))
