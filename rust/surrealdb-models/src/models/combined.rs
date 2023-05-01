@@ -4,11 +4,11 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
-use _core::time::Duration;
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
+use std::time::Duration;
 use surrealdb::{
     engine::local::{Db, Mem},
     opt::IntoResource,

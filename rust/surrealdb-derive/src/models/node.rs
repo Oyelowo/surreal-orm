@@ -219,6 +219,7 @@ impl ToTokens for NodeToken{
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
+                use super::*;
 
                 pub struct TableNameStaticChecker {
                     pub #table_name_ident: String,
