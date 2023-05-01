@@ -5,16 +5,12 @@ use geo::polygon;
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
-use surrealdb_models::weapon_schema;
-use surrealdb_models::weaponold_schema;
-use surrealdb_models::WeaponNonNullUpdater;
-use surrealdb_models::WeaponOld;
-use surrealdb_models::{alien_schema, Alien, SpaceShip, Weapon};
-use surrealdb_orm::statements::insert;
-use surrealdb_orm::statements::patch;
-use surrealdb_orm::statements::update;
+use surrealdb_models::{
+    alien_schema, weapon_schema, weaponold_schema, Alien, SpaceShip, Weapon, WeaponNonNullUpdater,
+    WeaponOld,
+};
 use surrealdb_orm::{
-    statements::{create, select},
+    statements::{create, insert, patch, select, update},
     *,
 };
 
