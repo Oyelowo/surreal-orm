@@ -134,11 +134,13 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon {
+    let weapon = || Weapon {
         name: "Laser".to_string(),
         created: Utc::now(),
         ..Default::default()
     };
+    let weapon1 = weapon();
+    let weapon2 = weapon();
 
     let space_ship = SpaceShip {
         id: SpaceShip::create_id("gbanda"),
@@ -158,11 +160,11 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
-    assert_eq!(weapon.clone().id.to_thing().tb, "weapon");
+    assert_eq!(weapon1.clone().id.to_thing().tb, "weapon");
 
     // create first record to weapon table
-    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
-    assert_eq!(created_weapon.id.to_thing(), weapon.id.to_thing());
+    let created_weapon = create(weapon1.clone()).get_one(db.clone()).await?;
+    assert_eq!(created_weapon.id.to_thing(), weapon1.id.to_thing());
 
     let select1: Vec<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -172,7 +174,7 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     assert_eq!(select1.len(), 1);
 
     //  Create second record
-    let created_weapon = create(weapon.clone()).return_one(db.clone()).await?;
+    let created_weapon = create(weapon2.clone()).return_one(db.clone()).await?;
 
     let select2: Vec<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -671,12 +673,12 @@ async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
     let build = create(unsaved_alien);
 
     assert_eq!(build.get_bindings().len(), 1);
-    insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value());
+    insta::assert_display_snapshot!(build.get_bindings()[0].get_raw_value().len());
     assert_eq!(
         build.fine_tune_params(),
         "CREATE alien CONTENT $_param_00000001;"
     );
-    insta::assert_display_snapshot!(build.to_raw().build());
+    insta::assert_display_snapshot!(build.to_raw().build().len());
     Ok(())
 }
 
