@@ -383,7 +383,8 @@ impl SchemaFieldsProperties {
                 };
                 
                 let mut insert_non_null_updater_token = |updater_field_token:  TokenStream| {
-                    if field_ident_normalised_as_str != "id" {
+                    let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    if !is_invalid {
                         store.non_null_updater_fields.push(updater_field_token);
                     }
                 };

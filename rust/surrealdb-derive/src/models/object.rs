@@ -101,12 +101,23 @@ impl ToTokens for ObjectToken{
             
             impl #crate_name::SurrealdbObject for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
-                type NonNullUpdater = #module_name::#non_null_updater_struct_name;
+                // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name;
                 
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
             }
+        
+            #[allow(non_snake_case)]
+            #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+            pub struct #non_null_updater_struct_name {
+               #( 
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    #non_null_updater_fields
+                ) *
+            } 
+
 
             #[allow(non_snake_case)]
             pub mod #module_name {
@@ -116,14 +127,6 @@ impl ToTokens for ObjectToken{
             
                #( #imports_referenced_node_schema) *
                 
-                #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-                pub struct #non_null_updater_struct_name {
-                   #( 
-                        #[serde(skip_serializing_if = "Option::is_none")]
-                        #non_null_updater_fields
-                    ) *
-                } 
-
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *

@@ -138,7 +138,7 @@ impl ToTokens for NodeToken{
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;
-                type NonNullUpdater = #module_name::#non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name;
 
                 fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -173,6 +173,16 @@ impl ToTokens for NodeToken{
                 }
                 
             }
+        
+            #[allow(non_snake_case)]
+            #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+            pub struct #non_null_updater_struct_name {
+               #( 
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    #non_null_updater_fields
+                ) *
+            } 
+
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
                 fn table_name() -> #crate_name::Table {
@@ -227,14 +237,6 @@ impl ToTokens for NodeToken{
                 
                #( #imports_referenced_node_schema) *
                 
-                #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-                pub struct #non_null_updater_struct_name {
-                   #( 
-                        #[serde(skip_serializing_if = "Option::is_none")]
-                        #non_null_updater_fields
-                    ) *
-                } 
-
                 #[allow(non_snake_case)]
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {

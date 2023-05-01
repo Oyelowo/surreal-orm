@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealdbNode;
+use surrealdb_orm::SurrealdbObject;
 
 // Weapon
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -26,13 +27,12 @@ pub struct WeaponOld {
     pub created: DateTime<Utc>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbObject, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct WeaponNonNullUpdater {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub strength: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub created: Option<DateTime<Utc>>,
+pub struct Rocket {
+    pub name: String,
+    pub strength: u64,
+    pub nice: bool,
+    pub bunch_of_other_fields: i32,
+    pub created: DateTime<Utc>,
 }

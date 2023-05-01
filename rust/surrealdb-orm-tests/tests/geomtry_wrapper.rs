@@ -40,7 +40,7 @@ use surrealdb_orm::{
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct Person {
+pub struct Person {
     name: String,
 }
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
