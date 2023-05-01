@@ -76,6 +76,7 @@ impl ToTokens for ObjectToken{
             connection_with_field_appended,
             record_link_fields_methods,
             schema_struct_fields_names_kv_empty,
+            non_null_updater_fields,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
@@ -85,6 +86,7 @@ impl ToTokens for ObjectToken{
 
         let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
         let test_function_name = format_ident!("test_{module_name}_edge_name");
+        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 
         
         // #[derive(SurrealdbObject, Serialize, Deserialize, Debug, Clone)]
@@ -99,6 +101,7 @@ impl ToTokens for ObjectToken{
             
             impl #crate_name::SurrealdbObject for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
+                type NonNullUpdater = #module_name::#non_null_updater_struct_name;
                 
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
@@ -113,6 +116,13 @@ impl ToTokens for ObjectToken{
             
                #( #imports_referenced_node_schema) *
                 
+                #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+                pub struct #non_null_updater_struct_name {
+                   #( 
+                        #[serde(skip_serializing_if = "Option::is_none")]
+                        #non_null_updater_fields
+                    ) *
+                } 
 
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {

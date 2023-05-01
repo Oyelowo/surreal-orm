@@ -88,6 +88,7 @@ impl ToTokens for NodeToken{
             link_many_fields,
             field_definitions,
             fields_relations_aliased,
+            non_null_updater_fields,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         
@@ -105,6 +106,7 @@ impl ToTokens for NodeToken{
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
+        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 
         
         let table_definitions = self.get_table_definition_token();
@@ -136,6 +138,7 @@ impl ToTokens for NodeToken{
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;
+                type NonNullUpdater = #module_name::#non_null_updater_struct_name;
 
                 fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
@@ -223,6 +226,13 @@ impl ToTokens for NodeToken{
                 
                #( #imports_referenced_node_schema) *
                 
+                #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+                pub struct #non_null_updater_struct_name {
+                   #( 
+                        #[serde(skip_serializing_if = "Option::is_none")]
+                        #non_null_updater_fields
+                    ) *
+                } 
 
                 #[allow(non_snake_case)]
                 #[derive(Debug, Clone)]

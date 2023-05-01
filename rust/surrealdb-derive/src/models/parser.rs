@@ -254,6 +254,7 @@ pub struct SchemaFieldsProperties {
     pub field_definitions: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,
     pub fields_relations_aliased: Vec<TokenStream>,
+    pub non_null_updater_fields: Vec<TokenStream>,
 }
 
 #[derive(Clone)]
@@ -400,6 +401,8 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.linked_fields);
                         update_field_names_fields_types_kv();
                         
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<super::#field_type>, ));
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                         get_link_meta_with_defs(&node_object)
                     }
@@ -418,6 +421,8 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.linked_fields);
                         update_field_names_fields_types_kv();
                         
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<super::#field_type>, ));
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         
                         get_link_meta_with_defs(&node_object)
@@ -429,6 +434,8 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.linked_fields);
                         update_field_names_fields_types_kv();
                         
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<super::#field_type>, ));
+                        
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                         get_link_meta_with_defs(&node_object)
                     }                    
@@ -438,17 +445,25 @@ impl SchemaFieldsProperties {
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
                         update_field_names_fields_types_kv();
                         
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<<super::#field_type as #crate_name::SurrealdbObject>::NonNullUpdater>, ));
+                        
                         get_nested_meta_with_defs(&node_object)
                     },
                         
                     RelationType::NestArray(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
+                        
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<super::#field_type>, ));
+
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
+                        
                         update_field_names_fields_types_kv();
                         get_nested_meta_with_defs(&node_object)
                     },
                     RelationType::None => {
                         update_field_names_fields_types_kv();
+                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<super::#field_type>, ));
+                        
                         ReferencedNodeMeta::default()
                             .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
                     }
