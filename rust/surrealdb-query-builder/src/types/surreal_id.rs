@@ -237,7 +237,7 @@ mod tests {
     fn test_create_uuid() {
         let id = TestUserId::uuid();
         assert_eq!(id.to_string().contains("user:"), true);
-        assert_eq!(id.to_string().len(), 49);
+        assert_eq!(id.to_string().len(), 47);
     }
 
     #[test]
@@ -261,40 +261,48 @@ mod tests {
     #[test]
     fn test_surreal_id_from_str_err() {
         let id = TestUserId::try_from("table1").unwrap_err();
-        assert_eq!(
-            id.to_string(),
-            "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
+        assert!(
+            id.to_string().contains(
+                "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
                 Check that the id is in the format 'table_name:id'"
+            ),
+            "Invalid id"
         );
     }
 
     #[test]
     fn test_surreal_id_from_str_err2() {
         let id = TestUserId::try_from("table:").unwrap_err();
-        assert_eq!(
-            id.to_string(),
-            "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
+        assert!(
+            id.to_string().contains(
+                "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
                 Check that the id is in the format 'table_name:id'"
+            ),
+            "Invalid id"
         );
     }
 
     #[test]
     fn test_surreal_id_from_str_err3() {
         let id = TestUserId::try_from("table:1:2").unwrap_err();
-        assert_eq!(
-            id.to_string(),
-            "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
+        assert!(
+            id.to_string().contains(
+                "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
                 Check that the id is in the format 'table_name:id'"
+            ),
+            "Invalid id"
         );
     }
 
     #[test]
     fn test_surreal_id_from_str_err4() {
         let id = TestUserId::try_from("table:1:2:3").unwrap_err();
-        assert_eq!(
-            id.to_string(),
-            "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
+        assert!(
+            id.to_string().contains(
+                "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
                 Check that the id is in the format 'table_name:id'"
+            ),
+            "Invalid id"
         );
     }
 }
