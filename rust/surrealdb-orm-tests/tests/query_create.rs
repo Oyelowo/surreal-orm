@@ -715,6 +715,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         name: "weapon1".to_string(),
         created: Utc::now(),
         strength: 55,
+        ..Default::default()
     };
 
     create(weapon_1.clone()).return_one(db.clone()).await?;

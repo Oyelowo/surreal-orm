@@ -5,6 +5,7 @@ use geo::polygon;
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
+use surrealdb_models::RocketNonNullUpdater;
 use surrealdb_models::{
     alien_schema, weapon_schema, weaponold_schema, Alien, SpaceShip, Weapon, WeaponNonNullUpdater,
     WeaponOld,
@@ -577,10 +578,15 @@ async fn test_update_merge_with_filter() -> SurrealdbOrmResult<()> {
     assert_eq!(get_selected_weapons().await.len(), 10);
 
     // Test update with MERGE keyoword and using updater
+    let rocket_update_object = RocketNonNullUpdater {
+        name: Some("Bruno".to_string()),
+        ..Default::default()
+    };
     let update_weapons_with_filter = update::<Weapon>(Weapon::table_name())
         .merge(WeaponNonNullUpdater {
             name: Some("Oyelowo".to_string()),
             strength: Some(16),
+            rocket: Some(rocket_update_object),
             ..Default::default()
         })
         .where_(filter)
@@ -752,7 +758,8 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
 
@@ -776,7 +783,8 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
 
@@ -817,7 +825,7 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -826,7 +834,7 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     Ok(())
@@ -926,7 +934,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
 
@@ -950,7 +959,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
 
@@ -961,6 +971,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
         ..
     } = WeaponOld::schema();
     // Deserializing with old struct should now cause error since there are fields missing.
+    // This is not how you should use the patch remove. Merely used for testing. Check the latter
+    // place for a good example where the new weapon struct is used.
     let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id)
         .patch(patch(nice).remove())
         .patch(patch(bunchOfOtherFields).remove())
@@ -1003,7 +1015,7 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -1012,7 +1024,7 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     //
@@ -1043,7 +1055,7 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
 
     let selected_weapon: Option<Weapon> = select(All)
@@ -1060,7 +1072,7 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
 
     let weaponold_schema::WeaponOld {
@@ -1138,7 +1150,8 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
     assert_eq!(
@@ -1154,7 +1167,8 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
             "strength",
             "nice",
             "bunchOfOtherFields",
-            "created"
+            "created",
+            "rocket"
         ]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");

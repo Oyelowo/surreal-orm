@@ -70,14 +70,3 @@ pub struct Alien2 {
     )]
     pub space_ships: LinkMany<SpaceShip>,
 }
-fn srej() {
-    let x = Alien2NonNullUpdater {
-        name: Some("rer".to_string()),
-        weapon: Some(RocketNonNullUpdater {
-            name: Some("rer".to_string()),
-            strength: Some(1),
-            ..Default::default()
-        }),
-        ..Default::default()
-    };
-}

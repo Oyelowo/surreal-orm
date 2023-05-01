@@ -13,6 +13,8 @@ pub struct Weapon {
     pub name: String,
     pub strength: u64,
     pub created: DateTime<Utc>,
+    #[surrealdb(nest_object = "Rocket")]
+    pub rocket: Rocket,
 }
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -25,6 +27,8 @@ pub struct WeaponOld {
     pub nice: bool,
     pub bunch_of_other_fields: i32,
     pub created: DateTime<Utc>,
+    #[surrealdb(nest_object = "Rocket")]
+    pub rocket: Rocket,
 }
 
 #[derive(SurrealdbObject, Serialize, Deserialize, Debug, Clone, Default)]
