@@ -135,52 +135,52 @@ impl<T: SurrealdbModel> Into<sql::Value> for SurrealId<T> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TestUser;
+#[allow(dead_code)]
+pub type TestUserId = SurrealId<TestUser>;
+impl SurrealdbModel for TestUser {
+    fn table_name() -> crate::Table {
+        "user".into()
+    }
+
+    fn get_serializable_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn get_linked_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn get_link_one_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn get_link_self_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn get_link_one_and_self_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn get_link_many_fields() -> Vec<crate::Field> {
+        unimplemented!()
+    }
+
+    fn define_table() -> crate::Raw {
+        unimplemented!()
+    }
+
+    fn define_fields() -> Vec<crate::Raw> {
+        unimplemented!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Field, Table};
     use surrealdb::sql::Uuid;
-
-    #[derive(Debug, Clone, PartialEq, Eq)]
-    struct TestUser;
-    type TestUserId = SurrealId<TestUser>;
-    impl SurrealdbModel for TestUser {
-        fn table_name() -> Table {
-            "user".into()
-        }
-
-        fn get_serializable_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn get_linked_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn get_link_one_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn get_link_self_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn get_link_one_and_self_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn get_link_many_fields() -> Vec<Field> {
-            unimplemented!()
-        }
-
-        fn define_table() -> crate::Raw {
-            unimplemented!()
-        }
-
-        fn define_fields() -> Vec<crate::Raw> {
-            unimplemented!()
-        }
-    }
 
     #[test]
     fn test_create_id_with_model() {

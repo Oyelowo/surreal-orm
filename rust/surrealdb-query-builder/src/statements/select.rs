@@ -609,8 +609,8 @@ impl Parametric for SelectStatement {
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
 /// # let city = Field::new("city");
-/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+/// # let fake_id = TestUser::create_id("oyelowo");
+/// # let fake_id2 = TestUser::create_id("oyedayo");
 ///
 ///  select(All)
 ///     .from(fake_id)
@@ -719,7 +719,7 @@ impl SelectStatement {
     /// # use surrealdb_orm::{*, statements::{order, select}};
     /// # let user = Table::new("user");
     /// # let alien = Table::new("alien");
-    /// # let user_id1 = SurrealId::try_from("user:1").unwrap();
+    /// # let user_id1 = TestUser::create_id("oyelowo");
     ///  //  Can select from a table name
     ///  select(All).from(user);
     ///
@@ -790,15 +790,14 @@ impl SelectStatement {
     ///
     /// Examples
     /// ```rust
-    /// # use surrealdb::sql;
     /// # use surrealdb_query_builder as surrealdb_orm;
     /// # use surrealdb_orm::{*, statements::{order, select}};
     /// # let name = Field::new("name");
     /// # let age = Field::new("age");
     /// # let country = Field::new("country");
     /// # let city = Field::new("city");
-    /// # let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string();
-    /// # let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string();
+    /// # let fake_id = TestUser::create_id("oyelowo");
+    /// # let fake_id2 = TestUser::create_id("oyedayo");
     /// // Supports simpler where clause without `cond` helper function
     /// # let select2 = select(All)
     /// #   .from(fake_id2)

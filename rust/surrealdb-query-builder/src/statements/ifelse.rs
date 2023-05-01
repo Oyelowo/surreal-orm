@@ -56,8 +56,8 @@ use crate::{
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
 /// # let city = Field::new("city");
-/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+/// # let fake_id = TestUser::create_id("oyelowo");
+/// # let fake_id2 = TestUser::create_id("oyedayo");
 ///
 /// let select1 = select(All)
 ///     .from(fake_id)

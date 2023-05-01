@@ -7,7 +7,7 @@
 
 use std::fmt::{self, Display};
 
-use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
+use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
 /// Chains together multiple queries into a single `QueryChain`.
 ///
@@ -21,8 +21,8 @@ use crate::traits::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Q
 /// use surrealdb_query_builder::{*, statements::{chain, select}};
 ///
 /// // Create a query chain with a single query
-/// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
-/// let user_dayo = SurrealId::try_from("user:oyedayo").unwrap();
+/// let user_lowo = TestUser::create_id("oyelowo");
+/// let user_dayo = TestUser::create_id("oyedayo");
 ///
 /// // Append a new query to the chain
 /// let query1 = select(All).from(user_lowo);
@@ -68,8 +68,8 @@ impl QueryChain {
     /// use surrealdb::sql;
     ///
     /// // Create a query chain with a single query
-    /// let user_lowo = sql::Thing::from(("user".to_string(), "oyelowo".to_string();
-    /// let user_dayo = sql::Thing::from(("user".to_string(), "oyedayo".to_string();
+    /// let user_lowo = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
+    /// let user_dayo = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
     ///
     /// // Append a new query to the chain
     /// let query1 = select(All).from(user_lowo);
@@ -124,7 +124,7 @@ mod tests {
         cond,
         statements::{chain, select},
         traits::Buildable,
-        All, Field, Operatable, SurrealId, ToRaw,
+        All, Field, Operatable, ToRaw,
     };
     use insta::assert_display_snapshot;
     use select::order;
