@@ -5,10 +5,9 @@
  * Licensed under the MIT license
  */
 
+use crate::SurrealdbNode;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-
-use crate::{SurrealId, SurrealdbNode};
 
 /// A reference to foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone)]

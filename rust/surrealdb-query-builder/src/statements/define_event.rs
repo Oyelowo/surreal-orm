@@ -49,10 +49,11 @@ You must select your namespace and database before you can use the DEFINE EVENT 
 ```rust
  # use surrealdb_query_builder as surrealdb_orm;
 use surrealdb_orm::{*, statements::{define_event, select}};
+use surrealdb::sql;
 
 # let age = Field::new("age");
 # let city = Field::new("city");
-# let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
+# let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string();
 # let user_table = Table::new("user");
 # let email_event = Event::new("email");
  let query = define_event(email_event)

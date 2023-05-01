@@ -65,10 +65,11 @@ impl QueryChain {
     ///
     /// ```rust
     /// use surrealdb_query_builder::{*, statements::{chain, select}};
+    /// use surrealdb::sql;
     ///
     /// // Create a query chain with a single query
-    /// let user_lowo = SurrealId::try_from("user:oyelowo").unwrap();
-    /// let user_dayo = SurrealId::try_from("user:oyedayo").unwrap();
+    /// let user_lowo = sql::Thing::from(("user".to_string(), "oyelowo".to_string();
+    /// let user_dayo = sql::Thing::from(("user".to_string(), "oyedayo".to_string();
     ///
     /// // Append a new query to the chain
     /// let query1 = select(All).from(user_lowo);

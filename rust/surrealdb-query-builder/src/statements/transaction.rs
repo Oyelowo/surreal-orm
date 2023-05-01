@@ -35,13 +35,14 @@ use crate::{
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use std::time::Duration;
+/// use surrealdb::sql;
 /// use surrealdb_orm::{*, statements::{begin_transaction, order, select}};
 /// # let name = Field::new("name");
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
 /// # let city = Field::new("city");
-/// # let fake_id = SurrealId::try_from("user:oyelowo").unwrap();
-/// # let fake_id2 = SurrealId::try_from("user:oyedayo").unwrap();
+/// # let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string();
+/// # let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string();
 ///
 /// let statement1 = select(All)
 ///     .from(fake_id)

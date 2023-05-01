@@ -65,12 +65,13 @@ pub struct DefineTableStatement {
 /// use surrealdb_orm::{*, functions::crypto, statements::{define_table, for_, order, select}};
 /// use CrudType::*;
 /// use std::time::Duration;
+/// use surrealdb::sql;
 ///
 /// let name = Field::new("name");
 /// let user = Table::from("user");
 /// let age = Field::new("age");
 /// let country = Field::new("country");
-/// let fake_id = SurrealId::try_from("user:oyedayo").unwrap();
+/// # let fake_id = sql::Thing::from(("user".to_string(), "oyedayo".to_string();
 /// let statement = define_table(user)
 ///     .drop()
 ///     .as_(

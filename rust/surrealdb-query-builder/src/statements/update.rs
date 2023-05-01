@@ -220,7 +220,7 @@ impl Erroneous for PatchOp {
 /// # Examples
 /// ```
 /// # use surrealdb_query_builder as surreal_orm;
-/// use surreal_orm::statements::{patch}
+/// use surreal_orm::{*, statements::{patch}};
 /// let ref name = Field::new("name");
 /// let name_first = Field::new("name.first");
 ///
@@ -446,7 +446,7 @@ where
     /// # Example
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
-    /// use surreal_orm::{*, statements:patch};
+    /// use surreal_orm::{*, statements::patch};
     /// // Typically, you would use the schema to get the field(e.g `User::schema().name(E).first`) but using this as an example.
     /// let name = Field::new("name.first");
     /// let patch_op = patch(name).change("Oyelowo");
