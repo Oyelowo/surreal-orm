@@ -294,7 +294,7 @@ async fn geom_collection() -> surrealdb::Result<()> {
 async fn insert_many() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Company::create_id("company:1"),
+            id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -310,7 +310,7 @@ async fn insert_many() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Company::create_id("company:2"),
+            id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -340,7 +340,7 @@ async fn insert_many() -> surrealdb::Result<()> {
 async fn insert_from_select_query() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Company::create_id("company:1"),
+            id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
@@ -356,7 +356,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             home: (45.3, 78.1).into(),
         },
         Company {
-            id: Company::create_id("company:2"),
+            id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
