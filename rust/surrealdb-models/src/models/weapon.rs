@@ -10,7 +10,7 @@ use surrealdb_orm::SurrealdbNode;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
-    pub id: SurrealId<Weapon>,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub strength: u64,
     pub created: DateTime<Utc>,
@@ -20,7 +20,7 @@ pub struct Weapon {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon", relax_table_name)]
 pub struct WeaponOld {
-    pub id: SurrealId<WeaponOld>,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub strength: u64,
     pub nice: bool,

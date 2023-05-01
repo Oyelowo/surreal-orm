@@ -12,8 +12,7 @@ use crate::{AlienVisitsPlanet, Planet, SpaceShip, Weapon};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
-    pub id: SurrealId<Alien>,
-    // pub id: sql::Thing,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub age: u8,
     pub created: DateTime<Utc>,

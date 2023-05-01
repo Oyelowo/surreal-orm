@@ -8,7 +8,7 @@ use surrealdb_orm::{SurrealId, SurrealdbNode};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "space_ship")]
 pub struct SpaceShip {
-    pub id: SurrealId<SpaceShip>,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub created: DateTime<Utc>,
 }

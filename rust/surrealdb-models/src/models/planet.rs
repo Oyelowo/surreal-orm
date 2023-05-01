@@ -8,7 +8,7 @@ use surrealdb_orm::{SurrealId, SurrealdbNode};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "planet")]
 pub struct Planet {
-    pub id: SurrealId<Planet>,
+    pub id: SurrealId<Self>,
     pub name: String,
     // area: Polygon,
     pub population: u64,

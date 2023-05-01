@@ -9,7 +9,7 @@ use surrealdb_orm::{
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "user")]
 pub struct User {
-    pub id: SurrealId<User>,
+    pub id: SurrealId<Self>,
     pub name: String,
     pub created: DateTime<Utc>,
     pub company: String,
@@ -20,7 +20,8 @@ pub struct User {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "like")]
 pub struct Like<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId<Like<In, Out>>,
+    // pub id: SurrealId<Like<In, Out>>,
+    pub id: SurrealId<Self>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
@@ -34,7 +35,7 @@ pub type CompanyLikeUser = Like<Company, User>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 pub struct Company {
-    pub id: SurrealId<Company>,
+    pub id: SurrealId<Self>,
     pub name: String,
     #[surrealdb(link_many = "User")]
     pub users: LinkMany<User>,

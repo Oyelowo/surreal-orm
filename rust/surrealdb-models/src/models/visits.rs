@@ -10,7 +10,8 @@ use crate::{Alien, Planet};
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "visits")]
 pub struct Visits<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId<Visits<In, Out>>,
+    // pub id: SurrealId<Visits<In, Out>>,
+    pub id: SurrealId<Self>,
     #[serde(rename = "in")]
     pub in_: LinkOne<In>,
     pub out: LinkOne<Out>,
