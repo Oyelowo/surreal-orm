@@ -390,33 +390,43 @@ impl SchemaFieldsProperties {
                 
                 let mut update_field_names_fields_types_kv = || {
                     // TODO:
-                    let field_name_as_camel = format_ident!("{}", field_name_original.to_string().to_case(Case::Camel));
-                    store.field_wrapper_type_custom_implementations
-                        .push(quote!(
-                            pub struct #field_name_as_camel(pub #crate_name::Field);
+                    let field_name_as_camel = format_ident!("{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
+                    let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    if !is_invalid {
+                        store.field_wrapper_type_custom_implementations
+                            .push(quote!(
+                                #[derive(Debug, Clone)]
+                                pub struct #field_name_as_camel(pub #crate_name::Field);
 
-                            impl From<&str> for #field_name_as_camel {
-                                fn from(field_name: &str) -> Self {
-                                    Self(#crate_name::Field::new(field_name))
+                                impl From<&str> for #field_name_as_camel {
+                                    fn from(field_name: &str) -> Self {
+                                        Self(#crate_name::Field::new(field_name))
+                                    }
                                 }
-                            }
 
-                            impl ::std::ops::Deref for #field_name_as_camel {
-                                type Target = #crate_name::Field;
+                                impl ::std::ops::Deref for #field_name_as_camel {
+                                    type Target = #crate_name::Field;
 
-                                fn deref(&self) -> &Self::Target {
-                                    &self.0
+                                    fn deref(&self) -> &Self::Target {
+                                        &self.0
+                                    }
                                 }
-                            }
 
-                        impl #crate_name::SetterAssignable<#field_type> for #field_name_as_camel  {}
+                                impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
+                            ));
+                        
+                            store.schema_struct_fields_types_kv
+                                .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
+                        } else {
+                            store.schema_struct_fields_types_kv
+                                .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                                
+                        }
+                
+                        store.schema_struct_fields_names_kv
+                            .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
-                    ));
-                    store.schema_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
                     
-                    store.schema_struct_fields_names_kv
-                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
                     
                     store.schema_struct_fields_names_kv_empty
                         .push(quote!(#field_ident_normalised: "".into(),));
