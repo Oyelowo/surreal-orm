@@ -1,8 +1,11 @@
+use std::ops::Deref;
+
 use serde::Serialize;
 use surrealdb::sql;
 
 use crate::{
-    statements::LetStatement, Binding, BindingsList, Buildable, Field, Param, Parametric, Valuex,
+    statements::LetStatement, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Param,
+    Parametric, Valuex,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -10,20 +13,12 @@ use crate::{
 pub struct Setter {
     query_string: String,
     bindings: BindingsList,
+    errors: ErrorList,
 }
 
 impl Parametric for Setter {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
-    }
-}
-
-/// A helper struct for generating setters used in various statements
-pub fn updater(field: impl Into<Field>) -> Setter {
-    let field: Field = field.into();
-    Setter {
-        query_string: field.build(),
-        bindings: field.get_bindings(),
     }
 }
 
@@ -39,95 +34,93 @@ impl std::fmt::Display for Setter {
     }
 }
 
-/// Things that can be updated
-// pub enum Updateables {
-//     /// Single updater
-//     Updater(Updater),
-//     /// Multiple updaters
-//     Updaters(Vec<Updater>),
-// }
-//
-// impl From<Updater> for Updateables {
-//     fn from(value: Updater) -> Self {
-//         Self::Updater(value)
-//     }
-// }
-//
-// impl Parametric for Updateables {
-//     fn get_bindings(&self) -> BindingsList {
-//         match self {
-//             Updateables::Updater(up) => up.get_bindings(),
-//             Updateables::Updaters(ups) => ups
-//                 .into_iter()
-//                 .flat_map(|u| u.get_bindings())
-//                 .collect::<Vec<_>>(),
-//         }
-//     }
-// }
+struct SetArg {
+    string: String,
+    bindings: BindingsList,
+    errors: ErrorList,
+}
 
-// enum SetArg<T: Serialize> {
-//     Value(T),
-//     Field(Field),
-// }
-struct SetArg(Valuex);
+impl Buildable for SetArg {
+    fn build(&self) -> String {
+        self.string.to_string()
+    }
+}
+
+impl Parametric for SetArg {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Erroneous for SetArg {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
 
 impl<T: Serialize> From<T> for SetArg {
     fn from(value: T) -> Self {
         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        Self(Valuex {
+
+        Self {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
-        })
+            errors: vec![],
+        }
     }
 }
 
 impl From<Field> for SetArg {
     fn from(value: Field) -> Self {
-        todo!()
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
     }
 }
 
 impl From<Param> for SetArg {
     fn from(value: Param) -> Self {
-        todo!()
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
     }
 }
 
 impl From<LetStatement> for SetArg {
     fn from(value: LetStatement) -> Self {
-        todo!()
+        Self {
+            string: value.get_param().build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
     }
 }
 
-// impl<T: Into<Field>> From<T> for SetArg {}
-
-// trait SetterAssignable<T: Serialize + Into<Valuex>>
 trait SetterAssignable<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
     fn equal(&self, value: impl Into<T>) -> Setter {
-        // let value: Valuex = value.into().into();
         let operator = sql::Operator::Equal;
         let field = self.deref();
+        let set_arg: SetArg = value.into().into();
 
-        let value: Valuex = value.into();
-        let column_updater_string = format!("{field} {operator} {}", value.build());
+        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
         Setter {
             query_string: column_updater_string,
-            bindings: value.get_bindings(),
+            bindings: set_arg.get_bindings(),
+            errors: set_arg.get_errors(),
         }
     }
 
-    // fn update_field(&self, operator: sql::Operator, value: impl Into<Valuex>) -> Updater {
-    //     let value: Valuex = value.into();
-    //     let column_updater_string = format!("{self} {operator} {}", value.build());
-    //     Self {
-    //         query_string: column_updater_string,
-    //         bindings: value.get_bindings(),
-    //     }
-    // }
+    fn to_field(&self) -> Field {
+        self.deref().clone()
+    }
 }
 
 struct Lowo(Field);
@@ -144,10 +137,12 @@ impl SetterAssignable<sql::Duration> for Lowo {}
 // impl Setter<u8> for Lowo {}
 fn rer() {
     let lowo = Lowo(Field::new("lowo"));
-    lowo.like(34);
+    // lowo.like(34);
     lowo.equal(std::time::Duration::from_secs(1));
+    // lowo.equal(Field::new("lowo"));
+    // lowo.equal(lowo.deref());
 
-    // lowo.equals(45);
+    // lowo.equal(45);
     // lowo.equals(LinkOne::from(Weapon::default()));
     // lowo.equals("dfdf");
     // lowo.equal(15);
