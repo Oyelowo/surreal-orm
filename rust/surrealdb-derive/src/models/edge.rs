@@ -82,6 +82,7 @@ impl ToTokens for EdgeToken {
             __________connect_edge_to_graph_traversal_string,
             ___________graph_traversal_string,
             ___________model,
+            _____field_names,
             schema_instance,
             ___________in_marker,
             ___________out_marker,
@@ -100,6 +101,7 @@ impl ToTokens for EdgeToken {
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            field_wrapper_type_custom_implementations,
             serialized_field_names_normalised,
             static_assertions,
             imports_referenced_node_schema,
@@ -222,6 +224,12 @@ impl ToTokens for EdgeToken {
 
                 
                     #( #imports_referenced_node_schema) *
+        
+                    mod #_____field_names {
+                        use super::super::*;
+                    
+                        #( #field_wrapper_type_custom_implementations) *
+                    } 
 
                     #[derive(Debug, Clone)]
                     pub struct #struct_name_ident {

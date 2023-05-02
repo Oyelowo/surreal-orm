@@ -135,15 +135,38 @@ pub struct SchemaFieldsProperties {
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
     /// The full thing can look like:
     /// ```
-    ///     #[derive(Debug, Default)]
-    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
-    ///                pub id: Field,
-    ///                pub r#in: Field,
-    ///                pub out: Field,
-    ///                pub timeWritten: Field,
-    ///          }
+    /// mod _______field_module {
+    ///     pub struct Id(pub(super) Field);
+    ///     pub struct In(pub(super) Field);
+    ///     pub struct Out(pub(super) Field);
+    ///     pub struct TimeWritten(pub(super) Field);
+    /// }
+    /// 
+    /// #[derive(Debug, Default)]
+    /// pub struct Writes<Model: ::serde::Serialize + Default> {
+    ///     pub id: #_____field_module::Id,
+    ///     pub r#in: #_____field_module::In,
+    ///     pub out: #_____field_module::Out,
+    ///     pub timeWritten: #_____field_module::TimeWritten,
+    /// }
     /// ```
     pub schema_struct_fields_types_kv: Vec<TokenStream>,
+
+    /// Generated Field wrapper type implementations for each fiekd around `Field` type
+    /// Example value:
+    /// ```
+    /// struct Email(pub(super) Field);
+    /// 
+    /// impl std::ops::Deref for Email {
+    ///     type Target = #crate_name::Field;
+    ///
+    ///     fn deref(&self) -> &Self::Target {
+    ///         &self.0
+    ///     }
+    /// }
+    /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
+    /// ```
+     pub field_wrapper_type_custom_implementations: Vec<TokenStream>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
     /// This is used to build the actual instance of the model during intialization e,g out:
@@ -333,6 +356,7 @@ impl SchemaFieldsProperties {
                 let VariablesModelMacro { 
                     ___________graph_traversal_string, 
                     ____________update_many_bindings,
+                    _____field_names,
                     schema_instance, 
                     bindings,
                     .. 
@@ -365,8 +389,32 @@ impl SchemaFieldsProperties {
             
                 
                 let mut update_field_names_fields_types_kv = || {
+                    // TODO:
+                    let field_name_as_camel = format_ident!("{}", field_name_original.to_string().to_case(Case::Camel));
+                    store.field_wrapper_type_custom_implementations
+                        .push(quote!(
+                            pub struct #field_name_as_camel(pub #crate_name::Field);
+
+                            impl From<&str> for #field_name_as_camel {
+                                fn from(field_name: &str) -> Self {
+                                    Self(#crate_name::Field::new(field_name))
+                                }
+                            }
+
+                            impl ::std::ops::Deref for #field_name_as_camel {
+                                type Target = #crate_name::Field;
+
+                                fn deref(&self) -> &Self::Target {
+                                    &self.0
+                                }
+                            }
+
+                        impl #crate_name::SetterAssignable<#field_type> for #field_name_as_camel  {}
+
+                    ));
                     store.schema_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                        .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
+                    
                     store.schema_struct_fields_names_kv
                         .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
                     

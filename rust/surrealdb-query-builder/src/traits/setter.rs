@@ -101,7 +101,7 @@ impl From<LetStatement> for SetArg {
     }
 }
 
-trait SetterAssignable<T: Serialize>
+pub trait SetterAssignable<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
@@ -123,20 +123,36 @@ where
     }
 }
 
-struct Lowo(Field);
+type Test<T> = T;
+struct Dayo<T>(Test<T>);
 
-impl std::ops::Deref for Lowo {
-    type Target = Field;
+// struct Setter;
+type Mana = Dayo<super::Setter>;
+type Lowa = i32;
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
+mod field_module {
+    use super::SetterAssignable;
+    use super::*;
+    // use crate::Field;
+    use surrealdb::sql;
+
+    struct Setter;
+    type Lowa = Dayo<super::Mana>;
+    pub struct Lowo(pub(super) crate::Field);
+
+    impl std::ops::Deref for Lowo {
+        type Target = Field;
+
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
     }
-}
 
-impl SetterAssignable<sql::Duration> for Lowo {}
+    impl SetterAssignable<sql::Duration> for Lowo {}
+}
 // impl Setter<u8> for Lowo {}
 fn rer() {
-    let lowo = Lowo(Field::new("lowo"));
+    let lowo = field_module::Lowo(Field::new("lowo"));
     // lowo.like(34);
     lowo.equal(std::time::Duration::from_secs(1));
     // lowo.equal(Field::new("lowo"));

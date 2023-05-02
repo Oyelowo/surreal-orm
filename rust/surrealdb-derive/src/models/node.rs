@@ -60,6 +60,7 @@ impl ToTokens for NodeToken{
             ___________graph_traversal_string,
             ___________bindings,
             ___________errors,
+            _____field_names,
             schema_instance,
             ..
         } = VariablesModelMacro::new();
@@ -74,6 +75,7 @@ impl ToTokens for NodeToken{
             schema_struct_fields_names_kv,
             aliases_struct_fields_types_kv,
             aliases_struct_fields_names_kv,
+            field_wrapper_type_custom_implementations,
             static_assertions,
             imports_referenced_node_schema,
             connection_with_field_appended,
@@ -223,6 +225,7 @@ impl ToTokens for NodeToken{
                     ]
                 }
             }
+
             
             #[allow(non_snake_case)]
             pub mod #module_name {
@@ -237,6 +240,12 @@ impl ToTokens for NodeToken{
                 
                #( #imports_referenced_node_schema) *
                 
+                mod #_____field_names {
+                    use super::super::*;
+                
+                    #( #field_wrapper_type_custom_implementations) *
+                } 
+            
                 #[allow(non_snake_case)]
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
