@@ -129,7 +129,7 @@ fn define_age() -> DefineFieldStatement {
     //         ])
     //         .to_raw(),
     //     );
-    let statement = define_field(Student::schema().age.deref())
+    let statement = define_field(Student::schema().age)
         .on_table(Student::table_name())
         .type_(String)
         .value("example@codebreather.com")
