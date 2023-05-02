@@ -756,7 +756,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let alien_schema::Alien { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create(unsaved_alien.clone())
-        .load_links(vec![spaceShips])?
+        .load_links(arr![spaceShips])?
         .return_one(db.clone())
         .await?;
 

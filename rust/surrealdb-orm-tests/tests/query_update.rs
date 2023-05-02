@@ -84,7 +84,8 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Weapon>(id)
-        .set(updater(strength).equal(923))
+        // .set(updater(strength).equal(923))
+        .set(strength.equal(34))
         .return_one(db.clone())
         .await?;
 
@@ -210,7 +211,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 2));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(updater(name).equal("Rook"))
+        .set(name.equal("Rook"))
         .set(updater(tags).append("street"))
         .where_(cond(alien.weapon(E).strength.equal(5)).and(age.greater_than(3)))
         .return_many(db.clone())
