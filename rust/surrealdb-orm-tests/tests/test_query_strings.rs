@@ -343,24 +343,31 @@ fn multiplication_tests1() {
         .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
         .group_by(course)
         .group_by(firstName)
-        .group_by(&[lastName, unoBook, &Field::new("lowo")])
-        .group_by(vec![lastName, unoBook, &Field::new("lowo")])
+        .group_by(arr![lastName, unoBook, &Field::new("lowo")])
+        .group_by(arr![lastName, unoBook, &Field::new("lowo")])
+        // .group_by(&[lastName, unoBook, &Field::new("lowo")])
+        // .group_by(vec![lastName, unoBook, &Field::new("lowo")])
         .start(5)
         .limit(400)
         .fetch(firstName)
         .fetch(lastName)
-        .fetch(&[age, unoBook])
-        .fetch(vec![age, unoBook])
+        .fetch(arr![age, unoBook])
+        .fetch(arr![age, unoBook])
+        // .fetch(&[age, unoBook])
+        // .fetch(vec![age, unoBook])
         .split(lastName)
         .split(firstName)
-        .split(&[firstName, semCoures])
-        .split(vec![firstName, semCoures])
+        .split(arr![firstName, semCoures])
+        .split(arr![firstName, semCoures])
+        // .split(&[firstName, semCoures])
+        // .split(vec![firstName, semCoures])
         .timeout(Duration::from_secs(8))
         .parallel();
 
     let is_oyelowo = true;
     if is_oyelowo {
-        query = query.group_by(&[age, bestFriend, &Field::new("dayo")]);
+        // query = query.group_by(&[age, bestFriend, &Field::new("dayo")]);
+        query = query.group_by(arr![age, bestFriend, &Field::new("dayo")]);
     }
 
     // stringify_tokens!("lowo", "knows", 5);

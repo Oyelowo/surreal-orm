@@ -410,6 +410,13 @@ impl SchemaFieldsProperties {
                                     }
                                 }
                             
+                                impl From<&#field_name_as_camel> for #crate_name::Valuex {
+                                    fn from(value: &#field_name_as_camel) -> Self {
+                                        let field: #crate_name::Field = value.into();
+                                        field.into()
+                                    }
+                                }
+                            
                                 impl From<#field_name_as_camel> for #crate_name::Valuex {
                                     fn from(value: #field_name_as_camel) -> Self {
                                         let field: #crate_name::Field = value.into();

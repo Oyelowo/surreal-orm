@@ -429,6 +429,14 @@ impl From<Vec<&Field>> for Splittables {
     }
 }
 
+impl From<Vec<Valuex>> for Splittables {
+    fn from(value: Vec<Valuex>) -> Self {
+        // Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
+        // Self::Fields(value.into())
+        todo!()
+    }
+}
+
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
