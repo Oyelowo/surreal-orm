@@ -417,6 +417,12 @@ impl SchemaFieldsProperties {
                                     }
                                 }
                             
+                                impl From<&#field_name_as_camel> for #crate_name::Field {
+                                    fn from(field_name:& #field_name_as_camel) -> Self {
+                                        field_name.0.clone()
+                                    }
+                                }
+                            
                                 impl From<#field_name_as_camel> for #crate_name::Field {
                                     fn from(field_name: #field_name_as_camel) -> Self {
                                         field_name.0
