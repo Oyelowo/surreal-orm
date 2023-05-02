@@ -409,12 +409,24 @@ impl SchemaFieldsProperties {
                                         Self(field_name)
                                     }
                                 }
+                            
+                                impl From<#field_name_as_camel> for #crate_name::Field {
+                                    fn from(field_name: #field_name_as_camel) -> Self {
+                                        field_name.0
+                                    }
+                                }
 
                                 impl ::std::ops::Deref for #field_name_as_camel {
                                     type Target = #crate_name::Field;
 
                                     fn deref(&self) -> &Self::Target {
                                         &self.0
+                                    }
+                                }
+
+                                impl ::std::ops::DerefMut for #field_name_as_camel {
+                                    fn deref_mut(&mut self) -> &mut Self::Target {
+                                        &mut self.0
                                     }
                                 }
 

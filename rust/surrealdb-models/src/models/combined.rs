@@ -4,6 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
+use _core::ops::Deref;
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
@@ -128,7 +129,7 @@ fn define_age() -> DefineFieldStatement {
     //         ])
     //         .to_raw(),
     //     );
-    let statement = define_field(Student::schema().age)
+    let statement = define_field(Student::schema().age.deref())
         .on_table(Student::table_name())
         .type_(String)
         .value("example@codebreather.com")

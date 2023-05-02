@@ -2,7 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SurrealId, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, SetterAssignable, SurrealId, SurrealdbEdge, SurrealdbNode,
+    SurrealdbObject, E,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -49,4 +50,17 @@ pub struct Company {
 pub struct Time {
     // pub name: String,
     pub connected: DateTime<Utc>,
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "organization")]
+pub struct Organization {
+    pub id: SurrealId<Self>,
+    pub name: String,
+    #[surrealdb(link_many = "User")]
+    pub users: LinkMany<User>,
+    #[surrealdb(nest_object = "Time")]
+    pub time: Time,
+    pub age: u8,
 }

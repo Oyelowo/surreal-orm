@@ -140,6 +140,12 @@ mod field_module {
     type Lowa = Dayo<super::Mana>;
     pub struct Lowo(pub(super) crate::Field);
 
+    impl std::ops::DerefMut for Lowo {
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            &mut self.0
+        }
+    }
+
     impl std::ops::Deref for Lowo {
         type Target = Field;
 
