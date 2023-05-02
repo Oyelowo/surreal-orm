@@ -390,7 +390,7 @@ impl SchemaFieldsProperties {
                 
                 let mut update_field_names_fields_types_kv = || {
                     // TODO:
-                    let field_name_as_camel = format_ident!("{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
+                    let field_name_as_camel = format_ident!("_______________{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
                     let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     if !is_invalid {
                         store.field_wrapper_type_custom_implementations
@@ -401,6 +401,12 @@ impl SchemaFieldsProperties {
                                 impl From<&str> for #field_name_as_camel {
                                     fn from(field_name: &str) -> Self {
                                         Self(#crate_name::Field::new(field_name))
+                                    }
+                                }
+                            
+                                impl From<#crate_name::Field> for #field_name_as_camel {
+                                    fn from(field_name: #crate_name::Field) -> Self {
+                                        Self(field_name)
                                     }
                                 }
 
@@ -435,7 +441,7 @@ impl SchemaFieldsProperties {
                         .push(quote!(
                                     #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
                                       .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
-                                            .#____________update_many_bindings(#bindings);
+                                            .#____________update_many_bindings(#bindings).into();
                                 ));
 
                 };
