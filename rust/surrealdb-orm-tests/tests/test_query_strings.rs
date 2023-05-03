@@ -196,7 +196,7 @@ fn multiplication_tests1() {
 
     let written_book_selection = st
         .bestFriend(Empty)
-        .writes__(wrt.timeWritten.equal("12:00"))
+        .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
 
@@ -518,7 +518,11 @@ fn multiplication_tests2() {
 #[test]
 fn multiplication_tests3() {
     let x = Student::schema()
-        .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
+        .writes__(
+            StudentWritesBook::schema()
+                .timeWritten
+                .equal(Duration::from_secs(343)),
+        )
         .book(Empty)
         .content;
 

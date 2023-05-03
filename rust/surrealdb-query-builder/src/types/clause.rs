@@ -10,7 +10,7 @@ use std::ops::Deref;
 use crate::{
     statements::{LetStatement, SelectStatement},
     Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
-    Param, Parametric, SurrealdbModel, Table,
+    Param, Parametric, Setter, SurrealdbModel, Table,
 };
 
 use super::{Filter, NumberLike, SurrealId};
@@ -311,6 +311,14 @@ impl Erroneous for ObjectClause {
 impl From<Operation> for Clause {
     fn from(value: Operation) -> Self {
         let filter = Filter::new(value);
+        Self::new(ClauseType::Where(filter))
+    }
+}
+
+impl From<Setter> for Clause {
+    fn from(value: Setter) -> Self {
+        let filter: Operation = value.into();
+        let filter = Filter::new(filter);
         Self::new(ClauseType::Where(filter))
     }
 }

@@ -4,8 +4,8 @@ use serde::Serialize;
 use surrealdb::sql;
 
 use crate::{
-    statements::LetStatement, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Param,
-    Parametric, Valuex,
+    statements::LetStatement, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field,
+    Operation, Param, Parametric, Valuex,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -25,6 +25,12 @@ impl Parametric for Setter {
 impl Buildable for Setter {
     fn build(&self) -> String {
         self.query_string.to_string()
+    }
+}
+
+impl Erroneous for Setter {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
     }
 }
 

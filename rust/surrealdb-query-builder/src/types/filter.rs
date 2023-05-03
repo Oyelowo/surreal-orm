@@ -77,7 +77,7 @@ impl Filter {
     /// cond(age.greater_than(18))
     ///     .or(title.equal("Professor"));
     /// ```
-    pub fn or(self, filter: Operation) -> Self {
+    pub fn or(self, filter: impl Buildable + Parametric) -> Self {
         let precendence = self.bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
