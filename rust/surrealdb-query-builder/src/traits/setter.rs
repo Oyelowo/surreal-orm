@@ -4,8 +4,8 @@ use serde::Serialize;
 use surrealdb::sql;
 
 use crate::{
-    statements::LetStatement, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field,
-    Operation, Param, Parametric, Valuex,
+    statements::LetStatement, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
+    Field, Operation, Param, Parametric, Valuex,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -16,23 +16,23 @@ pub struct Setter {
     errors: ErrorList,
 }
 
-impl Parametric for Setter {
-    fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
-    }
-}
+// impl Parametric for Setter {
+//     fn get_bindings(&self) -> BindingsList {
+//         self.bindings.to_vec()
+//     }
+// }
+//
+// impl Buildable for Setter {
+//     fn build(&self) -> String {
+//         self.query_string.to_string()
+//     }
+// }
 
-impl Buildable for Setter {
-    fn build(&self) -> String {
-        self.query_string.to_string()
-    }
-}
-
-impl Erroneous for Setter {
-    fn get_errors(&self) -> ErrorList {
-        self.errors.to_vec()
-    }
-}
+// impl Erroneous for Setter {
+//     fn get_errors(&self) -> ErrorList {
+//         self.errors.to_vec()
+//     }
+// }
 
 impl std::fmt::Display for Setter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -106,6 +106,38 @@ impl From<LetStatement> for SetArg {
         }
     }
 }
+
+impl<T: Into<Setter>> From<&T> for Setter {
+    fn from(value: &T) -> Self {
+        let setter: Setter = value.into();
+        setter
+    }
+}
+
+// impl Conditional for Setter {}
+impl<T: Into<Setter>> Parametric for T {
+    fn get_bindings(&self) -> BindingsList {
+        let setter: Setter = self.into();
+        setter.bindings.to_vec()
+    }
+}
+
+impl<T> Buildable for T
+where
+    T: Into<Setter>,
+{
+    fn build(&self) -> String {
+        let setter: Setter = self.into();
+        setter.query_string.to_string()
+    }
+}
+impl<T: Into<Setter>> Erroneous for T {
+    fn get_errors(&self) -> ErrorList {
+        let setter: Setter = self.into();
+        setter.errors.to_vec()
+    }
+}
+impl<T: Into<Setter>> Conditional for T {}
 
 pub trait SetterAssignable<T: Serialize>
 where

@@ -117,15 +117,20 @@ where
     }
 
     ///
-    fn validate_fields_to_fetch(linked_fields_to_fetch: &Vec<Field>) -> SurrealdbOrmResult<()> {
+    fn validate_fields_to_fetch(
+        linked_fields_to_fetch: Vec<impl Into<Valuex>>,
+    ) -> SurrealdbOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
-            .iter()
-            .filter(|&n| {
-                !T::get_linked_fields()
-                    .iter()
-                    .any(|m| m.build() == *n.build())
+            .into_iter()
+            .map(|n| {
+                let n: Valuex = n.into();
+                n.build()
             })
-            .map(|n| n.build())
+            .filter(|n| !T::get_linked_fields().iter().any(|m| m.build() == *n))
+            // .map(|&n| {
+            //     let n: Valuex = n.into();
+            //     n.build()
+            // })
             .collect::<Vec<_>>();
 
         if !result.is_empty() {
@@ -133,13 +138,20 @@ where
                 result.join(", "),
             ));
         }
-        Ok(())
+        Ok(result)
     }
 
     /// Sets the return type to projections and fetches all records links.
     /// Defaults values to null for referenced records that do not exist.
-    fn load_links(self, linked_fields_to_fetch: Vec<Field>) -> SurrealdbOrmResult<Self> {
-        Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
+    fn load_links(
+        self,
+        linked_fields_to_fetch: Vec<impl Into<Valuex>>,
+    ) -> SurrealdbOrmResult<Self> {
+        let linked_fields_to_fetch = linked_fields_to_fetch
+            .into_iter()
+            .map(|n| n.into())
+            .collect::<Vec<_>>();
+        let linked_fields_to_fetch = Self::validate_fields_to_fetch(linked_fields_to_fetch)?;
         let projections = ReturnType::Projections(
             vec![Field::new("*")]
                 .into_iter()
@@ -154,7 +166,10 @@ where
                         // array items and the second set of `.*` says that we want all fields of
                         // all the arrays. If you want only a specific index, you would do link[0].*
                         // to get all fields of the first link and link[0].name to get only the name.
-                        .map(|field| field.all().all())
+                        .map(|field| {
+                            let field = Field::new(field);
+                            field.all().all()
+                        })
                         .collect::<Vec<_>>(),
                 )
                 .collect::<Vec<_>>()
