@@ -431,9 +431,12 @@ impl From<Vec<&Field>> for Splittables {
 
 impl From<Vec<Valuex>> for Splittables {
     fn from(value: Vec<Valuex>) -> Self {
-        // Self::Fields(value.into_iter().map(Into::into).collect::<Vec<_>>())
-        // Self::Fields(value.into())
-        todo!()
+        Self::Fields(
+            value
+                .into_iter()
+                .map(|v| Field::new(v.build()).with_bindings(v.get_bindings()))
+                .collect::<Vec<_>>(),
+        )
     }
 }
 

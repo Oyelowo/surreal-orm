@@ -329,7 +329,7 @@ fn multiplication_tests1() {
                     .or(age),
             )
             .and(bestFriend.exactly_equal("Oyelowo"))
-            .or(firstName.equal("rer"))
+            .or(firstName.equal("Oyedayo"))
             .and(age.greater_than_or_equal(150)),
         )
         // .where_(
