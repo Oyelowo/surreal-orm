@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
     types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, ToRaw,
+    Conditional, ErrorList, Field, ReturnableDefault, ReturnableStandard, Setter, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -425,15 +425,20 @@ where
     }
 
     /// When specifying fields to update using the SET clause, it is possible to increment and decrement numeric values, and add or remove values from arrays. To increment a numeric value, or to add an item to an array, use the += operator. To decrement a numeric value, or to remove an value from an array, use the -= operator.
-    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
-        let settable: Updateables = settables.into();
-        self.bindings.extend(settable.get_bindings());
+    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> Self {
+        let settable: Vec<Setter> = settables.into();
 
-        let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.build()],
-            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
-        };
-        self.set.extend(setter_query);
+        let (settable, bindings) = settable.into_iter().fold(
+            (Vec::new(), Vec::new()),
+            |(mut settable, mut bindings), s| {
+                settable.push(s.build());
+                bindings.extend(s.get_bindings());
+                (settable, bindings)
+            },
+        );
+
+        self.bindings.extend(bindings);
+        self.set.extend(settable);
         self
     }
 

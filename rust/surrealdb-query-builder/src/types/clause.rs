@@ -160,7 +160,7 @@ impl NodeClause {
 
 impl<T: SurrealdbModel> From<SurrealId<T>> for NodeClause {
     fn from(value: SurrealId<T>) -> Self {
-        Self(Clause::new(ClauseType::Id(value.clone())))
+        Self(Clause::new(ClauseType::Id(value.to_thing())))
     }
 }
 

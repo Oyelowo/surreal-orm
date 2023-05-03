@@ -107,37 +107,29 @@ impl From<LetStatement> for SetArg {
     }
 }
 
-impl<T: Into<Setter>> From<&T> for Setter {
-    fn from(value: &T) -> Self {
-        let setter: Setter = value.into();
-        setter
+impl From<Setter> for Vec<Setter> {
+    fn from(value: Setter) -> Self {
+        vec![value]
     }
 }
 
-// impl Conditional for Setter {}
-impl<T: Into<Setter>> Parametric for T {
+impl Parametric for Setter {
     fn get_bindings(&self) -> BindingsList {
-        let setter: Setter = self.into();
-        setter.bindings.to_vec()
+        self.bindings.to_vec()
     }
 }
 
-impl<T> Buildable for T
-where
-    T: Into<Setter>,
-{
+impl Buildable for Setter {
     fn build(&self) -> String {
-        let setter: Setter = self.into();
-        setter.query_string.to_string()
+        self.query_string.to_string()
     }
 }
-impl<T: Into<Setter>> Erroneous for T {
+impl Erroneous for Setter {
     fn get_errors(&self) -> ErrorList {
-        let setter: Setter = self.into();
-        setter.errors.to_vec()
+        self.errors.to_vec()
     }
 }
-impl<T: Into<Setter>> Conditional for T {}
+impl Conditional for Setter {}
 
 pub trait SetterAssignable<T: Serialize>
 where

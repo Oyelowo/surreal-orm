@@ -68,7 +68,7 @@ impl<T: SurrealdbModel> SurrealId<T> {
     }
 
     /// Generates default id as nano random id used by surrealdb
-    pub fn default() -> Self {
+    pub fn nano_id() -> Self {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::rand())),
             PhantomData,
@@ -95,7 +95,7 @@ impl<T: SurrealdbModel> From<&SurrealId<T>> for sql::Thing {
 
 impl<T: SurrealdbModel> Default for SurrealId<T> {
     fn default() -> Self {
-        Self::default()
+        Self::nano_id()
     }
 }
 
