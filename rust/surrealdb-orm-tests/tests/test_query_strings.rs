@@ -224,7 +224,7 @@ fn multiplication_tests1() {
     let st = Student::schema();
     let written_book_selection = st
         .bestFriend(Empty)
-        .writes__(wrt.timeWritten.equal("12:00"))
+        .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
 
