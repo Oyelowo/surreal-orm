@@ -118,7 +118,7 @@ where
 
     ///
     fn validate_fields_to_fetch(
-        linked_fields_to_fetch: Vec<impl Into<Valuex>>,
+        linked_fields_to_fetch: &Vec<Field>,
     ) -> SurrealdbOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
             .into_iter()
@@ -149,9 +149,14 @@ where
     ) -> SurrealdbOrmResult<Self> {
         let linked_fields_to_fetch = linked_fields_to_fetch
             .into_iter()
-            .map(|n| n.into())
+            .map(|field| {
+                let valuex: Valuex = field.into();
+                let field = Field::new(valuex.build()).with_bindings(valuex.get_bindings());
+                field
+            })
             .collect::<Vec<_>>();
-        let linked_fields_to_fetch = Self::validate_fields_to_fetch(linked_fields_to_fetch)?;
+        Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
+
         let projections = ReturnType::Projections(
             vec![Field::new("*")]
                 .into_iter()
@@ -166,10 +171,7 @@ where
                         // array items and the second set of `.*` says that we want all fields of
                         // all the arrays. If you want only a specific index, you would do link[0].*
                         // to get all fields of the first link and link[0].name to get only the name.
-                        .map(|field| {
-                            let field = Field::new(field);
-                            field.all().all()
-                        })
+                        .map(|field| field.all().all())
                         .collect::<Vec<_>>(),
                 )
                 .collect::<Vec<_>>()
