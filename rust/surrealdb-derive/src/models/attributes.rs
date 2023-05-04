@@ -254,7 +254,7 @@ pub struct MyFieldReceiver {
 }
 
 impl MyFieldReceiver {
-    fn type_is_inferrable(&self) -> bool {
+    pub fn type_is_inferrable(&self) -> bool {
         self.raw_type_is_float()
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
@@ -265,10 +265,16 @@ impl MyFieldReceiver {
             || self.raw_type_is_datetime()
             || self.raw_type_is_geometry()
     }
-    fn is_numeric(&self) -> bool {
+    pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
-        match self.ty {
-            syn::Type::Path(ref p) => {
+        // let xx = FieldType::from_str(self.type_.clone().unwrap_or_default().0.as_str());
+        let surreal_fielt_type = match &self.type_ {
+            Some(x) => FieldType::from_str(x.0.as_str()).unwrap_or(FieldType::Any),
+            None => FieldType::Any,
+        };
+
+        match (ty, surreal_fielt_type) {
+            (syn::Type::Path(ref p), _) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
                     let ident = &path.segments[0].ident.to_string();
@@ -280,6 +286,7 @@ impl MyFieldReceiver {
                     .any(|&x| x == ident)
                 }
             }
+            (_, FieldType::Number | FieldType::Float) => true,
             _ => false,
         }
         // let is_numeric = match quote! {#ty}.to_string().as_str() {
@@ -290,7 +297,7 @@ impl MyFieldReceiver {
         // is_numeric
     }
 
-    fn raw_type_is_float(&self) -> bool {
+    pub fn raw_type_is_float(&self) -> bool {
         let ty = &self.ty;
         // let is_float = match quote! {#ty}.to_string().as_str() {
         //     "f32" | "f64" => true,
@@ -309,7 +316,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_integer(&self) -> bool {
+    pub fn raw_type_is_integer(&self) -> bool {
         let ty = &self.ty;
         // let is_integer = match quote! {#ty}.to_string().as_str() {
         //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
@@ -333,7 +340,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_string(&self) -> bool {
+    pub fn raw_type_is_string(&self) -> bool {
         let ty = &self.ty;
         // let is_string = match quote! {#ty}.to_string().as_str() {
         //     "String" => true,
@@ -352,7 +359,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_bool(&self) -> bool {
+    pub fn raw_type_is_bool(&self) -> bool {
         let ty = &self.ty;
         // let is_bool = match quote! {#ty}.to_string().as_str() {
         //     "bool" => true,
@@ -380,7 +387,7 @@ impl MyFieldReceiver {
     //     is_array
     // }
 
-    fn raw_type_is_list(&self) -> bool {
+    pub fn raw_type_is_list(&self) -> bool {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(path) => {
@@ -403,7 +410,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_object(&self) -> bool {
+    pub fn raw_type_is_object(&self) -> bool {
         let ty = &self.ty;
         // let is_object = match quote! {#ty}.to_string().as_str() {
         //     "HashMap" | "std::collections::HashMap" => true,
@@ -433,7 +440,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_datetime(&self) -> bool {
+    pub fn raw_type_is_datetime(&self) -> bool {
         let ty = &self.ty;
         // let is_datetime = match quote! {#ty}.to_string().as_str() {
         //     "std::time::Duration" | "chrono::Duration" => true,
@@ -462,7 +469,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_duration(&self) -> bool {
+    pub fn raw_type_is_duration(&self) -> bool {
         let ty = &self.ty;
         // let is_duration = match quote! {#ty}.to_string().as_str() {
         //     "Duration" => true,
@@ -490,7 +497,7 @@ impl MyFieldReceiver {
         }
     }
 
-    fn raw_type_is_geometry(&self) -> bool {
+    pub fn raw_type_is_geometry(&self) -> bool {
         let ty = &self.ty;
         // let is_geometry = match quote! {#ty}.to_string().as_str() {
         //     "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString"
@@ -590,7 +597,7 @@ impl FromMeta for Permissions {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FieldTypeWrapper(pub String);
 
 impl FieldTypeWrapper {

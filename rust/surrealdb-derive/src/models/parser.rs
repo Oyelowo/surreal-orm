@@ -393,6 +393,12 @@ impl SchemaFieldsProperties {
                     // TODO:
                     let field_name_as_camel = format_ident!("_______________{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
                     let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    let numeric_trait = if field_receiver.is_numeric(){
+                        quote!(impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {})
+                    } else {
+                        quote!()
+                    };
+                    
                     if !is_invalid {
                         store.field_wrapper_type_custom_implementations
                             .push(quote!(
@@ -452,6 +458,8 @@ impl SchemaFieldsProperties {
                                 }
 
                                 impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
+
+                                #numeric_trait
                             ));
                         
                             store.schema_struct_fields_types_kv

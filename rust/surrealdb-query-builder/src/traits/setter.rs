@@ -153,6 +153,76 @@ where
     }
 }
 
+pub trait SetterNumeric<T: Serialize>
+where
+    Self: std::ops::Deref<Target = Field>,
+{
+    fn increment_by(&self, value: impl Into<T>) -> Setter {
+        let operator = sql::Operator::Inc;
+        let field = self.deref();
+        let set_arg: SetArg = value.into().into();
+
+        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
+        Setter {
+            query_string: column_updater_string,
+            bindings: set_arg.get_bindings(),
+            errors: set_arg.get_errors(),
+        }
+    }
+
+    fn decrement_by(&self, value: impl Into<T>) -> Setter {
+        let operator = sql::Operator::Dec;
+        let field = self.deref();
+        let set_arg: SetArg = value.into().into();
+
+        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
+        Setter {
+            query_string: column_updater_string,
+            bindings: set_arg.get_bindings(),
+            errors: set_arg.get_errors(),
+        }
+    }
+
+    fn to_field(&self) -> Field {
+        self.deref().clone()
+    }
+}
+
+pub trait SetterArray<T: Serialize>
+where
+    Self: std::ops::Deref<Target = Field>,
+{
+    fn append(&self, value: impl Into<T>) -> Setter {
+        let operator = sql::Operator::Inc;
+        let field = self.deref();
+        let set_arg: SetArg = value.into().into();
+
+        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
+        Setter {
+            query_string: column_updater_string,
+            bindings: set_arg.get_bindings(),
+            errors: set_arg.get_errors(),
+        }
+    }
+
+    fn remove(&self, value: impl Into<T>) -> Setter {
+        let operator = sql::Operator::Dec;
+        let field = self.deref();
+        let set_arg: SetArg = value.into().into();
+
+        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
+        Setter {
+            query_string: column_updater_string,
+            bindings: set_arg.get_bindings(),
+            errors: set_arg.get_errors(),
+        }
+    }
+
+    fn to_field(&self) -> Field {
+        self.deref().clone()
+    }
+}
+
 type Test<T> = T;
 struct Dayo<T>(Test<T>);
 
