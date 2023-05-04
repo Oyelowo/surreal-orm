@@ -347,6 +347,7 @@ impl SchemaFieldsProperties {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
+                dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
