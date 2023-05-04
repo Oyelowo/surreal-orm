@@ -347,7 +347,7 @@ impl SchemaFieldsProperties {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
-                dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
+                // dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
@@ -393,8 +393,12 @@ impl SchemaFieldsProperties {
                     // TODO:
                     let field_name_as_camel = format_ident!("_______________{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
                     let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    
                     let numeric_trait = if field_receiver.is_numeric(){
-                        quote!(impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {})
+                        quote!(
+                        impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
+                        // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
+                    )
                     } else {
                         quote!()
                     };

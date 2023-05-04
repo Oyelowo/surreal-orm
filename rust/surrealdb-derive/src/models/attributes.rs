@@ -9,7 +9,7 @@
 
 use std::{ops::Deref, str::FromStr};
 
-use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta};
+use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use surrealdb_query_builder::FieldType;
 use syn::{Ident, Lit, LitStr, Path};
@@ -268,13 +268,17 @@ impl MyFieldReceiver {
     pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
         // let xx = FieldType::from_str(self.type_.clone().unwrap_or_default().0.as_str());
-        let surreal_fielt_type = match &self.type_ {
+        let surreal_field_type = match &self.type_ {
             Some(x) => FieldType::from_str(x.0.as_str()).unwrap_or(FieldType::Any),
             None => FieldType::Any,
         };
+        // dbg!(
+        //     &self.ident.to_token_stream().to_string(),
+        //     &surreal_field_type
+        // );
 
-        match (ty, surreal_fielt_type) {
-            (syn::Type::Path(ref p), _) => {
+        let type_is_numeric = match ty {
+            syn::Type::Path(ref p) => {
                 let path = &p.path;
                 path.leading_colon.is_none() && path.segments.len() == 1 && {
                     let ident = &path.segments[0].ident.to_string();
@@ -286,9 +290,14 @@ impl MyFieldReceiver {
                     .any(|&x| x == ident)
                 }
             }
-            (_, FieldType::Number | FieldType::Float) => true,
             _ => false,
-        }
+        };
+
+        type_is_numeric
+            || matches!(
+                surreal_field_type,
+                FieldType::Int | FieldType::Number | FieldType::Float
+            )
         // let is_numeric = match quote! {#ty}.to_string().as_str() {
         //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128"
         //     | "f32" | "f64" => true,

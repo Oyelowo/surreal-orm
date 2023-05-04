@@ -11,6 +11,8 @@ use surrealdb_orm::SurrealdbObject;
 pub struct Weapon {
     pub id: SurrealId<Self>,
     pub name: String,
+    // pub strength: u64,
+    #[surrealdb(type = "int")]
     pub strength: Strength,
     pub created: DateTime<Utc>,
     #[surrealdb(nest_object = "Rocket")]

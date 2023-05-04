@@ -52,49 +52,51 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
-    let created_weapon = create(weapon).return_one(db.clone()).await.unwrap();
-    assert_eq!(created_weapon.as_ref().unwrap().name, "Laser");
-    assert_eq!(created_weapon.as_ref().unwrap().strength, 0);
+    let created_weapon = create(weapon).get_one(db.clone()).await.unwrap();
+    assert_eq!(created_weapon.name, "Laser");
+    assert_eq!(created_weapon.strength, 0);
     //
     // // Increment by 5;
-    let ref id = created_weapon.unwrap().clone().id;
-    let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-    //
-    // update::<Weapon>(id)
-    //     .set(updater(strength).increment_by(5))
-    //     .run(db.clone())
-    //     .await?;
-    //
-    // update::<Weapon>(id)
-    //     .set(updater(strength).increment_by(5))
-    //     .run(db.clone())
-    //     .await?;
-    //
-    // let updated = update::<Weapon>(id)
-    //     .set(updater(strength).decrement_by(2))
-    //     .return_one(db.clone())
-    //     .await?;
-    //
-    // let selected: Option<Weapon> = select(All)
-    //     .from(Weapon::table_name())
-    //     .return_one(db.clone())
-    //     .await?;
-    // assert_eq!(updated.unwrap().strength, 8);
-    // assert_eq!(selected.unwrap().strength, 8);
-    //
-    // // Try setting
-    // let updated = update::<Weapon>(id)
-    //     // .set(updater(strength).equal(923))
-    //     .set(strength.equal(34u64))
-    //     .return_one(db.clone())
-    //     .await?;
-    //
-    // let selected: Option<Weapon> = select(All)
-    //     .from(Weapon::table_name())
-    //     .return_one(db.clone())
-    //     .await?;
-    // assert_eq!(updated.unwrap().strength, 923);
-    // assert_eq!(selected.unwrap().strength, 923);
+    let ref id = created_weapon.clone().id;
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+
+    update::<Weapon>(id)
+        // .set(updater(strength).increment_by(5))
+        .set(strength.increment_by(5u64))
+        .run(db.clone())
+        .await?;
+
+    update::<Weapon>(id)
+        // .set(updater(strength).increment_by(5))
+        .set(strength.increment_by(5u64))
+        .run(db.clone())
+        .await?;
+
+    let updated = update::<Weapon>(id)
+        .set(strength.decrement_by(2u64))
+        .return_one(db.clone())
+        .await?;
+
+    let selected: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(updated.unwrap().strength, 8);
+    assert_eq!(selected.unwrap().strength, 8);
+
+    // Try setting
+    let updated = update::<Weapon>(id)
+        // .set(updater(strength).equal(923))
+        .set(strength.equal(923u64))
+        .return_one(db.clone())
+        .await?;
+
+    let selected: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(updated.unwrap().strength, 923);
+    assert_eq!(selected.unwrap().strength, 923);
     Ok(())
 }
 
