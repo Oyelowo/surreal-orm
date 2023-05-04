@@ -259,83 +259,129 @@ impl MyFieldReceiver {
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
-            || self.raw_type_is_array()
+            || self.raw_type_is_list()
             || self.raw_type_is_object()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
             || self.raw_type_is_geometry()
     }
     fn is_numeric(&self) -> bool {
-        // match self.ty {
-        //     syn::Type::Path(ref p) => {
-        //         let path = &p.path;
-        //         path.leading_colon.is_none() && path.segments.len() == 1 && {
-        //             let ident = &path.segments[0].ident.to_string();
-        //             [
-        //                 "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
-        //                 "i128", "isize",
-        //             ]
-        //             .iter()
-        //             .any(|&x| x == ident)
-        //         }
-        //     }
-        //     _ => false,
-        // }
         let ty = &self.ty;
-        let is_numeric = match quote! {#ty}.to_string().as_str() {
-            "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128"
-            | "f32" | "f64" => true,
+        match self.ty {
+            syn::Type::Path(ref p) => {
+                let path = &p.path;
+                path.leading_colon.is_none() && path.segments.len() == 1 && {
+                    let ident = &path.segments[0].ident.to_string();
+                    [
+                        "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
+                        "i128", "isize",
+                    ]
+                    .iter()
+                    .any(|&x| x == ident)
+                }
+            }
             _ => false,
-        };
-        is_numeric
+        }
+        // let is_numeric = match quote! {#ty}.to_string().as_str() {
+        //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128"
+        //     | "f32" | "f64" => true,
+        //     _ => false,
+        // };
+        // is_numeric
     }
 
     fn raw_type_is_float(&self) -> bool {
         let ty = &self.ty;
-        let is_float = match quote! {#ty}.to_string().as_str() {
-            "f32" | "f64" => true,
+        // let is_float = match quote! {#ty}.to_string().as_str() {
+        //     "f32" | "f64" => true,
+        //     _ => false,
+        // };
+        // is_float
+        match self.ty {
+            syn::Type::Path(ref p) => {
+                let path = &p.path;
+                path.leading_colon.is_none() && path.segments.len() == 1 && {
+                    let ident = &path.segments[0].ident.to_string();
+                    ["f32", "f64"].iter().any(|&x| x == ident)
+                }
+            }
             _ => false,
-        };
-        is_float
+        }
     }
 
     fn raw_type_is_integer(&self) -> bool {
         let ty = &self.ty;
-        let is_integer = match quote! {#ty}.to_string().as_str() {
-            "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
+        // let is_integer = match quote! {#ty}.to_string().as_str() {
+        //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
+        //     _ => false,
+        // };
+        // is_integer
+        match self.ty {
+            syn::Type::Path(ref p) => {
+                let path = &p.path;
+                path.leading_colon.is_none() && path.segments.len() == 1 && {
+                    let ident = &path.segments[0].ident.to_string();
+                    [
+                        "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
+                        "i128", "isize",
+                    ]
+                    .iter()
+                    .any(|&x| x == ident)
+                }
+            }
             _ => false,
-        };
-        is_integer
+        }
     }
 
     fn raw_type_is_string(&self) -> bool {
         let ty = &self.ty;
-        let is_string = match quote! {#ty}.to_string().as_str() {
-            "String" => true,
+        // let is_string = match quote! {#ty}.to_string().as_str() {
+        //     "String" => true,
+        //     _ => false,
+        // };
+        // is_string
+        match self.ty {
+            syn::Type::Path(ref p) => {
+                let path = &p.path;
+                path.leading_colon.is_none() && path.segments.len() == 1 && {
+                    let ident = &path.segments[0].ident.to_string();
+                    ["String"].iter().any(|&x| x == ident)
+                }
+            }
             _ => false,
-        };
-        is_string
+        }
     }
 
     fn raw_type_is_bool(&self) -> bool {
         let ty = &self.ty;
-        let is_bool = match quote! {#ty}.to_string().as_str() {
-            "bool" => true,
+        // let is_bool = match quote! {#ty}.to_string().as_str() {
+        //     "bool" => true,
+        //     _ => false,
+        // };
+        // is_bool
+        match self.ty {
+            syn::Type::Path(ref p) => {
+                let path = &p.path;
+                path.leading_colon.is_none() && path.segments.len() == 1 && {
+                    let ident = &path.segments[0].ident.to_string();
+                    ["bool"].iter().any(|&x| x == ident)
+                }
+            }
             _ => false,
-        };
-        is_bool
+        }
     }
 
-    fn raw_type_is_array(&self) -> bool {
+    // fn raw_type_is_array(&self) -> bool {
+    //     let ty = &self.ty;
+    //     let is_array = match quote! {#ty}.to_string().as_str() {
+    //         "Vec" => true,
+    //         _ => false,
+    //     };
+    //     is_array
+    // }
+
+    fn raw_type_is_list(&self) -> bool {
         let ty = &self.ty;
-        let is_array = match quote! {#ty}.to_string().as_str() {
-            "Vec" => true,
-            _ => false,
-        };
-        is_array
-    }
-
-    fn is_list(ty: &syn::Type) -> bool {
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
@@ -347,7 +393,7 @@ impl MyFieldReceiver {
                             return false;
                         }
                     }
-                    last_seg.ident == "Vec"
+                    last_seg.ident.to_string() == "Vec"
                 } else {
                     false
                 }
@@ -359,41 +405,125 @@ impl MyFieldReceiver {
 
     fn raw_type_is_object(&self) -> bool {
         let ty = &self.ty;
-        let is_object = match quote! {#ty}.to_string().as_str() {
-            "HashMap" | "std::collections::HashMap" => true,
-            "BTreeMap" | "std::collections::BTreeMap" => true,
+        // let is_object = match quote! {#ty}.to_string().as_str() {
+        //     "HashMap" | "std::collections::HashMap" => true,
+        //     "BTreeMap" | "std::collections::BTreeMap" => true,
+        //     _ => false,
+        // };
+        // is_object
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path.path.segments.last().unwrap();
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                        if let syn::Type::Infer(_) = inner_type {
+                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                            // The list type should have a specified type parameter
+                            return false;
+                        }
+                    }
+                    last_seg.ident.to_string() == "HashMap"
+                        || last_seg.ident.to_string() == "BTreeMap"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
             _ => false,
-        };
-        is_object
+        }
     }
 
     fn raw_type_is_datetime(&self) -> bool {
         let ty = &self.ty;
-        let is_datetime = match quote! {#ty}.to_string().as_str() {
-            "std::time::Duration" | "chrono::Duration" => true,
-            "chrono::NaiveDateTime" | "chrono::DateTime<chrono::Utc>" => true,
+        // let is_datetime = match quote! {#ty}.to_string().as_str() {
+        //     "std::time::Duration" | "chrono::Duration" => true,
+        //     "chrono::NaiveDateTime" | "chrono::DateTime<chrono::Utc>" => true,
+        //     _ => false,
+        // };
+        // is_datetime
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path.path.segments.last().unwrap();
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                        if let syn::Type::Infer(_) = inner_type {
+                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                            // The list type should have a specified type parameter
+                            return false;
+                        }
+                    }
+                    last_seg.ident.to_string() == "DateTime"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
             _ => false,
-        };
-        is_datetime
+        }
     }
 
     fn raw_type_is_duration(&self) -> bool {
         let ty = &self.ty;
-        let is_duration = match quote! {#ty}.to_string().as_str() {
-            "Duration" => true,
+        // let is_duration = match quote! {#ty}.to_string().as_str() {
+        //     "Duration" => true,
+        //     _ => false,
+        // };
+        // is_duration
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path.path.segments.last().unwrap();
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                        if let syn::Type::Infer(_) = inner_type {
+                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                            // The list type should have a specified type parameter
+                            return false;
+                        }
+                    }
+                    last_seg.ident.to_string() == "Duration"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
             _ => false,
-        };
-        is_duration
+        }
     }
 
     fn raw_type_is_geometry(&self) -> bool {
         let ty = &self.ty;
-        let is_geometry = match quote! {#ty}.to_string().as_str() {
-            "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString"
-            | "MultiPolygon" | "GeometryCollection" | "Geometry" => true,
+        // let is_geometry = match quote! {#ty}.to_string().as_str() {
+        //     "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString"
+        //     | "MultiPolygon" | "GeometryCollection" | "Geometry" => true,
+        //     _ => false,
+        // };
+        // is_geometry
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path.path.segments.last().unwrap();
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                        if let syn::Type::Infer(_) = inner_type {
+                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                            // The list type should have a specified type parameter
+                            return false;
+                        }
+                    }
+                    last_seg.ident.to_string() == "Geometry"
+                        || last_seg.ident.to_string() == "Point"
+                        || last_seg.ident.to_string() == "LineString"
+                        || last_seg.ident.to_string() == "Polygon"
+                        || last_seg.ident.to_string() == "MultiPoint"
+                        || last_seg.ident.to_string() == "MultiLineString"
+                        || last_seg.ident.to_string() == "MultiPolygon"
+                        || last_seg.ident.to_string() == "GeometryCollection"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
             _ => false,
-        };
-        is_geometry
+        }
     }
 }
 
