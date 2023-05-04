@@ -12,7 +12,7 @@ use std::{ops::Deref, str::FromStr};
 use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use surrealdb_query_builder::FieldType;
-use syn::{Ident, Lit, LitStr, Path};
+use syn::{GenericArgument, Ident, Lit, LitStr, Path, PathArguments, Type};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -541,8 +541,41 @@ impl MyFieldReceiver {
             _ => false,
         }
     }
+
+    pub fn get_array_content_type(&self) -> Option<TokenStream> {
+        let ty = &self.ty;
+        get_vector_item_type(ty).map(|t| t.into_token_stream())
+        // match ty {
+        //     syn::Type::Array(array) => {
+        //         dbg!(&array.elem);
+        //         Some(*array.elem.clone())
+        //     }
+        //     _ => None,
+        // }
+    }
 }
 
+fn get_vector_item_type(ty: &Type) -> Option<Type> {
+    let item_ty = match ty {
+        syn::Type::Path(type_path) => {
+            let last_segment = type_path.path.segments.last().unwrap();
+            if last_segment.ident != "Vec" {
+                return None;
+            }
+            let item_ty = match last_segment.arguments {
+                syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
+                _ => None,
+            };
+            match item_ty {
+                Some(syn::GenericArgument::Type(ty)) => ty,
+                _ => return None,
+            }
+        }
+        _ => return None,
+    };
+    dbg!(&item_ty);
+    Some(item_ty.clone())
+}
 // #[derive(Debug, Clone)]
 // pub struct ValueWrapper(syn::LitStr);
 //

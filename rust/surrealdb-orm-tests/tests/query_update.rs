@@ -212,52 +212,55 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .iter()
         .all(|alien| alien.tags.len() == 2));
 
-    // let weak_aliens = update::<Alien>(Alien::table_name())
-    //     .set(name.equal("Rook"))
-    //     .set(updater(tags).append("street"))
-    //     .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
-    //     .return_many(db.clone())
-    //     .await?;
-    //
-    // // Based on the modulo above in the linking, we should have 7 weapons with strength 5.
-    // // Out of the 7, only 5 have age greater than 3.
-    // assert_eq!(weak_aliens.len(), 5);
-    // // Assert that they all now have the name rook
-    // assert!(weak_aliens.iter().all(|alien| alien.name == "Rook"));
-    // // Assert that they all now have the tag street
-    // assert!(weak_aliens
-    //     .iter()
-    //     .all(|alien| alien.tags.contains(&"street".to_string())));
-    //
-    // // They should now all be rooks
-    // assert!(select_weak_aliens()
-    //     .await
-    //     .iter()
-    //     .all(|alien| alien.name == "Rook"));
-    // assert!(select_weak_aliens()
-    //     .await
-    //     .iter()
-    //     .all(|alien| alien.tags.len() == 3));
-    //
-    // let weak_aliens = update::<Alien>(Alien::table_name())
-    //     .set(updater(name).equal("Kiwi"))
-    //     .set(updater(tags).remove("street"))
-    //     .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
-    //     .return_many(db.clone())
-    //     .await?;
-    // assert!(weak_aliens
-    //     .iter()
-    //     .all(|alien| !alien.tags.contains(&"street".to_string())));
-    //
-    // // They should now all be kiwi
-    // assert!(select_weak_aliens()
-    //     .await
-    //     .iter()
-    //     .all(|alien| alien.name == "Kiwi"));
-    // assert!(select_weak_aliens()
-    //     .await
-    //     .iter()
-    //     .all(|alien| alien.tags.len() == 2));
+    let weak_aliens = update::<Alien>(Alien::table_name())
+        .set(name.equal("Rook"))
+        .set(tags.append("street"))
+        // .set(updater(tags).append("street"))
+        .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
+        .return_many(db.clone())
+        .await?;
+
+    // Based on the modulo above in the linking, we should have 7 weapons with strength 5.
+    // Out of the 7, only 5 have age greater than 3.
+    assert_eq!(weak_aliens.len(), 5);
+    // Assert that they all now have the name rook
+    assert!(weak_aliens.iter().all(|alien| alien.name == "Rook"));
+    // Assert that they all now have the tag street
+    assert!(weak_aliens
+        .iter()
+        .all(|alien| alien.tags.contains(&"street".to_string())));
+
+    // They should now all be rooks
+    assert!(select_weak_aliens()
+        .await
+        .iter()
+        .all(|alien| alien.name == "Rook"));
+    assert!(select_weak_aliens()
+        .await
+        .iter()
+        .all(|alien| alien.tags.len() == 3));
+
+    let weak_aliens = update::<Alien>(Alien::table_name())
+        .set(name.equal("Kiwi"))
+        .set(tags.remove("street"))
+        // .set(updater(name).equal("Kiwi"))
+        // .set(updater(tags).remove("street"))
+        .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
+        .return_many(db.clone())
+        .await?;
+    assert!(weak_aliens
+        .iter()
+        .all(|alien| !alien.tags.contains(&"street".to_string())));
+
+    // They should now all be kiwi
+    assert!(select_weak_aliens()
+        .await
+        .iter()
+        .all(|alien| alien.name == "Kiwi"));
+    assert!(select_weak_aliens()
+        .await
+        .iter()
+        .all(|alien| alien.tags.len() == 2));
     Ok(())
 }
 

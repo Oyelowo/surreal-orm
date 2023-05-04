@@ -403,6 +403,21 @@ impl SchemaFieldsProperties {
                         quote!()
                     };
                     
+                    let array_trait = if field_receiver.raw_type_is_list(){
+                        let array_elem_ty = field_receiver.get_array_content_type().unwrap_or(quote!());
+                        quote!(
+                        impl #crate_name::SetterArray<#array_elem_ty> for self::#field_name_as_camel  {}
+                        // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
+                    )
+                    } else {
+                        quote!()
+                    };
+
+                    // let array_trait = field_receiver.get_array_content_type().map_or(quote!(), |element|{
+                    //     quote!(
+                    //     impl #crate_name::SetterArray<#element> for self::#field_name_as_camel  {}
+                    //     // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
+                    // )});
                     if !is_invalid {
                         store.field_wrapper_type_custom_implementations
                             .push(quote!(
@@ -464,6 +479,8 @@ impl SchemaFieldsProperties {
                                 impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
 
                                 #numeric_trait
+                            
+                                #array_trait
                             ));
                         
                             store.schema_struct_fields_types_kv
