@@ -57,6 +57,7 @@ mod operators_macros;
 pub mod statements;
 mod traits;
 mod types;
+pub mod validators;
 
 pub use errors::*;
 pub use helpers::*;
@@ -67,3 +68,6 @@ pub use surrealdb::opt::RecordId;
 pub use surrealdb::sql;
 pub use surrealdb::sql::json;
 pub use surrealdb::sql::Value;
+
+
+

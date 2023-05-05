@@ -1041,10 +1041,17 @@ impl ReferencedNodeMeta {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::string::String>);)
                 }
                 FieldType::Int => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    quote!(
+                        #crate_name::validators::is_int::<#raw_type>();
+                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                    )
                 }
                 FieldType::Float => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    quote!(
+                        #crate_name::validators::is_float::<#raw_type>();
+                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                    )
+                    // quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Bool => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::primitive::bool>);)
@@ -1065,7 +1072,11 @@ impl ReferencedNodeMeta {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Duration>);)
                 }
                 FieldType::Number => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    quote!(
+                        #crate_name::validators::is_num::<#raw_type>();
+                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                    )
+                    // quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Object => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Object>);)
