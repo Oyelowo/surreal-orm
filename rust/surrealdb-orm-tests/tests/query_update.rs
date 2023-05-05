@@ -57,13 +57,11 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
 
     update::<Weapon>(id)
-        // .set(updater(strength).increment_by(5))
         .set(strength.increment_by(5u64))
         .run(db.clone())
         .await?;
 
     update::<Weapon>(id)
-        // .set(updater(strength).increment_by(5))
         .set(strength.increment_by(5u64))
         .run(db.clone())
         .await?;
@@ -82,7 +80,6 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Weapon>(id)
-        // .set(updater(strength).equal(923))
         .set(strength.equal(923u64))
         .return_one(db.clone())
         .await?;

@@ -11,7 +11,7 @@ use std::{ops::Deref, str::FromStr};
 
 use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::FieldType;
+use surrealdb_query_builder::{FieldType, GeometryType};
 use syn::{GenericArgument, Ident, Lit, LitStr, Path, PathArguments, Type};
 
 use super::{
@@ -253,9 +253,72 @@ pub struct MyFieldReceiver {
     default: ::darling::util::Ignored,
 }
 
+type StaticAssertion = TokenStream;
+type FieldTypeToken = TokenStream;
 impl MyFieldReceiver {
-    pub fn type_is_inferrable(&self) -> bool {
-        self.raw_type_is_float()
+    pub fn infer_surreal_type_heuristically(&self) -> (FieldTypeToken, StaticAssertion) {
+        let crate_name = get_crate_name(false);
+        let ty = &self.ty;
+
+        if self.raw_type_is_bool() {
+            (
+                quote!(#crate_name::FieldType::Bool),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Bool>);),
+            )
+        } else if self.raw_type_is_float() {
+            (
+                quote!(#crate_name::FieldType::Float),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Float>);),
+            )
+        } else if self.raw_type_is_integer() {
+            (
+                quote!(#crate_name::FieldType::Int),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Int>);),
+            )
+        } else if self.raw_type_is_string() {
+            (
+                quote!(#crate_name::FieldType::String),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Strand>);),
+            )
+        } else if self.raw_type_is_list() {
+            (
+                quote!(#crate_name::FieldType::Array),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Array>);),
+            )
+        } else if self.raw_type_is_object() {
+            (
+                quote!(#crate_name::FieldType::Object),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Object>);),
+            )
+        } else if self.raw_type_is_duration() {
+            (
+                quote!(#crate_name::FieldType::Duration),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Duration>);),
+            )
+        } else if self.raw_type_is_datetime() {
+            (
+                quote!(#crate_name::FieldType::DateTime),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::DateTime>);),
+            )
+        } else if self.raw_type_is_geometry() {
+            (
+                quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Geometry>);),
+            )
+        } else {
+            (
+                quote!(#crate_name::FieldType::Any),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Value>);),
+            )
+        }
+    }
+
+    pub fn type_is_inferrable(&self, field_name_normalized_str: &String) -> bool {
+        self.link_one.is_none()
+            || self.link_self.is_none()
+            || self.link_many.is_none()
+            || field_name_normalized_str == "id"
+            || self.raw_type_is_float()
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
@@ -776,7 +839,17 @@ impl ReferencedNodeMeta {
             _ => {}
         };
 
-        // Generate schema type. If type attribute not provided, set some defaults that can be
+        // let surreal_type = if field_receiver.type_is_inferrable(field_name_normalized) {
+        //     field_receiver.infer_surreal_type_heuristically()
+        // } else {
+        //     if field_receiver.type_.is_none() {
+        //         panic!("Field type is not provided. Please provide a type for the field.");
+        //         // field_receiver.type_.as_ref().unwrap().0.to_string()
+        //     }
+        //     // field_receiver.type_.as_ref().unwrap().0.to_string()
+        //     (FieldType::Any, quote!())
+        // };
+        // // Generate schema type. If type attribute not provided, set some defaults that can be
         // derived at compile time.
         if let Some(type_) = &field_receiver.type_ {
             let type_ = type_.0.to_string();
@@ -899,6 +972,7 @@ impl ReferencedNodeMeta {
                 if field_name_normalized == "id" {
                     define_field_methods
                         .push(quote!(.type_(#crate_name::FieldType::Record(Self::table_name()))));
+                    // TODO: Only do this for SurrealEdge
                 } else if field_name_normalized == "out" || field_name_normalized == "in" {
                     // An edge might be shared by multiple In/Out nodes. So, default to any type of
                     // record for edge in and out
@@ -911,6 +985,19 @@ impl ReferencedNodeMeta {
                     define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
                 }
             }
+            let (field_type, static_assertion) =
+                if field_receiver.type_is_inferrable(field_name_normalized) {
+                    field_receiver.infer_surreal_type_heuristically()
+                } else {
+                    if field_receiver.type_.is_none() {
+                        panic!("Field type is not provided. Please provide a type for the field.");
+                        // field_receiver.type_.as_ref().unwrap().0.to_string()
+                    }
+                    // field_receiver.type_.as_ref().unwrap().0.to_string()
+                    (quote!(), quote!())
+                };
+            define_field_methods.push(quote!(.type_(#field_type)));
+            static_assertions.push(static_assertion);
         };
 
         match field_receiver {
