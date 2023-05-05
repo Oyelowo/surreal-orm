@@ -389,7 +389,7 @@ impl SchemaFieldsProperties {
                 };
             
                 
-                let mut update_field_names_fields_types_kv = |array_element: Option<syn::Ident>| {
+                let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
                     let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
                     let is_settable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     
@@ -402,7 +402,7 @@ impl SchemaFieldsProperties {
                     };
                     
                     // Only works for vectors
-                    let array_trait = array_element.map(|el|el.to_token_stream()).or_else(||field_receiver.get_array_content_type()).map(|items|{
+                    let array_trait = array_element.or_else(||field_receiver.get_array_content_type()).map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         }).unwrap_or(quote!());
                     
@@ -553,7 +553,7 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(Some(foreign_node.clone()));
+                        update_field_names_fields_types_kv(Some(quote!(#crate_name::SurrealId<#foreign_node>)));
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -578,7 +578,7 @@ impl SchemaFieldsProperties {
 
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         
-                        update_field_names_fields_types_kv(Some(foreign_node.clone()));
+                        update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
                         get_nested_meta_with_defs(&node_object)
                     },
                     RelationType::None => {
