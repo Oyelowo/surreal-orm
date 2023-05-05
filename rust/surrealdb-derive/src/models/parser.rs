@@ -390,35 +390,23 @@ impl SchemaFieldsProperties {
             
                 
                 let mut update_field_names_fields_types_kv = || {
-                    // TODO:
-                    let field_name_as_camel = format_ident!("_______________{}", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
-                    let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
+                    let is_updateable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     
                     let numeric_trait = if field_receiver.is_numeric(){
                         quote!(
-                        impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
-                        // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
-                    )
+                            impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
+                        )
                     } else {
                         quote!()
                     };
                     
-                    let array_trait = if field_receiver.raw_type_is_list(){
-                        let array_elem_ty = field_receiver.get_array_content_type().unwrap_or(quote!());
-                        quote!(
-                        impl #crate_name::SetterArray<#array_elem_ty> for self::#field_name_as_camel  {}
-                        // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
-                    )
-                    } else {
-                        quote!()
-                    };
-
-                    // let array_trait = field_receiver.get_array_content_type().map_or(quote!(), |element|{
-                    //     quote!(
-                    //     impl #crate_name::SetterArray<#element> for self::#field_name_as_camel  {}
-                    //     // impl #crate_name::SetterNumeric<#field_type> for &self::#field_name_as_camel  {}
-                    // )});
-                    if !is_invalid {
+                    // Only works for vectors
+                    let array_trait = field_receiver.get_array_content_type().map(|items|{
+                            quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
+                        }).unwrap_or(quote!());
+                    
+                    if is_updateable {
                         store.field_wrapper_type_custom_implementations
                             .push(quote!(
                                 #[derive(Debug, Clone)]
