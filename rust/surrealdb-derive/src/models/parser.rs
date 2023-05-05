@@ -389,9 +389,9 @@ impl SchemaFieldsProperties {
                 };
             
                 
-                let mut update_field_names_fields_types_kv = || {
+                let mut update_field_names_fields_types_kv = |array_element: Option<syn::Ident>| {
                     let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
-                    let is_updateable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    let is_settable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     
                     let numeric_trait = if field_receiver.is_numeric(){
                         quote!(
@@ -402,11 +402,11 @@ impl SchemaFieldsProperties {
                     };
                     
                     // Only works for vectors
-                    let array_trait = field_receiver.get_array_content_type().map(|items|{
+                    let array_trait = array_element.map(|el|el.to_token_stream()).or_else(||field_receiver.get_array_content_type()).map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         }).unwrap_or(quote!());
                     
-                    if is_updateable {
+                    if is_settable {
                         store.field_wrapper_type_custom_implementations
                             .push(quote!(
                                 #[derive(Debug, Clone)]
@@ -508,7 +508,7 @@ impl SchemaFieldsProperties {
                 let referenced_node_meta = match relationship.clone() {
                     RelationType::Relate(relation) => {
                             store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
-                        update_aliases_struct_fields_types_kv();
+                        // update_aliases_struct_fields_types_kv();
                         let connection = relation.connection_model; 
                         store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
                             ReferencedNodeMeta::default()
@@ -520,7 +520,7 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_one_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -540,7 +540,7 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_self_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -553,7 +553,7 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(Some(foreign_node.clone()));
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -564,7 +564,7 @@ impl SchemaFieldsProperties {
                     RelationType::NestObject(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::SurrealdbObject>::NonNullUpdater>, ));
                         
@@ -578,11 +578,11 @@ impl SchemaFieldsProperties {
 
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(Some(foreign_node.clone()));
                         get_nested_meta_with_defs(&node_object)
                     },
                     RelationType::None => {
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
                         ReferencedNodeMeta::default()

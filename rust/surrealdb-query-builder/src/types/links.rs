@@ -183,6 +183,13 @@ impl<V: SurrealdbNode> LinkSelf<V> {
     }
 }
 
+impl<T: SurrealdbNode> From<SurrealId<T>> for LinkSelf<T> {
+    fn from(id: SurrealId<T>) -> Self {
+        let reference = Reference::Id(id.into());
+        Self(reference.into())
+    }
+}
+
 // impl<V: SurrealdbNode> Default for LinkSelf<V> {}
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
