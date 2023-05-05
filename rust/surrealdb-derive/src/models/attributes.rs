@@ -1035,52 +1035,50 @@ impl ReferencedNodeMeta {
             let field_type = FieldType::from_str(&type_.to_string()).unwrap();
             let static_assertion = match field_type {
                 FieldType::Any => {
-                    quote!(#crate_name::sql::Value)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Value>);)
                 }
                 FieldType::String => {
-                    quote!(::std::string::String)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::string::String>);)
                 }
                 FieldType::Int => {
-                    quote!( #crate_name::sql::Number)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Float => {
-                    quote!( #crate_name::sql::Number)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Bool => {
-                    quote!(::std::primitive::bool)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::primitive::bool>);)
                 }
                 FieldType::Array => {
-                    quote!( #crate_name::sql::Value)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Value);)
                 }
                 FieldType::Record(_) => {
-                    quote!( Option<#crate_name::sql::Thing>)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
                 }
                 FieldType::DateTime => {
-                    quote!( #crate_name::sql::Datetime)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Datetime>);)
                 }
                 FieldType::Decimal => {
-                    quote!( #crate_name::sql::Number)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Duration => {
-                    quote!( #crate_name::sql::Duration)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Duration>);)
                 }
                 FieldType::Number => {
-                    quote!( #crate_name::sql::Number)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Object => {
-                    quote!( #crate_name::sql::Object)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Object>);)
                 }
                 FieldType::RecordAny => {
-                    quote!( Option<#crate_name::sql::Thing>)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
                 }
                 FieldType::Geometry(_) => {
-                    quote!( #crate_name::sql::Geometry)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Geometry>);)
                 }
             };
 
-            static_assertions.push(quote!(
-                ::static_assertions::assert_impl_all!(#raw_type: std::convert::Into<#static_assertion>);
-            ));
+            static_assertions.push(static_assertion);
 
             // Get the field type
             define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::FieldType>()
