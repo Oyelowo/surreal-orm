@@ -64,5 +64,6 @@ pub use traits::*;
 pub use types::*;
 
 pub use surrealdb::opt::RecordId;
+pub use surrealdb::sql;
 pub use surrealdb::sql::json;
 pub use surrealdb::sql::Value;

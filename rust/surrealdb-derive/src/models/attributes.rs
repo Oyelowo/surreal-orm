@@ -256,24 +256,28 @@ pub struct MyFieldReceiver {
 type StaticAssertion = TokenStream;
 type FieldTypeToken = TokenStream;
 impl MyFieldReceiver {
-    pub fn infer_surreal_type_heuristically(&self) -> (FieldTypeToken, StaticAssertion) {
+    pub fn infer_surreal_type_heuristically(
+        &self,
+        struct_name_ident_str: &String,
+        field_name_normalized: &String,
+    ) -> (FieldTypeToken, StaticAssertion) {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
 
         if self.raw_type_is_bool() {
             (
                 quote!(#crate_name::FieldType::Bool),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Bool>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<::std::primitive::bool>);),
             )
         } else if self.raw_type_is_float() {
             (
                 quote!(#crate_name::FieldType::Float),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Float>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Number>);),
             )
         } else if self.raw_type_is_integer() {
             (
                 quote!(#crate_name::FieldType::Int),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Int>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Number>);),
             )
         } else if self.raw_type_is_string() {
             (
@@ -298,13 +302,46 @@ impl MyFieldReceiver {
         } else if self.raw_type_is_datetime() {
             (
                 quote!(#crate_name::FieldType::DateTime),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::DateTime>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Datetime>);),
             )
         } else if self.raw_type_is_geometry() {
             (
                 quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
                 quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Geometry>);),
             )
+        } else if let MyFieldReceiver {
+            type_: None,
+            link_one,
+            link_self,
+            link_many,
+            ..
+        } = self
+        {
+            let field_name_normalized = field_name_normalized.as_str();
+            let _struct_ident = format_ident!("{struct_name_ident_str}");
+
+            if field_name_normalized == "id" {
+                (
+                    quote!(#crate_name::FieldType::Record(Self::table_name())),
+                    quote!(),
+                )
+                // TODO: Only do this for SurrealEdge
+            } else if field_name_normalized == "out" || field_name_normalized == "in" {
+                // An edge might be shared by multiple In/Out nodes. So, default to any type of
+                // record for edge in and out
+                (quote!(#crate_name::FieldType::RecordAny), quote!())
+            } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
+                let ref_node_type = format_ident!("{ref_node_type}");
+
+                (
+                    quote!(#crate_name::FieldType::Record(#ref_node_type::table_name())),
+                    quote!(),
+                )
+            } else if let Some(_ref_node_type) = link_many {
+                (quote!(#crate_name::FieldType::Array), quote!())
+            } else {
+                (quote!(), quote!())
+            }
         } else {
             (
                 quote!(#crate_name::FieldType::Any),
@@ -314,10 +351,14 @@ impl MyFieldReceiver {
     }
 
     pub fn type_is_inferrable(&self, field_name_normalized_str: &String) -> bool {
-        self.link_one.is_none()
-            || self.link_self.is_none()
-            || self.link_many.is_none()
+        self.link_one.is_some()
+            || self.link_self.is_some()
+            || self.link_many.is_some()
+            || self.nest_object.is_some()
+            || self.nest_array.is_some()
             || field_name_normalized_str == "id"
+            || field_name_normalized_str == "in"
+            || field_name_normalized_str == "out"
             || self.raw_type_is_float()
             || self.raw_type_is_integer()
             || self.raw_type_is_string()
@@ -548,23 +589,34 @@ impl MyFieldReceiver {
         //     _ => false,
         // };
         // is_duration
+        // match ty {
+        //     syn::Type::Path(path) => {
+        //         let last_seg = path.path.segments.last().unwrap();
+        //         if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+        //             if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+        //                 if let syn::Type::Infer(_) = inner_type {
+        //                     // if let syn::Type::Infer(_) = inner_type.as_ref() {
+        //                     // The list type should have a specified type parameter
+        //                     return false;
+        //                 }
+        //             }
+        //             last_seg.ident.to_string() == "Duration"
+        //         } else {
+        //             false
+        //         }
+        //     }
+        //     syn::Type::Array(_) => true,
+        //     _ => false,
+        // }
         match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                        if let syn::Type::Infer(_) = inner_type {
-                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                            // The list type should have a specified type parameter
-                            return false;
-                        }
-                    }
-                    last_seg.ident.to_string() == "Duration"
+            syn::Type::Path(type_path) => {
+                let last_segment = type_path.path.segments.last().unwrap();
+                if last_segment.ident == "Duration" {
+                    return true;
                 } else {
-                    false
+                    return false;
                 }
             }
-            syn::Type::Array(_) => true,
             _ => false,
         }
     }
@@ -580,25 +632,33 @@ impl MyFieldReceiver {
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                        if let syn::Type::Infer(_) = inner_type {
-                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                            // The list type should have a specified type parameter
-                            return false;
-                        }
-                    }
-                    last_seg.ident.to_string() == "Geometry"
-                        || last_seg.ident.to_string() == "Point"
-                        || last_seg.ident.to_string() == "LineString"
-                        || last_seg.ident.to_string() == "Polygon"
-                        || last_seg.ident.to_string() == "MultiPoint"
-                        || last_seg.ident.to_string() == "MultiLineString"
-                        || last_seg.ident.to_string() == "MultiPolygon"
-                        || last_seg.ident.to_string() == "GeometryCollection"
-                } else {
-                    false
-                }
+                last_seg.ident.to_string() == "Geometry"
+                    || last_seg.ident.to_string() == "Point"
+                    || last_seg.ident.to_string() == "LineString"
+                    || last_seg.ident.to_string() == "Polygon"
+                    || last_seg.ident.to_string() == "MultiPoint"
+                    || last_seg.ident.to_string() == "MultiLineString"
+                    || last_seg.ident.to_string() == "MultiPolygon"
+                    || last_seg.ident.to_string() == "GeometryCollection"
+                // if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                //     // if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+                //     //     if let syn::Type::Infer(_) = inner_type {
+                //     //         // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                //     //         // The list type should have a specified type parameter
+                //     //         return false;
+                //     //     }
+                //     // }
+                //     last_seg.ident.to_string() == "Geometry"
+                //         || last_seg.ident.to_string() == "Point"
+                //         || last_seg.ident.to_string() == "LineString"
+                //         || last_seg.ident.to_string() == "Polygon"
+                //         || last_seg.ident.to_string() == "MultiPoint"
+                //         || last_seg.ident.to_string() == "MultiLineString"
+                //         || last_seg.ident.to_string() == "MultiPolygon"
+                //         || last_seg.ident.to_string() == "GeometryCollection"
+                // } else {
+                //     false
+                // }
             }
             syn::Type::Array(_) => true,
             _ => false,
@@ -958,44 +1018,23 @@ impl ReferencedNodeMeta {
                                       );
         } else {
             // Provide default for links when type not provided
-            if let MyFieldReceiver {
-                type_: None,
-                link_one,
-                link_self,
-                link_many,
-                ..
-            } = field_receiver
-            {
-                let field_name_normalized = field_name_normalized.as_str();
-                let _struct_ident = format_ident!("{struct_name_ident_str}");
 
-                if field_name_normalized == "id" {
-                    define_field_methods
-                        .push(quote!(.type_(#crate_name::FieldType::Record(Self::table_name()))));
-                    // TODO: Only do this for SurrealEdge
-                } else if field_name_normalized == "out" || field_name_normalized == "in" {
-                    // An edge might be shared by multiple In/Out nodes. So, default to any type of
-                    // record for edge in and out
-                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::RecordAny)));
-                } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
-                    let ref_node_type = format_ident!("{ref_node_type}");
-                    define_field_methods
-                            .push(quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))));
-                } else if let Some(_ref_node_type) = link_many {
-                    define_field_methods.push(quote!(.type_(#crate_name::FieldType::Array)));
-                }
-            }
-            let (field_type, static_assertion) =
-                if field_receiver.type_is_inferrable(field_name_normalized) {
-                    field_receiver.infer_surreal_type_heuristically()
-                } else {
-                    if field_receiver.type_.is_none() {
-                        panic!("Field type is not provided. Please provide a type for the field.");
-                        // field_receiver.type_.as_ref().unwrap().0.to_string()
-                    }
+            let (field_type, static_assertion) = if field_receiver
+                .type_is_inferrable(field_name_normalized)
+            {
+                field_receiver
+                    .infer_surreal_type_heuristically(struct_name_ident_str, field_name_normalized)
+            } else {
+                if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
+                    panic!(
+                            "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field {}",
+                            field_name_normalized, field_name_normalized
+);
                     // field_receiver.type_.as_ref().unwrap().0.to_string()
-                    (quote!(), quote!())
-                };
+                }
+                // field_receiver.type_.as_ref().unwrap().0.to_string()
+                (quote!(), quote!())
+            };
             define_field_methods.push(quote!(.type_(#field_type)));
             static_assertions.push(static_assertion);
         };
