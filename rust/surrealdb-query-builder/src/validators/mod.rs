@@ -1,4 +1,5 @@
 use num_traits::{Float, Num, PrimInt};
+use static_assertions::assert_impl_all;
 
 /// Validate that type is a number at compile time
 ///
@@ -46,3 +47,27 @@ pub fn is_int<T: PrimInt>() {}
 /// is_float::<f64>();
 /// ```
 pub fn is_float<T: Float>() {}
+
+/// Validate that type is a vector at compile time
+///
+/// # Example
+/// ```
+/// # use surrealdb_query_builder::validators::assert_is_vec;
+/// assert_is_vec::<Vec<i8>>();
+/// assert_is_vec::<Vec<String>>();
+/// assert_is_vec::<Vec<i32>>();
+/// assert_is_vec::<Vec<i64>>();
+/// assert_is_vec::<Vec<i128>>();
+/// assert_is_vec::<Vec<isize>>();
+/// assert_is_vec::<Vec<u8>>();
+/// assert_is_vec::<Vec<u16>>();
+/// assert_is_vec::<Vec<u32>>();
+/// assert_is_vec::<Vec<u64>>();
+/// assert_is_vec::<Vec<u128>>();
+/// assert_is_vec::<Vec<usize>>();
+/// assert_is_vec::<Vec<f32>>();
+/// assert_is_vec::<Vec<f64>>();
+/// ```
+pub fn assert_is_vec<T: IntoIterator>() {
+    let _ = <T as IntoIterator>::into_iter;
+}

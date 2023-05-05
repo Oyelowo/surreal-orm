@@ -1057,10 +1057,9 @@ impl ReferencedNodeMeta {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::primitive::bool>);)
                 }
                 FieldType::Array => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Value);)
-                }
-                FieldType::Record(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
+                    quote!(
+                        #crate_name::validators::assert_is_vec::<#raw_type>();
+                    )
                 }
                 FieldType::DateTime => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Datetime>);)
@@ -1080,6 +1079,9 @@ impl ReferencedNodeMeta {
                 }
                 FieldType::Object => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Object>);)
+                }
+                FieldType::Record(_) => {
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
                 }
                 FieldType::RecordAny => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)

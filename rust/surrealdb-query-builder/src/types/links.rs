@@ -289,6 +289,15 @@ macro_rules! impl_utils_for_ref_vec {
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
 
+impl<V: SurrealdbNode> IntoIterator for LinkMany<V> {
+    type Item = Reference<V>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl<V: SurrealdbNode> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
     fn from(link: LinkMany<V>) -> Self {
         link.0
