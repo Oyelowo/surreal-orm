@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::SurrealdbNode;
+use crate::{SurrealId, SurrealdbNode};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
@@ -155,6 +155,13 @@ implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
+
+impl<T: SurrealdbNode> From<SurrealId<T>> for LinkOne<T> {
+    fn from(id: SurrealId<T>) -> Self {
+        let reference = Reference::Id(id.into());
+        Self(reference.into())
+    }
+}
 
 impl<V: SurrealdbNode> LinkOne<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct

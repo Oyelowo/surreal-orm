@@ -270,17 +270,17 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let unsaved_alien = create_test_alien(20, "Oyelowo".into());
-    let created_alien = create(unsaved_alien).return_one(db.clone()).await.unwrap();
-    assert_eq!(created_alien.as_ref().unwrap().name, "Oyelowo");
+    let created_alien = create(unsaved_alien).get_one(db.clone()).await?;
+    assert_eq!(created_alien.name, "Oyelowo");
     assert_eq!(
-        created_alien.as_ref().unwrap().tags,
+        created_alien.tags,
         vec!["tag1".to_string(), "tag2".to_string()]
     );
-    assert!(created_alien.as_ref().unwrap().weapon.get_id().is_none());
-    assert!(created_alien.as_ref().unwrap().space_ships.is_empty());
+    assert!(created_alien.weapon.get_id().is_none());
+    assert!(created_alien.space_ships.is_empty());
 
     // Try append
-    let ref alien_id = created_alien.as_ref().unwrap().clone().id;
+    let ref alien_id = created_alien.clone().id;
     let alien_schema::Alien {
         ref tags,
         ref weapon,
@@ -288,16 +288,22 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
         ..
     } = Alien::schema();
 
-    // update::<Alien>(alien_id)
-    //     .set(updater(tags).append("tag3"))
-    //     .set(updater(weapon).equal(Weapon::create_id("agi")))
-    //     .set(updater(spaceShips).append(SpaceShip::create_id("cali")))
-    //     .set(updater(spaceShips).append(SpaceShip::create_id("codebreather")))
-    //     .set(updater(spaceShips).append(SpaceShip::create_id("blayz")))
-    //     .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
-    //     .run(db.clone())
-    //     .await?;
-    //
+    update::<Alien>(alien_id)
+        // .set(updater(tags).append("tag3"))
+        // .set(updater(weapon).equal(Weapon::create_id("agi")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("cali")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("codebreather")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("blayz")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
+        .set(tags.append("tag3"))
+        .set(weapon.equal(Weapon::create_id("agi")))
+        .set(spaceShips.append(SpaceShip::create_id("cali")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("codebreather")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("blayz")))
+        // .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
+        .run(db.clone())
+        .await?;
+
     // update::<Alien>(alien_id)
     //     .set(updater(tags).append("rust"))
     //     .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
