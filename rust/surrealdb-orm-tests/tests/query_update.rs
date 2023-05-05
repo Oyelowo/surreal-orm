@@ -1,14 +1,10 @@
 use chrono::Utc;
-use geo::line_string;
-use geo::point;
-use geo::polygon;
+use geo::{line_string, point, polygon};
 use std::time::Duration;
-use surrealdb::engine::local::Mem;
-use surrealdb::Surreal;
-use surrealdb_models::RocketNonNullUpdater;
+use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{
-    alien_schema, weapon_schema, weaponold_schema, Alien, SpaceShip, Weapon, WeaponNonNullUpdater,
-    WeaponOld,
+    alien_schema, weapon_schema, weaponold_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
+    WeaponNonNullUpdater, WeaponOld,
 };
 use surrealdb_orm::{
     statements::{create, insert, patch, select, update},
