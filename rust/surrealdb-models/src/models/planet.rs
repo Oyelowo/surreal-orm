@@ -11,6 +11,7 @@ pub struct Planet {
     pub id: SurrealId<Self>,
     pub name: String,
     // area: Polygon,
+    #[surrealdb(type = "int")]
     pub population: Population,
     pub created: DateTime<Utc>,
     pub tags: Vec<String>,

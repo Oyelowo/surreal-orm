@@ -1018,25 +1018,20 @@ impl ReferencedNodeMeta {
                                       );
         } else {
             // Provide default for links when type not provided
+            if field_receiver.type_is_inferrable(field_name_normalized) {
+                let (field_type, static_assertion) = field_receiver
+                    .infer_surreal_type_heuristically(struct_name_ident_str, field_name_normalized);
 
-            let (field_type, static_assertion) = if field_receiver
-                .type_is_inferrable(field_name_normalized)
-            {
-                field_receiver
-                    .infer_surreal_type_heuristically(struct_name_ident_str, field_name_normalized)
+                define_field_methods.push(quote!(.type_(#field_type)));
+                static_assertions.push(static_assertion);
             } else {
                 if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
                     panic!(
                             "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field {}",
                             field_name_normalized, field_name_normalized
-);
-                    // field_receiver.type_.as_ref().unwrap().0.to_string()
+                        );
                 }
-                // field_receiver.type_.as_ref().unwrap().0.to_string()
-                (quote!(), quote!())
             };
-            define_field_methods.push(quote!(.type_(#field_type)));
-            static_assertions.push(static_assertion);
         };
 
         match field_receiver {
