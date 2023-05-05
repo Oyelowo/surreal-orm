@@ -151,10 +151,20 @@ impl<V: SurrealdbNode> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
+
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
+
+impl<V: SurrealdbNode> From<LinkOne<V>> for Option<sql::Thing> {
+    fn from(link: LinkOne<V>) -> Self {
+        match link.0 {
+            Reference::Id(id) => Some(id),
+            _ => None,
+        }
+    }
+}
 
 impl<T: SurrealdbNode> From<SurrealId<T>> for LinkOne<T> {
     fn from(id: SurrealId<T>) -> Self {
@@ -175,6 +185,15 @@ impl<V: SurrealdbNode> LinkOne<V> {
 /// It is similar to `LinkOne` is boxed to avoid infinite recursion.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
+
+impl<V: SurrealdbNode> From<LinkSelf<V>> for Option<sql::Thing> {
+    fn from(link: LinkSelf<V>) -> Self {
+        match link.0.as_ref() {
+            Reference::Id(id) => Some(id.clone()),
+            _ => None,
+        }
+    }
+}
 
 impl<V: SurrealdbNode> LinkSelf<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct
@@ -269,6 +288,18 @@ macro_rules! impl_utils_for_ref_vec {
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
+
+impl<V: SurrealdbNode> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
+    fn from(link: LinkMany<V>) -> Self {
+        link.0
+            .into_iter()
+            .map(|r| match r {
+                Reference::Id(id) => Some(id),
+                _ => None,
+            })
+            .collect::<Vec<Option<sql::Thing>>>()
+    }
+}
 
 // impl<V: SurrealdbNode> From<Vec<V>> for LinkMany<V> {}
 

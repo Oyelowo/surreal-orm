@@ -255,7 +255,7 @@ pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
-    pub likes_count: u128,
+    pub likes_count: u64,
 }
 pub type StudentLiksBook = Likes<Student, Book>;
 

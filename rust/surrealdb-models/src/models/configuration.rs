@@ -6,6 +6,7 @@ use surrealdb_orm::SurrealdbObject;
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     length: u64,
+    #[surrealdb(type = "int")]
     shape: Shape,
 }
 

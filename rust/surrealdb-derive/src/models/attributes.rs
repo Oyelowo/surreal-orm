@@ -1022,13 +1022,67 @@ impl ReferencedNodeMeta {
                                 }
                             }
                             _ => {
-                                panic!("type must `array` when link_many attribute is used")
+                                panic!("type must be `array` when link_many attribute is used")
                             }
                         }
                     }
                 }
                 _ => {}
             };
+
+            // Gather assertions for all field types
+            let raw_type = &field_receiver.ty;
+            let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+            let static_assertion = match field_type {
+                FieldType::Any => {
+                    quote!(#crate_name::sql::Value)
+                }
+                FieldType::String => {
+                    quote!(::std::string::String)
+                }
+                FieldType::Int => {
+                    quote!( #crate_name::sql::Number)
+                }
+                FieldType::Float => {
+                    quote!( #crate_name::sql::Number)
+                }
+                FieldType::Bool => {
+                    quote!(::std::primitive::bool)
+                }
+                FieldType::Array => {
+                    quote!( #crate_name::sql::Value)
+                }
+                FieldType::Record(_) => {
+                    quote!( Option<#crate_name::sql::Thing>)
+                }
+                FieldType::DateTime => {
+                    quote!( #crate_name::sql::Datetime)
+                }
+                FieldType::Decimal => {
+                    quote!( #crate_name::sql::Number)
+                }
+                FieldType::Duration => {
+                    quote!( #crate_name::sql::Duration)
+                }
+                FieldType::Number => {
+                    quote!( #crate_name::sql::Number)
+                }
+                FieldType::Object => {
+                    quote!( #crate_name::sql::Object)
+                }
+                FieldType::RecordAny => {
+                    quote!( Option<#crate_name::sql::Thing>)
+                }
+                FieldType::Geometry(_) => {
+                    quote!( #crate_name::sql::Geometry)
+                }
+            };
+
+            static_assertions.push(quote!(
+                ::static_assertions::assert_impl_all!(#raw_type: std::convert::Into<#static_assertion>);
+            ));
+
+            // Get the field type
             define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::FieldType>()
                                                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                                              )
