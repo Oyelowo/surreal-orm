@@ -314,6 +314,8 @@ impl MyFieldReceiver {
             link_one,
             link_self,
             link_many,
+            nest_array,
+            nest_object,
             ..
         } = self
         {
@@ -339,8 +341,23 @@ impl MyFieldReceiver {
                 )
             } else if let Some(_ref_node_type) = link_many {
                 (quote!(#crate_name::FieldType::Array), quote!())
+            } else if let Some(_ref_node_type) = nest_object {
+                (quote!(#crate_name::FieldType::Object), quote!())
+            } else if let Some(_ref_node_type) = nest_array {
+                (quote!(#crate_name::FieldType::Array), quote!())
+            } else if let Some(_ref_node_type) = link_one {
+                (
+                    quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
+                    // #crate_name::SurrealId<#foreign_node>
+                    quote!(),
+                )
+            } else if let Some(_ref_node_type) = link_self {
+                (
+                    quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
+                    quote!(),
+                )
             } else {
-                (quote!(), quote!())
+                (quote!(#crate_name::FieldType::Any), quote!())
             }
         } else {
             (
@@ -994,8 +1011,8 @@ impl ReferencedNodeMeta {
                                             let ref_node_token: TokenStream = ref_node.into();
 
                                             static_assertions.push(quote!(
-                                            type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealdbNode>::TableNameChecker;
-                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_content_table_name);
+                                                            type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealdbNode>::TableNameChecker;
+                                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_content_table_name);
                                                        ));
                                         }
                                         _ => {
