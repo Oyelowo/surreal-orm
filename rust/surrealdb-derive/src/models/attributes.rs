@@ -882,7 +882,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        struct_name_ident_str: &String,
+        struct_name_ident: &Ident,
         field_name_normalized: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
@@ -895,7 +895,7 @@ impl ReferencedNodeMeta {
             MyFieldReceiver {
                 define,
                 define_fn,
-                type_,
+                // type_,
                 assert,
                 assert_fn,
                 value,
@@ -907,33 +907,38 @@ impl ReferencedNodeMeta {
                 content_assert_fn,
                 ..
             } if (define_fn.is_some() || define.is_some())
-                && (type_.is_some()
-                    || assert.is_some()
-                    || assert_fn.is_some()
-                    || value.is_some()
-                    || value_fn.is_some()
-                    || permissions.is_some()
-                    || permissions_fn.is_some()
-                    || content_type.is_some()
-                    || content_assert.is_some()
-                    || content_assert_fn.is_some()) =>
+                && (
+                    // I think type should be allowed in addition to define or define_fn but will
+                    // override whatever is defined in define or define_fn, so we can use it for
+                    // code inference and generation.
+                    // type_.is_some()
+                    assert.is_some()
+                        || assert_fn.is_some()
+                        || value.is_some()
+                        || value_fn.is_some()
+                        || permissions.is_some()
+                        || permissions_fn.is_some()
+                        || content_type.is_some()
+                        || content_assert.is_some()
+                        || content_assert_fn.is_some()
+                ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
-                            type,
-                            assert,
-                            assert_fn,
-                            value,
-                            value_fn,
-                            permissions,
-                            permissions_fn,
-                            content_type,
-                            content_assert,
-                            content_assert_fn");
+    type,
+    assert,
+    assert_fn,
+    value,
+    value_fn,
+    permissions,
+    permissions_fn,
+    content_type,
+    content_assert,
+    content_assert_fn");
             }
             MyFieldReceiver {
                 define,
                 define_fn,
-                type_,
+                // type_,
                 assert,
                 assert_fn,
                 value,
@@ -946,32 +951,34 @@ impl ReferencedNodeMeta {
                 relate,
                 ..
             } if (relate.is_some())
-                && (type_.is_some()
-                    || define.is_some()
-                    || define_fn.is_some()
-                    || assert.is_some()
-                    || assert_fn.is_some()
-                    || value.is_some()
-                    || value_fn.is_some()
-                    || permissions.is_some()
-                    || permissions_fn.is_some()
-                    || content_type.is_some()
-                    || content_assert.is_some()
-                    || content_assert_fn.is_some()) =>
+                && (
+                    // type_.is_some()
+                    define.is_some()
+                        || define_fn.is_some()
+                        || assert.is_some()
+                        || assert_fn.is_some()
+                        || value.is_some()
+                        || value_fn.is_some()
+                        || permissions.is_some()
+                        || permissions_fn.is_some()
+                        || content_type.is_some()
+                        || content_assert.is_some()
+                        || content_assert_fn.is_some()
+                ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
-                            type,
-                            define,
-                            define_fn,
-                            assert,
-                            assert_fn,
-                            value,
-                            value_fn,
-                            permissions,
-                            permissions_fn,
-                            content_type,
-                            content_assert,
-                            content_assert_fn");
+    type,
+    define,
+    define_fn,
+    assert,
+    assert_fn,
+    value,
+    value_fn,
+    permissions,
+    permissions_fn,
+    content_type,
+    content_assert,
+    content_assert_fn");
             }
             MyFieldReceiver {
                 define: Some(_),
@@ -982,16 +989,32 @@ impl ReferencedNodeMeta {
             }
             MyFieldReceiver {
                 define: Some(define),
+                type_,
                 ..
             } => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_field = Some(quote!(#define.to_raw()));
+                define_field = if let Some(type_) = type_ {
+                    let type_ = type_.to_string();
+                    Some(
+                        quote!(#define.type_(#crate_name::FieldType::from_str(#type_.to_string()).expect("Must be a valid surreal type")).to_raw()),
+                    )
+                } else {
+                    Some(quote!(#define.type_(type_).to_raw()))
+                };
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
+                type_,
                 ..
             } => {
-                define_field = Some(quote!(#define_fn().to_raw()));
+                define_field = if let Some(type_) = type_ {
+                    let type_ = type_.to_string();
+                    Some(
+                        quote!(#define_fn().type_(#crate_name::FieldType::from_str(#type_.to_string()).expect("Must be a valid surreal type")).to_raw()),
+                    )
+                } else {
+                    Some(quote!(#define_fn().type_(type_).to_raw()))
+                };
             }
             _ => {}
         };
@@ -1110,9 +1133,13 @@ impl ReferencedNodeMeta {
                             if field_receiver.content_type.is_none()
                                 && !field_receiver.type_is_inferrable(field_name_normalized)
                             {
-                                panic!("Not able to infer array content type. Content type must \
-                                    be provided when type is array and the compiler cannot infer the type. \
-                                    Please, provide `content_type` for the field - {}", &field_name_normalized);
+                                panic!(
+                                    "Not able to infer array content type. Content type must 
+be provided when type is array and the compiler cannot infer the type. 
+Please, provide `content_type` for the field - {}. 
+e.g `#[surrealdb(type=array, content_type=\"int\")]`",
+                                    &field_name_normalized
+                                );
                             }
                         }
                     }
@@ -1192,14 +1219,17 @@ impl ReferencedNodeMeta {
             // Provide default for links when type not provided
             if field_receiver.type_is_inferrable(field_name_normalized) {
                 let (field_type, static_assertion) = field_receiver
-                    .infer_surreal_type_heuristically(struct_name_ident_str, field_name_normalized);
+                    .infer_surreal_type_heuristically(
+                        &struct_name_ident.to_string(),
+                        field_name_normalized,
+                    );
 
                 define_field_methods.push(quote!(.type_(#field_type)));
                 static_assertions.push(static_assertion);
             } else {
                 if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
                     panic!(
-                            "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field {}",
+                            "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field - {}",
                             field_name_normalized, field_name_normalized
                         );
                 }
@@ -1340,7 +1370,7 @@ impl ReferencedNodeMeta {
             quote!(
                     ,
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
-                                        .on_table(#crate_name::Table::from(#struct_name_ident_str))
+                                        .on_table(#crate_name::Table::from(#struct_name_ident::table_name()))
                                         #( # define_array_field_content_methods) *
                                         .to_raw()
 
@@ -1349,7 +1379,7 @@ impl ReferencedNodeMeta {
 
         self.field_definition = define_field.unwrap_or_else(||quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
-                                            .on_table(#crate_name::Table::from(#struct_name_ident_str))
+                                            .on_table(#crate_name::Table::from(#struct_name_ident::table_name()))
                                             #( # define_field_methods) *
                                             .to_raw()
                     #array_content_definition

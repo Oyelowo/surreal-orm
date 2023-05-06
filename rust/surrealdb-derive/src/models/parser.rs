@@ -366,12 +366,12 @@ impl SchemaFieldsProperties {
         
                 let get_link_meta_with_defs = |node_object: &NodeTypeName| {
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
                 
                 let get_nested_meta_with_defs = |node_object: &NodeTypeName| {
                         ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
 
                 let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
@@ -590,7 +590,7 @@ impl SchemaFieldsProperties {
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
                         ReferencedNodeMeta::default()
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                     }
                 };
                 
