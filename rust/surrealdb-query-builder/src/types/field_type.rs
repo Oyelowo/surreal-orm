@@ -100,6 +100,16 @@ pub enum FieldType {
     Geometry(Vec<GeometryType>),
 }
 
+impl FieldType {
+    /// Returns a list of all the variants of the enum
+    pub fn variants() -> Vec<&'static str> {
+        vec![
+            "any", "array", "bool", "datetime", "decimal", "duration", "float", "int", "number",
+            "object", "string", "record", "geometry",
+        ]
+    }
+}
+
 impl From<FieldType> for String {
     fn from(val: FieldType) -> Self {
         val.to_string()

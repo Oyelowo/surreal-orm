@@ -7,7 +7,7 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::{BindingsList, Buildable, Parametric, Valuex};
+use crate::{BindingsList, Buildable, Parametric, Setter, Valuex};
 
 use super::Field;
 
@@ -56,6 +56,15 @@ pub enum Updateables {
 impl From<Updater> for Updateables {
     fn from(value: Updater) -> Self {
         Self::Updater(value)
+    }
+}
+
+impl From<Setter> for Updateables {
+    fn from(value: Setter) -> Self {
+        Self::Updater(Updater {
+            query_string: value.build(),
+            bindings: value.get_bindings(),
+        })
     }
 }
 

@@ -1,17 +1,13 @@
 use chrono::Utc;
-use geo::line_string;
-use geo::point;
-use geo::polygon;
+use geo::{line_string, point, polygon};
 use std::time::Duration;
-use surrealdb::engine::local::Mem;
-use surrealdb::Surreal;
-use surrealdb_models::RocketNonNullUpdater;
+use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{
-    alien_schema, weapon_schema, weaponold_schema, Alien, SpaceShip, Weapon, WeaponNonNullUpdater,
-    WeaponOld,
+    alien_schema, weapon_schema, weaponold_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
+    WeaponNonNullUpdater, WeaponOld,
 };
 use surrealdb_orm::{
-    statements::{create, insert, patch, select, update},
+    statements::{create, insert, select, update},
     *,
 };
 
@@ -23,7 +19,7 @@ fn create_test_alien(age: u8, name: String) -> Alien {
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     Alien {
-        id: SurrealId::default(),
+        id: SurrealId::nano_id(),
         name,
         age,
         created: Utc::now(),
@@ -52,26 +48,26 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
-    let created_weapon = create(weapon).return_one(db.clone()).await.unwrap();
-    assert_eq!(created_weapon.as_ref().unwrap().name, "Laser");
-    assert_eq!(created_weapon.as_ref().unwrap().strength, 0);
-
-    // Increment by 5;
-    let ref id = created_weapon.unwrap().clone().id;
-    let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
+    let created_weapon = create(weapon).get_one(db.clone()).await.unwrap();
+    assert_eq!(created_weapon.name, "Laser");
+    assert_eq!(created_weapon.strength, 0);
+    //
+    // // Increment by 5;
+    let ref id = created_weapon.clone().id;
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
 
     update::<Weapon>(id)
-        .set(updater(strength).increment_by(5))
+        .set(strength.increment_by(5u64))
         .run(db.clone())
         .await?;
 
     update::<Weapon>(id)
-        .set(updater(strength).increment_by(5))
+        .set(strength.increment_by(5u64))
         .run(db.clone())
         .await?;
 
     let updated = update::<Weapon>(id)
-        .set(updater(strength).decrement_by(2))
+        .set(strength.decrement_by(2u64))
         .return_one(db.clone())
         .await?;
 
@@ -84,7 +80,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Weapon>(id)
-        .set(updater(strength).equal(923))
+        .set(strength.equal(923u64))
         .return_one(db.clone())
         .await?;
 
@@ -97,14 +93,6 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
     Ok(())
 }
 
-// // conditionlly link any of the weapons
-// if i % 2 == 0 {
-//     unsaved_alien.weapon = LinkOne::from(weapon1);
-// } else if i % 3 == 0 {
-//     unsaved_alien.weapon = LinkOne::from(weapon2);
-// } else {
-//     unsaved_alien.weapon = LinkOne::from(weapon3);
-// }
 #[tokio::test]
 async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -187,7 +175,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
     let select_weak_aliens = || async {
         let weak_aliens: Vec<Alien> = select(All)
             .from(Alien::table_name())
-            .where_(cond(alien.weapon(E).strength.equal(5)).and(age.greater_than(3)))
+            .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
             .return_many(db.clone())
             .await
             .unwrap();
@@ -210,9 +198,10 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 2));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(updater(name).equal("Rook"))
-        .set(updater(tags).append("street"))
-        .where_(cond(alien.weapon(E).strength.equal(5)).and(age.greater_than(3)))
+        .set(name.equal("Rook"))
+        .set(tags.append("street"))
+        // .set(updater(tags).append("street"))
+        .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
 
@@ -231,15 +220,18 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .await
         .iter()
         .all(|alien| alien.name == "Rook"));
+
     assert!(select_weak_aliens()
         .await
         .iter()
         .all(|alien| alien.tags.len() == 3));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(updater(name).equal("Kiwi"))
-        .set(updater(tags).remove("street"))
-        .where_(cond(alien.weapon(E).strength.equal(5)).and(age.greater_than(3)))
+        .set(name.equal("Kiwi"))
+        .set(tags.remove("street"))
+        // .set(updater(name).equal("Kiwi"))
+        // .set(updater(tags).remove("street"))
+        .where_(cond(alien.weapon(E).strength.equal(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
     assert!(weak_aliens
@@ -264,17 +256,17 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let unsaved_alien = create_test_alien(20, "Oyelowo".into());
-    let created_alien = create(unsaved_alien).return_one(db.clone()).await.unwrap();
-    assert_eq!(created_alien.as_ref().unwrap().name, "Oyelowo");
+    let created_alien = create(unsaved_alien).get_one(db.clone()).await?;
+    assert_eq!(created_alien.name, "Oyelowo");
     assert_eq!(
-        created_alien.as_ref().unwrap().tags,
+        created_alien.tags,
         vec!["tag1".to_string(), "tag2".to_string()]
     );
-    assert!(created_alien.as_ref().unwrap().weapon.get_id().is_none());
-    assert!(created_alien.as_ref().unwrap().space_ships.is_empty());
+    assert!(created_alien.weapon.get_id().is_none());
+    assert!(created_alien.space_ships.is_empty());
 
     // Try append
-    let ref alien_id = created_alien.as_ref().unwrap().clone().id;
+    let ref alien_id = created_alien.clone().id;
     let alien_schema::Alien {
         ref tags,
         ref weapon,
@@ -283,24 +275,24 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     } = Alien::schema();
 
     update::<Alien>(alien_id)
-        .set(updater(tags).append("tag3"))
-        .set(updater(weapon).equal(Weapon::create_id("agi")))
-        .set(updater(spaceShips).append(SpaceShip::create_id("cali")))
-        .set(updater(spaceShips).append(SpaceShip::create_id("codebreather")))
-        .set(updater(spaceShips).append(SpaceShip::create_id("blayz")))
-        .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
+        .set(tags.append("tag3"))
+        .set(weapon.equal(Weapon::create_id("agi")))
+        .set(spaceShips.append(SpaceShip::create_id("cali")))
+        .set(spaceShips.append(SpaceShip::create_id("codebreather")))
+        .set(spaceShips.append(SpaceShip::create_id("blayz")))
+        .set(spaceShips.append(SpaceShip::create_id("anam")))
         .run(db.clone())
         .await?;
 
     update::<Alien>(alien_id)
-        .set(updater(tags).append("rust"))
-        .set(updater(spaceShips).append(SpaceShip::create_id("anam")))
+        .set(tags.append("rust"))
+        .set(spaceShips.append(SpaceShip::create_id("anam")))
         .run(db.clone())
         .await?;
 
     let ref updated = update::<Alien>(alien_id)
-        .set(updater(tags).plus_equal("rice"))
-        .set(updater(spaceShips).append(SpaceShip::create_id("cali")))
+        .set(tags.append("rice"))
+        .set(spaceShips.append(SpaceShip::create_id("cali")))
         .return_one(db.clone())
         .await?;
 
@@ -346,10 +338,10 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 
     // Try removing
     let updated = update::<Alien>(alien_id)
-        .set(updater(tags).remove("tag1"))
+        .set((tags).remove("tag1"))
         // removes one of calis. There should be 2 before this
-        .set(updater(spaceShips).remove(SpaceShip::create_id("cali")))
-        .set(updater(spaceShips).remove(SpaceShip::create_id("nonexistent")))
+        .set(spaceShips.remove(SpaceShip::create_id("cali")))
+        .set(spaceShips.remove(SpaceShip::create_id("nonexistent")))
         .return_one(db.clone())
         .await?;
 
@@ -365,7 +357,7 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Alien>(alien_id)
-        .set(updater(tags).equal(vec!["oye", "dayo"]))
+        .set(tags.equal(vec!["oye".into(), "dayo".into()]))
         .return_one(db.clone())
         .await?;
 
@@ -877,8 +869,8 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
     } = Weapon::schema();
     let updated_weapon = update::<Weapon>(created_weapon.clone().id)
         .patch(vec![
-            patch(name).change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"),
-            patch(strength).replace(34),
+            name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"),
+            strength.patch_replace(34u64),
         ])
         .get_one(db.clone())
         .await?;
@@ -894,8 +886,8 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
         "weapon:lowo"
     );
     let updated_weapon = update::<Weapon>(created_weapon.clone().id)
-        .patch(patch(strength).replace(921))
-        .patch(patch(name).change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
+        .patch(strength.patch_replace(921u64))
+        .patch(name.patch_change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
         .get_one(db.clone())
         .await?;
     assert_eq!(updated_weapon.name, "teot");
@@ -974,8 +966,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     // This is not how you should use the patch remove. Merely used for testing. Check the latter
     // place for a good example where the new weapon struct is used.
     let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).remove())
-        .patch(patch(bunchOfOtherFields).remove())
+        .patch(nice.patch_remove())
+        .patch(bunchOfOtherFields.patch_remove())
         .return_one(db.clone())
         .await
         .unwrap_err();
@@ -990,8 +982,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
 
     // that are not present in the new object. This is a destructive operation.
     let ref updated_weapon = update::<Weapon>(old_weapon.clone().id)
-        .patch(patch(nice).remove())
-        .patch(patch(bunchOfOtherFields).remove())
+        .patch(nice.patch_remove())
+        .patch(bunchOfOtherFields.patch_remove())
         .get_one(db.clone())
         .await?;
 
@@ -1094,29 +1086,14 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
 
     // bunchOfOtherFields is not string
     let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).add(true))
-        .patch(patch(bunchOfOtherFields).add("test"))
+        .patch(nice.patch_add(true))
+        .patch(bunchOfOtherFields.patch_add(56))
         .return_one(db.clone())
         .await;
-    assert!(
-        updated_weapon
-            .as_ref()
-            .unwrap_err()
-            .to_string()
-            .contains("expected i32"),
-        "Wrong type"
-    );
-    assert!(
-        updated_weapon.as_ref().unwrap_err().to_string().contains(
-            "Unable to parse data returned from the database. \
-            Check that all fields are complete and the types are able to deserialize surrealdb data types properly."
-        ),
-        "Should not be able to deserialize with old struct"
-    );
 
     let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).add(true))
-        .patch(patch(bunchOfOtherFields).add(45))
+        .patch(nice.patch_add(true))
+        .patch(bunchOfOtherFields.patch_add(45))
         .get_one(db.clone())
         .await?;
 

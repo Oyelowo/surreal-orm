@@ -1023,7 +1023,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
     // We are trying to fetch fields that are not linked fields type. Catch the error
     let created_alien_with_fetched_links =
         insert(vec![unsaved_alien1.clone(), unsaved_alien2.clone()])
-            .load_links(vec![spaceShips, age, created]);
+            .load_links(arr![spaceShips, age, created]);
 
     assert!(created_alien_with_fetched_links.is_err());
 

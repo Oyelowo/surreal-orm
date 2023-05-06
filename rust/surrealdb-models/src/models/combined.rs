@@ -4,6 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
+use _core::ops::Deref;
 use insta;
 use regex;
 use serde::{Deserialize, Serialize};
@@ -254,7 +255,7 @@ pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
     pub in_: LinkOne<In>,
     #[serde(skip_serializing)]
     pub out: LinkOne<Out>,
-    pub likes_count: u128,
+    pub likes_count: u64,
 }
 pub type StudentLiksBook = Likes<Student, Book>;
 

@@ -9,21 +9,24 @@ use surrealdb_orm::SurrealdbObject;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
-    pub id: SurrealId<Self>,
+    pub id: SurrealId<Weapon>,
     pub name: String,
-    pub strength: u64,
+    // pub strength: u64,
+    #[surrealdb(type = "int")]
+    pub strength: Strength,
     pub created: DateTime<Utc>,
     #[surrealdb(nest_object = "Rocket")]
     pub rocket: Rocket,
 }
-
+type Strength = u64;
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon", relax_table_name)]
 pub struct WeaponOld {
     pub id: SurrealId<Self>,
     pub name: String,
-    pub strength: u64,
+    #[surrealdb(type = "int")]
+    pub strength: Strength,
     pub nice: bool,
     pub bunch_of_other_fields: i32,
     pub created: DateTime<Utc>,

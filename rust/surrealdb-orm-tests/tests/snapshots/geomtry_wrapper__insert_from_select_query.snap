@@ -13,8 +13,10 @@ expression: results
             },
             PhantomData<geomtry_wrapper::GenZCompany>,
         ),
-        nam: Uuid(
-            725cfebe-a7f2-4100-aeb3-7f73998fff02,
+        nam: UuidWrapper(
+            Uuid(
+                725cfebe-a7f2-4100-aeb3-7f73998fff02,
+            ),
         ),
         name: "Acme Inc.",
         founded: Datetime(
@@ -51,8 +53,10 @@ expression: results
             },
             PhantomData<geomtry_wrapper::GenZCompany>,
         ),
-        nam: Uuid(
-            375cfebe-a7f2-4100-aeb3-7f73998fff02,
+        nam: UuidWrapper(
+            Uuid(
+                375cfebe-a7f2-4100-aeb3-7f73998fff02,
+            ),
         ),
         name: "Apple Inc.",
         founded: Datetime(

@@ -6,8 +6,8 @@
  */
 
 use crate::{
-    Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, GeometryLike,
-    Ordinal, Parametric, Valuex,
+    Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
+    GeometryLike, Ordinal, Parametric, Setter, Valuex,
 };
 use std::fmt::Display;
 use surrealdb::sql;
@@ -17,6 +17,7 @@ use surrealdb::sql;
 pub struct Operation {
     query_string: String,
     bindings: BindingsList,
+    errors: ErrorList,
 }
 
 impl Display for Operation {
@@ -56,8 +57,27 @@ impl Operatable for Operation {}
 impl Conditional for Operation {}
 impl Conditional for &Operation {}
 
-impl Erroneous for &Operation {}
-impl Erroneous for Operation {}
+impl Erroneous for &Operation {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
+
+impl Erroneous for Operation {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
+
+impl From<Setter> for Operation {
+    fn from(value: Setter) -> Self {
+        Self {
+            query_string: value.build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
+    }
+}
 
 /// Defines the operations that can be performed on a field or param or some other types
 /// it is implemented for.
@@ -965,6 +985,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         Operation {
             query_string: condition,
             bindings: updated_params,
+            errors: vec![],
         }
     }
 
@@ -1005,6 +1026,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         Operation {
             query_string: condition,
             bindings: updated_params,
+            errors: vec![],
         }
     }
 
@@ -1018,6 +1040,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         Operation {
             query_string: self.build(),
             bindings: updated_params,
+            errors: vec![],
         }
     }
 
@@ -1041,6 +1064,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         Operation {
             query_string: condition,
             bindings: updated_bindings,
+            errors: vec![],
         }
     }
 }

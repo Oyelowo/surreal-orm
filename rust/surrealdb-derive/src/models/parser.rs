@@ -135,15 +135,38 @@ pub struct SchemaFieldsProperties {
     /// to build up struct for generating fields of a Schema of the SurrealdbEdge
     /// The full thing can look like:
     /// ```
-    ///     #[derive(Debug, Default)]
-    ///     pub struct Writes<Model: ::serde::Serialize + Default> {
-    ///                pub id: Field,
-    ///                pub r#in: Field,
-    ///                pub out: Field,
-    ///                pub timeWritten: Field,
-    ///          }
+    /// mod _______field_module {
+    ///     pub struct Id(pub(super) Field);
+    ///     pub struct In(pub(super) Field);
+    ///     pub struct Out(pub(super) Field);
+    ///     pub struct TimeWritten(pub(super) Field);
+    /// }
+    /// 
+    /// #[derive(Debug, Default)]
+    /// pub struct Writes<Model: ::serde::Serialize + Default> {
+    ///     pub id: #_____field_module::Id,
+    ///     pub r#in: #_____field_module::In,
+    ///     pub out: #_____field_module::Out,
+    ///     pub timeWritten: #_____field_module::TimeWritten,
+    /// }
     /// ```
     pub schema_struct_fields_types_kv: Vec<TokenStream>,
+
+    /// Generated Field wrapper type implementations for each fiekd around `Field` type
+    /// Example value:
+    /// ```
+    /// struct Email(pub(super) Field);
+    /// 
+    /// impl std::ops::Deref for Email {
+    ///     type Target = #crate_name::Field;
+    ///
+    ///     fn deref(&self) -> &Self::Target {
+    ///         &self.0
+    ///     }
+    /// }
+    /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
+    /// ```
+     pub field_wrapper_type_custom_implementations: Vec<TokenStream>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
     /// This is used to build the actual instance of the model during intialization e,g out:
@@ -324,6 +347,7 @@ impl SchemaFieldsProperties {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
+                // dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
@@ -333,6 +357,7 @@ impl SchemaFieldsProperties {
                 let VariablesModelMacro { 
                     ___________graph_traversal_string, 
                     ____________update_many_bindings,
+                    _____field_names,
                     schema_instance, 
                     bindings,
                     .. 
@@ -341,12 +366,12 @@ impl SchemaFieldsProperties {
         
                 let get_link_meta_with_defs = |node_object: &NodeTypeName| {
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
                 
                 let get_nested_meta_with_defs = |node_object: &NodeTypeName| {
                         ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
 
                 let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
@@ -364,11 +389,106 @@ impl SchemaFieldsProperties {
                 };
             
                 
-                let mut update_field_names_fields_types_kv = || {
-                    store.schema_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
-                    store.schema_struct_fields_names_kv
-                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
+                    let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
+                    let is_settable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    
+                    let numeric_trait = if field_receiver.is_numeric(){
+                        quote!(
+                            impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
+                        )
+                    } else {
+                        quote!()
+                    };
+                    
+                    // Only works for vectors
+                    let array_trait = array_element
+                        .or_else(||field_receiver.get_array_content_type())
+                        .or_else(|| Some(field_receiver.get_fallback_array_content_concrete_type()))
+                        .map(|items|{
+                            quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
+                        })
+                        .unwrap_or(quote!());
+                    
+                    if is_settable {
+                        store.field_wrapper_type_custom_implementations
+                            .push(quote!(
+                                #[derive(Debug, Clone)]
+                                pub struct #field_name_as_camel(pub #crate_name::Field);
+
+                                impl From<&str> for #field_name_as_camel {
+                                    fn from(field_name: &str) -> Self {
+                                        Self(#crate_name::Field::new(field_name))
+                                    }
+                                }
+                            
+                                impl From<#crate_name::Field> for #field_name_as_camel {
+                                    fn from(field_name: #crate_name::Field) -> Self {
+                                        Self(field_name)
+                                    }
+                                }
+                            
+                                impl From<&#field_name_as_camel> for #crate_name::Valuex {
+                                    fn from(value: &#field_name_as_camel) -> Self {
+                                        let field: #crate_name::Field = value.into();
+                                        field.into()
+                                    }
+                                }
+                            
+                                impl From<#field_name_as_camel> for #crate_name::Valuex {
+                                    fn from(value: #field_name_as_camel) -> Self {
+                                        let field: #crate_name::Field = value.into();
+                                        field.into()
+                                    }
+                                }
+                            
+                                impl From<&#field_name_as_camel> for #crate_name::Field {
+                                    fn from(field_name:& #field_name_as_camel) -> Self {
+                                        field_name.0.clone()
+                                    }
+                                }
+                            
+                                impl From<#field_name_as_camel> for #crate_name::Field {
+                                    fn from(field_name: #field_name_as_camel) -> Self {
+                                        field_name.0
+                                    }
+                                }
+
+                                impl ::std::ops::Deref for #field_name_as_camel {
+                                    type Target = #crate_name::Field;
+
+                                    fn deref(&self) -> &Self::Target {
+                                        &self.0
+                                    }
+                                }
+
+                                impl ::std::ops::DerefMut for #field_name_as_camel {
+                                    fn deref_mut(&mut self) -> &mut Self::Target {
+                                        &mut self.0
+                                    }
+                                }
+
+                                impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
+                            
+                                impl #crate_name::Patchable<#field_type> for self::#field_name_as_camel  {}
+
+                                #numeric_trait
+                            
+                                #array_trait
+                            ));
+                        
+                            store.schema_struct_fields_types_kv
+                                .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
+                        } else {
+                            store.schema_struct_fields_types_kv
+                                .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
+                                
+                        }
+                
+                        store.schema_struct_fields_names_kv
+                            .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+
+                    
                     
                     store.schema_struct_fields_names_kv_empty
                         .push(quote!(#field_ident_normalised: "".into(),));
@@ -377,7 +497,7 @@ impl SchemaFieldsProperties {
                         .push(quote!(
                                     #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
                                       .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
-                                            .#____________update_many_bindings(#bindings);
+                                            .#____________update_many_bindings(#bindings).into();
                                 ));
 
                 };
@@ -406,7 +526,7 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_one_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -426,7 +546,7 @@ impl SchemaFieldsProperties {
                         update_ser_field_type(&mut store.link_self_fields);
                         update_ser_field_type(&mut store.link_one_and_self_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -439,7 +559,7 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(Some(quote!(#crate_name::SurrealId<#foreign_node>)));
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -450,7 +570,7 @@ impl SchemaFieldsProperties {
                     RelationType::NestObject(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::SurrealdbObject>::NonNullUpdater>, ));
                         
@@ -464,15 +584,15 @@ impl SchemaFieldsProperties {
 
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
                         get_nested_meta_with_defs(&node_object)
                     },
                     RelationType::None => {
-                        update_field_names_fields_types_kv();
+                        update_field_names_fields_types_kv(None);
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
                         ReferencedNodeMeta::default()
-                            .with_field_definition(field_receiver, &struct_name_ident.to_string(), field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                     }
                 };
                 

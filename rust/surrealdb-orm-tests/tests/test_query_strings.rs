@@ -196,7 +196,7 @@ fn multiplication_tests1() {
 
     let written_book_selection = st
         .bestFriend(Empty)
-        .writes__(wrt.timeWritten.equal("12:00"))
+        .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
 
@@ -224,7 +224,7 @@ fn multiplication_tests1() {
     let st = Student::schema();
     let written_book_selection = st
         .bestFriend(Empty)
-        .writes__(wrt.timeWritten.equal("12:00"))
+        .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
 
@@ -329,7 +329,7 @@ fn multiplication_tests1() {
                     .or(age),
             )
             .and(bestFriend.exactly_equal("Oyelowo"))
-            .or(firstName.equal(true))
+            .or(firstName.equal("Oyedayo"))
             .and(age.greater_than_or_equal(150)),
         )
         // .where_(
@@ -343,24 +343,31 @@ fn multiplication_tests1() {
         .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
         .group_by(course)
         .group_by(firstName)
-        .group_by(&[lastName, unoBook, &Field::new("lowo")])
-        .group_by(vec![lastName, unoBook, &Field::new("lowo")])
+        .group_by(arr![lastName, unoBook, &Field::new("lowo")])
+        .group_by(arr![lastName, unoBook, &Field::new("lowo")])
+        // .group_by(&[lastName, unoBook, &Field::new("lowo")])
+        // .group_by(vec![lastName, unoBook, &Field::new("lowo")])
         .start(5)
         .limit(400)
         .fetch(firstName)
         .fetch(lastName)
-        .fetch(&[age, unoBook])
-        .fetch(vec![age, unoBook])
+        .fetch(arr![age, unoBook])
+        .fetch(arr![age, unoBook])
+        // .fetch(&[age, unoBook])
+        // .fetch(vec![age, unoBook])
         .split(lastName)
         .split(firstName)
-        .split(&[firstName, semCoures])
-        .split(vec![firstName, semCoures])
+        .split(arr![firstName, semCoures])
+        .split(arr![firstName, semCoures])
+        // .split(&[firstName, semCoures])
+        // .split(vec![firstName, semCoures])
         .timeout(Duration::from_secs(8))
         .parallel();
 
     let is_oyelowo = true;
     if is_oyelowo {
-        query = query.group_by(&[age, bestFriend, &Field::new("dayo")]);
+        // query = query.group_by(&[age, bestFriend, &Field::new("dayo")]);
+        query = query.group_by(arr![age, bestFriend, &Field::new("dayo")]);
     }
 
     // stringify_tokens!("lowo", "knows", 5);
@@ -511,7 +518,11 @@ fn multiplication_tests2() {
 #[test]
 fn multiplication_tests3() {
     let x = Student::schema()
-        .writes__(StudentWritesBook::schema().timeWritten.equal("12:00"))
+        .writes__(
+            StudentWritesBook::schema()
+                .timeWritten
+                .equal(Duration::from_secs(343)),
+        )
         .book(Empty)
         .content;
 

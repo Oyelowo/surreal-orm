@@ -55,7 +55,7 @@ impl Field {
     }
 
     /// Sets field query graph. For building connection from node to node or node to edge.
-    pub fn set_graph_string(mut self, connection_string: String) -> Self {
+    pub fn set_graph_string(&mut self, connection_string: String) -> &Self {
         self.graph_string = connection_string;
         self
     }

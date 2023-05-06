@@ -58,6 +58,7 @@ impl ToTokens for ObjectToken{
             ___________graph_traversal_string,
             ___________bindings,
             ___________errors,
+            _____field_names,
             schema_instance,
             ..
         } = VariablesModelMacro::new();
@@ -71,6 +72,7 @@ impl ToTokens for ObjectToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            field_wrapper_type_custom_implementations,
             static_assertions,
             imports_referenced_node_schema,
             connection_with_field_appended,
@@ -127,6 +129,14 @@ impl ToTokens for ObjectToken{
             
                #( #imports_referenced_node_schema) *
                 
+                mod #_____field_names {
+                    use super::super::*;
+                    use #crate_name::Parametric as _;
+                    use #crate_name::Buildable as _;
+                
+                    #( #field_wrapper_type_custom_implementations) *
+                } 
+            
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *

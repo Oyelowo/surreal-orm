@@ -204,6 +204,18 @@ macro_rules! arr {
     }};
 }
 
+// impl<T: Into<Field>> From<T> for Valuex {
+//     fn from(value: T) -> Self {
+//         let value: Field = value.into();
+//         let binding = Binding::new(value);
+//
+//         Valuex {
+//             string: binding.get_param_dollarised(),
+//             bindings: vec![binding],
+//         }
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use surrealdb::sql;

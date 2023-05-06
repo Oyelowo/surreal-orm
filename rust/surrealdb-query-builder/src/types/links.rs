@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::SurrealdbNode;
+use crate::{SurrealId, SurrealdbNode};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
@@ -151,10 +151,27 @@ impl<V: SurrealdbNode> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkOne<V: SurrealdbNode>(Reference<V>);
+
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
+
+impl<V: SurrealdbNode> From<LinkOne<V>> for Option<sql::Thing> {
+    fn from(link: LinkOne<V>) -> Self {
+        match link.0 {
+            Reference::Id(id) => Some(id),
+            _ => None,
+        }
+    }
+}
+
+impl<T: SurrealdbNode> From<SurrealId<T>> for LinkOne<T> {
+    fn from(id: SurrealId<T>) -> Self {
+        let reference = Reference::Id(id.into());
+        Self(reference.into())
+    }
+}
 
 impl<V: SurrealdbNode> LinkOne<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct
@@ -169,10 +186,26 @@ impl<V: SurrealdbNode> LinkOne<V> {
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkSelf<V: SurrealdbNode>(Box<Reference<V>>);
 
+impl<V: SurrealdbNode> From<LinkSelf<V>> for Option<sql::Thing> {
+    fn from(link: LinkSelf<V>) -> Self {
+        match link.0.as_ref() {
+            Reference::Id(id) => Some(id.clone()),
+            _ => None,
+        }
+    }
+}
+
 impl<V: SurrealdbNode> LinkSelf<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct
     pub fn null() -> Self {
         Self(Reference::Null.into())
+    }
+}
+
+impl<T: SurrealdbNode> From<SurrealId<T>> for LinkSelf<T> {
+    fn from(id: SurrealId<T>) -> Self {
+        let reference = Reference::Id(id.into());
+        Self(reference.into())
     }
 }
 
@@ -255,6 +288,27 @@ macro_rules! impl_utils_for_ref_vec {
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct LinkMany<V: SurrealdbNode>(Vec<Reference<V>>);
+
+impl<V: SurrealdbNode> IntoIterator for LinkMany<V> {
+    type Item = Reference<V>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<V: SurrealdbNode> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
+    fn from(link: LinkMany<V>) -> Self {
+        link.0
+            .into_iter()
+            .map(|r| match r {
+                Reference::Id(id) => Some(id),
+                _ => None,
+            })
+            .collect::<Vec<Option<sql::Thing>>>()
+    }
+}
 
 // impl<V: SurrealdbNode> From<Vec<V>> for LinkMany<V> {}
 

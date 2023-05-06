@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
@@ -78,14 +80,8 @@ impl_number_or_field_from!(
     i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
 
-impl From<Field> for Ordinal {
-    fn from(val: Field) -> Self {
-        Ordinal::Field(val.into())
-    }
-}
-
-impl From<&Field> for Ordinal {
-    fn from(val: &Field) -> Self {
+impl<T: Into<Field>> From<T> for Ordinal {
+    fn from(val: T) -> Self {
         Ordinal::Field(val.into())
     }
 }

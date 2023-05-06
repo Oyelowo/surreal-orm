@@ -117,15 +117,20 @@ where
     }
 
     ///
-    fn validate_fields_to_fetch(linked_fields_to_fetch: &Vec<Field>) -> SurrealdbOrmResult<()> {
+    fn validate_fields_to_fetch(
+        linked_fields_to_fetch: &Vec<Field>,
+    ) -> SurrealdbOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
-            .iter()
-            .filter(|&n| {
-                !T::get_linked_fields()
-                    .iter()
-                    .any(|m| m.build() == *n.build())
+            .into_iter()
+            .map(|n| {
+                let n: Valuex = n.into();
+                n.build()
             })
-            .map(|n| n.build())
+            .filter(|n| !T::get_linked_fields().iter().any(|m| m.build() == *n))
+            // .map(|&n| {
+            //     let n: Valuex = n.into();
+            //     n.build()
+            // })
             .collect::<Vec<_>>();
 
         if !result.is_empty() {
@@ -133,13 +138,25 @@ where
                 result.join(", "),
             ));
         }
-        Ok(())
+        Ok(result)
     }
 
     /// Sets the return type to projections and fetches all records links.
     /// Defaults values to null for referenced records that do not exist.
-    fn load_links(self, linked_fields_to_fetch: Vec<Field>) -> SurrealdbOrmResult<Self> {
+    fn load_links(
+        self,
+        linked_fields_to_fetch: Vec<impl Into<Valuex>>,
+    ) -> SurrealdbOrmResult<Self> {
+        let linked_fields_to_fetch = linked_fields_to_fetch
+            .into_iter()
+            .map(|field| {
+                let valuex: Valuex = field.into();
+                let field = Field::new(valuex.build()).with_bindings(valuex.get_bindings());
+                field
+            })
+            .collect::<Vec<_>>();
         Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
+
         let projections = ReturnType::Projections(
             vec![Field::new("*")]
                 .into_iter()

@@ -393,17 +393,17 @@ pub enum Splittables {
     Fields(Vec<Field>),
 }
 
-impl From<Field> for Splittables {
-    fn from(value: Field) -> Self {
-        Self::Field(value.into())
-    }
-}
+// impl From<Field> for Splittables {
+//     fn from(value: Field) -> Self {
+//         Self::Field(value.into())
+//     }
+// }
 
-impl From<&Field> for Splittables {
-    fn from(value: &Field) -> Self {
-        Self::Field(value.into())
-    }
-}
+// impl From<&Field> for Splittables {
+//     fn from(value: &Field) -> Self {
+//         Self::Field(value.into())
+//     }
+// }
 
 impl<'a, const N: usize> From<&[&Field; N]> for Splittables {
     fn from(value: &[&Field; N]) -> Self {
@@ -429,12 +429,39 @@ impl From<Vec<&Field>> for Splittables {
     }
 }
 
+impl From<Vec<Valuex>> for Splittables {
+    fn from(value: Vec<Valuex>) -> Self {
+        Self::Fields(
+            value
+                .into_iter()
+                .map(|v| Field::new(v.build()).with_bindings(v.get_bindings()))
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
 type Groupables = Splittables;
 type Fetchables = Groupables;
 
+impl<T: Into<Field>> From<T> for Splittables {
+    fn from(value: T) -> Self {
+        let value: Field = value.into();
+        Self::Field(value)
+    }
+}
 /// Items that can be selected
 
 pub struct Selectables(Valuex);
+
+impl<T: Into<Field>> From<T> for Selectables {
+    fn from(value: T) -> Self {
+        let value: Field = value.into();
+        Self(Valuex {
+            string: value.build(),
+            bindings: value.get_bindings(),
+        })
+    }
+}
 
 impl From<Vec<Valuex>> for Selectables {
     fn from(value: Vec<Valuex>) -> Self {
@@ -499,23 +526,23 @@ impl From<Vec<Field>> for Selectables {
     }
 }
 
-impl From<Field> for Selectables {
-    fn from(value: Field) -> Self {
-        Self(Valuex {
-            string: value.build(),
-            bindings: value.get_bindings(),
-        })
-    }
-}
-
-impl From<&Field> for Selectables {
-    fn from(value: &Field) -> Self {
-        Self(Valuex {
-            string: value.build(),
-            bindings: value.get_bindings(),
-        })
-    }
-}
+// impl From<Field> for Selectables {
+//     fn from(value: Field) -> Self {
+//         Self(Valuex {
+//             string: value.build(),
+//             bindings: value.get_bindings(),
+//         })
+//     }
+// }
+//
+// impl From<&Field> for Selectables {
+//     fn from(value: &Field) -> Self {
+//         Self(Valuex {
+//             string: value.build(),
+//             bindings: value.get_bindings(),
+//         })
+//     }
+// }
 
 impl From<Function> for Selectables {
     fn from(value: Function) -> Self {
