@@ -17,15 +17,15 @@
 // 	[ TIMEOUT @duration ]
 // 	[ PARALLEL ]
 // ;
-use std::{fmt::Display, marker::PhantomData};
+use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealdbModel},
-    types::{DurationLike, Filter, ReturnType, SurrealId, Updateables},
-    Conditional, ErrorList, Field, PatchOp, ReturnableDefault, ReturnableStandard, Setter, ToRaw,
+    Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, ErrorList, Filter,
+    Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard, Setter,
+    SurrealId, SurrealdbModel, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -278,13 +278,15 @@ where
     /// helper function.
     ///
     /// # Example
-    /// ```rust
+    /// ```rust, ignore
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, statements::patch};
     /// // Typically, you would use the schema to get the field(e.g `User::schema().name(E).first`) but using this as an example.
-    /// let name = Field::new("name.first");
-    /// let patch_op = patch(name).change("Oyelowo");
-    /// assert_eq!(patch_op.to_raw().build(), "{ op: 'change', path: '/name/first', value: 'Oyelowo' }");
+    /// name.patch_replace("Oyelowo");
+    /// name.patch_add("Oyelowo");
+    /// name.patch_remove();
+    /// // regex search and replace
+    /// name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n");
     pub fn patch(mut self, patch_op: impl Into<Vec<PatchOp>>) -> Self {
         let patch_op: Vec<PatchOp> = patch_op.into();
         for patch_op in patch_op {
