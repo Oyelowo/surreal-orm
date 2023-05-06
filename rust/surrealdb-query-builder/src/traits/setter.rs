@@ -16,24 +16,6 @@ pub struct Setter {
     errors: ErrorList,
 }
 
-// impl Parametric for Setter {
-//     fn get_bindings(&self) -> BindingsList {
-//         self.bindings.to_vec()
-//     }
-// }
-//
-// impl Buildable for Setter {
-//     fn build(&self) -> String {
-//         self.query_string.to_string()
-//     }
-// }
-
-// impl Erroneous for Setter {
-//     fn get_errors(&self) -> ErrorList {
-//         self.errors.to_vec()
-//     }
-// }
-
 impl std::fmt::Display for Setter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
@@ -131,10 +113,13 @@ impl Erroneous for Setter {
 }
 impl Conditional for Setter {}
 
+/// A trait for assigning values to a field used in `SET`
+/// function in create and update statements.
 pub trait SetterAssignable<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
+    /// Assigns the given value to the field.
     fn equal(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Equal;
         let field = self.deref();
@@ -148,15 +133,19 @@ where
         }
     }
 
+    /// Derefs to field type.
     fn to_field(&self) -> Field {
         self.deref().clone()
     }
 }
 
+/// A trait for incrementing or decrementing values to a field used in `SET`
+/// function in create and update statements.
 pub trait SetterNumeric<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
+    /// Increments the value of the field by the given value.
     fn increment_by(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Inc;
         let field = self.deref();
@@ -170,6 +159,7 @@ where
         }
     }
 
+    /// Decrements the value of the field by the given value.
     fn decrement_by(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Dec;
         let field = self.deref();
@@ -183,15 +173,18 @@ where
         }
     }
 
+    /// Derefs to field type.
     fn to_field(&self) -> Field {
         self.deref().clone()
     }
 }
 
+/// Setter for array fields.
 pub trait SetterArray<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
+    /// Appends the given value to the array.
     fn append(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Inc;
         let field = self.deref();
@@ -205,6 +198,7 @@ where
         }
     }
 
+    /// Removes the given value from the array.
     fn remove(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Dec;
         let field = self.deref();
@@ -218,94 +212,8 @@ where
         }
     }
 
+    /// Derefs to field type.
     fn to_field(&self) -> Field {
         self.deref().clone()
     }
-}
-
-type Test<T> = T;
-struct Dayo<T>(Test<T>);
-
-// struct Setter;
-type Mana = Dayo<super::Setter>;
-type Lowa = i32;
-
-mod field_module {
-    use super::SetterAssignable;
-    use super::*;
-    // use crate::Field;
-    use surrealdb::sql;
-
-    struct Setter;
-    type Lowa = Dayo<super::Mana>;
-    pub struct Lowo(pub(super) crate::Field);
-
-    impl std::ops::DerefMut for Lowo {
-        fn deref_mut(&mut self) -> &mut Self::Target {
-            &mut self.0
-        }
-    }
-
-    impl std::ops::Deref for Lowo {
-        type Target = Field;
-
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
-
-    impl SetterAssignable<sql::Duration> for Lowo {}
-}
-// impl Setter<u8> for Lowo {}
-fn rer() {
-    let lowo = field_module::Lowo(Field::new("lowo"));
-    // lowo.like(34);
-    lowo.equal(std::time::Duration::from_secs(1));
-    // lowo.equal(Field::new("lowo"));
-    // lowo.equal(lowo.deref());
-
-    // lowo.equal(45);
-    // lowo.equals(LinkOne::from(Weapon::default()));
-    // lowo.equals("dfdf");
-    // lowo.equal(15);
-    // lowo
-    // lowo.equals(LinkOne::from(SpaceShip::default()));
-    // lowo.equals(LinkOne::from(Weapon::default()));
-}
-
-impl Setter {
-    // pub fn equal(&self, value: impl Into<sql::Value>) -> Self {
-    //     let value: sql::Value = value.into();
-    //     self.update_field(Operator::Equal, value)
-    // }
-    // // pub fn increment_by(&self, value: impl Into<sql::Number>) -> Self {
-    //     let value: sql::Number = value.into();
-    //     self.update_field(Operator::Inc, value)
-    // }
-    // pub fn append(&self, value: impl Into<sql::Value>) -> Self {
-    //     self.update_field(Operator::Inc, value)
-    // }
-    // pub fn decrement_by(&self, value: impl Into<sql::Number>) -> Self {
-    //     let value: sql::Number = value.into();
-    //     self.update_field(Operator::Dec, value)
-    // }
-    // pub fn remove(&self, value: impl Into<sql::Value>) -> Self {
-    //     self.update_field(Operator::Dec, value)
-    // }
-    // pub fn plus_equal(&self, value: impl Into<sql::Value>) -> Self {
-    //     self.update_field(Operator::Inc, value)
-    // }
-    //
-    // pub fn minus_equal(&self, value: impl Into<sql::Value>) -> Self {
-    //     self.update_field(Operator::Dec, value)
-    // }
-    //
-    // fn update_field(&self, operator: sql::Operator, value: impl Into<Valuex>) -> Updater {
-    //     let value: Valuex = value.into();
-    //     let column_updater_string = format!("{self} {operator} {}", value.build());
-    //     Self {
-    //         query_string: column_updater_string,
-    //         bindings: value.get_bindings(),
-    //     }
-    // }
 }
