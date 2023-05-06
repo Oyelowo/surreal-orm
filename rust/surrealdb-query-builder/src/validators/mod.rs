@@ -1,5 +1,8 @@
-use num_traits::{Float, Num, PrimInt};
-use static_assertions::assert_impl_all;
+pub use num_traits::{Float, Num, PrimInt as Int};
+pub use static_assertions::assert_fields;
+pub use static_assertions::assert_impl_all;
+pub use static_assertions::assert_impl_any;
+pub use static_assertions::assert_impl_one;
 
 /// Validate that type is a number at compile time
 ///
@@ -35,7 +38,7 @@ pub fn is_number<T: Num>() {}
 /// is_int::<i128>();
 /// is_int::<isize>();
 /// ```
-pub fn is_int<T: PrimInt>() {}
+pub fn is_int<T: Int>() {}
 
 /// Validate that type is a primitive float at compile time
 ///
