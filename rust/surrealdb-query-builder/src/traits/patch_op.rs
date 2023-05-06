@@ -28,6 +28,7 @@ impl Display for OpType {
     }
 }
 
+/// Contains metadata of initialized patch operations.
 #[derive(Clone, Debug)]
 pub struct PatchOpInit {
     path: String,
@@ -37,7 +38,7 @@ pub struct PatchOpInit {
     errors: ErrorList,
 }
 
-///
+/// Contains metadata for patch operations.
 pub struct PatchOp(PatchOpInit);
 
 impl std::ops::Deref for PatchOp {
@@ -81,14 +82,37 @@ impl Erroneous for PatchOp {
     }
 }
 
+/// Patchable trait
 pub trait Patchable<T: Serialize>
 where
     Self: std::ops::Deref<Target = Field>,
 {
+    /// Json Add patch operation
+    /// The field acts as the path to the field to be patched. It automatically
+    /// converts a field path to a valid json path to the field.
+    /// So, `name` will become `/name` and `name.first` will become `/name/first`
+    ///
+    /// # Arguments
+    ///
+    /// value: The value to be patched
+    ///
+    /// # Examples
+    /// ```rust, ignore
+    /// name.patch_add("Oyelowo");
+    /// ```
     fn patch_add(&self, value: impl Into<T>) -> PatchOp {
         patch_path(self.deref(), OpType::Add, value)
     }
 
+    /// Json Remove patch operation
+    /// The field acts as the path to the field to be patched. It automatically
+    /// converts a field path to a valid json path to the field.
+    /// So, `name` will become `/name` and `name.first` will become `/name/first`
+    ///
+    /// # Examples
+    /// ```rust, ignore
+    /// name.patch_remove();
+    /// ```
     fn patch_remove(&self) -> PatchOp {
         let patch = patch(self.deref());
         PatchOp(PatchOpInit {
@@ -97,16 +121,38 @@ where
         })
     }
 
+    /// Json Replace patch operation
+    /// The field acts as the path to the field to be patched. It automatically
+    /// converts a field path to a valid json path to the field.
+    /// So, `name` will become `/name` and `name.first` will become `/name/first`
+    ///
+    /// # Arguments
+    /// value: The value to be patched
+    ///
+    /// # Examples
+    /// ```rust, ignore
+    /// name.patch_replace("Oyelowo");
+    /// ```
     fn patch_replace(&self, value: impl Into<T>) -> PatchOp {
         patch_path(self.deref(), OpType::Replace, value)
     }
 
-    fn patch_change(&self, value: &str) -> PatchOp {
-        // patch_path(self.deref(), OpType::Change, value)
-        // let sql_value = sql::json(&serde_json::to_string(&value.into()).unwrap()).unwrap();
-        let binding = Binding::new(value);
-        let field = self.deref();
-        let patch = patch(field);
+    /// Json Change patch operation
+    /// The field acts as the path to the field to be patched. It automatically
+    /// converts a field path to a valid json path to the field.
+    /// So, `name` will become `/name` and `name.first` will become `/name/first`
+    ///
+    /// # Arguments
+    /// regex_match_and_replace_string: A string that matches a regex pattern and replaces it with the string
+    ///
+    /// # Examples
+    /// ```rust, ignore
+    /// // The below changes "test" to "text
+    /// name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n");
+    /// ```
+    fn patch_change(&self, regex_match_and_replace_string: &str) -> PatchOp {
+        let binding = Binding::new(regex_match_and_replace_string);
+        let patch = patch(self.deref());
 
         PatchOp(PatchOpInit {
             op: OpType::Change,
@@ -116,6 +162,7 @@ where
         })
     }
 
+    /// Derefs to field
     fn to_field(&self) -> Field {
         self.deref().clone()
     }
@@ -153,7 +200,7 @@ fn patch_path<T: Serialize>(field: &Field, operation_type: OpType, value: impl I
 /// let patch_op = patch(name).replace("Oyelowo");
 /// let patch_op = patch(name).remove();
 /// ```
-pub fn patch(path: impl Into<Field>) -> PatchOpInit {
+fn patch(path: impl Into<Field>) -> PatchOpInit {
     let path: Field = path.into();
     let path = path.build();
     let path = path.split('.').collect::<Vec<&str>>();
