@@ -469,6 +469,8 @@ impl SchemaFieldsProperties {
                                 }
 
                                 impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
+                            
+                                impl #crate_name::Patchable<#field_type> for self::#field_name_as_camel  {}
 
                                 #numeric_trait
                             

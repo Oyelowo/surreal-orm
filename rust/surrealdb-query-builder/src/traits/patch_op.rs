@@ -101,8 +101,19 @@ where
         patch_path(self.deref(), OpType::Replace, value)
     }
 
-    fn patch_change(&self, value: impl Into<T>) -> PatchOp {
-        patch_path(self.deref(), OpType::Change, value)
+    fn patch_change(&self, value: &str) -> PatchOp {
+        // patch_path(self.deref(), OpType::Change, value)
+        // let sql_value = sql::json(&serde_json::to_string(&value.into()).unwrap()).unwrap();
+        let binding = Binding::new(value);
+        let field = self.deref();
+        let patch = patch(field);
+
+        PatchOp(PatchOpInit {
+            op: OpType::Change,
+            value: Some(binding.get_param_dollarised()),
+            bindings: patch.bindings.into_iter().chain(vec![binding]).collect(),
+            ..patch
+        })
     }
 
     fn to_field(&self) -> Field {
@@ -119,11 +130,7 @@ fn patch_path<T: Serialize>(field: &Field, operation_type: OpType, value: impl I
     PatchOp(PatchOpInit {
         op: operation_type,
         value: Some(binding.get_param_dollarised()),
-        bindings: field
-            .get_bindings()
-            .into_iter()
-            .chain(vec![binding])
-            .collect(),
+        bindings: patch.bindings.into_iter().chain(vec![binding]).collect(),
         ..patch
     })
 }

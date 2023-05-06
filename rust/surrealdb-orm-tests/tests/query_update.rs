@@ -7,7 +7,7 @@ use surrealdb_models::{
     WeaponNonNullUpdater, WeaponOld,
 };
 use surrealdb_orm::{
-    statements::{create, insert, patch, select, update},
+    statements::{create, insert, select, update},
     *,
 };
 
@@ -869,8 +869,8 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
     } = Weapon::schema();
     let updated_weapon = update::<Weapon>(created_weapon.clone().id)
         .patch(vec![
-            patch(name).change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"),
-            patch(strength).replace(34),
+            name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n"),
+            strength.patch_replace(34u64),
         ])
         .get_one(db.clone())
         .await?;
@@ -886,8 +886,8 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
         "weapon:lowo"
     );
     let updated_weapon = update::<Weapon>(created_weapon.clone().id)
-        .patch(patch(strength).replace(921))
-        .patch(patch(name).change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
+        .patch(strength.patch_replace(921u64))
+        .patch(name.patch_change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
         .get_one(db.clone())
         .await?;
     assert_eq!(updated_weapon.name, "teot");
@@ -966,8 +966,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     // This is not how you should use the patch remove. Merely used for testing. Check the latter
     // place for a good example where the new weapon struct is used.
     let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).remove())
-        .patch(patch(bunchOfOtherFields).remove())
+        .patch(nice.patch_remove())
+        .patch(bunchOfOtherFields.patch_remove())
         .return_one(db.clone())
         .await
         .unwrap_err();
@@ -982,8 +982,8 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
 
     // that are not present in the new object. This is a destructive operation.
     let ref updated_weapon = update::<Weapon>(old_weapon.clone().id)
-        .patch(patch(nice).remove())
-        .patch(patch(bunchOfOtherFields).remove())
+        .patch(nice.patch_remove())
+        .patch(bunchOfOtherFields.patch_remove())
         .get_one(db.clone())
         .await?;
 
@@ -1086,29 +1086,14 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
 
     // bunchOfOtherFields is not string
     let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).add(true))
-        .patch(patch(bunchOfOtherFields).add("test"))
+        .patch(nice.patch_add(true))
+        .patch(bunchOfOtherFields.patch_add(56))
         .return_one(db.clone())
         .await;
-    assert!(
-        updated_weapon
-            .as_ref()
-            .unwrap_err()
-            .to_string()
-            .contains("expected i32"),
-        "Wrong type"
-    );
-    assert!(
-        updated_weapon.as_ref().unwrap_err().to_string().contains(
-            "Unable to parse data returned from the database. \
-            Check that all fields are complete and the types are able to deserialize surrealdb data types properly."
-        ),
-        "Should not be able to deserialize with old struct"
-    );
 
     let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(patch(nice).add(true))
-        .patch(patch(bunchOfOtherFields).add(45))
+        .patch(nice.patch_add(true))
+        .patch(bunchOfOtherFields.patch_add(45))
         .get_one(db.clone())
         .await?;
 
