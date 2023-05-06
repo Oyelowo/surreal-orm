@@ -267,48 +267,48 @@ impl MyFieldReceiver {
         if self.raw_type_is_bool() {
             (
                 quote!(#crate_name::FieldType::Bool),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<::std::primitive::bool>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             )
         } else if self.raw_type_is_float() {
             (
                 quote!(#crate_name::FieldType::Float),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Number>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             )
         } else if self.raw_type_is_integer() {
             (
                 quote!(#crate_name::FieldType::Int),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Number>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             )
         } else if self.raw_type_is_string() {
             (
                 quote!(#crate_name::FieldType::String),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Strand>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             )
         } else if self.raw_type_is_list() {
             (
                 quote!(#crate_name::FieldType::Array),
                 quote!(#crate_name::validators::assert_is_vec::<#ty>();),
-                // quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Array>);),
+                // quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             )
         } else if self.raw_type_is_object() {
             (
                 quote!(#crate_name::FieldType::Object),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Object>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             )
         } else if self.raw_type_is_duration() {
             (
                 quote!(#crate_name::FieldType::Duration),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Duration>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             )
         } else if self.raw_type_is_datetime() {
             (
                 quote!(#crate_name::FieldType::DateTime),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Datetime>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             )
         } else if self.raw_type_is_geometry() {
             (
                 quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Geometry>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             )
         } else if let MyFieldReceiver {
             type_: None,
@@ -363,7 +363,7 @@ impl MyFieldReceiver {
         } else {
             (
                 quote!(#crate_name::FieldType::Any),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Value>);),
+                quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
             )
         }
     }
@@ -705,6 +705,63 @@ impl MyFieldReceiver {
         //     _ => None,
         // }
     }
+
+    pub fn guess_approximate_fallback_concrete_type(&self) -> TokenStream {
+        let field_type = FieldType::from_str(
+            &self
+                .content_type
+                .clone()
+                .unwrap_or("any".into())
+                .to_string(),
+        )
+        .unwrap();
+        let crate_name = get_crate_name(false);
+        match field_type {
+            FieldType::Any => {
+                quote!(::std::convert::Into<#crate_name::sql::Value>)
+            }
+            FieldType::String => {
+                quote!(::std::convert::Into<::std::string::String>)
+            }
+            FieldType::Int => {
+                quote!(::std::convert::Into<#crate_name::validators::Int>)
+            }
+            FieldType::Float => {
+                quote!(::std::convert::Into<#crate_name::validators::Float>)
+            }
+            FieldType::Bool => {
+                quote!(::std::convert::Into<::std::primitive::bool>)
+            }
+            FieldType::Array => {
+                quote!(::std::iter::IntoIterator)
+                // quote!(::std::convert::Into<Vec<#crate_name::sql::Value>>)
+            }
+            FieldType::DateTime => {
+                quote!(::std::convert::Into<#crate_name::sql::Datetime>)
+            }
+            FieldType::Decimal => {
+                quote!(::std::convert::Into<#crate_name::sql::Number>)
+            }
+            FieldType::Duration => {
+                quote!(::std::convert::Into<#crate_name::sql::Duration>)
+            }
+            FieldType::Number => {
+                quote!(::std::convert::Into<#crate_name::validators::Num>)
+            }
+            FieldType::Object => {
+                quote!(::std::convert::Into<#crate_name::sql::Object>)
+            }
+            FieldType::Record(_) => {
+                quote!(::std::convert::Into<Option<#crate_name::sql::Thing>>)
+            }
+            FieldType::RecordAny => {
+                quote!(::std::convert::Into<Option<#crate_name::sql::Thing>>)
+            }
+            FieldType::Geometry(_) => {
+                quote!(::std::convert::Into<#crate_name::sql::Geometry>)
+            }
+        }
+    }
 }
 
 fn get_vector_item_type(ty: &Type) -> Option<Type> {
@@ -793,6 +850,12 @@ impl FromMeta for Permissions {
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldTypeWrapper(pub String);
+
+impl From<&str> for FieldTypeWrapper {
+    fn from(value: &str) -> Self {
+        Self(value.to_string())
+    }
+}
 
 impl FieldTypeWrapper {
     fn to_string(&self) -> &String {
@@ -1037,6 +1100,16 @@ impl ReferencedNodeMeta {
                                 panic!("type must be `array` when link_many attribute is used")
                             }
                         }
+                    } else {
+                        if let FieldType::Array = field_type {
+                            if field_receiver.content_type.is_none()
+                                && !field_receiver.type_is_inferrable(field_name_normalized)
+                            {
+                                panic!("Not able to infer array content type. Content type must \
+                                    be provided when type is array and the compiler cannot infer the type. \
+                                    Please, provide `content_type` for the field - {}", &field_name_normalized);
+                            }
+                        }
                     }
                 }
                 _ => {}
@@ -1047,26 +1120,26 @@ impl ReferencedNodeMeta {
             let field_type = FieldType::from_str(&type_.to_string()).unwrap();
             let static_assertion = match field_type {
                 FieldType::Any => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Value>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                 }
                 FieldType::String => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::string::String>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
                 }
                 FieldType::Int => {
                     quote!(
                         #crate_name::validators::is_int::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                 }
                 FieldType::Float => {
                     quote!(
                         #crate_name::validators::is_float::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Bool => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<::std::primitive::bool>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
                 }
                 FieldType::Array => {
                     quote!(
@@ -1074,32 +1147,32 @@ impl ReferencedNodeMeta {
                     )
                 }
                 FieldType::DateTime => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Datetime>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
                 }
                 FieldType::Decimal => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Duration => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Duration>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
                 }
                 FieldType::Number => {
                     quote!(
                         #crate_name::validators::is_num::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::num_traits>);
+                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Number>);)
+                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Object => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Object>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
                 }
                 FieldType::Record(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                 }
                 FieldType::RecordAny => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<Option<#crate_name::sql::Thing>>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                 }
                 FieldType::Geometry(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: Into<#crate_name::sql::Geometry>);)
+                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
                 }
             };
 
