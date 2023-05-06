@@ -287,7 +287,8 @@ impl MyFieldReceiver {
         } else if self.raw_type_is_list() {
             (
                 quote!(#crate_name::FieldType::Array),
-                quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Array>);),
+                quote!(#crate_name::validators::assert_is_vec::<#ty>();),
+                // quote!(::static_assertions::assert_impl_one!(#ty: Into<#crate_name::sql::Array>);),
             )
         } else if self.raw_type_is_object() {
             (
@@ -578,23 +579,34 @@ impl MyFieldReceiver {
         //     _ => false,
         // };
         // is_datetime
+        // match ty {
+        //     syn::Type::Path(path) => {
+        //         let last_seg = path.path.segments.last().unwrap();
+        //         if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+        //             // if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
+        //             //     if let syn::Type::Infer(_) = inner_type {
+        //             //         // if let syn::Type::Infer(_) = inner_type.as_ref() {
+        //             //         // The list type should have a specified type parameter
+        //             //         return false;
+        //             //     }
+        //             // }
+        //             last_seg.ident.to_string() == "DateTime"
+        //         } else {
+        //             false
+        //         }
+        //     }
+        //     syn::Type::Array(_) => true,
+        //     _ => false,
+        // }
         match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                        if let syn::Type::Infer(_) = inner_type {
-                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                            // The list type should have a specified type parameter
-                            return false;
-                        }
-                    }
-                    last_seg.ident.to_string() == "DateTime"
+            syn::Type::Path(type_path) => {
+                let last_segment = type_path.path.segments.last().unwrap();
+                if last_segment.ident.to_string().to_lowercase() == "datetime" {
+                    return true;
                 } else {
-                    false
+                    return false;
                 }
             }
-            syn::Type::Array(_) => true,
             _ => false,
         }
     }

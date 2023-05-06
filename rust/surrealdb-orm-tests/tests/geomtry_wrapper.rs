@@ -27,6 +27,7 @@ use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
 use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealdbModel;
+use surrealdb_orm::SurrealdbObject;
 use surrealdb_orm::ToRaw;
 // use surrealdb_derive::SurrealdbNode;
 use std::time::Duration;
@@ -39,7 +40,7 @@ use surrealdb_orm::{
     SurrealdbNode,
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(SurrealdbObject, Debug, Serialize, Deserialize, Clone)]
 pub struct Person {
     name: String,
 }
@@ -48,7 +49,8 @@ pub struct Person {
 #[surrealdb(table_name = "company")]
 struct Company {
     id: SurrealId<Company>,
-    nam: Uuid,
+    #[surrealdb(type = "string")]
+    nam: UuidWrapper,
     name: String,
     founded: Datetime,
     founders: Vec<Person>,
@@ -61,12 +63,36 @@ struct Company {
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
     id: SurrealId<GenZCompany>,
-    nam: Uuid,
+    #[surrealdb(type = "string")]
+    nam: UuidWrapper,
     name: String,
     founded: Datetime,
     founders: Vec<Person>,
     tags: Vec<String>,
     home: sql::Geometry,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UuidWrapper(Uuid);
+
+impl From<Uuid> for UuidWrapper {
+    fn from(uuid: Uuid) -> Self {
+        UuidWrapper(uuid)
+    }
+}
+
+impl From<UuidWrapper> for String {
+    fn from(uuid: UuidWrapper) -> Self {
+        uuid.to_string()
+    }
+}
+
+impl std::ops::Deref for UuidWrapper {
+    type Target = Uuid;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -85,7 +111,9 @@ fn default_resource() -> sql::Thing {
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
         id: Company::create_id("lowo"),
-        nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+        nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02")
+            .unwrap()
+            .into(),
         name: "Mana Inc.".to_string(),
         founded: "1967-05-03".into(),
         founders: vec![
@@ -306,7 +334,9 @@ async fn insert_many() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02")
+                .unwrap()
+                .into(),
             home: (45.3, 78.1).into(),
         },
         Company {
@@ -322,7 +352,9 @@ async fn insert_many() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02")
+                .unwrap()
+                .into(),
             home: (63.0, 21.0).into(),
         },
     ];
@@ -352,7 +384,9 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02")
+                .unwrap()
+                .into(),
             home: (45.3, 78.1).into(),
         },
         Company {
@@ -368,7 +402,9 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                 },
             ],
             tags: vec!["foo".to_string(), "bar".to_string()],
-            nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02").unwrap(),
+            nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02")
+                .unwrap()
+                .into(),
             home: (63.0, 21.0).into(),
         },
     ];

@@ -14,7 +14,7 @@ pub struct Planet {
     #[surrealdb(type = "int")]
     pub population: Population,
     pub created: DateTime<Utc>,
-    pub tags: Vec<String>,
+    pub tags: Vec<u64>,
 }
 
 type Population = u64;
