@@ -1208,7 +1208,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                 }
                 FieldType::Number => {
                     quote!(
-                        #crate_name::validators::is_num::<#raw_type>();
+                        #crate_name::validators::is_number::<#raw_type>();
                         // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                     // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
