@@ -890,6 +890,35 @@ impl ReferencedNodeMeta {
         let mut define_field_methods = vec![];
         let mut define_array_field_content_methods = vec![];
         let mut static_assertions = vec![];
+        let mut field_type_resolved = quote!();
+
+        // Provide default for links when type not provided
+        if let Some(ref type_) = field_receiver.type_ {
+            let type_ = &type_.0;
+            let error = format!(
+                "Invalid type. Expected one of - `{:?}`",
+                FieldType::variants()
+            );
+            let error = error.as_str();
+            field_type_resolved = quote!(#type_.parse::<#crate_name::FieldType>().expect(#error));
+            // define_field_methods
+            // .push();
+            // static_assertions.push(static_assertion);
+        } else if field_receiver.type_is_inferrable(field_name_normalized) {
+            let (field_type_, static_assertion) = field_receiver.infer_surreal_type_heuristically(
+                &struct_name_ident.to_string(),
+                field_name_normalized,
+            );
+            field_type_resolved = quote!(#field_type_);
+            static_assertions.push(static_assertion);
+        } else {
+            if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
+                panic!(
+                            "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field - {}",
+                            field_name_normalized, field_name_normalized
+                        );
+            }
+        };
 
         match field_receiver {
             MyFieldReceiver {
@@ -902,7 +931,7 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
-                content_type,
+                // content_type,
                 content_assert,
                 content_assert_fn,
                 ..
@@ -918,20 +947,18 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        || content_type.is_some()
+                        // || content_type.is_some()
                         || content_assert.is_some()
                         || content_assert_fn.is_some()
                 ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
-    type,
     assert,
     assert_fn,
     value,
     value_fn,
     permissions,
     permissions_fn,
-    content_type,
     content_assert,
     content_assert_fn");
             }
@@ -945,7 +972,7 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
-                content_type,
+                // content_type,
                 content_assert,
                 content_assert_fn,
                 relate,
@@ -961,13 +988,12 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        || content_type.is_some()
+                        // || content_type.is_some()
                         || content_assert.is_some()
                         || content_assert_fn.is_some()
                 ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
-    type,
     define,
     define_fn,
     assert,
@@ -976,7 +1002,6 @@ impl ReferencedNodeMeta {
     value_fn,
     permissions,
     permissions_fn,
-    content_type,
     content_assert,
     content_assert_fn");
             }
@@ -993,28 +1018,22 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
-                define_field = if let Some(type_) = type_ {
-                    let type_ = type_.to_string();
-                    Some(
-                        quote!(#define.type_(#crate_name::FieldType::from_str(#type_.to_string()).expect("Must be a valid surreal type")).to_raw()),
-                    )
-                } else {
-                    Some(quote!(#define.type_(type_).to_raw()))
-                };
+                if define.to_token_stream().to_string().chars().count() < 3 {
+                    // If empty, we get only the `()` of the function, so we can assume that it is empty
+                    // if there are less than 3 characters.
+                    panic!("define attribute is empty. Please provide a define_fn attribute.");
+                }
+                define_field = Some(quote!(#define.type_(#field_type_resolved).to_raw()));
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
                 type_,
                 ..
             } => {
-                define_field = if let Some(type_) = type_ {
-                    let type_ = type_.to_string();
-                    Some(
-                        quote!(#define_fn().type_(#crate_name::FieldType::from_str(#type_.to_string()).expect("Must be a valid surreal type")).to_raw()),
-                    )
-                } else {
-                    Some(quote!(#define_fn().type_(type_).to_raw()))
-                };
+                if define_fn.to_token_stream().to_string().is_empty() {
+                    panic!("define_fn attribute is empty. Please provide a define_fn attribute.");
+                }
+                define_field = Some(quote!(#define_fn().type_(#field_type_resolved).to_raw()));
             }
             _ => {}
         };
@@ -1211,29 +1230,12 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
             static_assertions.push(static_assertion);
 
             // Get the field type
-            define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::FieldType>()
-                                                        .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
-                                             )
-                                      );
+            // define_field_methods.push(quote!(.type_(#type_.parse::<#crate_name::FieldType>()
+            //                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
+            //                                  )
+            //                           );
+            define_field_methods.push(quote!(.type_(#field_type_resolved)));
         } else {
-            // Provide default for links when type not provided
-            if field_receiver.type_is_inferrable(field_name_normalized) {
-                let (field_type, static_assertion) = field_receiver
-                    .infer_surreal_type_heuristically(
-                        &struct_name_ident.to_string(),
-                        field_name_normalized,
-                    );
-
-                define_field_methods.push(quote!(.type_(#field_type)));
-                static_assertions.push(static_assertion);
-            } else {
-                if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
-                    panic!(
-                            "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field - {}",
-                            field_name_normalized, field_name_normalized
-                        );
-                }
-            };
         };
 
         match field_receiver {

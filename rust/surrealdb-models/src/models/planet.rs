@@ -13,7 +13,7 @@ pub struct Planet {
     // area: Polygon,
     // #[surrealdb(type = "int")]
     // #[surrealdb(type = "array", content_type = "int")]
-    #[surrealdb(type = "array", content_type = "int", define = "")]
+    #[surrealdb(type = "array", content_type = "int")]
     pub population: PopArray,
     pub created: DateTime<Utc>,
     pub tags: Vec<u64>,
