@@ -220,6 +220,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .await
         .iter()
         .all(|alien| alien.name == "Rook"));
+
     assert!(select_weak_aliens()
         .await
         .iter()
