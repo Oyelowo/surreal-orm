@@ -1372,7 +1372,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
             quote!(
                     ,
                 #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
-                                        .on_table(#crate_name::Table::from(#struct_name_ident::table_name()))
+                                        .on_table(#crate_name::Table::from(Self::table_name()))
                                         #( # define_array_field_content_methods) *
                                         .to_raw()
 
@@ -1381,7 +1381,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
         self.field_definition = define_field.unwrap_or_else(||quote!(
                     #crate_name::statements::define_field(#crate_name::Field::new(#field_name_normalized))
-                                            .on_table(#crate_name::Table::from(#struct_name_ident::table_name()))
+                                            .on_table(#crate_name::Table::from(Self::table_name()))
                                             #( # define_field_methods) *
                                             .to_raw()
                     #array_content_definition
