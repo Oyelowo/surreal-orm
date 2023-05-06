@@ -402,9 +402,13 @@ impl SchemaFieldsProperties {
                     };
                     
                     // Only works for vectors
-                    let array_trait = array_element.or_else(||field_receiver.get_array_content_type()).map(|items|{
+                    let array_trait = array_element
+                        .or_else(||field_receiver.get_array_content_type())
+                        .or_else(|| Some(field_receiver.get_fallback_array_content_concrete_type()))
+                        .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
-                        }).unwrap_or(quote!());
+                        })
+                        .unwrap_or(quote!());
                     
                     if is_settable {
                         store.field_wrapper_type_custom_implementations

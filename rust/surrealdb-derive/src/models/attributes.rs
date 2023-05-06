@@ -706,7 +706,7 @@ impl MyFieldReceiver {
         // }
     }
 
-    pub fn guess_approximate_fallback_concrete_type(&self) -> TokenStream {
+    pub fn get_fallback_array_content_concrete_type(&self) -> TokenStream {
         let field_type = FieldType::from_str(
             &self
                 .content_type
@@ -718,47 +718,52 @@ impl MyFieldReceiver {
         let crate_name = get_crate_name(false);
         match field_type {
             FieldType::Any => {
-                quote!(::std::convert::Into<#crate_name::sql::Value>)
+                quote!(#crate_name::sql::Value)
             }
             FieldType::String => {
-                quote!(::std::convert::Into<::std::string::String>)
+                quote!(::std::string::String)
             }
             FieldType::Int => {
-                quote!(::std::convert::Into<#crate_name::validators::Int>)
+                // quote!(#crate_name::validators::Int)
+                quote!(#crate_name::sql::Number)
             }
             FieldType::Float => {
-                quote!(::std::convert::Into<#crate_name::validators::Float>)
+                // quote!(#crate_name::validators::Float)
+                quote!(#crate_name::sql::Number)
             }
             FieldType::Bool => {
-                quote!(::std::convert::Into<::std::primitive::bool>)
+                quote!(:std::convert::Into<::std::primitive::bool>)
             }
             FieldType::Array => {
-                quote!(::std::iter::IntoIterator)
-                // quote!(::std::convert::Into<Vec<#crate_name::sql::Value>>)
+                // quote!(::std::iter::IntoIterator)
+                // quote!(::std::convert::Into<#crate_name::sql::Array>)
+                quote!(::std::vec::Vec<#crate_name::sql::Value>)
             }
             FieldType::DateTime => {
-                quote!(::std::convert::Into<#crate_name::sql::Datetime>)
+                quote!(#crate_name::sql::Datetime)
             }
             FieldType::Decimal => {
-                quote!(::std::convert::Into<#crate_name::sql::Number>)
+                quote!(#crate_name::validators::Float)
             }
             FieldType::Duration => {
-                quote!(::std::convert::Into<#crate_name::sql::Duration>)
+                quote!(#crate_name::sql::Duration)
             }
             FieldType::Number => {
-                quote!(::std::convert::Into<#crate_name::validators::Num>)
+                // quote!(#crate_name::validators::Num)
+                quote!(#crate_name::sql::Number)
             }
             FieldType::Object => {
-                quote!(::std::convert::Into<#crate_name::sql::Object>)
+                quote!(#crate_name::sql::Object)
+                // quote!(#crate_name::SurrealdbObject)
             }
             FieldType::Record(_) => {
-                quote!(::std::convert::Into<Option<#crate_name::sql::Thing>>)
+                quote!(Option<#crate_name::sql::Thing>)
             }
             FieldType::RecordAny => {
-                quote!(::std::convert::Into<Option<#crate_name::sql::Thing>>)
+                quote!(Option<#crate_name::sql::Thing>)
             }
             FieldType::Geometry(_) => {
-                quote!(::std::convert::Into<#crate_name::sql::Geometry>)
+                quote!(#crate_name::sql::Geometry)
             }
         }
     }
