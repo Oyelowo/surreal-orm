@@ -49,3 +49,19 @@ impl Deref for AfterParam {
 pub fn after() -> AfterParam {
     AfterParam(Param::new("after"))
 }
+
+/// stands for surrealdb native `$this`
+pub struct ThisParam(Param);
+
+impl Deref for ThisParam {
+    type Target = Param;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+/// creates surrealdb native `$this`
+pub fn this() -> ThisParam {
+    ThisParam(Param::new("this"))
+}
