@@ -12,7 +12,14 @@ pub struct SurrealId<T: SurrealdbModel, Id: Into<sql::Id>>(
     PhantomData<T>,
     PhantomData<Id>,
 );
+// from surrealid to surrealsimle id
+// impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for SurrealSimpleId<T> {
+//     fn from(surreal_id: SurrealId<T, Id>) -> Self {
+//         SurrealSimpleId(surreal_id)
+//     }
+// }
 
+#[derive(Debug, Clone)]
 struct Nanoid(String);
 
 impl From<Nanoid> for sql::Id {
@@ -20,8 +27,75 @@ impl From<Nanoid> for sql::Id {
         sql::Id::String(nanoid.0)
     }
 }
-pub type SurrealSimpleId<T: SurrealdbModel> = SurrealId<T, Nanoid>;
-pub type SurrealUuid<T: SurrealdbModel> = SurrealId<T, sql::Uuid>;
+
+#[derive(Debug, Clone)]
+pub struct SurrealSimpleId<T: SurrealdbModel>(SurrealId<T, Nanoid>);
+
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealSimpleId<T>> for SurrealId<T, Id> {
+    fn from(simple_id: SurrealSimpleId<T>) -> Self {
+        SurrealId(simple_id.0 .0, PhantomData, PhantomData)
+    }
+}
+
+impl<T: SurrealdbModel> SurrealSimpleId<T> {
+    /// Generates a new random nano id
+    pub fn new() -> Self {
+        // SurrealSimpleId(SurrealId::rand())
+        Self(SurrealId(
+            Thing::from((T::table_name().to_string(), sql::Id::rand())),
+            PhantomData,
+            PhantomData,
+        ))
+    }
+}
+
+impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
+    type Target = SurrealId<T, Nanoid>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SurrealUuid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
+
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUuid<T>> for SurrealId<T, Id> {
+    fn from(uuid: SurrealUuid<T>) -> Self {
+        SurrealId(uuid.0 .0, PhantomData, PhantomData)
+    }
+}
+
+impl<T: SurrealdbModel> SurrealUuid<T> {
+    /// Generates a new uuid
+    pub fn new() -> Self {
+        Self(SurrealId(
+            Thing::from((T::table_name().to_string(), sql::Id::uuid())),
+            PhantomData,
+            PhantomData,
+        ))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SurrealUlid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
+
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUlid<T>> for SurrealId<T, Id> {
+    fn from(ulid: SurrealUlid<T>) -> Self {
+        SurrealId(ulid.0 .0, PhantomData, PhantomData)
+    }
+}
+
+impl<T: SurrealdbModel> SurrealUlid<T> {
+    /// Generates a new ulid
+    pub fn new() -> Self {
+        Self(SurrealId(
+            Thing::from((T::table_name().to_string(), sql::Id::ulid())),
+            PhantomData,
+            PhantomData,
+        ))
+    }
+}
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> Serialize for SurrealId<T, Id> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -50,7 +124,7 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Display for SurrealId<T, Id> {
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> SurrealId<T, Id> {
     /// Create a new SurrealId from a string
-    pub fn new(id: impl Into<Id>) -> Self {
+    pub fn new(id: Id) -> Self {
         Self(
             Thing::from((T::table_name().to_string(), id.into())),
             PhantomData,
@@ -59,12 +133,13 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> SurrealId<T, Id> {
     }
 
     /// Generates a new random nano id
-    pub fn rand() -> Self {
+    pub fn rand() -> SurrealSimpleId<T> {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::rand())),
             PhantomData,
             PhantomData,
         )
+        .into()
     }
 
     /// Generates a new ulid
@@ -114,7 +189,7 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for sql::Thin
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> Default for SurrealId<T, Id> {
     fn default() -> Self {
-        Self::nano_id()
+        SurrealSimpleId::new().into()
     }
 }
 
