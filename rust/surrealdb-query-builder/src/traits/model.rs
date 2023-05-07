@@ -5,7 +5,9 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, Field, NodeClause, Raw, SurrealId, Table};
+use crate::{
+    Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, Table,
+};
 use serde::Serialize;
 use surrealdb::sql::{Id, Thing, Uuid};
 
@@ -46,32 +48,29 @@ pub trait SurrealdbModel: Sized {
 
     ///
     fn create_id<V: Into<Id>>(id: V) -> SurrealId<Self, V> {
-        // Thing::from((Self::table_name().to_string(), id.into()))
-        // SurrealId2::cr
         SurrealId::new(id).into()
     }
 
     /// Create a new surreal Thing/compound id from a Uuid
-    fn create_uuid() -> SurrealId<Self, Uuid> {
-        SurrealId::new(Thing::from((
-            Self::table_name().to_string(),
-            Uuid::new_v4().to_string(),
-        )))
-        .into()
+    fn create_uuid() -> SurrealUuid<Self> {
+        SurrealUuid::new()
     }
 
-    fn create_ulid() -> SurrealId<Self, Uuid> {
-        SurrealId::new(Thing::from((
-            Self::table_name().to_string(),
-            Uuid::new_v4().to_string(),
-        )))
-        .into()
+    /// Create a new surreal Thing/compound id from a Ulid
+    fn create_ulid() -> SurrealUlid<Self> {
+        SurrealUlid::new()
     }
 
-    /// Create a new surreal Thing/compound id from a Uuid
-    fn create_thing_uuid() -> Thing {
-        Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
+    /// Create a new surreal Thing/compound id from a simple NanoId.
+    /// This is the default used by surrealdb engine.
+    fn create_simple_id() -> SurrealSimpleId<Self> {
+        SurrealSimpleId::new()
     }
+
+    // /// Create a new surreal Thing/compound id from a Uuid
+    // fn create_thing_uuid() -> Thing {
+    //     Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
+    // }
 }
 
 /// SurrealdbNode is a trait signifying a node in the graph

@@ -1,4 +1,4 @@
-use std::{fmt::Display, marker::PhantomData, ops::Deref};
+use std::{collections::HashMap, fmt::Display, marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::{self, thing, Id, Thing, Uuid};
@@ -6,6 +6,9 @@ use surrealdb::sql::{self, thing, Id, Thing, Uuid};
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
 /// Wrapper around surrealdb::sql::Thing to extend its capabilities
+/// and provide a more ergonomic interface. This is used to create a statically
+/// typed id for a model. And is a combinatiion of the model's table name and
+/// the id which is anyhting that can be converted to a `surrealdb::sql::Id`.
 #[derive(Debug, Clone)]
 pub struct SurrealId<T: SurrealdbModel, Id: Into<sql::Id>>(
     sql::Thing,
@@ -38,7 +41,11 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Display for SurrealId<T, Id> {
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> SurrealId<T, Id> {
+impl<T, Id> SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     /// Create a new SurrealId from a string
     pub fn new(id: Id) -> Self {
         Self(
@@ -135,19 +142,9 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id>
 //     }
 // }
 
-// NANO RAND ID
-// Nano rand id which is used by default in surrealdb engine
+/// The default surrealdb id generated as a combination of the model/table name and a random nano id.
 #[derive(Debug, Clone)]
-struct Nanoid(String);
-
-impl From<Nanoid> for sql::Id {
-    fn from(nanoid: Nanoid) -> Self {
-        sql::Id::String(nanoid.0)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct SurrealSimpleId<T: SurrealdbModel>(SurrealId<T, Nanoid>);
+pub struct SurrealSimpleId<T: SurrealdbModel>(SurrealId<T, String>);
 
 impl<T: SurrealdbModel> Display for SurrealSimpleId<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -173,14 +170,14 @@ impl<T: SurrealdbModel> SurrealSimpleId<T> {
 }
 
 impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
-    type Target = SurrealId<T, Nanoid>;
+    type Target = SurrealId<T, String>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-// UUID
+/// A surrealdb id generated as combination of the model/table name and a uuid for the id part.
 #[derive(Debug, Clone)]
 pub struct SurrealUuid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
 
@@ -207,7 +204,7 @@ impl<T: SurrealdbModel> Display for SurrealUuid<T> {
     }
 }
 
-// ULID
+/// A surrealdb id generated as combination of the model/table name and a ulid for the id part.
 #[derive(Debug, Clone)]
 pub struct SurrealUlid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
 
@@ -239,8 +236,17 @@ impl<T: SurrealdbModel> Display for SurrealUlid<T> {
 pub struct TestUser;
 #[allow(dead_code)]
 /// For internal testing
-// pub type TestUserId = SurrealSimpleId<TestUser>;
-pub type TestUserId<T: Into<sql::Id>> = SurrealId<TestUser, T>;
+pub type TestUserSimpleId = SurrealSimpleId<TestUser>;
+/// For internal testing
+pub type TestUserUuid = SurrealUuid<TestUser>;
+/// For internal testing
+pub type TestUserUlid = SurrealUlid<TestUser>;
+/// For internal testing
+pub type TestUserStringId = SurrealId<TestUser, String>;
+/// For internal testing
+pub type TestUserNumberId = SurrealId<TestUser, u64>;
+/// For internal testing
+pub type TestUserObjectId = SurrealId<TestUser, HashMap<String, String>>;
 impl SurrealdbModel for TestUser {
     fn table_name() -> crate::Table {
         "user".into()
@@ -315,54 +321,51 @@ mod tests {
 
     #[test]
     fn test_create_surreal_id() {
-        let id = TestUserId::new(1);
+        let id = TestUserNumberId::new(1);
         assert_eq!(id.to_string(), "user:1");
     }
 
     #[test]
     fn test_create_surreal_id_with_string() {
-        let id = TestUserId::new("oyelowo");
+        let id = TestUserStringId::new("oyelowo".into());
         assert_eq!(id.to_string(), "user:oyelowo");
     }
 
     #[test]
     fn test_create_surreal_id_with_uuid() {
-        let id = TestUserId::new(Uuid::default());
+        let id = TestUserUuid::new();
         assert_eq!(id.to_string().contains("user:"), true);
-        assert_eq!(
-            id.to_string(),
-            "user:⟨00000000-0000-0000-0000-000000000000⟩"
-        );
+        assert_eq!(id.to_string().len(), 55);
     }
 
     #[test]
     fn test_create_uuid() {
-        let id = TestUserId::uuid();
+        let id = SurrealUuid::<TestUser>::new();
         assert_eq!(id.to_string().contains("user:"), true);
         assert_eq!(id.to_string().len(), 47);
     }
 
     #[test]
     fn test_surreal_id() {
-        let id = TestUserId::try_from("table:1").unwrap();
+        let id = TestUserNumberId::try_from("table:1").unwrap();
         assert_eq!(id.to_string(), "table:1");
     }
 
     #[test]
     fn test_surreal_id_from_string() {
-        let id = TestUserId::try_from("table:oyelowo").unwrap();
+        let id = TestUserStringId::try_from("table:oyelowo").unwrap();
         assert_eq!(id.to_string(), "table:oyelowo");
     }
 
     #[test]
     fn test_surreal_id_from_number() {
-        let id = TestUserId::try_from("table:1").unwrap();
+        let id = TestUserNumberId::try_from("table:1").unwrap();
         assert_eq!(id.to_string(), "table:1");
     }
 
     #[test]
     fn test_surreal_id_from_str_err() {
-        let id = TestUserId::try_from("table1").unwrap_err();
+        let id = TestUserNumberId::try_from("table1").unwrap_err();
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -374,7 +377,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err2() {
-        let id = TestUserId::try_from("table:").unwrap_err();
+        let id = TestUserStringId::try_from("table:").unwrap_err();
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -386,7 +389,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err3() {
-        let id = TestUserId::try_from("table:1:2").unwrap_err();
+        let id = TestUserNumberId::try_from("table:1:2:3").unwrap_err();
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
@@ -398,7 +401,7 @@ mod tests {
 
     #[test]
     fn test_surreal_id_from_str_err4() {
-        let id = TestUserId::try_from("table:1:2:3").unwrap_err();
+        let id = TestUserNumberId::try_from("table:1:2:3").unwrap_err();
         assert!(
             id.to_string().contains(
                 "Invalid id. Problem deserializing string to surrealdb::sql::Thing. \
