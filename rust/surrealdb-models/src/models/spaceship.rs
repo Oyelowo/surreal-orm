@@ -5,14 +5,32 @@ use surrealdb_orm::{
     SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, SurrealdbNode,
 };
 
+// #[derive(Serialize, Deserialize)]
+// struct SpaceShipId(SurrealId<SpaceShip, String>);
+// impl Default for SpaceShipId {
+//     fn default() -> Self {
+//         SpaceShip::create_id("default")
+//     }
+// }
+
 // SpaceShip
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "space_ship")]
 pub struct SpaceShip {
-    pub id: SurrealSimpleId<Self>,
+    pub id: SurrealId<SpaceShip, String>,
     pub name: String,
     pub created: DateTime<Utc>,
+}
+
+impl Default for SpaceShip {
+    fn default() -> Self {
+        Self {
+            id: Self::create_id(sql::Uuid::new_v4().to_string()),
+            name: Default::default(),
+            created: Default::default(),
+        }
+    }
 }
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
