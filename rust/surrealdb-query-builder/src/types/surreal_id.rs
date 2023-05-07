@@ -320,11 +320,11 @@ impl SurrealdbModel for TestUser {
         "user".into()
     }
 
-    fn get_id(&self) -> Self::Id {
+    fn get_id(self) -> Self::Id {
         TestUserSimpleId::new()
     }
 
-    fn get_id_as_thing(&self) -> sql::Thing {
+    fn get_id_as_thing(self) -> sql::Thing {
         self.get_id().to_thing()
     }
 

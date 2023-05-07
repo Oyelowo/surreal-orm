@@ -20,10 +20,10 @@ pub trait SurrealdbModel: Sized {
     fn table_name() -> Table;
 
     /// Returns id of the model/table
-    fn get_id(&self) -> Self::Id;
+    fn get_id(self) -> Self::Id;
 
     /// Returns id of the model/table as a Thing
-    fn get_id_as_thing(&self) -> sql::Thing;
+    fn get_id_as_thing(self) -> sql::Thing;
 
     /// The name of the all fields that are serializable
     /// and can potentially be written to the database.
