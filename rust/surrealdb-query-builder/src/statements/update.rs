@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, ErrorList, Filter,
     Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard, Setter,
-    SurrealId, SurrealdbModel, ToRaw,
+    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -194,23 +194,79 @@ impl From<sql::Thing> for TargettablesForUpdate {
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for TargettablesForUpdate {
-    fn from(value: &SurrealId<T, Id>) -> Self {
-        Self::SurrealId(value.to_owned().to_thing())
-    }
-}
-
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for TargettablesForUpdate {
+impl<T, Id> From<SurrealId<T, Id>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn from(value: SurrealId<T, Id>) -> Self {
         Self::SurrealId(value.to_thing())
     }
 }
 
-// impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
-//     fn from(value: SurrealId<T>) -> Self {
-//         Self::SurrealId(value.to_thing().into())
-//     }
-// }
+impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &SurrealId<T, Id>) -> Self {
+        Self::SurrealId(value.to_owned().to_thing())
+    }
+}
+
+impl<T> From<SurrealSimpleId<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: SurrealSimpleId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T> From<&SurrealSimpleId<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: &SurrealSimpleId<T>) -> Self {
+        Self::SurrealId(value.to_owned().to_thing())
+    }
+}
+
+impl<T> From<SurrealUuid<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: SurrealUuid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T> From<&SurrealUuid<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: &SurrealUuid<T>) -> Self {
+        Self::SurrealId(value.to_owned().to_thing())
+    }
+}
+
+impl<T> From<SurrealUlid<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: SurrealUlid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T> From<&SurrealUlid<T>> for TargettablesForUpdate
+where
+    T: SurrealdbModel,
+{
+    fn from(value: &SurrealUlid<T>) -> Self {
+        Self::SurrealId(value.to_owned().to_thing())
+    }
+}
 
 impl From<sql::Table> for TargettablesForUpdate {
     fn from(value: sql::Table) -> Self {

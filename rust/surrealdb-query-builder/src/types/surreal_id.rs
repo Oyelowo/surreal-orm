@@ -341,6 +341,42 @@ impl<T: SurrealdbModel> Display for SurrealUlid<T> {
     }
 }
 
+impl<T: SurrealdbModel> From<SurrealSimpleId<T>> for sql::Value {
+    fn from(simple_id: SurrealSimpleId<T>) -> Self {
+        sql::Value::Thing(simple_id.0 .0)
+    }
+}
+
+impl<T: SurrealdbModel> From<&SurrealSimpleId<T>> for sql::Value {
+    fn from(simple_id: &SurrealSimpleId<T>) -> Self {
+        sql::Value::Thing(simple_id.0 .0.clone())
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealUuid<T>> for sql::Value {
+    fn from(uuid: SurrealUuid<T>) -> Self {
+        sql::Value::Thing(uuid.0 .0)
+    }
+}
+
+impl<T: SurrealdbModel> From<&SurrealUuid<T>> for sql::Value {
+    fn from(uuid: &SurrealUuid<T>) -> Self {
+        sql::Value::Thing(uuid.0 .0.clone())
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealUlid<T>> for sql::Value {
+    fn from(ulid: SurrealUlid<T>) -> Self {
+        sql::Value::Thing(ulid.0 .0)
+    }
+}
+
+impl<T: SurrealdbModel> From<&SurrealUlid<T>> for sql::Value {
+    fn from(ulid: &SurrealUlid<T>) -> Self {
+        sql::Value::Thing(ulid.0 .0.clone())
+    }
+}
+
 /// For internal testing
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TestUser;
