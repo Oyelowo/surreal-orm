@@ -333,7 +333,7 @@ where
     }
 }
 
-impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForSelect
+impl<T, Id> From<Vec<&SurrealId<T, Id>>> for TargettablesForSelect
 where
     T: SurrealdbModel,
     Id: Into<sql::Id>,
