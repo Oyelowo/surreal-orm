@@ -452,7 +452,7 @@ async fn test_update_content_with_filter() -> SurrealdbOrmResult<()> {
 
     let generated_weapons = (0..20)
         .map(|x| {
-            let mut weapon = Weapon {
+            let weapon = Weapon {
                 name: "Laser".to_string(),
                 created: Utc::now(),
                 strength: x,
@@ -542,7 +542,7 @@ async fn test_update_merge_with_filter() -> SurrealdbOrmResult<()> {
 
     let generated_weapons = (0..20)
         .map(|x| {
-            let mut weapon = Weapon {
+            let weapon = Weapon {
                 name: "Laser".to_string(),
                 created: Utc::now(),
                 strength: x,
@@ -1075,7 +1075,7 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
     );
 
     // bunchOfOtherFields is not string
-    let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
+    let ref _updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
         .patch(nice.patch_add(true))
         .patch(bunchOfOtherFields.patch_add(56))
         .return_one(db.clone())

@@ -199,7 +199,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         tags: vec!["developer".to_string()],
         ..Default::default()
     };
-    create(oyelowo).return_one(db.clone()).await;
+    let _ = create(oyelowo).return_one(db.clone()).await;
     let devs = insert(generated_developers).return_many(db.clone()).await?;
     let sample = devs.into_iter().take(2).collect::<Vec<_>>();
 

@@ -5,14 +5,10 @@
  * Licensed under the MIT license
  */
 
-use std::ops::Deref;
-
+use super::Field;
+use crate::{Binding, Buildable, Parametric, Valuex};
 use bigdecimal::BigDecimal;
 use surrealdb::sql;
-
-use crate::{Binding, Buildable, Parametric, Valuex};
-
-use super::Field;
 
 /// A value that cen be ordered
 #[derive(Debug, Clone)]

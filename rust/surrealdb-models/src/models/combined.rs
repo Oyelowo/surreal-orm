@@ -62,7 +62,7 @@ fn full() -> u32 {
 fn define_student() -> DefineTableStatement {
     use CrudType::*;
     let name = Field::new("name");
-    let user_table = Table::from("user");
+    let _user_table = Table::from("user");
     let age = Field::new("age");
     let country = Field::new("country");
     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));

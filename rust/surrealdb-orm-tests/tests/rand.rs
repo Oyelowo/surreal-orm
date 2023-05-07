@@ -1,6 +1,5 @@
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::cell::RefCell;
-use surrealdb::sql::Uuid;
 
 thread_local!(
     static THREAD_RNG: RefCell<StdRng> = RefCell::new(StdRng::seed_from_u64(123456789));

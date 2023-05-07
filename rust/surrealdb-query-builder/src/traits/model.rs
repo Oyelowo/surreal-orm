@@ -9,7 +9,7 @@ use crate::{
     Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, Table,
 };
 use serde::Serialize;
-use surrealdb::sql::{self, Id, Thing, Uuid};
+use surrealdb::sql::{self, Id, Thing};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel

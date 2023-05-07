@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Display, marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing, Id, Thing, Uuid};
+use surrealdb::sql::{self, thing, Thing};
 
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 

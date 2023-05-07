@@ -1,9 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SetterAssignable, SurrealId, SurrealSimpleId, SurrealdbEdge,
-    SurrealdbNode, SurrealdbObject, E,
+    LinkMany, LinkOne, Relate, SurrealSimpleId, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
