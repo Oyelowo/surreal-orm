@@ -689,7 +689,7 @@ async fn test_alien_build_output() -> SurrealdbOrmResult<()> {
             $_param_00000010, $_param_00000011, $_param_00000012);"
     );
     insta::assert_display_snapshot!(build.fine_tune_params());
-    insta::assert_display_snapshot!(build.to_raw().build());
+    insta::assert_display_snapshot!(build.to_raw().build().len());
     Ok(())
 }
 

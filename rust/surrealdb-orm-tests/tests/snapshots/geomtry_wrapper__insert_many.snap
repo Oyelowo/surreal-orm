@@ -8,10 +8,11 @@ expression: results
             Thing {
                 tb: "company",
                 id: Number(
-                    1,
+                    32,
                 ),
             },
             PhantomData<geomtry_wrapper::Company>,
+            PhantomData<i32>,
         ),
         nam: UuidWrapper(
             Uuid(
@@ -52,6 +53,7 @@ expression: results
                 ),
             },
             PhantomData<geomtry_wrapper::Company>,
+            PhantomData<i32>,
         ),
         nam: UuidWrapper(
             Uuid(

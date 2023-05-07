@@ -4,14 +4,17 @@ expression: results
 ---
 [
     GenZCompany {
-        id: SurrealId(
-            Thing {
-                tb: "gen_z_company",
-                id: Number(
-                    1,
-                ),
-            },
-            PhantomData<geomtry_wrapper::GenZCompany>,
+        id: SurrealSimpleId(
+            SurrealId(
+                Thing {
+                    tb: "gen_z_company",
+                    id: Number(
+                        1,
+                    ),
+                },
+                PhantomData<geomtry_wrapper::GenZCompany>,
+                PhantomData<alloc::string::String>,
+            ),
         ),
         nam: UuidWrapper(
             Uuid(
@@ -44,14 +47,17 @@ expression: results
         ),
     },
     GenZCompany {
-        id: SurrealId(
-            Thing {
-                tb: "gen_z_company",
-                id: Number(
-                    2,
-                ),
-            },
-            PhantomData<geomtry_wrapper::GenZCompany>,
+        id: SurrealSimpleId(
+            SurrealId(
+                Thing {
+                    tb: "gen_z_company",
+                    id: Number(
+                        2,
+                    ),
+                },
+                PhantomData<geomtry_wrapper::GenZCompany>,
+                PhantomData<alloc::string::String>,
+            ),
         ),
         nam: UuidWrapper(
             Uuid(
