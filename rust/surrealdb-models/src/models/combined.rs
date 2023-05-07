@@ -148,7 +148,7 @@ fn define_age() -> DefineFieldStatement {
     statement
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
     table_name = "student"
@@ -161,7 +161,7 @@ fn define_age() -> DefineFieldStatement {
     // define_fn = "define_student"
 )]
 pub struct Student {
-    id: SurrealSimpleId<Student>,
+    id: SurrealId<Student, &'static str>,
 
     first_name: String,
     last_name: String,

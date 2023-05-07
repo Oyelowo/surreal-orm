@@ -173,6 +173,15 @@ where
     }
 }
 
+impl<T> From<SurrealSimpleId<T>> for sql::Thing
+where
+    T: SurrealdbModel,
+{
+    fn from(simple_id: SurrealSimpleId<T>) -> Self {
+        simple_id.0 .0
+    }
+}
+
 impl<T> Display for SurrealSimpleId<T>
 where
     T: SurrealdbModel,
@@ -232,6 +241,12 @@ impl<T: SurrealdbModel> Default for SurrealUuid<T> {
     }
 }
 
+impl<T: SurrealdbModel> From<SurrealUuid<T>> for sql::Thing {
+    fn from(uuid: SurrealUuid<T>) -> Self {
+        uuid.0 .0
+    }
+}
+
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUuid<T>> for SurrealId<T, Id> {
     fn from(uuid: SurrealUuid<T>) -> Self {
         SurrealId(uuid.0 .0, PhantomData, PhantomData)
@@ -273,6 +288,12 @@ impl<T: SurrealdbModel> Default for SurrealUlid<T> {
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUlid<T>> for SurrealId<T, Id> {
     fn from(ulid: SurrealUlid<T>) -> Self {
         SurrealId(ulid.0 .0, PhantomData, PhantomData)
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealUlid<T>> for sql::Thing {
+    fn from(ulid: SurrealUlid<T>) -> Self {
+        ulid.0 .0
     }
 }
 

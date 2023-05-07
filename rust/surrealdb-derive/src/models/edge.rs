@@ -179,7 +179,7 @@ impl ToTokens for EdgeToken {
                     }
                 
                     fn get_id_as_thing(self) -> #crate_name::sql::Thing {
-                        self.id.to_thing()
+                        self.id.into()
                     }
                 
                     fn get_serializable_fields() -> Vec<#crate_name::Field> {
