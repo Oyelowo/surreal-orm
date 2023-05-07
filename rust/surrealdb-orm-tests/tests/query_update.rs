@@ -277,22 +277,22 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     update::<Alien>(alien_id)
         .set(tags.append("tag3"))
         .set(weapon.equal(Weapon::create_id("agi")))
-        .set(spaceShips.append(SpaceShip::create_id("cali")))
-        .set(spaceShips.append(SpaceShip::create_id("codebreather")))
-        .set(spaceShips.append(SpaceShip::create_id("blayz")))
-        .set(spaceShips.append(SpaceShip::create_id("anam")))
+        .set(spaceShips.append(SpaceShip::create_id("cali".into())))
+        .set(spaceShips.append(SpaceShip::create_id("codebreather".into())))
+        .set(spaceShips.append(SpaceShip::create_id("blayz".into())))
+        .set(spaceShips.append(SpaceShip::create_id("anam".into())))
         .run(db.clone())
         .await?;
 
     update::<Alien>(alien_id)
         .set(tags.append("rust"))
-        .set(spaceShips.append(SpaceShip::create_id("anam")))
+        .set(spaceShips.append(SpaceShip::create_id("anam".into())))
         .run(db.clone())
         .await?;
 
     let ref updated = update::<Alien>(alien_id)
         .set(tags.append("rice"))
-        .set(spaceShips.append(SpaceShip::create_id("cali")))
+        .set(spaceShips.append(SpaceShip::create_id("cali".into())))
         .return_one(db.clone())
         .await?;
 
@@ -1020,7 +1020,6 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon_old = Weapon {
-        id: Weapon::create_id("original_id"),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
