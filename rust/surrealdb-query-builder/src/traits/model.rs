@@ -9,7 +9,7 @@ use crate::{
     Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, Table,
 };
 use serde::Serialize;
-use surrealdb::sql::{Id, Thing, Uuid};
+use surrealdb::sql::{self, Id, Thing, Uuid};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
@@ -21,6 +21,9 @@ pub trait SurrealdbModel: Sized {
 
     /// Returns id of the model/table
     fn get_id(&self) -> Self::Id;
+
+    /// Returns id of the model/table as a Thing
+    fn get_id_as_thing(&self) -> sql::Thing;
 
     /// The name of the all fields that are serializable
     /// and can potentially be written to the database.

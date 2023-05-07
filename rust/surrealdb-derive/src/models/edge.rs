@@ -178,6 +178,10 @@ impl ToTokens for EdgeToken {
                         self.id
                     }
                 
+                    fn get_id_as_thing(&self) -> #crate_name::sql::Thing {
+                        self.id.to_thing()
+                    }
+                
                     fn get_serializable_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #serializable_fields), *]
                     }

@@ -191,6 +191,10 @@ impl<T: SurrealdbModel> SurrealSimpleId<T> {
             PhantomData,
         ))
     }
+
+    pub fn to_thing(&self) -> Thing {
+        self.0 .0.clone()
+    }
 }
 
 impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
@@ -220,6 +224,10 @@ impl<T: SurrealdbModel> SurrealUuid<T> {
             PhantomData,
         ))
     }
+
+    pub fn to_thing(&self) -> Thing {
+        self.0 .0.clone()
+    }
 }
 
 impl<T: SurrealdbModel> Display for SurrealUuid<T> {
@@ -246,6 +254,10 @@ impl<T: SurrealdbModel> SurrealUlid<T> {
             PhantomData,
             PhantomData,
         ))
+    }
+
+    pub fn to_thing(&self) -> Thing {
+        self.0 .0.clone()
     }
 }
 
@@ -279,6 +291,10 @@ impl SurrealdbModel for TestUser {
 
     fn get_id(&self) -> Self::Id {
         TestUserSimpleId::new()
+    }
+
+    fn get_id_as_thing(&self) -> sql::Thing {
+        self.get_id().to_thing()
     }
 
     fn get_serializable_fields() -> Vec<crate::Field> {

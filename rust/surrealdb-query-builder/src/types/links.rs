@@ -5,14 +5,14 @@
  * Licensed under the MIT license
  */
 
-use crate::{SurrealId, SurrealdbNode};
+use crate::{SurrealId, SurrealdbModel, SurrealdbNode};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
 /// A reference to foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
-pub enum Reference<V: SurrealdbNode> {
+pub enum Reference<V: SurrealdbModel> {
     /// the id of the foreign node. The defualt if foreign node is not fetched
     Id(sql::Thing),
     // Id(SurrealId<V>),
@@ -31,8 +31,8 @@ where
     /// # Panics
     ///
     /// Panics if .
-    pub fn from_model(model: impl SurrealdbNode) -> Self {
-        let id = model.get_id();
+    pub fn from_model(model: impl SurrealdbModel) -> Self {
+        let id: sql::Thing = model.get_id_as_thing();
         Self::Id(id)
     }
 
@@ -106,7 +106,7 @@ macro_rules! impl_from_model_for_ref_type {
         impl<V: SurrealdbNode> std::convert::From<$surrealdb_node_generics> for $reference_type {
             fn from(model: $surrealdb_node_generics) -> Self {
                 // let id = model.get_id::<SurrealId<$surrealdb_node_generics>>();
-                let id: sql::Thing = model.get_id();
+                let id: sql::Thing = model.get_id_as_thing();
                 let reference = Reference::Id(id.clone());
                 Self(reference.into())
             }
@@ -116,7 +116,7 @@ macro_rules! impl_from_model_for_ref_type {
             for $reference_type
         {
             fn from(model: &$surrealdb_node_generics) -> Self {
-                let id: sql::Thing = model.clone().get_id();
+                let id: sql::Thing = model.clone().get_id_as_thing();
                 let reference = Reference::Id(id.to_owned());
                 Self(reference.into())
             }
@@ -129,7 +129,7 @@ impl<V: SurrealdbNode> std::convert::From<Vec<V>> for LinkMany<V> {
         let xx = model_vec
             .into_iter()
             .map(|m| {
-                let id: sql::Thing = m.get_id();
+                let id: sql::Thing = m.get_id_as_thing();
                 Reference::Id(id.clone())
             })
             .collect::<Vec<Reference<V>>>();
