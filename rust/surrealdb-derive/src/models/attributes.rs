@@ -518,6 +518,13 @@ impl MyFieldReceiver {
     //     is_array
     // }
 
+    pub fn is_list(&self) -> bool {
+        self.raw_type_is_list()
+            || self.type_.as_ref().map_or(false, |t| {
+                t.parse::<FieldType>().unwrap_or(FieldType::Any).is_array()
+            })
+    }
+
     pub fn raw_type_is_list(&self) -> bool {
         let ty = &self.ty;
         match ty {
@@ -1389,6 +1396,46 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         self.field_type_validation_asserts.extend(static_assertions);
 
         self
+    }
+
+    pub(crate) fn from_simple_array(normalized_field_name: &::syn::Ident) -> Self {
+        let normalized_field_name_str = normalized_field_name.to_string();
+        let crate_name = get_crate_name(false);
+
+        let record_link_default_alias_as_method = quote!(
+            pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
+                let clause: #crate_name::NodeAliasClause = clause.into();
+                let clause: #crate_name::NodeClause = clause.into_inner();
+
+                let normalized_field_name_str = if self.build().is_empty(){
+                    #normalized_field_name_str.to_string()
+                }else {
+                    format!(".{}", #normalized_field_name_str)
+                };
+
+                let clause: #crate_name::NodeClause = clause.into();
+                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<Vec<_>>();
+
+                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<Vec<_>>();
+
+                let field = #crate_name::Field::new(format!("{normalized_field_name_str}{}", clause.build()))
+                            .with_bindings(bindings)
+                            .with_errors(errors);
+                field
+
+            }
+        );
+
+        Self {
+            foreign_node_schema_import: quote!(),
+
+            foreign_node_type_validator: quote!(),
+
+            record_link_default_alias_as_method,
+            foreign_node_type: quote!(schema_type_ident),
+            field_definition: quote!(),
+            field_type_validation_asserts: vec![],
+        }
     }
 
     pub(crate) fn from_record_link(
