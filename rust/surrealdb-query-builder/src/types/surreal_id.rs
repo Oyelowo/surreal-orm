@@ -1,15 +1,29 @@
 use std::{fmt::Display, marker::PhantomData, ops::Deref};
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{self, thing, Id, Thing};
+use surrealdb::sql::{self, thing, Id, Thing, Uuid};
 
 use crate::{Erroneous, SurrealdbModel, SurrealdbOrmError};
 
 /// Wrapper around surrealdb::sql::Thing to extend its capabilities
 #[derive(Debug, Clone)]
-pub struct SurrealId<T: SurrealdbModel>(sql::Thing, PhantomData<T>);
+pub struct SurrealId<T: SurrealdbModel, Id: Into<sql::Id>>(
+    sql::Thing,
+    PhantomData<T>,
+    PhantomData<Id>,
+);
 
-impl<T: SurrealdbModel> Serialize for SurrealId<T> {
+struct Nanoid(String);
+
+impl From<Nanoid> for sql::Id {
+    fn from(nanoid: Nanoid) -> Self {
+        sql::Id::String(nanoid.0)
+    }
+}
+pub type SurrealSimpleId<T: SurrealdbModel> = SurrealId<T, Nanoid>;
+pub type SurrealUuid<T: SurrealdbModel> = SurrealId<T, sql::Uuid>;
+
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Serialize for SurrealId<T, Id> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -18,27 +32,28 @@ impl<T: SurrealdbModel> Serialize for SurrealId<T> {
     }
 }
 
-impl<'de, T: SurrealdbModel> Deserialize<'de> for SurrealId<T> {
+impl<'de, T: SurrealdbModel, Id: Into<sql::Id>> Deserialize<'de> for SurrealId<T, Id> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         let thing = Thing::deserialize(deserializer)?;
-        Ok(SurrealId(thing, PhantomData))
+        Ok(SurrealId(thing, PhantomData, PhantomData))
     }
 }
 
-impl<T: SurrealdbModel> Display for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Display for SurrealId<T, Id> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())
     }
 }
 
-impl<T: SurrealdbModel> SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> SurrealId<T, Id> {
     /// Create a new SurrealId from a string
     pub fn new(id: impl Into<Id>) -> Self {
         Self(
             Thing::from((T::table_name().to_string(), id.into())),
+            PhantomData,
             PhantomData,
         )
     }
@@ -48,6 +63,7 @@ impl<T: SurrealdbModel> SurrealId<T> {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::rand())),
             PhantomData,
+            PhantomData,
         )
     }
 
@@ -55,6 +71,7 @@ impl<T: SurrealdbModel> SurrealId<T> {
     pub fn ulid() -> Self {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::ulid())),
+            PhantomData,
             PhantomData,
         )
     }
@@ -64,6 +81,7 @@ impl<T: SurrealdbModel> SurrealId<T> {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::uuid())),
             PhantomData,
+            PhantomData,
         )
     }
 
@@ -71,6 +89,7 @@ impl<T: SurrealdbModel> SurrealId<T> {
     pub fn nano_id() -> Self {
         Self(
             Thing::from((T::table_name().to_string(), sql::Id::rand())),
+            PhantomData,
             PhantomData,
         )
     }
@@ -81,25 +100,25 @@ impl<T: SurrealdbModel> SurrealId<T> {
     }
 }
 
-impl<T: SurrealdbModel> From<SurrealId<T>> for sql::Thing {
-    fn from(value: SurrealId<T>) -> Self {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for sql::Thing {
+    fn from(value: SurrealId<T, Id>) -> Self {
         value.0
     }
 }
 
-impl<T: SurrealdbModel> From<&SurrealId<T>> for sql::Thing {
-    fn from(value: &SurrealId<T>) -> Self {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for sql::Thing {
+    fn from(value: &SurrealId<T, Id>) -> Self {
         value.0.clone()
     }
 }
 
-impl<T: SurrealdbModel> Default for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Default for SurrealId<T, Id> {
     fn default() -> Self {
         Self::nano_id()
     }
 }
 
-impl<T: SurrealdbModel> Deref for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Deref for SurrealId<T, Id> {
     type Target = sql::Thing;
 
     fn deref(&self) -> &Self::Target {
@@ -107,29 +126,29 @@ impl<T: SurrealdbModel> Deref for SurrealId<T> {
     }
 }
 
-impl<T: SurrealdbModel> Erroneous for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Erroneous for SurrealId<T, Id> {
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
 
-impl<T: SurrealdbModel> TryFrom<&str> for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> TryFrom<&str> for SurrealId<T, Id> {
     type Error = SurrealdbOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         thing(&value.to_string())
-            .map(|v| SurrealId(v, PhantomData))
+            .map(|v| SurrealId(v, PhantomData, PhantomData))
             .map_err(|e| SurrealdbOrmError::InvalidId(e.into()))
     }
 }
 
-impl<T: SurrealdbModel> From<sql::Thing> for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<sql::Thing> for SurrealId<T, Id> {
     fn from(value: sql::Thing) -> Self {
-        Self(value, PhantomData)
+        Self(value, PhantomData, PhantomData)
     }
 }
 
-impl<T: SurrealdbModel> Into<sql::Value> for SurrealId<T> {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id> {
     fn into(self) -> sql::Value {
         self.0.into()
     }
@@ -140,7 +159,7 @@ impl<T: SurrealdbModel> Into<sql::Value> for SurrealId<T> {
 pub struct TestUser;
 #[allow(dead_code)]
 /// For internal testing
-pub type TestUserId = SurrealId<TestUser>;
+pub type TestUserId = SurrealSimpleId<TestUser>;
 impl SurrealdbModel for TestUser {
     fn table_name() -> crate::Table {
         "user".into()

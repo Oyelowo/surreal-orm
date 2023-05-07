@@ -166,8 +166,12 @@ impl<V: SurrealdbNode> From<LinkOne<V>> for Option<sql::Thing> {
     }
 }
 
-impl<T: SurrealdbNode> From<SurrealId<T>> for LinkOne<T> {
-    fn from(id: SurrealId<T>) -> Self {
+impl<T, Id> From<SurrealId<T, Id>> for LinkOne<T>
+where
+    T: SurrealdbNode,
+    Id: Into<sql::Id>,
+{
+    fn from(id: SurrealId<T, Id>) -> Self {
         let reference = Reference::Id(id.into());
         Self(reference.into())
     }
@@ -202,8 +206,12 @@ impl<V: SurrealdbNode> LinkSelf<V> {
     }
 }
 
-impl<T: SurrealdbNode> From<SurrealId<T>> for LinkSelf<T> {
-    fn from(id: SurrealId<T>) -> Self {
+impl<T, Id> From<SurrealId<T, Id>> for LinkSelf<T>
+where
+    T: SurrealdbNode,
+    Id: Into<sql::Id>,
+{
+    fn from(id: SurrealId<T, Id>) -> Self {
         let reference = Reference::Id(id.into());
         Self(reference.into())
     }

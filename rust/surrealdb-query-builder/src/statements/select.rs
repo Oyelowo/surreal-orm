@@ -313,26 +313,42 @@ impl<const N: usize> From<&[sql::Table; N]> for TargettablesForSelect {
     }
 }
 
-impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForSelect {
-    fn from(value: &SurrealId<T>) -> Self {
+impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &SurrealId<T, Id>) -> Self {
         Self::SurrealId(value.to_thing())
     }
 }
 
-impl<const N: usize, T: SurrealdbModel> From<&[SurrealId<T>; N]> for TargettablesForSelect {
-    fn from(value: &[SurrealId<T>; N]) -> Self {
+impl<const N: usize, T, Id> From<&[SurrealId<T, Id>; N]> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &[SurrealId<T, Id>; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
     }
 }
 
-impl<T: SurrealdbModel> From<Vec<&SurrealId<T>>> for TargettablesForSelect {
-    fn from(value: Vec<&SurrealId<T>>) -> Self {
+impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: Vec<&SurrealId<T, Id>>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
-impl<const N: usize, T: SurrealdbModel> From<&[&SurrealId<T>; N]> for TargettablesForSelect {
-    fn from(value: &[&SurrealId<T>; N]) -> Self {
+impl<const N: usize, T, Id> From<&[&SurrealId<T, Id>; N]> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &[&SurrealId<T, Id>; N]) -> Self {
         Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
     }
 }
@@ -348,14 +364,18 @@ impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
     }
 }
 
-impl<T: SurrealdbModel> From<Vec<SurrealId<T>>> for TargettablesForSelect {
-    fn from(value: Vec<SurrealId<T>>) -> Self {
+impl<T, Id> From<Vec<SurrealId<T, Id>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: Vec<SurrealId<T, Id>>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
 
-impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForSelect {
-    fn from(value: SurrealId<T>) -> Self {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for TargettablesForSelect {
+    fn from(value: SurrealId<T, Id>) -> Self {
         Self::SurrealId(value.to_thing())
     }
 }

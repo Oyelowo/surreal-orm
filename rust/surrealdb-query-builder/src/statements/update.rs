@@ -194,14 +194,14 @@ impl From<sql::Thing> for TargettablesForUpdate {
     }
 }
 
-impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForUpdate {
-    fn from(value: &SurrealId<T>) -> Self {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for TargettablesForUpdate {
+    fn from(value: &SurrealId<T, Id>) -> Self {
         Self::SurrealId(value.to_owned().to_thing())
     }
 }
 
-impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForUpdate {
-    fn from(value: SurrealId<T>) -> Self {
+impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for TargettablesForUpdate {
+    fn from(value: SurrealId<T, Id>) -> Self {
         Self::SurrealId(value.to_thing())
     }
 }

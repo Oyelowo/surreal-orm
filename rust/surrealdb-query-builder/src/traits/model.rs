@@ -45,14 +45,22 @@ pub trait SurrealdbModel: Sized {
     }
 
     ///
-    fn create_id(id: impl Into<Id>) -> SurrealId<Self> {
+    fn create_id<V: Into<Id>>(id: V) -> SurrealId<Self, V> {
         // Thing::from((Self::table_name().to_string(), id.into()))
         // SurrealId2::cr
         SurrealId::new(id).into()
     }
 
     /// Create a new surreal Thing/compound id from a Uuid
-    fn create_uuid() -> SurrealId<Self> {
+    fn create_uuid() -> SurrealId<Self, Uuid> {
+        SurrealId::new(Thing::from((
+            Self::table_name().to_string(),
+            Uuid::new_v4().to_string(),
+        )))
+        .into()
+    }
+
+    fn create_ulid() -> SurrealId<Self, Uuid> {
         SurrealId::new(Thing::from((
             Self::table_name().to_string(),
             Uuid::new_v4().to_string(),
