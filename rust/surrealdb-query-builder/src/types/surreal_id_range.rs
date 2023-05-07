@@ -1,15 +1,105 @@
-use crate::statements::select::TargettablesForSelect;
-use crate::Binding;
-use crate::SurrealSimpleId;
-use crate::SurrealUlid;
-use crate::SurrealUuid;
-use crate::SurrealdbModel;
-use crate::Valuex;
+use crate::{
+    statements::select::TargettablesForSelect, Binding, SurrealId, SurrealSimpleId, SurrealUlid,
+    SurrealUuid, SurrealdbModel, Valuex,
+};
+use surrealdb::sql;
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
-)]
-struct Uuid(String);
+impl<T, V> From<std::ops::RangeInclusive<SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeInclusive<SurrealId<T, V>>) -> Self {
+        let start = range.start();
+        let end = range.end();
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!(
+            "{table}:{}..={}",
+            start_binding.get_param_dollarised(),
+            end_binding.get_param_dollarised()
+        );
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding, end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeFrom<SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeFrom<SurrealId<T, V>>) -> Self {
+        let start = range.start;
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let build = format!("{table}:{}..", start_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeTo<SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeTo<SurrealId<T, V>>) -> Self {
+        let end = range.end;
+        let table = T::table_name();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!("{table}:..{}", end_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeToInclusive<SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeToInclusive<SurrealId<T, V>>) -> Self {
+        let end = range.end;
+        let table = T::table_name();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!("{table}:..={}", end_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::Range<SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::Range<SurrealId<T, V>>) -> Self {
+        let start = range.start;
+        let end = range.end;
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!(
+            "{table}:{}..{}",
+            start_binding.get_param_dollarised(),
+            end_binding.get_param_dollarised()
+        );
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding, end_binding],
+        })
+    }
+}
 
 //////////////////////////////////////////
 macro_rules! create_range {
@@ -115,7 +205,6 @@ create_range!(SurrealUlid);
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{statements::select, *};
 
     #[test]
@@ -371,6 +460,96 @@ mod tests {
     fn test_range_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
         let id2 = TestUser::create_ulid();
+        let statement = select(All).from(id1..id2);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 2);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!(
+                "SELECT * FROM user:{}..{};",
+                bindings[0].get_raw_value(),
+                bindings[1].get_raw_value()
+            )
+        );
+    }
+
+    #[test]
+    fn test_range_inclusive_for_surreal_custom() {
+        let id1 = TestUser::create_id("oyelowo");
+        let id2 = TestUser::create_id("oyedayo");
+        let statement = select(All).from(id1..=id2);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 2);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!(
+                "SELECT * FROM user:{}..={};",
+                bindings[0].get_raw_value(),
+                bindings[1].get_raw_value()
+            )
+        );
+    }
+
+    #[test]
+    fn test_range_from_for_surreal_custom() {
+        let id1 = TestUser::create_id("oyelowo");
+        let statement = select(All).from(id1..);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:$_param_00000001..;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 1);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!("SELECT * FROM user:{}..;", bindings[0].get_raw_value(),)
+        );
+    }
+
+    #[test]
+    fn test_range_to_for_surreal_custom() {
+        let id1 = TestUser::create_id("oyelowo");
+        let statement = select(All).from(..id1);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:..$_param_00000001;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 1);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!("SELECT * FROM user:..{};", bindings[0].get_raw_value(),)
+        );
+    }
+
+    #[test]
+    fn test_range_to_inclusive_for_surreal_custom() {
+        let id1 = TestUser::create_id("oyelowo");
+        let statement = select(All).from(..=id1);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:..=$_param_00000001;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 1);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!("SELECT * FROM user:..={};", bindings[0].get_raw_value(),)
+        );
+    }
+
+    #[test]
+    fn test_range_for_surreal_custom() {
+        let id1 = TestUser::create_id("oyelowo");
+        let id2 = TestUser::create_id("oyedayo");
         let statement = select(All).from(id1..id2);
         assert_eq!(
             statement.fine_tune_params(),
