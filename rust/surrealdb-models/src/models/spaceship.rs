@@ -16,10 +16,10 @@ pub struct SpaceShip {
 }
 fn ere() {
     let x = SpaceShip::default().get_id();
-    let xx: SurrealId<SpaceShip, i32> = SpaceShip::create_id("dff");
+    // let xx: SurrealId<SpaceShip, &str> = SpaceShip::create_id("dff");
 
     let c = SpaceShip {
-        id: SpaceShip::create_id("fdf".to_string()),
+        id: SpaceShip::create_id("545"),
         ..Default::default()
     };
 }

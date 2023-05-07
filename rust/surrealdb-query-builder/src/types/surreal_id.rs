@@ -93,11 +93,11 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for sql::Thin
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Default for SurrealId<T, Id> {
-    fn default() -> Self {
-        SurrealSimpleId::new().into()
-    }
-}
+// impl<T: SurrealdbModel, Id: Into<sql::Id>> Default for SurrealId<T, Id> {
+//     fn default() -> Self {
+//         SurrealSimpleId::new().into()
+//     }
+// }
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> Deref for SurrealId<T, Id> {
     type Target = sql::Thing;
@@ -161,28 +161,41 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id>
 // }
 
 /// The default surrealdb id generated as a combination of the model/table name and a random nano id.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealSimpleId<T: SurrealdbModel>(SurrealId<T, String>);
 
-// impl<T: SurrealdbModel> Default for SurrealSimpleId<T> {
-//     fn default() -> Self {
-//         Self(Default::default())
-//     }
-// }
+impl<T> Default for SurrealSimpleId<T>
+where
+    T: SurrealdbModel,
+{
+    fn default() -> Self {
+        SurrealSimpleId::new()
+    }
+}
 
-impl<T: SurrealdbModel> Display for SurrealSimpleId<T> {
+impl<T> Display for SurrealSimpleId<T>
+where
+    T: SurrealdbModel,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0 .0.fmt(f)
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealSimpleId<T>> for SurrealId<T, Id> {
+impl<T, Id> From<SurrealSimpleId<T>> for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn from(simple_id: SurrealSimpleId<T>) -> Self {
         SurrealId(simple_id.0 .0, PhantomData, PhantomData)
     }
 }
 
-impl<T: SurrealdbModel> SurrealSimpleId<T> {
+impl<T> SurrealSimpleId<T>
+where
+    T: SurrealdbModel,
+{
     /// Generates a new random nano id
     pub fn new() -> Self {
         Self(SurrealId(
@@ -192,12 +205,16 @@ impl<T: SurrealdbModel> SurrealSimpleId<T> {
         ))
     }
 
+    /// Converts the surreal id to a thing
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
     }
 }
 
-impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
+impl<T> Deref for SurrealSimpleId<T>
+where
+    T: SurrealdbModel + Deref,
+{
     type Target = SurrealId<T, String>;
 
     fn deref(&self) -> &Self::Target {
@@ -206,8 +223,14 @@ impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
 }
 
 /// A surrealdb id generated as combination of the model/table name and a uuid for the id part.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealUuid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
+
+impl<T: SurrealdbModel> Default for SurrealUuid<T> {
+    fn default() -> Self {
+        SurrealUuid::new()
+    }
+}
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUuid<T>> for SurrealId<T, Id> {
     fn from(uuid: SurrealUuid<T>) -> Self {
@@ -225,6 +248,7 @@ impl<T: SurrealdbModel> SurrealUuid<T> {
         ))
     }
 
+    /// Converts the surreal id to a thing
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
     }
@@ -237,8 +261,14 @@ impl<T: SurrealdbModel> Display for SurrealUuid<T> {
 }
 
 /// A surrealdb id generated as combination of the model/table name and a ulid for the id part.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealUlid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
+
+impl<T: SurrealdbModel> Default for SurrealUlid<T> {
+    fn default() -> Self {
+        SurrealUlid::new()
+    }
+}
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUlid<T>> for SurrealId<T, Id> {
     fn from(ulid: SurrealUlid<T>) -> Self {
@@ -256,6 +286,7 @@ impl<T: SurrealdbModel> SurrealUlid<T> {
         ))
     }
 
+    /// Converts the surreal id to a thing
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
     }

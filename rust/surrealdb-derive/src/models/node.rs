@@ -190,11 +190,11 @@ impl ToTokens for NodeToken{
                 }
                 
                 fn get_id(&self) -> Self::Id {
-                    self.id
+                    self.id.clone()
                 }
             
                 fn get_id_as_thing(&self) -> #crate_name::sql::Thing {
-                    self.id.to_thing()
+                    self.id.clone().to_thing()
                 }
             
                 fn get_serializable_fields() -> Vec<#crate_name::Field> {

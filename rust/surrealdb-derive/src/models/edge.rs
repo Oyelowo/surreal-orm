@@ -174,11 +174,11 @@ impl ToTokens for EdgeToken {
                         #table_name_str.into()
                     }
                     
-                    fn get_id(&self) -> Self::Id {
+                    fn get_id(self) -> Self::Id {
                         self.id
                     }
                 
-                    fn get_id_as_thing(&self) -> #crate_name::sql::Thing {
+                    fn get_id_as_thing(self) -> #crate_name::sql::Thing {
                         self.id.to_thing()
                     }
                 
