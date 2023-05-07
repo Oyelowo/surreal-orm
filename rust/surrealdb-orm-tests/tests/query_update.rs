@@ -988,7 +988,7 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     // Only name should be updated
     assert_eq!(updated_weapon.strength, 20);
     assert_eq!(updated_weapon.name, "Laser");
-    assert_eq!(updated_weapon.id.to_string(), "weapon:original_id");
+    assert_eq!(updated_weapon.id.to_string(), old_weapon.id.to_string());
 
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
