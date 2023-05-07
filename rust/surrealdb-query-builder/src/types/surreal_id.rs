@@ -277,6 +277,10 @@ impl SurrealdbModel for TestUser {
         "user".into()
     }
 
+    fn get_id(&self) -> Self::Id {
+        TestUserSimpleId::new()
+    }
+
     fn get_serializable_fields() -> Vec<crate::Field> {
         unimplemented!()
     }
