@@ -566,4 +566,28 @@ mod tests {
             )
         );
     }
+
+    #[test]
+    fn test_range_for_thing() {
+        let thing1 = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
+        let thing2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
+
+        let id1 = TestUser::from_thing(thing1).unwrap();
+        let id2 = TestUser::from_thing(thing2).unwrap();
+        let statement = select(All).from(id1..id2);
+        assert_eq!(
+            statement.fine_tune_params(),
+            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
+        );
+        let bindings = statement.get_bindings();
+        assert_eq!(bindings.len(), 2);
+        assert_eq!(
+            statement.to_raw().build(),
+            format!(
+                "SELECT * FROM user:{}..{};",
+                bindings[0].get_raw_value(),
+                bindings[1].get_raw_value()
+            )
+        );
+    }
 }

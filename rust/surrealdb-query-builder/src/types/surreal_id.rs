@@ -103,13 +103,21 @@ where
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for sql::Thing {
+impl<T, Id> From<SurrealId<T, Id>> for sql::Thing
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn from(value: SurrealId<T, Id>) -> Self {
         value.0
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for sql::Thing {
+impl<T, Id> From<&SurrealId<T, Id>> for sql::Thing
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn from(value: &SurrealId<T, Id>) -> Self {
         value.0.clone()
     }
@@ -121,7 +129,11 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> From<&SurrealId<T, Id>> for sql::Thin
 //     }
 // }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Deref for SurrealId<T, Id> {
+impl<T, Id> Deref for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     type Target = sql::Thing;
 
     fn deref(&self) -> &Self::Target {
@@ -129,13 +141,21 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Deref for SurrealId<T, Id> {
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Erroneous for SurrealId<T, Id> {
+impl<T, Id> Erroneous for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn get_errors(&self) -> Vec<String> {
         vec![]
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> TryFrom<&str> for SurrealId<T, Id> {
+impl<T, Id> TryFrom<&str> for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     type Error = SurrealdbOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -145,42 +165,23 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> TryFrom<&str> for SurrealId<T, Id> {
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> From<sql::Thing> for SurrealId<T, Id> {
-    fn from(value: sql::Thing) -> Self {
-        Self(value, PhantomData, PhantomData)
+impl<T, Id> TryFrom<sql::Thing> for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    type Error = SurrealdbOrmError;
+
+    fn try_from(value: sql::Thing) -> Result<Self, Self::Error> {
+        if value.tb != T::table_name().to_string() {
+            return Err(SurrealdbOrmError::IdBelongsToAnotherTable(
+                value.to_string(),
+                T::table_name().to_string(),
+            ));
+        }
+        Ok(Self(value, PhantomData, PhantomData))
     }
 }
-
-// impl<T: SurrealdbModel> From<sql::Thing> for SurrealSimpleId<T> {
-//     fn from(value: sql::Thing) -> Self {
-//         // SurrealUuid(value, PhantomData, PhantomData)
-//         SurrealId(value, PhantomData, PhantomData).into()
-//     }
-// }
-
-// impl<T, Id, AnyId> From<sql::Thing> for AnyId
-// where
-//     T: SurrealdbModel,
-//     Id: Into<sql::Id>,
-//     AnyId: Into<SurrealId<T, Id>>,
-// {
-//     fn from(value: sql::Thing) -> Self {
-//         Self(value, PhantomData, PhantomData)
-//     }
-// }
-
-// impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for sql::Value {
-//     fn from(val: SurrealId<T, Id>) -> Self {
-//         val.0.into()
-//     }
-// }
-
-// from surrealid to surrealsimle id
-// impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for SurrealSimpleId<T> {
-//     fn from(surreal_id: SurrealId<T, Id>) -> Self {
-//         SurrealSimpleId(surreal_id)
-//     }
-// }
 
 /// The default surrealdb id generated as a combination of the model/table name and a random nano id.
 #[derive(Debug, Clone, Serialize, Deserialize)]

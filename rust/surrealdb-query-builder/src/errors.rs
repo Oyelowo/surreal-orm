@@ -27,6 +27,9 @@ impl From<u8> for ExpectedLength {
     }
 }
 
+type IdString = String;
+type TableString = String;
+
 /// The error type for the SurrealdbOrm
 #[allow(missing_docs)]
 #[derive(Error, Debug)]
@@ -45,6 +48,9 @@ pub enum SurrealdbOrmError {
 
     #[error("Invalid id. Problem deserializing string to surrealdb::sql::Thing. Check that the id is in the format 'table_name:id'. {0}")]
     InvalidId(#[source] surrealdb::Error),
+
+    #[error("The id - {0} provided does not belong to the table {1}. Please ensure that the id provided is for the table you are trying to fetch from.")]
+    IdBelongsToAnotherTable(IdString, TableString),
 
     #[error("The following fields could not be fetched as they are not linked to a foreign table: {0}. Please ensure that all fields provided are of types 'link_self', 'link_one' or 'link_many' to allow fetching of linked values from other tables.")]
     FieldsUnfetchableNotARecordLink(String),
