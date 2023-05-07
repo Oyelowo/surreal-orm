@@ -16,7 +16,21 @@ pub struct SurrealId<T: SurrealdbModel, Id: Into<sql::Id>>(
     PhantomData<Id>,
 );
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Serialize for SurrealId<T, Id> {
+impl<T, Id> From<SurrealId<T, Id>> for sql::Value
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: SurrealId<T, Id>) -> Self {
+        value.0.into()
+    }
+}
+
+impl<T, Id> Serialize for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -25,7 +39,11 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Serialize for SurrealId<T, Id> {
     }
 }
 
-impl<'de, T: SurrealdbModel, Id: Into<sql::Id>> Deserialize<'de> for SurrealId<T, Id> {
+impl<'de, T, Id> Deserialize<'de> for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -35,7 +53,11 @@ impl<'de, T: SurrealdbModel, Id: Into<sql::Id>> Deserialize<'de> for SurrealId<T
     }
 }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Display for SurrealId<T, Id> {
+impl<T, Id> Display for SurrealId<T, Id>
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_string())
     }
@@ -147,11 +169,11 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> From<sql::Thing> for SurrealId<T, Id>
 //     }
 // }
 
-impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id> {
-    fn into(self) -> sql::Value {
-        self.0.into()
-    }
-}
+// impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for sql::Value {
+//     fn from(val: SurrealId<T, Id>) -> Self {
+//         val.0.into()
+//     }
+// }
 
 // from surrealid to surrealsimle id
 // impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealId<T, Id>> for SurrealSimpleId<T> {

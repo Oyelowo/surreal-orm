@@ -44,6 +44,7 @@ struct User {
 
 use serde_json::Result;
 use serde_json::{Map, Value};
+use surrealdb_orm::SurrealSimpleId;
 use surrealdb_orm::{
     cond, statements::select, updater, All, Field, Geometry, Operatable, Parametric, SurrealId,
     SurrealdbModel, SurrealdbNode,
@@ -173,7 +174,7 @@ struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    id: SurrealId<Company>,
+    id: SurrealSimpleId<Self>,
     // id: String,
     // nam: Uuid,
     name: String,
@@ -316,7 +317,7 @@ async fn test_it() -> surrealdb::Result<()> {
 
     let companies = vec![
         Company {
-            id: Company::create_uuid(),
+            id: Company::create_simple_id(),
             // id: "company:1".into(),
             name: "Acme Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -338,7 +339,7 @@ async fn test_it() -> surrealdb::Result<()> {
             // home: LineString(vec![Coord { x: 34.6, y: 34.6 }]),
         },
         Company {
-            id: Company::create_uuid(),
+            id: Company::create_simple_id(),
             // id: "company:2".into(),
             name: "Apple Inc.".to_string(),
             // founded: "1967-05-03".to_string(),
@@ -362,7 +363,7 @@ async fn test_it() -> surrealdb::Result<()> {
     // let a = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1., y: 1. });
     // let b = Line::new(coord! { x: 0., y: 0. }, coord! { x: 1.001, y: 1. });
     let xx = Company {
-        id: Company::create_id("lowo"),
+        id: Company::create_simple_id(),
         // id: "company:1".into(),
         name: "Mana Inc.".to_string(),
         // founded: "1967-05-03".to_string(),

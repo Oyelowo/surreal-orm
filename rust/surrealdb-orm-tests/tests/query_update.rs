@@ -19,7 +19,7 @@ fn create_test_alien(age: u8, name: String) -> Alien {
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
     Alien {
-        id: SurrealId::nano_id(),
+        id: Alien::create_simple_id(),
         name,
         age,
         created: Utc::now(),
@@ -340,8 +340,8 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     let updated = update::<Alien>(alien_id)
         .set((tags).remove("tag1"))
         // removes one of calis. There should be 2 before this
-        .set(spaceShips.remove(SpaceShip::create_id("cali")))
-        .set(spaceShips.remove(SpaceShip::create_id("nonexistent")))
+        .set(spaceShips.remove(SpaceShip::create_id("cali".into())))
+        .set(spaceShips.remove(SpaceShip::create_id("nonexistent".into())))
         .return_one(db.clone())
         .await?;
 
@@ -395,14 +395,14 @@ async fn test_update_single_id_content() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
-        id: Weapon::create_id("original_id"),
+        id: Weapon::create_simple_id(),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
         ..Default::default()
     };
     let weapon_to_update = Weapon {
-        id: Weapon::create_id("lowo"),
+        id: Weapon::create_simple_id(),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 1000,
@@ -458,7 +458,6 @@ async fn test_update_content_with_filter() -> SurrealdbOrmResult<()> {
                 strength: x,
                 ..Default::default()
             };
-            weapon.id = Weapon::create_id(&format!("weapon:{}", x));
             weapon
         })
         .collect::<Vec<Weapon>>();
@@ -549,7 +548,6 @@ async fn test_update_merge_with_filter() -> SurrealdbOrmResult<()> {
                 strength: x,
                 ..Default::default()
             };
-            weapon.id = Weapon::create_id(&format!("weapon:{}", x));
             weapon
         })
         .collect::<Vec<Weapon>>();
@@ -611,14 +609,12 @@ async fn test_update_single_id_merge_no_fields_skip() -> SurrealdbOrmResult<()> 
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
-        id: Weapon::create_id("original_id"),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
         ..Default::default()
     };
     let weapon_to_update = Weapon {
-        id: Weapon::create_id("lowo"),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 1000,
@@ -668,7 +664,6 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
-        id: Weapon::create_id("original_id"),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
@@ -685,7 +680,7 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealdbOrmResult<()> {
     assert_eq!(created_weapon.name, "Laser");
     assert_eq!(created_weapon.id.to_string(), "weapon:original_id");
     assert_eq!(created_weapon.strength, 20);
-    assert_eq!(created_weapon.id.tb, "weapon");
+    assert_eq!(created_weapon.id.to_thing().tb, "weapon");
 
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
@@ -723,7 +718,6 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     let weapon_old = WeaponOld {
-        id: WeaponOld::create_id("original_id"),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,
@@ -736,7 +730,7 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
     assert_eq!(old_weapon.name, "Laser");
     assert_eq!(old_weapon.id.to_string(), "weapon:original_id");
     assert_eq!(old_weapon.strength, 20);
-    assert_eq!(old_weapon.id.tb, "weapon");
+    assert_eq!(old_weapon.id.to_thing().tb, "weapon");
     assert_eq!(
         serde_json::to_value(&old_weapon)
             .unwrap()
@@ -782,7 +776,6 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
 
     // Will replace the whole weapon.
     let weapon_to_update_with_new_fields = Weapon {
-        id: Weapon::create_id("original_id"),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 823,
@@ -838,7 +831,6 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon {
-        id: Weapon::create_id("original_id"),
         name: "test".to_string(),
         created: Utc::now(),
         strength: 20,
@@ -900,7 +892,6 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     let weapon_old = WeaponOld {
-        id: WeaponOld::create_id("original_id"),
         name: "Laser".to_string(),
         created: Utc::now(),
         strength: 20,

@@ -26,6 +26,8 @@ use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
 use surrealdb_orm::SurrealId;
+use surrealdb_orm::SurrealSimpleId;
+use surrealdb_orm::SurrealUuid;
 use surrealdb_orm::SurrealdbModel;
 use surrealdb_orm::SurrealdbObject;
 use surrealdb_orm::ToRaw;
@@ -48,7 +50,7 @@ pub struct Person {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "company")]
 struct Company {
-    id: SurrealId<Company>,
+    id: SurrealId<Self, i32>,
     #[surrealdb(type = "string")]
     nam: UuidWrapper,
     name: String,
@@ -62,7 +64,7 @@ struct Company {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
-    id: SurrealId<GenZCompany>,
+    id: SurrealSimpleId<Self>,
     #[surrealdb(type = "string")]
     nam: UuidWrapper,
     name: String,
@@ -99,7 +101,7 @@ impl std::ops::Deref for UuidWrapper {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    id: SurrealId<Book>,
+    id: SurrealSimpleId<Self>,
     // #[serde(default = "default_resource")]
     title: String,
     content: String,
@@ -110,7 +112,7 @@ fn default_resource() -> sql::Thing {
 }
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
-        id: Company::create_id("lowo"),
+        id: Company::create_id(32),
         nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02")
             .unwrap()
             .into(),
@@ -322,7 +324,7 @@ async fn geom_collection() -> surrealdb::Result<()> {
 async fn insert_many() -> surrealdb::Result<()> {
     let companies = vec![
         Company {
-            id: Company::create_id(1),
+            id: Company::create_id(32),
             name: "Acme Inc.".to_string(),
             founded: "1967-05-03".into(),
             founders: vec![
