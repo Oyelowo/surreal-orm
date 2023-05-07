@@ -14,9 +14,13 @@ use surrealdb::sql::{Id, Thing, Uuid};
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
 pub trait SurrealdbModel: Sized {
+    /// The id of the model/table
     type Id;
     /// The name of the model/table
     fn table_name() -> Table;
+
+    /// Returns id of the model/table
+    fn get_id(&self) -> Self::Id;
 
     /// The name of the all fields that are serializable
     /// and can potentially be written to the database.

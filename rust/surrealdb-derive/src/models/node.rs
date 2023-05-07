@@ -160,12 +160,6 @@ impl ToTokens for NodeToken{
                     #module_name::#aliases_struct_name::new()
                 }
                 
-                fn get_id<T: Into<#crate_name::RecordId>>(self) -> T {
-                    // let record_id = #crate_name::RecordId::from(self.id).into();
-                    // let record_id: Re = #crate_name::RecordId::from(self.id).into();
-                    // record_id
-                    self.id
-                }
                 
                 fn get_table_name() -> #crate_name::Table {
                     #table_name_str.into()
@@ -195,6 +189,10 @@ impl ToTokens for NodeToken{
                     #table_name_str.into()
                 }
                 
+                fn get_id(&self) -> Self::Id {
+                    self.id
+                }
+            
                 fn get_serializable_fields() -> Vec<#crate_name::Field> {
                     return vec![#( #serializable_fields), *]
                 }

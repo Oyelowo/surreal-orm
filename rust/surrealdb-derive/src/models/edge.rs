@@ -151,11 +151,6 @@ impl ToTokens for EdgeToken {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn get_id<T: From<#crate_name::RecordId>>(self) -> T {
-                        let record_id = #crate_name::RecordId::from(self.id).into();
-                        record_id
-                    }
-                    
                     #[allow(non_snake_case)]
                     fn get_table_name() -> #crate_name::Table {
                         #table_name_str.into()
@@ -179,6 +174,10 @@ impl ToTokens for EdgeToken {
                         #table_name_str.into()
                     }
                     
+                    fn get_id(&self) -> Self::Id {
+                        self.id
+                    }
+                
                     fn get_serializable_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #serializable_fields), *]
                     }
