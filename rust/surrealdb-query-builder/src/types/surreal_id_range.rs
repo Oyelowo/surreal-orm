@@ -25,7 +25,7 @@ macro_rules! create_range {
                 let start_binding = Binding::new(start.to_thing().id).as_raw();
                 let end_binding = Binding::new(end.to_thing().id).as_raw();
                 let build = format!(
-                    "{table}:{}..{}",
+                    "{table}:{}..={}",
                     start_binding.get_param_dollarised(),
                     end_binding.get_param_dollarised()
                 );
@@ -125,14 +125,14 @@ mod tests {
         let statement = select(All).from(id1..=id2);
         assert_eq!(
             statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
+            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
         );
         let bindings = statement.get_bindings();
         assert_eq!(bindings.len(), 2);
         assert_eq!(
             statement.to_raw().build(),
             format!(
-                "SELECT * FROM user:{}..{};",
+                "SELECT * FROM user:{}..={};",
                 bindings[0].get_raw_value(),
                 bindings[1].get_raw_value()
             )
