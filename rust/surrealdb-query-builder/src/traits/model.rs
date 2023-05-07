@@ -6,7 +6,8 @@
  */
 
 use crate::{
-    Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, Table,
+    Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
+    SurrealdbOrmResult, Table,
 };
 use serde::Serialize;
 use surrealdb::sql::{self, Id, Thing};
@@ -73,6 +74,11 @@ pub trait SurrealdbModel: Sized {
     /// This is the default used by surrealdb engine.
     fn create_simple_id() -> SurrealSimpleId<Self> {
         SurrealSimpleId::new()
+    }
+
+    /// Map a Thing to a SurrealId
+    fn from_thing(thing: sql::Thing) -> SurrealdbOrmResult<SurrealId<Self, sql::Id>> {
+        SurrealId::try_from(thing)
     }
 
     // /// Create a new surreal Thing/compound id from a Uuid

@@ -24,6 +24,7 @@ pub(crate) mod params_standard;
 pub(crate) mod projection;
 pub(crate) mod return_type;
 pub(crate) mod surreal_id;
+pub(crate) mod surreal_id_range;
 pub(crate) mod token_target;
 pub(crate) mod valuex;
 
@@ -46,6 +47,7 @@ pub use params_standard::*;
 pub use projection::*;
 pub use return_type::*;
 pub use surreal_id::*;
+pub use surreal_id_range::*;
 pub use token_target::*;
 pub use valuex::*;
 

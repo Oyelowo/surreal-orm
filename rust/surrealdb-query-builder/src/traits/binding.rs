@@ -36,6 +36,12 @@ impl Binding {
         }
     }
 
+    // as value as raw
+    pub fn as_raw(mut self) -> Self {
+        self.raw_string = format!("{}", &self.value.to_raw_string());
+        self
+    }
+
     fn generate_param_name() -> String {
         let sanitized_uuid = uuid::Uuid::new_v4().simple();
         let mut param = format!("_param_{sanitized_uuid}");

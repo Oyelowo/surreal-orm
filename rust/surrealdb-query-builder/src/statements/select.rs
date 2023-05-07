@@ -231,6 +231,7 @@ pub enum TargettablesForSelect {
     // Should already be bound
     SubQuery(SelectStatement),
     Function(Function),
+    RecordRange(Valuex),
 }
 
 impl From<Vec<sql::Thing>> for TargettablesForSelect {
@@ -915,6 +916,10 @@ impl SelectStatement {
             TargettablesForSelect::Function(function) => {
                 targets_bindings.extend(function.get_bindings());
                 vec![function.build()]
+            }
+            TargettablesForSelect::RecordRange(r) => {
+                targets_bindings.extend(r.get_bindings());
+                vec![r.build()]
             }
         };
 
