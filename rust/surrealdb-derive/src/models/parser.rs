@@ -365,13 +365,13 @@ impl SchemaFieldsProperties {
                 } = VariablesModelMacro::new();
                 
         
-                let get_link_meta_with_defs = |node_object: &NodeTypeName| {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident) 
+                let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident, is_list) 
                             .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
                 
-                let get_nested_meta_with_defs = |node_object: &NodeTypeName| {
-                        ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident) 
+                let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+                        ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident, is_list) 
                             .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                 };
 
@@ -532,7 +532,7 @@ impl SchemaFieldsProperties {
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object)
+                        get_link_meta_with_defs(&node_object, false)
                     }
                     
                     RelationType::LinkSelf(node_object) => {
@@ -553,7 +553,7 @@ impl SchemaFieldsProperties {
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         
-                        get_link_meta_with_defs(&node_object)
+                        get_link_meta_with_defs(&node_object, false)
                     }
                     
                     RelationType::LinkMany(node_object) => {
@@ -565,7 +565,7 @@ impl SchemaFieldsProperties {
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object)
+                        get_link_meta_with_defs(&node_object, true)
                     }                    
                     
                     RelationType::NestObject(node_object) => {
@@ -575,7 +575,7 @@ impl SchemaFieldsProperties {
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::SurrealdbObject>::NonNullUpdater>, ));
                         
-                        get_nested_meta_with_defs(&node_object)
+                        get_nested_meta_with_defs(&node_object, false)
                     },
                         
                     RelationType::NestArray(node_object) => {
@@ -586,7 +586,7 @@ impl SchemaFieldsProperties {
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         
                         update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
-                        get_nested_meta_with_defs(&node_object)
+                        get_nested_meta_with_defs(&node_object, true)
                     },
                     RelationType::None => {
                         update_field_names_fields_types_kv(None);
