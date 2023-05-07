@@ -194,7 +194,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         .collect::<Vec<_>>();
 
     let oyelowo = User {
-        id: User::create_id("oyelowo"),
+        id: User::create_simple_id(),
         name: "oyelowo".to_string(),
         tags: vec!["developer".to_string()],
         ..Default::default()
@@ -205,7 +205,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
 
     // Create company
     let codebreather_coy = Company {
-        id: Company::create_id("codebreather"),
+        id: Company::create_simple_id(),
         name: "codebreather".to_string(),
         users: LinkMany::from(sample),
         ..Default::default()
@@ -475,7 +475,7 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
         statement.fine_tune_params(),
         "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT $_param_00000001 ;"
     );
-    let write_id = write.get_id::<sql::Thing>();
+    let write_id = write.get_id();
     assert_eq!(
         statement.to_raw().build(),
         format!("RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT {{ count: 0, id: {write_id}, timeWritten: {{ nanos: 0, secs: 52 }} }} ;")

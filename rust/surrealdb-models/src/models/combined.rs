@@ -161,7 +161,7 @@ fn define_age() -> DefineFieldStatement {
     // define_fn = "define_student"
 )]
 pub struct Student {
-    id: SurrealId<Student, &'static str>,
+    id: SurrealId<Student, String>,
 
     first_name: String,
     last_name: String,
@@ -213,6 +213,24 @@ pub struct Student {
     #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     #[serde(skip_serializing)]
     blogsssss: Relate<Blog>,
+}
+
+impl Default for Student {
+    fn default() -> Self {
+        let id = Self::create_id(sql::Id::rand().to_raw());
+        Self {
+            id,
+            first_name: Default::default(),
+            last_name: Default::default(),
+            age: Default::default(),
+            best_friend: Default::default(),
+            fav_book: Default::default(),
+            course: Default::default(),
+            all_semester_courses: Default::default(),
+            written_books: Default::default(),
+            blogsssss: Default::default(),
+        }
+    }
 }
 // #[test]
 // fn xama() {
