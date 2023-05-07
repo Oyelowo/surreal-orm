@@ -53,8 +53,9 @@ enum ModelOrFieldName {
     Field(String),
 }
 
+/// Contains metadata for Array Clause
 #[derive(Debug, Clone)]
-struct Clause {
+pub struct Clause {
     kind: ClauseType,
     arrow: Option<String>,
     model_or_field_name: Option<ModelOrFieldName>,
