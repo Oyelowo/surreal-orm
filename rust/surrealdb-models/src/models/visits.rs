@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use surrealdb_orm::{LinkOne, SurrealId, SurrealdbEdge, SurrealdbNode};
+use surrealdb_orm::{LinkOne, SurrealId, SurrealSimpleId, SurrealdbEdge, SurrealdbNode};
 
 use crate::{Alien, Planet};
 
@@ -11,7 +11,7 @@ use crate::{Alien, Planet};
 #[surrealdb(table_name = "visits")]
 pub struct Visits<In: SurrealdbNode, Out: SurrealdbNode> {
     // pub id: SurrealId<Visits<In, Out>>,
-    pub id: SurrealId<Self>,
+    pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
     pub in_: LinkOne<In>,
     pub out: LinkOne<Out>,

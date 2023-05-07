@@ -1,14 +1,14 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{SetterArray, SurrealId, SurrealdbNode};
+use surrealdb_orm::{SetterArray, SurrealId, SurrealSimpleId, SurrealdbNode};
 
 // Planet
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "planet")]
 pub struct Planet {
-    pub id: SurrealId<Self>,
+    pub id: SurrealSimpleId<Self>,
     pub name: String,
     // area: Polygon,
     // #[surrealdb(type = "any")]

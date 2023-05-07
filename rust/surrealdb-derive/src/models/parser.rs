@@ -599,7 +599,7 @@ impl SchemaFieldsProperties {
                 };
                 
                 if field_ident_normalised_as_str == "id" {
-                    store.table_id_type = Some(field_type.clone());
+                    store.table_id_type =   quote!(#field_type);
                     // store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
                 }
                 

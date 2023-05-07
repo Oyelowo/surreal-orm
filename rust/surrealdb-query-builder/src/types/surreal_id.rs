@@ -161,8 +161,14 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id>
 // }
 
 /// The default surrealdb id generated as a combination of the model/table name and a random nano id.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SurrealSimpleId<T: SurrealdbModel>(SurrealId<T, String>);
+
+// impl<T: SurrealdbModel> Default for SurrealSimpleId<T> {
+//     fn default() -> Self {
+//         Self(Default::default())
+//     }
+// }
 
 impl<T: SurrealdbModel> Display for SurrealSimpleId<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -196,7 +202,7 @@ impl<T: SurrealdbModel + Deref> Deref for SurrealSimpleId<T> {
 }
 
 /// A surrealdb id generated as combination of the model/table name and a uuid for the id part.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SurrealUuid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUuid<T>> for SurrealId<T, Id> {
@@ -223,7 +229,7 @@ impl<T: SurrealdbModel> Display for SurrealUuid<T> {
 }
 
 /// A surrealdb id generated as combination of the model/table name and a ulid for the id part.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SurrealUlid<T: SurrealdbModel>(SurrealId<T, sql::Uuid>);
 
 impl<T: SurrealdbModel, Id: Into<sql::Id>> From<SurrealUlid<T>> for SurrealId<T, Id> {
@@ -266,6 +272,7 @@ pub type TestUserNumberId = SurrealId<TestUser, u64>;
 /// For internal testing
 pub type TestUserObjectId = SurrealId<TestUser, HashMap<String, String>>;
 impl SurrealdbModel for TestUser {
+    type Id = TestUserSimpleId;
     fn table_name() -> crate::Table {
         "user".into()
     }
