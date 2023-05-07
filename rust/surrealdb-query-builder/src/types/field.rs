@@ -10,7 +10,8 @@ use std::borrow::Cow;
 use surrealdb::sql;
 
 use crate::{
-    Aliasable, Binding, BindingsList, Buildable, Conditional, Erroneous, Operatable, Parametric,
+    Aliasable, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable,
+    Parametric,
 };
 
 use super::Idiomx;
@@ -35,6 +36,7 @@ pub struct Field {
     name: String,
     bindings: BindingsList,
     graph_string: String,
+    errors: ErrorList,
 }
 
 impl Field {
@@ -43,14 +45,21 @@ impl Field {
         let value: String = value.into();
         Self {
             name: value.clone(),
-            bindings: vec![],
             graph_string: value,
+            bindings: vec![],
+            errors: vec![],
         }
     }
 
     /// Adds bindings to the field
     pub fn with_bindings(mut self, bindings: BindingsList) -> Self {
-        self.bindings = bindings;
+        self.bindings.extend(bindings);
+        self
+    }
+
+    /// Adds errors to the field
+    pub fn with_errors(mut self, errors: ErrorList) -> Self {
+        self.errors.extend(errors);
         self
     }
 
@@ -71,6 +80,7 @@ impl Field {
             graph_string: self.graph_string.to_string(),
             bindings: updated_params,
             name: self.name.clone(),
+            errors: self.errors.clone(),
         }
     }
 }

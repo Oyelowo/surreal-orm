@@ -518,6 +518,13 @@ impl MyFieldReceiver {
     //     is_array
     // }
 
+    pub fn is_list(&self) -> bool {
+        self.raw_type_is_list()
+            || self.type_.as_ref().map_or(false, |t| {
+                t.parse::<FieldType>().unwrap_or(FieldType::Any).is_array()
+            })
+    }
+
     pub fn raw_type_is_list(&self) -> bool {
         let ty = &self.ty;
         match ty {
@@ -1391,10 +1398,51 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         self
     }
 
+    pub(crate) fn from_simple_array(normalized_field_name: &::syn::Ident) -> Self {
+        let normalized_field_name_str = normalized_field_name.to_string();
+        let crate_name = get_crate_name(false);
+
+        let record_link_default_alias_as_method = quote!(
+            pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #crate_name::Field {
+                let clause: #crate_name::NodeAliasClause = clause.into();
+                let clause: #crate_name::NodeClause = clause.into_inner();
+
+                let normalized_field_name_str = if self.build().is_empty(){
+                    #normalized_field_name_str.to_string()
+                }else {
+                    format!(".{}", #normalized_field_name_str)
+                };
+
+                let clause: #crate_name::NodeClause = clause.into();
+                let bindings = self.get_bindings().into_iter().chain(clause.get_bindings().into_iter()).collect::<Vec<_>>();
+
+                let errors = self.get_errors().into_iter().chain(clause.get_errors().into_iter()).collect::<Vec<_>>();
+
+                let field = #crate_name::Field::new(format!("{normalized_field_name_str}{}", clause.build()))
+                            .with_bindings(bindings)
+                            .with_errors(errors);
+                field
+
+            }
+        );
+
+        Self {
+            foreign_node_schema_import: quote!(),
+
+            foreign_node_type_validator: quote!(),
+
+            record_link_default_alias_as_method,
+            foreign_node_type: quote!(schema_type_ident),
+            field_definition: quote!(),
+            field_type_validation_asserts: vec![],
+        }
+    }
+
     pub(crate) fn from_record_link(
         node_type_name: &NodeTypeName,
         normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
+        is_list: bool,
     ) -> Self {
         let VariablesModelMacro {
             ___________graph_traversal_string,
@@ -1414,16 +1462,9 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         } else {
             quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbNode>::Schema;)
         };
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbNode>::Schema;
-            foreign_node_schema_import,
 
-            foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbNode);
-            ),
-
-            record_link_default_alias_as_method: quote!(
+        let record_link_default_alias_as_method = if is_list {
+            quote!(
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::NodeAliasClause>) -> #schema_type_ident {
                      let clause: #crate_name::NodeAliasClause = clause.into();
                      let clause: #crate_name::NodeClause = clause.into_inner();
@@ -1441,7 +1482,37 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                     )
 
                 }
+            )
+        } else {
+            quote!(
+                pub fn #normalized_field_name(&self) -> #schema_type_ident {
+                    let clause = #crate_name::Clause::from(#crate_name::Empty);
+
+                    let normalized_field_name_str = if self.build().is_empty(){
+                        #normalized_field_name_str.to_string()
+                    }else {
+                        format!(".{}", #normalized_field_name_str)
+                    };
+
+                    #schema_type_ident::#__________connect_node_to_graph_traversal_string(
+                        self,
+                        clause.with_field(normalized_field_name_str)
+                    )
+
+                }
+            )
+        };
+
+        Self {
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SurrealdbNode>::Schema;
+            foreign_node_schema_import,
+
+            foreign_node_type_validator: quote!(
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbNode);
             ),
+
+            record_link_default_alias_as_method,
             foreign_node_type: quote!(schema_type_ident),
             field_definition: quote!(),
             field_type_validation_asserts: vec![],
@@ -1452,6 +1523,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         node_type_name: &NodeTypeName,
         normalized_field_name: &::syn::Ident,
         struct_name_ident: &::syn::Ident,
+        is_list: bool,
     ) -> Self {
         let VariablesModelMacro {
             __________connect_object_to_graph_traversal_string,
@@ -1471,18 +1543,11 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         } else {
             quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbObject>::Schema;)
         };
-        Self {
-            // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbObject>::Schema;
-            foreign_node_schema_import,
 
-            foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbObject);
-            ),
-
-            record_link_default_alias_as_method: quote!(
+        let record_link_default_alias_as_method = if is_list {
+            quote!(
                 pub fn #normalized_field_name(&self, clause: impl Into<#crate_name::ObjectClause>) -> #schema_type_ident {
-                     let clause: #crate_name::ObjectClause = clause.into();
+                    let clause: #crate_name::ObjectClause = clause.into();
                     let normalized_field_name_str = if self.build().is_empty(){
                         #normalized_field_name_str.to_string()
                     }else {
@@ -1496,7 +1561,38 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                     )
 
                 }
+            )
+        } else {
+            quote!(
+                pub fn #normalized_field_name(&self) -> #schema_type_ident {
+                    let clause = #crate_name::Clause::from(#crate_name::Empty);
+
+                    let normalized_field_name_str = if self.build().is_empty(){
+                        #normalized_field_name_str.to_string()
+                    }else {
+                        format!(".{}", #normalized_field_name_str)
+                    };
+
+
+                    #schema_type_ident::#__________connect_object_to_graph_traversal_string(
+                        self,
+                        clause.with_field(normalized_field_name_str)
+                    )
+
+                }
+            )
+        };
+
+        Self {
+            // imports for specific schema from the trait Generic Associated types e.g
+            // type Book = <super::Book as SurrealdbObject>::Schema;
+            foreign_node_schema_import,
+
+            foreign_node_type_validator: quote!(
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealdbObject);
             ),
+
+            record_link_default_alias_as_method,
             foreign_node_type: quote!(schema_type_ident),
             field_definition: quote!(),
             field_type_validation_asserts: vec![],

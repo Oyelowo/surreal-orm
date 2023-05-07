@@ -108,6 +108,11 @@ impl FieldType {
             "object", "string", "record", "geometry",
         ]
     }
+
+    /// Returns true if the field type is an array
+    pub fn is_array(&self) -> bool {
+        matches!(self, Self::Array)
+    }
 }
 
 impl From<FieldType> for String {

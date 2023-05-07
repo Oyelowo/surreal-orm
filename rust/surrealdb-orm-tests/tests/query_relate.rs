@@ -225,7 +225,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         .from(User::table_name())
         .where_(tags.contains("developer"));
 
-    let time = CompanyLikeUser::schema().time(E);
+    let time = CompanyLikeUser::schema().time();
     let dt = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(61, 0).unwrap(), Utc);
 
     // Relate fromstate -> like-> devs

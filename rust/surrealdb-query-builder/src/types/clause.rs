@@ -53,8 +53,9 @@ enum ModelOrFieldName {
     Field(String),
 }
 
+/// Contains metadata for Array Clause
 #[derive(Debug, Clone)]
-struct Clause {
+pub struct Clause {
     kind: ClauseType,
     arrow: Option<String>,
     model_or_field_name: Option<ModelOrFieldName>,
@@ -404,11 +405,13 @@ impl Clause {
         }
     }
 
+    /// Create a new Clause with arrow. This is used in the macro for building a graph query.
     pub fn with_arrow(mut self, arrow: impl Into<String>) -> Self {
         self.arrow = Some(arrow.into());
         self
     }
 
+    /// attach the table name to the clause as metadata. Useful for doing some checks.
     pub fn with_table(self, table_name: impl Into<String>) -> Self {
         let table_name: String = table_name.into();
         let mut updated_clause = self.update_errors(&table_name);
@@ -416,6 +419,7 @@ impl Clause {
         updated_clause
     }
 
+    /// attach the field name to the clause as metadata.
     pub fn with_field(mut self, field_name: String) -> Self {
         let field_name: String = field_name.into();
         self.model_or_field_name = Some(ModelOrFieldName::Field(field_name));

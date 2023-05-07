@@ -7,11 +7,8 @@ fn test_setter() {
     let org = Organization::schema();
 
     org.age.equal(34);
-    let org = org.time(index(0)).connected.equal(chrono::Utc::now());
+    let org = org.time().connected.equal(chrono::Utc::now());
 
-    assert_eq!(
-        org.fine_tune_params(),
-        "time[$_param_00000001].connected = $_param_00000002"
-    );
-    assert!(org.to_raw().build().len() > 60,);
+    assert_eq!(org.fine_tune_params(), "time.connected = $_param_00000001");
+    assert!(org.to_raw().build().len() > 40,);
 }

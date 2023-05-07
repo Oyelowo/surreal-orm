@@ -195,7 +195,7 @@ fn multiplication_tests1() {
     assert_eq!(xx.to_string(), "student->writes->book".to_string());
 
     let written_book_selection = st
-        .bestFriend(Empty)
+        .bestFriend()
         .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
@@ -223,7 +223,7 @@ fn multiplication_tests1() {
 
     let st = Student::schema();
     let written_book_selection = st
-        .bestFriend(Empty)
+        .bestFriend()
         .writes__(wrt.timeWritten.equal(Duration::from_secs(34)))
         .book(bk.content.contains("Oyelowo in Uranus"))
         .__as__(Student::aliases().writtenBooks);
@@ -456,8 +456,8 @@ fn multiplication_tests2() {
     // Another case
     let x = st_schema
         // .bestFriend(student_id)
-        .bestFriend(st_schema.age.between(18, 150))
-        .bestFriend(Empty)
+        .bestFriend()
+        .bestFriend()
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
         .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
         .content;
