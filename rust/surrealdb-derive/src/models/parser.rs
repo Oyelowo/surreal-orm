@@ -592,7 +592,12 @@ impl SchemaFieldsProperties {
                         update_field_names_fields_types_kv(None);
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
-                        ReferencedNodeMeta::default()
+                        let ref_node_meta = if field_receiver.is_list(){
+                                                 ReferencedNodeMeta::from_simple_array( field_ident_normalised)
+                                            }else{
+                                                ReferencedNodeMeta::default()
+                                            };
+                        ref_node_meta
                             .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                     }
                 };
@@ -601,6 +606,7 @@ impl SchemaFieldsProperties {
                     store.table_id_type =   quote!(#field_type);
                     // store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
                 }
+
                 
                 if !referenced_node_meta.field_definition.is_empty() {
                     store.field_definitions.push(referenced_node_meta.field_definition);
