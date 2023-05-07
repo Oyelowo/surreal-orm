@@ -116,6 +116,7 @@ impl ToTokens for EdgeToken {
             link_one_and_self_fields,
             link_many_fields,
             non_null_updater_fields,
+            table_id_type,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // if serialized_field_names_normalised.conta("")
@@ -150,11 +151,6 @@ impl ToTokens for EdgeToken {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn get_id<T: From<#crate_name::RecordId>>(self) -> T {
-                        let record_id = #crate_name::RecordId::from(self.id).into();
-                        record_id
-                    }
-                    
                     #[allow(non_snake_case)]
                     fn get_table_name() -> #crate_name::Table {
                         #table_name_str.into()
@@ -172,10 +168,20 @@ impl ToTokens for EdgeToken {
         
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbModel for #struct_name_ident<In, Out> {
+                    type Id = #table_id_type;
+                
                     fn table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
                     
+                    fn get_id(self) -> Self::Id {
+                        self.id
+                    }
+                
+                    fn get_id_as_thing(self) -> #crate_name::sql::Thing {
+                        self.id.into()
+                    }
+                
                     fn get_serializable_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #serializable_fields), *]
                     }

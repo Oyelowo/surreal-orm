@@ -278,6 +278,7 @@ pub struct SchemaFieldsProperties {
     pub node_edge_metadata: NodeEdgeMetadataStore,
     pub fields_relations_aliased: Vec<TokenStream>,
     pub non_null_updater_fields: Vec<TokenStream>,
+    pub table_id_type: TokenStream,
 }
 
 #[derive(Clone)]
@@ -559,7 +560,8 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(Some(quote!(#crate_name::SurrealId<#foreign_node>)));
+                        // update_field_names_fields_types_kv(Some(quote!(#crate_name::SurrealId<#foreign_node>)));
+                        update_field_names_fields_types_kv(Some(quote!(<#foreign_node as #crate_name::SurrealdbModel>::Id)));
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
@@ -595,6 +597,11 @@ impl SchemaFieldsProperties {
                             .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
                     }
                 };
+                
+                if field_ident_normalised_as_str == "id" {
+                    store.table_id_type =   quote!(#field_type);
+                    // store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
+                }
                 
                 if !referenced_node_meta.field_definition.is_empty() {
                     store.field_definitions.push(referenced_node_meta.field_definition);

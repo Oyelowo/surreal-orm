@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::Deref};
+use std::fmt::Display;
 
 use serde::Serialize;
 use surrealdb::sql;
@@ -182,24 +182,7 @@ fn patch_path<T: Serialize>(field: &Field, operation_type: OpType, value: impl I
     })
 }
 
-/// Json patch operation
-/// # Arguments
-/// * `path` - The path to the field to be patched. Use the same field operation
-/// you use in the library for accessing top level or nested fields. It automatically
-/// converts that to a valid json path to the field.
-///
-/// # Examples
-/// ```
-/// # use surrealdb_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::{patch}};
-/// let ref name = Field::new("name");
-/// let name_first = Field::new("name.first");
-///
-/// let patch_op = patch(name).add("Oyelowo");
-/// let patch_op = patch(name_first).change("Oyelowo");
-/// let patch_op = patch(name).replace("Oyelowo");
-/// let patch_op = patch(name).remove();
-/// ```
+// Patch helper
 fn patch(path: impl Into<Field>) -> PatchOpInit {
     let path: Field = path.into();
     let path = path.build();

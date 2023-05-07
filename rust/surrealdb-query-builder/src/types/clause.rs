@@ -158,14 +158,22 @@ impl NodeClause {
     }
 }
 
-impl<T: SurrealdbModel> From<SurrealId<T>> for NodeClause {
-    fn from(value: SurrealId<T>) -> Self {
+impl<T, Id> From<SurrealId<T, Id>> for NodeClause
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: SurrealId<T, Id>) -> Self {
         Self(Clause::new(ClauseType::Id(value.to_thing())))
     }
 }
 
-impl<T: SurrealdbModel> From<&SurrealId<T>> for NodeClause {
-    fn from(value: &SurrealId<T>) -> Self {
+impl<T, Id> From<&SurrealId<T, Id>> for NodeClause
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &SurrealId<T, Id>) -> Self {
         Self(Clause::new(ClauseType::Id(value.clone().to_thing())))
     }
 }

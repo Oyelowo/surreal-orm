@@ -787,7 +787,6 @@ fn get_vector_item_type(ty: &Type) -> Option<Type> {
         }
         _ => return None,
     };
-    dbg!(&item_ty);
     Some(item_ty.clone())
 }
 // #[derive(Debug, Clone)]

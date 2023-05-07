@@ -1,11 +1,9 @@
-use std::ops::Deref;
-
 use serde::Serialize;
 use surrealdb::sql;
 
 use crate::{
     statements::LetStatement, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
-    Field, Operation, Param, Parametric, Valuex,
+    Field, Param, Parametric,
 };
 
 /// A helper struct for generating SQL update statements.

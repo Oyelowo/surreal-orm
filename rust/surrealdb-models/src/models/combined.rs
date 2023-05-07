@@ -62,7 +62,7 @@ fn full() -> u32 {
 fn define_student() -> DefineTableStatement {
     use CrudType::*;
     let name = Field::new("name");
-    let user_table = Table::from("user");
+    let _user_table = Table::from("user");
     let age = Field::new("age");
     let country = Field::new("country");
     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
@@ -148,7 +148,7 @@ fn define_age() -> DefineFieldStatement {
     statement
 }
 
-#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(
     table_name = "student"
@@ -161,7 +161,7 @@ fn define_age() -> DefineFieldStatement {
     // define_fn = "define_student"
 )]
 pub struct Student {
-    id: SurrealId<Student>,
+    id: SurrealId<Student, String>,
 
     first_name: String,
     last_name: String,
@@ -214,6 +214,24 @@ pub struct Student {
     #[serde(skip_serializing)]
     blogsssss: Relate<Blog>,
 }
+
+impl Default for Student {
+    fn default() -> Self {
+        let id = Self::create_id(sql::Id::rand().to_raw());
+        Self {
+            id,
+            first_name: Default::default(),
+            last_name: Default::default(),
+            age: Default::default(),
+            best_friend: Default::default(),
+            fav_book: Default::default(),
+            course: Default::default(),
+            all_semester_courses: Default::default(),
+            written_books: Default::default(),
+            blogsssss: Default::default(),
+        }
+    }
+}
 // #[test]
 // fn xama() {
 //     assert_eq!(
@@ -232,7 +250,7 @@ pub struct Student {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
 pub struct Writes<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId<Writes<In, Out>>,
+    pub id: SurrealSimpleId<Writes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -249,7 +267,7 @@ pub type StudentWritesBlog = Writes<Student, Blog>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "likes")]
 pub struct Likes<In: SurrealdbNode, Out: SurrealdbNode> {
-    pub id: SurrealId<Likes<In, Out>>,
+    pub id: SurrealSimpleId<Likes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -263,7 +281,7 @@ pub type StudentLiksBook = Likes<Student, Book>;
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
 pub struct Book {
-    id: SurrealId<Book>,
+    id: SurrealSimpleId<Book>,
     title: String,
     content: String,
 }
@@ -272,7 +290,7 @@ pub struct Book {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "blog")]
 pub struct Blog {
-    id: SurrealId<Blog>,
+    id: SurrealSimpleId<Blog>,
     title: String,
     content: String,
 }

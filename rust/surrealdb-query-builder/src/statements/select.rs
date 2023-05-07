@@ -35,7 +35,7 @@ use surrealdb::sql;
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, Field,
     Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId,
-    SurrealdbModel, Table, ToRaw, Valuex,
+    SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
 };
 
 /// Creates a new `Order` instance with the specified database field.
@@ -233,20 +233,207 @@ pub enum TargettablesForSelect {
     Function(Function),
 }
 
+impl From<Vec<sql::Thing>> for TargettablesForSelect {
+    fn from(value: Vec<sql::Thing>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl From<&sql::Thing> for TargettablesForSelect {
+    fn from(value: &sql::Thing) -> Self {
+        Self::SurrealId(value.to_owned().into())
+    }
+}
+
+impl From<sql::Thing> for TargettablesForSelect {
+    fn from(value: sql::Thing) -> Self {
+        Self::SurrealId(value.into())
+    }
+}
 impl From<Vec<sql::Table>> for TargettablesForSelect {
     fn from(value: Vec<sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
     }
 }
-// impl<'a> From<sql::Tables> for Targettables<'a> {
-//     fn from(value: sql::Tables) -> Self {
-//         Self::Tables(value)
-//     }
-// }
 
-impl From<Vec<sql::Thing>> for TargettablesForSelect {
-    fn from(value: Vec<sql::Thing>) -> Self {
+// from surrealid to TargettablesForSelect
+impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &SurrealId<T, Id>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<const N: usize, T, Id> From<&[SurrealId<T, Id>; N]> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &[SurrealId<T, Id>; N]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
+    }
+}
+
+impl<T, Id> From<Vec<&SurrealId<T, Id>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: Vec<&SurrealId<T, Id>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize, T, Id> From<&[&SurrealId<T, Id>; N]> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &[&SurrealId<T, Id>; N]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
+    fn from(value: &[sql::Thing; N]) -> Self {
+        Self::SurrealIds(
+            value
+                .into_iter()
+                .map(|t| t.to_owned().into())
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
+impl<T, Id> From<Vec<SurrealId<T, Id>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: Vec<SurrealId<T, Id>>) -> Self {
         Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<T, Id> From<SurrealId<T, Id>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: SurrealId<T, Id>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealSimpleId<T>> for TargettablesForSelect {
+    fn from(value: SurrealSimpleId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<&SurrealSimpleId<T>> for TargettablesForSelect {
+    fn from(value: &SurrealSimpleId<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<SurrealSimpleId<T>>> for TargettablesForSelect {
+    fn from(value: Vec<SurrealSimpleId<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<&SurrealSimpleId<T>>> for TargettablesForSelect {
+    fn from(value: Vec<&SurrealSimpleId<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[SurrealSimpleId<T>]> for TargettablesForSelect {
+    fn from(value: &[SurrealSimpleId<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[&SurrealSimpleId<T>]> for TargettablesForSelect {
+    fn from(value: &[&SurrealSimpleId<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&SurrealUuid<T>> for TargettablesForSelect {
+    fn from(value: &SurrealUuid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealUuid<T>> for TargettablesForSelect {
+    fn from(value: SurrealUuid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<SurrealUuid<T>>> for TargettablesForSelect {
+    fn from(value: Vec<SurrealUuid<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<&SurrealUuid<T>>> for TargettablesForSelect {
+    fn from(value: Vec<&SurrealUuid<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[SurrealUuid<T>]> for TargettablesForSelect {
+    fn from(value: &[SurrealUuid<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[&SurrealUuid<T>]> for TargettablesForSelect {
+    fn from(value: &[&SurrealUuid<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+// from surrealUlid
+impl<T: SurrealdbModel> From<&SurrealUlid<T>> for TargettablesForSelect {
+    fn from(value: &SurrealUlid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<SurrealUlid<T>> for TargettablesForSelect {
+    fn from(value: SurrealUlid<T>) -> Self {
+        Self::SurrealId(value.to_thing())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<SurrealUlid<T>>> for TargettablesForSelect {
+    fn from(value: Vec<SurrealUlid<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<Vec<&SurrealUlid<T>>> for TargettablesForSelect {
+    fn from(value: Vec<&SurrealUlid<T>>) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[SurrealUlid<T>]> for TargettablesForSelect {
+    fn from(value: &[SurrealUlid<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+    }
+}
+
+impl<T: SurrealdbModel> From<&[&SurrealUlid<T>]> for TargettablesForSelect {
+    fn from(value: &[&SurrealUlid<T>]) -> Self {
+        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -277,18 +464,6 @@ impl From<&sql::Table> for TargettablesForSelect {
         Self::Table(value.to_owned())
     }
 }
-impl From<&sql::Thing> for TargettablesForSelect {
-    fn from(value: &sql::Thing) -> Self {
-        Self::SurrealId(value.to_owned().into())
-    }
-}
-
-impl From<sql::Thing> for TargettablesForSelect {
-    fn from(value: sql::Thing) -> Self {
-        Self::SurrealId(value.into())
-    }
-}
-
 impl From<Vec<&sql::Table>> for TargettablesForSelect {
     fn from(value: Vec<&sql::Table>) -> Self {
         Self::Tables(value.into_iter().map(|t| t.to_owned()).collect::<Vec<_>>())
@@ -310,53 +485,6 @@ impl<const N: usize> From<&[&Table; N]> for TargettablesForSelect {
 impl<const N: usize> From<&[sql::Table; N]> for TargettablesForSelect {
     fn from(value: &[sql::Table; N]) -> Self {
         Self::Tables(value.to_vec())
-    }
-}
-
-impl<T: SurrealdbModel> From<&SurrealId<T>> for TargettablesForSelect {
-    fn from(value: &SurrealId<T>) -> Self {
-        Self::SurrealId(value.to_thing())
-    }
-}
-
-impl<const N: usize, T: SurrealdbModel> From<&[SurrealId<T>; N]> for TargettablesForSelect {
-    fn from(value: &[SurrealId<T>; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
-    }
-}
-
-impl<T: SurrealdbModel> From<Vec<&SurrealId<T>>> for TargettablesForSelect {
-    fn from(value: Vec<&SurrealId<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
-    }
-}
-
-impl<const N: usize, T: SurrealdbModel> From<&[&SurrealId<T>; N]> for TargettablesForSelect {
-    fn from(value: &[&SurrealId<T>; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
-    }
-}
-
-impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
-    fn from(value: &[sql::Thing; N]) -> Self {
-        Self::SurrealIds(
-            value
-                .into_iter()
-                .map(|t| t.to_owned().into())
-                .collect::<Vec<_>>(),
-        )
-    }
-}
-
-impl<T: SurrealdbModel> From<Vec<SurrealId<T>>> for TargettablesForSelect {
-    fn from(value: Vec<SurrealId<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
-    }
-}
-
-impl<T: SurrealdbModel> From<SurrealId<T>> for TargettablesForSelect {
-    fn from(value: SurrealId<T>) -> Self {
-        Self::SurrealId(value.to_thing())
     }
 }
 
@@ -392,18 +520,6 @@ pub enum Splittables {
     /// Multiple fields to split by
     Fields(Vec<Field>),
 }
-
-// impl From<Field> for Splittables {
-//     fn from(value: Field) -> Self {
-//         Self::Field(value.into())
-//     }
-// }
-
-// impl From<&Field> for Splittables {
-//     fn from(value: &Field) -> Self {
-//         Self::Field(value.into())
-//     }
-// }
 
 impl<'a, const N: usize> From<&[&Field; N]> for Splittables {
     fn from(value: &[&Field; N]) -> Self {
