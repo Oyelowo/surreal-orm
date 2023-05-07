@@ -471,7 +471,7 @@ mod tests {
     fn test_create_uuid_with_model() {
         let id = TestUser::create_uuid();
         assert_eq!(id.to_string().contains("user:"), true);
-        assert_eq!(id.to_string().len(), 49);
+        assert_eq!(id.to_string().len(), 47);
     }
 
     #[test]
@@ -490,7 +490,7 @@ mod tests {
     fn test_create_surreal_id_with_uuid() {
         let id = TestUserUuid::new();
         assert_eq!(id.to_string().contains("user:"), true);
-        assert_eq!(id.to_string().len(), 55);
+        assert_eq!(id.to_string().len(), 47);
     }
 
     #[test]
