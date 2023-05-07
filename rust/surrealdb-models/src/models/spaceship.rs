@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{SurrealId, SurrealSimpleId, SurrealdbNode};
+use surrealdb_orm::{SurrealId, SurrealSimpleId, SurrealdbModel, SurrealdbNode};
 
 // SpaceShip
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
