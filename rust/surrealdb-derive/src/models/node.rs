@@ -91,6 +91,7 @@ impl ToTokens for NodeToken{
             field_definitions,
             fields_relations_aliased,
             non_null_updater_fields,
+            table_id_type,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         
@@ -159,9 +160,11 @@ impl ToTokens for NodeToken{
                     #module_name::#aliases_struct_name::new()
                 }
                 
-                fn get_id<T: From<#crate_name::RecordId>>(self) -> T {
-                    let record_id = #crate_name::RecordId::from(self.id).into();
-                    record_id
+                fn get_id<T: Into<#crate_name::RecordId>>(self) -> T {
+                    // let record_id = #crate_name::RecordId::from(self.id).into();
+                    // let record_id: Re = #crate_name::RecordId::from(self.id).into();
+                    // record_id
+                    self.id
                 }
                 
                 fn get_table_name() -> #crate_name::Table {
@@ -187,6 +190,7 @@ impl ToTokens for NodeToken{
 
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
+                type Id = #table_id_type;
                 fn table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }

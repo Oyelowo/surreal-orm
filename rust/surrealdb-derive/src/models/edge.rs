@@ -116,6 +116,7 @@ impl ToTokens for EdgeToken {
             link_one_and_self_fields,
             link_many_fields,
             non_null_updater_fields,
+            table_id_type,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
         // if serialized_field_names_normalised.conta("")
@@ -172,6 +173,8 @@ impl ToTokens for EdgeToken {
         
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbModel for #struct_name_ident<In, Out> {
+                    type Id = #table_id_type;
+                
                     fn table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }

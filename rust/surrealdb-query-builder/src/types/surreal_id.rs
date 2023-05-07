@@ -129,6 +129,24 @@ impl<T: SurrealdbModel, Id: Into<sql::Id>> From<sql::Thing> for SurrealId<T, Id>
     }
 }
 
+// impl<T: SurrealdbModel> From<sql::Thing> for SurrealSimpleId<T> {
+//     fn from(value: sql::Thing) -> Self {
+//         // SurrealUuid(value, PhantomData, PhantomData)
+//         SurrealId(value, PhantomData, PhantomData).into()
+//     }
+// }
+
+// impl<T, Id, AnyId> From<sql::Thing> for AnyId
+// where
+//     T: SurrealdbModel,
+//     Id: Into<sql::Id>,
+//     AnyId: Into<SurrealId<T, Id>>,
+// {
+//     fn from(value: sql::Thing) -> Self {
+//         Self(value, PhantomData, PhantomData)
+//     }
+// }
+
 impl<T: SurrealdbModel, Id: Into<sql::Id>> Into<sql::Value> for SurrealId<T, Id> {
     fn into(self) -> sql::Value {
         self.0.into()
