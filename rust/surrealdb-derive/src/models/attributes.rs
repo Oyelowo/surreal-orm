@@ -250,6 +250,8 @@ pub struct MyFieldReceiver {
     #[darling(default)]
     with: ::darling::util::Ignored,
     #[darling(default)]
+    deserialize_with: ::darling::util::Ignored,
+    #[darling(default)]
     default: ::darling::util::Ignored,
 }
 
