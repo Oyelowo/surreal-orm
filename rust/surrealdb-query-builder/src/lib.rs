@@ -49,6 +49,9 @@
 
 mod errors;
 
+/// This module contains the different types of casts that can be used to cast values to
+/// different types.
+pub mod cast;
 pub mod functions;
 mod helpers;
 mod operators_macros;
@@ -65,7 +68,4 @@ pub use helpers::*;
 pub use traits::*;
 pub use types::*;
 
-pub use surrealdb::opt::RecordId;
 pub use surrealdb::sql;
-pub use surrealdb::sql::json;
-pub use surrealdb::sql::Value;

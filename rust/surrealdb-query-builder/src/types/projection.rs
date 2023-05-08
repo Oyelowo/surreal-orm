@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use crate::{Alias, BindingsList, Buildable, Field, Function, Param, Parametric, Valuex};
 
 /// Used to represent a list of projections to access fields of a table or

@@ -17,7 +17,7 @@ use regex;
 use serde::{Deserialize, Serialize};
 use static_assertions::*;
 use std::time::Duration;
-use surrealdb::sql::{self, thing};
+use surrealdb::sql::{self, thing, Thing};
 use surrealdb::{
     engine::local::{Db, Mem},
     opt::IntoResource,
@@ -442,7 +442,7 @@ async fn relate_query_building_for_subqueries() {
 fn multiplication_tests2() {
     let x = Student::schema()
         .writes__(Empty)
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
         .title;
 
     assert_eq!(
@@ -459,7 +459,7 @@ fn multiplication_tests2() {
         .bestFriend()
         .bestFriend()
         .writes__(StudentWritesBook::schema().timeWritten.greater_than(3422))
-        .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
+        .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
         .content;
 
     // insta::assert_display_snapshot!(&x.to_string());

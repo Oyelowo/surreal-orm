@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use crate::{
     statements::select::TargettablesForSelect, Binding, SurrealId, SurrealSimpleId, SurrealUlid,
     SurrealUuid, SurrealdbModel, Valuex,
