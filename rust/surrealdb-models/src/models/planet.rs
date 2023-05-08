@@ -1,9 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql;
-use surrealdb_orm::{
-    SchemaGetter, SetterArray, SetterAssignable, SurrealId, SurrealSimpleId, SurrealdbNode,
-};
+use surrealdb_orm::{SurrealSimpleId, SurrealdbNode};
 
 // Planet
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -57,7 +54,13 @@ impl IntoIterator for PopArray {
 // }
 type Population = u64;
 
-#[test]
-fn test_auto_inference() {
-    Planet::schema().tags.append(45u64);
+#[cfg(test)]
+mod tests {
+    use surrealdb_orm::{SchemaGetter, SetterArray};
+    use super::*;
+
+    #[test]
+    fn test_auto_inference() {
+        Planet::schema().tags.append(45u64);
+    }
 }

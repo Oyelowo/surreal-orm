@@ -1,11 +1,10 @@
 use std::time::Duration;
 
+use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealSimpleId, SurrealdbNode, E};
-
-use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
 
 // Alien
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
@@ -25,12 +24,10 @@ pub struct Alien {
     #[surrealdb(link_self = "Alien", type = "record(alien)")]
     pub ally: LinkSelf<Alien>,
 
-    // #[serde(skip_serializing)]
     #[surrealdb(link_one = "Weapon", type = "record(weapon)")]
     pub weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    // #[serde(skip_serializing)]
     #[surrealdb(
         link_many = "SpaceShip",
         type = "array",
@@ -62,7 +59,6 @@ pub struct Alien2 {
     pub weapon: Rocket,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    // #[serde(skip_serializing)]
     #[surrealdb(
         link_many = "SpaceShip",
         type = "array",

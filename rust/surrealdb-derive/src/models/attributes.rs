@@ -429,7 +429,7 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        let ty = &self.ty;
+        // let ty = &self.ty;
         // let is_float = match quote! {#ty}.to_string().as_str() {
         //     "f32" | "f64" => true,
         //     _ => false,
@@ -448,7 +448,7 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        let ty = &self.ty;
+        // let ty = &self.ty;
         // let is_integer = match quote! {#ty}.to_string().as_str() {
         //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
         //     _ => false,
