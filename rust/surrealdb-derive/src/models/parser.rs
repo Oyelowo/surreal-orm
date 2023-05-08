@@ -349,7 +349,6 @@ impl SchemaFieldsProperties {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
-                // dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
@@ -424,12 +423,6 @@ impl SchemaFieldsProperties {
                                     }
                                 }
                             
-                                impl From<String> for #field_name_as_camel {
-                                    fn from(field_name: String) -> Self {
-                                        Self(#crate_name::Field::new(field_name))
-                                    }
-                                }
-                            
                                 impl From<#crate_name::Field> for #field_name_as_camel {
                                     fn from(field_name: #crate_name::Field) -> Self {
                                         Self(field_name)
@@ -497,11 +490,9 @@ impl SchemaFieldsProperties {
                             .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
                         store.schema_struct_fields_names_kv_prefixed
-                            .push(quote!(#field_ident_normalised: format!("{}{}", prefix.build(), #field_ident_normalised_as_str).into(),));
-                            // .push(quote!(self.#field_ident_normalised =
-                    // (prefix.to_string() + self#field_ident_normalised_as_str.as_str()).into();));
-                            // .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                    
+                            .push(quote!(#field_ident_normalised: 
+                                                #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_normalised_as_str))
+                                                .with_bindings(prefix.get_bindings()).into(),));
                     
                     store.schema_struct_fields_names_kv_empty
                         .push(quote!(#field_ident_normalised: "".into(),));

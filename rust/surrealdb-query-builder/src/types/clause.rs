@@ -372,7 +372,7 @@ impl Clause {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
                 let id_bindings = Binding::new(surreal_id.clone());
                 let param_string = format!("{}", id_bindings.get_param_dollarised());
-                errors = vec!["lowo aaaa".to_string()];
+                errors = vec![];
                 bindings = vec![id_bindings];
                 param_string
             }
