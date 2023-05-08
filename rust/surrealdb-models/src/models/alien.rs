@@ -3,7 +3,7 @@ use std::time::Duration;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{Last, LinkMany, LinkOne, LinkSelf, Relate, SurrealSimpleId, SurrealdbNode, E};
+use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealSimpleId, SurrealdbNode, E};
 
 use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
 

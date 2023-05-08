@@ -11,8 +11,8 @@ use std::{ops::Deref, str::FromStr};
 
 use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{FieldType, GeometryType};
-use syn::{GenericArgument, Ident, Lit, LitStr, Path, PathArguments, Type};
+use surrealdb_query_builder::FieldType;
+use syn::{Ident, Lit, LitStr, Path, Type};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -236,7 +236,7 @@ pub struct MyFieldReceiver {
     pub(crate) permissions_fn: Option<PermissionsFn>,
 
     #[darling(default)]
-    content_type: Option<FieldTypeWrapper>,
+    pub(crate) content_type: Option<FieldTypeWrapper>,
 
     #[darling(default)]
     content_assert: Option<syn::LitStr>,
