@@ -17,6 +17,7 @@ tokio = { workspace = true }
 bigdecimal = { workspace = true }
 async-graphql = { workspace = true }
 serde = { workspace = true }
+serde-aux = { workspace = true }
 serde_json = { workspace = true }
 static_assertions = "1.1.0"
 typed-builder = { workspace = true }

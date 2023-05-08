@@ -11,8 +11,8 @@ use std::{ops::Deref, str::FromStr};
 
 use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
-use surrealdb_query_builder::{FieldType, GeometryType};
-use syn::{GenericArgument, Ident, Lit, LitStr, Path, PathArguments, Type};
+use surrealdb_query_builder::FieldType;
+use syn::{Ident, Lit, LitStr, Path, Type};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -236,7 +236,7 @@ pub struct MyFieldReceiver {
     pub(crate) permissions_fn: Option<PermissionsFn>,
 
     #[darling(default)]
-    content_type: Option<FieldTypeWrapper>,
+    pub(crate) content_type: Option<FieldTypeWrapper>,
 
     #[darling(default)]
     content_assert: Option<syn::LitStr>,
@@ -249,6 +249,8 @@ pub struct MyFieldReceiver {
 
     #[darling(default)]
     with: ::darling::util::Ignored,
+    #[darling(default)]
+    deserialize_with: ::darling::util::Ignored,
     #[darling(default)]
     default: ::darling::util::Ignored,
 }
@@ -406,7 +408,7 @@ impl MyFieldReceiver {
                     let ident = &path.segments[0].ident.to_string();
                     [
                         "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
-                        "i128", "isize",
+                        "i128", "isize", "f32", "f64",
                     ]
                     .iter()
                     .any(|&x| x == ident)
@@ -429,7 +431,7 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        let ty = &self.ty;
+        // let ty = &self.ty;
         // let is_float = match quote! {#ty}.to_string().as_str() {
         //     "f32" | "f64" => true,
         //     _ => false,
@@ -448,7 +450,7 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        let ty = &self.ty;
+        // let ty = &self.ty;
         // let is_integer = match quote! {#ty}.to_string().as_str() {
         //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
         //     _ => false,
