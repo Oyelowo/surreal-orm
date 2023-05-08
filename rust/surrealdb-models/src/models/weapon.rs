@@ -1,9 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb_orm::SurrealId;
-use surrealdb_orm::SurrealSimpleId;
-use surrealdb_orm::SurrealdbNode;
-use surrealdb_orm::SurrealdbObject;
+use surrealdb_orm::{SurrealId, SurrealSimpleId, SurrealdbNode, SurrealdbObject};
+
+use serde_aux::prelude::deserialize_number_from_string;
 
 // Weapon
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
@@ -50,5 +49,6 @@ pub struct Rocket {
 #[surrealdb(table_name = "account")]
 pub struct Account {
     pub id: SurrealId<Self, String>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub balance: f64,
 }
