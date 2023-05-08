@@ -145,7 +145,7 @@ impl ToTokens for NodeToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn schema_prefixed(prefix: String) -> Self::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
                     #module_name::#struct_name_ident::new_prefixed(prefix)
                 }
             }
@@ -156,7 +156,7 @@ impl ToTokens for NodeToken{
                 type Aliases = #module_name::#aliases_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
 
-                fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
+                fn with(clause: impl Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
@@ -349,13 +349,14 @@ impl ToTokens for NodeToken{
                         }
                     }
                 
-                    pub fn new_prefixed(self, prefix: String) -> Self {
+                    pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
+                        let prefix: #crate_name::Valuex = prefix.into();
+                    
                         Self {
                            #( #schema_struct_fields_names_kv_prefixed) *
-                            // #___________graph_traversal_string: "".into(),
-                            // #___________bindings: vec![],
-                            // #___________errors: vec![],
-                            ..self
+                            #___________graph_traversal_string: prefix.build(),
+                            #___________bindings: prefix.get_bindings(),
+                            #___________errors: vec![],
                         }
                     }
 
@@ -372,7 +373,7 @@ impl ToTokens for NodeToken{
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl Into<#crate_name::NodeClause>,
                     ) -> Self {
-                        let mut #schema_instance = Self::empty(); 
+                        let mut #schema_instance = Self::new(); 
                         let clause: #crate_name::NodeClause = clause.into();
                         let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();

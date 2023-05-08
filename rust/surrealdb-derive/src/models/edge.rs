@@ -101,6 +101,7 @@ impl ToTokens for EdgeToken {
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            schema_struct_fields_names_kv_prefixed,
             field_wrapper_type_custom_implementations,
             serialized_field_names_normalised,
             static_assertions,
@@ -140,14 +141,14 @@ impl ToTokens for EdgeToken {
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _};
         
-                impl #crate_name::SchemaGetter for #struct_name_ident {
+                impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
                     type Schema = #module_name::#struct_name_ident;
                 
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
                     }
                     
-                    fn schema_prefixed(prefix: String) -> Self::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
                         #module_name::#struct_name_ident::new_prefixed(prefix)
                     }
                 }
@@ -307,6 +308,16 @@ impl ToTokens for EdgeToken {
                             }
                         }
 
+                        pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
+                            let prefix: #crate_name::Valuex = prefix.into();
+                            Self {
+                               #( #schema_struct_fields_names_kv_prefixed) *
+                                #___________graph_traversal_string: prefix.build(),
+                                #___________bindings: prefix.get_bindings(),
+                                #___________errors: vec![],
+                            }
+                        }
+                
                         pub fn empty() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
@@ -320,7 +331,6 @@ impl ToTokens for EdgeToken {
                             connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                             clause: impl Into<#crate_name::EdgeClause>,
                         ) -> Self {
-                            let writes = "Rer";
                             let mut schema_instance = Self::empty();
                             let clause: #crate_name::EdgeClause = clause.into();
                             let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();

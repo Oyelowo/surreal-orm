@@ -72,6 +72,7 @@ impl ToTokens for ObjectToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            schema_struct_fields_names_kv_prefixed,
             field_wrapper_type_custom_implementations,
             static_assertions,
             imports_referenced_node_schema,
@@ -108,7 +109,7 @@ impl ToTokens for ObjectToken{
                     #module_name::#struct_name_ident::new()
                 }
                 
-                fn schema_prefixed(prefix: String) -> Self::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
                     #module_name::#struct_name_ident::new_prefixed(prefix)
                 }
             }
@@ -211,7 +212,17 @@ impl ToTokens for ObjectToken{
                             #___________errors: vec![],
                         }
                     }
-
+                
+                    pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
+                        let prefix: #crate_name::Valuex = prefix.into();
+                        Self {
+                           #( #schema_struct_fields_names_kv_prefixed) *
+                            #___________graph_traversal_string: prefix.build(),
+                            #___________bindings: prefix.get_bindings(),
+                            #___________errors: vec![],
+                        }
+                    }
+                
                     pub fn empty() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *

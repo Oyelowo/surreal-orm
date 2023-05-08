@@ -1139,9 +1139,6 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
         ]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
-    // this().with_path::<Weapon>().rocket().name;
-    let xx = this::<Student>().bestFriend().bestFriend().course().title;
-    let xx = this();
 
     //
     Ok(())

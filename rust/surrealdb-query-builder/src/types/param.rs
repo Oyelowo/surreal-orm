@@ -10,7 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    BindingsList, Buildable, Erroneous, Operatable, Parametric, SurrealdbModel, SurrealdbNode,
+    BindingsList, Buildable, Clause, Erroneous, Operatable, Parametric, SchemaGetter,
+    SurrealdbModel, SurrealdbNode, Valuex,
 };
 
 /// Represents a surrogate parameter
@@ -68,12 +69,19 @@ impl Param {
         }
     }
 
-    /// as typed path
-    pub fn with_path<T: SurrealdbNode>(&self) -> T::Schema {
-        let x = "a".to_string();
-        let y = "b".to_string();
-        let z = x + y.as_str();
-        T::schema()
+    /// For traversing from the param
+    pub fn with_path<T: SchemaGetter>(&self, clause: impl Into<Clause>) -> T::Schema {
+        let clause: Clause = clause.into();
+        let value = Valuex {
+            string: format!("{}{}", self.build(), clause.build()),
+            bindings: self
+                .get_bindings()
+                .into_iter()
+                .chain(clause.get_bindings())
+                .collect::<Vec<_>>(),
+        };
+
+        T::schema_prefixed(value)
     }
 }
 

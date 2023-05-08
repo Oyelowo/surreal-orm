@@ -25,6 +25,7 @@ use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::Buildable;
 use surrealdb_orm::ReturnableSelect;
+use surrealdb_orm::SchemaGetter;
 use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealSimpleId;
 use surrealdb_orm::SurrealUuid;

@@ -497,7 +497,7 @@ impl SchemaFieldsProperties {
                             .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
                         store.schema_struct_fields_names_kv_prefixed
-                            .push(quote!(#field_ident_normalised: format!("{}{}", prefix, #field_ident_normalised_as_str).into(),));
+                            .push(quote!(#field_ident_normalised: format!("{}{}", prefix.build(), #field_ident_normalised_as_str).into(),));
                             // .push(quote!(self.#field_ident_normalised =
                     // (prefix.to_string() + self#field_ident_normalised_as_str.as_str()).into();));
                             // .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
@@ -774,7 +774,7 @@ impl NodeEdgeMetadataStore {
         let destination_node_schema_one = || {
             quote!(
             type #destination_node_model_ident = <super::super::#relation_model as #crate_name::SurrealdbEdge>::#foreign_node_in_or_out;
-            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SurrealdbNode>::Schema;
+            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SchemaGetter>::Schema;
             )
         };
 
@@ -912,7 +912,7 @@ impl NodeEdgeMetadataStore {
                     
                     #( #destination_node_schema) *
                     
-                    pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SurrealdbEdge>::Schema; 
+                    pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SchemaGetter>::Schema; 
 
                     pub struct #edge_name_as_struct_with_direction_ident(#edge_name_as_struct_original_ident);
                     

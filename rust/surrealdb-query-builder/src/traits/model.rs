@@ -7,7 +7,7 @@
 
 use crate::{
     Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    SurrealdbOrmResult, Table,
+    SurrealdbOrmResult, Table, Valuex,
 };
 use serde::Serialize;
 use surrealdb::sql::{self, Id, Thing};
@@ -219,7 +219,7 @@ pub trait SchemaGetter {
     ///
     fn schema() -> Self::Schema;
     ///
-    fn schema_prefixed(prefix: String) -> Self::Schema;
+    fn schema_prefixed(prefix: impl Into<Valuex>) -> Self::Schema;
 }
 
 /// List of error
