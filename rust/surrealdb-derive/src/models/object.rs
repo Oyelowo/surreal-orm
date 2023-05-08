@@ -101,14 +101,26 @@ impl ToTokens for ObjectToken{
         tokens.extend(quote!( 
             use #crate_name::{ToRaw as _};
             
-            impl #crate_name::SurrealdbObject for #struct_name_ident {
+            impl #crate_name::SchemaGetter for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
-                // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
-                type NonNullUpdater = #non_null_updater_struct_name;
-                
+            
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
+                
+                fn schema_prefixed(prefix: String) -> Self::Schema {
+                    #module_name::#struct_name_ident::new_prefixed(prefix)
+                }
+            }
+        
+            impl #crate_name::SurrealdbObject for #struct_name_ident {
+                // type Schema = #module_name::#struct_name_ident;
+                // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
+                type NonNullUpdater = #non_null_updater_struct_name;
+                
+                // fn schema() -> Self::Schema {
+                //     #module_name::#struct_name_ident::new()
+                // }
             }
         
             #[allow(non_snake_case)]

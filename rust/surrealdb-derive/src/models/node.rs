@@ -73,6 +73,7 @@ impl ToTokens for NodeToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            schema_struct_fields_names_kv_prefixed,
             aliases_struct_fields_types_kv,
             aliases_struct_fields_names_kv,
             field_wrapper_type_custom_implementations,
@@ -137,9 +138,21 @@ impl ToTokens for NodeToken{
             use #crate_name::{ToRaw as _};
             use #crate_name::Aliasable as _;
             
+            impl #crate_name::SchemaGetter for #struct_name_ident {
+                type Schema = #module_name::#struct_name_ident;
+            
+                fn schema() -> Self::Schema {
+                    #module_name::#struct_name_ident::new()
+                }
+                
+                fn schema_prefixed(prefix: String) -> Self::Schema {
+                    #module_name::#struct_name_ident::new_prefixed(prefix)
+                }
+            }
+        
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
-                type Schema = #module_name::#struct_name_ident;
+                // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
 
@@ -151,11 +164,15 @@ impl ToTokens for NodeToken{
                                 clause.with_table(#table_name_str),
                     )
                 }
-                
-                fn schema() -> Self::Schema {
-                    #module_name::#struct_name_ident::new()
-                }
-                
+                //
+                // fn schema() -> Self::Schema {
+                //     #module_name::#struct_name_ident::new()
+                // }
+                //
+                // fn schema_prefixed(prefix: String) -> Self::Schema {
+                //     #module_name::#struct_name_ident::new_prefixed(prefix)
+                // }
+            
                 fn aliases() -> Self::Aliases {
                     #module_name::#aliases_struct_name::new()
                 }
@@ -329,6 +346,16 @@ impl ToTokens for NodeToken{
                             #___________graph_traversal_string: "".into(),
                             #___________bindings: vec![],
                             #___________errors: vec![],
+                        }
+                    }
+                
+                    pub fn new_prefixed(self, prefix: String) -> Self {
+                        Self {
+                           #( #schema_struct_fields_names_kv_prefixed) *
+                            // #___________graph_traversal_string: "".into(),
+                            // #___________bindings: vec![],
+                            // #___________errors: vec![],
+                            ..self
                         }
                     }
 

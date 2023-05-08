@@ -139,17 +139,29 @@ impl ToTokens for EdgeToken {
 
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _};
+        
+                impl #crate_name::SchemaGetter for #struct_name_ident {
+                    type Schema = #module_name::#struct_name_ident;
+                
+                    fn schema() -> Self::Schema {
+                        #module_name::#struct_name_ident::new()
+                    }
+                    
+                    fn schema_prefixed(prefix: String) -> Self::Schema {
+                        #module_name::#struct_name_ident::new_prefixed(prefix)
+                    }
+                }
                         
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SurrealdbEdge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
-                    type Schema = #module_name::#struct_name_ident;
+                    // type Schema = #module_name::#struct_name_ident;
 
-                    fn schema() -> Self::Schema {
-                        #module_name::#struct_name_ident::new()
-                    }
+                    // fn schema() -> Self::Schema {
+                    //     #module_name::#struct_name_ident::new()
+                    // }
                     
                     #[allow(non_snake_case)]
                     fn get_table_name() -> #crate_name::Table {

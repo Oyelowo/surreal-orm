@@ -182,15 +182,16 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
+    pub schema_struct_fields_names_kv_prefixed: Vec<TokenStream>,
     
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
     /// Self {
-    ///     id: "id".into(),
-    ///     r#in: "in".into(),
-    ///     out: "out".into(),
-    ///     timeWritten: "timeWritten".into(),
+    ///     id: "".into(),
+    ///     r#in: "".into(),
+    ///     out: "".into(),
+    ///     timeWritten: "".into(),
     /// }
     /// ```
     pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
@@ -423,6 +424,12 @@ impl SchemaFieldsProperties {
                                     }
                                 }
                             
+                                impl From<String> for #field_name_as_camel {
+                                    fn from(field_name: String) -> Self {
+                                        Self(#crate_name::Field::new(field_name))
+                                    }
+                                }
+                            
                                 impl From<#crate_name::Field> for #field_name_as_camel {
                                     fn from(field_name: #crate_name::Field) -> Self {
                                         Self(field_name)
@@ -489,6 +496,11 @@ impl SchemaFieldsProperties {
                         store.schema_struct_fields_names_kv
                             .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
+                        store.schema_struct_fields_names_kv_prefixed
+                            .push(quote!(#field_ident_normalised: format!("{}{}", prefix, #field_ident_normalised_as_str).into(),));
+                            // .push(quote!(self.#field_ident_normalised =
+                    // (prefix.to_string() + self#field_ident_normalised_as_str.as_str()).into();));
+                            // .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
                     
                     
                     store.schema_struct_fields_names_kv_empty
