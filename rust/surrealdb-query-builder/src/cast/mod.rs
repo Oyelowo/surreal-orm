@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::fmt::Display;
 
 use crate::{BindingsList, Buildable, Erroneous, Parametric, Valuex};
@@ -27,7 +34,7 @@ impl Display for Cast {
 
 impl Buildable for Cast {
     fn build(&self) -> String {
-        self.string.to_string()
+        self.0.string.to_string()
     }
 }
 
