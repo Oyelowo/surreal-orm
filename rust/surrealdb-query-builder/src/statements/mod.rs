@@ -29,6 +29,7 @@ pub(crate) mod remove_scope;
 pub(crate) mod remove_table;
 pub(crate) mod remove_token;
 pub(crate) mod select;
+pub(crate) mod select_surreal_id_range;
 pub(crate) mod sleep;
 pub(crate) mod transaction;
 pub(crate) mod update;
