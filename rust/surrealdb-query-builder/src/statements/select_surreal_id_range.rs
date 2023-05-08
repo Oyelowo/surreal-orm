@@ -108,6 +108,102 @@ where
     }
 }
 
+impl<T, V> From<std::ops::RangeInclusive<&SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeInclusive<&SurrealId<T, V>>) -> Self {
+        let start = range.start();
+        let end = range.end();
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!(
+            "{table}:{}..={}",
+            start_binding.get_param_dollarised(),
+            end_binding.get_param_dollarised()
+        );
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding, end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeFrom<&SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeFrom<&SurrealId<T, V>>) -> Self {
+        let start = range.start;
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let build = format!("{table}:{}..", start_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeTo<&SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeTo<&SurrealId<T, V>>) -> Self {
+        let end = range.end;
+        let table = T::table_name();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!("{table}:..{}", end_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::RangeToInclusive<&SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::RangeToInclusive<&SurrealId<T, V>>) -> Self {
+        let end = range.end;
+        let table = T::table_name();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!("{table}:..={}", end_binding.get_param_dollarised());
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![end_binding],
+        })
+    }
+}
+
+impl<T, V> From<std::ops::Range<&SurrealId<T, V>>> for TargettablesForSelect
+where
+    T: SurrealdbModel,
+    V: Into<sql::Id>,
+{
+    fn from(range: std::ops::Range<&SurrealId<T, V>>) -> Self {
+        let start = range.start;
+        let end = range.end;
+        let table = T::table_name();
+        let start_binding = Binding::new(start.to_thing().id).as_raw();
+        let end_binding = Binding::new(end.to_thing().id).as_raw();
+        let build = format!(
+            "{table}:{}..{}",
+            start_binding.get_param_dollarised(),
+            end_binding.get_param_dollarised()
+        );
+        TargettablesForSelect::RecordRange(Valuex {
+            string: build,
+            bindings: vec![start_binding, end_binding],
+        })
+    }
+}
 //////////////////////////////////////////
 macro_rules! create_range {
     ($id_type:ident) => {

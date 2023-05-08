@@ -78,7 +78,7 @@ impl QueryTransaction {
     /// takes a statement as an argument
     pub fn query(mut self, query: impl Queryable + Parametric + Display) -> Self {
         self.data.bindings.extend(query.get_bindings());
-        self.data.queries.push(query.to_string());
+        self.data.queries.push(query.build());
         self
     }
 
@@ -142,7 +142,7 @@ impl Buildable for TransactionCompletion {
         output.push_str("BEGIN TRANSACTION;\n");
 
         self.data.queries.iter().for_each(|q| {
-            output.push_str(&format!("\n{};\n", q));
+            output.push_str(&format!("\n{};\n", q.trim_end_matches(";")));
         });
 
         if let Some(completion_type) = &self.data.transaction_completion_type {

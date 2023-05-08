@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use surrealdb_orm::SurrealId;
 use surrealdb_orm::SurrealSimpleId;
 use surrealdb_orm::SurrealdbNode;
 use surrealdb_orm::SurrealdbObject;
@@ -42,4 +43,12 @@ pub struct Rocket {
     pub nice: bool,
     pub bunch_of_other_fields: i32,
     pub created: DateTime<Utc>,
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "account")]
+pub struct Account {
+    pub id: SurrealId<Self, String>,
+    pub balance: f64,
 }
