@@ -7,7 +7,7 @@
 
 use crate::{
     Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    SurrealdbOrmResult, Table,
+    SurrealdbOrmResult, Table, Valuex,
 };
 use serde::Serialize;
 use surrealdb::sql::{self, Id, Thing};
@@ -88,11 +88,11 @@ pub trait SurrealdbModel: Sized {
 }
 
 /// SurrealdbNode is a trait signifying a node in the graph
-pub trait SurrealdbNode: SurrealdbModel + Serialize {
+pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
     /// The type of the schema
-    type Schema;
+    // type Schema;
     /// The type of the aliases
     type Aliases;
     #[doc(hidden)]
@@ -115,7 +115,9 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
     ///     .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
     ///     .content
     /// ```
-    fn schema() -> Self::Schema;
+    // fn schema() -> Self::Schema;
+    /// Same as schema but prefixed. Useful for traversing the graph for e.g aliases.
+    // fn schema_prefixed(prefix: String) -> Self::Schema;
     /// returns the alias names of the relation graph strings of the model
     /// e.g for relation - `->edge->graph AS alias`, the alias would be alias.
     /// the struct definition could be:
@@ -182,7 +184,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize {
 }
 
 /// SurrealdbEdge is a trait signifying an edge in the graph
-pub trait SurrealdbEdge: SurrealdbModel + Serialize {
+pub trait SurrealdbEdge: SurrealdbModel + Serialize + SchemaGetter {
     /// The Origin node
     type In;
     /// The Destination node
@@ -190,10 +192,10 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
     #[doc(hidden)]
     type TableNameChecker;
     /// The type of the schema
-    type Schema;
+    // type Schema;
 
     /// returns the schema of the edge for generating graph strings e.g
-    fn schema() -> Self::Schema;
+    // fn schema() -> Self::Schema;
     // /// returns the key of the edge aka id field
     // fn get_id<T: From<Thing>>(self) -> T;
     /// returns the table name of the edge
@@ -201,13 +203,23 @@ pub trait SurrealdbEdge: SurrealdbModel + Serialize {
 }
 
 /// SurrealdbObject is a trait signifying a nested object in the graph
-pub trait SurrealdbObject: Serialize {
+pub trait SurrealdbObject: Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
-    /// The type of the schema
+    // The type of the schema
+    // type Schema;
+    // returns the schema of a nested object.
+    // fn schema() -> Self::Schema;
+}
+
+///
+pub trait SchemaGetter {
+    ///
     type Schema;
-    /// returns the schema of a nested object.
+    ///
     fn schema() -> Self::Schema;
+    ///
+    fn schema_prefixed(prefix: impl Into<Valuex>) -> Self::Schema;
 }
 
 /// List of error

@@ -1,5 +1,5 @@
 use surrealdb_models::{organization_schema, Organization};
-use surrealdb_orm::{index, Buildable, SetterAssignable, SurrealdbNode, ToRaw, E};
+use surrealdb_orm::{index, Buildable, SchemaGetter, SetterAssignable, SurrealdbNode, ToRaw, E};
 
 #[test]
 fn test_setter() {

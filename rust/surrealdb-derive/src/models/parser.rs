@@ -182,15 +182,16 @@ pub struct SchemaFieldsProperties {
     /// }
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
+    pub schema_struct_fields_names_kv_prefixed: Vec<TokenStream>,
     
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
     /// Self {
-    ///     id: "id".into(),
-    ///     r#in: "in".into(),
-    ///     out: "out".into(),
-    ///     timeWritten: "timeWritten".into(),
+    ///     id: "".into(),
+    ///     r#in: "".into(),
+    ///     out: "".into(),
+    ///     timeWritten: "".into(),
     /// }
     /// ```
     pub schema_struct_fields_names_kv_empty: Vec<TokenStream>,
@@ -348,7 +349,6 @@ impl SchemaFieldsProperties {
                 let crate_name = get_crate_name(false);
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
-                // dbg!(struct_name_ident.to_string(), "NAME==>", &field_name_original, "TPPPPE==>",&field_type, "Fieldtypestr ing", field_type.into_token_stream().to_string());
                 let relationship = RelationType::from(field_receiver);
                 let NormalisedField { 
                          ref field_ident_normalised,
@@ -489,7 +489,10 @@ impl SchemaFieldsProperties {
                         store.schema_struct_fields_names_kv
                             .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
-                    
+                        store.schema_struct_fields_names_kv_prefixed
+                            .push(quote!(#field_ident_normalised: 
+                                                #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_normalised_as_str))
+                                                .with_bindings(prefix.get_bindings()).into(),));
                     
                     store.schema_struct_fields_names_kv_empty
                         .push(quote!(#field_ident_normalised: "".into(),));
@@ -762,7 +765,7 @@ impl NodeEdgeMetadataStore {
         let destination_node_schema_one = || {
             quote!(
             type #destination_node_model_ident = <super::super::#relation_model as #crate_name::SurrealdbEdge>::#foreign_node_in_or_out;
-            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SurrealdbNode>::Schema;
+            type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SchemaGetter>::Schema;
             )
         };
 
@@ -900,7 +903,7 @@ impl NodeEdgeMetadataStore {
                     
                     #( #destination_node_schema) *
                     
-                    pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SurrealdbEdge>::Schema; 
+                    pub type #edge_name_as_struct_original_ident = <super::super::#edge_relation_model_selected_ident as #crate_name::SchemaGetter>::Schema; 
 
                     pub struct #edge_name_as_struct_with_direction_ident(#edge_name_as_struct_original_ident);
                     

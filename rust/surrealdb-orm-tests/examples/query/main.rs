@@ -44,6 +44,7 @@ struct User {
 
 use serde_json::Result;
 use serde_json::{Map, Value};
+use surrealdb_orm::SchemaGetter;
 use surrealdb_orm::SurrealSimpleId;
 use surrealdb_orm::{
     cond, statements::select, updater, All, Field, Geometry, Operatable, Parametric, SurrealId,

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{SetterArray, SurrealId, SurrealSimpleId, SurrealdbNode};
+use surrealdb_orm::{SchemaGetter, SetterArray, SurrealId, SurrealSimpleId, SurrealdbNode};
 
 // Planet
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]

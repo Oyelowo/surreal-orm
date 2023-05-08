@@ -1460,7 +1460,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbNode>::Schema;)
+            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = if is_list {
@@ -1505,7 +1505,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
         Self {
             // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbNode>::Schema;
+            // type Book = <super::Book as SchemaGetter>::Schema;
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
@@ -1541,7 +1541,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
-            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SurrealdbObject>::Schema;)
+            quote!(type #schema_type_ident = <super::#schema_type_ident as #crate_name::SchemaGetter>::Schema;)
         };
 
         let record_link_default_alias_as_method = if is_list {
@@ -1585,7 +1585,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
         Self {
             // imports for specific schema from the trait Generic Associated types e.g
-            // type Book = <super::Book as SurrealdbObject>::Schema;
+            // type Book = <super::Book as SchemaGetter>::Schema;
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(

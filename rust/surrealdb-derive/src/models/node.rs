@@ -73,6 +73,7 @@ impl ToTokens for NodeToken{
         let SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
+            schema_struct_fields_names_kv_prefixed,
             aliases_struct_fields_types_kv,
             aliases_struct_fields_names_kv,
             field_wrapper_type_custom_implementations,
@@ -137,13 +138,25 @@ impl ToTokens for NodeToken{
             use #crate_name::{ToRaw as _};
             use #crate_name::Aliasable as _;
             
+            impl #crate_name::SchemaGetter for #struct_name_ident {
+                type Schema = #module_name::#struct_name_ident;
+            
+                fn schema() -> Self::Schema {
+                    #module_name::#struct_name_ident::new()
+                }
+                
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
+                    #module_name::#struct_name_ident::new_prefixed(prefix)
+                }
+            }
+        
             impl #crate_name::SurrealdbNode for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
-                type Schema = #module_name::#struct_name_ident;
+                // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
 
-                fn with(clause: impl Into<#crate_name::NodeClause>) -> Self::Schema {
+                fn with(clause: impl Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
                     
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
@@ -151,11 +164,15 @@ impl ToTokens for NodeToken{
                                 clause.with_table(#table_name_str),
                     )
                 }
-                
-                fn schema() -> Self::Schema {
-                    #module_name::#struct_name_ident::new()
-                }
-                
+                //
+                // fn schema() -> Self::Schema {
+                //     #module_name::#struct_name_ident::new()
+                // }
+                //
+                // fn schema_prefixed(prefix: String) -> Self::Schema {
+                //     #module_name::#struct_name_ident::new_prefixed(prefix)
+                // }
+            
                 fn aliases() -> Self::Aliases {
                     #module_name::#aliases_struct_name::new()
                 }
@@ -331,6 +348,17 @@ impl ToTokens for NodeToken{
                             #___________errors: vec![],
                         }
                     }
+                
+                    pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
+                        let prefix: #crate_name::Valuex = prefix.into();
+                    
+                        Self {
+                           #( #schema_struct_fields_names_kv_prefixed) *
+                            #___________graph_traversal_string: prefix.build(),
+                            #___________bindings: prefix.get_bindings(),
+                            #___________errors: vec![],
+                        }
+                    }
 
                     pub fn empty() -> Self {
                         Self {
@@ -345,7 +373,7 @@ impl ToTokens for NodeToken{
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                         clause: impl Into<#crate_name::NodeClause>,
                     ) -> Self {
-                        let mut #schema_instance = Self::empty(); 
+                        let mut #schema_instance = Self::new(); 
                         let clause: #crate_name::NodeClause = clause.into();
                         let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
