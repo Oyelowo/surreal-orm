@@ -31,6 +31,7 @@ pub(crate) mod remove_token;
 pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
 pub(crate) mod sleep;
+pub(crate) mod subquery;
 pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
@@ -49,7 +50,7 @@ pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
 pub use delete::{delete, DeleteStatement};
 pub use for_::{for_, For, PermissionType};
-pub use ifelse::{if_, IfStatement};
+pub use ifelse::{if_, IfElseStatement};
 pub use info::{info_for, InfoStatement};
 pub use insert::{insert, InsertStatement, Insertables};
 pub use let_::{let_, LetStatement};
@@ -67,6 +68,7 @@ pub use select::{
     order, select, select_value, Order, Orderables, SelectStatement, Selectables, Splittables,
 };
 pub use sleep::{sleep, SleepStatement};
+pub use subquery::Subquery;
 pub use transaction::{begin_transaction, BeginTransactionStatement};
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};

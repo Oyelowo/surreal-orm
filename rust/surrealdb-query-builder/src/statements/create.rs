@@ -55,6 +55,7 @@ where
 
 /// Represents a CREATE SQL statement that can be executed. It implements various traits such as
 /// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
+#[derive(Debug, Clone)]
 pub struct CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,

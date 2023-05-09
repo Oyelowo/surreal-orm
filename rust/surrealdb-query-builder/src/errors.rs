@@ -57,6 +57,9 @@ pub enum SurrealdbOrmError {
 
     #[error("No record returned from {0}. Check that all fields in this table are selected.")]
     RecordNotFound(String),
+
+    #[error("Invalid subquery. {0}")]
+    InvalidSubquery(String),
 }
 
 pub type SurrealdbOrmResult<T> = std::result::Result<T, SurrealdbOrmError>;

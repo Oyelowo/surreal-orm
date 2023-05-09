@@ -136,6 +136,7 @@ where
 }
 
 /// Update statement builder
+#[derive(Debug, Clone)]
 pub struct UpdateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,

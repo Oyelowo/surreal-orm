@@ -8,7 +8,7 @@
 use std::ops::Deref;
 
 use crate::{
-    statements::{LetStatement, SelectStatement},
+    statements::{LetStatement, SelectStatement, Subquery},
     Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
     Param, Parametric, Setter, SurrealdbModel, Table,
 };
@@ -38,7 +38,7 @@ pub enum ClauseType {
     /// Stands for a WHERE clause e.g `WHERE id = 1`
     Where(Filter),
     /// Stands for a full Select statement
-    SelectStatement(SelectStatement),
+    Subquery(Subquery),
     /// Stands for a field e.g `person:oyelowo`. This is useful in a RELATE query.
     Id(sql::Thing),
     /// Stands for a parameter e.g `$name`
@@ -75,7 +75,8 @@ impl Buildable for Clause {
         };
 
         let clause = match self.kind.clone() {
-            ClauseType::SelectStatement(_q) => self.clone().query_string,
+            ClauseType::Subquery(subquery) => subquery.build(),
+            // ClauseType::SelectStatement(_q) => self.clone().query_string,
             ClauseType::Param(p) => p.build(),
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!("({}, {})", connection_name, edge_filters.build(),)
@@ -376,11 +377,17 @@ impl Clause {
                 bindings = vec![id_bindings];
                 param_string
             }
-            SelectStatement(select_statement) => {
-                bindings = select_statement.get_bindings();
-                errors = select_statement.get_errors();
-                format!("({})", select_statement.build().trim_end_matches(";"))
+            Subquery(subquery) => {
+                bindings = subquery.get_bindings();
+                errors = subquery.get_errors();
+                // format!("({})", subquery.build().trim_end_matches(";"))
+                subquery.build()
             }
+            // SelectStatement(select_statement) => {
+            //     bindings = select_statement.get_bindings();
+            //     errors = select_statement.get_errors();
+            //     format!("({})", select_statement.build().trim_end_matches(";"))
+            // }
             All => format!("[*]"),
             Last => format!("[$]"),
             Index(index) => {
@@ -467,18 +474,38 @@ impl From<Empty> for Clause {
     }
 }
 
-impl From<SelectStatement> for Clause {
-    fn from(value: SelectStatement) -> Self {
-        Self::new(ClauseType::SelectStatement(value))
+impl<T: Into<Subquery>> From<T> for Clause {
+    fn from(value: T) -> Self {
+        let value: Subquery = value.into();
+        Self::new(ClauseType::Subquery(value))
     }
 }
 
-impl From<&SelectStatement> for Clause {
-    fn from(value: &SelectStatement) -> Self {
-        // Self::Query(value.to_owned().into())
-        Self::new(ClauseType::SelectStatement(value.clone()))
-    }
-}
+// impl<T: Into<Subquery>> From<&T> for Clause {
+//     fn from(value: &T) -> Self {
+//         let value: Subquery = value.into();
+//         Self::new(ClauseType::Subquery(value))
+//     }
+// }
+// impl From<&SelectStatement> for Clause {
+//     fn from(value: &SelectStatement) -> Self {
+//         // Self::Query(value.to_owned().into())
+//         Self::new(ClauseType::SelectStatement(value.clone()))
+//     }
+// }
+
+// impl From<SelectStatement> for Clause {
+//     fn from(value: SelectStatement) -> Self {
+//         Self::new(ClauseType::SelectStatement(value))
+//     }
+// }
+//
+// impl From<&SelectStatement> for Clause {
+//     fn from(value: &SelectStatement) -> Self {
+//         // Self::Query(value.to_owned().into())
+//         Self::new(ClauseType::SelectStatement(value.clone()))
+//     }
+// }
 
 /// Use when you want no space. Also aliased as `E`.
 pub struct Empty;
@@ -712,7 +739,9 @@ mod test {
         let table = Table::new("students");
         let select_statement = select(All).from(table);
         let query_clause = Clause::from(select_statement);
-        assert_eq!(query_clause.build(), "(SELECT * FROM students)");
+        assert_eq!(query_clause.fine_tune_params(), "$_param_00000001");
+        assert_eq!(query_clause.get_bindings().len(), 1);
+        assert_eq!(query_clause.get_errors().len(), 0);
         assert_eq!(query_clause.to_raw().build(), "(SELECT * FROM students)");
     }
 
