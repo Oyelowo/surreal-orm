@@ -2,12 +2,12 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    Binding, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge, SurrealdbModel,
-    SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex, BindingsList,
+    Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge,
+    SurrealdbModel, SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex,
 };
 
 use super::{
-    CreateStatement, DeleteStatement, IfStatement, InsertStatement, RelateStatement,
+    CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
     SelectStatement, UpdateStatement,
 };
 
@@ -31,10 +31,10 @@ use super::{
 // }
 
 #[derive(Debug, Clone)]
-pub struct Subquery{
+pub struct Subquery {
     query_string: String,
     bindings: BindingsList,
-    errors: ErrorList
+    errors: ErrorList,
 }
 
 impl Buildable for Subquery {
@@ -55,9 +55,20 @@ impl Erroneous for Subquery {
     }
 }
 
-fn statement_str_to_subquery(statement: &str) -> Result<sql::Subquery, SurrealdbOrmError> {
-    let query = sql::parse(statement).unwrap();
-    let parsed_statement = query.0 .0.first().unwrap();
+fn statement_str_to_subquery(
+    statement: &str,
+) -> std::result::Result<sql::Subquery, SurrealdbOrmError> {
+    let query = sql::parse(statement).map_err(|err| {
+        SurrealdbOrmError::InvalidSubquery(format!("Problem parsing subquery. Error {err}"))
+    })?;
+    let parsed_statement = query
+        .0
+         .0
+        .first()
+        .ok_or(SurrealdbOrmError::InvalidSubquery(format!(
+            "Problem parsing subquery. No statement found."
+        )))?;
+
     let subquery = match parsed_statement {
         sql::Statement::Select(s) => sql::Subquery::Select(s.to_owned()),
         sql::Statement::Ifelse(s) => sql::Subquery::Ifelse(s.to_owned()),
@@ -74,22 +85,29 @@ fn statement_str_to_subquery(statement: &str) -> Result<sql::Subquery, Surrealdb
     Ok(subquery)
 }
 
+fn statement_to_subquery(statement: impl Buildable + Erroneous + Parametric) -> Subquery {
+    let mut errors = statement.get_errors();
+    let binding = statement_str_to_subquery(&statement.to_raw().build())
+        .map(|subquery| Binding::new(subquery))
+        .map_err(|err| errors.push(err.to_string()))
+        .unwrap_or(Binding::new("Invalid subquery!!!"));
+
+    Subquery {
+        query_string: binding.get_param_dollarised(),
+        bindings: vec![binding],
+        // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
+        // gathering the bindings from the subquery is not necessary.
+        // bindings: vec![binding]
+        //     .into_iter()
+        //     .chain(statement.get_bindings())
+        //     .collect(),
+        errors: statement.get_errors(),
+    }
+}
+
 impl From<SelectStatement> for Subquery {
     fn from(statement: SelectStatement) -> Self {
-        let subquery = statement_str_to_subquery(&statement.to_raw().build()).unwrap();
-        let binding = Binding::new(subquery);
-
-        Self{
-            query_string: binding.get_param_dollarised(),
-            bindings: vec![binding],
-                // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
-                // gathering the bindings from the subquery is not necessary.
-                // bindings: vec![binding]
-                //     .into_iter()
-                //     .chain(statement.get_bindings())
-                //     .collect(),
-                errors: statement.get_errors(),
-        }
+        statement_to_subquery(statement)
     }
 }
 
@@ -112,3 +130,53 @@ impl From<SelectStatement> for Subquery {
 //     }
 // }
 
+impl<T> From<CreateStatement<T>> for Subquery
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: CreateStatement<T>) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl<T> From<UpdateStatement<T>> for Subquery
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: UpdateStatement<T>) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl<T> From<DeleteStatement<T>> for Subquery
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl<T> From<RelateStatement<T>> for Subquery
+where
+    T: SurrealdbEdge + Serialize + DeserializeOwned,
+{
+    fn from(statement: RelateStatement<T>) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl<T> From<InsertStatement<T>> for Subquery
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: InsertStatement<T>) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl From<IfElseStatement> for Subquery {
+    fn from(statement: IfElseStatement) -> Self {
+        statement_to_subquery(statement)
+    }
+}

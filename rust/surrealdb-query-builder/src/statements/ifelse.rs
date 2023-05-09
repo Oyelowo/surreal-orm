@@ -138,8 +138,8 @@ impl ThenExpression {
         }
     }
 
-    pub fn end(self) -> End {
-        End {
+    pub fn end(self) -> IfElseStatement {
+        IfElseStatement {
             flow_data: self.flow_data,
             bindings: self.bindings,
         }
@@ -152,8 +152,8 @@ pub struct ElseIfStatement {
 }
 
 impl ElseStatement {
-    pub fn end(self) -> End {
-        End {
+    pub fn end(self) -> IfElseStatement {
+        IfElseStatement {
             flow_data: self.flow_data,
             bindings: self.bindings,
         }
@@ -255,19 +255,19 @@ impl IfStatement {
     }
 }
 
-pub struct End {
+pub struct IfElseStatement {
     flow_data: FlowStatementData,
     bindings: BindingsList,
 }
 
-impl Parametric for End {
+impl Parametric for IfElseStatement {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl Erroneous for End {}
-impl Buildable for End {
+impl Erroneous for IfElseStatement {}
+impl Buildable for IfElseStatement {
     fn build(&self) -> String {
         let mut output = String::new();
         output.push_str(&format!(
@@ -302,9 +302,9 @@ impl Buildable for End {
     }
 }
 
-impl Queryable for End {}
+impl Queryable for IfElseStatement {}
 
-impl fmt::Display for End {
+impl fmt::Display for IfElseStatement {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.build())
     }

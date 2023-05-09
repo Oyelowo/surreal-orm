@@ -50,7 +50,7 @@ pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
 pub use delete::{delete, DeleteStatement};
 pub use for_::{for_, For, PermissionType};
-pub use ifelse::{if_, IfStatement};
+pub use ifelse::{if_, IfElseStatement};
 pub use info::{info_for, InfoStatement};
 pub use insert::{insert, InsertStatement, Insertables};
 pub use let_::{let_, LetStatement};
