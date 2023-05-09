@@ -734,14 +734,16 @@ mod test {
         assert_eq!(id_clause.to_raw().build(), "student:oye");
     }
 
-    // #[test]
-    // fn test_display_clause_with_query() {
-    //     let table = Table::new("students");
-    //     let select_statement = select(All).from(table);
-    //     let query_clause = Clause::from(select_statement);
-    //     assert_eq!(query_clause.build(), "(SELECT * FROM students)");
-    //     assert_eq!(query_clause.to_raw().build(), "(SELECT * FROM students)");
-    // }
+    #[test]
+    fn test_display_clause_with_query() {
+        let table = Table::new("students");
+        let select_statement = select(All).from(table);
+        let query_clause = Clause::from(select_statement);
+        assert_eq!(query_clause.fine_tune_params(), "$_param_00000001");
+        assert_eq!(query_clause.get_bindings().len(), 1);
+        assert_eq!(query_clause.get_errors().len(), 0);
+        assert_eq!(query_clause.to_raw().build(), "(SELECT * FROM students)");
+    }
 
     #[test]
     fn test_display_clause_with_param() {
