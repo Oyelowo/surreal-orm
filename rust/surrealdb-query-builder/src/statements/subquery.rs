@@ -59,7 +59,7 @@ fn statement_str_to_subquery(
     statement: &str,
 ) -> std::result::Result<sql::Subquery, SurrealdbOrmError> {
     let query = sql::parse(statement).map_err(|err| {
-        SurrealdbOrmError::InvalidSubquery(format!("Problem parsing subquery. Error {err}"))
+        SurrealdbOrmError::InvalidSubquery(format!("Problem parsing subquery. Error: {err}"))
     })?;
     let parsed_statement = query
         .0
@@ -90,7 +90,7 @@ fn statement_to_subquery(statement: impl Buildable + Erroneous + Parametric) -> 
     let binding = statement_str_to_subquery(&statement.to_raw().build())
         .map(|subquery| Binding::new(subquery))
         .map_err(|err| errors.push(err.to_string()))
-        .unwrap_or(Binding::new("Invalid subquery!!!"));
+        .unwrap_or(Binding::new(errors.join(", ")));
 
     Subquery {
         query_string: binding.get_param_dollarised(),

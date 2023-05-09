@@ -38,6 +38,8 @@ use crate::{
     SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
 };
 
+use super::Subquery;
+
 /// Creates a new `Order` instance with the specified database field.
 ///
 /// To sort records, SurrealDB allows ordering on multiple fields and nested fields. Use the ORDER
@@ -229,7 +231,7 @@ pub enum TargettablesForSelect {
     SurrealId(sql::Thing),
     SurrealIds(Vec<sql::Thing>),
     // Should already be bound
-    SubQuery(SelectStatement),
+    Subquery(Subquery),
     Function(Function),
     RecordRange(Valuex),
 }
@@ -495,15 +497,9 @@ impl From<sql::Table> for TargettablesForSelect {
     }
 }
 
-impl From<&mut SelectStatement> for TargettablesForSelect {
-    fn from(value: &mut SelectStatement) -> Self {
-        Self::SubQuery(value.clone())
-    }
-}
-
-impl From<SelectStatement> for TargettablesForSelect {
-    fn from(value: SelectStatement) -> Self {
-        Self::SubQuery(value.clone())
+impl<T: Into<Subquery>> From<T> for TargettablesForSelect {
+    fn from(value: T) -> Self {
+        Self::Subquery(value.into())
     }
 }
 
@@ -891,7 +887,7 @@ impl SelectStatement {
                 .map(|t| t.to_string())
                 .collect::<Vec<_>>(),
             // Should already be bound
-            TargettablesForSelect::SubQuery(query) => {
+            TargettablesForSelect::Subquery(query) => {
                 targets_bindings.extend(query.get_bindings());
                 vec![query.build()]
             }
