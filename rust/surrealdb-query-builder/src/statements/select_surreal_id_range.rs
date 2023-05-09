@@ -5,6 +5,8 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Bound;
+
 use crate::{
     statements::select::TargettablesForSelect, Binding, SurrealId, SurrealSimpleId, SurrealUlid,
     SurrealUuid, SurrealdbModel, Valuex,
@@ -17,19 +19,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeInclusive<SurrealId<T, V>>) -> Self {
-        let start = range.start();
-        let end = range.end();
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!(
-            "{table}:{}..={}",
-            start_binding.get_param_dollarised(),
-            end_binding.get_param_dollarised()
-        );
+        // e.g user:1..=5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start().to_thing().id),
+            end: Bound::Included(range.end().to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding, end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -40,13 +39,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeFrom<SurrealId<T, V>>) -> Self {
-        let start = range.start;
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let build = format!("{table}:{}..", start_binding.get_param_dollarised());
+        // e.g user:1..
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start.to_thing().id),
+            end: Bound::Unbounded,
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -57,13 +59,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeTo<SurrealId<T, V>>) -> Self {
-        let end = range.end;
-        let table = T::table_name();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!("{table}:..{}", end_binding.get_param_dollarised());
+        // e.g user:..5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Unbounded,
+            end: Bound::Excluded(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -74,13 +79,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeToInclusive<SurrealId<T, V>>) -> Self {
-        let end = range.end;
-        let table = T::table_name();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!("{table}:..={}", end_binding.get_param_dollarised());
+        // e.g user:..=5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Unbounded,
+            end: Bound::Included(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -91,19 +99,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::Range<SurrealId<T, V>>) -> Self {
-        let start = range.start;
-        let end = range.end;
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!(
-            "{table}:{}..{}",
-            start_binding.get_param_dollarised(),
-            end_binding.get_param_dollarised()
-        );
+        // e.g user:1..5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start.to_thing().id),
+            end: Bound::Excluded(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding, end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -114,19 +119,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeInclusive<&SurrealId<T, V>>) -> Self {
-        let start = range.start();
-        let end = range.end();
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!(
-            "{table}:{}..={}",
-            start_binding.get_param_dollarised(),
-            end_binding.get_param_dollarised()
-        );
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start().to_thing().id),
+            end: Bound::Included(range.end().to_thing().id),
+        };
+        let binding = Binding::new(range);
+
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding, end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -137,13 +139,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeFrom<&SurrealId<T, V>>) -> Self {
-        let start = range.start;
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let build = format!("{table}:{}..", start_binding.get_param_dollarised());
+        // e.g user:1..
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start.to_thing().id),
+            end: Bound::Unbounded,
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -154,13 +159,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeTo<&SurrealId<T, V>>) -> Self {
-        let end = range.end;
-        let table = T::table_name();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!("{table}:..{}", end_binding.get_param_dollarised());
+        // e.g user:..5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Unbounded,
+            end: Bound::Excluded(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -171,13 +179,16 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeToInclusive<&SurrealId<T, V>>) -> Self {
-        let end = range.end;
-        let table = T::table_name();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!("{table}:..={}", end_binding.get_param_dollarised());
+        // e.g user:..=5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Unbounded,
+            end: Bound::Included(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
@@ -188,22 +199,20 @@ where
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::Range<&SurrealId<T, V>>) -> Self {
-        let start = range.start;
-        let end = range.end;
-        let table = T::table_name();
-        let start_binding = Binding::new(start.to_thing().id).as_raw();
-        let end_binding = Binding::new(end.to_thing().id).as_raw();
-        let build = format!(
-            "{table}:{}..{}",
-            start_binding.get_param_dollarised(),
-            end_binding.get_param_dollarised()
-        );
+        // e.g user:1..5
+        let range = sql::Range {
+            tb: T::table_name().to_string(),
+            beg: Bound::Included(range.start.to_thing().id),
+            end: Bound::Excluded(range.end.to_thing().id),
+        };
+        let binding = Binding::new(range);
         TargettablesForSelect::RecordRange(Valuex {
-            string: build,
-            bindings: vec![start_binding, end_binding],
+            string: binding.get_param_dollarised(),
+            bindings: vec![binding],
         })
     }
 }
+
 //////////////////////////////////////////
 macro_rules! create_range {
     ($id_type:ident) => {
@@ -212,19 +221,16 @@ macro_rules! create_range {
             T: SurrealdbModel,
         {
             fn from(range: std::ops::RangeInclusive<$id_type<T>>) -> Self {
-                let start = range.start();
-                let end = range.end();
-                let table = T::table_name();
-                let start_binding = Binding::new(start.to_thing().id).as_raw();
-                let end_binding = Binding::new(end.to_thing().id).as_raw();
-                let build = format!(
-                    "{table}:{}..={}",
-                    start_binding.get_param_dollarised(),
-                    end_binding.get_param_dollarised()
-                );
+                // e.g user:1..=5
+                let range = sql::Range {
+                    tb: T::table_name().to_string(),
+                    beg: Bound::Included(range.start().to_thing().id),
+                    end: Bound::Included(range.end().to_thing().id),
+                };
+                let binding = Binding::new(range);
                 TargettablesForSelect::RecordRange(Valuex {
-                    string: build,
-                    bindings: vec![start_binding, end_binding],
+                    string: binding.get_param_dollarised(),
+                    bindings: vec![binding],
                 })
             }
         }
@@ -234,13 +240,16 @@ macro_rules! create_range {
             T: SurrealdbModel,
         {
             fn from(range: std::ops::RangeFrom<$id_type<T>>) -> Self {
-                let start = range.start;
-                let table = T::table_name();
-                let start_binding = Binding::new(start.to_thing().id).as_raw();
-                let build = format!("{table}:{}..", start_binding.get_param_dollarised());
+                // e.g user:1..
+                let range = sql::Range {
+                    tb: T::table_name().to_string(),
+                    beg: Bound::Included(range.start.to_thing().id),
+                    end: Bound::Unbounded,
+                };
+                let binding = Binding::new(range);
                 TargettablesForSelect::RecordRange(Valuex {
-                    string: build,
-                    bindings: vec![start_binding],
+                    string: binding.get_param_dollarised(),
+                    bindings: vec![binding],
                 })
             }
         }
@@ -250,13 +259,16 @@ macro_rules! create_range {
             T: SurrealdbModel,
         {
             fn from(range: std::ops::RangeTo<$id_type<T>>) -> Self {
-                let end = range.end;
-                let table = T::table_name();
-                let end_binding = Binding::new(end.to_thing().id).as_raw();
-                let build = format!("{table}:..{}", end_binding.get_param_dollarised());
+                // e.g user:..5
+                let range = sql::Range {
+                    tb: T::table_name().to_string(),
+                    beg: Bound::Unbounded,
+                    end: Bound::Excluded(range.end.to_thing().id),
+                };
+                let binding = Binding::new(range);
                 TargettablesForSelect::RecordRange(Valuex {
-                    string: build,
-                    bindings: vec![end_binding],
+                    string: binding.get_param_dollarised(),
+                    bindings: vec![binding],
                 })
             }
         }
@@ -266,13 +278,16 @@ macro_rules! create_range {
             T: SurrealdbModel,
         {
             fn from(range: std::ops::RangeToInclusive<$id_type<T>>) -> Self {
-                let end = range.end;
-                let table = T::table_name();
-                let end_binding = Binding::new(end.to_thing().id).as_raw();
-                let build = format!("{table}:..={}", end_binding.get_param_dollarised());
+                // e.g user:..=5
+                let range = sql::Range {
+                    tb: T::table_name().to_string(),
+                    beg: Bound::Unbounded,
+                    end: Bound::Included(range.end.to_thing().id),
+                };
+                let binding = Binding::new(range);
                 TargettablesForSelect::RecordRange(Valuex {
-                    string: build,
-                    bindings: vec![end_binding],
+                    string: binding.get_param_dollarised(),
+                    bindings: vec![binding],
                 })
             }
         }
@@ -282,19 +297,16 @@ macro_rules! create_range {
             T: SurrealdbModel,
         {
             fn from(range: std::ops::Range<$id_type<T>>) -> Self {
-                let start = range.start;
-                let end = range.end;
-                let table = T::table_name();
-                let start_binding = Binding::new(start.to_thing().id).as_raw();
-                let end_binding = Binding::new(end.to_thing().id).as_raw();
-                let build = format!(
-                    "{table}:{}..{}",
-                    start_binding.get_param_dollarised(),
-                    end_binding.get_param_dollarised()
-                );
+                // e.g user:1..5
+                let range = sql::Range {
+                    tb: T::table_name().to_string(),
+                    beg: Bound::Included(range.start.to_thing().id),
+                    end: Bound::Excluded(range.end.to_thing().id),
+                };
+                let binding = Binding::new(range);
                 TargettablesForSelect::RecordRange(Valuex {
-                    string: build,
-                    bindings: vec![start_binding, end_binding],
+                    string: binding.get_param_dollarised(),
+                    bindings: vec![binding],
                 })
             }
         }
