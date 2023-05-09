@@ -31,6 +31,7 @@ pub(crate) mod remove_token;
 pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
 pub(crate) mod sleep;
+pub(crate) mod subquery;
 pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
@@ -67,6 +68,7 @@ pub use select::{
     order, select, select_value, Order, Orderables, SelectStatement, Selectables, Splittables,
 };
 pub use sleep::{sleep, SleepStatement};
+pub use subquery::Subquery;
 pub use transaction::{begin_transaction, BeginTransactionStatement};
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};

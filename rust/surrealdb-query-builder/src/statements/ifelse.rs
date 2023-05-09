@@ -225,6 +225,7 @@ impl ElseIfStatement {
 }
 
 /// if flow builder
+#[derive(Debug, Clone)]
 pub struct IfStatement {
     condition: Filter,
 }

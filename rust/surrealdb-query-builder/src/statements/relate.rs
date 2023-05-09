@@ -54,13 +54,13 @@ use crate::{
 /// ).content(write)
 /// // Generates e.g RELATE (select * from student)->writes->(select * from book) CONTENT {...}
 /// ```
-pub fn relate<T>(connection: impl std::fmt::Display + Parametric + Erroneous) -> RelateStatement<T>
+pub fn relate<T>(connection: impl Buildable + Parametric + Erroneous) -> RelateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbEdge,
 {
     let errors = connection.get_errors();
     RelateStatement {
-        relation: connection.to_string(),
+        relation: connection.build(),
         content_param: None,
         set: vec![],
         return_type: None,

@@ -219,6 +219,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     let company_schema::Company { users, .. } = Company::schema();
 
     // select users from company
+    // let from_statement = select(All).from(codebreather.id);
     let from_statement = select_value(users).from(codebreather.id);
     // select devs
     let devs_statement = select(All)
@@ -234,25 +235,25 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
             .like__(Empty)
             .user(devs_statement),
     )
-    .set(updater(time.connected).equal(sql::Datetime(dt)));
+    .set(time.connected.equal(sql::Datetime(dt)));
 
     assert_eq!(relation.get_errors().len(), 0);
+    assert_eq!(
+        relation.fine_tune_params(),
+        "RELATE $_param_00000001->like->$_param_00000002 SET time.connected = $_param_00000003 ;"
+    );
+    assert_eq!(relation.to_raw().build().len(), 167);
 
-    // Variable binding and deserialaization not yet working properly.
-    // TODO: Fix this. It should be possible to bind variables to the relation
-    // with subqueries and then deserialize the result.
-    // The problem is that the variable binding is not being deserialized properly
-    // so i cannot use the return methods for now. I am turning it back into
-    // a raw query for now.
-    relation.to_raw().run(db.clone()).await?;
-    // Expected
-    // let result = relation.return_many(db.clone()).await?;
+    let result = relation.return_many(db.clone()).await?;
+    assert_eq!(result.len(), 22);
+    assert_eq!(result[0].time.connected, dt);
 
     let result = select(All)
         .from(CompanyLikeUser::table_name())
         .return_many::<CompanyLikeUser>(db.clone())
         .await?;
     assert_eq!(result.len(), 22);
+    assert_eq!(result[0].time.connected, dt);
 
     Ok(())
 }
@@ -470,10 +471,11 @@ async fn relate_query_with_sub_query() -> surrealdb_orm::SurrealdbOrmResult<()> 
     .content(write.clone());
 
     assert_eq!(statement.get_errors().len(), 0);
-    assert_eq!(statement.get_bindings().len(), 1);
+    assert_eq!(statement.get_bindings().len(), 3);
     assert_eq!(
         statement.fine_tune_params(),
-        "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT $_param_00000001 ;"
+        // "RELATE (SELECT * FROM student)->writes->(SELECT * FROM book) CONTENT $_param_00000001 ;"
+        "RELATE $_param_00000001->writes->$_param_00000002 CONTENT $_param_00000003 ;"
     );
     let write_id = write.get_id();
     assert_eq!(
