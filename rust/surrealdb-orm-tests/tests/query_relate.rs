@@ -12,8 +12,8 @@ use std::time::Duration;
 use surrealdb::sql;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{
-    company_schema, user_schema, writes_schema, AlienVisitsPlanet, Blog, Book, Company,
-    CompanyLikeUser, Student, StudentLiksBook, StudentWritesBlog, StudentWritesBook, User,
+    company_schema, like_schema, user_schema, writes_schema, AlienVisitsPlanet, Blog, Book,
+    Company, CompanyLikeUser, Student, StudentLiksBook, StudentWritesBlog, StudentWritesBook, User,
 };
 use surrealdb_orm::statements::{create, insert, order, relate, select, select_value};
 use surrealdb_orm::*;
@@ -184,76 +184,91 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     let generated_developers = (0..10)
         .into_iter()
         .map(|i| {
+            // roll through developer, designer, manager, etc
+            let tags = match i % 4 {
+                0 => vec!["developer".to_string()],
+                1 => vec!["designer".to_string()],
+                2 => vec!["manager".to_string()],
+                _ => vec!["developer".to_string()],
+            };
             let user = User {
+                id: User::create_id(format!("user{}", i)),
                 name: format!("user{}", i),
-                tags: vec!["developer".to_string()],
+                tags,
                 ..Default::default()
             };
             user
         })
         .collect::<Vec<_>>();
 
-    let oyelowo = User {
-        id: User::create_simple_id(),
+    let _ = create(User {
+        id: User::create_id("oyelowo".to_string()),
         name: "oyelowo".to_string(),
         tags: vec!["developer".to_string()],
         ..Default::default()
-    };
-    let _ = create(oyelowo).return_one(db.clone()).await;
+    })
+    .run(db.clone())
+    .await;
+
     let devs = insert(generated_developers).return_many(db.clone()).await?;
     let sample = devs.into_iter().take(2).collect::<Vec<_>>();
 
     // Create company
-    let codebreather_coy = Company {
+    let codebreather = create(Company {
         id: Company::create_simple_id(),
         name: "codebreather".to_string(),
-        users: LinkMany::from(sample),
+        users: LinkMany::from(sample.clone()),
         ..Default::default()
-    };
-    let codebreather = create(codebreather_coy)
-        .return_one(db.clone())
-        .await?
-        .unwrap();
+    })
+    .get_one(db.clone())
+    .await?;
 
-    let user_schema::User { tags, .. } = User::schema();
+    let user_schema::User { tags, id, .. } = User::schema();
     let company_schema::Company { users, .. } = Company::schema();
+    let like_schema::Like { in_, .. } = CompanyLikeUser::schema();
 
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
-    let from_statement = select_value(users).from(codebreather.id);
+    // We use select value to pull out the nested users field to only give the list of userids
+    // to make this work
+    let from_statement = select_value(&users).from(codebreather.id);
     // select devs
     let devs_statement = select(All)
         .from(User::table_name())
-        .where_(tags.contains("developer"));
+        .where_(tags.contains("developer"))
+        .order_by(order(id).desc());
 
     let time = CompanyLikeUser::schema().time();
     let dt = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(61, 0).unwrap(), Utc);
 
     // Relate fromstate -> like-> devs
-    let relation = relate::<CompanyLikeUser>(
-        Company::with(from_statement)
-            .like__(Empty)
-            .user(devs_statement),
-    )
-    .set(time.connected.equal(sql::Datetime(dt)));
+    let relation =
+        relate::<CompanyLikeUser>(Company::with(from_statement).like__(E).user(devs_statement))
+            .set(time.connected.equal(sql::Datetime(dt)));
+    let result = relation.return_many(db.clone()).await?;
 
     assert_eq!(relation.get_errors().len(), 0);
     assert_eq!(
         relation.fine_tune_params(),
         "RELATE $_param_00000001->like->$_param_00000002 SET time.connected = $_param_00000003 ;"
     );
-    assert_eq!(relation.to_raw().build().len(), 167);
-
-    let result = relation.return_many(db.clone()).await?;
-    assert_eq!(result.len(), 22);
+    assert_eq!(relation.to_raw().build().len(), 184);
+    assert_eq!(result.len(), 12);
     assert_eq!(result[0].time.connected, dt);
 
     let result = select(All)
         .from(CompanyLikeUser::table_name())
+        .order_by(order(in_).desc())
+        // .order_by(order(time.connected).desc())
         .return_many::<CompanyLikeUser>(db.clone())
         .await?;
-    assert_eq!(result.len(), 22);
+    assert_eq!(result.len(), 12);
     assert_eq!(result[0].time.connected, dt);
+    assert_eq!(result[0].in_.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[1].in_.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[2].in_.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[5].in_.get_id().unwrap().to_string(), "user:user1");
+    assert_eq!(result[6].in_.get_id().unwrap().to_string(), "user:user0");
 
     Ok(())
 }
