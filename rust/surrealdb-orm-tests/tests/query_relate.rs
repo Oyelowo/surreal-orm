@@ -246,7 +246,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     // a raw query for now.
     relation.to_raw().run(db.clone()).await?;
     // Expected
-    // let result = relation.return_many().run(db.clone()).await?;
+    // let result = relation.return_many(db.clone()).await?;
 
     let result = select(All)
         .from(CompanyLikeUser::table_name())
