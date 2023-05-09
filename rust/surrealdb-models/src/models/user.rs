@@ -1,18 +1,32 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SurrealSimpleId, SurrealdbEdge, SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, SurrealId, SurrealSimpleId, SurrealdbEdge, SurrealdbModel,
+    SurrealdbNode, SurrealdbObject,
 };
 
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "user")]
 pub struct User {
-    pub id: SurrealSimpleId<Self>,
+    pub id: SurrealId<Self, String>,
     pub name: String,
     pub created: DateTime<Utc>,
     pub company: String,
     pub tags: Vec<String>,
+}
+
+impl Default for User {
+    fn default() -> Self {
+        Self {
+            id: User::create_id(sql::Id::rand().to_string()),
+            name: Default::default(),
+            created: Default::default(),
+            company: Default::default(),
+            tags: Default::default(),
+        }
+    }
 }
 
 #[derive(SurrealdbEdge, Serialize, Deserialize, Debug, Clone, Default)]
