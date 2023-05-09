@@ -36,8 +36,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
         .await?;
 
     let accounts = select(All)
-        .from(Account::table_name())
-        // .from(id1..=id2)
+        .from(id1..=id2)
         .return_many::<Account>(db.clone())
         .await?;
 
