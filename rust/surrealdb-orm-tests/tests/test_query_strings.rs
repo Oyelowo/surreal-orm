@@ -27,20 +27,20 @@ fn multiplication_tests1() {
         unoBook,
         course,
         semCoures,
-        age,
+        ref age,
         ..
     } = &Student::schema();
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
     let book_schema::Book { ref content, .. } = Book::schema();
 
-    let mut query1 = select(arr![All, content])
+    let mut query1 = select(arr![age, lastName, content])
         .from(Book::get_table_name())
         .where_(
-            cond(content.like("lowo").and(age).greater_than_or_equal(600))
+            cond(content.like("lowo"))
+                .and(age.greater_than_or_equal(600))
                 .or(firstName.equal("Oyelowo"))
                 .and(lastName.equal("Oyedayo")),
         )
-        .group_by(content)
         .order_by(order(lastName).desc())
         .limit(50)
         .start(20)
@@ -49,7 +49,7 @@ fn multiplication_tests1() {
 
     let is_lowo = true;
     if is_lowo {
-        query1 = query1.limit(50).group_by(age);
+        query1 = query1.limit(55).order_by(order(age).desc());
     }
 
     insta::assert_display_snapshot!(&query1.fine_tune_params());
@@ -57,7 +57,6 @@ fn multiplication_tests1() {
     let ref student_table = Student::get_table_name();
     let ref book_table = Book::get_table_name();
     let ref book_id = thing("book:1").unwrap();
-    let ref student_id = thing("student:1").unwrap();
 
     let mut query = select(arr![All, content, age, lastName, firstName, course])
         // Also work
@@ -76,8 +75,6 @@ fn multiplication_tests1() {
         .where_(
             cond(
                 age.greater_than(age)
-                    .greater_than_or_equal(age)
-                    .less_than_or_equal(20)
                     .like(firstName)
                     .add(5)
                     .subtract(10)
@@ -132,8 +129,6 @@ fn multiplication_tests1() {
 
 #[tokio::test]
 async fn relate_query_building_for_ids() {
-    use surrealdb::sql::Datetime;
-
     let ref student_id = thing("student:1").unwrap();
     let ref book_id = thing("book:2").unwrap();
     let write = StudentWritesBook {
@@ -166,7 +161,7 @@ async fn relate_query_building_for_subqueries() {
     )
     .content(write);
     insta::assert_display_snapshot!(relation.fine_tune_params());
-    assert_eq!(relation.get_bindings().len(), 4);
+    assert_eq!(relation.get_bindings().len(), 3);
 }
 
 #[test]

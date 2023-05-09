@@ -1,6 +1,0 @@
----
-source: surrealdb-orm-tests/tests/test_query_strings.rs
-assertion_line: 385
-expression: "&query.to_raw().build()"
----
-SELECT *, content FROM student, student, book, student, book, book:1, "Invalid subquery. Problem parsing subquery. Error: Found 'age' in GROUP BY clause on line 1, but field is not present in SELECT expression" WHERE (age > age >= age <= 20 ~ firstName + 5 - 10 AND unoBook OR age) AND (bestFriend == 'Oyelowo') OR (firstName = 'Oyedayo') AND (age >= 150) SPLIT lastName, firstName, firstName, semCoures, firstName, semCoures GROUP BY course, firstName, lastName, unoBook, lowo, lastName, unoBook, lowo, age, bestFriend, dayo ORDER BY firstName RAND() DESC, lastName COLLATE ASC, id NUMERIC DESC, id NUMERIC DESC, id NUMERIC DESC, firstName  DESC, id NUMERIC DESC, firstName  DESC LIMIT 400 START AT 5 FETCH firstName, lastName, age, unoBook, age, unoBook TIMEOUT 8s PARALLEL;
