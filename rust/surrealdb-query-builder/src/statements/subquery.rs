@@ -3,7 +3,7 @@ use surrealdb::sql;
 
 use crate::{
     Binding, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge, SurrealdbModel,
-    SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex,
+    SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex, BindingsList,
 };
 
 use super::{
@@ -31,24 +31,27 @@ use super::{
 // }
 
 #[derive(Debug, Clone)]
-pub struct Subquery(Valuex);
+pub struct Subquery{
+    query_string: String,
+    bindings: BindingsList,
+    errors: ErrorList
+}
 
 impl Buildable for Subquery {
     fn build(&self) -> String {
-        self.0.string.to_owned()
+        self.query_string.to_owned()
     }
 }
 
 impl Parametric for Subquery {
     fn get_bindings(&self) -> Vec<Binding> {
-        self.0.bindings.to_owned()
+        self.bindings.to_owned()
     }
 }
 
 impl Erroneous for Subquery {
     fn get_errors(&self) -> ErrorList {
-        // self.0.get.to_owned()
-        vec![]
+        self.errors.to_owned()
     }
 }
 
@@ -76,16 +79,17 @@ impl From<SelectStatement> for Subquery {
         let subquery = statement_str_to_subquery(&statement.to_raw().build()).unwrap();
         let binding = Binding::new(subquery);
 
-        Self(Valuex {
-            string: binding.get_param_dollarised(),
-            bindings: vec![binding]
-            // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
-            // gathering the bindings from the subquery is not necessary.
-            // bindings: vec![binding]
-            //     .into_iter()
-            //     .chain(statement.get_bindings())
-            //     .collect(),
-        })
+        Self{
+            query_string: binding.get_param_dollarised(),
+            bindings: vec![binding],
+                // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
+                // gathering the bindings from the subquery is not necessary.
+                // bindings: vec![binding]
+                //     .into_iter()
+                //     .chain(statement.get_bindings())
+                //     .collect(),
+                errors: statement.get_errors(),
+        }
     }
 }
 
@@ -108,51 +112,3 @@ impl From<SelectStatement> for Subquery {
 //     }
 // }
 
-// impl From
-
-//
-// strup    // Ifelse(IfelseStatement),
-//     // Output(OutputStatement),
-//     // Select(SelectStatement),
-//     // Create(CreateStatement),
-//     // Update(UpdateStatement),
-//     // Delete(DeleteStatement),
-//     // Relate(RelateStatement),
-//     // Insert(InsertStatement),
-//     // let subquery2 = sql::parse("SELECT * FROM user WHERE tags CONTAINS 'rust'").unwrap();
-//     let subquery2 = sql::parse("SELECT * FROM user WHERE tags CONTAINS $p2").unwrap();
-//     let subquery2 = subquery2.0 .0.first().unwrap();
-//     let q2 = match subquery2 {
-//         sql::Statement::Select(s) => Some(Subquery::Select(s.to_owned())),
-//         sql::Statement::Ifelse(s) => Some(Subquery::Ifelse(s.to_owned())),
-//         sql::Statement::Create(s) => Some(Subquery::Create(s.to_owned())),
-//         sql::Statement::Relate(s) => Some(Subquery::Relate(s.to_owned())),
-//         sql::Statement::Insert(s) => Some(Subquery::Insert(s.to_owned())),
-//         sql::Statement::Update(s) => Some(Subquery::Update(s.to_owned())),
-//         sql::Statement::Output(s) => Some(Subquery::Output(s.to_owned())),
-//         sql::Statement::Delete(s) => Some(Subquery::Delete(s.to_owned())),
-//         // sql::Statement::Relate(s) => Some(Subquery::Relate(s.to_owned())),
-//         _=> None
-//     };    // Ifelse(IfelseStatement),
-//     // Output(OutputStatement),
-//     // Select(SelectStatement),
-//     // Create(CreateStatement),
-//     // Update(UpdateStatement),
-//     // Delete(DeleteStatement),
-//     // Relate(RelateStatement),
-//     // Insert(InsertStatement),
-//     // let subquery2 = sql::parse("SELECT * FROM user WHERE tags CONTAINS 'rust'").unwrap();
-//     let subquery2 = sql::parse("SELECT * FROM user WHERE tags CONTAINS $p2").unwrap();
-//     let subquery2 = subquery2.0 .0.first().unwrap();
-//     let q2 = match subquery2 {
-//         sql::Statement::Select(s) => Some(Subquery::Select(s.to_owned())),
-//         sql::Statement::Ifelse(s) => Some(Subquery::Ifelse(s.to_owned())),
-//         sql::Statement::Create(s) => Some(Subquery::Create(s.to_owned())),
-//         sql::Statement::Relate(s) => Some(Subquery::Relate(s.to_owned())),
-//         sql::Statement::Insert(s) => Some(Subquery::Insert(s.to_owned())),
-//         sql::Statement::Update(s) => Some(Subquery::Update(s.to_owned())),
-//         sql::Statement::Output(s) => Some(Subquery::Output(s.to_owned())),
-//         sql::Statement::Delete(s) => Some(Subquery::Delete(s.to_owned())),
-//         // sql::Statement::Relate(s) => Some(Subquery::Relate(s.to_owned())),
-//         _=> None
-//     };
