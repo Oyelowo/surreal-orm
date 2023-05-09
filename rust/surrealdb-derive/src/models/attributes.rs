@@ -13,7 +13,6 @@ use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use surrealdb_query_builder::FieldType;
 use syn::{Ident, Lit, LitStr, Path, Type};
-
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name, parse_lit_to_tokenstream,

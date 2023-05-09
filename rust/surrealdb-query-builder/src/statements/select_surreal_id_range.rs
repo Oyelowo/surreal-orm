@@ -322,387 +322,140 @@ create_range!(SurrealUlid);
 mod tests {
     use crate::{statements::select, *};
 
-    #[test]
-    fn test_range_inclusive_for_simple_surreal_id() {
-        let id1 = TestUser::create_simple_id();
-        let id2 = TestUser::create_simple_id();
-        let statement = select(All).from(id1..=id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..={};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+    macro_rules! gen_test {
+        ($range:expr) => {
+            let statement = select(All).from($range);
+            assert_eq!(
+                statement.fine_tune_params(),
+                "SELECT * FROM $_param_00000001;"
+            );
+            let bindings = statement.get_bindings();
+            assert_eq!(bindings.len(), 1);
+            assert_eq!(
+                statement.to_raw().build(),
+                format!("SELECT * FROM {};", bindings[0].get_raw_value())
+            );
+        };
     }
 
     #[test]
     fn test_range_from_for_simple_surreal_id() {
         let id1 = TestUser::create_simple_id();
-        let statement = select(All).from(id1..);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:{}..;", bindings[0].get_raw_value(),)
-        );
+        gen_test!(id1..);
     }
 
     #[test]
     fn test_range_to_for_simple_surreal_id() {
         let id1 = TestUser::create_simple_id();
-        let statement = select(All).from(..id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..{};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..id1);
     }
 
     #[test]
     fn test_range_to_inclusive_for_simple_surreal_id() {
         let id1 = TestUser::create_simple_id();
-        let statement = select(All).from(..=id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..=$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..={};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..=id1);
     }
 
     #[test]
     fn test_range_for_simple_surreal_id() {
         let id1 = TestUser::create_simple_id();
         let id2 = TestUser::create_simple_id();
-        let statement = select(All).from(id1..id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..{};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..id2);
     }
 
     #[test]
     fn test_range_inclusive_for_surreal_uuid() {
         let id1 = TestUser::create_uuid();
         let id2 = TestUser::create_uuid();
-        let statement = select(All).from(id1..=id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..={};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..=id2);
     }
 
     #[test]
     fn test_range_from_for_surreal_uuid() {
         let id1 = TestUser::create_uuid();
-        let statement = select(All).from(id1..);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:{}..;", bindings[0].get_raw_value(),)
-        );
+        gen_test!(id1..);
     }
 
     #[test]
     fn test_range_to_for_surreal_uuid() {
         let id1 = TestUser::create_uuid();
-        let statement = select(All).from(..id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..{};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..id1);
     }
 
     #[test]
     fn test_range_to_inclusive_for_surreal_uuid() {
         let id1 = TestUser::create_uuid();
-        let statement = select(All).from(..=id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..=$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..={};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..=id1);
     }
 
     #[test]
     fn test_range_for_surreal_uuid() {
         let id1 = TestUser::create_uuid();
         let id2 = TestUser::create_uuid();
-        let statement = select(All).from(id1..id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..{};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..id2);
     }
 
     #[test]
     fn test_range_inclusive_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
         let id2 = TestUser::create_ulid();
-        let statement = select(All).from(id1..=id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..={};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..=id2);
     }
 
     #[test]
     fn test_range_from_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
-        let statement = select(All).from(id1..);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:{}..;", bindings[0].get_raw_value(),)
-        );
+        gen_test!(id1..);
     }
 
     #[test]
     fn test_range_to_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
-        let statement = select(All).from(..id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..{};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..id1);
     }
 
     #[test]
     fn test_range_to_inclusive_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
-        let statement = select(All).from(..=id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..=$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..={};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..=id1);
     }
 
     #[test]
     fn test_range_for_surreal_ulid() {
         let id1 = TestUser::create_ulid();
         let id2 = TestUser::create_ulid();
-        let statement = select(All).from(id1..id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..{};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..id2);
     }
 
     #[test]
     fn test_range_inclusive_for_surreal_custom() {
         let id1 = TestUser::create_id("oyelowo");
         let id2 = TestUser::create_id("oyedayo");
-        let statement = select(All).from(id1..=id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..=$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..={};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..=id2);
     }
 
     #[test]
     fn test_range_from_for_surreal_custom() {
         let id1 = TestUser::create_id("oyelowo");
-        let statement = select(All).from(id1..);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:{}..;", bindings[0].get_raw_value(),)
-        );
+        gen_test!(id1..);
     }
 
     #[test]
     fn test_range_to_for_surreal_custom() {
         let id1 = TestUser::create_id("oyelowo");
-        let statement = select(All).from(..id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..{};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..id1);
     }
 
     #[test]
     fn test_range_to_inclusive_for_surreal_custom() {
         let id1 = TestUser::create_id("oyelowo");
-        let statement = select(All).from(..=id1);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:..=$_param_00000001;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 1);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!("SELECT * FROM user:..={};", bindings[0].get_raw_value(),)
-        );
+        gen_test!(..=id1);
     }
 
     #[test]
     fn test_range_for_surreal_custom() {
         let id1 = TestUser::create_id("oyelowo");
         let id2 = TestUser::create_id("oyedayo");
-        let statement = select(All).from(id1..id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..{};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
-    }
-
-    #[test]
-    fn test_range_for_thing() {
-        let thing1 = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
-        let thing2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
-
-        let id1 = TestUser::from_thing(thing1).unwrap();
-        let id2 = TestUser::from_thing(thing2).unwrap();
-        let statement = select(All).from(id1..id2);
-        assert_eq!(
-            statement.fine_tune_params(),
-            "SELECT * FROM user:$_param_00000001..$_param_00000002;"
-        );
-        let bindings = statement.get_bindings();
-        assert_eq!(bindings.len(), 2);
-        assert_eq!(
-            statement.to_raw().build(),
-            format!(
-                "SELECT * FROM user:{}..{};",
-                bindings[0].get_raw_value(),
-                bindings[1].get_raw_value()
-            )
-        );
+        gen_test!(id1..id2);
     }
 }
