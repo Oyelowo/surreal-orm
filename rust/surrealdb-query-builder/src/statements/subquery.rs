@@ -79,9 +79,12 @@ impl From<SelectStatement> for Subquery {
         Self(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding]
-                .into_iter()
-                .chain(statement.get_bindings())
-                .collect(),
+            // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
+            // gathering the bindings from the subquery is not necessary.
+            // bindings: vec![binding]
+            //     .into_iter()
+            //     .chain(statement.get_bindings())
+            //     .collect(),
         })
     }
 }

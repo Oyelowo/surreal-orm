@@ -435,7 +435,7 @@ async fn relate_query_building_for_subqueries() {
     )
     .content(write);
     insta::assert_display_snapshot!(relation.fine_tune_params());
-    assert_eq!(relation.get_bindings().len(), 2);
+    assert_eq!(relation.get_bindings().len(), 3);
 }
 
 #[test]
