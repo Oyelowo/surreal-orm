@@ -80,7 +80,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Weapon>(id)
-        .set(strength.equal(923u64))
+        .set(strength.equal_to(923u64))
         .return_one(db.clone())
         .await?;
 
@@ -175,7 +175,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
     let select_weak_aliens = || async {
         let weak_aliens: Vec<Alien> = select(All)
             .from(Alien::table_name())
-            .where_(cond(alien.weapon().strength.equal(5u64)).and(age.greater_than(3)))
+            .where_(cond(alien.weapon().strength.equal_to(5u64)).and(age.greater_than(3)))
             .return_many(db.clone())
             .await
             .unwrap();
@@ -198,10 +198,10 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 2));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(name.equal("Rook"))
+        .set(name.equal_to("Rook"))
         .set(tags.append("street"))
         // .set(updater(tags).append("street"))
-        .where_(cond(alien.weapon().strength.equal(5u64)).and(age.greater_than(3)))
+        .where_(cond(alien.weapon().strength.equal_to(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
 
@@ -227,11 +227,11 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 3));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(name.equal("Kiwi"))
+        .set(name.equal_to("Kiwi"))
         .set(tags.remove("street"))
         // .set(updater(name).equal("Kiwi"))
         // .set(updater(tags).remove("street"))
-        .where_(cond(alien.weapon().strength.equal(5u64)).and(age.greater_than(3)))
+        .where_(cond(alien.weapon().strength.equal_to(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
     assert!(weak_aliens
@@ -276,7 +276,7 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 
     update::<Alien>(alien_id)
         .set(tags.append("tag3"))
-        .set(weapon.equal(Weapon::create_id("agi")))
+        .set(weapon.equal_to(Weapon::create_id("agi")))
         .set(spaceShips.append(SpaceShip::create_id("cali".into())))
         .set(spaceShips.append(SpaceShip::create_id("codebreather".into())))
         .set(spaceShips.append(SpaceShip::create_id("blayz".into())))
@@ -357,7 +357,7 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 
     // Try setting
     let updated = update::<Alien>(alien_id)
-        .set(tags.equal(vec!["oye".into(), "dayo".into()]))
+        .set(tags.equal_to(vec!["oye".into(), "dayo".into()]))
         .return_one(db.clone())
         .await?;
 
