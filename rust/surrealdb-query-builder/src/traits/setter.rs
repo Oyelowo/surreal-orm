@@ -109,6 +109,32 @@ impl Erroneous for Setter {
         self.errors.to_vec()
     }
 }
+impl Parametric for Vec<Setter> {
+    fn get_bindings(&self) -> BindingsList {
+        self.iter().fold(vec![], |mut acc, setter| {
+            acc.extend(setter.get_bindings());
+            acc
+        })
+    }
+}
+
+impl Buildable for Vec<Setter> {
+    fn build(&self) -> String {
+        self.iter()
+            .map(|setter| setter.build())
+            .collect::<Vec<String>>()
+            .join(", ")
+    }
+}
+impl Erroneous for Vec<Setter> {
+    fn get_errors(&self) -> ErrorList {
+        self.iter().fold(vec![], |mut acc, setter| {
+            acc.extend(setter.get_errors());
+            acc
+        })
+    }
+}
+
 impl Conditional for Setter {}
 
 /// A trait for assigning values to a field used in `SET`
