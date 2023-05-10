@@ -144,7 +144,7 @@ where
     Self: std::ops::Deref<Target = Field>,
 {
     /// Assigns the given value to the field.
-    fn equal(&self, value: impl Into<T>) -> Setter {
+    fn equal_to(&self, value: impl Into<T>) -> Setter {
         let operator = sql::Operator::Equal;
         let field = self.deref();
         let set_arg: SetArg = value.into().into();
