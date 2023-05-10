@@ -1131,16 +1131,29 @@ async fn test_insert_from_another_table() {
     assert_eq!(created_weapons.len(), 1000);
 
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
-    let strong_weapons = insert::<StrongWeapon>(
-        select(All)
-            .from(Weapon::table_name())
-            .where_(cond(strength.greater_than_or_equal(800)).and(strength.less_than(950))),
-    )
-    .return_many(db.clone())
-    .await
-    .unwrap();
+    let select_statement = select(All)
+        .from(Weapon::table_name())
+        .where_(cond(strength.greater_than_or_equal(800)).and(strength.less_than(950)));
+    let result: Vec<Weapon> = select_statement.return_many(db.clone()).await.unwrap();
+    assert_eq!(result.len(), 150);
+    assert!(
+        result[0].id.to_string().starts_with("weapon:"),
+        "Original should start with weapon:"
+    );
+
+    let strong_weapons = insert::<StrongWeapon>(select_statement)
+        .return_many(db.clone())
+        .await
+        .unwrap();
 
     assert_eq!(strong_weapons.len(), 150);
+    assert!(
+        strong_weapons[0]
+            .id
+            .to_string()
+            .starts_with("strong_weapon:"),
+        "copied should start with new table name - strong_weapon:"
+    );
 
     let strong_weapons: Vec<StrongWeapon> = select(All)
         .from(StrongWeapon::table_name())

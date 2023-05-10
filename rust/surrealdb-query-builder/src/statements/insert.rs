@@ -23,7 +23,7 @@ use crate::{
     ErrorList, ReturnType, ReturnableDefault, ReturnableStandard,
 };
 
-use super::SelectStatement;
+use super::{SelectStatement, Subquery};
 
 /// Insert statement initialization builder
 #[derive(Debug, Clone)]
@@ -101,7 +101,7 @@ where
                 node_bindings.bindings
             })
             .collect::<Vec<_>>(),
-        Insertables::FromQuery(query) => {
+        Insertables::FromSubQuery(query) => {
             let bindings = query.get_bindings();
             select_query = Some(query.build());
             errors.extend(query.get_errors());
@@ -170,7 +170,7 @@ where
     /// A list of surrealdb node
     Nodes(Vec<T>),
     /// A select statement
-    FromQuery(SelectStatement),
+    FromSubQuery(Subquery),
 }
 
 impl<T> From<Vec<T>> for Insertables<T>
@@ -196,7 +196,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: SelectStatement) -> Self {
-        Self::FromQuery(value)
+        Self::FromSubQuery(value.into())
     }
 }
 
@@ -205,7 +205,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn from(value: &SelectStatement) -> Self {
-        Self::FromQuery(value.to_owned())
+        Self::FromSubQuery(value.to_owned().into())
     }
 }
 
