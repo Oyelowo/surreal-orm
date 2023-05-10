@@ -392,7 +392,7 @@ impl SchemaFieldsProperties {
                 
                 let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
                     let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
-                    let is_settable = !&["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                    let is_settable = !&["in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     
                     let numeric_trait = if field_receiver.is_numeric(){
                         quote!(
@@ -411,6 +411,12 @@ impl SchemaFieldsProperties {
                         })
                         .unwrap_or(quote!())} else {
                             quote!()
+                    };
+
+                    let field_type_for_setter = if field_ident_normalised_as_str == "id" {
+                        quote!(#crate_name::sql::Thing)
+                    } else {
+                        quote!(#field_type)
                     };
                     
                     if is_settable {
@@ -471,9 +477,9 @@ impl SchemaFieldsProperties {
                                     }
                                 }
 
-                                impl #crate_name::SetterAssignable<#field_type> for self::#field_name_as_camel  {}
+                                impl #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  {}
                             
-                                impl #crate_name::Patchable<#field_type> for self::#field_name_as_camel  {}
+                                impl #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  {}
 
                                 #numeric_trait
                             
