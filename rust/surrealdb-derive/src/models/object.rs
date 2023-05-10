@@ -17,7 +17,7 @@ use syn::{self, parse_macro_input};
 use super::{
     attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
-    parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
+    parser::{SchemaFieldsProperties, SchemaPropertiesArgs, DataType},
     variables::VariablesModelMacro,
 };
 
@@ -81,7 +81,7 @@ impl ToTokens for ObjectToken{
             schema_struct_fields_names_kv_empty,
             non_null_updater_fields,
             ..
-        } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Object);
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
         let imports_referenced_node_schema = imports_referenced_node_schema
             .into_iter()

@@ -244,7 +244,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
     // Relate fromstate -> like-> devs
     let relation =
         relate::<CompanyLikeUser>(Company::with(from_statement).like__(E).user(devs_statement))
-            .set(time.connected.equal(sql::Datetime(dt)));
+            .set(time.connected.equal_to(sql::Datetime(dt)));
     let result = relation.return_many(db.clone()).await?;
 
     assert_eq!(relation.get_errors().len(), 0);

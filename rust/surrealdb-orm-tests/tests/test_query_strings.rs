@@ -38,8 +38,8 @@ fn multiplication_tests1() {
         .where_(
             cond(content.like("lowo"))
                 .and(age.greater_than_or_equal(600))
-                .or(firstName.equal("Oyelowo"))
-                .and(lastName.equal("Oyedayo")),
+                .or(firstName.equal_to("Oyelowo"))
+                .and(lastName.equal_to("Oyedayo")),
         )
         .order_by(order(lastName).desc())
         .limit(50)
@@ -82,7 +82,7 @@ fn multiplication_tests1() {
                     .or(age),
             )
             .and(bestFriend.exactly_equal("Oyelowo"))
-            .or(firstName.equal("Oyedayo"))
+            .or(firstName.equal_to("Oyedayo"))
             .and(age.greater_than_or_equal(150)),
         )
         // .where_(
@@ -190,7 +190,7 @@ fn multiplication_tests3() {
         .writes__(
             StudentWritesBook::schema()
                 .timeWritten
-                .equal(Duration::from_secs(343)),
+                .equal_to(Duration::from_secs(343)),
         )
         .book(Empty)
         .content;

@@ -56,8 +56,8 @@ type Population = u64;
 
 #[cfg(test)]
 mod tests {
-    use surrealdb_orm::{SchemaGetter, SetterArray};
     use super::*;
+    use surrealdb_orm::{SchemaGetter, SetterArray};
 
     #[test]
     fn test_auto_inference() {

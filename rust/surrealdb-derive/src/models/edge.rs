@@ -19,7 +19,7 @@ use super::{
     attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
-    parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
+    parser::{SchemaFieldsProperties, SchemaPropertiesArgs, DataType},
     variables::VariablesModelMacro,
 };
 
@@ -119,7 +119,7 @@ impl ToTokens for EdgeToken {
             non_null_updater_fields,
             table_id_type,
             ..
-        } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Edge);
         // if serialized_field_names_normalised.conta("")
         if !serialized_field_names_normalised.contains(&"in".into())
             || !serialized_field_names_normalised.contains(&"out".into())
