@@ -18,7 +18,7 @@ use super::{
     attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
-    parser::{SchemaFieldsProperties, SchemaPropertiesArgs},
+    parser::{SchemaFieldsProperties, SchemaPropertiesArgs, DataType},
     variables::VariablesModelMacro
 };
 
@@ -94,7 +94,7 @@ impl ToTokens for NodeToken{
             non_null_updater_fields,
             table_id_type,
             ..
-        } = SchemaFieldsProperties::from_receiver_data(schema_props_args);
+        } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node);
         
         
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();

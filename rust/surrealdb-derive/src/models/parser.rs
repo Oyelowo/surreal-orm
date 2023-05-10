@@ -325,13 +325,20 @@ pub struct SchemaPropertiesArgs<'a> {
     pub struct_name_ident: &'a syn::Ident,
     // pub table_name_ident: &'a syn::Ident,
 }
+
+pub(crate) enum DataType{
+    Node,
+    Edge,
+    Object
+}
+
 impl SchemaFieldsProperties {
     /// .
     ///
     /// # Panics
     ///
     /// Panics if .
-    pub(crate) fn from_receiver_data(args: SchemaPropertiesArgs) -> Self {
+    pub(crate) fn from_receiver_data(args: SchemaPropertiesArgs, data_type: DataType) -> Self {
         let SchemaPropertiesArgs {
             data,
             struct_level_casing,
@@ -392,7 +399,6 @@ impl SchemaFieldsProperties {
                 
                 let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
                     let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
-                    let is_settable = !&["in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     
                     let numeric_trait = if field_receiver.is_numeric(){
                         quote!(
@@ -413,86 +419,81 @@ impl SchemaFieldsProperties {
                             quote!()
                     };
 
-                    let field_type_for_setter = if field_ident_normalised_as_str == "id" {
+                    let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str()) && matches!(data_type, DataType::Edge);
+                    let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes{
                         quote!(#crate_name::sql::Thing)
                     } else {
                         quote!(#field_type)
                     };
                     
-                    if is_settable {
-                        store.field_wrapper_type_custom_implementations
-                            .push(quote!(
-                                #[derive(Debug, Clone)]
-                                pub struct #field_name_as_camel(pub #crate_name::Field);
+                    store.field_wrapper_type_custom_implementations
+                        .push(quote!(
+                            #[derive(Debug, Clone)]
+                            pub struct #field_name_as_camel(pub #crate_name::Field);
 
-                                impl From<&str> for #field_name_as_camel {
-                                    fn from(field_name: &str) -> Self {
-                                        Self(#crate_name::Field::new(field_name))
-                                    }
+                            impl From<&str> for #field_name_as_camel {
+                                fn from(field_name: &str) -> Self {
+                                    Self(#crate_name::Field::new(field_name))
                                 }
-                            
-                                impl From<#crate_name::Field> for #field_name_as_camel {
-                                    fn from(field_name: #crate_name::Field) -> Self {
-                                        Self(field_name)
-                                    }
-                                }
-                            
-                                impl From<&#field_name_as_camel> for #crate_name::Valuex {
-                                    fn from(value: &#field_name_as_camel) -> Self {
-                                        let field: #crate_name::Field = value.into();
-                                        field.into()
-                                    }
-                                }
-                            
-                                impl From<#field_name_as_camel> for #crate_name::Valuex {
-                                    fn from(value: #field_name_as_camel) -> Self {
-                                        let field: #crate_name::Field = value.into();
-                                        field.into()
-                                    }
-                                }
-                            
-                                impl From<&#field_name_as_camel> for #crate_name::Field {
-                                    fn from(field_name:& #field_name_as_camel) -> Self {
-                                        field_name.0.clone()
-                                    }
-                                }
-                            
-                                impl From<#field_name_as_camel> for #crate_name::Field {
-                                    fn from(field_name: #field_name_as_camel) -> Self {
-                                        field_name.0
-                                    }
-                                }
-
-                                impl ::std::ops::Deref for #field_name_as_camel {
-                                    type Target = #crate_name::Field;
-
-                                    fn deref(&self) -> &Self::Target {
-                                        &self.0
-                                    }
-                                }
-
-                                impl ::std::ops::DerefMut for #field_name_as_camel {
-                                    fn deref_mut(&mut self) -> &mut Self::Target {
-                                        &mut self.0
-                                    }
-                                }
-
-                                impl #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  {}
-                            
-                                impl #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  {}
-
-                                #numeric_trait
-                            
-                                #array_trait
-                            ));
+                            }
                         
-                            store.schema_struct_fields_types_kv
-                                .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
-                        } else {
-                            store.schema_struct_fields_types_kv
-                                .push(quote!(pub #field_ident_normalised: #crate_name::Field, ));
-                                
-                        }
+                            impl From<#crate_name::Field> for #field_name_as_camel {
+                                fn from(field_name: #crate_name::Field) -> Self {
+                                    Self(field_name)
+                                }
+                            }
+                        
+                            impl From<&#field_name_as_camel> for #crate_name::Valuex {
+                                fn from(value: &#field_name_as_camel) -> Self {
+                                    let field: #crate_name::Field = value.into();
+                                    field.into()
+                                }
+                            }
+                        
+                            impl From<#field_name_as_camel> for #crate_name::Valuex {
+                                fn from(value: #field_name_as_camel) -> Self {
+                                    let field: #crate_name::Field = value.into();
+                                    field.into()
+                                }
+                            }
+                        
+                            impl From<&#field_name_as_camel> for #crate_name::Field {
+                                fn from(field_name:& #field_name_as_camel) -> Self {
+                                    field_name.0.clone()
+                                }
+                            }
+                        
+                            impl From<#field_name_as_camel> for #crate_name::Field {
+                                fn from(field_name: #field_name_as_camel) -> Self {
+                                    field_name.0
+                                }
+                            }
+
+                            impl ::std::ops::Deref for #field_name_as_camel {
+                                type Target = #crate_name::Field;
+
+                                fn deref(&self) -> &Self::Target {
+                                    &self.0
+                                }
+                            }
+
+                            impl ::std::ops::DerefMut for #field_name_as_camel {
+                                fn deref_mut(&mut self) -> &mut Self::Target {
+                                    &mut self.0
+                                }
+                            }
+
+                            impl #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  {}
+                        
+                            impl #crate_name::Patchable<#field_type_for_setter> for self::#field_name_as_camel  {}
+
+                            #numeric_trait
+                        
+                            #array_trait
+                        ));
+                    
+                        store.schema_struct_fields_types_kv
+                            .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
                 
                         store.schema_struct_fields_names_kv
                             .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
