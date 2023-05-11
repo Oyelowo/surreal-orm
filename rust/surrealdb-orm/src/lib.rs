@@ -192,4 +192,6 @@ pub use surrealdb_derive::SurrealdbNode;
 #[doc = include_str!("docs/surrealdb_object.md")]
 pub use surrealdb_derive::SurrealdbObject;
 
+#[doc(hidden)]
+pub use serde;
 pub use surrealdb_query_builder::*;

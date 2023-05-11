@@ -25,7 +25,7 @@ use surrealdb::sql;
 use crate::{
     Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, ErrorList, Filter,
     Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard, Setter,
-    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, ToRaw,
+    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -173,6 +173,12 @@ pub enum TargettablesForUpdate {
 
 impl From<crate::Table> for TargettablesForUpdate {
     fn from(value: crate::Table) -> Self {
+        Self::Table(value.into())
+    }
+}
+
+impl From<&crate::Table> for TargettablesForUpdate {
+    fn from(value: &crate::Table) -> Self {
         Self::Table(value.into())
     }
 }

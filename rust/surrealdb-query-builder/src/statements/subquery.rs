@@ -30,6 +30,7 @@ use super::{
 //     Insert(InsertStatement<N>),
 // }
 
+/// A subquery is a query that is nested inside another query.
 #[derive(Debug, Clone)]
 pub struct Subquery {
     query_string: String,
@@ -78,8 +79,6 @@ fn statement_str_to_subquery(
         sql::Statement::Update(s) => sql::Subquery::Update(s.to_owned()),
         // sql::Statement::Value(s) => Subquery::Value(s.to_owned()),
         sql::Statement::Delete(s) => sql::Subquery::Delete(s.to_owned()),
-        // sql::Statement::Relate(s) => Some(Subquery::Relate(s.to_owned())),
-        // _ => panic!("Invalid subquery"),
         _ => return Err(SurrealdbOrmError::InvalidSubquery(statement.to_string())),
     };
     Ok(subquery)

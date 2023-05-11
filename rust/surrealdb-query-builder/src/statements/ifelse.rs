@@ -90,6 +90,7 @@ pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }
 
+#[derive(Debug, Clone)]
 pub struct IfElseExpression(Expression);
 
 impl From<Expression> for IfElseExpression {
@@ -160,7 +161,7 @@ impl ElseStatement {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct ExpressionContent(String);
 
 impl ExpressionContent {
@@ -187,20 +188,20 @@ impl ExpressionContent {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct FlowStatementData {
     if_data: Flow,
     else_if_data: Flows,
     else_data: ExpressionContent,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct Flows {
     conditions: Vec<Filter>,
     expressions: Vec<IfElseExpression>,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct Flow {
     condition: Option<Filter>,
     expression: Option<ExpressionContent>,
@@ -255,6 +256,8 @@ impl IfStatement {
     }
 }
 
+/// if else flow builder
+#[derive(Debug, Clone)]
 pub struct IfElseStatement {
     flow_data: FlowStatementData,
     bindings: BindingsList,
@@ -505,29 +508,32 @@ mod tests {
             .else_("Hot")
             .end();
 
-        assert_eq!(if_statement5.get_bindings().len(), 17);
+        assert_eq!(if_statement5.get_bindings().len(), 9);
         assert_display_snapshot!(if_statement5.fine_tune_params());
         assert_display_snapshot!(if_statement5.to_raw().build());
         assert_eq!(
             if_statement5.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
-                ( SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) OR (city ~ $_param_00000006) ORDER BY age NUMERIC ASC LIMIT $_param_00000007 START AT $_param_00000008 PARALLEL )\n\
-                ELSE IF name ~ $_param_00000009 THEN\n\t\
-                ( SELECT * FROM $_param_00000010 WHERE country IS $_param_00000011 ORDER BY age NUMERIC ASC LIMIT $_param_00000012 START AT $_param_00000013 )\n\
-                ELSE IF (country IS $_param_00000014) OR (country IS $_param_00000015) THEN\n\t$_param_00000016\n\
-                ELSE\n\t\
-                $_param_00000017\n\
-                END"
+            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\
+                \t$_param_00000003\n\
+                ELSE IF name ~ $_param_00000004 THEN\n\
+                \t$_param_00000005\n\
+                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) THEN\n\
+                \t$_param_00000008\nELSE\n\t$_param_00000009\nEND"
         );
 
         assert_eq!(
             if_statement5.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t\
-                ( SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL )\nELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t( SELECT * FROM user:oyedayo WHERE country IS 'INDONESIA' ORDER BY age NUMERIC ASC LIMIT 20 START AT 5 )\n\
-                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\t\
-                'Cold'\n\
-                ELSE\n\t\
-                'Hot'\n\
+            "IF age >= 18 <= 120 THEN\n\
+                \t(SELECT * FROM user:oyelowo \
+                WHERE (city = 'Prince Edward Island') AND (city = 'NewFoundland') OR (city ~ 'Toronto') \
+                ORDER BY age NUMERIC LIMIT 153 START 10 PARALLEL)\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\
+                \t(SELECT * FROM user:oyedayo WHERE country = 'INDONESIA' \
+                ORDER BY age NUMERIC LIMIT 20 START 5)\n\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\
+                \t'Cold'\n\
+                ELSE\n\
+                \t'Hot'\n\
                 END"
         );
     }

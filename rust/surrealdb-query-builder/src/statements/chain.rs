@@ -108,7 +108,7 @@ impl Erroneous for QueryChain {
 
 impl Buildable for QueryChain {
     fn build(&self) -> String {
-        self.queries.join("\n")
+        self.queries.join("\n\n")
     }
 }
 
