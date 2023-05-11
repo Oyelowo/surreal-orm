@@ -12,6 +12,7 @@ documentation = { workspace = true }
 surrealdb-derive = { workspace = true }
 surrealdb-query-builder = { workspace = true }
 insta = { workspace = true }
+serde = { workspace = true }
 
 [lib]
 doctest = false

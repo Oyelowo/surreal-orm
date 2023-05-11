@@ -2,8 +2,8 @@ use serde::Serialize;
 use surrealdb::sql;
 
 use crate::{
-    statements::LetStatement, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
-    Field, Param, Parametric,
+    statements::{LetStatement, Subquery},
+    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Field, Param, Parametric,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -135,6 +135,36 @@ impl Erroneous for Vec<Setter> {
     }
 }
 
+pub enum SetterArg<T>
+where
+    T: Serialize,
+{
+    Value(T),
+    Field(Field),
+    Subquery(Subquery),
+    Param(Param),
+    LetStatement(LetStatement),
+}
+
+// impl<T: Serialize> From<T> for SetterArg<T> {
+//     fn from(value: T) -> Self {
+//         // Self::Value(value)
+//         todo!()
+//     }
+// }
+impl<T: Serialize, V: Into<T> + Serialize> From<V> for SetterArg<T> {
+    fn from(value: V) -> Self {
+        // Self::Value(value)
+        todo!()
+    }
+}
+
+impl<T: Serialize> From<Field> for SetterArg<T> {
+    fn from(value: Field) -> Self {
+        Self::Field(value)
+    }
+}
+
 impl Conditional for Setter {}
 
 /// A trait for assigning values to a field used in `SET`
@@ -144,17 +174,19 @@ where
     Self: std::ops::Deref<Target = Field>,
 {
     /// Assigns the given value to the field.
-    fn equal_to(&self, value: impl Into<T>) -> Setter {
+    fn equal_to(&self, value: impl Into<SetterArg<T>>) -> Setter {
         let operator = sql::Operator::Equal;
         let field = self.deref();
-        let set_arg: SetArg = value.into().into();
+        // let set_arg: SetArg = value.into().into();
+        let set_arg: SetterArg<T> = value.into().into();
 
-        let column_updater_string = format!("{field} {operator} {}", set_arg.build());
-        Setter {
-            query_string: column_updater_string,
-            bindings: set_arg.get_bindings(),
-            errors: set_arg.get_errors(),
-        }
+        todo!()
+        // let column_updater_string = format!("{field} {operator} {}", set_arg.build());
+        // Setter {
+        //     query_string: column_updater_string,
+        //     bindings: set_arg.get_bindings(),
+        //     errors: set_arg.get_errors(),
+        // }
     }
 
     /// Derefs to field type.
