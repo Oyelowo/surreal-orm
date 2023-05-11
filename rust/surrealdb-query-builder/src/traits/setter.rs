@@ -103,63 +103,6 @@ impl<T: Serialize> From<&Field> for SetterArg<T> {
     }
 }
 
-// impl From<SelectStatement> for Expression {
-//     fn from(select_statement: SelectStatement) -> Self {
-//         Self::Subquery(select_statement.into())
-//     }
-// }
-//
-// impl<T> From<CreateStatement<T>> for Expression
-// where
-//     T: SurrealdbNode + Serialize + DeserializeOwned,
-// {
-//     fn from(create_statement: CreateStatement<T>) -> Self {
-//         Self::Subquery(create_statement.into())
-//     }
-// }
-//
-// impl<T> From<UpdateStatement<T>> for Expression
-// where
-//     T: SurrealdbNode + Serialize + DeserializeOwned,
-// {
-//     fn from(update_statement: UpdateStatement<T>) -> Self {
-//         Self::Subquery(update_statement.into())
-//     }
-// }
-//
-// impl<T> From<DeleteStatement<T>> for Expression
-// where
-//     T: SurrealdbNode + Serialize + DeserializeOwned,
-// {
-//     fn from(delete_statement: DeleteStatement<T>) -> Self {
-//         Self::Subquery(delete_statement.into())
-//     }
-// }
-//
-// impl<T> From<InsertStatement<T>> for Expression
-// where
-//     T: SurrealdbNode + Serialize + DeserializeOwned,
-// {
-//     fn from(insert_statement: InsertStatement<T>) -> Self {
-//         Self::Subquery(insert_statement.into())
-//     }
-// }
-//
-// impl<T> From<RelateStatement<T>> for Expression
-// where
-//     T: SurrealdbEdge + Serialize + DeserializeOwned,
-// {
-//     fn from(relate_statement: RelateStatement<T>) -> Self {
-//         Self::Subquery(relate_statement.into())
-//     }
-// }
-//
-// impl From<IfElseStatement> for Expression {
-//     fn from(ifelse_statement: IfElseStatement) -> Self {
-//         Self::Subquery(ifelse_statement.into())
-//     }
-// }
-
 impl<T: Serialize> From<SelectStatement> for SetterArg<T> {
     fn from(value: SelectStatement) -> Self {
         Self::Subquery(value.into())
