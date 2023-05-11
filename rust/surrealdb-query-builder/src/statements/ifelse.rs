@@ -90,6 +90,7 @@ pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }
 
+#[derive(Debug, Clone)]
 pub struct IfElseExpression(Expression);
 
 impl From<Expression> for IfElseExpression {
@@ -160,7 +161,7 @@ impl ElseStatement {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct ExpressionContent(String);
 
 impl ExpressionContent {
@@ -187,20 +188,20 @@ impl ExpressionContent {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct FlowStatementData {
     if_data: Flow,
     else_if_data: Flows,
     else_data: ExpressionContent,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct Flows {
     conditions: Vec<Filter>,
     expressions: Vec<IfElseExpression>,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct Flow {
     condition: Option<Filter>,
     expression: Option<ExpressionContent>,
@@ -256,6 +257,7 @@ impl IfStatement {
 }
 
 /// if else flow builder
+#[derive(Debug, Clone)]
 pub struct IfElseStatement {
     flow_data: FlowStatementData,
     bindings: BindingsList,

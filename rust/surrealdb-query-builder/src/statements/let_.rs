@@ -54,12 +54,12 @@ impl LetStatement {
     /// # let user = Table::new("user");
     /// // You can assign a value surrealdb value
     /// # let_("name")
-    /// .equal(5);
+    /// .equal_to(5);
     ///
     /// // and even a select statement
     /// # let_("users")
-    /// .equal(select(All).from(user));
-    pub fn equal(mut self, value: impl Into<Expression>) -> Self {
+    /// .equal_to(select(All).from(user));
+    pub fn equal_to(mut self, value: impl Into<Expression>) -> Self {
         let value: Expression = value.into();
         self.bindings.extend(value.get_bindings());
         self.value = Some(value);
@@ -107,7 +107,7 @@ mod tests {
 
     #[test]
     fn test_let_statement() {
-        let statement = let_("name").equal(5);
+        let statement = let_("name").equal_to(5);
 
         assert_eq!(
             statement.fine_tune_params(),
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn test_let_statement_with_select_statement() {
         let user = Table::new("user");
-        let statement = let_("name").equal(select(All).from(user));
+        let statement = let_("name").equal_to(select(All).from(user));
 
         assert_eq!(
             statement.fine_tune_params(),
