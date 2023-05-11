@@ -20,72 +20,72 @@ impl std::fmt::Display for Setter {
     }
 }
 
-struct SetArg {
-    string: String,
-    bindings: BindingsList,
-    errors: ErrorList,
-}
-
-impl Buildable for SetArg {
-    fn build(&self) -> String {
-        self.string.to_string()
-    }
-}
-
-impl Parametric for SetArg {
-    fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
-    }
-}
-
-impl Erroneous for SetArg {
-    fn get_errors(&self) -> ErrorList {
-        self.errors.to_vec()
-    }
-}
-
-impl<T: Serialize> From<T> for SetArg {
-    fn from(value: T) -> Self {
-        let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
-        let binding = Binding::new(sql_value);
-
-        Self {
-            string: binding.get_param_dollarised(),
-            bindings: vec![binding],
-            errors: vec![],
-        }
-    }
-}
-
-impl From<Field> for SetArg {
-    fn from(value: Field) -> Self {
-        Self {
-            string: value.build(),
-            bindings: value.get_bindings(),
-            errors: value.get_errors(),
-        }
-    }
-}
-
-impl From<Param> for SetArg {
-    fn from(value: Param) -> Self {
-        Self {
-            string: value.build(),
-            bindings: value.get_bindings(),
-            errors: value.get_errors(),
-        }
-    }
-}
-
-impl From<LetStatement> for SetArg {
-    fn from(value: LetStatement) -> Self {
-        Self {
-            string: value.get_param().build(),
-            bindings: value.get_bindings(),
-            errors: value.get_errors(),
-        }
-    }
-}
+// struct SetArg {
+//     string: String,
+//     bindings: BindingsList,
+//     errors: ErrorList,
+// }
+//
+// impl Buildable for SetArg {
+//     fn build(&self) -> String {
+//         self.string.to_string()
+//     }
+// }
+//
+// impl Parametric for SetArg {
+//     fn get_bindings(&self) -> BindingsList {
+//         self.bindings.to_vec()
+//     }
+// }
+//
+// impl Erroneous for SetArg {
+//     fn get_errors(&self) -> ErrorList {
+//         self.errors.to_vec()
+//     }
+// }
+//
+// impl<T: Serialize> From<T> for SetArg {
+//     fn from(value: T) -> Self {
+//         let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
+//         let binding = Binding::new(sql_value);
+//
+//         Self {
+//             string: binding.get_param_dollarised(),
+//             bindings: vec![binding],
+//             errors: vec![],
+//         }
+//     }
+// }
+//
+// impl From<Field> for SetArg {
+//     fn from(value: Field) -> Self {
+//         Self {
+//             string: value.build(),
+//             bindings: value.get_bindings(),
+//             errors: value.get_errors(),
+//         }
+//     }
+// }
+//
+// impl From<Param> for SetArg {
+//     fn from(value: Param) -> Self {
+//         Self {
+//             string: value.build(),
+//             bindings: value.get_bindings(),
+//             errors: value.get_errors(),
+//         }
+//     }
+// }
+//
+// impl From<LetStatement> for SetArg {
+//     fn from(value: LetStatement) -> Self {
+//         Self {
+//             string: value.get_param().build(),
+//             bindings: value.get_bindings(),
+//             errors: value.get_errors(),
+//         }
+//     }
+// }
 
 impl From<Setter> for Vec<Setter> {
     fn from(value: Setter) -> Self {
@@ -180,13 +180,32 @@ where
         // let set_arg: SetArg = value.into().into();
         let set_arg: SetterArg<T> = value.into().into();
 
-        todo!()
-        // let column_updater_string = format!("{field} {operator} {}", set_arg.build());
-        // Setter {
-        //     query_string: column_updater_string,
-        //     bindings: set_arg.get_bindings(),
-        //     errors: set_arg.get_errors(),
-        // }
+        let (build, bindings, errors) = match set_arg {
+            SetterArg::Value(value) => {
+                let sql_value = sql::json(&serde_json::to_string(&value).unwrap()).unwrap();
+                let binding = Binding::new(sql_value);
+                (binding.get_param_dollarised(), vec![binding], vec![])
+            }
+            SetterArg::Field(field) => (field.build(), field.get_bindings(), field.get_errors()),
+            SetterArg::Subquery(subquery) => (
+                subquery.build(),
+                subquery.get_bindings(),
+                subquery.get_errors(),
+            ),
+            SetterArg::Param(param) => (param.build(), param.get_bindings(), param.get_errors()),
+            SetterArg::LetStatement(let_statement) => (
+                let_statement.get_param().build(),
+                let_statement.get_bindings(),
+                let_statement.get_errors(),
+            ),
+        };
+
+        let column_updater_string = format!("{field} {operator} {}", build);
+        Setter {
+            query_string: column_updater_string,
+            bindings,
+            errors,
+        }
     }
 
     /// Derefs to field type.
