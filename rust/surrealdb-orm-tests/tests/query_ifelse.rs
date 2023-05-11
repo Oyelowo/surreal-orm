@@ -1,47 +1,17 @@
-//
-// IF ELSE statement
-// The IF ELSE statement can be used as a main statement, or within a parent statement, to return a value depending on whether a condition, or a series of conditions match. The statement allows for multiple ELSE IF expressions, and a final ELSE expression, with no limit to the number of ELSE IF conditional expressions.
-//
-// Statement syntax
-// IF @condition THEN
-// 	@expression
-// [ ELSE IF @condition THEN
-// 	@expression ... ]
-// [ ELSE
-// 	@expression ]
-// END
-// Example usage
-// The following query shows example usage of this statement.
-//
-// IF $scope = "admin" THEN
-// 	( SELECT * FROM account )
-// ELSE IF $scope = "user" THEN
-// 	( SELECT * FROM $auth.account )
-// ELSE
-// 	[]
-// END
-// If-else statements can also be used as subqueries within other statements.
-//
-// UPDATE person SET railcard =
-// 	IF age <= 10 THEN
-// 		'junior'
-// 	ELSE IF age <= 21 THEN
-// 		'student'
-// 	ELSE IF age >= 65 THEN
-// 		'senior'
-// 	ELSE
-// 		NULL
-// 	END
-// ;
-//
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::local::Mem, sql, Surreal};
 use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
-    statements::{chain, if_, insert, let_, order, select, QueryChain},
-    All, Buildable, Operatable, ReturnableStandard, Runnable, SchemaGetter, SurrealdbModel,
-    SurrealdbOrmResult, ToRaw,
+    statements::{chain, if_, insert, let_, order, select, update, QueryChain},
+    All, Buildable, Operatable, ReturnableSelect, ReturnableStandard, Runnable, SchemaGetter,
+    SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
 };
 
 #[tokio::test]
@@ -74,6 +44,7 @@ async fn test_if_else_statement() -> SurrealdbOrmResult<()> {
     let name = || let_name.get_param();
 
     let if_statement = if_(val().greater_than(5))
+        .clone()
         .then(
             select(All)
                 .from(SpaceShip::table_name())
@@ -167,38 +138,79 @@ END"
     Ok(())
 }
 
-// #[test]
-// fn test_if_else_statement_with_select_statement() {
-//     let user = Table::new("user");
-//     let statement = if_("name").equal(select(All).from(user));
-//
-//     assert_eq!(
-//         statement.fine_tune_params(),
-//         "IF $name = $_param_00000001 THEN"
-//     );
-//
-//     assert_eq!(
-//         statement.to_raw().build(),
-//         "IF $name = (SELECT * FROM user) THEN"
-//     );
-//
-//     assert_eq!(statement.get_param().build(), "$name");
-// }
-//
-// #[test]
-// fn test_if_else_statement_with_else_if() {
-//     let user = Table::new("user");
-//     let statement = if_("name").equal(select(All).from(user));
-//
-//     assert_eq!(
-//         statement.fine_tune_params(),
-//         "IF $name = $_param_00000001 THEN"
-//     );
-//
-//     assert_eq!(
-//         statement.to_raw().build(),
-//         "IF $name = (SELECT * FROM user) THEN"
-//     );
-//
-//     assert_eq!(statement.get_param().build(), "$name");
-// }
+#[tokio::test]
+async fn test_if_else_in_update_statement_setter() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    let weapon_schema::Weapon {
+        ref strength, name, ..
+    } = Weapon::schema();
+    let ref weapon = Weapon::table_name();
+
+    let generated_weapons = (0..=100)
+        .map(|i| Weapon {
+            strength: i,
+            name: format!("weapon-{}", i),
+            ..Default::default()
+        })
+        .collect::<Vec<_>>();
+    insert(generated_weapons).run(db.clone()).await?;
+
+    let weapons: Vec<Weapon> = select(All)
+        .from(weapon)
+        .order_by(order(strength).asc())
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(weapons.len(), 101);
+    assert_eq!(weapons[0].name, "weapon-0");
+    assert_eq!(weapons[10].name, "weapon-10");
+
+    assert_eq!(weapons[11].name, "weapon-11");
+    assert_eq!(weapons[20].name, "weapon-20");
+    assert_eq!(weapons[21].name, "weapon-21");
+
+    assert_eq!(weapons[22].name, "weapon-22");
+    assert_eq!(weapons[64].name, "weapon-64");
+
+    assert_eq!(weapons[65].name, "weapon-65");
+    assert_eq!(weapons[100].name, "weapon-100");
+
+    update::<Weapon>(weapon)
+        .set(
+            name.equal_to(
+                if_(strength.less_than_or_equal(10))
+                    .then("junior")
+                    .else_if(strength.less_than_or_equal(21))
+                    .then("student")
+                    .else_if(strength.greater_than_or_equal(65))
+                    .then("senior")
+                    .else_("NULL")
+                    .end(),
+            ),
+        )
+        .run(db.clone())
+        .await?;
+
+    let weapons: Vec<Weapon> = select(All)
+        .from(weapon)
+        .order_by(order(strength).asc())
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(weapons.len(), 101);
+    assert_eq!(weapons[0].name, "junior");
+    assert_eq!(weapons[10].name, "junior");
+
+    assert_eq!(weapons[11].name, "student");
+    assert_eq!(weapons[20].name, "student");
+    assert_eq!(weapons[21].name, "student");
+
+    assert_eq!(weapons[22].name, "NULL");
+    assert_eq!(weapons[64].name, "NULL");
+
+    assert_eq!(weapons[65].name, "senior");
+    assert_eq!(weapons[100].name, "senior");
+
+    Ok(())
+}
