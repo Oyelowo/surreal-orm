@@ -488,6 +488,12 @@ impl SchemaFieldsProperties {
                                     Self::Field(value.into())
                                 }
                             }
+                        
+                            impl<T: #crate_name::serde::Serialize> From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
+                                fn from(value: &self::#field_name_as_camel) -> Self {
+                                    Self::Field(value.into())
+                                }
+                            }
 
                             impl #crate_name::SetterAssignable<#field_type_for_setter> for self::#field_name_as_camel  {}
                         

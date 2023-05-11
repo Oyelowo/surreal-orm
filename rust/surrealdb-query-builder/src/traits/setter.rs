@@ -1,9 +1,13 @@
-use serde::Serialize;
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    statements::{LetStatement, Subquery},
+    statements::{
+        DeleteStatement, IfElseStatement, InsertStatement, LetStatement, RelateStatement,
+        SelectStatement, Subquery, UpdateStatement,
+    },
     Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Field, Param, Parametric,
+    SurrealdbEdge, SurrealdbNode,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -90,6 +94,142 @@ impl<T: Serialize, V: Into<T> + Serialize> From<V> for SetterArg<T> {
 impl<T: Serialize> From<Field> for SetterArg<T> {
     fn from(value: Field) -> Self {
         Self::Field(value)
+    }
+}
+
+impl<T: Serialize> From<&Field> for SetterArg<T> {
+    fn from(value: &Field) -> Self {
+        Self::Field(value.into())
+    }
+}
+
+// impl From<SelectStatement> for Expression {
+//     fn from(select_statement: SelectStatement) -> Self {
+//         Self::Subquery(select_statement.into())
+//     }
+// }
+//
+// impl<T> From<CreateStatement<T>> for Expression
+// where
+//     T: SurrealdbNode + Serialize + DeserializeOwned,
+// {
+//     fn from(create_statement: CreateStatement<T>) -> Self {
+//         Self::Subquery(create_statement.into())
+//     }
+// }
+//
+// impl<T> From<UpdateStatement<T>> for Expression
+// where
+//     T: SurrealdbNode + Serialize + DeserializeOwned,
+// {
+//     fn from(update_statement: UpdateStatement<T>) -> Self {
+//         Self::Subquery(update_statement.into())
+//     }
+// }
+//
+// impl<T> From<DeleteStatement<T>> for Expression
+// where
+//     T: SurrealdbNode + Serialize + DeserializeOwned,
+// {
+//     fn from(delete_statement: DeleteStatement<T>) -> Self {
+//         Self::Subquery(delete_statement.into())
+//     }
+// }
+//
+// impl<T> From<InsertStatement<T>> for Expression
+// where
+//     T: SurrealdbNode + Serialize + DeserializeOwned,
+// {
+//     fn from(insert_statement: InsertStatement<T>) -> Self {
+//         Self::Subquery(insert_statement.into())
+//     }
+// }
+//
+// impl<T> From<RelateStatement<T>> for Expression
+// where
+//     T: SurrealdbEdge + Serialize + DeserializeOwned,
+// {
+//     fn from(relate_statement: RelateStatement<T>) -> Self {
+//         Self::Subquery(relate_statement.into())
+//     }
+// }
+//
+// impl From<IfElseStatement> for Expression {
+//     fn from(ifelse_statement: IfElseStatement) -> Self {
+//         Self::Subquery(ifelse_statement.into())
+//     }
+// }
+
+impl<T: Serialize> From<SelectStatement> for SetterArg<T> {
+    fn from(value: SelectStatement) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T, V> From<UpdateStatement<V>> for SetterArg<T>
+where
+    T: Serialize,
+    V: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(value: UpdateStatement<V>) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T, V> From<DeleteStatement<V>> for SetterArg<T>
+where
+    T: Serialize,
+    V: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(value: DeleteStatement<V>) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T, V> From<InsertStatement<V>> for SetterArg<T>
+where
+    T: Serialize,
+    V: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(value: InsertStatement<V>) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T, V> From<RelateStatement<V>> for SetterArg<T>
+where
+    T: Serialize,
+    V: SurrealdbEdge + Serialize + DeserializeOwned,
+{
+    fn from(value: RelateStatement<V>) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T> From<IfElseStatement> for SetterArg<T>
+where
+    T: Serialize,
+{
+    fn from(value: IfElseStatement) -> Self {
+        Self::Subquery(value.into())
+    }
+}
+
+impl<T: Serialize> From<Param> for SetterArg<T> {
+    fn from(value: Param) -> Self {
+        Self::Param(value)
+    }
+}
+
+impl<T: Serialize> From<LetStatement> for SetterArg<T> {
+    fn from(value: LetStatement) -> Self {
+        Self::LetStatement(value)
+    }
+}
+
+impl<T: Serialize> From<Subquery> for SetterArg<T> {
+    fn from(value: Subquery) -> Self {
+        Self::Subquery(value)
     }
 }
 
