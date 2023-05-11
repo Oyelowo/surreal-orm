@@ -1,0 +1,16 @@
+---
+source: surrealdb-orm-tests/tests/query_ifelse.rs
+assertion_line: 81
+expression: queries.to_raw().build()
+---
+LET $val = 7;
+
+LET $name = 'Oyelowo';
+
+IF $val > 8 THEN
+	(SELECT * FROM space_ship)
+ELSE IF $name = 'Oyelowo' THEN
+	(SELECT * FROM weapon)
+ELSE
+	5
+END
