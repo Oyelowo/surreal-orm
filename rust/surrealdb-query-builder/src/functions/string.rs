@@ -59,7 +59,7 @@ pub fn len_fn(string: impl Into<StrandLike>) -> Function {
 /// let len = string::len!(string_field);
 /// assert_eq!(len.to_raw().build(), "string::length(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let len = string::len!(string_param);
 /// assert_eq!(len.to_raw().build(), "string::length($string_param)");
 /// ```
@@ -91,7 +91,7 @@ pub fn lowercase_fn(string: impl Into<StrandLike>) -> Function {
 /// let lowercase = string::lowercase!(string_field);
 /// assert_eq!(lowercase.to_raw().build(), "string::lowercase(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let lowercase = string::lowercase!(string_param);
 /// assert_eq!(lowercase.to_raw().build(), "string::lowercase($string_param)");
 /// ```
@@ -127,7 +127,7 @@ pub fn uppercase_fn(string: impl Into<StrandLike>) -> Function {
 /// let uppercase = string::uppercase!(string_field);
 /// assert_eq!(uppercase.to_raw().build(), "string::uppercase(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let uppercase = string::uppercase!(string_param);
 /// assert_eq!(uppercase.to_raw().build(), "string::uppercase($string_param)");
 /// ```
@@ -161,7 +161,7 @@ pub fn words_fn(string: impl Into<StrandLike>) -> Function {
 /// let words = string::words!(string_field);
 /// assert_eq!(words.to_raw().build(), "string::words(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let words = string::words!(string_param);
 /// assert_eq!(words.to_raw().build(), "string::words($string_param)");
 /// ```
@@ -195,7 +195,7 @@ pub fn reverse_fn(string: impl Into<StrandLike>) -> Function {
 /// let reverse = string::reverse!(string_field);
 /// assert_eq!(reverse.to_raw().build(), "string::reverse(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let reverse = string::reverse!(string_param);
 /// assert_eq!(reverse.to_raw().build(), "string::reverse($string_param)");
 /// ```
@@ -230,7 +230,7 @@ pub fn trim_fn(string: impl Into<StrandLike>) -> Function {
 /// let trim = string::trim!(string_field);
 /// assert_eq!(trim.to_raw().build(), "string::trim(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let trim = string::trim!(string_param);
 /// assert_eq!(trim.to_raw().build(), "string::trim($string_param)");
 /// ```
@@ -264,7 +264,7 @@ pub fn slug_fn(string: impl Into<StrandLike>) -> Function {
 /// let slug = string::slug!(string_field);
 /// assert_eq!(slug.to_raw().build(), "string::slug(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let slug = string::slug!(string_param);
 /// assert_eq!(slug.to_raw().build(), "string::slug($string_param)");
 /// ```
@@ -319,7 +319,7 @@ pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
 /// let concat = string::concat!(string_field, "Oyedayo");
 /// assert_eq!(concat.to_raw().build(), "string::concat(string_field, 'Oyedayo')");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let concat = string::concat!(string_param, "Oyedayo");
 /// assert_eq!(concat.to_raw().build(), "string::concat($string_param, 'Oyedayo')");
 /// ```
@@ -367,7 +367,7 @@ pub fn join_fn(values: impl Into<ArgsList>) -> Function {
 /// let join = string::join!(string_field);
 /// assert_eq!(join.to_raw().build(), "string::join(string_field)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let join = string::join!(string_param);
 /// assert_eq!(join.to_raw().build(), "string::join($string_param)");
 /// ```
@@ -416,7 +416,7 @@ pub fn ends_with_fn(string: impl Into<StrandLike>, ending: impl Into<StrandLike>
 /// let string_field = Field::new("string_field");
 /// let ends_with = string::ends_with!(string_field, "Oyedayo");
 /// assert_eq!(ends_with.to_raw().build(), "string::ends_with(string_field, 'Oyedayo')");
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let ends_with = string::ends_with!(string_param, "Oyedayo");
 /// assert_eq!(ends_with.to_raw().build(), "string::ends_with($string_param, 'Oyedayo')");
 /// ```
@@ -468,7 +468,7 @@ pub fn starts_with_fn(string: impl Into<StrandLike>, starting: impl Into<StrandL
 /// let starts_with = string::starts_with!(string_field, "Oyedayo");
 /// assert_eq!(starts_with.to_raw().build(), "string::starts_with(string_field, 'Oyedayo')");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let starts_with = string::starts_with!(string_param, "Oyedayo");
 /// assert_eq!(starts_with.to_raw().build(), "string::starts_with($string_param, 'Oyedayo')");
 /// ```
@@ -514,7 +514,7 @@ pub fn split_fn(string: impl Into<StrandLike>, by: impl Into<StrandLike>) -> Fun
 /// let split = string::split!(string_field, " ");
 /// assert_eq!(split.to_raw().build(), "string::split(string_field, ' ')");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let split = string::split!(string_param, " ");
 /// assert_eq!(split.to_raw().build(), "string::split($string_param, ' ')");
 /// ```
@@ -560,7 +560,7 @@ pub fn repeat_fn(string: impl Into<StrandLike>, ending: impl Into<NumberLike>) -
 /// let repeat = string::repeat!(string_field, 3);
 ///
 /// assert_eq!(repeat.to_raw().build(), "string::repeat(string_field, 3)");
-/// let string_param = let_("string_param").equal("Oyelowo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo").get_param();
 /// let repeat = string::repeat!(string_param, 3);
 /// assert_eq!(repeat.to_raw().build(), "string::repeat($string_param, 3)");
 /// ```
@@ -618,7 +618,7 @@ pub fn slice_fn(
 /// let slice = string::slice!(string_field, 0, 7);
 /// assert_eq!(slice.to_raw().build(), "string::slice(string_field, 0, 7)");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let slice = string::slice!(string_param, 0, 7);
 /// assert_eq!(slice.to_raw().build(), "string::slice($string_param, 0, 7)");
 /// ```
@@ -677,7 +677,7 @@ pub fn replace_fn(
 /// let replace = string::replace!(string_field, "Oyedayo", "Oyelowo");
 /// assert_eq!(replace.to_raw().build(), "string::replace(string_field, 'Oyedayo', 'Oyelowo')");
 ///
-/// let string_param = let_("string_param").equal("Oyelowo Oyedayo").get_param();
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
 /// let replace = string::replace!(string_param, "Oyedayo", "Oyelowo");
 /// assert_eq!(replace.to_raw().build(), "string::replace($string_param, 'Oyedayo', 'Oyelowo')");
 /// ```

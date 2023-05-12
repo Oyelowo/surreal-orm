@@ -29,6 +29,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -49,6 +50,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -69,6 +71,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -89,6 +92,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -109,6 +113,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -129,6 +134,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -149,6 +155,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -169,6 +176,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -189,6 +197,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -209,6 +218,7 @@ where
         TargettablesForSelect::RecordRange(Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         })
     }
 }
@@ -231,6 +241,7 @@ macro_rules! create_range {
                 TargettablesForSelect::RecordRange(Valuex {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
+                    errors: vec![],
                 })
             }
         }
@@ -250,6 +261,7 @@ macro_rules! create_range {
                 TargettablesForSelect::RecordRange(Valuex {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
+                    errors: vec![],
                 })
             }
         }
@@ -269,6 +281,7 @@ macro_rules! create_range {
                 TargettablesForSelect::RecordRange(Valuex {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
+                    errors: vec![],
                 })
             }
         }
@@ -288,6 +301,7 @@ macro_rules! create_range {
                 TargettablesForSelect::RecordRange(Valuex {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
+                    errors: vec![],
                 })
             }
         }
@@ -307,6 +321,7 @@ macro_rules! create_range {
                 TargettablesForSelect::RecordRange(Valuex {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
+                    errors: vec![],
                 })
             }
         }

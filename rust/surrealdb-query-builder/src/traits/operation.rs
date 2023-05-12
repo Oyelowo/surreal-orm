@@ -853,7 +853,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         T: Into<ArrayLike>,
     {
         let value = value.into();
-        self.generate_query(sql::Operator::AllInside, value)
+        self.generate_query(sql::Operator::AnyInside, value)
     }
 
     /// `NONEINSIDE` or `⊄` Check whether none of multiple values are contained within another value.

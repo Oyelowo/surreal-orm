@@ -43,7 +43,11 @@ impl From<Ordinal> for Valuex {
                 (param, vec![binding])
             }
         };
-        Valuex { string, bindings }
+        Valuex {
+            string,
+            bindings,
+            errors: vec![],
+        }
     }
 }
 

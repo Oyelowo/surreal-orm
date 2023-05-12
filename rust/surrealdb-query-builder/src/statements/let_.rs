@@ -24,10 +24,10 @@ use crate::{
 /// use surrealdb_orm::{*, statements::{let_, select}};
 /// # let user = Table::new("user");
 /// // You can assign a value surrealdb value
-/// let_("name").equal(5);
+/// let_("name").equal_to(5);
 ///
 /// // and even a select statement
-/// let_("users").equal(select(All).from(user));
+/// let_("users").equal_to(select(All).from(user));
 pub fn let_(parameter: impl Into<Param>) -> LetStatement {
     let param: Param = parameter.into();
     LetStatement {

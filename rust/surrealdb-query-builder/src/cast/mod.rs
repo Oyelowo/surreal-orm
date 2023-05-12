@@ -51,6 +51,7 @@ macro_rules! create_cast_function {
                 Cast(Valuex {
                     string,
                     bindings: value.get_bindings(),
+                    errors: value.get_errors(),
                 })
             }
 

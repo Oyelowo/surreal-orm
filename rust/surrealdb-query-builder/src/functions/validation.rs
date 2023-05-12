@@ -153,7 +153,7 @@ pub mod is {
         /// let result = is::alphanum!(alphanum_field);
         /// assert_eq!(result.to_raw().to_string(), "is::alphanum(alphanum_field)");
         ///
-        /// let alphanum_param = let_("alphanum_param").equal("oyelowo1234").get_param();
+        /// let alphanum_param = let_("alphanum_param").equal_to("oyelowo1234").get_param();
         /// let result = is::alphanum!(alphanum_param);
         /// assert_eq!(result.fine_tune_params(), "is::alphanum($alphanum_param)");
         /// ```
@@ -182,7 +182,7 @@ pub mod is {
         /// let result = is::alpha!(alpha_field);
         /// assert_eq!(result.to_raw().to_string(), "is::alpha(alpha_field)");
         ///
-        /// let alpha_param = let_("alpha_param").equal("oyelowo").get_param();
+        /// let alpha_param = let_("alpha_param").equal_to("oyelowo").get_param();
         /// let result = is::alpha!(alpha_param);
         /// assert_eq!(result.fine_tune_params(), "is::alpha($alpha_param)");
         /// ```
@@ -211,7 +211,7 @@ pub mod is {
         /// let result = is::ascii!(ascii_field);
         /// assert_eq!(result.to_raw().to_string(), "is::ascii(ascii_field)");
         ///
-        /// let ascii_param = let_("ascii_param").equal("oyelowo").get_param();
+        /// let ascii_param = let_("ascii_param").equal_to("oyelowo").get_param();
         /// let result = is::ascii!(ascii_param);
         /// assert_eq!(result.fine_tune_params(), "is::ascii($ascii_param)");
         /// ```
@@ -240,7 +240,7 @@ pub mod is {
         /// let result = is::domain!(domain_field);
         /// assert_eq!(result.to_raw().to_string(), "is::domain(domain_field)");
         ///
-        /// let domain_param = let_("domain_param").equal("oyelowo.com").get_param();
+        /// let domain_param = let_("domain_param").equal_to("oyelowo.com").get_param();
         /// let result = is::domain!(domain_param);
         /// assert_eq!(result.fine_tune_params(), "is::domain($domain_param)");
         /// ```
@@ -269,7 +269,7 @@ pub mod is {
         /// let result = is::email!(email_field);
         /// assert_eq!(result.to_raw().to_string(), "is::email(email_field)");
         ///
-        /// let email_param = let_("email_param").equal("oyelowo@codebreather").get_param();
+        /// let email_param = let_("email_param").equal_to("oyelowo@codebreather").get_param();
         ///
         /// let result = is::email!(email_param);
         /// assert_eq!(result.fine_tune_params(), "is::email($email_param)");
@@ -299,7 +299,7 @@ pub mod is {
             /// let result = is::hexadecimal!(hexadecimal_field);
             /// assert_eq!(result.to_raw().to_string(), "is::hexadecimal(hexadecimal_field)");
             ///
-            /// let hexadecimal_param = let_("hexadecimal_param").equal("oyelowo").get_param();
+            /// let hexadecimal_param = let_("hexadecimal_param").equal_to("oyelowo").get_param();
             /// let result = is::hexadecimal!(hexadecimal_param);
             /// assert_eq!(result.fine_tune_params(), "is::hexadecimal($hexadecimal_param)");
             /// ```
@@ -328,7 +328,7 @@ pub mod is {
         /// let result = is::latitude!(latitude_field);
         /// assert_eq!(result.to_raw().to_string(), "is::latitude(latitude_field)");
         ///
-        /// let latitude_param = let_("latitude_param").equal("oyelowo").get_param();
+        /// let latitude_param = let_("latitude_param").equal_to("oyelowo").get_param();
         /// let result = is::latitude!(latitude_param);
         /// assert_eq!(result.fine_tune_params(), "is::latitude($latitude_param)");
         /// ```
@@ -357,7 +357,7 @@ pub mod is {
         /// let result = is::longitude!(longitude_field);
         /// assert_eq!(result.to_raw().to_string(), "is::longitude(longitude_field)");
         ///
-        /// let longitude_param = let_("longitude_param").equal("oyelowo").get_param();
+        /// let longitude_param = let_("longitude_param").equal_to("oyelowo").get_param();
         /// let result = is::longitude!(longitude_param);
         /// assert_eq!(result.fine_tune_params(), "is::longitude($longitude_param)");
         /// ```
@@ -386,7 +386,7 @@ pub mod is {
         /// let result = is::numeric!(numeric_field);
         /// assert_eq!(result.to_raw().to_string(), "is::numeric(numeric_field)");
         ///
-        /// let numeric_param = let_("numeric_param").equal("oyelowo").get_param();
+        /// let numeric_param = let_("numeric_param").equal_to("oyelowo").get_param();
         /// let result = is::numeric!(numeric_param);
         /// assert_eq!(result.fine_tune_params(), "is::numeric($numeric_param)");
         /// ```
@@ -415,7 +415,7 @@ pub mod is {
         /// let result = is::semver!(semver_field);
         /// assert_eq!(result.to_raw().to_string(), "is::semver(semver_field)");
         ///
-        /// let semver_param = let_("semver_param").equal("oyelowo").get_param();
+        /// let semver_param = let_("semver_param").equal_to("oyelowo").get_param();
         /// let result = is::semver!(semver_param);
         /// assert_eq!(result.fine_tune_params(), "is::semver($semver_param)");
         /// ```
@@ -444,7 +444,7 @@ pub mod is {
         /// let result = is::uuid!(uuid_field);
         /// assert_eq!(result.to_raw().to_string(), "is::uuid(uuid_field)");
         ///
-        /// let uuid_param = let_("uuid_param").equal("oyelowo").get_param();
+        /// let uuid_param = let_("uuid_param").equal_to("oyelowo").get_param();
         /// let result = is::uuid!(uuid_param);
         /// assert_eq!(result.fine_tune_params(), "is::uuid($uuid_param)");
         /// ```
@@ -473,7 +473,7 @@ pub mod is {
         /// let result = is::datetime!(datetime_field);
         /// assert_eq!(result.to_raw().to_string(), "is::datetime(datetime_field)");
         ///
-        /// let datetime_param = let_("datetime_param").equal("oyelowo").get_param();
+        /// let datetime_param = let_("datetime_param").equal_to("oyelowo").get_param();
         /// let result = is::datetime!(datetime_param);
         /// assert_eq!(result.fine_tune_params(), "is::datetime($datetime_param)");
         /// ```

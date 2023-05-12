@@ -572,6 +572,7 @@ impl<T: Into<Field>> From<T> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -581,6 +582,7 @@ impl From<Vec<Valuex>> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -590,6 +592,7 @@ impl From<&All> for Selectables {
         Self(Valuex {
             string: "*".into(),
             bindings: vec![],
+            errors: vec![],
         })
     }
 }
@@ -599,6 +602,7 @@ impl From<All> for Selectables {
         Self(Valuex {
             string: "*".into(),
             bindings: vec![],
+            errors: vec![],
         })
     }
 }
@@ -608,6 +612,7 @@ impl<'a, const N: usize> From<&[Field; N]> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -617,6 +622,7 @@ impl<'a, const N: usize> From<&[&Field; N]> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -626,6 +632,7 @@ impl From<Vec<&Field>> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -635,6 +642,7 @@ impl From<Vec<Field>> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -662,6 +670,7 @@ impl From<Function> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -671,6 +680,7 @@ impl From<&Function> for Selectables {
         Self(Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }

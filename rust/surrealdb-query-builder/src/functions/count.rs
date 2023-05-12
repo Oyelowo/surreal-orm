@@ -64,7 +64,7 @@ pub fn count_fn(countable: impl Into<Valuex>) -> Function {
 /// # let email_field = Field::new("email_field");
 /// count!(email_field);
 ///
-/// let email_param = let_("email_param").equal("oyelowo@codebreather.com").get_param();
+/// let email_param = let_("email_param").equal_to("oyelowo@codebreather.com").get_param();
 /// count!(email_param);
 #[macro_export]
 macro_rules! count {

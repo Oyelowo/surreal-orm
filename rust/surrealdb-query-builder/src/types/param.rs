@@ -79,6 +79,7 @@ impl Param {
                 .into_iter()
                 .chain(clause.get_bindings())
                 .collect::<Vec<_>>(),
+            errors: self.get_errors(),
         };
 
         T::schema_prefixed(value)
