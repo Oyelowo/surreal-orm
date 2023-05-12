@@ -112,9 +112,9 @@ mod tests {
 
     #[test]
     fn test_function_with_params_with_variable_interpolation_in_the_function() {
-        let value = let_("value").equal("SurrealDB").get_param();
+        let value = let_("value").equal_to("SurrealDB").get_param();
         let words = let_("words")
-            .equal(vec!["awesome", "advanced", "cool"])
+            .equal_to(vec!["awesome", "advanced", "cool"])
             .get_param();
 
         let f2 = function!(
@@ -135,9 +135,9 @@ mod tests {
 
     #[test]
     fn test_function_with_params_without_variable_interpolation_in_the_function() {
-        let value = let_("value").equal("SurrealDB").get_param();
+        let value = let_("value").equal_to("SurrealDB").get_param();
         let words = let_("words")
-            .equal(vec!["awesome", "advanced", "cool"])
+            .equal_to(vec!["awesome", "advanced", "cool"])
             .get_param();
 
         let f2 = function!((value, words), {

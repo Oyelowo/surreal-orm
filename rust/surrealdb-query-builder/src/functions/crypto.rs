@@ -1,4 +1,4 @@
-/*
+*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
@@ -498,8 +498,8 @@ mod tests {
 
     #[test]
     fn test_argon2_compare_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = argon2::compare_fn(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -556,8 +556,8 @@ mod tests {
 
     #[test]
     fn test_argon2_compare_macro_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = argon2::compare!(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -586,8 +586,8 @@ mod tests {
     // pbkdf2
     #[test]
     fn test_pbkdf2_compare_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = pbkdf2::compare_fn(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -644,8 +644,8 @@ mod tests {
 
     #[test]
     fn test_pbkdf2_compare_macro_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = pbkdf2::compare!(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -673,8 +673,8 @@ mod tests {
 
     #[test]
     fn test_scrypt_compare_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = scrypt::compare_fn(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -731,8 +731,8 @@ mod tests {
 
     #[test]
     fn test_scrypt_compare_macro_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = scrypt::compare!(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -762,8 +762,8 @@ mod tests {
     // Create all tests for bcrypt
     #[test]
     fn test_bcrypt_compare_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = bcrypt::compare_fn(hash.get_param(), pass.get_param());
         assert_eq!(
@@ -820,8 +820,8 @@ mod tests {
 
     #[test]
     fn test_bcrypt_compare_macro_with_param() {
-        let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-        let pass = let_("pass").equal("the strongest password");
+        let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+        let pass = let_("pass").equal_to("the strongest password");
 
         let result = bcrypt::compare!(hash.get_param(), pass.get_param());
         assert_eq!(

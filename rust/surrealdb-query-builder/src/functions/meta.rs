@@ -116,7 +116,7 @@ mod tests {
         let result = id!(id_field);
         assert_eq!(result.to_raw().build(), format!("meta::id(id_field)"));
 
-        let id_param = let_("id_param").equal("person:oyelowo").get_param();
+        let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
         let result = id!(id_param);
         assert_eq!(result.to_raw().build(), format!("meta::id($id_param)"));
     }
@@ -131,7 +131,7 @@ mod tests {
         let result = tb!(id_field);
         assert_eq!(result.to_raw().build(), format!("meta::tb(id_field)"));
 
-        let id_param = let_("id_param").equal("person:oyelowo").get_param();
+        let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
         let result = tb!(id_param);
         assert_eq!(result.to_raw().build(), format!("meta::tb($id_param)"));
     }

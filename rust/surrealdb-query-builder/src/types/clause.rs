@@ -748,7 +748,7 @@ mod test {
     #[test]
     fn test_display_clause_with_param() {
         let table = Table::new("students");
-        let devs = let_("devs").equal(select(All).from(table));
+        let devs = let_("devs").equal_to(select(All).from(table));
         let clause = NodeClause::from(devs.get_param());
         assert_eq!(clause.build(), "$devs");
         assert_eq!(clause.to_raw().build(), "$devs");
@@ -757,7 +757,7 @@ mod test {
     #[test]
     fn test_display_clause_with_let_statement() {
         let table = Table::new("students");
-        let devs = let_("devs").equal(select(All).from(table));
+        let devs = let_("devs").equal_to(select(All).from(table));
         let clause = NodeClause::from(devs);
         assert_eq!(clause.build(), "$devs");
         assert_eq!(clause.to_raw().build(), "$devs");
