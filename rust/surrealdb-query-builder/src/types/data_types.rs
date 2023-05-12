@@ -183,6 +183,63 @@ impl From<&Field> for ArrayLike {
     }
 }
 
+impl From<SelectStatement> for ArrayLike {
+    fn from(statement: SelectStatement) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl<T> From<CreateStatement<T>> for ArrayLike
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: CreateStatement<T>) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl<T> From<UpdateStatement<T>> for ArrayLike
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: UpdateStatement<T>) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl<T> From<DeleteStatement<T>> for ArrayLike
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl<T> From<RelateStatement<T>> for ArrayLike
+where
+    T: SurrealdbEdge + Serialize + DeserializeOwned,
+{
+    fn from(statement: RelateStatement<T>) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl<T> From<InsertStatement<T>> for ArrayLike
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: InsertStatement<T>) -> Self {
+        Self(statement.into())
+    }
+}
+
+impl From<IfElseStatement> for ArrayLike {
+    fn from(statement: IfElseStatement) -> Self {
+        Self(statement.into())
+    }
+}
+
 struct Array(sql::Array);
 
 impl From<Array> for sql::Array {
