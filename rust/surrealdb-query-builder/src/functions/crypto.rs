@@ -206,8 +206,8 @@ pub mod argon2 {
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
-    /// let hash = let_("hash").equal("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let hash = let_("hash").equal_to("$argon2id$v=19$m=4096,t=3,p=1$pbZ6yJ2rPJKk4pyEMVwslQ$jHzpsiB+3S/H+kwFXEcr10vmOiDkBkydVCSMfRxV7CA");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     ///
     /// let result = crypto::argon2::compare!(hash.get_param(), pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::argon2::compare($hash, $pass)");
@@ -219,7 +219,7 @@ pub mod argon2 {
     /// assert_eq!(result.to_raw().build(), "crypto::argon2::compare(hash_field, 'Oyelowo')");
     ///
     /// let hash_field = Field::new("hash_field");
-    /// let pass = let_("pass").equal("Oyelowo");
+    /// let pass = let_("pass").equal_to("Oyelowo");
     /// let result = crypto::argon2::compare!(hash_field, pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::argon2::compare(hash_field, $pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::argon2::compare(hash_field, $pass)");
@@ -249,7 +249,7 @@ pub mod argon2 {
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
     /// crypto::argon2::generate!("password from jupiter");
     ///
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// let result = crypto::argon2::generate!(pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::argon2::generate($pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::argon2::generate($pass)");
@@ -283,8 +283,8 @@ pub mod bcrypt {
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
-    /// let hash = let_("hash").equal("bcrypt_hash");
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let hash = let_("hash").equal_to("bcrypt_hash");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// let result = crypto::bcrypt::compare!(hash.get_param(), pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::bcrypt::compare($hash, $pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::bcrypt::compare($hash, $pass)");
@@ -317,7 +317,7 @@ pub mod bcrypt {
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
     /// crypto::bcrypt::generate!("password from jupiter");
     ///
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// let result = crypto::bcrypt::generate!(pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::bcrypt::generate($pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::bcrypt::generate($pass)");
@@ -352,8 +352,8 @@ pub mod pbkdf2 {
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
-    /// let hash = let_("hash").equal("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let hash = let_("hash").equal_to("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     ///
     /// let result = crypto::pbkdf2::compare!(hash.get_param(), pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::compare($hash, $pass)");
@@ -365,7 +365,7 @@ pub mod pbkdf2 {
     /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::compare(hash_field, 'Oyelowo')");
     ///
     /// let hash_field = Field::new("hash_field");
-    /// let pass = let_("pass").equal("Oyelowo");
+    /// let pass = let_("pass").equal_to("Oyelowo");
     /// let result = crypto::pbkdf2::compare!(hash_field, pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::compare(hash_field, $pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::compare(hash_field, $pass)");
@@ -394,7 +394,7 @@ pub mod pbkdf2 {
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
     /// crypto::pbkdf2::generate!("password from jupiter");
     ///
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// let result = crypto::pbkdf2::generate!(pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::pbkdf2::generate($pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::pbkdf2::generate($pass)");
@@ -430,8 +430,8 @@ pub mod scrypt {
     /// ```rust
     /// # use surrealdb_query_builder as  surrealdb_orm;
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
-    /// let hash = let_("hash").equal("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let hash = let_("hash").equal_to("pbkdf2$sha256$1000$ZG9uZQ==$MjAxOS0wNC0xMCAxMzowMzowMA==$c2FsdA==");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// crypto::scrypt::compare!(hash.get_param(), pass.get_param());
     ///
     /// let hash_field = Field::new("hash_field");
@@ -464,7 +464,7 @@ pub mod scrypt {
     /// use surrealdb_orm::{*, statements::let_, functions::crypto};
     /// crypto::scrypt::generate!("password from jupiter");
     ///
-    /// let pass = let_("pass").equal("this is a strong password");
+    /// let pass = let_("pass").equal_to("this is a strong password");
     /// let result = crypto::scrypt::generate!(pass.get_param());
     /// assert_eq!(result.fine_tune_params(), "crypto::scrypt::generate($pass)");
     /// assert_eq!(result.to_raw().build(), "crypto::scrypt::generate($pass)");

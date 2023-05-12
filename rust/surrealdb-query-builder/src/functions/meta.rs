@@ -42,7 +42,7 @@ pub fn id_fn(record_id: impl Into<ThingLike>) -> crate::Function {
 /// let result = meta::id!(id_field);
 /// assert_eq!(result.to_raw().build(), format!("meta::id(id_field)"));
 ///
-/// let id_param = let_("id_param").equal("person:oyelowo").get_param();
+/// let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
 /// let result = meta::id!(id_param);
 /// assert_eq!(result.to_raw().build(), format!("meta::id($id_param)"));
 /// ```
@@ -86,7 +86,7 @@ pub fn tb_fn(record_id: impl Into<ThingLike>) -> crate::Function {
 /// let result = meta::tb!(id_field);
 /// assert_eq!(result.to_raw().build(), format!("meta::tb(id_field)"));
 ///
-/// let id_param = let_("id_param").equal("person:oyelowo").get_param();
+/// let id_param = let_("id_param").equal_to("person:oyelowo").get_param();
 /// let result = meta::tb!(id_param);
 /// assert_eq!(result.to_raw().build(), format!("meta::tb($id_param)"));
 /// ```

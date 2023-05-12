@@ -319,7 +319,7 @@ create_type!(
     /// let result = type_::table!(table_field);
     /// assert_eq!(result.to_raw().build(), "type::table(table_field)");
     ///
-    /// let table_param = let_("table_param").equal("user").get_param();
+    /// let table_param = let_("table_param").equal_to("user").get_param();
     /// let result = type_::table!(table_param);
     /// assert_eq!(result.to_raw().build(), "type::table($table_param)");
     /// ```
@@ -363,8 +363,8 @@ pub fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) ->
 /// let result = type_::point!(point1_field, point2_field);
 /// assert_eq!(result.to_raw().build(), "type::point(point1_field, point2_field)");
 ///
-/// let point1_param = let_("point1_param").equal(1234).get_param();
-/// let point2_param = let_("point2_param").equal(1234).get_param();
+/// let point1_param = let_("point1_param").equal_to(1234).get_param();
+/// let point2_param = let_("point2_param").equal_to(1234).get_param();
 /// let result = type_::point!(point1_param, point2_param);
 /// assert_eq!(result.to_raw().build(), "type::point($point1_param, $point2_param)");
 /// ```
@@ -413,8 +413,8 @@ pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<Valuex>) -> Functi
 /// let result = type_::thing!(table_field, value_field);
 /// assert_eq!(result.to_raw().build(), "type::thing(table_field, value_field)");
 ///
-/// let table_param = let_("table_param").equal("user").get_param();
-/// let value_param = let_("value_param").equal(1234).get_param();
+/// let table_param = let_("table_param").equal_to("user").get_param();
+/// let value_param = let_("value_param").equal_to(1234).get_param();
 /// let result = type_::thing!(table_param, value_param);
 /// assert_eq!(result.to_raw().build(), "type::thing($table_param, $value_param)");
 /// ```

@@ -62,8 +62,8 @@ pub fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>)
 /// // Function arguments
 /// // Additional arguments can be passed in to the function from SurrealDB, and these are accessible using the arguments object within the JavaScript function.
 /// // Create a new parameter
-/// let value = let_("value").equal("SurrealDB").get_param();
-/// let words = let_("words").equal(vec!["awesome", "advanced", "cool"]).get_param();
+/// let value = let_("value").equal_to("SurrealDB").get_param();
+/// let words = let_("words").equal_to(vec!["awesome", "advanced", "cool"]).get_param();
 /// // Pass the parameter values into the function
 /// let f3 = function!((value, words), "{
 ///   return `${arguments[0]} is ${arguments[1]}`;
