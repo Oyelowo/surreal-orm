@@ -77,6 +77,7 @@ fn statement_str_to_subquery(
         sql::Statement::Relate(s) => sql::Subquery::Relate(s.to_owned()),
         sql::Statement::Insert(s) => sql::Subquery::Insert(s.to_owned()),
         sql::Statement::Update(s) => sql::Subquery::Update(s.to_owned()),
+        // sql::Statement::Value(s) => sql::Subquery::Value(s.to_owned()),
         // sql::Statement::Value(s) => Subquery::Value(s.to_owned()),
         sql::Statement::Delete(s) => sql::Subquery::Delete(s.to_owned()),
         _ => return Err(SurrealdbOrmError::InvalidSubquery(statement.to_string())),
@@ -177,5 +178,11 @@ where
 impl From<IfElseStatement> for Subquery {
     fn from(statement: IfElseStatement) -> Self {
         statement_to_subquery(statement)
+    }
+}
+
+impl From<Valuex> for Subquery {
+    fn from(statement: Valuex) -> Self {
+        Valuex::from(statement).into()
     }
 }
