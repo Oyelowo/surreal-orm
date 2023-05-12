@@ -6,9 +6,14 @@
  */
 
 use crate::{
-    Alias, All, Binding, BindingsList, Buildable, Field, Filter, Function, Operation, Param,
-    Parametric, E, NONE, NULL,
+    statements::{
+        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
+        SelectStatement, Subquery, UpdateStatement,
+    },
+    Alias, All, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Filter, Function,
+    Operation, Param, Parametric, SurrealdbEdge, SurrealdbModel, SurrealdbNode, E, NONE, NULL,
 };
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 /// A value that can be used in a SQL statement. Serves as the bind and arbiter between
@@ -17,6 +22,7 @@ use surrealdb::sql;
 pub struct Valuex {
     pub(crate) string: String,
     pub(crate) bindings: BindingsList,
+    pub(crate) errors: ErrorList,
 }
 
 impl Parametric for Valuex {
@@ -29,6 +35,20 @@ impl Parametric for Vec<Valuex> {
     fn get_bindings(&self) -> BindingsList {
         self.into_iter()
             .flat_map(|m| m.get_bindings())
+            .collect::<Vec<_>>()
+    }
+}
+
+impl Erroneous for Valuex {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
+
+impl Erroneous for Vec<Valuex> {
+    fn get_errors(&self) -> ErrorList {
+        self.into_iter()
+            .flat_map(|m| m.get_errors())
             .collect::<Vec<_>>()
     }
 }
@@ -53,6 +73,7 @@ impl From<&Field> for Valuex {
         Self {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -62,6 +83,7 @@ impl From<Field> for Valuex {
         Self {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -71,6 +93,7 @@ impl From<Param> for Valuex {
         Self {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -80,6 +103,7 @@ impl From<Alias> for Valuex {
         Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -89,6 +113,7 @@ impl From<All> for Valuex {
         Valuex {
             string: "*".to_string(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 }
@@ -98,6 +123,7 @@ impl From<NULL> for Valuex {
         Valuex {
             string: "NULL".to_string(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 }
@@ -107,6 +133,7 @@ impl From<E> for Valuex {
         Valuex {
             string: "".to_string(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 }
@@ -116,6 +143,7 @@ impl From<NONE> for Valuex {
         Valuex {
             string: "NONE".to_string(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 }
@@ -125,6 +153,7 @@ impl From<Filter> for Valuex {
         Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -134,6 +163,7 @@ impl From<Operation> for Valuex {
         Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -143,6 +173,7 @@ impl From<Function> for Valuex {
         Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         }
     }
 }
@@ -155,7 +186,78 @@ impl<T: Into<sql::Value>> From<T> for Valuex {
         Valuex {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
+            errors: vec![],
         }
+    }
+}
+
+fn statement_to_valuex<T>(statement: T) -> Valuex
+where
+    T: Into<Subquery>,
+{
+    let subquery: Subquery = statement.into();
+
+    Valuex {
+        string: subquery.build(),
+        bindings: subquery.get_bindings(),
+        errors: subquery.get_errors(),
+    }
+}
+
+impl From<SelectStatement> for Valuex {
+    fn from(statement: SelectStatement) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl<T> From<CreateStatement<T>> for Valuex
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: CreateStatement<T>) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl<T> From<UpdateStatement<T>> for Valuex
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: UpdateStatement<T>) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl<T> From<DeleteStatement<T>> for Valuex
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl<T> From<RelateStatement<T>> for Valuex
+where
+    T: SurrealdbEdge + Serialize + DeserializeOwned,
+{
+    fn from(statement: RelateStatement<T>) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl<T> From<InsertStatement<T>> for Valuex
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: InsertStatement<T>) -> Self {
+        statement_to_valuex(statement)
+    }
+}
+
+impl From<IfElseStatement> for Valuex {
+    fn from(statement: IfElseStatement) -> Self {
+        statement_to_valuex(statement)
     }
 }
 

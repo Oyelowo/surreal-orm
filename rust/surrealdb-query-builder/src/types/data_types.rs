@@ -1,4 +1,12 @@
-use crate::{Binding, BindingsList, Buildable, Field, Param, Parametric, Valuex};
+use crate::{
+    statements::{
+        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
+        SelectStatement, Subquery, UpdateStatement,
+    },
+    Binding, BindingsList, Buildable, Erroneous, Field, Param, Parametric, SurrealdbEdge,
+    SurrealdbModel, SurrealdbNode, Valuex,
+};
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 macro_rules! create_value_like_struct {
@@ -50,6 +58,59 @@ macro_rules! create_value_like_struct {
             impl From<&Field> for [<$sql_type_name Like>] {
                 fn from(val: &Field) -> Self {
                     [<$sql_type_name Like>](val.clone().into())
+                }
+            }
+
+
+            impl<T> From<CreateStatement<T>> for [<$sql_type_name Like>]
+            where
+                T: SurrealdbNode + Serialize + DeserializeOwned,
+            {
+                fn from(statement: CreateStatement<T>) -> Self {
+                    [<$sql_type_name Like>](statement.into())
+
+                }
+            }
+
+            impl<T> From<UpdateStatement<T>> for [<$sql_type_name Like>]
+            where
+                T: SurrealdbModel + Serialize + DeserializeOwned,
+            {
+                fn from(statement: UpdateStatement<T>) -> Self {
+                    [<$sql_type_name Like>](statement.into())
+                }
+            }
+
+            impl<T> From<DeleteStatement<T>> for [<$sql_type_name Like>]
+            where
+                T: SurrealdbModel + Serialize + DeserializeOwned,
+            {
+                fn from(statement: DeleteStatement<T>) -> Self {
+                    [<$sql_type_name Like>](statement.into())
+                }
+            }
+
+            impl<T> From<RelateStatement<T>> for [<$sql_type_name Like>]
+            where
+                T: SurrealdbEdge + Serialize + DeserializeOwned,
+            {
+                fn from(statement: RelateStatement<T>) -> Self {
+                    [<$sql_type_name Like>](statement.into())
+                }
+            }
+
+            impl<T> From<InsertStatement<T>> for [<$sql_type_name Like>]
+            where
+                T: SurrealdbNode + Serialize + DeserializeOwned,
+            {
+                fn from(statement: InsertStatement<T>) -> Self {
+                    [<$sql_type_name Like>](statement.into())
+                }
+            }
+
+            impl From<IfElseStatement> for [<$sql_type_name Like>] {
+                fn from(statement: IfElseStatement) -> Self {
+                    [<$sql_type_name Like>](statement.into())
                 }
             }
         }
@@ -141,6 +202,7 @@ impl From<Vec<Valuex>> for ArrayLike {
         Self(Valuex {
             string: format!("[{}]", value.build()),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
@@ -177,6 +239,7 @@ impl<T: Into<sql::Value>> From<Vec<T>> for ArgsList {
         Self(Valuex {
             string: params.join(", "),
             bindings,
+            errors: vec![],
         })
     }
 }
@@ -213,6 +276,7 @@ impl From<Vec<Valuex>> for ArgsList {
         Self(Valuex {
             string: format!("{}", value.build()),
             bindings: value.get_bindings(),
+            errors: value.get_errors(),
         })
     }
 }
