@@ -7,7 +7,7 @@
 
 use std::fmt::{self, Display};
 
-use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
+use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
 /// Chains together multiple queries into a single `QueryChain`.
 ///
@@ -85,11 +85,16 @@ impl QueryChain {
     /// # Panics
     ///
     /// This method does not panic.
-    pub fn chain(mut self, query: impl Queryable + Parametric + Display) -> Self {
+    pub fn chain(mut self, query: impl Queryable + Parametric + Buildable) -> Self {
         self.bindings.extend(query.get_bindings());
         self.errors.extend(query.get_errors());
-        self.queries.push(query.to_string());
+        self.queries.push(query.build());
         self
+    }
+
+    /// Surrounds the query chain with a curly brace.
+    pub fn as_block(self) -> Block {
+        self.into()
     }
 }
 
