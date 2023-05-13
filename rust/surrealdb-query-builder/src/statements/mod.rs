@@ -28,6 +28,7 @@ pub(crate) mod remove_namespace;
 pub(crate) mod remove_scope;
 pub(crate) mod remove_table;
 pub(crate) mod remove_token;
+pub(crate) mod return_;
 pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
 pub(crate) mod sleep;
@@ -64,6 +65,7 @@ pub use remove_namespace::{remove_namespace, RemoveNamespaceStatement};
 pub use remove_scope::{remove_scope, RemoveScopeStatement};
 pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
+pub use return_::{return_, ReturnStatement};
 pub use select::{
     order, select, select_value, Order, Orderables, SelectStatement, Selectables, Splittables,
 };

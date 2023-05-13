@@ -84,6 +84,18 @@ impl Buildable for LetStatement {
     }
 }
 
+impl Buildable for &LetStatement {
+    fn build(&self) -> String {
+        let mut query = format!("LET {}", self.get_param().build());
+
+        if let Some(value) = &self.value {
+            query = format!("{query} = {};", value.build());
+        }
+
+        query
+    }
+}
+
 impl Display for LetStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
@@ -95,9 +107,16 @@ impl Parametric for LetStatement {
         self.bindings.to_vec()
     }
 }
+impl Parametric for &LetStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
 
 impl Queryable for LetStatement {}
+impl Queryable for &LetStatement {}
 impl Erroneous for LetStatement {}
+impl Erroneous for &LetStatement {}
 
 #[cfg(test)]
 mod tests {
