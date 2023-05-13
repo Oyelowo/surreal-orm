@@ -10,13 +10,17 @@ use super::select::Fetchables;
 /// # Examples
 /// ```
 /// # use surrealdb_query_builder as surrealdb_orm;
-/// # use surrealdb_orm::*;
+/// use surrealdb_orm::{*, statements::*, functions::*};
 ///
-/// let name = Field::new("name");
-/// let age = Field::new("age");
-/// let query = return_(1).fetch(vec![name, age]);
+/// let user = TestUser::create_id("oyelowo");
+/// let account = Field::new("account");
+/// let connection = Field::new("connection");
 ///
-/// assert_eq!(query.to_raw().build(), "RETURN 1 FETCH name, age");
+/// let query = return_(user).fetch(&[account, connection]);
+/// assert_eq!(
+///     query.to_raw().build(),
+///     "RETURN user:oyelowo FETCH account, connection"
+/// );
 ///
 /// let sales = Table::new("sales");
 /// let metrics = Table::new("metrics");
@@ -138,7 +142,7 @@ mod tests {
     }
 
     #[test]
-    fn test_return_with_let() {
+    fn test_return_with_record() {
         let user = TestUser::create_id("oyelowo");
         let account = Field::new("account");
         let connection = Field::new("connection");
