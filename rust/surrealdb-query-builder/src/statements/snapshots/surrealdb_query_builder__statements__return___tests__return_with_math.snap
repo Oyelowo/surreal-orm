@@ -9,5 +9,5 @@ LET $total = math::sum($sales);
 
 LET $count = count($sales);
 
-RETURN ($total / $count)
+RETURN ($total / $count);
 };

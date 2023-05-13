@@ -44,7 +44,7 @@ pub fn let_(parameter: impl Into<Param>) -> LetStatement {
 /// ```rust
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, statements::{let_, select}};
-/// # let user = Table::new("user");
+/// # let ref user = Table::new("user");
 /// // You can assign a value surrealdb value
 /// let_!(name = 5);
 /// // or

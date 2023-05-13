@@ -21,31 +21,6 @@ use super::select::Fetchables;
 ///     query.to_raw().build(),
 ///     "RETURN user:oyelowo FETCH account, connection"
 /// );
-///
-/// let sales = Table::new("sales");
-/// let metrics = Table::new("metrics");
-/// let quantity = Field::new("quantity");
-/// let average_sales = Field::new("average_sales");
-///
-/// let ref sales = let_("sales").equal_to(select_value(quantity).from(sales));
-/// let ref total = let_("total").equal_to(math::sum!(sales));
-/// let ref count = let_("count").equal_to(count!(sales));
-///
-/// let returned = return_(bracket(total.divide(count)));
-///
-/// let def = define_field(average_sales).on_table(metrics).value(block(
-///     chain(sales).chain(total).chain(count).chain(returned),
-/// ));
-///
-/// assert_eq!(
-///     def.to_raw().build(),
-///     "DEFINE FIELD average_sales ON TABLE metrics VALUE $value OR {\n\
-///         LET $sales = (SELECT VALUE quantity FROM sales);\n\n\
-///         LET $total = math::sum($sales);\n\n\
-///         LET $count = count($sales);\n\n\
-///         RETURN ($total / $count)\n\
-///         };"
-/// );
 /// ```
 pub fn return_(return_value: impl Into<Valuex>) -> ReturnStatement {
     let return_value: Valuex = return_value.into();
@@ -196,7 +171,7 @@ mod tests {
                 LET $sales = (SELECT VALUE quantity FROM sales);\n\n\
                 LET $total = math::sum($sales);\n\n\
                 LET $count = count($sales);\n\n\
-                RETURN ($total / $count)\n\
+                RETURN ($total / $count);\n\
                 };"
         );
     }
