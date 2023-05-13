@@ -33,9 +33,9 @@ use std::{
 use surrealdb::sql;
 
 use crate::{
-    Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, Field,
-    Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect, SurrealId,
-    SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
+    Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
+    ErrorList, Field, Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect,
+    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
 };
 
 use super::Subquery;
@@ -554,7 +554,7 @@ impl From<Vec<Valuex>> for Splittables {
 }
 
 type Groupables = Splittables;
-type Fetchables = Groupables;
+pub(crate) type Fetchables = Groupables;
 
 impl<T: Into<Field>> From<T> for Splittables {
     fn from(value: T) -> Self {
@@ -715,6 +715,7 @@ pub struct SelectStatement {
     timeout: Option<String>,
     parallel: bool,
     bindings: BindingsList,
+    errors: ErrorList,
 }
 
 impl Aliasable for SelectStatement {
@@ -735,7 +736,7 @@ impl Conditional for SelectStatement {
 
 impl Erroneous for SelectStatement {
     fn get_errors(&self) -> Vec<String> {
-        vec![]
+        self.errors.to_vec()
     }
 }
 
@@ -831,6 +832,7 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
         timeout: None,
         parallel: false,
         bindings: selectables.get_bindings(),
+        errors: selectables.get_errors(),
     }
 }
 
@@ -852,6 +854,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
         timeout: None,
         parallel: false,
         bindings: selectables.get_bindings(),
+        errors: selectables.get_errors(),
     }
 }
 
@@ -1274,6 +1277,7 @@ impl SelectStatement {
         fields.iter().for_each(|f| {
             self.fetch.push(f.build());
             self.bindings.extend(f.get_bindings());
+            self.errors.extend(f.get_errors());
         });
         self
     }
