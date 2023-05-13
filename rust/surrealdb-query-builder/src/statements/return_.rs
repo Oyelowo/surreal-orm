@@ -27,22 +27,14 @@ use super::select::Fetchables;
 /// let quantity = Field::new("quantity");
 /// let average_sales = Field::new("average_sales");
 ///
-/// let ref step1_assign_sales = let_("sales").equal_to(select_value(quantity).from(sales));
-/// let ref sales = step1_assign_sales.get_param();
+/// let ref sales = let_("sales").equal_to(select_value(quantity).from(sales));
+/// let ref total = let_("total").equal_to(math::sum!(sales));
+/// let ref count = let_("count").equal_to(count!(sales));
 ///
-/// let ref step2_assign_total = let_("total").equal_to(math::sum!(sales));
-/// let total = step2_assign_total.get_param();
-///
-/// let ref step3_assign_count = let_("count").equal_to(count!(sales));
-/// let count = step3_assign_count.get_param();
-///
-/// let step4_return_last = return_(bracket(total.divide(count)));
+/// let returned = return_(bracket(total.divide(count)));
 ///
 /// let def = define_field(average_sales).on_table(metrics).value(block(
-///     chain(step1_assign_sales)
-///         .chain(step2_assign_total)
-///         .chain(step3_assign_count)
-///         .chain(step4_return_last),
+///     chain(sales).chain(total).chain(count).chain(returned),
 /// ));
 ///
 /// assert_eq!(
@@ -184,22 +176,14 @@ mod tests {
         let quantity = Field::new("quantity");
         let average_sales = Field::new("average_sales");
 
-        let ref step1_assign_sales = let_("sales").equal_to(select_value(quantity).from(sales));
-        let ref sales = step1_assign_sales.get_param();
+        let ref sales = let_("sales").equal_to(select_value(quantity).from(sales));
+        let ref total = let_("total").equal_to(math::sum!(sales));
+        let ref count = let_("count").equal_to(count!(sales));
 
-        let ref step2_assign_total = let_("total").equal_to(math::sum!(sales));
-        let total = step2_assign_total.get_param();
-
-        let ref step3_assign_count = let_("count").equal_to(count!(sales));
-        let count = step3_assign_count.get_param();
-
-        let step4_return_last = return_(bracket(total.divide(count)));
+        let returned = return_(bracket(total.divide(count)));
 
         let def = define_field(average_sales).on_table(metrics).value(block(
-            chain(step1_assign_sales)
-                .chain(step2_assign_total)
-                .chain(step3_assign_count)
-                .chain(step4_return_last),
+            chain(sales).chain(total).chain(count).chain(returned),
         ));
 
         insta::assert_display_snapshot!(def.to_raw());

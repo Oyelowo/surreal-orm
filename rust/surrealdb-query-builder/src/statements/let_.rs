@@ -38,7 +38,23 @@ pub fn let_(parameter: impl Into<Param>) -> LetStatement {
 }
 
 #[macro_export]
-/// let__(name = (SELECT * FOM user));
+/// Macro for creating a LET statement
+///
+/// Examples
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::{let_, select}};
+/// # let user = Table::new("user");
+/// // You can assign a value surrealdb value
+/// let_!(name = 5);
+/// // or
+/// let_statement!(name = 5);
+///
+/// // and even a select statement
+/// let_!(users = select(All).from(user));
+/// // or
+/// let_statement!(users = select(All).from(user));
+/// ```
 macro_rules! let_statement {
     ($param: ident =  $expr: expr) => {
         let $param = $crate::statements::let_(stringify!($param)).equal_to($expr);
