@@ -198,6 +198,10 @@ mod tests {
                 .chain(step4_return_last),
         ));
 
+        insta::assert_display_snapshot!(def.to_raw());
+
+        insta::assert_display_snapshot!(def.fine_tune_params());
+
         assert_eq!(
             def.to_raw().build(),
             "DEFINE FIELD average_sales ON TABLE metrics VALUE $value OR {\n\
