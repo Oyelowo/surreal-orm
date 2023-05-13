@@ -15,9 +15,9 @@ use surrealdb::sql;
 /// Defines the operations that can be performed on a field
 #[derive(Debug, Clone)]
 pub struct Operation {
-    query_string: String,
-    bindings: BindingsList,
-    errors: ErrorList,
+    pub(crate) query_string: String,
+    pub(crate) bindings: BindingsList,
+    pub(crate) errors: ErrorList,
 }
 
 impl Display for Operation {

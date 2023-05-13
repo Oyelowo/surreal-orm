@@ -1,7 +1,7 @@
 use crate::{
     statements::{
-        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
-        SelectStatement, Subquery, UpdateStatement,
+        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
+        RelateStatement, SelectStatement, Subquery, UpdateStatement,
     },
     Binding, BindingsList, Buildable, Erroneous, Field, Param, Parametric, SurrealdbEdge,
     SurrealdbModel, SurrealdbNode, Valuex,
@@ -180,6 +180,16 @@ impl From<Param> for ArrayLike {
 impl From<&Param> for ArrayLike {
     fn from(val: &Param) -> Self {
         Self(val.to_owned().into())
+    }
+}
+impl From<LetStatement> for ArrayLike {
+    fn from(val: LetStatement) -> Self {
+        Self(val.get_param().into())
+    }
+}
+impl From<&LetStatement> for ArrayLike {
+    fn from(val: &LetStatement) -> Self {
+        Self(val.get_param().into())
     }
 }
 

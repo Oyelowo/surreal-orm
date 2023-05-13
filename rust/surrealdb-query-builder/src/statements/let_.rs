@@ -10,7 +10,7 @@ use std::fmt::Display;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::expression::Expression,
-    Param,
+    Operatable, Operation, Param, Valuex,
 };
 
 /// Builds LET statement.
@@ -37,12 +37,47 @@ pub fn let_(parameter: impl Into<Param>) -> LetStatement {
     }
 }
 
+#[macro_export]
+/// let__(name = (SELECT * FOM user));
+macro_rules! let_statement {
+    ($param: ident =  $expr: expr) => {
+        let $param = $crate::statements::let_(stringify!($param)).equal_to($expr);
+    };
+}
+
+pub use let_statement as let_;
+
 /// Let statement builder
 #[derive(Debug, Clone)]
 pub struct LetStatement {
     parameter: Param,
     value: Option<Expression>,
     bindings: BindingsList,
+}
+
+impl Operatable for LetStatement {
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        let value: Valuex = value.into();
+        let condition = format!(
+            "{} {} {}",
+            self.get_param().build(),
+            operator,
+            &value.build()
+        );
+        let updated_bindings = [
+            self.get_bindings().as_slice(),
+            value.get_bindings().as_slice(),
+        ]
+        .concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_bindings,
+            errors: vec![],
+        }
+    }
 }
 
 impl LetStatement {

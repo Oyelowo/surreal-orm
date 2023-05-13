@@ -7,8 +7,8 @@
 
 use crate::{
     statements::{
-        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
-        SelectStatement, Subquery, UpdateStatement,
+        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
+        RelateStatement, SelectStatement, Subquery, UpdateStatement,
     },
     Alias, All, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Filter, Function,
     Operation, Param, Parametric, SurrealdbEdge, SurrealdbModel, SurrealdbNode, E, NONE, NULL,
@@ -104,6 +104,26 @@ impl From<&Param> for Valuex {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
+        }
+    }
+}
+
+impl From<LetStatement> for Valuex {
+    fn from(value: LetStatement) -> Self {
+        Self {
+            string: value.get_param().build(),
+            bindings: vec![],
+            errors: vec![],
+        }
+    }
+}
+
+impl From<&LetStatement> for Valuex {
+    fn from(value: &LetStatement) -> Self {
+        Self {
+            string: value.get_param().build(),
+            bindings: vec![],
+            errors: vec![],
         }
     }
 }
