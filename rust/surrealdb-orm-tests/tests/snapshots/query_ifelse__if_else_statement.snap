@@ -6,7 +6,7 @@ LET $val = 7;
 
 LET $name = 'Oyelowo';
 
-IF $val > 5 THEN
+IF $val > 8 THEN
 	(SELECT * FROM space_ship)
 ELSE IF $name = 'Oyelowo' THEN
 	(SELECT * FROM weapon)

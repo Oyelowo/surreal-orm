@@ -12,7 +12,7 @@ use surrealdb::sql;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, FieldType, Filter, Table},
-    Binding, Conditional,
+    Binding, Conditional, Valuex,
 };
 
 use super::for_::PermissionType;
@@ -111,11 +111,10 @@ impl DefineFieldStatement {
     }
 
     /// Set the default value for the field.
-    pub fn value(mut self, default_value: impl Into<sql::Value>) -> Self {
-        let value: sql::Value = default_value.into();
-        let binding = Binding::new(value);
-        self.value = Some(binding.get_param_dollarised());
-        self.bindings.push(binding);
+    pub fn value(mut self, default_value: impl Into<Valuex>) -> Self {
+        let value: Valuex = default_value.into();
+        self.value = Some(value.build());
+        self.bindings.extend(value.get_bindings());
         self
     }
 

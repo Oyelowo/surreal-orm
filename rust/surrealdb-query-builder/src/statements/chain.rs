@@ -7,7 +7,7 @@
 
 use std::fmt::{self, Display};
 
-use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable};
+use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable};
 
 /// Chains together multiple queries into a single `QueryChain`.
 ///
@@ -46,6 +46,7 @@ pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
 ///
 /// A `QueryChain` is created with an initial query, and additional queries can be added to the chain using the `chain` method. A `QueryChain` can be built into a single SQL query using the `build` method.
 ///
+#[derive(Debug, Clone)]
 pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,
@@ -85,11 +86,16 @@ impl QueryChain {
     /// # Panics
     ///
     /// This method does not panic.
-    pub fn chain(mut self, query: impl Queryable + Parametric + Display) -> Self {
+    pub fn chain(mut self, query: impl Queryable + Parametric + Buildable) -> Self {
         self.bindings.extend(query.get_bindings());
         self.errors.extend(query.get_errors());
-        self.queries.push(query.to_string());
+        self.queries.push(query.build());
         self
+    }
+
+    /// Surrounds the query chain with a curly brace.
+    pub fn as_block(self) -> Block {
+        self.into()
     }
 }
 

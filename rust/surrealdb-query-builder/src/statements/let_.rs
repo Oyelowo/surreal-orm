@@ -10,7 +10,7 @@ use std::fmt::Display;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::expression::Expression,
-    Param,
+    Operatable, Operation, Param, Valuex,
 };
 
 /// Builds LET statement.
@@ -37,12 +37,63 @@ pub fn let_(parameter: impl Into<Param>) -> LetStatement {
     }
 }
 
+#[macro_export]
+/// Macro for creating a LET statement
+///
+/// Examples
+/// ```rust
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::{let_, select}};
+/// # let ref user = Table::new("user");
+/// // You can assign a value surrealdb value
+/// let_!(name = 5);
+/// // or
+/// let_statement!(name = 5);
+///
+/// // and even a select statement
+/// let_!(users = select(All).from(user));
+/// // or
+/// let_statement!(users = select(All).from(user));
+/// ```
+macro_rules! let_statement {
+    ($param: ident =  $expr: expr) => {
+        let $param = $crate::statements::let_(stringify!($param)).equal_to($expr);
+    };
+}
+
+pub use let_statement as let_;
+
 /// Let statement builder
 #[derive(Debug, Clone)]
 pub struct LetStatement {
     parameter: Param,
     value: Option<Expression>,
     bindings: BindingsList,
+}
+
+impl Operatable for LetStatement {
+    fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        let value: Valuex = value.into();
+        let condition = format!(
+            "{} {} {}",
+            self.get_param().build(),
+            operator,
+            &value.build()
+        );
+        let updated_bindings = [
+            self.get_bindings().as_slice(),
+            value.get_bindings().as_slice(),
+        ]
+        .concat();
+        Operation {
+            query_string: condition,
+            bindings: updated_bindings,
+            errors: vec![],
+        }
+    }
 }
 
 impl LetStatement {
@@ -84,6 +135,18 @@ impl Buildable for LetStatement {
     }
 }
 
+impl Buildable for &LetStatement {
+    fn build(&self) -> String {
+        let mut query = format!("LET {}", self.get_param().build());
+
+        if let Some(value) = &self.value {
+            query = format!("{query} = {};", value.build());
+        }
+
+        query
+    }
+}
+
 impl Display for LetStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
@@ -95,9 +158,16 @@ impl Parametric for LetStatement {
         self.bindings.to_vec()
     }
 }
+impl Parametric for &LetStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
 
 impl Queryable for LetStatement {}
+impl Queryable for &LetStatement {}
 impl Erroneous for LetStatement {}
+impl Erroneous for &LetStatement {}
 
 #[cfg(test)]
 mod tests {

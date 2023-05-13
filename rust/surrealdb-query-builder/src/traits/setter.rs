@@ -6,8 +6,8 @@ use crate::{
         DeleteStatement, IfElseStatement, InsertStatement, LetStatement, RelateStatement,
         SelectStatement, Subquery, UpdateStatement,
     },
-    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Field, Param, Parametric,
-    SurrealdbEdge, SurrealdbNode,
+    Binding, BindingsList, Block, Buildable, Conditional, Erroneous, ErrorList, Field, Param,
+    Parametric, SurrealdbEdge, SurrealdbNode,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -80,6 +80,7 @@ where
 {
     Value(T),
     Field(Field),
+    Block(Block),
     Subquery(Subquery),
     Param(Param),
     LetStatement(LetStatement),
@@ -100,6 +101,18 @@ impl<T: Serialize> From<Field> for SetterArg<T> {
 impl<T: Serialize> From<&Field> for SetterArg<T> {
     fn from(value: &Field) -> Self {
         Self::Field(value.into())
+    }
+}
+
+impl<T: Serialize> From<Block> for SetterArg<T> {
+    fn from(value: Block) -> Self {
+        Self::Block(value)
+    }
+}
+
+impl<T: Serialize> From<&Block> for SetterArg<T> {
+    fn from(value: &Block) -> Self {
+        Self::Block(value.clone().into())
     }
 }
 
@@ -209,6 +222,7 @@ fn get_setter<T: Serialize>(
             (binding.get_param_dollarised(), vec![binding], vec![])
         }
         SetterArg::Field(field) => (field.build(), field.get_bindings(), field.get_errors()),
+        SetterArg::Block(block) => (block.build(), block.get_bindings(), block.get_errors()),
         SetterArg::Subquery(subquery) => (
             subquery.build(),
             subquery.get_bindings(),
