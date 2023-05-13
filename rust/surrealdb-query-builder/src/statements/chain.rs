@@ -46,6 +46,7 @@ pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
 ///
 /// A `QueryChain` is created with an initial query, and additional queries can be added to the chain using the `chain` method. A `QueryChain` can be built into a single SQL query using the `build` method.
 ///
+#[derive(Debug, Clone)]
 pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,

@@ -6,11 +6,12 @@ pub fn block(code: QueryChain) -> Block {
 }
 
 /// A code block. Surrounds the code with curly braces.
+#[derive(Debug, Clone)]
 pub struct Block(QueryChain);
 
 impl Buildable for Block {
     fn build(&self) -> String {
-        format!("{{\n{}\n}}", self.0.build())
+        format!("{{\n{};\n}}", self.0.build().trim_end_matches(";"))
     }
 }
 

@@ -19,6 +19,7 @@ pub struct Weapon {
     pub rocket: Rocket,
 }
 type Strength = u64;
+
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon", relax_table_name)]
@@ -42,6 +43,16 @@ pub struct Rocket {
     pub nice: bool,
     pub bunch_of_other_fields: i32,
     pub created: DateTime<Utc>,
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "weapon_stats")]
+pub struct WeaponStats {
+    pub id: SurrealSimpleId<Self>,
+
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub average_strength: f64,
 }
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
