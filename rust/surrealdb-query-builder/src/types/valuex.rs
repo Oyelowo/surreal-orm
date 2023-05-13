@@ -98,6 +98,16 @@ impl From<Param> for Valuex {
     }
 }
 
+impl From<&Param> for Valuex {
+    fn from(value: &Param) -> Self {
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
+    }
+}
+
 impl From<Alias> for Valuex {
     fn from(value: Alias) -> Self {
         Valuex {

@@ -177,6 +177,12 @@ impl From<Param> for ArrayLike {
         Self(val.into())
     }
 }
+impl From<&Param> for ArrayLike {
+    fn from(val: &Param) -> Self {
+        Self(val.to_owned().into())
+    }
+}
+
 impl From<&Field> for ArrayLike {
     fn from(val: &Field) -> Self {
         Self(val.clone().into())

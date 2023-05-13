@@ -6,6 +6,7 @@
  */
 
 pub(crate) mod alias;
+pub(crate) mod block;
 pub(crate) mod clause;
 pub(crate) mod crud_type;
 pub(crate) mod data_types;
@@ -29,6 +30,7 @@ pub(crate) mod token_target;
 pub(crate) mod valuex;
 
 pub use alias::*;
+pub use block::*;
 pub use clause::*;
 pub use crud_type::*;
 pub use data_types::*;
