@@ -19,7 +19,7 @@ use super::select::Fetchables;
 /// let query = return_(user).fetch(&[account, connection]);
 /// assert_eq!(
 ///     query.to_raw().build(),
-///     "RETURN user:oyelowo FETCH account, connection"
+///     "RETURN user:oyelowo FETCH account, connection;"
 /// );
 /// ```
 pub fn return_(return_value: impl Into<Valuex>) -> ReturnStatement {
@@ -70,7 +70,7 @@ impl Buildable for ReturnStatement {
             query = format!("{query} FETCH {}", self.fetch.join(", "));
         }
 
-        query
+        format!("{query};")
     }
 }
 
@@ -104,8 +104,8 @@ mod tests {
     #[test]
     fn test_return() {
         let query = return_(1);
-        assert_eq!(query.fine_tune_params(), "RETURN $_param_00000001");
-        assert_eq!(query.to_raw().build(), "RETURN 1");
+        assert_eq!(query.fine_tune_params(), "RETURN $_param_00000001;");
+        assert_eq!(query.to_raw().build(), "RETURN 1;");
     }
 
     #[test]
@@ -117,19 +117,19 @@ mod tests {
         let query = return_(user).fetch(&[account, connection]);
         assert_eq!(
             query.fine_tune_params(),
-            "RETURN $_param_00000001 FETCH account, connection"
+            "RETURN $_param_00000001 FETCH account, connection;"
         );
         assert_eq!(
             query.to_raw().build(),
-            "RETURN user:oyelowo FETCH account, connection"
+            "RETURN user:oyelowo FETCH account, connection;"
         );
     }
 
     #[test]
     fn test_return_fetch() {
         let query = return_(1).fetch("a");
-        assert_eq!(query.fine_tune_params(), "RETURN $_param_00000001 FETCH a");
-        assert_eq!(query.to_raw().build(), "RETURN 1 FETCH a");
+        assert_eq!(query.fine_tune_params(), "RETURN $_param_00000001 FETCH a;");
+        assert_eq!(query.to_raw().build(), "RETURN 1 FETCH a;");
     }
 
     #[test]
@@ -139,9 +139,9 @@ mod tests {
         let query = return_(1).fetch(vec![name, age]);
         assert_eq!(
             query.fine_tune_params(),
-            "RETURN $_param_00000001 FETCH name, age"
+            "RETURN $_param_00000001 FETCH name, age;"
         );
-        assert_eq!(query.to_raw().build(), "RETURN 1 FETCH name, age");
+        assert_eq!(query.to_raw().build(), "RETURN 1 FETCH name, age;");
     }
 
     #[test]
