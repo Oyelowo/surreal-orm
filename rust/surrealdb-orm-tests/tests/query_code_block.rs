@@ -11,8 +11,12 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let weapon = Weapon::table_name();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
+    let ref weapon = Weapon::table_name();
+    let weapon_schema::Weapon {
+        ref name,
+        ref strength,
+        ..
+    } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();

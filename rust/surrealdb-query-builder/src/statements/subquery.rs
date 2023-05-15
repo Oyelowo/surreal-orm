@@ -113,9 +113,9 @@ impl From<SelectStatement> for Subquery {
 
 impl From<Block> for Subquery {
     fn from(statement: Block) -> Self {
-        let block = format!("{{\n{}\n}}", statement.build());
+        // let block = format!("{{\n{}\n}}", statement.build().trim_end_matches(";"));
         Self {
-            query_string: block,
+            query_string: statement.build(),
             bindings: statement.get_bindings(),
             errors: statement.get_errors(),
         }

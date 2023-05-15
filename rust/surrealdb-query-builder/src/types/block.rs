@@ -24,7 +24,7 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::statements::chain;
+            $crate::statements::
             $(
                 chain(&$var).
             )*
@@ -32,9 +32,28 @@ macro_rules! code_block {
             chain($crate::statements::return_($expr)).as_block()
         }
     };
+    ($(let $var:ident = $value:expr;)*) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::statements::chain;
+
+
+            let chain: $crate::statements::QueryChain = $(
+            chain(&$var).
+            )*
+            into();
+
+            chain
+        }
+    };
+    // ($statement:stmt) => {{
+    //     $statement
+    // }};
     // () => {};
 }
-
 pub use code_block as block;
 
 /// A code block. Surrounds the code with curly braces.
@@ -76,7 +95,8 @@ pub struct Block(QueryChain);
 
 impl Buildable for Block {
     fn build(&self) -> String {
-        format!("{};", self.0.build().trim_end_matches(";"))
+        // format!("{};", self.0.build().trim_end_matches(";"))
+        format!("{{\n{}\n}};", self.0.build().trim_end_matches(";"))
     }
 }
 
