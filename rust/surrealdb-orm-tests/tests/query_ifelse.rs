@@ -38,10 +38,14 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         .collect::<Vec<_>>();
     insert(generated_weapons).run(db.clone()).await?;
 
-    let space_ship = SpaceShip::table_name();
-    let weapon = Weapon::table_name();
+    let ref space_ship = SpaceShip::table_name();
+    let ref weapon = Weapon::table_name();
     let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
+    let weapon_schema::Weapon {
+        ref name,
+        ref strength,
+        ..
+    } = Weapon::schema();
 
     let queries_1 = block! {
         let val = 7;
@@ -97,42 +101,69 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
     };
 
-    // let let_val = let_val.equal_to(4);
-    //
-    // let queries_2 = chain(let_val.clone())
-    //     .chain(let_name.clone())
-    //     .chain(if_statement.clone());
-    //
-    // let query_result_2 = queries_2
-    //     .run(db.clone())
-    //     .await?
-    //     .take::<Vec<SpaceShipOrWeapon>>(2)
-    //     .unwrap();
-    // assert_eq!(query_result_2.len(), 10);
-    // if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
-    //     assert_eq!(w.name, "weapon-9");
-    //     assert!(w.id.to_string().starts_with("weapon:"));
-    //     assert_eq!(w.strength, 9);
-    // };
-    //
-    // // Matches Else
-    // let let_val = let_val.equal_to(4);
-    // let let_name = let_name.equal_to("Not Oyelowo");
-    //
-    // let queries_3 = chain(let_val.clone())
-    //     .chain(let_name.clone())
-    //     .chain(if_statement);
-    //
-    // let query_result_3 = queries_3
-    //     .run(db.clone())
-    //     .await?
-    //     .take::<Vec<SpaceShipOrWeapon>>(2)
-    //     .unwrap();
-    //
-    // assert_eq!(query_result_3.len(), 1);
-    // if let SpaceShipOrWeapon::Number(n) = &query_result_3[0] {
-    //     assert_eq!(*n, 2505);
-    // };
+    let queries_2 = block! {
+        let val = 4;
+        let oye_name = "Oyelowo";
+
+        return if_(val.greater_than(5))
+            .then(
+                select(All)
+                    .from(space_ship)
+                    .order_by(order(name).desc()),
+            )
+            .else_if(oye_name.equal("Oyelowo"))
+            .then(
+                select(All)
+                    .from(weapon)
+                    .order_by(order(strength).desc()),
+            )
+            .else_(2505)
+            .end();
+    };
+
+    let query_result_2 = queries_2
+        .run(db.clone())
+        .await?
+        .take::<Vec<SpaceShipOrWeapon>>(2)
+        .unwrap();
+    assert_eq!(query_result_2.len(), 10);
+    if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
+        assert_eq!(w.name, "weapon-9");
+        assert!(w.id.to_string().starts_with("weapon:"));
+        assert_eq!(w.strength, 9);
+    };
+
+    // Matches Else
+    let queries_3 = block! {
+        let val = 4;
+        let oye_name = "Not Oyelowo";
+
+        return if_(val.greater_than(5))
+            .then(
+                select(All)
+                    .from(space_ship)
+                    .order_by(order(name).desc()),
+            )
+            .else_if(oye_name.equal("Oyelowo"))
+            .then(
+                select(All)
+                    .from(weapon)
+                    .order_by(order(strength).desc()),
+            )
+            .else_(2505)
+            .end();
+    };
+
+    let query_result_3 = queries_3
+        .run(db.clone())
+        .await?
+        .take::<Vec<SpaceShipOrWeapon>>(2)
+        .unwrap();
+
+    assert_eq!(query_result_3.len(), 1);
+    if let SpaceShipOrWeapon::Number(n) = &query_result_3[0] {
+        assert_eq!(*n, 2505);
+    };
 
     Ok(())
 }
