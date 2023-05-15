@@ -193,28 +193,9 @@ async fn test_if_else_statement_and_let_macro() -> SurrealdbOrmResult<()> {
     let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
     let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
 
-    let queries_1 = block! {
-        let val = 7;
-        let oye_name = "Oyelowo";
-        let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
-
-        let query_result = if_(val.greater_than(5))
-            .then(&select_space_ship)
-            .else_if(oye_name.equal("Oyelowo"))
-            .then(
-                select(All)
-                    .from(weapon)
-                    .order_by(order(strength).desc()),
-            )
-            .else_(2505)
-            .end();
-        return query_result;
-    };
-
     let_!(val = 7);
     let_!(name = "Oyelowo");
     let if_statement = if_(val.greater_than(5))
-        .clone()
         .then(
             select(All)
                 .from(SpaceShip::table_name())
@@ -268,45 +249,44 @@ async fn test_if_else_statement_and_let_macro() -> SurrealdbOrmResult<()> {
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
     };
 
-    // let let_val = let_val.equal_to(4);
-    //
-    // let queries_2 = chain(let_val.clone())
-    //     .chain(let_name.clone())
-    //     .chain(if_statement.clone());
-    //
-    // let query_result_2 = queries_2
-    //     .run(db.clone())
-    //     .await?
-    //     .take::<Vec<SpaceShipOrWeapon>>(2)
-    //     .unwrap();
-    // assert_eq!(query_result_2.len(), 10);
-    // if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
-    //     assert_eq!(w.name, "weapon-9");
-    //     assert!(w.id.to_string().starts_with("weapon:"));
-    //     assert_eq!(w.strength, 9);
-    // };
-    //
-    // // Matches Else
-    // let let_val = let_val.equal_to(4);
-    // let let_name = let_name.equal_to("Not Oyelowo");
-    //
-    // let queries_3 = chain(let_val.clone())
-    //     .chain(let_name.clone())
-    //     .chain(if_statement);
-    //
-    // let query_result_3 = queries_3
-    //     .run(db.clone())
-    //     .await?
-    //     .take::<Vec<SpaceShipOrWeapon>>(2)
-    //     .unwrap();
-    //
-    // assert_eq!(query_result_3.len(), 1);
-    // if let SpaceShipOrWeapon::Number(n) = &query_result_3[0] {
-    //     assert_eq!(*n, 2505);
-    // };
+    let val = let_("val").equal_to(4);
+    let name = let_("name").equal_to("Oyelowo");
+
+    let queries_2 = chain(val).chain(name).chain(if_statement.clone());
+
+    let query_result_2 = queries_2
+        .run(db.clone())
+        .await?
+        .take::<Vec<SpaceShipOrWeapon>>(2)
+        .unwrap();
+
+    assert_eq!(query_result_2.len(), 10);
+    if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
+        assert_eq!(w.name, "weapon-9");
+        assert!(w.id.to_string().starts_with("weapon:"));
+        assert_eq!(w.strength, 9);
+    };
+
+    // Matches Else
+    let_!(val = 4);
+    let_!(name = "Not Oyelowo");
+
+    let queries_3 = chain(val).chain(name).chain(if_statement);
+
+    let query_result_3 = queries_3
+        .run(db.clone())
+        .await?
+        .take::<Vec<SpaceShipOrWeapon>>(2)
+        .unwrap();
+
+    assert_eq!(query_result_3.len(), 1);
+    if let SpaceShipOrWeapon::Number(n) = &query_result_3[0] {
+        assert_eq!(*n, 2505);
+    };
 
     Ok(())
 }
+
 #[tokio::test]
 async fn test_if_else_statement() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -337,7 +317,6 @@ async fn test_if_else_statement() -> SurrealdbOrmResult<()> {
     let name = || let_name.get_param();
 
     let if_statement = if_(val().greater_than(5))
-        .clone()
         .then(
             select(All)
                 .from(SpaceShip::table_name())
