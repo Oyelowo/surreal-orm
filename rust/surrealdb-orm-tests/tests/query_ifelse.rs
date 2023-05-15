@@ -10,9 +10,9 @@ use surrealdb::{engine::local::Mem, sql, Surreal};
 use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
     block,
-    statements::{chain, if_, insert, let_, order, select, update, QueryChain},
-    All, Buildable, Operatable, ReturnableSelect, ReturnableStandard, Runnable, SchemaGetter,
-    SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
+    statements::{chain, if_, insert, let_, order, select, update, LetStatement, QueryChain},
+    All, Buildable, Operatable, Param, ReturnableSelect, ReturnableStandard, Runnable,
+    SchemaGetter, SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
 };
 
 #[tokio::test]
@@ -50,6 +50,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
     let queries_1 = block! {
         let val = 7;
         let oye_name = "Oyelowo";
+        // You can even assign a statement
         let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
 
         let query_result = if_(val.greater_than(5))
@@ -101,24 +102,20 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
     };
 
+    // A good way to share a query across multiple blocks
+    let if_else_external = |val: LetStatement, oye_name: LetStatement| {
+        if_(val.greater_than(5))
+            .then(select(All).from(space_ship).order_by(order(name).desc()))
+            .else_if(oye_name.equal("Oyelowo"))
+            .then(select(All).from(weapon).order_by(order(strength).desc()))
+            .else_(2505)
+            .end()
+    };
+
     let queries_2 = block! {
         let val = 4;
         let oye_name = "Oyelowo";
-
-        return if_(val.greater_than(5))
-            .then(
-                select(All)
-                    .from(space_ship)
-                    .order_by(order(name).desc()),
-            )
-            .else_if(oye_name.equal("Oyelowo"))
-            .then(
-                select(All)
-                    .from(weapon)
-                    .order_by(order(strength).desc()),
-            )
-            .else_(2505)
-            .end();
+        return if_else_external(val, oye_name);
     };
 
     let query_result_2 = queries_2
