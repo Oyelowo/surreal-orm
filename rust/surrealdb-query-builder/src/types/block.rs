@@ -1,5 +1,42 @@
 use crate::{statements::QueryChain, Buildable, Erroneous, Parametric, Valuex};
 
+#[macro_export]
+/// Macro for creating a surrealdb code block
+/// # Examples
+/// ```
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::*, functions::*};
+/// # let alien = Table::new("alien");
+/// # let metrics = Table::new("metrics");
+/// # let strength = Field::new("strength");
+///
+/// let code_block = block! {
+///     let strengths = select_value(strength).from(alien);
+///     let total = math::sum!(&strengths);
+///     let count = count!(&strengths);
+///     return total.divide(count);
+/// };
+/// ```
+macro_rules! code_block {
+    ($(let $var:ident = $value:expr;)* return $expr:expr;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::statements::chain;
+            $(
+                chain(&$var).
+            )*
+
+            chain($crate::statements::return_($expr)).as_block()
+        }
+    };
+    // () => {};
+}
+
+pub use code_block as block;
+
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
 /// ```

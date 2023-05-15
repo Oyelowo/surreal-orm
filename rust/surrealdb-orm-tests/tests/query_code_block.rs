@@ -6,23 +6,6 @@ use surrealdb_orm::{
     *,
 };
 
-macro_rules! code_block {
-    ($(let $var:ident = $value:expr;)* return $expr:expr;) => {
-        {
-            $(
-                let $var = let_(stringify!($var)).equal_to($value);
-            )*
-
-            $(
-                chain(&$var).
-            )*
-
-            chain(return_($expr)).as_block()
-        }
-    };
-    // () => {};
-}
-
 #[tokio::test]
 async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -44,7 +27,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let code_block = code_block! {
+    let code_block = block! {
         let strengths = select_value(strength).from(weapon);
         let total = math::sum!(&strengths);
         let count = count!(&strengths);
