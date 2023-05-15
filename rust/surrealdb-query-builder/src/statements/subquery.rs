@@ -2,7 +2,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge,
+    Binding, BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge,
     SurrealdbModel, SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex,
 };
 
@@ -108,6 +108,17 @@ fn statement_to_subquery(statement: impl Buildable + Erroneous + Parametric) -> 
 impl From<SelectStatement> for Subquery {
     fn from(statement: SelectStatement) -> Self {
         statement_to_subquery(statement)
+    }
+}
+
+impl From<Block> for Subquery {
+    fn from(statement: Block) -> Self {
+        let block = format!("{{\n{}\n}}", statement.build());
+        Self {
+            query_string: block,
+            bindings: statement.get_bindings(),
+            errors: statement.get_errors(),
+        }
     }
 }
 
