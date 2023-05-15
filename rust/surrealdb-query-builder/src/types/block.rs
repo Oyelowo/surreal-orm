@@ -1,4 +1,4 @@
-use crate::{statements::QueryChain, Buildable, Erroneous, Parametric, Valuex};
+use crate::{statements::QueryChain, Buildable, Erroneous, Parametric, Queryable, Valuex};
 
 #[macro_export]
 /// Macro for creating a surrealdb code block
@@ -76,7 +76,7 @@ pub struct Block(QueryChain);
 
 impl Buildable for Block {
     fn build(&self) -> String {
-        format!("{{\n{};\n}}", self.0.build().trim_end_matches(";"))
+        format!("{};", self.0.build().trim_end_matches(";"))
     }
 }
 
@@ -95,6 +95,8 @@ impl From<Block> for Valuex {
         }
     }
 }
+
+impl Queryable for Block {}
 
 impl Parametric for Block {
     fn get_bindings(&self) -> crate::BindingsList {
