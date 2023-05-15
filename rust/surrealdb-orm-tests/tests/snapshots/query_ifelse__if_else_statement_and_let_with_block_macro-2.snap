@@ -2,6 +2,7 @@
 source: surrealdb-orm-tests/tests/query_ifelse.rs
 expression: queries_1.fine_tune_params()
 ---
+{
 LET $val = $_param_00000001;
 
 LET $oye_name = $_param_00000002;
@@ -11,3 +12,4 @@ LET $select_space_ship = $_param_00000003;
 LET $query_result = $_param_00000004;
 
 RETURN $query_result;
+}

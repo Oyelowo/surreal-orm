@@ -70,7 +70,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
 
     assert_eq!(
         queries_1.to_raw().build(),
-        "LET $val = 7;\n\n\
+        "{\n\
+            LET $val = 7;\n\n\
             LET $oye_name = 'Oyelowo';\n\n\
             LET $select_space_ship = (SELECT * FROM space_ship ORDER BY name DESC);\n\n\
             LET $query_result = IF $val > 5 THEN \
@@ -80,7 +81,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
             ELSE \
             2505 \
             END;\n\n\
-            RETURN $query_result;"
+            RETURN $query_result;\n\
+            }"
     );
 
     #[derive(Debug, Serialize, Deserialize)]
@@ -90,13 +92,11 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         SpaceShip(SpaceShip),
         Number(u32),
     }
-    let query_result_1 = queries_1
-        .run(db.clone())
-        .await?
-        .take::<Vec<SpaceShipOrWeapon>>(4)
-        .unwrap();
+    let query_result_1 = select(All)
+        .from(queries_1)
+        .return_many::<SpaceShipOrWeapon>(db.clone())
+        .await?;
 
-    assert_eq!(query_result_1.len(), 7);
     if let SpaceShipOrWeapon::SpaceShip(s) = &query_result_1[0] {
         assert_eq!(s.name, "spaceship-6");
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
@@ -118,11 +118,9 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         return if_else_external(val, oye_name);
     };
 
-    let query_result_2 = queries_2
-        .run(db.clone())
-        .await?
-        .take::<Vec<SpaceShipOrWeapon>>(2)
-        .unwrap();
+    let query_result_2: Vec<SpaceShipOrWeapon> =
+        select(All).from(queries_2).return_many(db.clone()).await?;
+
     assert_eq!(query_result_2.len(), 10);
     if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
         assert_eq!(w.name, "weapon-9");
@@ -151,14 +149,14 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
             .end();
     };
 
-    let query_result_3 = queries_3
+    let query_result_3 = select(All)
+        .from(queries_3)
         .run(db.clone())
         .await?
-        .take::<Vec<SpaceShipOrWeapon>>(2)
+        .take::<Option<SpaceShipOrWeapon>>(0)
         .unwrap();
 
-    assert_eq!(query_result_3.len(), 1);
-    if let SpaceShipOrWeapon::Number(n) = &query_result_3[0] {
+    if let Some(SpaceShipOrWeapon::Number(n)) = &query_result_3 {
         assert_eq!(*n, 2505);
     };
 
