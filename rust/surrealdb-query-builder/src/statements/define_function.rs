@@ -68,17 +68,6 @@ pub fn define_function(name: impl Into<String>) -> DefineFunctionStatement {
 // }
 // ($($arg:expr),*), {$($code:tt)*}
 
-// #[macro_use]
-// macro_rules! generate_inner_macro {
-//     () => {
-//         macro_rules! inner_macro {
-//             ($inner_input:tt) => {
-//                 // Inner macro rule body
-//                 println!("Inner macro rule executed with input: {:?}", ($($inner_input)*));
-//             };
-//         }
-//     };
-// }
 #[macro_export]
 macro_rules! define_function_ {
     ($function_name:ident ($($param:ident : $type:ident),* ) {$(let $var:ident = $value:expr;)* return $expr:expr;}) => {
@@ -107,17 +96,16 @@ macro_rules! define_function_ {
                         .body(body)
                 }
             }
-        macro_rules! $function_name {
-        ( $val:expr ) => {
-            // $crate::functions::string::join_fn( $val )
-        };
-        ($( $val:expr ),*) => {
-            // $crate::functions::string::join_fn($crate::arr![ $( $val ), * ])
-        };
-        }
 
-        }
+            pub fn [<$function_name _fn>]($($param: impl Into<check_field_type!($type)>),*) {}
 
+            // https://github.com/rust-lang/rust/issues/35853
+            // macro_rules! $function_name {
+            //     (@inner $($xx:expr),*) => {
+            //         // [<$function_name _statement>]().body.unwrap().build()
+            //     };
+            // }
+        }
     };
 }
 pub use define_function_ as define_function;
@@ -127,7 +115,7 @@ macro_rules! check_field_type {
         $crate::Valuex
     };
     (array) => {
-        $crate::StrandLike
+        $crate::ArrayLike
     };
     // (array) => { FieldType::Array };
     // (bool) => { FieldType::Bool };
@@ -139,6 +127,9 @@ macro_rules! check_field_type {
     // (number) => { FieldType::Number };
     // (object) => { FieldType::Object };
     // (string) => { FieldType::String };
+    (string) => {
+        $crate::StrandLike
+    };
     // (record()) => { FieldType::RecordAny };
     // (geometry($($geom:ident),+)) => {{
     //     let geometries = vec![
@@ -152,12 +143,14 @@ macro_rules! check_field_type {
     }};
 }
 
-fn erer(mm: check_field_type!(any)) {}
+fn erer(mm: impl Into<check_field_type!(any)>) {}
 fn ere() {
     define_function!(get_it(first: string, last: string, birthday: string) {
         let person = "43";
         return person;
     });
+    get_it_fn("3".to_string(), "3".to_string(), "3".to_string());
+    // get_it!(first, last, birthday);
 
     // get_it_statement()
 }
