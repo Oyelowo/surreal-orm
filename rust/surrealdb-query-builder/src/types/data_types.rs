@@ -123,6 +123,19 @@ create_value_like_struct!("Strand");
 create_value_like_struct!("Geometry");
 create_value_like_struct!("Thing");
 
+create_value_like_struct!("Duration");
+create_value_like_struct!("Datetime");
+create_value_like_struct!("Table");
+create_value_like_struct!("Object");
+
+/// Represents the surrealdb NULL value
+#[derive(Debug, Clone)]
+pub struct NULL;
+
+/// Represents the surrealdb NONE value
+#[derive(Debug, Clone)]
+pub struct NONE;
+
 /// Represents the surrealdb Array value, or field, param which can all be used
 /// to represent the value itself within a query.
 #[derive(Debug, Clone)]
@@ -353,16 +366,3 @@ impl From<Vec<Valuex>> for ArgsList {
         })
     }
 }
-
-create_value_like_struct!("Duration");
-create_value_like_struct!("Datetime");
-create_value_like_struct!("Table");
-create_value_like_struct!("Object");
-
-/// Represents the surrealdb NULL value
-#[derive(Debug, Clone)]
-pub struct NULL;
-
-/// Represents the surrealdb NONE value
-#[derive(Debug, Clone)]
-pub struct NONE;
