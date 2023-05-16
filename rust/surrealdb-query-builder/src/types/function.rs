@@ -9,7 +9,7 @@ use std::fmt::Display;
 
 use crate::{
     traits::{BindingsList, Buildable, Parametric},
-    Aliasable, Erroneous,
+    Aliasable, Erroneous, ErrorList,
 };
 
 /// Represents a subquery function.
@@ -17,6 +17,32 @@ use crate::{
 pub struct Function {
     pub(crate) query_string: String,
     pub(crate) bindings: BindingsList,
+    // pub(crate) errors: ErrorList,
+}
+
+impl Function {
+    pub fn new() -> Self {
+        Self {
+            query_string: String::new(),
+            bindings: vec![],
+            // errors: vec![],
+        }
+    }
+
+    pub fn with_bindings(mut self, bindings: BindingsList) -> Self {
+        self.bindings = bindings;
+        self
+    }
+
+    pub fn with_args_string(mut self, query_string: String) -> Self {
+        self.query_string = query_string;
+        self
+    }
+
+    // pub fn with_errors(mut self, errors: ErrorList) -> Self {
+    //     self.errors = errors;
+    //     self
+    // }
 }
 
 impl Parametric for Function {

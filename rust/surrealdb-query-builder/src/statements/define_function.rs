@@ -58,16 +58,6 @@ pub fn define_function(name: impl Into<String>) -> DefineFunctionStatement {
     }
 }
 
-// #[macro_export]
-// macro_rules! define_function_ {
-//     ($name:ident, $params:ident, $body:ident) => {
-//         pub fn $name($params: Vec<String>, $body: impl Into<String>) -> DefineFunctionStatement {
-//             define_function(stringify!($name), $params, $body)
-//         }
-//     };
-// }
-// ($($arg:expr),*), {$($code:tt)*}
-
 #[macro_export]
 macro_rules! define_function_ {
     ($function_name:ident ($($param:ident : $type:ident),* ) {$(let $var:ident = $value:expr;)* return $expr:expr;}) => {
@@ -97,7 +87,24 @@ macro_rules! define_function_ {
                 }
             }
 
-            pub fn [<$function_name _fn>]($($param: impl Into<check_field_type!($type)>),*) {}
+            pub fn [<$function_name _fn>]($($param: impl Into<check_field_type!($type)>),*) -> $crate::Function {
+                use $crate::Buildable as _;
+                use $crate::Parametric as _;
+                {
+                    let mut __private_bindings = vec![];
+                    let mut __private_args = vec![];
+                    $(
+                        let $param: check_field_type!($type) = $param.into();
+                        __private_bindings.extend($param.get_bindings());
+                        __private_args.push($param.build());
+                    )*
+                let build = format!("{}({})", stringify!($function_name), __private_args.join(", "));
+                $crate::Function::new()
+                    .with_args_string(build)
+                    .with_bindings(__private_bindings)
+                }
+
+            }
 
             // https://github.com/rust-lang/rust/issues/35853
             // macro_rules! $function_name {
@@ -108,8 +115,10 @@ macro_rules! define_function_ {
         }
     };
 }
+
 pub use define_function_ as define_function;
 use quote::format_ident;
+
 macro_rules! check_field_type {
     (any) => {
         $crate::Valuex
@@ -117,26 +126,40 @@ macro_rules! check_field_type {
     (array) => {
         $crate::ArrayLike
     };
-    // (array) => { FieldType::Array };
-    // (bool) => { FieldType::Bool };
-    // (datetime) => { FieldType::DateTime };
-    // (decimal) => { FieldType::Decimal };
-    // (duration) => { FieldType::Duration };
-    // (float) => { FieldType::Float };
-    // (int) => { FieldType::Int };
-    // (number) => { FieldType::Number };
-    // (object) => { FieldType::Object };
-    // (string) => { FieldType::String };
+    (bool) => {
+        // $crate::BoolLike
+        todo!()
+    };
+    (datetime) => {
+        $crate::DateTimeLike
+    };
     (string) => {
         $crate::StrandLike
     };
-    // (record()) => { FieldType::RecordAny };
-    // (geometry($($geom:ident),+)) => {{
-    //     let geometries = vec![
-    //         $(GeometryType::$geom),+
-    //     ];
-    //     FieldType::Geometry(geometries)
-    // }};
+    (number) => {
+        $crate::NumberLike
+    };
+    (int) => {
+        $crate::NumberLike
+    };
+    (float) => {
+        $crate::NumberLike
+    };
+    (decimal) => {
+        $crate::NumberLike
+    };
+    (duration) => {
+        $crate::DurationLike
+    };
+    (object) => {
+        $crate::ObjectLike
+    };
+    (record) => {
+        $crate::RecordLike
+    };
+    (geometry) => {
+        $crate::GeometryLike
+    };
     ($field_type:expr) => {{
         compile_error!(concat!("Invalid field type: ", $field_type));
         unreachable!();
@@ -149,7 +172,7 @@ fn ere() {
         let person = "43";
         return person;
     });
-    get_it_fn("3".to_string(), "3".to_string(), "3".to_string());
+    let xx = get_it_fn("3".to_string(), "3".to_string(), "3".to_string());
     // get_it!(first, last, birthday);
 
     // get_it_statement()
