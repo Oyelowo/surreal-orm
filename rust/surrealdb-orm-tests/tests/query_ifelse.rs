@@ -111,7 +111,9 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
             .else_(2505)
             .end()
     };
-
+    // If declared outside of a block
+    // let_!(val = 4);
+    // let_!(oye_name = "Oyelowo");
     let queries_2 = block! {
         let val = 4;
         let oye_name = "Oyelowo";
