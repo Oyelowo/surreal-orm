@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Param, Parametric};
+use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable};
 // -- Define a global function which can be used in any query
 // DEFINE FUNCTION fn::get_person($first: string, $last: string, $birthday: string) {
 //
@@ -87,6 +87,8 @@ impl Erroneous for DefineFunctionStatement {
     }
 }
 
+impl Queryable for DefineFunctionStatement {}
+
 impl Buildable for DefineFunctionStatement {
     fn build(&self) -> String {
         let mut build = format!("DEFINE FUNCTION {}(", self.name);
@@ -98,12 +100,11 @@ impl Buildable for DefineFunctionStatement {
                 .collect::<Vec<String>>()
                 .join(", "),
         );
-        build.push_str(") {");
+        build.push_str(") ");
         if let Some(body) = &self.body {
             build.push_str(&body.build());
         }
-        build.push_str("};");
-        build
+        format!("{build};")
     }
 }
 
@@ -116,7 +117,7 @@ macro_rules! define_function_ {
                 {
                     $(
                         let $param = $crate::Param::new(stringify!($param));
-                        let field_type: $crate::FieldType = stringify!($type).parse().unwrap();
+                        // let field_type: $crate::FieldType = stringify!($type).parse().unwrap();
 
                     )*
 
@@ -137,7 +138,7 @@ macro_rules! define_function_ {
                 }
             }
 
-            pub fn [<$function_name _fn>]($($param: impl Into<check_field_type!($type)>),*) -> $crate::Function {
+            pub fn [<$function_name>]($($param: impl Into<check_field_type!($type)>),*) -> $crate::Function {
                 use $crate::Buildable as _;
                 use $crate::Parametric as _;
                 {
@@ -219,7 +220,42 @@ fn ere() {
         let person = "43";
         return person;
     });
-    let xx = get_it_fn(false, "3".to_string(), "3".to_string());
+    let xx = get_it(false, "3".to_string(), "3".to_string());
 
     let xx = get_it_statement();
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ToRaw;
+
+    use super::*;
+
+    define_function!(get_it(first: bool, last: string, birthday: string) {
+        let person = "43";
+        return person;
+    });
+
+    #[test]
+    fn test_define_function() {
+        let fn_statement = get_it_statement();
+
+        insta::assert_display_snapshot!(fn_statement.to_raw().build());
+        insta::assert_display_snapshot!(fn_statement.fine_tune_params());
+        assert_eq!(
+            fn_statement.to_raw().build(),
+            "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
+                LET $person = '43';\n\n\
+                RETURN $person;\n\
+                };"
+        );
+        assert_eq!(
+            fn_statement.fine_tune_params(),
+            "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
+            LET $person = $_param_00000001;\n\n\
+            RETURN $person;\n\
+            };"
+        );
+        let x = get_it(false, "3".to_string(), "3".to_string());
+    }
 }
