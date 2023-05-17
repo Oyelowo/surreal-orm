@@ -215,16 +215,6 @@ macro_rules! check_field_type {
     }};
 }
 
-fn ere() {
-    define_function!(get_it(first: bool, last: string, birthday: string) {
-        let person = "43";
-        return person;
-    });
-    let xx = get_it(false, "3".to_string(), "3".to_string());
-
-    let xx = get_it_statement();
-}
-
 #[cfg(test)]
 mod tests {
     use crate::ToRaw;
@@ -256,6 +246,11 @@ mod tests {
             RETURN $person;\n\
             };"
         );
-        let x = get_it(false, "3".to_string(), "3".to_string());
+        let get_it_function = get_it(false, "3".to_string(), "3".to_string());
+        assert_eq!(get_it_function.to_raw().build(), "get_it(false, '3', '3')");
+        assert_eq!(
+            get_it_function.fine_tune_params(),
+            "get_it($_param_00000001, $_param_00000002, $_param_00000003)"
+        );
     }
 }
