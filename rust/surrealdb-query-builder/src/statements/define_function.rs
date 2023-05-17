@@ -1,3 +1,11 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Param, Parametric};
 // -- Define a global function which can be used in any query
 // DEFINE FUNCTION fn::get_person($first: string, $last: string, $birthday: string) {
 //
@@ -16,6 +24,8 @@
 
 type ParamType = String;
 
+/// A function definition statement
+#[derive(Debug, Clone)]
 pub struct DefineFunctionStatement {
     name: String,
     params: Vec<(Param, ParamType)>,
@@ -25,6 +35,10 @@ pub struct DefineFunctionStatement {
 }
 
 impl DefineFunctionStatement {
+    /// Create a new function definition statement
+    ///
+    /// # Arguments
+    /// * `name` - The name of the function
     pub fn new(name: String) -> Self {
         Self {
             name,
@@ -35,11 +49,13 @@ impl DefineFunctionStatement {
         }
     }
 
+    /// Sets the parameters for the function
     pub fn params(mut self, params: Vec<(Param, ParamType)>) -> Self {
         self.params = params;
         self
     }
 
+    /// Sets the body of the function
     pub fn body(mut self, body: Block) -> Self {
         self.bindings.extend(body.get_bindings());
         self.errors.extend(body.get_errors());
@@ -48,6 +64,7 @@ impl DefineFunctionStatement {
     }
 }
 
+/// Create a new function definition statement
 pub fn define_function(name: impl Into<String>) -> DefineFunctionStatement {
     DefineFunctionStatement {
         name: name.into(),
@@ -58,6 +75,39 @@ pub fn define_function(name: impl Into<String>) -> DefineFunctionStatement {
     }
 }
 
+impl Parametric for DefineFunctionStatement {
+    fn get_bindings(&self) -> BindingsList {
+        self.bindings.to_vec()
+    }
+}
+
+impl Erroneous for DefineFunctionStatement {
+    fn get_errors(&self) -> ErrorList {
+        self.errors.to_vec()
+    }
+}
+
+impl Buildable for DefineFunctionStatement {
+    fn build(&self) -> String {
+        let mut build = format!("DEFINE FUNCTION {}(", self.name);
+        build.push_str(
+            &self
+                .params
+                .iter()
+                .map(|(param, param_type)| format!("{}: {}", param.build(), param_type))
+                .collect::<Vec<String>>()
+                .join(", "),
+        );
+        build.push_str(") {");
+        if let Some(body) = &self.body {
+            build.push_str(&body.build());
+        }
+        build.push_str("};");
+        build
+    }
+}
+
+/// Define a function
 #[macro_export]
 macro_rules! define_function_ {
     ($function_name:ident ($($param:ident : $type:ident),* ) {$(let $var:ident = $value:expr;)* return $expr:expr;}) => {
@@ -117,7 +167,6 @@ macro_rules! define_function_ {
 }
 
 pub use define_function_ as define_function;
-use quote::format_ident;
 
 macro_rules! check_field_type {
     (any) => {
@@ -127,11 +176,10 @@ macro_rules! check_field_type {
         $crate::ArrayLike
     };
     (bool) => {
-        // $crate::BoolLike
-        todo!()
+        $crate::BoolLike
     };
     (datetime) => {
-        $crate::DateTimeLike
+        $crate::DatetimeLike
     };
     (string) => {
         $crate::StrandLike
@@ -155,7 +203,7 @@ macro_rules! check_field_type {
         $crate::ObjectLike
     };
     (record) => {
-        $crate::RecordLike
+        $crate::ThingLike
     };
     (geometry) => {
         $crate::GeometryLike
@@ -166,16 +214,12 @@ macro_rules! check_field_type {
     }};
 }
 
-fn erer(mm: impl Into<check_field_type!(any)>) {}
 fn ere() {
-    define_function!(get_it(first: string, last: string, birthday: string) {
+    define_function!(get_it(first: bool, last: string, birthday: string) {
         let person = "43";
         return person;
     });
-    let xx = get_it_fn("3".to_string(), "3".to_string(), "3".to_string());
-    // get_it!(first, last, birthday);
+    let xx = get_it_fn(false, "3".to_string(), "3".to_string());
 
-    // get_it_statement()
+    let xx = get_it_statement();
 }
-
-use crate::{BindingsList, Block, Erroneous, ErrorList, Param, Parametric};
