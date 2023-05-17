@@ -177,6 +177,12 @@ impl<T: Serialize> From<Param> for SetterArg<T> {
     }
 }
 
+impl<T: Serialize> From<&Param> for SetterArg<T> {
+    fn from(value: &Param) -> Self {
+        Self::Param(value.to_owned())
+    }
+}
+
 impl<T: Serialize> From<LetStatement> for SetterArg<T> {
     fn from(value: LetStatement) -> Self {
         Self::LetStatement(value)

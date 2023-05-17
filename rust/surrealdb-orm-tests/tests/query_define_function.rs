@@ -19,7 +19,7 @@ use surrealdb_models::{spaceship_schema, SpaceShip};
 use surrealdb_orm::{
     cond, index,
     statements::{create, define_function, if_, select},
-    All, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, Table,
+    All, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, Table, NONE,
 };
 
 // const SPACE_SHIP: SpaceShip = SpaceShip::schema();
@@ -36,17 +36,17 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
         );
 
-    return if_(person.with_path::<SpaceShip>(index(0)).id)
-        .then_(person.with_path::<SpaceShip>(index(0)))
-    .else_(
-            create::<SpaceShip>(
-                vec![
-                    SpaceShip::schema().id.equal_to(&first_arg),
-                    SpaceShip::schema().name.equal_to(&last_arg),
-                    SpaceShip::schema().created.equal_to(&birthday_arg),
-                ]
-            )
-        ).end();
+    return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
+                .then(person.with_path::<SpaceShip>(index(0)))
+            .else_(
+                create::<SpaceShip>(
+                    vec![
+                        SpaceShip::schema().id.equal_to(&first_arg),
+                        SpaceShip::schema().name.equal_to(&last_arg),
+                        SpaceShip::schema().created.equal_to(&birthday_arg),
+                    ]
+                )
+            ).end();
 });
 
 #[test]
