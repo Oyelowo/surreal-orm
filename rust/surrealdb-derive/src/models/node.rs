@@ -294,6 +294,12 @@ impl ToTokens for NodeToken{
                 }
 
                 impl #crate_name::Aliasable for #struct_name_ident {}
+
+                impl From<#struct_name_ident> for #crate_name::Valuex {
+                    fn from(node: #struct_name_ident) -> Self {
+                       Self::new(node)
+                    }
+                }
                 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {

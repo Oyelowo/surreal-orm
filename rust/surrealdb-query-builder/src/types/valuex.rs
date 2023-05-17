@@ -25,6 +25,17 @@ pub struct Valuex {
     pub(crate) errors: ErrorList,
 }
 
+impl Valuex {
+    /// Create a new `Valuex` from other values.
+    pub fn new(value: impl Buildable + Parametric + Erroneous) -> Self {
+        Self {
+            string: value.build(),
+            bindings: value.get_bindings(),
+            errors: value.get_errors(),
+        }
+    }
+}
+
 impl Parametric for Valuex {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()

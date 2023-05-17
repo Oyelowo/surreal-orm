@@ -10,7 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    BindingsList, Buildable, Clause, Erroneous, Operatable, Parametric, SchemaGetter,
+    BindingsList, Buildable, Clause, Erroneous, Index, Operatable, Parametric, SchemaGetter,
     SurrealdbModel, SurrealdbNode, Valuex,
 };
 
@@ -83,6 +83,25 @@ impl Param {
         };
 
         T::schema_prefixed(value)
+    }
+
+    /// For accessing an object in a list.
+    pub fn index(self, index: impl Into<Index>) -> Self {
+        let index: Index = index.into();
+        let value = Valuex {
+            string: format!("{}{}", self.build(), index.build()),
+            bindings: self
+                .get_bindings()
+                .into_iter()
+                .chain(index.get_bindings())
+                .collect::<Vec<_>>(),
+            errors: self.get_errors(),
+        };
+
+        Self {
+            param: sql::Param::from(value.build()),
+            bindings: self.get_bindings(),
+        }
     }
 }
 

@@ -1,0 +1,18 @@
+---
+source: surrealdb-query-builder/src/statements/define_function.rs
+assertion_line: 245
+expression: fn_statement.get_bindings()
+---
+[
+    Binding {
+        param: "_param_3a546f9b",
+        value: Strand(
+            Strand(
+                "43",
+            ),
+        ),
+        original_inline_name: "_param_3a546f9b",
+        raw_string: "'43'",
+        description: None,
+    },
+]

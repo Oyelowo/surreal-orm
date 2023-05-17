@@ -10,7 +10,7 @@ use std::fmt::Display;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::expression::Expression,
-    Operatable, Operation, Param, Valuex,
+    Clause, Operatable, Operation, Param, SchemaGetter, Valuex,
 };
 
 /// Builds LET statement.
@@ -120,6 +120,22 @@ impl LetStatement {
     /// helper function for getting assigned param from the LET statement
     pub fn get_param(&self) -> Param {
         self.parameter.clone()
+    }
+
+    /// For traversing from the param
+    pub fn with_path<T: SchemaGetter>(&self, clause: impl Into<Clause>) -> T::Schema {
+        let clause: Clause = clause.into();
+        let value = Valuex {
+            string: format!("{}{}", self.get_param().build(), clause.build()),
+            bindings: self
+                .get_bindings()
+                .into_iter()
+                .chain(clause.get_bindings())
+                .collect::<Vec<_>>(),
+            errors: self.get_errors(),
+        };
+
+        T::schema_prefixed(value)
     }
 }
 

@@ -113,7 +113,6 @@ impl<T: Serialize> From<Block> for SetterArg<T> {
 impl<T: Serialize> From<&Block> for SetterArg<T> {
     fn from(value: &Block) -> Self {
         Self::Subquery(value.clone().into())
-        // Self::Block(value.clone().into())
     }
 }
 
@@ -175,6 +174,12 @@ where
 impl<T: Serialize> From<Param> for SetterArg<T> {
     fn from(value: Param) -> Self {
         Self::Param(value)
+    }
+}
+
+impl<T: Serialize> From<&Param> for SetterArg<T> {
+    fn from(value: &Param) -> Self {
+        Self::Param(value.to_owned())
     }
 }
 
