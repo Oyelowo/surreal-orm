@@ -54,6 +54,14 @@ fn test_function_definition() {
     let person = get_person("Oyelowo", "Oyedayo", "2022-09-21");
     insta::assert_display_snapshot!(person.to_raw().build());
     insta::assert_display_snapshot!(person.fine_tune_params());
+    assert_eq!(
+        person.to_raw().build(),
+        "get_person('Oyelowo', 'Oyedayo', '2022-09-21')"
+    );
+    assert_eq!(
+        person.fine_tune_params(),
+        "get_person($_param_00000001, $_param_00000002, $_param_00000003)"
+    );
 
     let person_statement = get_person_statement();
     insta::assert_display_snapshot!(person_statement.to_raw().build());
