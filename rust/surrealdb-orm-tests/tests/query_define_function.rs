@@ -79,4 +79,11 @@ fn test_function_definition() {
             END;\n\
             };"
     );
+
+    assert_eq!(person_statement.fine_tune_params(),
+    "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
+            LET $person = $_param_00000001;\n\n\
+            RETURN $_param_00000002;\n\
+            };"
+    );
 }
