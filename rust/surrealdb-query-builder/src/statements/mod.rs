@@ -73,7 +73,7 @@ pub use select::{
 };
 pub use sleep::{sleep, SleepStatement};
 pub use subquery::Subquery;
-pub use transaction::{begin_transaction, BeginTransactionStatement};
+pub use transaction::{begin_transaction, transaction, BeginTransactionStatement};
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
