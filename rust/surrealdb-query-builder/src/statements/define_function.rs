@@ -6,21 +6,6 @@
  */
 
 use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable};
-// -- Define a global function which can be used in any query
-// DEFINE FUNCTION fn::get_person($first: string, $last: string, $birthday: string) {
-//
-// 	LET $person = SELECT * FROM person WHERE [first, last, birthday] = [$first, $last, $birthday];
-//
-// 	RETURN IF $person[0].id THEN
-// 		$person[0]
-// 	ELSE
-// 		CREATE person SET first = $first, last = $last, birthday = $birthday
-// 	END;
-//
-// };
-//
-// -- Call the global custom function, receiving the returned result
-// LET $person = fn::get_person('Tobie', 'Morgan Hitchcock', '2022-09-21');
 
 type ParamType = String;
 
@@ -112,8 +97,53 @@ impl Buildable for DefineFunctionStatement {
 #[macro_export]
 macro_rules! define_function_ {
     ($function_name:ident ($($param:ident : $type:ident),* ) {$(let $var:ident = $value:expr;)* return $expr:expr;}) => {
-        ::paste::paste! {
-            pub fn [<$function_name _statement>]() -> DefineFunctionStatement{
+        macro_rules! check_field_type {
+            (any) => {
+                $crate::Valuex
+            };
+            (array) => {
+                $crate::ArrayLike
+            };
+            (bool) => {
+                $crate::BoolLike
+            };
+            (datetime) => {
+                $crate::DatetimeLike
+            };
+            (string) => {
+                $crate::StrandLike
+            };
+            (number) => {
+                $crate::NumberLike
+            };
+            (int) => {
+                $crate::NumberLike
+            };
+            (float) => {
+                $crate::NumberLike
+            };
+            (decimal) => {
+                $crate::NumberLike
+            };
+            (duration) => {
+                $crate::DurationLike
+            };
+            (object) => {
+                $crate::ObjectLike
+            };
+            (record) => {
+                $crate::ThingLike
+            };
+            (geometry) => {
+                $crate::GeometryLike
+            };
+            ($field_type:expr) => {{
+                compile_error!(concat!("Invalid field type: ", $field_type));
+                unreachable!();
+            }};
+        }
+        $crate::internal_tools::paste::paste! {
+            pub fn [<$function_name _statement>]() -> $crate::statements::DefineFunctionStatement{
                 {
                     $(
                         let $param = $crate::Param::new(stringify!($param));
@@ -169,55 +199,9 @@ macro_rules! define_function_ {
 
 pub use define_function_ as define_function;
 
-macro_rules! check_field_type {
-    (any) => {
-        $crate::Valuex
-    };
-    (array) => {
-        $crate::ArrayLike
-    };
-    (bool) => {
-        $crate::BoolLike
-    };
-    (datetime) => {
-        $crate::DatetimeLike
-    };
-    (string) => {
-        $crate::StrandLike
-    };
-    (number) => {
-        $crate::NumberLike
-    };
-    (int) => {
-        $crate::NumberLike
-    };
-    (float) => {
-        $crate::NumberLike
-    };
-    (decimal) => {
-        $crate::NumberLike
-    };
-    (duration) => {
-        $crate::DurationLike
-    };
-    (object) => {
-        $crate::ObjectLike
-    };
-    (record) => {
-        $crate::ThingLike
-    };
-    (geometry) => {
-        $crate::GeometryLike
-    };
-    ($field_type:expr) => {{
-        compile_error!(concat!("Invalid field type: ", $field_type));
-        unreachable!();
-    }};
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::ToRaw;
+    use crate::{statements::select, All, Field, SurrealdbModel, TestUser, ToRaw};
 
     use super::*;
 
