@@ -19,7 +19,7 @@ use surrealdb_models::{spaceship_schema, SpaceShip};
 use surrealdb_orm::{
     cond, index,
     statements::{create, define_function, if_, select},
-    All, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, Table, NONE,
+    All, Buildable, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, Table, ToRaw, NONE,
 };
 
 // const SPACE_SHIP: SpaceShip = SpaceShip::schema();
@@ -50,4 +50,25 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
 });
 
 #[test]
-fn test_function_definition() {}
+fn test_function_definition() {
+    let person = get_person("Oyelowo", "Oyedayo", "2022-09-21");
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
+
+    let person_statement = get_person_statement();
+    insta::assert_display_snapshot!(person_statement.to_raw().build());
+    insta::assert_display_snapshot!(person_statement.fine_tune_params());
+
+    assert_eq!(
+        person_statement.to_raw().build(),
+        "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
+            LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND \
+            (created = $birthday_arg));\n\n\
+            RETURN IF $person[0].id != NONE THEN \
+            $person[0] \
+            ELSE \
+            (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) \
+            END;\n\
+            };"
+    );
+}
