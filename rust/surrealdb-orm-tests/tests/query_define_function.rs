@@ -1,35 +1,21 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 // -- Define a global function which can be used in any query
-// DEFINE FUNCTION fn::get_person($first: string, $last: string, $birthday: string) {
-//
-// 	LET $person = SELECT * FROM person WHERE [first, last, birthday] = [$first, $last, $birthday];
-//
-// 	RETURN IF $person[0].id THEN
-// 		$person[0]
-// 	ELSE
-// 		CREATE person SET first = $first, last = $last, birthday = $birthday
-// 	END;
-//
-// };
-//
-// -- Call the global custom function, receiving the returned result
-// LET $person = fn::get_person('Tobie', 'Morgan Hitchcock', '2022-09-21');
-// define more complex function using select statement within like the raw above this file
 
 use surrealdb_models::{spaceship_schema, SpaceShip};
 use surrealdb_orm::{
     cond, index,
     statements::{create, define_function, if_, select},
-    All, Buildable, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, Table, ToRaw, NONE,
+    All, Buildable, Operatable, SchemaGetter, SetterAssignable, SurrealdbModel, ToRaw, NONE,
 };
-
-// const SPACE_SHIP: SpaceShip = SpaceShip::schema();
-fn spaceship() -> Table {
-    SpaceShip::table_name()
-}
 
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
     let person = select(All)
-        .from(spaceship())
+        .from(SpaceShip::table_name())
         .where_(
             cond(SpaceShip::schema().id.equal(&first_arg))
                 .and(SpaceShip::schema().name.equal(&last_arg))
