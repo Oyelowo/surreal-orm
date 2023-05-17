@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{weapon_schema, weaponstats_schema, Weapon, WeaponStats};
 use surrealdb_orm::{
@@ -30,7 +37,6 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
         .collect::<Vec<_>>();
 
     insert(generated_weapons).return_many(db.clone()).await?;
-
 
     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
         let strengths = select_value(strength).from(weapon);

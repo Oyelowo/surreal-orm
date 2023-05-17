@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use crate::{
     statements::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
@@ -135,6 +142,104 @@ pub struct NULL;
 /// Represents the surrealdb NONE value
 #[derive(Debug, Clone)]
 pub struct NONE;
+
+/// Represents the surrealdb boolean value
+#[derive(Debug, Clone)]
+pub struct BoolLike(Valuex);
+
+impl From<BoolLike> for Valuex {
+    fn from(val: BoolLike) -> Self {
+        val.0
+    }
+}
+
+impl Parametric for BoolLike {
+    fn get_bindings(&self) -> BindingsList {
+        self.0.bindings.to_vec()
+    }
+}
+
+impl Buildable for BoolLike {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl From<bool> for BoolLike {
+    fn from(value: bool) -> Self {
+        let value: sql::Value = value.into();
+        Self(value.into())
+    }
+}
+
+impl From<Field> for BoolLike {
+    fn from(val: Field) -> Self {
+        BoolLike(val.into())
+    }
+}
+
+impl From<Param> for BoolLike {
+    fn from(val: Param) -> Self {
+        BoolLike(val.into())
+    }
+}
+
+impl From<&Field> for BoolLike {
+    fn from(val: &Field) -> Self {
+        BoolLike(val.clone().into())
+    }
+}
+
+impl<T> From<CreateStatement<T>> for BoolLike
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: CreateStatement<T>) -> Self {
+        BoolLike(statement.into())
+    }
+}
+
+impl<T> From<UpdateStatement<T>> for BoolLike
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: UpdateStatement<T>) -> Self {
+        BoolLike(statement.into())
+    }
+}
+
+impl<T> From<DeleteStatement<T>> for BoolLike
+where
+    T: SurrealdbModel + Serialize + DeserializeOwned,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        BoolLike(statement.into())
+    }
+}
+
+impl<T> From<RelateStatement<T>> for BoolLike
+where
+    T: SurrealdbEdge + Serialize + DeserializeOwned,
+{
+    fn from(statement: RelateStatement<T>) -> Self {
+        BoolLike(statement.into())
+    }
+}
+
+impl<T> From<InsertStatement<T>> for BoolLike
+where
+    T: SurrealdbNode + Serialize + DeserializeOwned,
+{
+    fn from(statement: InsertStatement<T>) -> Self {
+        BoolLike(statement.into())
+    }
+}
+
+impl From<IfElseStatement> for BoolLike {
+    fn from(statement: IfElseStatement) -> Self {
+        BoolLike(statement.into())
+    }
+}
 
 /// Represents the surrealdb Array value, or field, param which can all be used
 /// to represent the value itself within a query.
