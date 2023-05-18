@@ -4,6 +4,7 @@
 ## Convention
 To carry out certain tasks in any directory, these are the standard commands:
 
+
 | Commands   |      Purpose      
 |----------|:-------------
 | `make setup`    | To setup the codebase for development| 
