@@ -152,6 +152,37 @@ macro_rules! code_block {
 }
 pub use code_block as block;
 
+#[macro_export]
+macro_rules! blockko {
+    // Handle "let <ident> = <expr>;" pattern
+    (let $var:ident = $expr:expr; $($rest:tt)*) => {
+        {
+            println!("let {}: {:?}", stringify!($var), $expr); // Just print for demo
+            block!($($rest)*);  // Recurse to parse the rest
+        }
+    };
+
+    // Handle "return <expr>;" pattern
+    (return $expr:expr; $($rest:tt)*) => {
+        {
+            println!("return: {:?}", $expr);  // Just print for demo
+            block!($($rest)*);  // Recurse to parse the rest
+        }
+    };
+
+    // Handle "<expr>;" pattern
+    ($expr:expr; $($rest:tt)*) => {
+        {
+            println!("expr: {:?}", $expr);  // Just print for demo
+            block!($($rest)*);  // Recurse to parse the rest
+        }
+    };
+
+    // Base case - nothing left to parse
+    () => {};
+}
+pub use blockko as blockk;
+
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
 /// ```

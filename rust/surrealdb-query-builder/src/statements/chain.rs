@@ -34,9 +34,9 @@ use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Qu
 /// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\n\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
 /// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\n\nSELECT * FROM user:oyedayo LIMIT 10;");
 /// ```
-pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
+pub fn chain(query: impl Queryable + Parametric + Buildable) -> QueryChain {
     QueryChain {
-        queries: vec![query.to_string()],
+        queries: vec![query.build()],
         bindings: query.get_bindings(),
         errors: query.get_errors(),
     }
