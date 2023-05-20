@@ -154,33 +154,36 @@ pub use code_block as block;
 
 #[macro_export]
 macro_rules! blockko {
-    // Handle "let <ident> = <expr>;" pattern
-    (let $var:ident = $expr:expr; $($rest:tt)*) => {
+    ($($rest:tt)*) => {{
+        let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
         {
-            println!("let {}: {:?}", stringify!($var), $expr); // Just print for demo
-            block!($($rest)*);  // Recurse to parse the rest
+            let _ = || {
+                block_inner!(&mut __statements; $($rest)*);
+            };
         }
-    };
-
-    // Handle "return <expr>;" pattern
-    (return $expr:expr; $($rest:tt)*) => {
-        {
-            println!("return: {:?}", $expr);  // Just print for demo
-            block!($($rest)*);  // Recurse to parse the rest
-        }
-    };
-
-    // Handle "<expr>;" pattern
-    ($expr:expr; $($rest:tt)*) => {
-        {
-            println!("expr: {:?}", $expr);  // Just print for demo
-            block!($($rest)*);  // Recurse to parse the rest
-        }
-    };
-
-    // Base case - nothing left to parse
-    () => {};
+        $crate::Block::from($crate::statements::QueryChain::from(__statements))
+    }};
 }
+
+#[macro_export]
+macro_rules! block_inner {
+    ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
+        let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        $statements.push($var.clone().into());
+        block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; return $value:expr; $($rest:tt)*) => {{
+        let __stmt = $crate::statements::return_($value);
+        $statements.push(__stmt.into());
+        block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; $expr:expr; $($rest:tt)*) => {{
+        $statements.push($expr.into());
+        block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr;) => {};
+}
+
 pub use blockko as blockk;
 
 /// A code block. Surrounds the code with curly braces.

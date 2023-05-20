@@ -38,7 +38,7 @@ pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
 
-pub use chain::{chain, QueryChain};
+pub use chain::{chain, Chainable, QueryChain};
 pub use create::{create, CreateStatement};
 pub use create_by_setting::{create_by_setting, CreateBySettingStatement};
 pub use define_database::{define_database, DefineDatabaseStatement};
