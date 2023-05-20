@@ -53,7 +53,10 @@ pub struct QueryChain {
     errors: ErrorList,
 }
 
+/// A chainable query.
+#[derive(Debug, Clone)]
 pub struct Chainable(Valuex);
+
 impl<T: Erroneous + Parametric + Buildable> From<T> for Chainable {
     fn from(query: T) -> Self {
         Self(Valuex {

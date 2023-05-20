@@ -153,15 +153,14 @@ macro_rules! code_block {
 pub use code_block as block;
 
 #[macro_export]
-macro_rules! code_block2 {
+macro_rules! blockko {
     ($($rest:tt)*) => {{
         let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
         {
-
-            block_inner!( __statements; $($rest)*);
-
+            let _ = || {
+                block_inner!(&mut __statements; $($rest)*);
+            };
         }
-        dbg!(&__statements);
         $crate::Block::from($crate::statements::QueryChain::from(__statements))
     }};
 }
@@ -185,7 +184,36 @@ macro_rules! block_inner {
     ($statements:expr;) => {};
 }
 
-pub use code_block2 as block2;
+#[macro_export]
+macro_rules! blocke {
+    ($($code:tt)*) => {{
+        let mut statements = Vec::new();
+        $($code)*
+        let block = {
+            let mut chain = $crate::statements::Chain::new();
+            for statement in statements {
+                chain = chain.chain(&statement);
+            }
+            chain.as_block()
+        };
+        block
+    }};
+    (let $var:ident = $expr:expr; $($rest:tt)*) => {{
+        let $var = $expr;
+        statements.push($crate::statements::let_(stringify!($var)).equal_to(&$var));
+        block!($($rest)*)
+    }};
+    (return $expr:expr;) => {{
+        statements.push($crate::statements::return_($expr));
+    }};
+    (select($($args:tt)*) $($rest:tt)*) => {{
+        statements.push($crate::statements::select($($args)*));
+        block!($($rest)*)
+    }};
+}
+pub use blocke as blockk;
+
+// pub use blockko as blockk;
 
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
