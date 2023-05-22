@@ -19,8 +19,8 @@ use crate::{statements::QueryChain, Buildable, Erroneous, Parametric, Queryable,
 ///
 /// let code_block = block! {
 ///     let strengths = select_value(strength).from(alien);
-///     let total = math::sum!(&strengths);
-///     let count = count!(&strengths);
+///     let total = math::sum!(strengths);
+///     let count = count!(strengths);
 ///     return total.divide(count);
 /// };
 /// ```

@@ -204,7 +204,8 @@ mod tests {
             .from(fake_id)
             .where_(
                 cond(city.is("Prince Edward Island"))
-                    .and(city.is("NewFoundland").or(city.like("Toronto"))),
+                    .and(city.is("NewFoundland"))
+                    .or(city.like("Toronto")),
             )
             .order_by(order(&age).numeric())
             .limit(153)
