@@ -189,6 +189,12 @@ impl<T: Serialize> From<LetStatement> for SetterArg<T> {
     }
 }
 
+impl<T: Serialize> From<&LetStatement> for SetterArg<T> {
+    fn from(value: &LetStatement) -> Self {
+        Self::LetStatement(value.clone())
+    }
+}
+
 impl<T: Serialize> From<Subquery> for SetterArg<T> {
     fn from(value: Subquery) -> Self {
         Self::Subquery(value)

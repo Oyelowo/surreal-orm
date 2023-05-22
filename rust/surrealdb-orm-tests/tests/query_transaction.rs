@@ -1,5 +1,5 @@
 use surrealdb::{engine::local::Mem, Surreal};
-use surrealdb_models::Account;
+use surrealdb_models::{Account, Balance};
 use surrealdb_orm::{
     statements::{begin_transaction, create, select, update},
     *,
@@ -91,22 +91,27 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
 
     let ref id1 = Account::create_id("one".into());
     let ref id2 = Account::create_id("two".into());
-
     let acc = Account::schema();
 
+    let amount_to_transfer = 300.00;
     begin_transaction()
         .query(queries!(
-            let amount_to_transfer = 300.00;
+            let balance = create(Balance {
+                balance: amount_to_transfer,
+                ..Default::default()
+            });
+
             create(Account {
                 id: id1.clone(),
                 balance: 135_605.16,
             });
+
             create(Account {
                 id: id2.clone(),
                 balance: 91_031.31,
             });
 
-            update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
+            update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).balance));
             update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
         ))
         .commit_transaction()
