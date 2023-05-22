@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{engine::local::Mem, sql, Surreal};
 use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
-    block,
+    block, queries,
     statements::{chain, if_, insert, let_, order, select, update, LetStatement, QueryChain},
     All, Buildable, Operatable, Param, ReturnableSelect, ReturnableStandard, Runnable,
     SchemaGetter, SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
@@ -54,7 +54,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
         let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
 
         let query_result = if_(val.greater_than(5))
-            .then(&select_space_ship)
+            .then(select_space_ship)
             .else_if(oye_name.equal("Oyelowo"))
             .then(
                 select(All)
@@ -103,7 +103,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
     };
 
     // A good way to share a query across multiple blocks
-    let if_else_external = |val: LetStatement, oye_name: LetStatement| {
+    let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
         if_(val.greater_than(5))
             .then(select(All).from(space_ship).order_by(order(name).desc()))
             .else_if(oye_name.equal("Oyelowo"))

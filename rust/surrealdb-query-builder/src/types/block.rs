@@ -28,12 +28,12 @@ macro_rules! code_block {
     ($(let $var:ident = $value:expr;)* return $expr:expr;) => {
         {
             $(
-                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+                let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
             $crate::statements::
             $(
-                chain(&$var).
+                chain($var).
             )*
 
             chain($crate::statements::return_($expr)).as_block()
@@ -86,6 +86,24 @@ macro_rules! code_block {
             .commit_transaction()
         }
     };
+    (BEGIN TRANSACTION; $(let $var:ident = $value:expr;)* CANCEL TRANSACTION;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::statements::chain;
+
+            let chain: $crate::statements::QueryChain = $(
+                chain(&$var).
+                )*
+                into();
+
+            $crate::statements::begin_transaction().
+            query(chain)
+            .cancel_transaction()
+        }
+    };
     (BEGIN TRANSACTION; $($query:expr;)* COMMIT TRANSACTION;) => {
         {
             $crate::statements::begin_transaction().
@@ -106,103 +124,86 @@ macro_rules! code_block {
             .commit_transaction()
         }
     };
-    // (begin transaction;$(let $var:ident = $value:expr;)* commit transaction;) => {
-    //     $(
-    //         let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
-    //     )*
-    //
-    //     use $crate::statements::chain;
-    //
-    //     let chain: $crate::statements::QueryChain = $(
-    //         chain(&$var).
-    //         )*
-    //         into();
-    //
-    //     $crate::statements::begin_transaction().
-    //     $(
-    //     query(&chain).
-    //     )*
-    //
-    //     .commit_transaction()
-    // };
-    // (BEGIN TRANSACTION; $($query:expr;)* CANCEL TRANSACTION;) => {
-    //     {
-    //         $crate::statements::begin_transaction().
-    //         $(
-    //         query(&$query).
-    //         )*
-    //
-    //         .cancel_transaction()
-    //     }
-    // };
-    // (begin transaction; $($query:expr;)* cancel transaction;) => {
-    //     {
-    //         $crate::statements::begin_transaction().
-    //         $(
-    //         query(&$query).
-    //         )*
-    //
-    //         .cancel_transaction()
-    //     }
-    // };
-    // ($statement:stmt) => {{
-    //     $statement
-    // }};
+    (begin transaction;$(let $var:ident = $value:expr;)* commit transaction;) => {
+        $(
+            let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        )*
+
+        use $crate::statements::chain;
+
+        let chain: $crate::statements::QueryChain = $(
+            chain(&$var).
+            )*
+            into();
+
+        $crate::statements::begin_transaction().
+        $(
+        query(&chain).
+        )*
+
+        .commit_transaction()
+    };
+    (BEGIN TRANSACTION; $($query:expr;)* CANCEL TRANSACTION;) => {
+        {
+            $crate::statements::begin_transaction().
+            $(
+            query(&$query).
+            )*
+
+            .cancel_transaction()
+        }
+    };
+    (begin transaction; $($query:expr;)* cancel transaction;) => {
+        {
+            $crate::statements::begin_transaction().
+            $(
+            query(&$query).
+            )*
+
+            .cancel_transaction()
+        }
+    };
+    ($statement:stmt) => {{
+        $statement
+    }};
     // () => {};
 }
 pub use code_block as block;
 
+/// Write multiple queries in
 #[macro_export]
-macro_rules! query_block {
-    // handle block starting with BEGIN TRANSACTION; and ending with COMMIT TRANSACTION;
-    (BEGIN TRANSACTION; $($rest:tt)* COMMIT TRANSACTION;) => {{
-        let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
-        {
-            block_inner!( __statements; $($rest)*);
-        }
-        dbg!(&__statements);
-        $crate::Block::from($crate::statements::QueryChain::from(__statements))
-    }};
-    // handle block starting with BEGIN TRANSACTION; and ending with CANCEL TRANSACTION;
-    (BEGIN TRANSACTION; $($rest:tt)* CANCEL TRANSACTION;) => {{
-        let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
-        {
-            block_inner!( __statements; $($rest)*);
-        }
-        dbg!(&__statements);
-        $crate::Block::from($crate::statements::QueryChain::from(__statements))
-    }};
-    // handle any other patterns
+macro_rules! surreal_queries {
     ($($rest:tt)*) => {{
         let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
         {
-            block_inner!( __statements; $($rest)*);
+            $crate::block_inner!( __statements; $($rest)*);
         }
-        dbg!(&__statements);
-        $crate::Block::from($crate::statements::QueryChain::from(__statements))
+        // $crate::Block::from($crate::statements::QueryChain::from(__statements))
+        $crate::statements::QueryChain::from(__statements)
     }};
 }
 
+///
 #[macro_export]
 macro_rules! block_inner {
     ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
         let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         $statements.push($var.clone().into());
-        block_inner!($statements; $($rest)*);
+        $crate::block_inner!($statements; $($rest)*);
     }};
     ($statements:expr; return $value:expr; $($rest:tt)*) => {{
         let __stmt = $crate::statements::return_($value);
         $statements.push(__stmt.into());
-        block_inner!($statements; $($rest)*);
+        $crate::block_inner!($statements; $($rest)*);
     }};
     ($statements:expr; $expr:expr; $($rest:tt)*) => {{
         $statements.push($expr.into());
-        block_inner!($statements; $($rest)*);
+        $crate::block_inner!($statements; $($rest)*);
     }};
     ($statements:expr;) => {};
 }
 
-pub use query_block as queries;
+pub use surreal_queries as queries;
 
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
