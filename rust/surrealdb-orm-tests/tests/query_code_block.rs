@@ -39,6 +39,14 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
     insert(generated_weapons).return_many(db.clone()).await?;
 
     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block2! {
+        // BEGIN TRANSACTION;
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = count!(strengths);
+        return total.divide(count);
+        // COMMIT TRANSACTION;
+    }));
+    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block2! {
         let strengths = select_value(strength).from(weapon);
         let total = math::sum!(strengths);
         let count = count!(strengths);

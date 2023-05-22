@@ -153,13 +153,30 @@ macro_rules! code_block {
 pub use code_block as block;
 
 #[macro_export]
-macro_rules! code_block2 {
+macro_rules! query_block {
+    // handle block starting with BEGIN TRANSACTION; and ending with COMMIT TRANSACTION;
+    (BEGIN TRANSACTION; $($rest:tt)* COMMIT TRANSACTION;) => {{
+        let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
+        {
+            block_inner!( __statements; $($rest)*);
+        }
+        dbg!(&__statements);
+        $crate::Block::from($crate::statements::QueryChain::from(__statements))
+    }};
+    // handle block starting with BEGIN TRANSACTION; and ending with CANCEL TRANSACTION;
+    (BEGIN TRANSACTION; $($rest:tt)* CANCEL TRANSACTION;) => {{
+        let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
+        {
+            block_inner!( __statements; $($rest)*);
+        }
+        dbg!(&__statements);
+        $crate::Block::from($crate::statements::QueryChain::from(__statements))
+    }};
+    // handle any other patterns
     ($($rest:tt)*) => {{
         let mut __statements: Vec<$crate::statements::Chainable> = Vec::new();
         {
-
             block_inner!( __statements; $($rest)*);
-
         }
         dbg!(&__statements);
         $crate::Block::from($crate::statements::QueryChain::from(__statements))
@@ -185,7 +202,7 @@ macro_rules! block_inner {
     ($statements:expr;) => {};
 }
 
-pub use code_block2 as block2;
+pub use query_block as queries;
 
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
