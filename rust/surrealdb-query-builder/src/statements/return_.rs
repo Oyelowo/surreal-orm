@@ -93,9 +93,9 @@ mod tests {
     use select::select_value;
 
     use crate::{
-        block, bracket,
+        block, bracket, chain,
         functions::{count, math},
-        statements::{chain, define_field, let_, select},
+        statements::{define_field, let_, select},
         Field, Operatable, SurrealdbModel, Table, TestUser, ToRaw,
     };
 

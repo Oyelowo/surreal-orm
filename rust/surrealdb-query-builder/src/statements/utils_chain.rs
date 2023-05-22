@@ -5,9 +5,9 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::{self, Display};
+use std::fmt;
 
-use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable};
+use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable, Valuex};
 
 /// Chains together multiple queries into a single `QueryChain`.
 ///
@@ -34,9 +34,9 @@ use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Qu
 /// assert_eq!(chain.fine_tune_params(), "SELECT * FROM $_param_00000001;\n\nSELECT * FROM $_param_00000002 LIMIT $_param_00000003;");
 /// assert_eq!(chain.to_raw().to_string(), "SELECT * FROM user:oyelowo;\n\nSELECT * FROM user:oyedayo LIMIT 10;");
 /// ```
-pub fn chain(query: impl Queryable + Parametric + Display) -> QueryChain {
+pub fn chain(query: impl Queryable + Parametric + Buildable) -> QueryChain {
     QueryChain {
-        queries: vec![query.to_string()],
+        queries: vec![query.build()],
         bindings: query.get_bindings(),
         errors: query.get_errors(),
     }
@@ -51,6 +51,20 @@ pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,
     errors: ErrorList,
+}
+
+/// A chainable query.
+#[derive(Debug, Clone)]
+pub struct Chainable(Valuex);
+
+impl<T: Erroneous + Parametric + Buildable> From<T> for Chainable {
+    fn from(query: T) -> Self {
+        Self(Valuex {
+            string: query.build(),
+            bindings: query.get_bindings(),
+            errors: query.get_errors(),
+        })
+    }
 }
 
 impl QueryChain {
@@ -86,7 +100,8 @@ impl QueryChain {
     /// # Panics
     ///
     /// This method does not panic.
-    pub fn chain(mut self, query: impl Queryable + Parametric + Buildable) -> Self {
+    pub fn chain(mut self, query: impl Into<Chainable>) -> Self {
+        let query = query.into().0;
         self.bindings.extend(query.get_bindings());
         self.errors.extend(query.get_errors());
         self.queries.push(query.build());
@@ -124,13 +139,50 @@ impl fmt::Display for QueryChain {
     }
 }
 
+impl From<Vec<Valuex>> for QueryChain {
+    fn from(values: Vec<Valuex>) -> Self {
+        let mut bindings = BindingsList::new();
+        let mut errors = ErrorList::new();
+        let mut queries = Vec::new();
+
+        for query in values {
+            bindings.extend(query.get_bindings());
+            errors.extend(query.get_errors());
+            queries.push(query.build());
+        }
+
+        Self {
+            queries,
+            bindings,
+            errors,
+        }
+    }
+}
+
+impl From<Vec<Chainable>> for QueryChain {
+    fn from(values: Vec<Chainable>) -> Self {
+        let mut bindings = BindingsList::new();
+        let mut errors = ErrorList::new();
+        let mut queries = Vec::new();
+
+        for query in values {
+            bindings.extend(query.0.get_bindings());
+            errors.extend(query.0.get_errors());
+            queries.push(query.0.build());
+        }
+
+        Self {
+            queries,
+            bindings,
+            errors,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{
-        cond,
-        statements::{chain, select},
-        traits::Buildable,
-        All, Field, Operatable, ToRaw,
+        chain, cond, statements::select, traits::Buildable, All, Field, Operatable, ToRaw,
     };
     use insta::assert_display_snapshot;
     use select::order;
@@ -147,11 +199,11 @@ mod tests {
 
         let statement1 = select(All)
             .from(fake_id)
-            .where_(cond(
+            .where_(
                 cond(city.is("Prince Edward Island"))
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
-            ))
+            )
             .order_by(order(&age).numeric())
             .limit(153)
             .start(10)

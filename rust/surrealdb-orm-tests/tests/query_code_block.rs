@@ -8,8 +8,9 @@
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{weapon_schema, weaponstats_schema, Weapon, WeaponStats};
 use surrealdb_orm::{
+    chain,
     functions::math,
-    statements::{chain, create, insert, let_, return_, select, select_value},
+    statements::{create, insert, let_, return_, select, select_value},
     *,
 };
 
@@ -40,8 +41,8 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
 
     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
         let strengths = select_value(strength).from(weapon);
-        let total = math::sum!(&strengths);
-        let count = count!(&strengths);
+        let total = math::sum!(strengths);
+        let count = count!(strengths);
         return total.divide(count);
     }));
 
