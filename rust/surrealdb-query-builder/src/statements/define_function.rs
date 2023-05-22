@@ -197,7 +197,7 @@ macro_rules! define_function_ {
                         let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
                     )*
 
-                    let body = $crate::statements::
+                    let body = $crate::
                     $(
                         chain(&$var).
                     )*

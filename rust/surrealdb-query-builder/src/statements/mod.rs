@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-pub(crate) mod chain;
 pub(crate) mod create;
 pub(crate) mod create_by_setting;
 pub(crate) mod define_database;
@@ -37,8 +36,10 @@ pub(crate) mod subquery;
 pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
+pub(crate) mod utils_block;
+pub(crate) mod utils_chain;
+pub(crate) mod utils_queries;
 
-pub use chain::{chain, Chainable, QueryChain};
 pub use create::{create, CreateStatement};
 pub use create_by_setting::{create_by_setting, CreateBySettingStatement};
 pub use define_database::{define_database, DefineDatabaseStatement};
@@ -77,7 +78,13 @@ pub use transaction::{begin_transaction, transaction, BeginTransactionStatement}
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
-pub(crate) enum NamespaceOrDatabase {
+pub mod utils {
+    pub use super::utils_block::{block, Block};
+    pub use super::utils_chain::{chain, Chainable, QueryChain};
+    pub use super::utils_queries::queries;
+}
+
+pub enum NamespaceOrDatabase {
     Namespace,
     Database,
 }

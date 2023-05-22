@@ -9,9 +9,9 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{engine::local::Mem, sql, Surreal};
 use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
-    block, queries,
-    statements::{chain, if_, insert, let_, order, select, update, LetStatement, QueryChain},
-    All, Buildable, Operatable, Param, ReturnableSelect, ReturnableStandard, Runnable,
+    block, chain, queries,
+    statements::{if_, insert, let_, order, select, update, LetStatement},
+    All, Buildable, Operatable, Param, QueryChain, ReturnableSelect, ReturnableStandard, Runnable,
     SchemaGetter, SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
 };
 

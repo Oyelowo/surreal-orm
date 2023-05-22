@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::{self, Display};
+use std::fmt;
 
 use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable, Valuex};
 
@@ -182,10 +182,7 @@ impl From<Vec<Chainable>> for QueryChain {
 #[cfg(test)]
 mod tests {
     use crate::{
-        cond,
-        statements::{chain, select},
-        traits::Buildable,
-        All, Field, Operatable, ToRaw,
+        chain, cond, statements::select, traits::Buildable, All, Field, Operatable, ToRaw,
     };
     use insta::assert_display_snapshot;
     use select::order;
