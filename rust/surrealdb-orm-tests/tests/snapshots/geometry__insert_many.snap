@@ -1,5 +1,5 @@
 ---
-source: surrealdb-orm-tests/tests/geomtry_wrapper.rs
+source: surrealdb-orm-tests/tests/geometry.rs
 expression: results
 ---
 [
@@ -11,7 +11,7 @@ expression: results
                     32,
                 ),
             },
-            PhantomData<geomtry_wrapper::Company>,
+            PhantomData<geometry::Company>,
             PhantomData<i32>,
         ),
         nam: UuidWrapper(
@@ -52,7 +52,7 @@ expression: results
                     2,
                 ),
             },
-            PhantomData<geomtry_wrapper::Company>,
+            PhantomData<geometry::Company>,
             PhantomData<i32>,
         ),
         nam: UuidWrapper(

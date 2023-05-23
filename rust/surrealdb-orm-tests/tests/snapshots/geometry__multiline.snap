@@ -1,5 +1,5 @@
 ---
-source: surrealdb-orm-tests/tests/geomtry_wrapper.rs
+source: surrealdb-orm-tests/tests/geometry.rs
 expression: company
 ---
 {"id":"company:32","nam":"285cfebe-a7f2-4100-aeb3-7f73998fff02","name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"type":"MultiLineString","coordinates":[[[0.0,0.0],[1.0,1.0],[2.0,2.0]],[[3.0,3.0],[4.0,4.0],[5.0,5.0]]]}}
