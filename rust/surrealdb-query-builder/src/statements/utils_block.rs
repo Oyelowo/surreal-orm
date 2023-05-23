@@ -333,6 +333,11 @@ macro_rules! block_inner {
         $statements.push(__private_stmt.into());
         $crate::block_inner!($statements; $($rest)*);
     }};
+    ($statements:expr; RETURN $value:expr; $($rest:tt)*) => {{
+        let __private_stmt = $crate::statements::return_($value);
+        $statements.push(__private_stmt.into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
     ($statements:expr; $expr:expr; $($rest:tt)*) => {{
         $statements.push($expr.into());
         $crate::block_inner!($statements; $($rest)*);
