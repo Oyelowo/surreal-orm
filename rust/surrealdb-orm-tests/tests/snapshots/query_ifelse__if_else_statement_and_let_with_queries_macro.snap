@@ -1,6 +1,5 @@
 ---
 source: surrealdb-orm-tests/tests/query_ifelse.rs
-assertion_line: 68
 expression: queries_1.to_raw().build()
 ---
 {

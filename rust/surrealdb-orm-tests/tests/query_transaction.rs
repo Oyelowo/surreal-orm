@@ -94,11 +94,11 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
     let acc = Account::schema();
 
     let amount_to_transfer = 300.00;
-    begin_transaction()
-        .query(queries!(
+    let transaction_query = begin_transaction()
+        .query(block!(
             let balance = create(Balance {
+                id: Balance::create_id("balance".into()),
                 balance: amount_to_transfer,
-                ..Default::default()
             });
 
             create(Account {
@@ -114,14 +114,39 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
             update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).balance));
             update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
         ))
-        .commit_transaction()
-        .run(db.clone())
-        .await?;
+        .commit_transaction();
+
+    transaction_query.run(db.clone()).await?;
 
     let accounts = select(All)
         .from(id1..=id2)
         .return_many::<Account>(db.clone())
         .await?;
+
+    assert_eq!(
+        transaction_query.to_raw().build(),
+        "BEGIN TRANSACTION;\n\n\
+            LET $balance = (CREATE balance CONTENT { balance: 300.0, id: balance:balance });\n\n\
+            CREATE account CONTENT { balance: 135605.16, id: account:one };\n\n\
+            CREATE account CONTENT { balance: 91031.31, id: account:two };\n\n\
+            UPDATE account:one SET balance += $balance.balance;\n\n\
+            UPDATE account:two SET balance -= 300.0;\n\n\
+            COMMIT TRANSACTION;\n\t"
+    );
+
+    assert_eq!(
+        transaction_query.fine_tune_params(),
+        "BEGIN TRANSACTION;\n\n\
+            LET $balance = $_param_00000001;\n\n\
+            CREATE account CONTENT $_param_00000002;\n\n\
+            CREATE account CONTENT $_param_00000003;\n\n\
+            UPDATE $_param_00000004 SET balance += $balance.balance;\n\n\
+            UPDATE $_param_00000005 SET balance -= $_param_00000006;\n\n\
+            COMMIT TRANSACTION;\n\t"
+    );
+
+    insta::assert_display_snapshot!(transaction_query.fine_tune_params());
+    insta::assert_display_snapshot!(transaction_query.to_raw().build());
 
     assert_eq!(accounts.len(), 2);
     assert_eq!(accounts[0].balance, 135_905.16);

@@ -64,11 +64,11 @@ pub struct Account {
     pub balance: f64,
 }
 
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "balance")]
 pub struct Balance {
-    pub id: SurrealSimpleId<Self>,
+    pub id: SurrealId<Self, String>,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub balance: f64,
 }

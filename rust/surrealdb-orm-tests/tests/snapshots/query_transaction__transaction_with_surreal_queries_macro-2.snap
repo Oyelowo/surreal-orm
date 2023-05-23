@@ -1,0 +1,18 @@
+---
+source: surrealdb-orm-tests/tests/query_transaction.rs
+expression: transaction_query.to_raw().build()
+---
+BEGIN TRANSACTION;
+
+LET $balance = (CREATE balance CONTENT { balance: 300.0, id: balance:balance });
+
+CREATE account CONTENT { balance: 135605.16, id: account:one };
+
+CREATE account CONTENT { balance: 91031.31, id: account:two };
+
+UPDATE account:one SET balance += $balance.balance;
+
+UPDATE account:two SET balance -= 300.0;
+
+COMMIT TRANSACTION;
+	
