@@ -25,7 +25,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
         .query(block!(
             let balance = create(Balance {
                 id: Balance::create_id("balance".into()),
-                balance: amount_to_transfer,
+                amount: amount_to_transfer,
             });
 
             create(Account {
@@ -38,7 +38,10 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
                 balance: 91_031.31,
             });
 
-            update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).balance));
+        // You can reference the balance object by using the $balance variable and pass the amount
+        // as a parameter to the decrement_by function. i.e $balance.amount
+            update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
+        // You can also pass the amount directly to the decrement_by function. i.e 300.00
             update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
         ))
         .commit_transaction();

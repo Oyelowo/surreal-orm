@@ -70,5 +70,5 @@ pub struct Account {
 pub struct Balance {
     pub id: SurrealId<Self, String>,
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub balance: f64,
+    pub amount: f64,
 }
