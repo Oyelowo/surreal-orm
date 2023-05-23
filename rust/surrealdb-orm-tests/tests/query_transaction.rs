@@ -97,17 +97,17 @@ async fn test_transaction_with_block_macro() -> SurrealdbOrmResult<()> {
     block! {
         BEGIN TRANSACTION;
 
-        let acc1 = create(Account {
+        LET acc1 = create(Account {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        let acc2 = create(Account {
+        LET acc2 = create(Account {
             id: id2.clone(),
             balance: 91_031.31,
         });
 
-        let updated1 = update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
-        let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+        LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
+        LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 
         COMMIT TRANSACTION;
     }

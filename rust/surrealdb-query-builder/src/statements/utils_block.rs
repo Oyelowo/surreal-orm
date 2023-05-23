@@ -150,6 +150,24 @@ macro_rules! code_block {
             chain
         }
     };
+    (BEGIN TRANSACTION; $(LET $var:ident = $value:expr;)* COMMIT TRANSACTION;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::chain;
+
+            let chain: $crate::QueryChain = $(
+                chain(&$var).
+                )*
+                into();
+
+            $crate::statements::begin_transaction().
+            query(chain)
+            .commit_transaction()
+        }
+    };
     (BEGIN TRANSACTION; $(let $var:ident = $value:expr;)* COMMIT TRANSACTION;) => {
         {
             $(
@@ -166,6 +184,24 @@ macro_rules! code_block {
             $crate::statements::begin_transaction().
             query(chain)
             .commit_transaction()
+        }
+    };
+    (BEGIN TRANSACTION; $(LET $var:ident = $value:expr;)* CANCEL TRANSACTION;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::statements::chain;
+
+            let chain: $crate::statements::QueryChain = $(
+                chain(&$var).
+                )*
+                into();
+
+            $crate::statements::begin_transaction().
+            query(chain)
+            .cancel_transaction()
         }
     };
     (BEGIN TRANSACTION; $(let $var:ident = $value:expr;)* CANCEL TRANSACTION;) => {
@@ -205,6 +241,25 @@ macro_rules! code_block {
 
             .commit_transaction()
         }
+    };
+    (begin transaction;$(LET $var:ident = $value:expr;)* commit transaction;) => {
+        $(
+            let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        )*
+
+        use $crate::statements::chain;
+
+        let chain: $crate::statements::QueryChain = $(
+            chain(&$var).
+            )*
+            into();
+
+        $crate::statements::begin_transaction().
+        $(
+        query(&chain).
+        )*
+
+        .commit_transaction()
     };
     (begin transaction;$(let $var:ident = $value:expr;)* commit transaction;) => {
         $(
