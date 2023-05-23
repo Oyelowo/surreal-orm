@@ -107,7 +107,21 @@ macro_rules! code_block {
             chain($crate::statements::return_($expr)).as_block()
         }
     };
-    ($(let $var:ident = $value:expr;)*) => {
+    ($(LET $var:ident = $value:expr;)* RETURN $expr:expr;) => {
+        {
+            $(
+                let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            $crate::
+            $(
+                chain($var).
+            )*
+
+            chain($crate::statements::return_($expr)).as_block()
+        }
+    };
+    ($(LET $var:ident = $value:expr;)*) => {
         {
             $(
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
@@ -246,10 +260,15 @@ macro_rules! code_block {
 }
 pub use code_block as block;
 
-///
+///  helper function for block macro
 #[macro_export]
 macro_rules! block_inner {
     ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
+        let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        $statements.push($var.clone().into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; LET $var:ident = $value:expr; $($rest:tt)*) => {{
         let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         $statements.push($var.clone().into());
         $crate::block_inner!($statements; $($rest)*);
