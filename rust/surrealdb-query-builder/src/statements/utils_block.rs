@@ -10,7 +10,9 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, Valuex};
 #[macro_export]
 /// Macro for creating a surrealdb code block
 /// # Examples
-/// ```
+/// ```rust
+/// // Use to create a return blocked that can be passed as a value in a statement.
+///
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, statements::*, functions::*};
 /// # let alien = Table::new("alien");
@@ -22,6 +24,72 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, Valuex};
 ///     let total = math::sum!(strengths);
 ///     let count = count!(strengths);
 ///     return total.divide(count);
+/// };
+/// ```
+/// ```rust, ignore
+/// // Example passing as a value in a statement.
+///     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+///     let strengths = select_value(strength).from(weapon);
+///     let total = math::sum!(strengths);
+///     let count = count!(strengths);
+///     return total.divide(count);
+/// }));
+/// ```
+/// ```rust, ignore
+/// // Using in a transaction query function.
+///
+/// let id1 = Account::create_id("one".into());
+/// let id2 = Account::create_id("two".into());
+/// let acc = Account::schema();
+///
+/// let amount_to_transfer = 300.00;
+/// let transaction_query = begin_transaction()
+///     .query(block!(
+///         let balance = create(Balance {
+///             id: Balance::create_id("balance".into()),
+///             balance: amount_to_transfer,
+///         });
+///
+///         create(Account {
+///             id: id1,
+///             balance: 135_605.16,
+///         });
+///
+///         create(Account {
+///             id: id2,
+///             balance: 91_031.31,
+///         });
+///
+///         update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).balance));
+///         update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///     ))
+///     .commit_transaction();
+///
+/// transaction_query.run(db.clone()).await?;
+/// ```
+/// ```rust, ignore
+/// // Using to create a transaction query function.
+/// let id1 = Account::create_id("one".into());
+/// let id2 = Account::create_id("two".into());
+/// let amount_to_transfer = 300.00;
+/// let acc = Account::schema();
+///
+/// let transaction = block! {
+///     BEGIN TRANSACTION;
+///
+///     let acc1 = create(Account {
+///         id: id1,
+///         balance: 135_605.16,
+///     });
+///     let acc2 = create(Account {
+///         id: id2,
+///         balance: 91_031.31,
+///     });
+///
+///     let updated1 = update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
+///     let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///
+///     COMMIT TRANSACTION;
 /// };
 /// ```
 macro_rules! code_block {
