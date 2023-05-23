@@ -81,7 +81,7 @@ pub use use_::{use_, UseStatement};
 pub mod utils {
     pub use super::utils_block::{block, Block};
     pub use super::utils_chain::{chain, Chainable, QueryChain};
-    pub use super::utils_queries::queries;
+    // pub use super::utils_queries::queries;
 }
 
 pub enum NamespaceOrDatabase {
