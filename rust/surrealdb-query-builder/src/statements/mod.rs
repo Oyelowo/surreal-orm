@@ -38,7 +38,6 @@ pub(crate) mod update;
 pub(crate) mod use_;
 pub(crate) mod utils_block;
 pub(crate) mod utils_chain;
-pub(crate) mod utils_queries;
 
 pub use create::{create, CreateStatement};
 pub use create_by_setting::{create_by_setting, CreateBySettingStatement};
@@ -78,12 +77,13 @@ pub use transaction::{begin_transaction, transaction, BeginTransactionStatement}
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
+/// helpers for statements
 pub mod utils {
     pub use super::utils_block::{block, Block};
     pub use super::utils_chain::{chain, Chainable, QueryChain};
-    // pub use super::utils_queries::queries;
 }
 
+#[allow(missing_docs)]
 pub enum NamespaceOrDatabase {
     Namespace,
     Database,
