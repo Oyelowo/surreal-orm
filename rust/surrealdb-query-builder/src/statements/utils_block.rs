@@ -10,7 +10,9 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, Valuex};
 #[macro_export]
 /// Macro for creating a surrealdb code block
 /// # Examples
-/// ```
+/// ```rust
+/// // Use to create a return blocked that can be passed as a value in a statement.
+///
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, statements::*, functions::*};
 /// # let alien = Table::new("alien");
@@ -22,6 +24,72 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, Valuex};
 ///     let total = math::sum!(strengths);
 ///     let count = count!(strengths);
 ///     return total.divide(count);
+/// };
+/// ```
+/// ```rust, ignore
+/// // Example passing as a value in a statement.
+///     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+///     let strengths = select_value(strength).from(weapon);
+///     let total = math::sum!(strengths);
+///     let count = count!(strengths);
+///     return total.divide(count);
+/// }));
+/// ```
+/// ```rust, ignore
+/// // Using in a transaction query function.
+///
+/// let id1 = Account::create_id("one".into());
+/// let id2 = Account::create_id("two".into());
+/// let acc = Account::schema();
+///
+/// let amount_to_transfer = 300.00;
+/// let transaction_query = begin_transaction()
+///     .query(block!(
+///         let balance = create(Balance {
+///             id: Balance::create_id("balance".into()),
+///             balance: amount_to_transfer,
+///         });
+///
+///         create(Account {
+///             id: id1,
+///             balance: 135_605.16,
+///         });
+///
+///         create(Account {
+///             id: id2,
+///             balance: 91_031.31,
+///         });
+///
+///         update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).balance));
+///         update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///     ))
+///     .commit_transaction();
+///
+/// transaction_query.run(db.clone()).await?;
+/// ```
+/// ```rust, ignore
+/// // Using to create a transaction query function.
+/// let id1 = Account::create_id("one".into());
+/// let id2 = Account::create_id("two".into());
+/// let amount_to_transfer = 300.00;
+/// let acc = Account::schema();
+///
+/// let transaction = block! {
+///     BEGIN TRANSACTION;
+///
+///     let acc1 = create(Account {
+///         id: id1,
+///         balance: 135_605.16,
+///     });
+///     let acc2 = create(Account {
+///         id: id2,
+///         balance: 91_031.31,
+///     });
+///
+///     let updated1 = update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
+///     let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///
+///     COMMIT TRANSACTION;
 /// };
 /// ```
 macro_rules! code_block {
@@ -39,7 +107,21 @@ macro_rules! code_block {
             chain($crate::statements::return_($expr)).as_block()
         }
     };
-    ($(let $var:ident = $value:expr;)*) => {
+    ($(LET $var:ident = $value:expr;)* RETURN $expr:expr;) => {
+        {
+            $(
+                let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            $crate::
+            $(
+                chain($var).
+            )*
+
+            chain($crate::statements::return_($expr)).as_block()
+        }
+    };
+    ($(LET $var:ident = $value:expr;)*) => {
         {
             $(
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
@@ -68,6 +150,24 @@ macro_rules! code_block {
             chain
         }
     };
+    (BEGIN TRANSACTION; $(LET $var:ident = $value:expr;)* COMMIT TRANSACTION;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::chain;
+
+            let chain: $crate::QueryChain = $(
+                chain(&$var).
+                )*
+                into();
+
+            $crate::statements::begin_transaction().
+            query(chain)
+            .commit_transaction()
+        }
+    };
     (BEGIN TRANSACTION; $(let $var:ident = $value:expr;)* COMMIT TRANSACTION;) => {
         {
             $(
@@ -84,6 +184,24 @@ macro_rules! code_block {
             $crate::statements::begin_transaction().
             query(chain)
             .commit_transaction()
+        }
+    };
+    (BEGIN TRANSACTION; $(LET $var:ident = $value:expr;)* CANCEL TRANSACTION;) => {
+        {
+            $(
+                let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+            )*
+
+            use $crate::statements::chain;
+
+            let chain: $crate::statements::QueryChain = $(
+                chain(&$var).
+                )*
+                into();
+
+            $crate::statements::begin_transaction().
+            query(chain)
+            .cancel_transaction()
         }
     };
     (BEGIN TRANSACTION; $(let $var:ident = $value:expr;)* CANCEL TRANSACTION;) => {
@@ -123,6 +241,25 @@ macro_rules! code_block {
 
             .commit_transaction()
         }
+    };
+    (begin transaction;$(LET $var:ident = $value:expr;)* commit transaction;) => {
+        $(
+            let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        )*
+
+        use $crate::statements::chain;
+
+        let chain: $crate::statements::QueryChain = $(
+            chain(&$var).
+            )*
+            into();
+
+        $crate::statements::begin_transaction().
+        $(
+        query(&chain).
+        )*
+
+        .commit_transaction()
     };
     (begin transaction;$(let $var:ident = $value:expr;)* commit transaction;) => {
         $(
@@ -166,9 +303,42 @@ macro_rules! code_block {
     ($statement:stmt) => {{
         $statement
     }};
+    ($($rest:tt)*) => {{
+        let mut __statements: ::std::vec::Vec<$crate::Chainable> = ::std::vec::Vec::new();
+        {
+            $crate::block_inner!( __statements; $($rest)*);
+        }
+        $crate::QueryChain::from(__statements)
+    }};
+
     // () => {};
 }
 pub use code_block as block;
+
+///  helper function for block macro
+#[macro_export]
+macro_rules! block_inner {
+    ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
+        let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        $statements.push($var.clone().into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; LET $var:ident = $value:expr; $($rest:tt)*) => {{
+        let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
+        $statements.push($var.clone().into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; return $value:expr; $($rest:tt)*) => {{
+        let __private_stmt = $crate::statements::return_($value);
+        $statements.push(__private_stmt.into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr; $expr:expr; $($rest:tt)*) => {{
+        $statements.push($expr.into());
+        $crate::block_inner!($statements; $($rest)*);
+    }};
+    ($statements:expr;) => {};
+}
 
 /// A code block. Surrounds the code with curly braces.
 /// # Examples
