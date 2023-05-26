@@ -85,7 +85,7 @@ use crate::{
 ///     .then("Cold")
 ///     .else_("Hot")
 ///     .end();
-///
+/// ```
 pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }

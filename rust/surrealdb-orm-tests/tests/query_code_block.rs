@@ -45,7 +45,6 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
         LET count = count!(strengths);
         RETURN total.divide(count);
     }));
-
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(

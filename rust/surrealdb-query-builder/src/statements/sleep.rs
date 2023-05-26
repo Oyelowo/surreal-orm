@@ -23,6 +23,7 @@ use crate::{
 /// use surrealdb_orm::{*, statements::sleep};
 ///
 /// sleep(Duration::from_secs(43));
+/// ```
 pub fn sleep(duration: impl Into<DurationLike>) -> SleepStatement {
     let duration: DurationLike = duration.into();
 

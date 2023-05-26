@@ -5,16 +5,29 @@
  * Licensed under the MIT license
  */
 
+use std::marker::PhantomData;
+
 use crate::{
-    Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    SurrealdbOrmResult, Table, Valuex,
+    statements::{
+        create::{create, CreateStatement},
+        select::{select, SelectStatement},
+        update::{update, UpdateStatement},
+    },
+    Alias, All, Buildable, Conditional, Field, NodeClause, Parametric, Queryable, Raw,
+    ReturnableSelect, ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
+    SurrealdbOrmResult, Table, TestUser, Valuex,
 };
-use serde::Serialize;
-use surrealdb::sql::{self, Id, Thing};
+use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::{
+    engine::local::Db,
+    sql::{self, Thing},
+    Surreal,
+};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
-pub trait SurrealdbModel: Sized {
+#[async_trait::async_trait]
+pub trait SurrealdbModel: Sized + Serialize + DeserializeOwned {
     /// The id of the model/table
     type Id;
     /// The name of the model/table
@@ -51,12 +64,12 @@ pub trait SurrealdbModel: Sized {
     fn define_fields() -> Vec<Raw>;
 
     /// Create a new SurrealId from a string
-    fn create_thing(id: impl Into<Id>) -> Thing {
+    fn create_thing(id: impl Into<sql::Id>) -> Thing {
         Thing::from((Self::table_name().to_string(), id.into()))
     }
 
     ///
-    fn create_id<V: Into<Id>>(id: V) -> SurrealId<Self, V> {
+    fn create_id<V: Into<sql::Id>>(id: V) -> SurrealId<Self, V> {
         SurrealId::new(id).into()
     }
 
@@ -85,9 +98,57 @@ pub trait SurrealdbModel: Sized {
     // fn create_thing_uuid() -> Thing {
     //     Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
     // }
+
+    // DB QUERIES HELPERS
+    async fn save(self) -> UpdateStatement<Self> {
+        // let x = update::<Self>(self);
+        // update::<Self>(self).get_one(db)
+        update::<Self>(self)
+    }
+
+    async fn find_by_id(id: Self::Id, db: Surreal<Db>) -> SelectStatement {
+        select(All).from(id)
+    }
+
+    async fn find_one(filter: impl Conditional, db: Surreal<Db>) -> ModelSelect<Self> {
+        select(All).from(Self::table_name()).where_(filter).into()
+    }
+
+    async fn find_many(filter: impl Conditional, db: Surreal<Db>) -> ModelSelect<Self> {
+        select(All).from(Self::table_name()).where_(filter).into()
+    }
 }
 
+#[derive(Debug, Clone)]
+struct ModelSelect<T: Serialize + DeserializeOwned + SurrealdbModel>(
+    SelectStatement,
+    PhantomData<T>,
+);
+
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<SelectStatement> for ModelSelect<T> {
+    fn from(value: SelectStatement) -> Self {
+        Self(value, PhantomData)
+    }
+}
+
+// impl<T: Serialize + DeserializeOwned + SurrealdbModel + std::ops::Deref> std::ops::Deref
+//     for ModelSelect<T>
+// {
+//     type Target = SelectStatement;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Erroneous for ModelSelect<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for ModelSelect<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for ModelSelect<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Queryable for ModelSelect<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> ReturnableStandard<T> for ModelSelect<T> {}
+
 /// SurrealdbNode is a trait signifying a node in the graph
+#[async_trait::async_trait]
 pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
@@ -181,6 +242,11 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///    wrriten_blogs: Relate<Blog>,
     /// }
     fn get_fields_relations_aliased() -> Vec<Alias>;
+
+    // DB QUERIES HELPERS
+    async fn create(content: Self) -> CreateStatement<Self> {
+        create(content)
+    }
 }
 
 /// SurrealdbEdge is a trait signifying an edge in the graph

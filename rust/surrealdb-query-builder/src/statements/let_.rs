@@ -28,6 +28,7 @@ use crate::{
 ///
 /// // and even a select statement
 /// let_("users").equal_to(select(All).from(user));
+/// ```
 pub fn let_(parameter: impl Into<Param>) -> LetStatement {
     let param: Param = parameter.into();
     LetStatement {

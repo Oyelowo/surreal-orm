@@ -66,6 +66,7 @@ use crate::{
 ///     .query(statement1)
 ///     .query(statement2)
 ///     .commit_transaction();
+/// ```
 pub fn begin_transaction() -> QueryTransaction {
     BeginTransactionStatement::new()
 }
