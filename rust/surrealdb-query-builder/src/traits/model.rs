@@ -13,9 +13,9 @@ use crate::{
         select::{select, SelectStatement},
         update::{update, UpdateStatement},
     },
-    Alias, All, Buildable, Conditional, Field, NodeClause, Parametric, Queryable, Raw,
-    ReturnableSelect, ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    SurrealdbOrmResult, Table, TestUser, Valuex,
+    Alias, All, Buildable, Conditional, Field, NodeClause, Operatable, Parametric, Queryable, Raw,
+    ReturnableSelect, ReturnableStandard, Runnable, SurrealId, SurrealSimpleId, SurrealUlid,
+    SurrealUuid, SurrealdbOrmResult, Table, TestUser, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{
@@ -26,8 +26,7 @@ use surrealdb::{
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
-#[async_trait::async_trait]
-pub trait SurrealdbModel: Sized + Serialize + DeserializeOwned {
+pub trait SurrealdbModel: Sized {
     /// The id of the model/table
     type Id;
     /// The name of the model/table
@@ -100,23 +99,43 @@ pub trait SurrealdbModel: Sized + Serialize + DeserializeOwned {
     // }
 
     // DB QUERIES HELPERS
-    async fn save(self) -> UpdateStatement<Self> {
+    fn save(self) -> UpdateStatement<Self> {
         // let x = update::<Self>(self);
         // update::<Self>(self).get_one(db)
         update::<Self>(self)
     }
 
-    async fn find_by_id(id: Self::Id, db: Surreal<Db>) -> SelectStatement {
-        select(All).from(id)
-    }
+    // async fn find_by_id(id: Self::Id, db: Surreal<Db>) -> SelectStatement {
+    //     select(All).from(id)
+    // }
 
-    async fn find_one(filter: impl Conditional, db: Surreal<Db>) -> ModelSelect<Self> {
+    async fn find_one(filter: impl Conditional) -> ModelSelect<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    async fn find_many(filter: impl Conditional, db: Surreal<Db>) -> ModelSelect<Self> {
+    fn find(filter: impl Conditional) -> ModelSelect<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
+
+    async fn find_many(filter: impl Conditional) -> ModelSelect<Self> {
+        select(All).from(Self::table_name()).where_(filter).into()
+    }
+}
+
+async fn er() {
+    let p = TestUser;
+    let db = Surreal::new(Db::new());
+    // let x = p.load_link_ones().save(db).await?;
+    let x = p.save().return_one(db).await?;
+    let x = p.save().get_one(db).await?;
+    // let x = p.save().load_link_ones()?;
+    let x = p.save().load_link_ones()?.get_one(db).await?;
+    let x = p.save().run(db).await?;
+    // let u = TestUser::find_by_id(id, db).load_links();
+    let name = Field::new("name");
+    let xxx = TestUser::find(name.greater_than(34));
+    let xxx = TestUser::find(name.greater_than(34)).get_one(db).await?;
+    let xxx = TestUser::find(name.greater_than(34)).get_one(db).await?;
 }
 
 #[derive(Debug, Clone)]
