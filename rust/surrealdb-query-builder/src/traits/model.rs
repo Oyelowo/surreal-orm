@@ -26,7 +26,7 @@ use surrealdb::{
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
-pub trait SurrealdbModel: Sized {
+pub trait SurrealdbModel: Sized + Serialize + DeserializeOwned {
     /// The id of the model/table
     type Id;
     /// The name of the model/table
@@ -109,7 +109,7 @@ pub trait SurrealdbModel: Sized {
     //     select(All).from(id)
     // }
 
-    async fn find_one(filter: impl Conditional) -> ModelSelect<Self> {
+    fn find_one(filter: impl Conditional) -> ModelSelect<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
@@ -117,7 +117,7 @@ pub trait SurrealdbModel: Sized {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    async fn find_many(filter: impl Conditional) -> ModelSelect<Self> {
+    fn find_many(filter: impl Conditional) -> ModelSelect<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 }
@@ -139,10 +139,7 @@ async fn er() {
 }
 
 #[derive(Debug, Clone)]
-struct ModelSelect<T: Serialize + DeserializeOwned + SurrealdbModel>(
-    SelectStatement,
-    PhantomData<T>,
-);
+struct ModelSelect<T: SurrealdbModel>(SelectStatement, PhantomData<T>);
 
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> From<SelectStatement> for ModelSelect<T> {
     fn from(value: SelectStatement) -> Self {
@@ -164,7 +161,10 @@ impl<T: Serialize + DeserializeOwned + SurrealdbModel> Erroneous for ModelSelect
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for ModelSelect<T> {}
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for ModelSelect<T> {}
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Queryable for ModelSelect<T> {}
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> ReturnableStandard<T> for ModelSelect<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync> ReturnableStandard<T>
+    for ModelSelect<T>
+{
+}
 
 /// SurrealdbNode is a trait signifying a node in the graph
 #[async_trait::async_trait]
