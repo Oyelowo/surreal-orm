@@ -179,6 +179,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///    #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
+    /// ```
     fn aliases() -> Self::Aliases;
     /// returns the key of the node aka id field
     // // fn get_id<T: From<Thing>>(self) -> T;
@@ -207,6 +208,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///     .writes__(Empty)
     ///     .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
     ///     .title;
+    /// ```
     fn with(clause: impl Into<NodeClause>) -> Self::Schema;
 
     /// returns the relations aliases of the model in the format `->edge->graph AS alias`.
@@ -224,12 +226,8 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///    #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
+    /// ```
     fn get_fields_relations_aliased() -> Vec<Alias>;
-
-    // DB QUERIES HELPERS
-    // async fn create(content: Self) -> CreateStatement<Self> {
-    //     create(content)
-    // }
 }
 
 /// SurrealdbEdge is a trait signifying an edge in the graph
