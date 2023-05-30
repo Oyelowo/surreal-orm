@@ -12,7 +12,7 @@ use crate::{
         create::{create, CreateStatement},
         select::{select, SelectStatement},
         update::{update, UpdateStatement},
-        SelectMini,
+        SelectStatementMini,
     },
     Alias, All, Buildable, Conditional, Field, NodeClause, Operatable, Parametric, Queryable, Raw,
     ReturnableSelect, ReturnableStandard, Runnable, SurrealId, SurrealSimpleId, SurrealUlid,
@@ -98,74 +98,37 @@ pub trait SurrealdbModel: Sized {
     // fn create_thing_uuid() -> Thing {
     //     Thing::from((Self::table_name().to_string(), Uuid::new_v4().to_string()))
     // }
-
-    // DB QUERIES HELPERS
-    // fn save(self) -> UpdateStatement<Self> {
-    //     // let x = update::<Self>(self);
-    //     // update::<Self>(self).get_one(db)
-    //     update::<Self>(self)
-    // }
-
-    // async fn find_by_id(id: Self::Id, db: Surreal<Db>) -> SelectStatement {
-    //     select(All).from(id)
-    // }
-
-    // fn find_one(filter: impl Conditional) -> ModelSelect<Self> {
-    //     select(All).from(Self::table_name()).where_(filter).into()
-    // }
-    //
-    // fn find(filter: impl Conditional) -> ModelSelect<Self> {
-    //     select(All).from(Self::table_name()).where_(filter).into()
-    // }
-    //
-    // fn find_many(filter: impl Conditional) -> ModelSelect<Self> {
-    //     select(All).from(Self::table_name()).where_(filter).into()
-    // }
 }
 
+/// DB convenience helper methods.
 pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
-    // DB QUERIES HELPERS
+    /// Creates or updates a model/table in the database.
     fn save(self) -> UpdateStatement<Self> {
-        // let x = update::<Self>(self);
-        // update::<Self>(self).get_one(db)
         update::<Self>(self.get_id_as_thing())
     }
 
-    fn find_by_id(id: impl Into<Thing>) -> SelectMini<Self> {
-        let id = id.into();
-        select(All).from(id).into()
+    /// Finds a record by id.
+    fn find_by_id(id: impl Into<Thing>) -> SelectStatementMini<Self> {
+        select(All).from(id.into()).into()
     }
 
-    fn find_one(filter: impl Conditional + Clone) -> SelectMini<Self> {
+    /// Finds a record by filtering.
+    fn find_one(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    fn find(filter: impl Conditional + Clone) -> SelectMini<Self> {
+    /// Finds records by filtering.
+    fn find(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    fn find_many(filter: impl Conditional + Clone) -> SelectMini<Self> {
+    /// Finds many records by filtering.
+    fn find_many(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 }
 
 impl<T> SurrealdbCrud for T where T: Sized + Serialize + DeserializeOwned + SurrealdbModel {}
-
-async fn er() {
-    // let p = TestUser;
-    // let db = Surreal::new(Db::new());
-    // // let x = p.load_link_ones().save(db).await?;
-    // let x = p.save().return_one(db).await?;
-    // let x = p.save().get_one(db).await?;
-    // // let x = p.save().load_link_ones()?;
-    // let x = p.save().load_link_ones()?.get_one(db).await?;
-    // let x = p.save().run(db).await?;
-    // // let u = TestUser::find_by_id(id, db).load_links();
-    // let name = Field::new("name");
-    // let xxx = TestUser::find(name.greater_than(34));
-    // let xxx = TestUser::find(name.greater_than(34)).get_one(db).await?;
-    // let xxx = TestUser::find(name.greater_than(34)).get_one(db).await?;
-}
 
 /// SurrealdbNode is a trait signifying a node in the graph
 #[async_trait::async_trait]

@@ -386,7 +386,7 @@ impl<T: SurrealdbModel> From<&SurrealUlid<T>> for sql::Value {
 }
 
 /// For internal testing
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct TestUser;
 #[allow(dead_code)]
 /// For internal testing

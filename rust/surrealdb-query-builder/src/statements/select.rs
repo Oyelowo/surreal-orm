@@ -1383,10 +1383,12 @@ impl Buildable for SelectStatement {
     }
 }
 
+/// A mini version of the select statement used as Model convenience method for building select statements.
 #[derive(Debug, Clone)]
-pub struct SelectMini<T: SurrealdbModel>(SelectStatement, PhantomData<T>);
+pub struct SelectStatementMini<T: SurrealdbModel>(SelectStatement, PhantomData<T>);
 
-impl<T: SurrealdbModel> SelectMini<T> {
+impl<T: SurrealdbModel> SelectStatementMini<T> {
+    /// Order the results by the given fields
     pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
         let orderables: Orderables = orderables.into();
         self.0.update_bindings(orderables.get_bindings());
@@ -1396,6 +1398,7 @@ impl<T: SurrealdbModel> SelectMini<T> {
         self
     }
 
+    /// Starts the result at the offset
     pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
         let start: NumberLike = start.into();
         self.0.start = Some(start.build());
@@ -1403,6 +1406,7 @@ impl<T: SurrealdbModel> SelectMini<T> {
         self
     }
 
+    /// Limits the number of results returned
     pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
         let limit: NumberLike = limit.into();
         self.0.limit = Some(limit.build());
@@ -1410,13 +1414,14 @@ impl<T: SurrealdbModel> SelectMini<T> {
         self
     }
 
+    /// Parallelizes the query
     pub fn parallel(mut self) -> Self {
         self.0.parallel = true;
         self
     }
 }
 
-impl<T> From<SelectStatement> for SelectMini<T>
+impl<T> From<SelectStatement> for SelectStatementMini<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -1425,46 +1430,36 @@ where
     }
 }
 
-// impl<T: Serialize + DeserializeOwned + SurrealdbModel + std::ops::Deref> std::ops::Deref
-//     for ModelSelect<T>
-// {
-//     type Target = SelectStatement;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
+impl<T> Erroneous for SelectStatementMini<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Erroneous for SelectMini<T> {}
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for SelectMini<T> {
+impl<T> Parametric for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn get_bindings(&self) -> crate::BindingsList {
         self.0.get_bindings()
     }
 }
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for SelectMini<T> {
+impl<T> Buildable for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     fn build(&self) -> String {
         self.0.build()
     }
 }
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel> Queryable for SelectMini<T> {}
+impl<T> Queryable for SelectStatementMini<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
 
-impl<T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync> ReturnableStandard<T>
-    for SelectMini<T>
+impl<T> ReturnableStandard<T> for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
 {
     fn set_return_type(mut self, return_type: crate::ReturnType) -> Self {
         if let crate::ReturnType::Projections(projection) = return_type {
             self.0.projections = format!("{}, {}", self.0.projections, projection.build());
         }
         self
-        // let e = if let crate::ReturnType::Projections(projection) = return_type {
-        //     // self.0.projections = format!("{}, {}", self.0.projections, projection.build());
-        //     let xx = Self { ..self };
-        //     xx
-        // } else {
-        //     self
-        // };
-        // e
     }
 
     fn get_return_type(&self) -> crate::ReturnType {
