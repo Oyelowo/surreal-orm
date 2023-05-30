@@ -1438,24 +1438,37 @@ where
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Erroneous for SelectMini<T> {}
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for SelectMini<T> {
     fn get_bindings(&self) -> crate::BindingsList {
-        todo!()
+        self.0.get_bindings()
     }
 }
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for SelectMini<T> {
     fn build(&self) -> String {
-        todo!()
+        self.0.build()
     }
 }
+
 impl<T: Serialize + DeserializeOwned + SurrealdbModel> Queryable for SelectMini<T> {}
+
 impl<T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync> ReturnableStandard<T>
     for SelectMini<T>
 {
-    fn set_return_type(self, return_type: crate::ReturnType) -> Self {
-        todo!()
+    fn set_return_type(mut self, return_type: crate::ReturnType) -> Self {
+        if let crate::ReturnType::Projections(projection) = return_type {
+            self.0.projections = format!("{}, {}", self.0.projections, projection.build());
+        }
+        self
+        // let e = if let crate::ReturnType::Projections(projection) = return_type {
+        //     // self.0.projections = format!("{}, {}", self.0.projections, projection.build());
+        //     let xx = Self { ..self };
+        //     xx
+        // } else {
+        //     self
+        // };
+        // e
     }
 
     fn get_return_type(&self) -> crate::ReturnType {
-        todo!()
+        crate::ReturnType::After
     }
 }
 
