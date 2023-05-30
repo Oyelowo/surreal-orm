@@ -24,7 +24,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
     let transaction_query = begin_transaction()
         .query(block!(
             let balance = create(Balance {
-                id: Balance::create_id("balance".into()),
+                id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
             });
 
@@ -56,10 +56,10 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
     assert_eq!(
         transaction_query.to_raw().build(),
         "BEGIN TRANSACTION;\n\n\
-            LET $balance = (CREATE balance CONTENT { balance: 300.0, id: balance:balance });\n\n\
+            LET $balance = (CREATE balance CONTENT { amount: 300.0, id: balance:balance1 });\n\n\
             CREATE account CONTENT { balance: 135605.16, id: account:one };\n\n\
             CREATE account CONTENT { balance: 91031.31, id: account:two };\n\n\
-            UPDATE account:one SET balance += $balance.balance;\n\n\
+            UPDATE account:one SET balance += $balance.amount;\n\n\
             UPDATE account:two SET balance -= 300.0;\n\n\
             COMMIT TRANSACTION;\n\t"
     );
@@ -70,7 +70,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
             LET $balance = $_param_00000001;\n\n\
             CREATE account CONTENT $_param_00000002;\n\n\
             CREATE account CONTENT $_param_00000003;\n\n\
-            UPDATE $_param_00000004 SET balance += $balance.balance;\n\n\
+            UPDATE $_param_00000004 SET balance += $balance.amount;\n\n\
             UPDATE $_param_00000005 SET balance -= $_param_00000006;\n\n\
             COMMIT TRANSACTION;\n\t"
     );
