@@ -8,8 +8,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SurrealId, SurrealSimpleId, SurrealdbEdge, SurrealdbModel,
-    SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, ReturnableStandard, SurrealId, SurrealSimpleId, SurrealdbCrud,
+    SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
@@ -81,4 +81,23 @@ pub struct Organization {
     #[surrealdb(nest_object = "Time")]
     pub time: Time,
     pub age: u8,
+}
+
+// impl surrealdb_orm::SurrealdbCrud for User {}
+use surrealdb_orm::*;
+
+async fn erer() -> surrealdb_orm::SurrealdbOrmResult<()> {
+    let db = surrealdb::Surreal::new::<surrealdb::engine::local::Mem>(())
+        .await
+        .unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    let user = User::default();
+
+    // let xx = user.save().load_link_ones()?.get_one(db).await?;
+    // let xx = User::find_by_id(User::create_uuid()).get_one(db).await?;
+    let xx = User::find(User::schema().name.like("Oyelowo"))
+        .get_one(db)
+        .await?;
+    println!("{:#?}", user);
+    Ok(())
 }

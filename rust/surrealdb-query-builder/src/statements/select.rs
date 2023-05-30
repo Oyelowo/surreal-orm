@@ -27,15 +27,18 @@
 ; */
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},
+    marker::PhantomData,
     ops::Deref,
 };
 
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
     ErrorList, Field, Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect,
-    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
+    ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel,
+    Table, ToRaw, Valuex,
 };
 
 use super::Subquery;
@@ -1377,6 +1380,82 @@ impl Buildable for SelectStatement {
         }
 
         format!("{query};")
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SelectMini<T: SurrealdbModel>(SelectStatement, PhantomData<T>);
+
+impl<T: SurrealdbModel> SelectMini<T> {
+    pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
+        let orderables: Orderables = orderables.into();
+        self.0.update_bindings(orderables.get_bindings());
+
+        let orders: Vec<Order> = orderables.into();
+        self.0.order_by.extend(orders);
+        self
+    }
+
+    pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
+        let start: NumberLike = start.into();
+        self.0.start = Some(start.build());
+        self.0.update_bindings(start.get_bindings());
+        self
+    }
+
+    pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
+        let limit: NumberLike = limit.into();
+        self.0.limit = Some(limit.build());
+        self.0.update_bindings(limit.get_bindings());
+        self
+    }
+
+    pub fn parallel(mut self) -> Self {
+        self.0.parallel = true;
+        self
+    }
+}
+
+impl<T> From<SelectStatement> for SelectMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: SelectStatement) -> Self {
+        Self(value, PhantomData)
+    }
+}
+
+// impl<T: Serialize + DeserializeOwned + SurrealdbModel + std::ops::Deref> std::ops::Deref
+//     for ModelSelect<T>
+// {
+//     type Target = SelectStatement;
+//
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
+
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Erroneous for SelectMini<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Parametric for SelectMini<T> {
+    fn get_bindings(&self) -> crate::BindingsList {
+        todo!()
+    }
+}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Buildable for SelectMini<T> {
+    fn build(&self) -> String {
+        todo!()
+    }
+}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel> Queryable for SelectMini<T> {}
+impl<T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync> ReturnableStandard<T>
+    for SelectMini<T>
+{
+    fn set_return_type(self, return_type: crate::ReturnType) -> Self {
+        todo!()
+    }
+
+    fn get_return_type(&self) -> crate::ReturnType {
+        todo!()
     }
 }
 
