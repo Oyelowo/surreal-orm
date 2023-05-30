@@ -1,6 +1,5 @@
 ---
 source: surrealdb-query-builder/src/statements/define_function.rs
-assertion_line: 245
 expression: fn_statement.get_bindings()
 ---
 [
