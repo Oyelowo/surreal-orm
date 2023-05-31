@@ -38,7 +38,7 @@ pub trait SurrealdbModel: Sized {
     fn get_id(self) -> Self::Id;
 
     /// Returns id of the model/table as a Thing
-    fn get_id_as_thing(self) -> sql::Thing;
+    fn get_id_as_thing(&self) -> sql::Thing;
 
     /// The name of the all fields that are serializable
     /// and can potentially be written to the database.
@@ -103,9 +103,14 @@ pub trait SurrealdbModel: Sized {
 
 /// DB convenience helper methods.
 pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
+    // /// Creates or updates a model/table in the database.
+    // fn create(self) -> UpdateStatement<Self> {
+    //     create::<Self>(Self::table_name()).content(self)
+    // }
+
     /// Creates or updates a model/table in the database.
     fn save(self) -> UpdateStatement<Self> {
-        update::<Self>(self.get_id_as_thing())
+        update::<Self>(self.get_id_as_thing()).content(self)
     }
 
     /// Finds a record by id.

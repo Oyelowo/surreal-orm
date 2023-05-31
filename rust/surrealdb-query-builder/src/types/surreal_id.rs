@@ -411,8 +411,8 @@ impl SurrealdbModel for TestUser {
         TestUserSimpleId::new()
     }
 
-    fn get_id_as_thing(self) -> sql::Thing {
-        self.get_id().to_thing()
+    fn get_id_as_thing(&self) -> sql::Thing {
+        TestUserSimpleId::new().to_thing()
     }
 
     fn get_serializable_fields() -> Vec<crate::Field> {
