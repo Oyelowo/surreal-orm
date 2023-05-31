@@ -7,7 +7,7 @@
 
 use crate::{
     Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
-    GeometryLike, Ordinal, Parametric, Setter, Valuex,
+    GeometryLike, NumberLike, Ordinal, Parametric, Setter, Valuex,
 };
 use std::fmt::Display;
 use surrealdb::sql;
@@ -491,6 +491,27 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         T: Into<Valuex>,
     {
         self.generate_query(sql::Operator::Div, value)
+    }
+
+    /// `**` Raise the current query to the power of the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be raised to the power of the current query. Could be `sql::Value`, `Field` or `Param.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let age = Field::new("age");
+    /// age.power(5);
+    /// ```
+    fn power<T>(&self, value: T) -> Operation
+    where
+        T: Into<NumberLike>,
+    {
+        self.generate_query(sql::Operator::Pow, value.into())
     }
 
     /// `&&` Checks whether two values are truthy.
