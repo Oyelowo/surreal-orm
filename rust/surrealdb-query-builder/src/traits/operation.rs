@@ -85,7 +85,7 @@ impl From<Setter> for Operation {
 /// Defines the operations that can be performed on a field or param or some other types
 /// it is implemented for.
 pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
-    /// Return a new `operation` that checks whether the field is equal to the specified value
+    /// `=`. Return a new `operation` that checks whether the field is equal to the specified value
     ///
     /// # Arguments
     ///
@@ -117,7 +117,39 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Equal, value)
     }
 
-    /// Return a new `DbQuery` that checks whether the field is not equal to the specified value
+    /// `=`. Alias for `equal`. Return a new `operation` that checks whether the field is equal to the specified value
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to check for equality. Could be `sql::Value`, `Field` or `Param`
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// let query = age.eq(25);
+    /// assert_eq!(query.to_raw().build(), "age = 25");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_field = Field::new("valid_age_field");
+    /// let query = age.eq(valid_age_field);
+    /// assert_eq!(query.to_raw().build(), "age = valid_age_field");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_param = Param::new("valid_age_param");
+    /// let query = age.eq(valid_age_param);
+    /// assert_eq!(query.to_raw().build(), "age = $valid_age_param");
+    /// ```
+    fn eq<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Equal, value)
+    }
+
+    /// `!=`. Return a new `DbQuery` that checks whether the field is not equal to the specified value
     ///
     /// # Arguments
     ///
@@ -143,6 +175,38 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// assert_eq!(query.to_raw().build(), "age != $valid_age_param");
     /// ```
     fn not_equal<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::NotEqual, value)
+    }
+
+    /// `!=`. Alias for `not_equal`. Return a new `DbQuery` that checks whether the field is not equal to the specified value
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to check for inequality. Could be `sql::Value`, `Field` or `Param`
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// let query = age.neq(25);
+    /// assert_eq!(query.to_raw().build(), "age != 25");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_field = Field::new("valid_age_field");
+    /// let query = age.neq(valid_age_field);
+    /// assert_eq!(query.to_raw().build(), "age != valid_age_field");
+    ///
+    /// # let age = Field::new("age");
+    /// # let valid_age_param = Param::new("valid_age_param");
+    /// let query = age.neq(valid_age_param);
+    /// assert_eq!(query.to_raw().build(), "age != $valid_age_param");
+    /// ```
+    fn neq<T>(&self, value: T) -> Operation
     where
         T: Into<Valuex>,
     {
@@ -343,6 +407,28 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::LessThan, value)
     }
 
+    /// `<`. Alias for `less_than`. Check whether the value of the field is less than the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field. Could be `sql::Value`, `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.lt(30);
+    /// ```
+    fn lt<T>(&self, value: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let value: Ordinal = value.into();
+        self.generate_query(sql::Operator::LessThan, value)
+    }
+
     /// `<=` Check whether the value of the field is less than or equal to the given value.
     ///
     /// # Arguments
@@ -358,6 +444,28 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// age.less_than_or_equal(30);
     /// ```
     fn less_than_or_equal<T>(&self, value: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let value: Ordinal = value.into();
+        self.generate_query(sql::Operator::LessThanOrEqual, value)
+    }
+
+    /// `<=`. Alias for `less_than_or_equal`. Check whether the value of the field is less than or equal to the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field. Could be `sql::Value`, `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.lte(30);
+    /// ```
+    fn lte<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -387,6 +495,28 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::MoreThan, value)
     }
 
+    /// `>`. Alias for `greater_than`. Check whether the value of the field is greater than the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field. Could be `sql::Number`, `sql::Geometry`, `sql::Datetime`, `sql::Duration`, `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.gt(30);
+    /// ```
+    fn gt<T>(&self, value: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let value: Ordinal = value.into();
+        self.generate_query(sql::Operator::MoreThan, value)
+    }
+
     /// `>=` Check whether the value of the field is greater than or equal to the given value.
     ///
     /// # Arguments
@@ -402,6 +532,28 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// age.greater_than_or_equal(30);
     /// ```
     fn greater_than_or_equal<T>(&self, value: T) -> Operation
+    where
+        T: Into<Ordinal>,
+    {
+        let value: Ordinal = value.into();
+        self.generate_query(sql::Operator::MoreThanOrEqual, value)
+    }
+
+    /// `>=` Alias for `greater_than_or_equal`. Check whether the value of the field is greater than or equal to the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to compare against the field. Could be `sql::Number`, `sql::Geometry`, `sql::Datetime`, `sql::Duration`, `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.gte(30);
+    /// ```
+    fn gte<T>(&self, value: T) -> Operation
     where
         T: Into<Ordinal>,
     {
@@ -430,6 +582,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Add, value)
     }
 
+    /// `+` Alias for `add`. Adds a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be added to the current query. Could be `sql::Value`, `Field` or `Param
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.plus(5);
+    /// ```
+    fn plus<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Add, value)
+    }
+
     /// `-` Subtracts a value to the current query.
     ///
     /// # Arguments
@@ -445,6 +617,27 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// age.subtract(5);
     /// ```
     fn subtract<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Sub, value)
+    }
+
+    /// `-`. Alias for `subtract`. Subtracts a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be subtract to the current query. Could be `sql::Value`, `Field` or `Param.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.minus(5);
+    /// ```
+    fn minus<T>(&self, value: T) -> Operation
     where
         T: Into<Valuex>,
     {
@@ -472,6 +665,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Mul, value)
     }
 
+    /// `*` Alias for `multiply`. Multiply a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be multiply to the current query. Could be `sql::Value`, `Field` or `Param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// # let age = Field::new("age");
+    /// age.mul(5);
+    /// ```
+    fn mul<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Mul, value)
+    }
+
     /// `/` Divide a value to the current query.
     ///
     /// # Arguments
@@ -493,6 +706,26 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
         self.generate_query(sql::Operator::Div, value)
     }
 
+    /// `/` Alias for `divide`. Divide a value to the current query.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be divide to the current query. Could be `sql::Value`, `Field` or `Param.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let age = Field::new("age");
+    /// age.div(5);
+    /// ```
+    fn div<T>(&self, value: T) -> Operation
+    where
+        T: Into<Valuex>,
+    {
+        self.generate_query(sql::Operator::Div, value)
+    }
+
     /// `**` Raise the current query to the power of the given value.
     ///
     /// # Arguments
@@ -508,6 +741,27 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// age.power(5);
     /// ```
     fn power<T>(&self, value: T) -> Operation
+    where
+        T: Into<NumberLike>,
+    {
+        self.generate_query(sql::Operator::Pow, value.into())
+    }
+
+    /// `**` Alias for `power`. Raise the current query to the power of the given value.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to be raised to the power of the current query. Could be `sql::Value`, `Field` or `Param.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// # use surrealdb_orm::*;
+    /// let age = Field::new("age");
+    /// age.pow(5);
+    /// ```
+    fn pow<T>(&self, value: T) -> Operation
     where
         T: Into<NumberLike>,
     {
