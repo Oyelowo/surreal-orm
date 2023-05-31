@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use surrealdb_models::{rocket, spaceship_schema, weapon_schema, Rocket, SpaceShip, Weapon};
 use surrealdb_orm::*;
 

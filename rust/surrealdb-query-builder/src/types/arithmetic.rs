@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::ops::{Add, Div, Mul, Sub};
 
 use crate::{statements::LetStatement, Buildable, Field, NumberLike, Operation, Parametric};
