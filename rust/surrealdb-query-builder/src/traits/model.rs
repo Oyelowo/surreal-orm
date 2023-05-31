@@ -5,12 +5,26 @@
  * Licensed under the MIT license
  */
 
+use std::marker::PhantomData;
+
 use crate::{
-    Alias, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    SurrealdbOrmResult, Table, Valuex,
+    statements::{
+        create::{create, CreateStatement},
+        delete::{delete, DeleteStatementMini},
+        select::{select, SelectStatement},
+        update::{update, UpdateStatement},
+        DeleteStatement, SelectStatementMini,
+    },
+    Alias, All, Buildable, Conditional, Field, NodeClause, Operatable, Parametric, Queryable, Raw,
+    ReturnableSelect, ReturnableStandard, Runnable, SurrealId, SurrealSimpleId, SurrealUlid,
+    SurrealUuid, SurrealdbOrmResult, Table, TestUser, Valuex,
 };
-use serde::Serialize;
-use surrealdb::sql::{self, Id, Thing};
+use serde::{de::DeserializeOwned, Serialize};
+use surrealdb::{
+    engine::local::Db,
+    sql::{self, Thing},
+    Surreal,
+};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel
@@ -24,7 +38,7 @@ pub trait SurrealdbModel: Sized {
     fn get_id(self) -> Self::Id;
 
     /// Returns id of the model/table as a Thing
-    fn get_id_as_thing(self) -> sql::Thing;
+    fn get_id_as_thing(&self) -> sql::Thing;
 
     /// The name of the all fields that are serializable
     /// and can potentially be written to the database.
@@ -51,12 +65,12 @@ pub trait SurrealdbModel: Sized {
     fn define_fields() -> Vec<Raw>;
 
     /// Create a new SurrealId from a string
-    fn create_thing(id: impl Into<Id>) -> Thing {
+    fn create_thing(id: impl Into<sql::Id>) -> Thing {
         Thing::from((Self::table_name().to_string(), id.into()))
     }
 
     ///
-    fn create_id<V: Into<Id>>(id: V) -> SurrealId<Self, V> {
+    fn create_id<V: Into<sql::Id>>(id: V) -> SurrealId<Self, V> {
         SurrealId::new(id).into()
     }
 
@@ -87,7 +101,52 @@ pub trait SurrealdbModel: Sized {
     // }
 }
 
+/// DB convenience helper methods.
+pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
+    /// Creates or updates a model/table in the database.
+    fn save(self) -> UpdateStatement<Self> {
+        update::<Self>(self.get_id_as_thing()).content(self)
+    }
+
+    /// Finds a record by id.
+    fn find_by_id(id: impl Into<Thing>) -> SelectStatementMini<Self> {
+        select(All).from(id.into()).into()
+    }
+
+    /// Finds records by filtering.
+    fn find_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
+        select(All).from(Self::table_name()).where_(filter).into()
+    }
+
+    /// Delete the current record by instance.
+    fn delete(self) -> DeleteStatementMini<Self> {
+        delete::<Self>(self.get_id_as_thing()).into()
+    }
+
+    /// Deletes a record by id.
+    fn delete_by_id(id: impl Into<Thing>) -> DeleteStatementMini<Self> {
+        delete::<Self>(id.into()).into()
+    }
+
+    /// Deletes records by filtering.
+    fn delete_where(filter: impl Conditional + Clone) -> DeleteStatementMini<Self> {
+        delete::<Self>(Self::table_name()).where_(filter).into()
+    }
+}
+
+impl<T> SurrealdbCrud for T where T: Sized + Serialize + DeserializeOwned + SurrealdbModel {}
+
+/// DB convenience helper methods.
+pub trait SurrealdbCrudNode: Sized + Serialize + DeserializeOwned + SurrealdbNode {
+    /// Creates or updates a model/table in the database.
+    fn create(self) -> CreateStatement<Self> {
+        create(self)
+    }
+}
+impl<T> SurrealdbCrudNode for T where T: Sized + Serialize + DeserializeOwned + SurrealdbNode {}
+
 /// SurrealdbNode is a trait signifying a node in the graph
+#[async_trait::async_trait]
 pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
@@ -135,6 +194,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///    #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
+    /// ```
     fn aliases() -> Self::Aliases;
     /// returns the key of the node aka id field
     // // fn get_id<T: From<Thing>>(self) -> T;
@@ -163,6 +223,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///     .writes__(Empty)
     ///     .book(Book::schema().id.equal(RecordId::from(("book", "blaze"))))
     ///     .title;
+    /// ```
     fn with(clause: impl Into<NodeClause>) -> Self::Schema;
 
     /// returns the relations aliases of the model in the format `->edge->graph AS alias`.
@@ -180,6 +241,7 @@ pub trait SurrealdbNode: SurrealdbModel + Serialize + SchemaGetter {
     ///    #[surrealdb(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
     ///    wrriten_blogs: Relate<Blog>,
     /// }
+    /// ```
     fn get_fields_relations_aliased() -> Vec<Alias>;
 }
 

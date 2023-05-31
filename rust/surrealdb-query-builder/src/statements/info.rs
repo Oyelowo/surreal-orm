@@ -19,6 +19,7 @@ use crate::{
 /// # use surrealdb_query_builder as surrealdb_orm;
 /// use surrealdb_orm::{*, statements::info_for};
 /// info_for().kv().build();
+/// ```
 pub fn info_for() -> InfoStatementInit {
     InfoStatementInit {
         level: InfoLevel::Kv,

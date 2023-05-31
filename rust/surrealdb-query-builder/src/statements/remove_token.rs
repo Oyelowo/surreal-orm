@@ -45,6 +45,7 @@ use super::NamespaceOrDatabase;
 /// let token = Token::new("token");
 /// let statement = remove_token(token).on_database();
 /// assert_eq!(statement.build(), "REMOVE TOKEN token ON DATABASE;");
+/// ```
 pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatementInit {
     RemoveTokenStatementInit {
         token: token.into(),

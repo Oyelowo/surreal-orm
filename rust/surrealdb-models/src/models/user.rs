@@ -8,8 +8,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, SurrealId, SurrealSimpleId, SurrealdbEdge, SurrealdbModel,
-    SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, ReturnableStandard, SurrealId, SurrealSimpleId, SurrealdbCrud,
+    SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]

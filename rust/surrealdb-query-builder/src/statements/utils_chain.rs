@@ -18,7 +18,8 @@ use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Qu
 /// # Example Usage
 ///
 /// ```rust
-/// use surrealdb_query_builder::{*, statements::{chain, select}};
+/// # use surrealdb_query_builder as surrealdb_orm;
+/// use surrealdb_orm::{*, statements::select};
 ///
 /// // Create a query chain with a single query
 /// let user_lowo = TestUser::create_id("oyelowo");
@@ -79,7 +80,8 @@ impl QueryChain {
     /// # Examples
     ///
     /// ```rust
-    /// use surrealdb_query_builder::{*, statements::{chain, select}};
+    /// # use surrealdb_query_builder as surrealdb_orm;
+    /// use surrealdb_orm::{*, statements::select};
     /// use surrealdb::sql;
     ///
     /// // Create a query chain with a single query

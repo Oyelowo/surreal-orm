@@ -108,6 +108,11 @@ where
     pub fn to_thing(&self) -> Thing {
         self.0.clone()
     }
+
+    /// Converts the surreal id to a raw string
+    pub fn to_raw(&self) -> String {
+        self.to_thing().to_raw()
+    }
 }
 
 impl<T, Id> From<SurrealId<T, Id>> for sql::Thing
@@ -248,6 +253,11 @@ where
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
     }
+
+    /// Converts the surreal id to a raw string
+    pub fn to_raw(&self) -> String {
+        self.to_thing().to_raw()
+    }
 }
 
 impl<T> Deref for SurrealSimpleId<T>
@@ -297,6 +307,11 @@ impl<T: SurrealdbModel> SurrealUuid<T> {
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
     }
+
+    /// Converts the surreal id to a raw string
+    pub fn to_raw(&self) -> String {
+        self.to_thing().to_raw()
+    }
 }
 
 impl<T: SurrealdbModel> Display for SurrealUuid<T> {
@@ -340,6 +355,11 @@ impl<T: SurrealdbModel> SurrealUlid<T> {
     /// Converts the surreal id to a thing
     pub fn to_thing(&self) -> Thing {
         self.0 .0.clone()
+    }
+
+    /// Converts the surreal id to a raw string
+    pub fn to_raw(&self) -> String {
+        self.to_thing().to_raw()
     }
 }
 
@@ -386,7 +406,7 @@ impl<T: SurrealdbModel> From<&SurrealUlid<T>> for sql::Value {
 }
 
 /// For internal testing
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct TestUser;
 #[allow(dead_code)]
 /// For internal testing
@@ -411,8 +431,8 @@ impl SurrealdbModel for TestUser {
         TestUserSimpleId::new()
     }
 
-    fn get_id_as_thing(self) -> sql::Thing {
-        self.get_id().to_thing()
+    fn get_id_as_thing(&self) -> sql::Thing {
+        TestUserSimpleId::new().to_thing()
     }
 
     fn get_serializable_fields() -> Vec<crate::Field> {

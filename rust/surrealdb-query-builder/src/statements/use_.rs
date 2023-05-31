@@ -32,6 +32,7 @@ use crate::{
 /// use_()
 ///     .database(Database::from("test".to_string()))
 ///     .namespace(Namespace::from("test".to_string()));
+/// ```
 pub fn use_() -> UseStatement {
     UseStatement::default()
 }

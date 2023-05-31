@@ -27,15 +27,18 @@
 ; */
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},
+    marker::PhantomData,
     ops::Deref,
 };
 
+use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
     ErrorList, Field, Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect,
-    SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel, Table, ToRaw, Valuex,
+    ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel,
+    Table, ToRaw, Valuex,
 };
 
 use super::Subquery;
@@ -1377,6 +1380,90 @@ impl Buildable for SelectStatement {
         }
 
         format!("{query};")
+    }
+}
+
+/// A mini version of the select statement used as Model convenience method for building select statements.
+#[derive(Debug, Clone)]
+pub struct SelectStatementMini<T: SurrealdbModel>(SelectStatement, PhantomData<T>);
+
+impl<T: SurrealdbModel> SelectStatementMini<T> {
+    /// Order the results by the given fields
+    pub fn order_by(mut self, orderables: impl Into<Orderables>) -> Self {
+        let orderables: Orderables = orderables.into();
+        self.0.update_bindings(orderables.get_bindings());
+
+        let orders: Vec<Order> = orderables.into();
+        self.0.order_by.extend(orders);
+        self
+    }
+
+    /// Starts the result at the offset
+    pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
+        let start: NumberLike = start.into();
+        self.0.start = Some(start.build());
+        self.0.update_bindings(start.get_bindings());
+        self
+    }
+
+    /// Limits the number of results returned
+    pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
+        let limit: NumberLike = limit.into();
+        self.0.limit = Some(limit.build());
+        self.0.update_bindings(limit.get_bindings());
+        self
+    }
+
+    /// Parallelizes the query
+    pub fn parallel(mut self) -> Self {
+        self.0.parallel = true;
+        self
+    }
+}
+
+impl<T> From<SelectStatement> for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: SelectStatement) -> Self {
+        Self(value, PhantomData)
+    }
+}
+
+impl<T> Erroneous for SelectStatementMini<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> Parametric for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.0.get_bindings()
+    }
+}
+impl<T> Buildable for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl<T> Queryable for SelectStatementMini<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> ReturnableStandard<T> for SelectStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: crate::ReturnType) -> Self {
+        if let crate::ReturnType::Projections(projection) = return_type {
+            self.0.projections = format!("{}, {}", self.0.projections, projection.build());
+        }
+        self
+    }
+
+    fn get_return_type(&self) -> crate::ReturnType {
+        crate::ReturnType::After
     }
 }
 
