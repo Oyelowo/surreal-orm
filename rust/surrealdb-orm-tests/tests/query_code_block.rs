@@ -45,8 +45,8 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
         LET count = count!(strengths);
         RETURN total / count;
     }));
-    // insta::assert_display_snapshot!(created_stats_statement.to_raw());
-    // insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    insta::assert_display_snapshot!(created_stats_statement.to_raw());
+    insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
         created_stats_statement.to_raw().build(),
         "CREATE weapon_stats SET averageStrength = {\n\
