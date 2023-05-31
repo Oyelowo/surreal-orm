@@ -5,6 +5,36 @@ use surrealdb_models::{spaceship_schema, SpaceShip};
 use surrealdb_orm::*;
 
 #[tokio::test]
+async fn test_create() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let ss_id = SpaceShip::create_id(format!("num-{}", 1));
+    let spaceship = SpaceShip {
+        id: ss_id.clone(),
+        name: format!("spaceship-{}", 1),
+        created: chrono::Utc::now(),
+    };
+
+    let spaceship = spaceship.create().get_one(db.clone()).await?;
+    // Second attempt should fail since it will be duplicate.
+    spaceship
+        .clone()
+        .create()
+        .get_one(db.clone())
+        .await
+        .expect_err("should fail");
+
+    let saved_spaceship = SpaceShip::find_by_id(ss_id.clone())
+        .get_one(db.clone())
+        .await?;
+
+    assert_eq!(spaceship.id.to_thing(), saved_spaceship.id.to_thing());
+    assert_eq!(spaceship.name, saved_spaceship.name);
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_save() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();

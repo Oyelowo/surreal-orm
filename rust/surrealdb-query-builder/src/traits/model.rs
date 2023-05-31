@@ -103,11 +103,6 @@ pub trait SurrealdbModel: Sized {
 
 /// DB convenience helper methods.
 pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
-    // /// Creates or updates a model/table in the database.
-    // fn create(self) -> UpdateStatement<Self> {
-    //     create::<Self>(Self::table_name()).content(self)
-    // }
-
     /// Creates or updates a model/table in the database.
     fn save(self) -> UpdateStatement<Self> {
         update::<Self>(self.get_id_as_thing()).content(self)
@@ -140,6 +135,15 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
 }
 
 impl<T> SurrealdbCrud for T where T: Sized + Serialize + DeserializeOwned + SurrealdbModel {}
+
+/// DB convenience helper methods.
+pub trait SurrealdbCrudNode: Sized + Serialize + DeserializeOwned + SurrealdbNode {
+    /// Creates or updates a model/table in the database.
+    fn create(self) -> CreateStatement<Self> {
+        create(self)
+    }
+}
+impl<T> SurrealdbCrudNode for T where T: Sized + Serialize + DeserializeOwned + SurrealdbNode {}
 
 /// SurrealdbNode is a trait signifying a node in the graph
 #[async_trait::async_trait]
