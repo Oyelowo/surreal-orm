@@ -10,9 +10,10 @@ use std::marker::PhantomData;
 use crate::{
     statements::{
         create::{create, CreateStatement},
+        delete::{delete, DeleteStatementMini},
         select::{select, SelectStatement},
         update::{update, UpdateStatement},
-        SelectStatementMini,
+        DeleteStatement, SelectStatementMini,
     },
     Alias, All, Buildable, Conditional, Field, NodeClause, Operatable, Parametric, Queryable, Raw,
     ReturnableSelect, ReturnableStandard, Runnable, SurrealId, SurrealSimpleId, SurrealUlid,
@@ -112,19 +113,24 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
         select(All).from(id.into()).into()
     }
 
-    /// Finds a record by filtering.
-    fn find_one(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
-        select(All).from(Self::table_name()).where_(filter).into()
-    }
-
     /// Finds records by filtering.
-    fn find(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
+    fn find_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    /// Finds many records by filtering.
-    fn find_many(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
-        select(All).from(Self::table_name()).where_(filter).into()
+    /// Delete the current record by instance.
+    fn delete(self) -> DeleteStatementMini<Self> {
+        delete::<Self>(self.get_id_as_thing()).into()
+    }
+
+    /// Deletes a record by id.
+    fn delete_by_id(id: impl Into<Thing>) -> DeleteStatementMini<Self> {
+        delete::<Self>(id.into()).into()
+    }
+
+    /// Deletes records by filtering.
+    fn delete_where(filter: impl Conditional + Clone) -> DeleteStatementMini<Self> {
+        delete::<Self>(Self::table_name()).where_(filter).into()
     }
 }
 

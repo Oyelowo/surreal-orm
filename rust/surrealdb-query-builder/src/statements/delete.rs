@@ -288,5 +288,77 @@ where
     }
 }
 
+/// Used in model helper methods for deleting records
+#[derive(Debug, Clone)]
+pub struct DeleteStatementMini<T>(DeleteStatement<T>)
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel;
+
+impl<T> From<DeleteStatement<T>> for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        Self(statement)
+    }
+}
+
+impl<T> Parametric for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_bindings(&self) -> BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl<T> Erroneous for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
+    }
+}
+
+impl<T> Queryable for DeleteStatementMini<T> where T: Serialize + DeserializeOwned + SurrealdbModel {}
+
+impl<T> ReturnableDefault<T> for DeleteStatementMini<T> where
+    T: Serialize + DeserializeOwned + SurrealdbModel
+{
+}
+
+impl<T> ReturnableStandard<T> for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
+{
+    fn set_return_type(mut self, return_type: ReturnType) -> Self {
+        self.0.return_type = Some(return_type);
+        self
+    }
+
+    fn get_return_type(&self) -> ReturnType {
+        self.0.return_type.clone().unwrap_or(ReturnType::None)
+    }
+}
+
+impl<T> Buildable for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl<T> std::fmt::Display for DeleteStatementMini<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.build()))
+    }
+}
+
 #[test]
 fn test_query_builder() {}

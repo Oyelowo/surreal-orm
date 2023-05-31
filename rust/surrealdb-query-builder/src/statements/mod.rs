@@ -51,7 +51,7 @@ pub use define_namespace::{define_namespace, DefineNamespaceStatement};
 pub use define_scope::{define_scope, DefineScopeStatement};
 pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
-pub use delete::{delete, DeleteStatement};
+pub use delete::{delete, DeleteStatement, DeleteStatementMini};
 pub use for_::{for_, For, PermissionType};
 pub use ifelse::{if_, IfElseStatement};
 pub use info::{info_for, InfoStatement};
