@@ -133,50 +133,229 @@ fn test_rocket_add_field_to_field_owned_plus_borrowed() {
     );
 }
 
-// #[test]
-// fn test_rocket_sub() {
-//     let rocket = Rocket::schema();
-//     let operation = rocket.strength - 5;
-//
-//     assert_eq!(operation.query_string, "strength - 5");
-//     assert_eq!(
-//         operation.bindings,
-//         vec![
-//             rocket.strength.get_bindings(),
-//             NumberLike::Int(5).get_bindings()
-//         ]
-//         .concat()
-//     );
-// }
-//
-// #[test]
-// fn test_rocket_mul() {
-//     let rocket = Rocket::schema();
-//     let operation = rocket.strength * 5;
-//
-//     assert_eq!(operation.query_string, "strength * 5");
-//     assert_eq!(
-//         operation.bindings,
-//         vec![
-//             rocket.strength.get_bindings(),
-//             NumberLike::Int(5).get_bindings()
-//         ]
-//         .concat()
-//     );
-// }
-//
-// #[test]
-// fn test_rocket_div() {
-//     let rocket = Rocket::schema();
-//     let operation = rocket.strength / 5;
-//
-//     assert_eq!(operation.query_string, "strength / 5");
-//     assert_eq!(
-//         operation.bindings,
-//         vec![
-//             rocket.strength.get_bindings(),
-//             NumberLike::Int(5).get_bindings()
-//         ]
-//         .concat()
-//     );
-// }
+#[test]
+fn test_rocket_sub_with_real_number() {
+    let rocket::Rocket { ref strength, .. } = Rocket::schema();
+    let operation = strength - 5;
+
+    assert_eq!(operation.to_raw().build(), "strength - 5");
+    assert_eq!(operation.fine_tune_params(), "strength - $_param_00000001");
+}
+
+#[test]
+fn test_rocket_sub_field_to_field_owned() {
+    let rocket::Rocket {
+        strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength - bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength - bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength - bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_sub_field_to_field_borrowed_plus_borrowed() {
+    let rocket::Rocket {
+        ref strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength - bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength - bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength - bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_sub_field_to_field_borrowed_plus_owned() {
+    let rocket::Rocket {
+        ref strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength - bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength - bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength - bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_sub_field_to_field_owned_plus_borrowed() {
+    let rocket::Rocket {
+        strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength - bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength - bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength - bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_mul_field_to_real_number() {
+    let rocket::Rocket {
+        strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength * 5;
+
+    assert_eq!(operation.to_raw().build(), "strength * 5");
+    assert_eq!(operation.fine_tune_params(), "strength * $_param_00000001");
+}
+
+#[test]
+fn test_rocket_mul_field_to_field_owned() {
+    let rocket::Rocket {
+        strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength * bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength * bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength * bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_mul_field_to_field_borrowed_plus_borrowed() {
+    let rocket::Rocket {
+        ref strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength * bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength * bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength * bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_mul_field_to_field_borrowed_plus_owned() {
+    let rocket::Rocket {
+        ref strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength * bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength * bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength * bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_mul_field_to_field_owned_plus_borrowed() {
+    let rocket::Rocket {
+        strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength * bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength * bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength * bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_div() {
+    let rocket::Rocket {
+        ref strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength / 5;
+
+    assert_eq!(operation.to_raw().build(), "strength / 5");
+    assert_eq!(operation.fine_tune_params(), "strength / $_param_00000001");
+}
+
+#[test]
+fn test_rocket_div_field_to_field_owned() {
+    let rocket::Rocket {
+        strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength / bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength / bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength / bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_div_field_to_field_borrowed_plus_borrowed() {
+    let rocket::Rocket {
+        ref strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength / bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength / bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength / bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_div_field_to_field_borrowed_plus_owned() {
+    let rocket::Rocket {
+        ref strength,
+        bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength / bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength / bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength / bunchOfOtherFields"
+    );
+}
+
+#[test]
+fn test_rocket_div_field_to_field_owned_plus_borrowed() {
+    let rocket::Rocket {
+        strength,
+        ref bunchOfOtherFields,
+        ..
+    } = Rocket::schema();
+    let operation = strength / bunchOfOtherFields;
+
+    assert_eq!(operation.to_raw().build(), "strength / bunchOfOtherFields");
+    assert_eq!(
+        operation.fine_tune_params(),
+        "strength / bunchOfOtherFields"
+    );
+}
