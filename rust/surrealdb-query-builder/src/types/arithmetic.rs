@@ -138,7 +138,7 @@ impl<T: Into<NumberLike>> Add<T> for Operation {
     fn add(self, rhs: T) -> Self::Output {
         let rhs: NumberLike = rhs.into();
         Operation {
-            query_string: format!("{} + {}", self.build(), rhs.build()),
+            query_string: format!("({}) + {}", self.build(), rhs.build()),
             bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
             errors: vec![],
         }
@@ -151,7 +151,7 @@ impl<T: Into<NumberLike>> Sub<T> for Operation {
     fn sub(self, rhs: T) -> Self::Output {
         let rhs: NumberLike = rhs.into();
         Operation {
-            query_string: format!("{} - {}", self.build(), rhs.build()),
+            query_string: format!("({}) - {}", self.build(), rhs.build()),
             bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
             errors: vec![],
         }
@@ -164,7 +164,7 @@ impl<T: Into<NumberLike>> Div<T> for Operation {
     fn div(self, rhs: T) -> Self::Output {
         let rhs: NumberLike = rhs.into();
         Operation {
-            query_string: format!("{} / {}", self.build(), rhs.build()),
+            query_string: format!("({}) / {}", self.build(), rhs.build()),
             bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
             errors: vec![],
         }
@@ -177,7 +177,7 @@ impl<T: Into<NumberLike>> Mul<T> for Operation {
     fn mul(self, rhs: T) -> Self::Output {
         let rhs: NumberLike = rhs.into();
         Operation {
-            query_string: format!("{} * {}", self.build(), rhs.build()),
+            query_string: format!("({}) * {}", self.build(), rhs.build()),
             bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
             errors: vec![],
         }

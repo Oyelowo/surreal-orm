@@ -12,11 +12,11 @@ fn test_rocket_add_field_to_real_number_complex() {
 
     assert_eq!(
         operation.to_raw().build(),
-        "(strength + 5) / (strength + bunchOfOtherFields) * 32"
+        "((strength + 5) / (strength + bunchOfOtherFields)) * 32"
     );
     assert_eq!(
         operation.fine_tune_params(),
-        "(strength + $_param_00000001) / (strength + bunchOfOtherFields) * $_param_00000002"
+        "((strength + $_param_00000001) / (strength + bunchOfOtherFields)) * $_param_00000002"
     );
 }
 
@@ -377,4 +377,19 @@ fn test_complex() {
     let operation = (age + surname) / (name + email);
 
     assert_eq!(operation.query_string, "(age + surname) / (name + email)");
+}
+
+#[test]
+fn test_complex_2() {
+    let ref age = Field::new("age");
+    let name = Field::new("name");
+    let email = Param::new("email");
+    let surname = Param::new("surname");
+
+    let operation = ((age + surname) / (name + email)) * age;
+
+    assert_eq!(
+        operation.query_string,
+        "((age + $surname) / (name + $email)) * age"
+    );
 }
