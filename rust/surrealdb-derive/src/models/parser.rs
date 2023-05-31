@@ -404,11 +404,23 @@ impl SchemaFieldsProperties {
                         quote!(
                             impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
                         
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Add<T> for #field_name_as_camel {
+                            impl From<self::#field_name_as_camel> for #crate_name::NumberLike {
+                                fn from(val: self::#field_name_as_camel) -> Self {
+                                    val.0.into()
+                                }
+                            }
+                        
+                            impl From<&self::#field_name_as_camel> for #crate_name::NumberLike {
+                                fn from(val: &self::#field_name_as_camel) -> Self {
+                                    val.clone().0.into()
+                                }
+                            }
+                        
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn add(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                             query_string: format!("{} + {}", self.build(), rhs.build()),
@@ -418,11 +430,11 @@ impl SchemaFieldsProperties {
                                     }
                             }
                         
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Sub<T> for #field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn sub(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} - {}", self.build(), rhs.build()),
@@ -432,11 +444,11 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Mul<T> for #field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn mul(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} * {}", self.build(), rhs.build()),
@@ -446,11 +458,11 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Div<T> for #field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn div(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} / {}", self.build(), rhs.build()),
@@ -462,11 +474,11 @@ impl SchemaFieldsProperties {
                         
 
                         
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Add<T> for &#field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn add(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                             query_string: format!("{} + {}", self.build(), rhs.build()),
@@ -476,11 +488,11 @@ impl SchemaFieldsProperties {
                                     }
                             }
                         
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Sub<T> for &#field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn sub(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} - {}", self.build(), rhs.build()),
@@ -490,11 +502,11 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Mul<T> for &#field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn mul(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} * {}", self.build(), rhs.build()),
@@ -504,11 +516,11 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl<T: ::std::convert::Into<#crate_name::Field>> ::std::ops::Div<T> for &#field_name_as_camel {
+                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_as_camel {
                                 type Output = #crate_name::Operation;
 
                                 fn div(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::Field = rhs.into();
+                                    let rhs: #crate_name::NumberLike = rhs.into();
                             
                                     #crate_name::Operation {
                                         query_string: format!("{} / {}", self.build(), rhs.build()),
