@@ -42,34 +42,54 @@ async fn test_find_by_id() -> SurrealdbOrmResult<()> {
 
     let found_spaceship = SpaceShip::find_by_id(spaceship.id.clone())
         .get_one(db.clone())
-        .await
-        .unwrap();
+        .await?;
 
     assert_eq!(spaceship.id.to_thing(), found_spaceship.id.to_thing());
     Ok(())
 }
 
-// #[tokio::test]
-// async fn test_find_where() {
-//     let db = Surreal::new::<Mem>(()).await.unwrap();
-//     db.use_ns("test").use_db("test").await.unwrap();
-//
-//     let spaceship = SpaceShip {
-//         id: SpaceShip::create_id(format!("num-{}", 1)),
-//         name: format!("spaceship-{}", 1),
-//         created: chrono::Utc::now(),
-//     };
-//
-//     spaceship.save().run(db.clone()).await.unwrap();
-//     let found_spaceships = SpaceShip::find_where(Condition::Equal("name", spaceship.name.clone()))
-//         .run(db.clone())
-//         .await
-//         .unwrap();
-//
-//     assert_eq!(found_spaceships.len(), 1);
-//     assert_eq!(found_spaceships[0].id, spaceship.id);
-// }
-//
+#[tokio::test]
+async fn test_find_where() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let spaceship = SpaceShip {
+        id: SpaceShip::create_id(format!("num-{}", 1)),
+        name: format!("spaceship-{}", 1),
+        created: chrono::Utc::now(),
+    };
+    let spaceship2 = SpaceShip {
+        id: SpaceShip::create_id(format!("num-{}", 2)),
+        name: format!("spaceship-{}", 2),
+        created: chrono::Utc::now(),
+    }
+    .save()
+    .run(db.clone())
+    .await?;
+
+    let spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
+    let spaceship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
+
+    let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
+        .return_many(db.clone())
+        .await?;
+    assert_eq!(found_spaceships.len(), 2);
+
+    let found_spaceships = SpaceShip::find_where(name.equal("spaceship-1"))
+        .return_many(db.clone())
+        .await?;
+
+    assert_eq!(found_spaceships.len(), 1);
+    assert_eq!(found_spaceships[0].id.to_thing(), spaceship.id.to_thing());
+
+    let found_spaceship = SpaceShip::find_where(name.equal("spaceship-1"))
+        .get_one(db.clone())
+        .await?;
+
+    assert_eq!(found_spaceship.id.to_thing(), spaceship.id.to_thing());
+    Ok(())
+}
+
 // #[tokio::test]
 // async fn test_delete() {
 //     let db = Surreal::new::<Mem>(()).await.unwrap();
