@@ -6,6 +6,7 @@
  */
 
 pub(crate) mod alias;
+pub(crate) mod arithmetic;
 pub(crate) mod bracket;
 pub(crate) mod clause;
 pub(crate) mod crud_type;
@@ -30,6 +31,7 @@ pub(crate) mod token_target;
 pub(crate) mod valuex;
 
 pub use alias::*;
+pub use arithmetic::*;
 pub use bracket::*;
 pub use clause::*;
 pub use crud_type::*;

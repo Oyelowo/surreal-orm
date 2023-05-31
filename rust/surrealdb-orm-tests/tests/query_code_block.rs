@@ -15,6 +15,55 @@ use surrealdb_orm::{
 };
 
 #[tokio::test]
+async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let ref weapon = Weapon::table_name();
+    let weapon_schema::Weapon {
+        ref name,
+        ref strength,
+        ..
+    } = Weapon::schema();
+    let weaponstats_schema::WeaponStats {
+        averageStrength, ..
+    } = WeaponStats::schema();
+
+    let generated_weapons = (0..=14)
+        .map(|i| Weapon {
+            name: format!("weapon_{}", i),
+            strength: i,
+            ..Default::default()
+        })
+        .collect::<Vec<_>>();
+
+    insert(generated_weapons).return_many(db.clone()).await?;
+
+    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+        LET strengths = select_value(strength).from(weapon);
+        LET total = math::sum!(strengths);
+        LET count = count!(strengths);
+        RETURN total / count;
+    }));
+    // insta::assert_display_snapshot!(created_stats_statement.to_raw());
+    // insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
+    assert_eq!(
+        created_stats_statement.to_raw().build(),
+        "CREATE weapon_stats SET averageStrength = {\n\
+                LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
+                LET $total = math::sum($strengths);\n\n\
+                LET $count = count($strengths);\n\n\
+                RETURN $total / $count;\n\
+                };"
+    );
+
+    let result = created_stats_statement.get_one(db.clone()).await.unwrap();
+    assert_eq!(result.average_strength, 7.5);
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();

@@ -267,6 +267,7 @@ impl ToTokens for NodeToken{
                     use super::super::*;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
+                    use #crate_name::Operatable as _;
                 
                     #( #field_wrapper_type_custom_implementations) *
                 } 

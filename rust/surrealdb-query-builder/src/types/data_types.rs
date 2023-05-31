@@ -56,18 +56,29 @@ macro_rules! create_value_like_struct {
                 }
             }
 
-            impl From<Param> for [<$sql_type_name Like>] {
-                fn from(val: Param) -> Self {
-                    [<$sql_type_name Like>](val.into())
-                }
-            }
-
             impl From<&Field> for [<$sql_type_name Like>] {
                 fn from(val: &Field) -> Self {
                     [<$sql_type_name Like>](val.clone().into())
                 }
             }
 
+            impl From<LetStatement> for [<$sql_type_name Like>] {
+                fn from(val: LetStatement) -> Self {
+                    [<$sql_type_name Like>](val.into())
+                }
+            }
+
+            impl From<&LetStatement> for [<$sql_type_name Like>] {
+                fn from(val: &LetStatement) -> Self {
+                    [<$sql_type_name Like>](val.clone().into())
+                }
+            }
+
+            impl From<Param> for [<$sql_type_name Like>] {
+                fn from(val: Param) -> Self {
+                    [<$sql_type_name Like>](val.into())
+                }
+            }
 
             impl<T> From<CreateStatement<T>> for [<$sql_type_name Like>]
             where
