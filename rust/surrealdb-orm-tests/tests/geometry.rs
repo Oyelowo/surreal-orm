@@ -25,9 +25,8 @@ use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
 use surrealdb_orm::{
     statements::{insert, select},
-    All, Buildable, Geometry, Operatable, Parametric, ReturnableSelect, ReturnableStandard,
-    SchemaGetter, SurrealId, SurrealSimpleId, SurrealdbModel, SurrealdbNode, SurrealdbObject,
-    ToRaw,
+    All, Geometry, Operatable, Parametric, ReturnableSelect, ReturnableStandard, SchemaGetter,
+    SurrealId, SurrealSimpleId, SurrealdbModel, SurrealdbNode, SurrealdbObject, ToRaw,
 };
 
 use geo::Coord;
@@ -92,14 +91,10 @@ impl std::ops::Deref for UuidWrapper {
 #[surrealdb(table_name = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
-    // #[serde(default = "default_resource")]
     title: String,
     content: String,
 }
 
-fn default_resource() -> sql::Thing {
-    todo!()
-}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
         id: Company::create_id(32),

@@ -3,8 +3,8 @@ use geo::{line_string, point, polygon};
 use std::time::Duration;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{
-    alien_schema, weapon_schema, weaponold_schema, Alien, RocketNonNullUpdater, SpaceShip, Student,
-    Weapon, WeaponNonNullUpdater, WeaponOld,
+    alien_schema, weapon_schema, weaponold_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
+    WeaponNonNullUpdater, WeaponOld,
 };
 use surrealdb_orm::{
     statements::{create, insert, select, update},

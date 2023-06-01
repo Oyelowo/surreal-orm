@@ -1,11 +1,8 @@
-use surrealdb_models::{organization_schema, Organization};
-use surrealdb_orm::{
-    index, Buildable, Field, SchemaGetter, SetterAssignable, SurrealdbNode, ToRaw, E,
-};
+use surrealdb_models::Organization;
+use surrealdb_orm::{Buildable, Field, SchemaGetter, SetterAssignable, ToRaw};
 
 #[test]
 fn test_setter() {
-    let organization_schema::Organization { name, time, .. } = Organization::schema();
     let org = Organization::schema();
 
     org.age.equal_to(34);

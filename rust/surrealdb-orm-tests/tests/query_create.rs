@@ -962,7 +962,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
-    let space_ship2 = create::<SpaceShip>(vec![
+    let _space_ship2 = create::<SpaceShip>(vec![
         id.equal_to(spaceship_id_2),
         name.equal_to("SpaceShip2".to_string()),
         created.equal_to(Utc::now()),
@@ -971,7 +971,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
-    let space_ship3 = create::<SpaceShip>(vec![
+    let _space_ship3 = create::<SpaceShip>(vec![
         id.equal_to(spaceship_id_3),
         name.equal_to("SpaceShip3".to_string()),
         created.equal_to(Utc::now()),

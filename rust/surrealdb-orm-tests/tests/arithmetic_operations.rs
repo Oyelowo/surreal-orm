@@ -248,11 +248,7 @@ fn test_rocket_mul_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_div() {
-    let rocket::Rocket {
-        ref strength,
-        ref bunchOfOtherFields,
-        ..
-    } = Rocket::schema();
+    let rocket::Rocket { ref strength, .. } = Rocket::schema();
     let operation = strength / 5;
 
     assert_eq!(operation.to_raw().build(), "strength / 5");
