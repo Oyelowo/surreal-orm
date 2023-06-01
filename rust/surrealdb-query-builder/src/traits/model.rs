@@ -5,13 +5,11 @@
  * Licensed under the MIT license
  */
 
-use std::marker::PhantomData;
-
 use crate::{
     statements::{
         create::{create, CreateStatement},
         delete::{delete, DeleteStatementMini},
-        select::{select, SelectStatement},
+        select::select,
         update::{update, UpdateStatement},
         DeleteStatement, SelectStatementMini,
     },
@@ -21,7 +19,6 @@ use crate::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{
-    engine::local::Db,
     sql::{self, Thing},
     Surreal,
 };
