@@ -7,7 +7,7 @@
 
 #![deny(clippy::all)]
 #![warn(missing_docs)]
-#![warn(missing_doc_code_examples)]
+#![warn(rustdoc::missing_doc_code_examples)]
 #![forbid(unsafe_code)]
 #![deny(clippy::inefficient_to_string)]
 #![deny(clippy::match_wildcard_for_single_variants)]
