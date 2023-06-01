@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
-use geo::point;
 use geo::polygon;
 use geo::Point;
 use geo::Polygon;

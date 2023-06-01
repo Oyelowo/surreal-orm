@@ -67,6 +67,7 @@ fn create_fn_with_three_args(
         Some(body) => {
             let body: ObjectLike = body.into();
             all_bindings.extend(body.get_bindings());
+            errors.extend(body.get_errors());
 
             format!("http::{method}({}, {}", url.build(), body.build())
         }
@@ -79,6 +80,7 @@ fn create_fn_with_three_args(
         Some(headers) => {
             let headers: ObjectLike = headers.into();
             all_bindings.extend(headers.get_bindings());
+            errors.extend(headers.get_errors());
 
             format!("{string}, {})", headers.build())
         }
