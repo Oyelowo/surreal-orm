@@ -9,17 +9,17 @@
 
 use std::{ops::Deref, str::FromStr};
 
-use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
-use proc_macro2::TokenStream;
-use surrealdb_query_builder::FieldType;
-use syn::{Ident, Lit, LitStr, Path, Type};
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name, parse_lit_to_tokenstream,
     relations::NodeTypeName,
     variables::VariablesModelMacro,
 };
+use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+use surrealdb_query_builder::FieldType;
+use syn::{Ident, Lit, LitStr, Path, Type};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -449,12 +449,6 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_integer(&self) -> bool {
-        // let ty = &self.ty;
-        // let is_integer = match quote! {#ty}.to_string().as_str() {
-        //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128" => true,
-        //     _ => false,
-        // };
-        // is_integer
         match self.ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -473,12 +467,6 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_string(&self) -> bool {
-        let ty = &self.ty;
-        // let is_string = match quote! {#ty}.to_string().as_str() {
-        //     "String" => true,
-        //     _ => false,
-        // };
-        // is_string
         match self.ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -492,12 +480,6 @@ impl MyFieldReceiver {
     }
 
     pub fn raw_type_is_bool(&self) -> bool {
-        let ty = &self.ty;
-        // let is_bool = match quote! {#ty}.to_string().as_str() {
-        //     "bool" => true,
-        //     _ => false,
-        // };
-        // is_bool
         match self.ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -509,15 +491,6 @@ impl MyFieldReceiver {
             _ => false,
         }
     }
-
-    // fn raw_type_is_array(&self) -> bool {
-    //     let ty = &self.ty;
-    //     let is_array = match quote! {#ty}.to_string().as_str() {
-    //         "Vec" => true,
-    //         _ => false,
-    //     };
-    //     is_array
-    // }
 
     pub fn is_list(&self) -> bool {
         self.raw_type_is_list()
@@ -1021,7 +994,6 @@ impl ReferencedNodeMeta {
             }
             MyFieldReceiver {
                 define: Some(define),
-                type_,
                 ..
             } => {
                 let define = parse_lit_to_tokenstream(define).unwrap();
@@ -1034,7 +1006,6 @@ impl ReferencedNodeMeta {
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
-                type_,
                 ..
             } => {
                 if define_fn.to_token_stream().to_string().is_empty() {
