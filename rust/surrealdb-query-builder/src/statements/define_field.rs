@@ -8,9 +8,8 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
-    types::{Field, FieldType, Filter, Table},
-    Binding, Conditional, Valuex,
+    Binding, BindingsList, Buildable, Conditional, Erroneous, Field, FieldType, Filter, Parametric,
+    Queryable, Table, Valuex,
 };
 
 use super::for_::PermissionType;
