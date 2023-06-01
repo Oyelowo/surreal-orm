@@ -431,7 +431,7 @@ impl From<Vec<Valuex>> for ArrayLike {
 pub struct ArgsList(Valuex);
 impl ArgsList {
     pub(crate) fn get_errors(&self) -> Vec<String> {
-        todo!()
+        self.0.get_errors()
     }
 }
 impl From<ArgsList> for Valuex {
