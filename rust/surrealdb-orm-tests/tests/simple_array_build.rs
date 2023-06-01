@@ -1,7 +1,6 @@
 use surrealdb_models::Alien;
 use surrealdb_orm::{
-    index, this, where_, All, AllGetter, Buildable, Last, Operatable, SchemaGetter, SurrealdbNode,
-    ToRaw,
+    index, this, where_, All, AllGetter, Buildable, Last, Operatable, SchemaGetter, ToRaw,
 };
 
 #[test]
