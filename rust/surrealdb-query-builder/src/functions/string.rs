@@ -25,7 +25,7 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::{ArgsList, Buildable, Function, NumberLike, Parametric, StrandLike, Valuex};
+use crate::{ArgsList, Buildable, Erroneous, Function, NumberLike, Parametric, StrandLike, Valuex};
 
 fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name: &str) -> Function {
     let value: StrandLike = value.into();
@@ -34,6 +34,7 @@ fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name:
     Function {
         query_string,
         bindings: value.get_bindings(),
+        errors: value.get_errors(),
     }
 }
 
@@ -280,12 +281,14 @@ pub use string_slug as slug;
 /// The string::concat function concatenates strings together.
 pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
+    let mut errors = vec![];
 
     let values = values
         .into_iter()
         .map(|v| {
             let v: Valuex = v.into();
             bindings.extend(v.get_bindings());
+            errors.extend(v.get_errors());
             v.build()
         })
         .collect::<Vec<_>>();
@@ -295,6 +298,7 @@ pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -343,6 +347,7 @@ pub fn join_fn(values: impl Into<ArgsList>) -> Function {
     Function {
         query_string,
         bindings: values.get_bindings(),
+        errors: values.get_errors(),
     }
 }
 
@@ -388,14 +393,18 @@ pub fn ends_with_fn(string: impl Into<StrandLike>, ending: impl Into<StrandLike>
     let string: StrandLike = string.into();
     let ending: StrandLike = ending.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(string.get_bindings());
     bindings.extend(ending.get_bindings());
+    errors.extend(string.get_errors());
+    errors.extend(ending.get_errors());
 
     let query_string = format!("string::ends_with({}, {})", string.build(), ending.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -434,8 +443,11 @@ pub fn starts_with_fn(string: impl Into<StrandLike>, starting: impl Into<StrandL
     let string: StrandLike = string.into();
     let starting: StrandLike = starting.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(string.get_bindings());
     bindings.extend(starting.get_bindings());
+    errors.extend(string.get_errors());
+    errors.extend(starting.get_errors());
 
     let query_string = format!(
         "string::starts_with({}, {})",
@@ -446,6 +458,7 @@ pub fn starts_with_fn(string: impl Into<StrandLike>, starting: impl Into<StrandL
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -485,13 +498,16 @@ pub fn split_fn(string: impl Into<StrandLike>, by: impl Into<StrandLike>) -> Fun
     let string: StrandLike = string.into();
     let by: StrandLike = by.into();
     let mut bindings = string.get_bindings();
+    let mut errors = string.get_errors();
     bindings.extend(by.get_bindings());
+    errors.extend(by.get_errors());
 
     let query_string = format!("string::split({}, {})", string.build(), by.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -532,13 +548,16 @@ pub fn repeat_fn(string: impl Into<StrandLike>, ending: impl Into<NumberLike>) -
     let string: StrandLike = string.into();
     let ending: NumberLike = ending.into();
     let mut bindings = string.get_bindings();
+    let mut errors = string.get_errors();
     bindings.extend(ending.get_bindings());
+    errors.extend(ending.get_errors());
 
     let query_string = format!("string::repeat({}, {})", string.build(), ending.build(),);
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -583,8 +602,12 @@ pub fn slice_fn(
     let from: NumberLike = from.into();
     let to: NumberLike = to.into();
     let mut bindings = string.get_bindings();
+    let mut errors = string.get_errors();
+
     bindings.extend(from.get_bindings());
     bindings.extend(to.get_bindings());
+    errors.extend(from.get_errors());
+    errors.extend(to.get_errors());
 
     let query_string = format!(
         "string::slice({}, {}, {})",
@@ -596,6 +619,7 @@ pub fn slice_fn(
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -642,8 +666,12 @@ pub fn replace_fn(
     let replacement: StrandLike = replacement.into();
 
     let mut bindings = string.get_bindings();
+    let mut errors = string.get_errors();
+
     bindings.extend(to_match.get_bindings());
     bindings.extend(replacement.get_bindings());
+    errors.extend(to_match.get_errors());
+    errors.extend(replacement.get_errors());
 
     let query_string = format!(
         "string::replace({}, {}, {})",
@@ -655,6 +683,7 @@ pub fn replace_fn(
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 

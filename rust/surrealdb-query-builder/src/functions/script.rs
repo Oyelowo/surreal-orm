@@ -39,6 +39,7 @@ pub fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>)
     Function {
         query_string,
         bindings: vec![],
+        errors: vec![],
     }
 }
 
