@@ -3,32 +3,13 @@ use surrealdb::sql;
 
 use crate::{
     Binding, BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge,
-    SurrealdbModel, SurrealdbNode, SurrealdbOrmError, Table, ToRaw, Valuex,
+    SurrealdbModel, SurrealdbNode, SurrealdbOrmError, ToRaw, Valuex,
 };
 
 use super::{
     CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
-    SelectStatement, UpdateStatement,
+    ReturnStatement, SelectStatement, UpdateStatement,
 };
-
-// #[allow(missing_docs)]
-// #[derive(Debug, Clone)]
-// pub enum Subquery<M, N, E>
-// where
-//     M: SurrealdbModel + Serialize + DeserializeOwned,
-//     N: SurrealdbNode + Serialize + DeserializeOwned,
-//     E: SurrealdbEdge + Serialize + DeserializeOwned,
-// {
-//     Value(Valuex),
-//     Ifelse(IfStatement),
-//     // Output(OutputStatement),  // TODO. This is a Return statement
-//     Select(SelectStatement),
-//     Create(CreateStatement<N>),
-//     Update(UpdateStatement<M>),
-//     Delete(DeleteStatement<M>),
-//     Relate(RelateStatement<E>),
-//     Insert(InsertStatement<N>),
-// }
 
 /// A subquery is a query that is nested inside another query.
 #[derive(Debug, Clone)]
@@ -77,8 +58,7 @@ fn statement_str_to_subquery(
         sql::Statement::Relate(s) => sql::Subquery::Relate(s.to_owned()),
         sql::Statement::Insert(s) => sql::Subquery::Insert(s.to_owned()),
         sql::Statement::Update(s) => sql::Subquery::Update(s.to_owned()),
-        // sql::Statement::Value(s) => sql::Subquery::Value(s.to_owned()),
-        // sql::Statement::Value(s) => Subquery::Value(s.to_owned()),
+        sql::Statement::Output(s) => sql::Subquery::Output(s.to_owned()),
         sql::Statement::Delete(s) => sql::Subquery::Delete(s.to_owned()),
         _ => return Err(SurrealdbOrmError::InvalidSubquery(statement.to_string())),
     };
@@ -95,12 +75,6 @@ fn statement_to_subquery(statement: impl Buildable + Erroneous + Parametric) -> 
     Subquery {
         query_string: binding.get_param_dollarised(),
         bindings: vec![binding],
-        // Since we are making subqueries raw and parametizing it as a whole. Maybe, I
-        // gathering the bindings from the subquery is not necessary.
-        // bindings: vec![binding]
-        //     .into_iter()
-        //     .chain(statement.get_bindings())
-        //     .collect(),
         errors: statement.get_errors(),
     }
 }
@@ -113,7 +87,6 @@ impl From<SelectStatement> for Subquery {
 
 impl From<Block> for Subquery {
     fn from(statement: Block) -> Self {
-        // let block = format!("{{\n{}\n}}", statement.build().trim_end_matches(";"));
         Self {
             query_string: statement.build(),
             bindings: statement.get_bindings(),
@@ -121,25 +94,6 @@ impl From<Block> for Subquery {
         }
     }
 }
-
-// impl From<Table> for Subquery {
-//     fn from(value: Table) -> Self {
-//         Self(Valuex {
-//             string: value.to_string(),
-//             bindings: vec![],
-//         })
-//     }
-// }
-//
-// impl From<sql::Thing> for Subquery {
-//     fn from(value: sql::Thing) -> Self {
-//         let binding = Binding::new(value);
-//         Self(Valuex {
-//             string: binding.get_param_dollarised(),
-//             bindings: vec![binding],
-//         })
-//     }
-// }
 
 impl<T> From<CreateStatement<T>> for Subquery
 where
@@ -188,6 +142,12 @@ where
 
 impl From<IfElseStatement> for Subquery {
     fn from(statement: IfElseStatement) -> Self {
+        statement_to_subquery(statement)
+    }
+}
+
+impl From<ReturnStatement> for Subquery {
+    fn from(statement: ReturnStatement) -> Self {
         statement_to_subquery(statement)
     }
 }
