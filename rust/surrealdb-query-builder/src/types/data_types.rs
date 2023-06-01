@@ -10,11 +10,28 @@ use crate::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
         RelateStatement, SelectStatement, UpdateStatement,
     },
-    Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Param, Parametric,
+    Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Operation, Param, Parametric,
     SurrealdbEdge, SurrealdbModel, SurrealdbNode, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
+
+/// Represents the value, or field, param which can all be used
+#[derive(Debug, Clone)]
+pub(crate) enum ValueType {
+    Value,
+    Field,
+    LetStatement,
+    Param,
+    Operation,
+    IfElseStatement,
+    SelectStatement,
+    InsertStatement,
+    UpdateStatement,
+    DeleteStatement,
+    RelateStatement,
+    CreateStatement,
+}
 
 macro_rules! create_value_like_struct {
     ($sql_type_name:expr) => {
@@ -22,7 +39,17 @@ macro_rules! create_value_like_struct {
             /// Represents the value, or field, param which can all be used
             /// to represent the value itself within a query.
             #[derive(Debug, Clone)]
-            pub struct [<$sql_type_name Like>]($crate::Valuex);
+            pub struct [<$sql_type_name Like>]($crate::Valuex, ValueType);
+
+            impl [<$sql_type_name Like>] {
+                #[allow(dead_code)]
+                pub(crate) fn bracket_if_operation(&mut self) -> &Self {
+                    if matches!(self.1, ValueType::Operation) {
+                        self.0.string = format!("({})", self.0.string);
+                    }
+                    self
+                }
+            }
 
             impl From<[<$sql_type_name Like>]> for $crate::Valuex {
                 fn from(val: [<$sql_type_name Like>]) -> Self {
@@ -52,37 +79,43 @@ macro_rules! create_value_like_struct {
                 fn from(value: T) -> Self {
                     let value: sql::[<$sql_type_name>] = value.into();
                     let value: sql::Value = value.into();
-                    Self(value.into())
+                    Self(value.into(), ValueType::Value)
                 }
             }
 
             impl From<Field> for [<$sql_type_name Like>] {
                 fn from(val: Field) -> Self {
-                    [<$sql_type_name Like>](val.into())
+                    [<$sql_type_name Like>](val.into(), ValueType::Field)
                 }
             }
 
             impl From<&Field> for [<$sql_type_name Like>] {
                 fn from(val: &Field) -> Self {
-                    [<$sql_type_name Like>](val.clone().into())
+                    [<$sql_type_name Like>](val.clone().into(), ValueType::Field)
                 }
             }
 
             impl From<LetStatement> for [<$sql_type_name Like>] {
                 fn from(val: LetStatement) -> Self {
-                    [<$sql_type_name Like>](val.into())
+                    [<$sql_type_name Like>](val.into(), ValueType::LetStatement)
                 }
             }
 
             impl From<&LetStatement> for [<$sql_type_name Like>] {
                 fn from(val: &LetStatement) -> Self {
-                    [<$sql_type_name Like>](val.clone().into())
+                    [<$sql_type_name Like>](val.clone().into(), ValueType::LetStatement)
                 }
             }
 
             impl From<Param> for [<$sql_type_name Like>] {
                 fn from(val: Param) -> Self {
-                    [<$sql_type_name Like>](val.into())
+                    [<$sql_type_name Like>](val.into(), ValueType::Param)
+                }
+            }
+
+            impl From<Operation> for [<$sql_type_name Like>] {
+                fn from(val: Operation) -> Self {
+                    [<$sql_type_name Like>](val.into(), ValueType::Operation)
                 }
             }
 
@@ -91,8 +124,15 @@ macro_rules! create_value_like_struct {
                 T: SurrealdbNode + Serialize + DeserializeOwned,
             {
                 fn from(statement: CreateStatement<T>) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::CreateStatement)
 
+                }
+            }
+
+            impl From<SelectStatement> for [<$sql_type_name Like>]
+            {
+                fn from(statement: SelectStatement) -> Self {
+                    [<$sql_type_name Like>](statement.into(), ValueType::SelectStatement)
                 }
             }
 
@@ -101,7 +141,7 @@ macro_rules! create_value_like_struct {
                 T: SurrealdbModel + Serialize + DeserializeOwned,
             {
                 fn from(statement: UpdateStatement<T>) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::UpdateStatement)
                 }
             }
 
@@ -110,7 +150,7 @@ macro_rules! create_value_like_struct {
                 T: SurrealdbModel + Serialize + DeserializeOwned,
             {
                 fn from(statement: DeleteStatement<T>) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::DeleteStatement)
                 }
             }
 
@@ -119,7 +159,7 @@ macro_rules! create_value_like_struct {
                 T: SurrealdbEdge + Serialize + DeserializeOwned,
             {
                 fn from(statement: RelateStatement<T>) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::RelateStatement)
                 }
             }
 
@@ -128,13 +168,13 @@ macro_rules! create_value_like_struct {
                 T: SurrealdbNode + Serialize + DeserializeOwned,
             {
                 fn from(statement: InsertStatement<T>) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::InsertStatement)
                 }
             }
 
             impl From<IfElseStatement> for [<$sql_type_name Like>] {
                 fn from(statement: IfElseStatement) -> Self {
-                    [<$sql_type_name Like>](statement.into())
+                    [<$sql_type_name Like>](statement.into(), ValueType::IfElseStatement)
                 }
             }
         }
