@@ -8,7 +8,7 @@
 // Meta functions
 // These functions can be used to retrieve specific metadata from a SurrealDB Record ID.
 
-use crate::{Buildable, Function, Parametric, ThingLike};
+use crate::{Buildable, Erroneous, Function, Parametric, ThingLike};
 
 /// Extracts and returns the table id from a SurrealDB Record ID
 pub fn id_fn(record_id: impl Into<ThingLike>) -> crate::Function {
@@ -18,6 +18,7 @@ pub fn id_fn(record_id: impl Into<ThingLike>) -> crate::Function {
     Function {
         query_string,
         bindings: record_id.get_bindings(),
+        errors: record_id.get_errors(),
     }
 }
 
@@ -63,6 +64,7 @@ pub fn tb_fn(record_id: impl Into<ThingLike>) -> crate::Function {
     Function {
         query_string,
         bindings: record_id.get_bindings(),
+        errors: record_id.get_errors(),
     }
 }
 

@@ -20,7 +20,7 @@
 // rand::uuid::v4() Generates and returns a random Version 4 UUID
 // rand::uuid::v7() Generates and returns a random Version 7 UUID
 
-use crate::{Buildable, Function, NumberLike, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, NumberLike, Parametric, Valuex};
 
 /// The rand function generates a random float, between 0 and 1.
 ///
@@ -49,6 +49,7 @@ pub fn rand_fn() -> Function {
     Function {
         query_string,
         bindings: vec![],
+        errors: vec![],
     }
 }
 
@@ -77,6 +78,7 @@ pub fn bool_fn() -> Function {
     Function {
         query_string,
         bindings: vec![],
+        errors: vec![],
     }
 }
 
@@ -105,6 +107,7 @@ pub fn uuid_fn() -> Function {
     Function {
         query_string,
         bindings: vec![],
+        errors: vec![],
     }
 }
 
@@ -144,6 +147,7 @@ pub fn enum_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
     Function {
         query_string,
         bindings,
+        errors: vec![],
     }
 }
 
@@ -180,6 +184,7 @@ pub fn float_fn(
     to: Option<impl Into<NumberLike>>,
 ) -> Function {
     let mut bindings = vec![];
+    let mut errors = vec![];
 
     let query_string = match (from, to) {
         (Some(from), Some(to)) => {
@@ -188,6 +193,8 @@ pub fn float_fn(
 
             bindings.extend(from.get_bindings());
             bindings.extend(to.get_bindings());
+            errors.extend(from.get_errors());
+            errors.extend(to.get_errors());
             format!("rand::float({}, {})", from.build(), to.build())
         }
         _ => format!("rand::float()"),
@@ -196,6 +203,7 @@ pub fn float_fn(
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -249,6 +257,7 @@ pub use rand_float as float;
 /// The following examples show this function, and its output, when used in a select statement:
 pub fn int_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLike>>) -> Function {
     let mut bindings = vec![];
+    let mut errors = vec![];
 
     let query_string = match (from, to) {
         (Some(from), Some(to)) => {
@@ -257,6 +266,8 @@ pub fn int_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLi
 
             bindings.extend(from.get_bindings());
             bindings.extend(to.get_bindings());
+            errors.extend(from.get_errors());
+            errors.extend(to.get_errors());
             format!("rand::int({}, {})", from.build(), to.build())
         }
         _ => format!("rand::int()"),
@@ -265,6 +276,7 @@ pub fn int_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLi
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -314,6 +326,7 @@ pub use rand_int as int;
 /// rand::time(number, number) -> datetime
 pub fn time_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLike>>) -> Function {
     let mut bindings = vec![];
+    let mut errors = vec![];
 
     let query_string = match (from, to) {
         (Some(from), Some(to)) => {
@@ -323,6 +336,8 @@ pub fn time_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberL
 
             bindings.extend(from.get_bindings());
             bindings.extend(to.get_bindings());
+            errors.extend(from.get_errors());
+            errors.extend(to.get_errors());
             query_string
         }
         _ => format!("rand::time()"),
@@ -331,6 +346,7 @@ pub fn time_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberL
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -384,6 +400,7 @@ pub fn string_fn(
     to: Option<impl Into<NumberLike>>,
 ) -> Function {
     let mut bindings = vec![];
+    let mut errors = vec![];
 
     let query_string = match (from, to) {
         (Some(length), None) => {
@@ -398,6 +415,8 @@ pub fn string_fn(
 
             bindings.extend(from.get_bindings());
             bindings.extend(to.get_bindings());
+            errors.extend(from.get_errors());
+            errors.extend(to.get_errors());
 
             format!("rand::string({}, {})", from.build(), to.build())
         }
@@ -407,6 +426,7 @@ pub fn string_fn(
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -463,6 +483,7 @@ pub fn guid_fn(length: Option<impl Into<NumberLike>>) -> Function {
         None => Function {
             query_string: "rand::guid()".into(),
             bindings: vec![],
+            errors: vec![],
         },
         Some(length) => {
             let length: NumberLike = length.into();
@@ -471,6 +492,7 @@ pub fn guid_fn(length: Option<impl Into<NumberLike>>) -> Function {
             Function {
                 query_string,
                 bindings: length.get_bindings(),
+                errors: length.get_errors(),
             }
         }
     }
@@ -520,6 +542,7 @@ pub mod uuid {
         Function {
             query_string: "rand::uuid::v4()".into(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 
@@ -549,6 +572,7 @@ pub mod uuid {
         Function {
             query_string: "rand::uuid::v7()".into(),
             bindings: vec![],
+            errors: vec![],
         }
     }
 

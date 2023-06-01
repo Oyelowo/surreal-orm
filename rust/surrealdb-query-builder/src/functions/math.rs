@@ -22,7 +22,7 @@
 // math::sqrt()	Returns the square root of a number
 // math::sum()	Returns the total sum of a set of numbers
 
-use crate::{ArrayLike, Buildable, Function, NumberLike, Parametric};
+use crate::{ArrayLike, Buildable, Erroneous, Function, NumberLike, Parametric};
 
 fn create_fn_with_single_num_arg(number: impl Into<NumberLike>, function_name: &str) -> Function {
     let number: NumberLike = number.into();
@@ -31,6 +31,7 @@ fn create_fn_with_single_num_arg(number: impl Into<NumberLike>, function_name: &
     Function {
         query_string,
         bindings: number.get_bindings(),
+        errors: number.get_errors(),
     }
 }
 
@@ -41,6 +42,7 @@ fn create_fn_with_single_array_arg(value: impl Into<ArrayLike>, function_name: &
     Function {
         query_string,
         bindings: value.get_bindings(),
+        errors: value.get_errors(),
     }
 }
 
@@ -55,13 +57,16 @@ pub fn fixed_fn(number: impl Into<NumberLike>, decimal_place: impl Into<NumberLi
     let number: NumberLike = number.into();
     let dp: NumberLike = decimal_place.into();
     let mut bindings = number.get_bindings();
+    let mut errors = number.get_errors();
     bindings.extend(dp.get_bindings());
+    errors.extend(dp.get_errors());
 
     let query_string = format!("math::fixed({}, {})", number.build(), dp.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
