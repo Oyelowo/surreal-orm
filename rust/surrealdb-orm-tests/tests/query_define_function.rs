@@ -6,7 +6,7 @@
  */
 // -- Define a global function which can be used in any query
 
-use surrealdb_models::{spaceship_schema, SpaceShip};
+use surrealdb_models::SpaceShip;
 use surrealdb_orm::{
     cond, index,
     statements::{create, define_function, if_, select},
