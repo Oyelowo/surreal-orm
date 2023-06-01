@@ -2,7 +2,7 @@ use chrono::Utc;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
-    statements::{insert, order, select, select_value},
+    statements::{insert, order, select, select_value, CanOrder},
     All, Buildable, Operatable, ReturnableSelect, Runnable, SchemaGetter, SurrealdbModel,
     SurrealdbOrmResult, ToRaw,
 };
@@ -31,24 +31,24 @@ async fn test_subquery_in_select_statement() -> SurrealdbOrmResult<()> {
             strength.inside(
                 select_value(strength)
                     .from(weapon)
-                    .order_by(order(strength).asc())
+                    .order_by(strength.asc())
                     .limit(6),
             ),
         )
-        .order_by(order(strength).desc())
+        .order_by(strength.desc())
         .start(2)
         .limit(10);
 
     assert_eq!(
         statement.fine_tune_params(),
         "SELECT * FROM weapon WHERE strength INSIDE $_param_00000001 \
-            ORDER BY strength  DESC LIMIT $_param_00000002 START AT $_param_00000003;"
+            ORDER BY strength DESC LIMIT $_param_00000002 START AT $_param_00000003;"
     );
     assert_eq!(
         statement.to_raw().build(),
         "SELECT * FROM weapon WHERE strength INSIDE \
             (SELECT VALUE strength FROM weapon ORDER BY strength LIMIT 6) \
-            ORDER BY strength  DESC LIMIT 10 START AT 2;"
+            ORDER BY strength DESC LIMIT 10 START AT 2;"
     );
     let statement = statement.return_many::<SpaceShip>(db.clone()).await?;
 

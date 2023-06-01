@@ -199,7 +199,9 @@ impl Display for &Order {
     }
 }
 
-trait CanOrder: Into<Field> + Clone {
+/// Represents the direction of an ordering.
+pub trait CanOrder: Into<Field> + Clone {
+    /// Sets the direction of the ordering to ascending.
     fn asc(&self) -> Order {
         let field: Field = self.clone().into();
         Order {
@@ -209,6 +211,7 @@ trait CanOrder: Into<Field> + Clone {
         }
     }
 
+    /// Sets the direction of the ordering to descending.
     fn desc(&self) -> Order {
         let field: Field = self.clone().into();
         Order {
@@ -218,6 +221,7 @@ trait CanOrder: Into<Field> + Clone {
         }
     }
 
+    /// Sets the ordering option to random.
     fn rand(&self) -> Order {
         let field: Field = self.clone().into();
         Order {
@@ -227,6 +231,7 @@ trait CanOrder: Into<Field> + Clone {
         }
     }
 
+    /// Sets the ordering option to collate.
     fn collate(&self) -> Order {
         let field: Field = self.clone().into();
         Order {
@@ -236,6 +241,7 @@ trait CanOrder: Into<Field> + Clone {
         }
     }
 
+    /// Sets the ordering option to sort the values numerically instead of as strings.
     fn numeric(&self) -> Order {
         let field: Field = self.clone().into();
         Order {
