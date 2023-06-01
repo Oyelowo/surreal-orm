@@ -187,14 +187,66 @@ impl Order {
 
 impl Display for &Order {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(
-            "{} {} {}",
-            self.field,
-            self.option.map_or("".into(), |op| op.to_string()),
-            self.direction.unwrap_or(OrderDirection::Asc)
-        ))
+        let mut query = self.field.build();
+        if let Some(option) = &self.option {
+            query.push_str(&format!(" {}", option));
+        }
+
+        if let Some(direction) = &self.direction {
+            query.push_str(&format!(" {}", direction));
+        }
+        query.fmt(f)
     }
 }
+
+trait CanOrder: Into<Field> + Clone {
+    fn asc(&self) -> Order {
+        let field: Field = self.clone().into();
+        Order {
+            field,
+            direction: Some(OrderDirection::Asc),
+            option: None,
+        }
+    }
+
+    fn desc(&self) -> Order {
+        let field: Field = self.clone().into();
+        Order {
+            field,
+            direction: Some(OrderDirection::Desc),
+            option: None,
+        }
+    }
+
+    fn rand(&self) -> Order {
+        let field: Field = self.clone().into();
+        Order {
+            field,
+            direction: None,
+            option: Some(OrderOption::Rand),
+        }
+    }
+
+    fn collate(&self) -> Order {
+        let field: Field = self.clone().into();
+        Order {
+            field,
+            direction: None,
+            option: Some(OrderOption::Collate),
+        }
+    }
+
+    fn numeric(&self) -> Order {
+        let field: Field = self.clone().into();
+        Order {
+            field,
+            direction: None,
+            option: Some(OrderOption::Numeric),
+        }
+    }
+}
+
+impl<T> CanOrder for T where T: Into<Field> + Clone {}
 
 #[derive(Debug, Clone, Copy)]
 enum OrderDirection {
@@ -1485,7 +1537,10 @@ mod tests {
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
             )
-            .order_by(order(&age).numeric())
+            // You can call directly on field
+            .order_by(age.desc().numeric())
+            // Or use order function
+            .order_by(order(&city).asc())
             .limit(153)
             .start(10)
             .parallel();
@@ -1493,12 +1548,18 @@ mod tests {
         let statement_aliased = statement.__as__(canadian_cities);
 
         assert_eq!(
-        statement_aliased.fine_tune_params(),
-        "(SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) AND (city IS $_param_00000003) OR (city ~ $_param_00000004) ORDER BY age NUMERIC ASC LIMIT $_param_00000005 START AT $_param_00000006 PARALLEL) AS legal_age"
-    );
+            statement_aliased.fine_tune_params(),
+            "(SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) \
+                AND (city IS $_param_00000003) \
+                OR (city ~ $_param_00000004) \
+                ORDER BY age NUMERIC DESC, city ASC LIMIT \
+                $_param_00000005 START AT $_param_00000006 PARALLEL) AS legal_age"
+        );
         assert_eq!(
-        statement_aliased.to_raw().to_string(),
-        "(SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
-    );
+            statement_aliased.to_raw().to_string(),
+            "(SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') \
+                    AND (city IS 'NewFoundland') OR (city ~ 'Toronto') \
+                    ORDER BY age NUMERIC DESC, city ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
+        );
     }
 }
