@@ -5,15 +5,7 @@
  * Licensed under the MIT license
  */
 
-use serde::{de::DeserializeOwned, Serialize};
-
-use crate::{
-    statements::{
-        CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, RelateStatement,
-        SelectStatement, Subquery, UpdateStatement,
-    },
-    Buildable, Erroneous, ErrorList, Parametric, SurrealdbEdge, SurrealdbNode, Valuex,
-};
+use crate::{statements::Subquery, Buildable, Erroneous, ErrorList, Parametric, Valuex};
 
 /// An expression is a value or statement that can be used within another query.
 #[derive(Clone, Debug)]
@@ -43,7 +35,7 @@ impl Parametric for Expression {
 impl Erroneous for Expression {
     fn get_errors(&self) -> ErrorList {
         match self {
-            Expression::Value(value) => vec![],
+            Expression::Value(_value) => vec![],
             Expression::Subquery(subquery) => subquery.get_errors(),
         }
     }

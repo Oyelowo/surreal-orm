@@ -8,7 +8,7 @@
 use std::ops::Deref;
 
 use crate::{
-    statements::{LetStatement, SelectStatement, Subquery},
+    statements::{LetStatement, Subquery},
     Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
     Param, Parametric, Setter, SurrealdbModel, Table,
 };
@@ -352,6 +352,7 @@ impl Erroneous for Clause {
 }
 
 impl Clause {
+    /// Create a new Clause
     pub fn new(kind: ClauseType) -> Self {
         use ClauseType::*;
         let mut bindings = vec![];
@@ -380,14 +381,8 @@ impl Clause {
             Subquery(subquery) => {
                 bindings = subquery.get_bindings();
                 errors = subquery.get_errors();
-                // format!("({})", subquery.build().trim_end_matches(";"))
                 subquery.build()
             }
-            // SelectStatement(select_statement) => {
-            //     bindings = select_statement.get_bindings();
-            //     errors = select_statement.get_errors();
-            //     format!("({})", select_statement.build().trim_end_matches(";"))
-            // }
             All => format!("[*]"),
             Last => format!("[$]"),
             Index(index) => {

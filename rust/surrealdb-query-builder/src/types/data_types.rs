@@ -8,7 +8,7 @@
 use crate::{
     statements::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
-        RelateStatement, SelectStatement, Subquery, UpdateStatement,
+        RelateStatement, SelectStatement, UpdateStatement,
     },
     Binding, BindingsList, Buildable, Erroneous, Field, Param, Parametric, SurrealdbEdge,
     SurrealdbModel, SurrealdbNode, Valuex,
