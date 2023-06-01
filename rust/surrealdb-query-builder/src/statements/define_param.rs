@@ -97,3 +97,27 @@ impl Display for DefineParamStatement {
         write!(f, "{};", self.build())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ToRaw;
+
+    use super::*;
+    fn endpoint_base() -> Param {
+        Param::new("endpoint_base")
+    }
+
+    #[test]
+    fn test_define_param_statement() {
+        let statement = define_param(endpoint_base()).value("https://dummyjson.com");
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE PARAM $endpoint_base VALUE 'https://dummyjson.com'"
+        );
+
+        assert_eq!(
+            statement.fine_tune_params(),
+            "DEFINE PARAM $endpoint_base VALUE $_param_00000001"
+        );
+    }
+}
