@@ -33,8 +33,7 @@
 
 use std::fmt::Display;
 
-use crate::{ArrayLike, Function, NumberLike, Valuex};
-use crate::{Buildable, Parametric};
+use crate::{ArrayLike, Buildable, Erroneous, Function, NumberLike, Parametric, Valuex};
 
 /// The array::add function adds an item to an array only if it doesn't exist.
 /// array::add(array, value) -> array
@@ -46,11 +45,16 @@ pub fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
     let arr: ArrayLike = arr.into();
     let value: Valuex = value.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(arr.get_bindings());
     bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+
     Function {
         query_string: format!("array::add({}, {})", arr.build(), value.build()),
         bindings,
+        errors,
     }
 }
 
@@ -121,10 +125,14 @@ mod add_tests {
 pub fn all_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: ArrayLike = arr.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(arr.get_bindings());
+    errors.extend(arr.get_errors());
+
     Function {
         query_string: format!("array::all({})", arr.build()),
         bindings,
+        errors,
     }
 }
 
@@ -190,10 +198,14 @@ mod all_tests {
 pub fn any_fn(arr: impl Into<ArrayLike>) -> Function {
     let arr: ArrayLike = arr.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(arr.get_bindings());
+    errors.extend(arr.get_errors());
+
     Function {
         query_string: format!("array::any({})", arr.build()),
         bindings,
+        errors,
     }
 }
 
@@ -259,11 +271,15 @@ pub fn append_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Functio
     let arr: ArrayLike = arr.into();
     let value: Valuex = value.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(arr.get_bindings());
     bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
     Function {
         query_string: format!("array::append({}, {})", arr.build(), value.build()),
         bindings,
+        errors,
     }
 }
 
@@ -348,11 +364,15 @@ fn create_array_helper(
     let arr1: ArrayLike = arr1.into();
     let arr2: ArrayLike = arr2.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(arr1.get_bindings());
     bindings.extend(arr2.get_bindings());
+    errors.extend(arr1.get_errors());
+    errors.extend(arr2.get_errors());
     Function {
         query_string: format!("array::{func_name}({}, {})", arr1.build(), arr2.build()),
         bindings,
+        errors,
     }
 }
 
@@ -633,6 +653,7 @@ pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::distinct({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -713,6 +734,7 @@ pub fn flatten_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::flatten({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -799,6 +821,7 @@ pub fn group_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::group({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -912,6 +935,12 @@ pub fn insert_fn(
             .chain(value.get_bindings())
             .chain(index.get_bindings())
             .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(value.get_errors())
+            .chain(index.get_errors())
+            .collect(),
     }
 }
 
@@ -1003,6 +1032,7 @@ pub fn len_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::len({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -1081,6 +1111,7 @@ pub fn pop_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::pop({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -1162,6 +1193,11 @@ pub fn prepend_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Functi
             .get_bindings()
             .into_iter()
             .chain(value.get_bindings())
+            .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(value.get_errors())
             .collect(),
     }
 }
@@ -1258,6 +1294,11 @@ pub fn push_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function 
             .into_iter()
             .chain(value.get_bindings())
             .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(value.get_errors())
+            .collect(),
     }
 }
 
@@ -1352,6 +1393,11 @@ pub fn remove_fn(arr: impl Into<ArrayLike>, number: impl Into<Valuex>) -> Functi
             .into_iter()
             .chain(number.get_bindings())
             .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(number.get_errors())
+            .collect(),
     }
 }
 
@@ -1441,6 +1487,7 @@ pub fn reverse_fn(arr: impl Into<ArrayLike>) -> Function {
     Function {
         query_string: format!("array::reverse({})", arr.build()),
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 
@@ -1551,6 +1598,7 @@ pub fn sort_fn(arr: impl Into<ArrayLike>, ordering: Ordering) -> Function {
     Function {
         query_string,
         bindings: arr.get_bindings(),
+        errors: arr.get_errors(),
     }
 }
 /// The array::sort function calculates the length of an array, returning a number. This function
@@ -1605,6 +1653,7 @@ pub mod sort {
         Function {
             query_string: format!("array::sort::asc({})", arr.build()),
             bindings: arr.get_bindings(),
+            errors: arr.get_errors(),
         }
     }
 
@@ -1641,6 +1690,7 @@ pub mod sort {
         Function {
             query_string: format!("array::sort::desc({})", arr.build()),
             bindings: arr.get_bindings(),
+            errors: arr.get_errors(),
         }
     }
 

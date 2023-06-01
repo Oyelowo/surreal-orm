@@ -17,32 +17,35 @@ use crate::{
 pub struct Function {
     pub(crate) query_string: String,
     pub(crate) bindings: BindingsList,
-    // pub(crate) errors: ErrorList,
+    pub(crate) errors: ErrorList,
 }
 
 impl Function {
+    /// Creates a new function with the given query string.
     pub fn new() -> Self {
         Self {
             query_string: String::new(),
             bindings: vec![],
-            // errors: vec![],
+            errors: vec![],
         }
     }
 
+    /// Creates a new function with the given query string.
     pub fn with_bindings(mut self, bindings: BindingsList) -> Self {
         self.bindings = bindings;
         self
     }
 
+    /// Creates a new function with the given query string.
     pub fn with_args_string(mut self, query_string: String) -> Self {
         self.query_string = query_string;
         self
     }
 
-    // pub fn with_errors(mut self, errors: ErrorList) -> Self {
-    //     self.errors = errors;
-    //     self
-    // }
+    pub fn with_errors(mut self, errors: ErrorList) -> Self {
+        self.errors = errors;
+        self
+    }
 }
 
 impl Parametric for Function {
