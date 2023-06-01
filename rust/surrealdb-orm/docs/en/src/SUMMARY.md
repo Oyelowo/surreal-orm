@@ -1,8 +1,13 @@
 # Summary
 
+# Getting Started
+
 - [Introduction](./introduction.md)
 - [Quick Start](./quick_start.md)
 - [Comparison](./comparison.md)
+
+# Concept
+
 - [Concepts](./concepts.md)
   - [Model](./concepts/model.md)
   - [Node](./concepts/node.md)
@@ -14,6 +19,9 @@
   - [Object](./concepts/object.md)
     - [Struct Attributes](./concepts/object_struct_attributes.md)
     - [Field Attributes](./concepts/objec_field_attributes.md)
+
+# API
+
 - [Statements](./statements.md)
   - [Use](./statements/use.md)
   - [Let](./statements/let.md)

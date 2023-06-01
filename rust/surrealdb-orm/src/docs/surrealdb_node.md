@@ -1,5 +1,9 @@
 # SurrealdbNode
 
+In Surrealdb, a Node is a fundamental element that represents an entity in your data. It corresponds to a database table in a traditional Relational Database Management System (RDBMS). Each node can contain several fields representing properties or attributes of the entity.
+
+To define a node in Surrealdb, you create a Rust struct and decorate it with SurrealdbNode struct attributes and field attributes. The struct attributes are used for high-level configuration of the node, such as naming conventions and table management options. The field attributes describe the individual fields within the node.
+
 ## Struct Attributes
 
 | Attribute        | Description                                                                                                                                                                                                                                                                                                                                                                          | Type               | Optional |

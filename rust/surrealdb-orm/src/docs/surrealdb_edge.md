@@ -1,5 +1,11 @@
 # SurrealdbEdge
 
+An Edge in Surrealdb is a bridge between two nodes. It represents a relationship or connection between the entities denoted by the nodes. An Edge can be thought of as a join operation in SQL, connecting two tables based on a common attribute.
+
+To define an edge, you create a Rust struct and decorate it with SurrealdbEdge struct attributes and field attributes. The struct attributes serve the same purpose as in a Node, with the addition of `as` and `as_fn` that can be used to create a projection using a statement or an external function, respectively.
+
+The field attributes in an Edge have a similar role as in a Node, with additional attributes to specify relationships between Nodes.
+
 ## Struct Attributes
 
 | Attribute        | Description                                                                                                                                                                                                                                                                                                                                                                          | Type               | Optional |
