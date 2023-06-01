@@ -8,7 +8,7 @@
 use std::fmt::{self, Display};
 
 use crate::{
-    Binding, BindingsList, Buildable, Conditional, Erroneous, Field, FieldType, Filter, Parametric,
+    BindingsList, Buildable, Conditional, Erroneous, Field, FieldType, Filter, Parametric,
     Queryable, Table, Valuex,
 };
 
