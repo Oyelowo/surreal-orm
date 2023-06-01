@@ -1,10 +1,10 @@
+#![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-
 #![deny(clippy::all)]
 #![warn(missing_docs)]
 #![warn(rustdoc::missing_doc_code_examples)]

@@ -1,3 +1,4 @@
+#![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
