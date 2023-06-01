@@ -18,7 +18,7 @@
 //
 //
 
-use crate::{Buildable, Function, GeometryLike, Parametric};
+use crate::{Buildable, Erroneous, Function, GeometryLike, Parametric};
 
 pub(crate) fn create_geo_with_single_arg(
     geometry: impl Into<GeometryLike>,
@@ -29,6 +29,7 @@ pub(crate) fn create_geo_with_single_arg(
     Function {
         query_string: format!("geo::{fn_suffix}({})", geometry.build()),
         bindings: geometry.get_bindings(),
+        errors: geometry.get_errors(),
     }
 }
 
@@ -45,6 +46,7 @@ fn create_geo_fn_with_two_args(
     Function {
         query_string: format!("geo::{fn_suffix}({}, {})", point1.build(), point2.build()),
         bindings,
+        errors: point1.get_errors(),
     }
 }
 
@@ -238,7 +240,7 @@ pub use geo_distance as distance;
 
 /// This module contains functions for working with geohashes.
 pub mod hash {
-    use crate::{Buildable, Function, GeometryLike, NumberLike, Parametric, StrandLike};
+    use crate::{Buildable, Erroneous, Function, GeometryLike, NumberLike, Parametric, StrandLike};
 
     /// represents a geohash
     pub type GeoHash = StrandLike;
@@ -250,6 +252,7 @@ pub mod hash {
         Function {
             query_string: format!("geo::hash::decode({})", string.build()),
             bindings: string.get_bindings(),
+            errors: string.get_errors(),
         }
     }
 
@@ -288,10 +291,12 @@ pub mod hash {
         let geometry: GeometryLike = geometry.into();
 
         let mut bindings = geometry.get_bindings();
+        let mut errors = geometry.get_errors();
 
         let str = if let Some(accuracy) = accuracy {
             let accuracy: NumberLike = accuracy.into();
             bindings.extend(accuracy.get_bindings());
+            errors.extend(accuracy.get_errors());
 
             format!(
                 "geo::hash::encode({}, {})",
@@ -305,6 +310,7 @@ pub mod hash {
         Function {
             query_string: str,
             bindings,
+            errors,
         }
     }
 
