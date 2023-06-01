@@ -74,7 +74,7 @@ impl Buildable for DefineParamStatement {
             query = format!("{query} VALUE {value}");
         }
 
-        query
+        format!("{query};")
     }
 }
 
@@ -94,7 +94,7 @@ impl Queryable for DefineParamStatement {}
 
 impl Display for DefineParamStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{};", self.build())
+        write!(f, "{}", self.build())
     }
 }
 
@@ -112,12 +112,12 @@ mod tests {
         let statement = define_param(endpoint_base()).value("https://dummyjson.com");
         assert_eq!(
             statement.to_raw().build(),
-            "DEFINE PARAM $endpoint_base VALUE 'https://dummyjson.com'"
+            "DEFINE PARAM $endpoint_base VALUE 'https://dummyjson.com';"
         );
 
         assert_eq!(
             statement.fine_tune_params(),
-            "DEFINE PARAM $endpoint_base VALUE $_param_00000001"
+            "DEFINE PARAM $endpoint_base VALUE $_param_00000001;"
         );
     }
 }
