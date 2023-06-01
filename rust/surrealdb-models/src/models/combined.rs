@@ -98,17 +98,8 @@ fn erer() -> Filter {
 fn define_age() -> DefineFieldStatement {
     use surrealdb_orm::{SurrealdbModel, SurrealdbNode};
     use CrudType::*;
-    let student_schema::Student {
-        age,
-        firstName,
-        lastName,
-        ..
-    } = Student::schema();
+    let student_schema::Student { age, firstName, .. } = Student::schema();
 
-    let name = Field::new("name");
-    // let user_table = Table::from("user");
-    // let age = Field::new("age");
-    let email = Field::new("email");
     use FieldType::*;
 
     // let statement = define_field(Student::schema().age)
@@ -232,20 +223,7 @@ impl Default for Student {
         }
     }
 }
-// #[test]
-// fn xama() {
-//     assert_eq!(
-//         format!(
-//             "zz:{:?}",
-//             Student::define_fields()
-//                 .into_iter()
-//                 .map(|f| f.to_string())
-//                 .collect::<Vec<_>>()
-//         ),
-//         "er".to_string()
-//     );
-//     assert_eq!(Student::define_table().to_string(), "re".to_string());
-// }
+
 #[derive(SurrealdbEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "writes")]
