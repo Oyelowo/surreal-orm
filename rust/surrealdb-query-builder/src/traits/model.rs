@@ -5,26 +5,19 @@
  * Licensed under the MIT license
  */
 
-use std::marker::PhantomData;
-
 use crate::{
     statements::{
         create::{create, CreateStatement},
         delete::{delete, DeleteStatementMini},
-        select::{select, SelectStatement},
+        select::select,
         update::{update, UpdateStatement},
-        DeleteStatement, SelectStatementMini,
+        SelectStatementMini,
     },
-    Alias, All, Buildable, Conditional, Field, NodeClause, Operatable, Parametric, Queryable, Raw,
-    ReturnableSelect, ReturnableStandard, Runnable, SurrealId, SurrealSimpleId, SurrealUlid,
-    SurrealUuid, SurrealdbOrmResult, Table, TestUser, Valuex,
+    Alias, All, Conditional, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid,
+    SurrealUuid, SurrealdbOrmResult, Table, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::{
-    engine::local::Db,
-    sql::{self, Thing},
-    Surreal,
-};
+use surrealdb::sql::{self, Thing};
 
 /// SurrealdbModel is a trait signifying superset of SurrealdbNode and SurrealdbEdge.
 /// i.e both are SurrealdbModel

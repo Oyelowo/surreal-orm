@@ -8,8 +8,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 use surrealdb_orm::{
-    LinkMany, LinkOne, Relate, ReturnableStandard, SurrealId, SurrealSimpleId, SurrealdbCrud,
-    SurrealdbEdge, SurrealdbModel, SurrealdbNode, SurrealdbObject,
+    LinkMany, LinkOne, Relate, SurrealId, SurrealSimpleId, SurrealdbEdge, SurrealdbModel,
+    SurrealdbNode, SurrealdbObject,
 };
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
@@ -39,7 +39,6 @@ impl Default for User {
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "like")]
 pub struct Like<In: SurrealdbNode, Out: SurrealdbNode> {
-    // pub id: SurrealId<Like<In, Out>>,
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,

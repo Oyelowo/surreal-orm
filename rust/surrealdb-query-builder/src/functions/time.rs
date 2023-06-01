@@ -27,7 +27,7 @@
 // time::yday()	Extracts the yday as a number from a datetime
 // time::year()	Extracts the year as a number from a datetime
 
-use crate::{Buildable, DatetimeLike, DurationLike, Function, Parametric, StrandLike};
+use crate::{Buildable, DatetimeLike, DurationLike, Erroneous, Function, Parametric, StrandLike};
 
 /// The time::now function returns the current datetime as an ISO8601 timestamp.The time::now function returns the current datetime as an ISO8601 timestamp.
 pub fn now_fn() -> Function {
@@ -36,6 +36,7 @@ pub fn now_fn() -> Function {
     Function {
         query_string,
         bindings: vec![],
+        errors: vec![],
     }
 }
 
@@ -69,6 +70,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                 $crate::Function {
                     query_string,
                     bindings: datetime.get_bindings(),
+                    errors: datetime.get_errors(),
                 }
             }
 
@@ -520,13 +522,16 @@ pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
     let datetime: DatetimeLike = datetime.into();
     let duration: DurationLike = duration.into();
     let mut bindings = datetime.get_bindings();
+    let mut errors = datetime.get_errors();
     bindings.extend(duration.get_bindings());
+    errors.extend(duration.get_errors());
 
     let query_string = format!("time::floor({}, {})", datetime.build(), duration.build(),);
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -588,13 +593,16 @@ pub fn format_fn(datetime: impl Into<DatetimeLike>, format: impl Into<StrandLike
     let datetime: DatetimeLike = datetime.into();
     let format: StrandLike = format.into();
     let mut bindings = datetime.get_bindings();
+    let mut errors = datetime.get_errors();
     bindings.extend(format.get_bindings());
+    errors.extend(format.get_errors());
 
     let query_string = format!("time::format({}, {})", datetime.build(), format.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -654,6 +662,7 @@ pub fn timezone_fn() -> Function {
     Function {
         query_string: "time::timezone()".to_string(),
         bindings: vec![],
+        errors: vec![],
     }
 }
 
@@ -683,11 +692,14 @@ pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
     let datetime: DatetimeLike = datetime.into();
     let duration: DurationLike = duration.into();
     let mut bindings = datetime.get_bindings();
+    let mut errors = datetime.get_errors();
     bindings.extend(duration.get_bindings());
+    errors.extend(duration.get_errors());
 
     Function {
         query_string: format!("time::round({}, {})", datetime.build(), duration.build()),
         bindings,
+        errors,
     }
 }
 
@@ -744,13 +756,16 @@ pub fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLik
     let datetime: DatetimeLike = datetime.into();
     let interval: StrandLike = interval.into();
     let mut bindings = datetime.get_bindings();
+    let mut errors = datetime.get_errors();
     bindings.extend(interval.get_bindings());
+    errors.extend(interval.get_errors());
 
     let query_string = format!("time::group({}, {})", datetime.build(), interval.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 

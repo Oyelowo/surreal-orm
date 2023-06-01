@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use surrealdb_models::{rocket, spaceship_schema, weapon_schema, Rocket, SpaceShip, Weapon};
+use surrealdb_models::{rocket, Rocket};
 use surrealdb_orm::*;
 
 #[test]
@@ -29,11 +29,7 @@ fn test_rocket_add_field_to_real_number_complex() {
 
 #[test]
 fn test_rocket_add_field_to_real_number() {
-    let rocket::Rocket {
-        strength,
-        bunchOfOtherFields,
-        ..
-    } = Rocket::schema();
+    let rocket::Rocket { strength, .. } = Rocket::schema();
     let operation = strength + 5;
 
     assert_eq!(operation.to_raw().build(), "strength + 5");
@@ -179,11 +175,7 @@ fn test_rocket_sub_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_mul_field_to_real_number() {
-    let rocket::Rocket {
-        strength,
-        bunchOfOtherFields,
-        ..
-    } = Rocket::schema();
+    let rocket::Rocket { strength, .. } = Rocket::schema();
     let operation = strength * 5;
 
     assert_eq!(operation.to_raw().build(), "strength * 5");
@@ -256,11 +248,7 @@ fn test_rocket_mul_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_div() {
-    let rocket::Rocket {
-        ref strength,
-        ref bunchOfOtherFields,
-        ..
-    } = Rocket::schema();
+    let rocket::Rocket { ref strength, .. } = Rocket::schema();
     let operation = strength / 5;
 
     assert_eq!(operation.to_raw().build(), "strength / 5");

@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{spaceship_schema, SpaceShip};
 use surrealdb_orm::*;
@@ -88,7 +86,7 @@ async fn test_find_where() -> SurrealdbOrmResult<()> {
         name: format!("spaceship-{}", 1),
         created: chrono::Utc::now(),
     };
-    let spaceship2 = SpaceShip {
+    let _spaceship2 = SpaceShip {
         id: SpaceShip::create_id(format!("num-{}", 2)),
         name: format!("spaceship-{}", 2),
         created: chrono::Utc::now(),
@@ -97,7 +95,7 @@ async fn test_find_where() -> SurrealdbOrmResult<()> {
     .run(db.clone())
     .await?;
 
-    let spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
+    let _spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
     let spaceship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
@@ -125,7 +123,7 @@ async fn test_delete() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let mut spaceship = SpaceShip {
+    let spaceship = SpaceShip {
         id: SpaceShip::create_id(format!("num-{}", 1)),
         name: format!("spaceship-{}", 1),
         created: chrono::Utc::now(),

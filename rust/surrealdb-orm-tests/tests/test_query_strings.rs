@@ -8,9 +8,7 @@
 use insta;
 use std::time::Duration;
 use surrealdb::sql::{thing, Thing};
-use surrealdb_models::{
-    book_schema, student_schema, writes_schema, Book, Student, StudentWritesBook,
-};
+use surrealdb_models::{book_schema, student_schema, Book, Student, StudentWritesBook};
 use surrealdb_orm::{
     cond,
     statements::{order, relate, select},
@@ -30,7 +28,6 @@ fn multiplication_tests1() {
         ref age,
         ..
     } = &Student::schema();
-    let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
     let book_schema::Book { ref content, .. } = Book::schema();
 
     let mut query1 = select(arr![age, lastName, content])
@@ -166,7 +163,7 @@ async fn relate_query_building_for_subqueries() {
 
 #[test]
 fn multiplication_tests2() {
-    let simple_relation = Student::schema()
+    let _simple_relation = Student::schema()
         .writes__(Empty)
         .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
         .title;

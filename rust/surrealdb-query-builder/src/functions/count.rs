@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Buildable, Function, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, Parametric, Valuex};
 // Count functions
 // These functions can be used when counting field values and expressions.
 
@@ -27,6 +27,7 @@ pub fn count_fn(countable: impl Into<Valuex>) -> Function {
     Function {
         query_string: format!("count({})", countable.build()),
         bindings: countable.get_bindings(),
+        errors: countable.get_errors(),
     }
 }
 

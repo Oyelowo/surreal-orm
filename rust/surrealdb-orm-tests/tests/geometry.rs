@@ -17,31 +17,19 @@ use geo::polygon;
 use serde::Deserialize;
 use serde::Serialize;
 use surrealdb::engine::local::Mem;
-use surrealdb::opt::RecordId;
 use surrealdb::sql;
 use surrealdb::sql::Datetime;
 // use surrealdb::sql::Geometry;
+use std::time::Duration;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
-use surrealdb_orm::Buildable;
-use surrealdb_orm::ReturnableSelect;
-use surrealdb_orm::SchemaGetter;
-use surrealdb_orm::SurrealId;
-use surrealdb_orm::SurrealSimpleId;
-use surrealdb_orm::SurrealUuid;
-use surrealdb_orm::SurrealdbModel;
-use surrealdb_orm::SurrealdbObject;
-use surrealdb_orm::ToRaw;
-// use surrealdb_derive::SurrealdbNode;
-use std::time::Duration;
-
-use geo::Coord;
-use surrealdb::sql::statements::CommitStatement;
 use surrealdb_orm::{
     statements::{insert, select},
-    All, Geometry, Operatable, Parametric, ReturnableDefault, ReturnableStandard, Runnable,
-    SurrealdbNode,
+    All, Geometry, Operatable, Parametric, ReturnableSelect, ReturnableStandard, SchemaGetter,
+    SurrealId, SurrealSimpleId, SurrealdbModel, SurrealdbNode, SurrealdbObject, ToRaw,
 };
+
+use geo::Coord;
 
 #[derive(SurrealdbObject, Debug, Serialize, Deserialize, Clone)]
 pub struct Person {
@@ -103,14 +91,10 @@ impl std::ops::Deref for UuidWrapper {
 #[surrealdb(table_name = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
-    // #[serde(default = "default_resource")]
     title: String,
     content: String,
 }
 
-fn default_resource() -> sql::Thing {
-    todo!()
-}
 fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
     let company = Company {
         id: Company::create_id(32),
@@ -192,7 +176,7 @@ async fn linestring() -> surrealdb::Result<()> {
 
 #[tokio::test]
 async fn polygon() -> surrealdb::Result<()> {
-    let polygon = polygon![
+    let _polygon = polygon![
             (x: -111., y: 45.),
             (x: -111., y: 41.),
             (x: -104., y: 41.),
@@ -209,7 +193,7 @@ async fn polygon() -> surrealdb::Result<()> {
     // let company = create_geom_test(polygon).await?;
     // insta::assert_snapshot!(company);
 
-    let poly = polygon!(
+    let _poly = polygon!(
             exterior: [
                 (x: -111., y: 45.),
                 (x: -111., y: 41.),
@@ -451,9 +435,9 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     //     .return_one(db.clone())
     //     .await
     //     .unwrap();
-    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    let _results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
 
-    let results = insert::<GenZCompany>(select_query)
+    let _results = insert::<GenZCompany>(select_query)
         .return_many(db.clone())
         .await
         .unwrap();

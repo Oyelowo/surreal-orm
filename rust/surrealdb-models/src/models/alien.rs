@@ -4,7 +4,7 @@ use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealSimpleId, SurrealdbNode, E};
+use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealSimpleId, SurrealdbNode};
 
 // Alien
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]

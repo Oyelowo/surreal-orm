@@ -6,13 +6,13 @@
  */
 
 use serde::{Deserialize, Serialize};
-use surrealdb::{engine::local::Mem, sql, Surreal};
-use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
+use surrealdb::{engine::local::Mem, Surreal};
+use surrealdb_models::{weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
     block, chain,
     statements::{if_, insert, let_, order, select, update, LetStatement},
-    All, Buildable, Operatable, Param, QueryChain, ReturnableSelect, ReturnableStandard, Runnable,
-    SchemaGetter, SetterAssignable, SurrealdbModel, SurrealdbOrmResult, ToRaw,
+    All, Buildable, Operatable, ReturnableSelect, Runnable, SchemaGetter, SetterAssignable,
+    SurrealdbModel, SurrealdbOrmResult, ToRaw,
 };
 
 #[tokio::test]
@@ -40,7 +40,6 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealdbOrmResult
 
     let ref space_ship = SpaceShip::table_name();
     let ref weapon = Weapon::table_name();
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
     let weapon_schema::Weapon {
         ref name,
         ref strength,
@@ -187,11 +186,6 @@ async fn test_if_else_statement_and_let_macro() -> SurrealdbOrmResult<()> {
         })
         .collect::<Vec<_>>();
     insert(generated_weapons).run(db.clone()).await?;
-
-    let space_ship = SpaceShip::table_name();
-    let weapon = Weapon::table_name();
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
 
     let_!(val = 7);
     let_!(name = "Oyelowo");

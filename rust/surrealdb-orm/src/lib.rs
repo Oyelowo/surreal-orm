@@ -1,3 +1,4 @@
+#![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
@@ -145,7 +146,7 @@
 //! Now a HTML report is available at `benchmark/target/criterion/report`.
 
 #![warn(missing_docs)]
-#![warn(missing_doc_code_examples)]
+#![warn(rustdoc::missing_doc_code_examples)]
 #![forbid(unsafe_code)]
 #![deny(clippy::all)]
 #![deny(clippy::inefficient_to_string)]

@@ -1,11 +1,10 @@
 use chrono::Utc;
 use surrealdb::{engine::local::Mem, Surreal};
-use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
+use surrealdb_models::{weapon_schema, SpaceShip, Weapon};
 use surrealdb_orm::{
-    arr,
     statements::{insert, order, select, select_value},
-    Aliasable, All, Buildable, Operatable, ReturnableSelect, Runnable, SchemaGetter,
-    SurrealdbModel, SurrealdbOrmResult, ToRaw,
+    All, Buildable, Operatable, ReturnableSelect, Runnable, SchemaGetter, SurrealdbModel,
+    SurrealdbOrmResult, ToRaw,
 };
 
 #[tokio::test]

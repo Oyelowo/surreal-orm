@@ -10,7 +10,7 @@ use surrealdb_models::{weapon_schema, weaponstats_schema, Weapon, WeaponStats};
 use surrealdb_orm::{
     chain,
     functions::math,
-    statements::{create, insert, let_, return_, select, select_value},
+    statements::{create, insert, let_, return_, select_value},
     *,
 };
 
@@ -20,11 +20,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
     db.use_ns("test").use_db("test").await.unwrap();
 
     let ref weapon = Weapon::table_name();
-    let weapon_schema::Weapon {
-        ref name,
-        ref strength,
-        ..
-    } = Weapon::schema();
+    let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
@@ -69,11 +65,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let ref weapon = Weapon::table_name();
-    let weapon_schema::Weapon {
-        ref name,
-        ref strength,
-        ..
-    } = Weapon::schema();
+    let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
@@ -117,7 +109,7 @@ async fn test_code_block_with_macro() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon::table_name();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
@@ -164,7 +156,7 @@ async fn test_code_block_simplified() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon::table_name();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
@@ -217,7 +209,7 @@ async fn test_code_block() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let weapon = Weapon::table_name();
-    let weapon_schema::Weapon { name, strength, .. } = Weapon::schema();
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),

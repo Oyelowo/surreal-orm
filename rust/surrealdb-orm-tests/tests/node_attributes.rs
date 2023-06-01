@@ -1,13 +1,11 @@
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
-use geo::point;
-use geo::polygon;
 use geo::Point;
 use geo::Polygon;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
-use surrealdb_orm::{statements::create, *};
+use surrealdb_orm::*;
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

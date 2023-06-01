@@ -23,8 +23,8 @@
 // type::thing()	Converts a value into a record pointer
 
 use crate::{
-    Buildable, DatetimeLike, DurationLike, Function, NumberLike, Parametric, StrandLike, TableLike,
-    Valuex,
+    Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric, StrandLike,
+    TableLike, Valuex,
 };
 
 macro_rules! create_type {
@@ -39,6 +39,7 @@ macro_rules! create_type {
                 $crate::Function {
                     query_string,
                     bindings: value.get_bindings(),
+                    errors: value.get_errors(),
                 }
             }
 
@@ -332,13 +333,17 @@ pub fn point_fn(point1: impl Into<NumberLike>, point2: impl Into<NumberLike>) ->
     let point1: NumberLike = point1.into();
     let point2: NumberLike = point2.into();
     let mut bindings = point1.get_bindings();
+    let mut errors = point1.get_errors();
+
     bindings.extend(point2.get_bindings());
+    errors.extend(point2.get_errors());
 
     let query_string = format!("type::point({}, {})", point1.build(), point2.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 
@@ -382,13 +387,17 @@ pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<Valuex>) -> Functi
     let table: TableLike = table.into();
     let value: Valuex = value.into();
     let mut bindings = table.get_bindings();
+    let mut errors = table.get_errors();
+
     bindings.extend(value.get_bindings());
+    errors.extend(value.get_errors());
 
     let query_string = format!("type::thing({}, {})", table.build(), value.build());
 
     Function {
         query_string,
         bindings,
+        errors,
     }
 }
 

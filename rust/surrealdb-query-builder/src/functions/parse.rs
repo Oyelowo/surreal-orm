@@ -18,7 +18,7 @@
 // parse::url::port()	Parses and returns the port number from a URL
 // parse::url::query()	Parses and returns the query string from a URL
 
-use crate::{Buildable, Function, Parametric, StrandLike};
+use crate::{Buildable, Erroneous, Function, Parametric, StrandLike};
 
 fn create_fn_with_single_string_arg(
     string: impl Into<StrandLike>,
@@ -30,6 +30,7 @@ fn create_fn_with_single_string_arg(
     Function {
         query_string,
         bindings: string.get_bindings(),
+        errors: string.get_errors(),
     }
 }
 

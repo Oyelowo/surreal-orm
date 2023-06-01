@@ -94,7 +94,7 @@ where
     let content: ContentOrSets<T> = content.into();
     let mut errors = vec![];
     let mut bindings = vec![];
-    let mut content_or_set = ContentOrSetString::Content("".to_string());
+    let content_or_set;
 
     match content {
         ContentOrSets::Content(content) => {

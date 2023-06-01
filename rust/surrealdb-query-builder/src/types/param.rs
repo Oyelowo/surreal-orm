@@ -10,8 +10,7 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    BindingsList, Buildable, Clause, Erroneous, Index, Operatable, Parametric, SchemaGetter,
-    SurrealdbModel, SurrealdbNode, Valuex,
+    BindingsList, Buildable, Clause, Erroneous, Index, Operatable, Parametric, SchemaGetter, Valuex,
 };
 
 /// Represents a surrogate parameter

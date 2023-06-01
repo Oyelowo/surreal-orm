@@ -1,4 +1,4 @@
-use crate::{Buildable, Erroneous, Parametric, QueryChain, Valuex};
+use crate::{Buildable, Erroneous, Parametric, Valuex};
 
 /// A code block. Surrounds the code with brackets.
 pub struct Bracket(Valuex);

@@ -27,6 +27,7 @@ macro_rules! create_function {
                 $crate::Function {
                     query_string,
                     bindings: vec![],
+                    errors: vec![],
                 }
             }
 

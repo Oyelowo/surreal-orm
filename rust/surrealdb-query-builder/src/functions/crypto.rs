@@ -22,7 +22,7 @@
 // crypto::scrypt::compare()	Compares an scrypt hash to a password
 // crypto::scrypt::generate()	Generates a new scrypt hashed password
 
-use crate::{Buildable, Function, Parametric, StrandLike};
+use crate::{Buildable, Erroneous, Function, Parametric, StrandLike};
 
 pub(crate) fn create_fn_with_single_value(
     value: impl Into<StrandLike>,
@@ -33,6 +33,7 @@ pub(crate) fn create_fn_with_single_value(
     Function {
         query_string: format!("crypto::{function_suffix}({})", value.build()),
         bindings: value.get_bindings(),
+        errors: value.get_errors(),
     }
 }
 
@@ -44,8 +45,11 @@ pub(crate) fn create_fn_with_two_values(
     let value1: StrandLike = value1.into();
     let value2: StrandLike = value2.into();
     let mut bindings = vec![];
+    let mut errors = vec![];
     bindings.extend(value1.get_bindings());
     bindings.extend(value2.get_bindings());
+    errors.extend(value1.get_errors());
+    errors.extend(value2.get_errors());
 
     Function {
         query_string: format!(
@@ -54,6 +58,7 @@ pub(crate) fn create_fn_with_two_values(
             value2.build()
         ),
         bindings,
+        errors,
     }
 }
 

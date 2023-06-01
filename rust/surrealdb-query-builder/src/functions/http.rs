@@ -16,7 +16,7 @@
 // http::patch()	Perform a remote HTTP PATCH request
 // http::delete()	Perform a remote HTTP DELETE request
 
-use crate::{Buildable, Function, ObjectLike, Parametric, StrandLike};
+use crate::{Buildable, Erroneous, Function, ObjectLike, Parametric, StrandLike};
 
 /// Represents URL
 pub type Url = StrandLike;
@@ -28,6 +28,7 @@ fn create_fn_with_two_args(
 ) -> Function {
     let url: Url = url.into();
     let mut all_bindings = url.get_bindings();
+    let mut errors = url.get_errors();
 
     let string = match custom_headers {
         None => {
@@ -36,6 +37,7 @@ fn create_fn_with_two_args(
         Some(headers) => {
             let headers: ObjectLike = headers.into();
             all_bindings.extend(headers.get_bindings());
+            errors.extend(headers.get_errors());
 
             format!("http::{method}({}, {})", url.build(), headers.build())
         }
@@ -44,6 +46,7 @@ fn create_fn_with_two_args(
     Function {
         query_string: string,
         bindings: all_bindings,
+        errors,
     }
 }
 
@@ -55,6 +58,7 @@ fn create_fn_with_three_args(
 ) -> Function {
     let url: Url = url.into();
     let mut all_bindings = url.get_bindings();
+    let mut errors = url.get_errors();
 
     let string = match request_body {
         None => {
@@ -63,6 +67,7 @@ fn create_fn_with_three_args(
         Some(body) => {
             let body: ObjectLike = body.into();
             all_bindings.extend(body.get_bindings());
+            errors.extend(body.get_errors());
 
             format!("http::{method}({}, {}", url.build(), body.build())
         }
@@ -75,6 +80,7 @@ fn create_fn_with_three_args(
         Some(headers) => {
             let headers: ObjectLike = headers.into();
             all_bindings.extend(headers.get_bindings());
+            errors.extend(headers.get_errors());
 
             format!("{string}, {})", headers.build())
         }
@@ -83,6 +89,7 @@ fn create_fn_with_three_args(
     Function {
         query_string: string,
         bindings: all_bindings,
+        errors,
     }
 }
 

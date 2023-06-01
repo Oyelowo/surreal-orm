@@ -8,10 +8,10 @@
 use crate::{
     statements::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
-        RelateStatement, SelectStatement, Subquery, UpdateStatement,
+        RelateStatement, SelectStatement, UpdateStatement,
     },
-    Binding, BindingsList, Buildable, Erroneous, Field, Param, Parametric, SurrealdbEdge,
-    SurrealdbModel, SurrealdbNode, Valuex,
+    Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Param, Parametric,
+    SurrealdbEdge, SurrealdbModel, SurrealdbNode, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -37,8 +37,14 @@ macro_rules! create_value_like_struct {
             }
 
             impl $crate::Buildable for [<$sql_type_name Like>] {
-                fn build(&self) -> String {
+                fn build(&self) -> ::std::string::String {
                     self.0.build()
+                }
+            }
+
+            impl $crate::Erroneous for [<$sql_type_name Like>] {
+                fn get_errors(&self) -> $crate::ErrorList {
+                    self.0.get_errors()
                 }
             }
 
@@ -170,6 +176,12 @@ impl Parametric for BoolLike {
     }
 }
 
+impl Erroneous for BoolLike {
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
+    }
+}
+
 impl Buildable for BoolLike {
     fn build(&self) -> String {
         self.0.build()
@@ -264,6 +276,12 @@ impl From<ArrayLike> for Valuex {
 impl Parametric for ArrayLike {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
+    }
+}
+
+impl Erroneous for ArrayLike {
+    fn get_errors(&self) -> ErrorList {
+        self.0.errors.to_vec()
     }
 }
 
@@ -411,6 +429,11 @@ impl From<Vec<Valuex>> for ArrayLike {
 
 /// Used to represent a list of arguments to a function
 pub struct ArgsList(Valuex);
+impl ArgsList {
+    pub(crate) fn get_errors(&self) -> Vec<String> {
+        self.0.get_errors()
+    }
+}
 impl From<ArgsList> for Valuex {
     fn from(val: ArgsList) -> Self {
         val.0
@@ -419,6 +442,12 @@ impl From<ArgsList> for Valuex {
 impl Parametric for ArgsList {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
+    }
+}
+
+impl Erroneous for ArgsList {
+    fn get_errors(&self) -> ErrorList {
+        self.0.errors.to_vec()
     }
 }
 

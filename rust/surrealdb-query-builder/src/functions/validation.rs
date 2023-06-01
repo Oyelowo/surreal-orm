@@ -24,7 +24,7 @@
 // is::uuid()	Checks whether a value is a UUID
 //
 
-use crate::{Buildable, Function, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, Parametric, Valuex};
 
 fn create_validation_function(value: impl Into<Valuex>, function_name: &str) -> Function {
     let value: Valuex = value.into();
@@ -32,6 +32,7 @@ fn create_validation_function(value: impl Into<Valuex>, function_name: &str) -> 
     Function {
         query_string: format!("is::{function_name}({})", value.build()),
         bindings: value.get_bindings(),
+        errors: value.get_errors(),
     }
 }
 
