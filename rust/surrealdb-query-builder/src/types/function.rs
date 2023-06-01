@@ -42,6 +42,7 @@ impl Function {
         self
     }
 
+    /// Gathers error for this function.
     pub fn with_errors(mut self, errors: ErrorList) -> Self {
         self.errors = errors;
         self
