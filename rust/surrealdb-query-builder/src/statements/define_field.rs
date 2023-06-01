@@ -7,8 +7,6 @@
 
 use std::fmt::{self, Display};
 
-use surrealdb::sql;
-
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, FieldType, Filter, Table},
