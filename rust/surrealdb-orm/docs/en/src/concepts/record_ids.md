@@ -2,21 +2,16 @@
 
 The `SurrealId` is a wrapper struct that extends the capabilities of `surrealdb::sql::Thing` and provides a more ergonomic interface. It's a static type representing the id of a model in the SurrealDB ORM and is a combination of the model's table name and the id, where the id can be anything that can be converted into a `surrealdb::sql::Id`.
 
+Let's explore how to utilize these ID types both implicitly (through auto-generation via the Default trait) and explicitly (by creating them manually).
+
 1. **SurrealSimpleId<Self>:**
 
-This ID type is perfect when you need a unique identifier without any
-special requirements for its structure. `SurrealSimpleId<Self>`
-automatically generates an ID when a new instance of the struct is created,
-thanks to the implementation of the Default trait.
-
-However, to manually generate a simple ID, you'd invoke the `create_simple_id`
-method directly on the struct. This returns an instance of `SurrealSimpleId<Self>`
-that can be used as an ID.
+This ID type auto-generates a unique identifier when a new instance of the struct is created, thanks to the implementation of the Default trait. But you can also manually generate it using the `create_simple_id()` function directly on the struct.
 
 Example struct:
 
 ```rust
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
@@ -25,7 +20,16 @@ pub struct Alien {
 }
 ```
 
-Creating an instance of Alien with a simple ID:
+Creating an instance of Alien with an auto-generated ID (implicit):
+
+```rust
+let alien = Alien {
+    // other fields
+    ..Default::default()
+};
+```
+
+Creating an instance of Alien with a manually generated ID (explicit):
 
 ```rust
 let alien = Alien {
@@ -36,14 +40,12 @@ let alien = Alien {
 
 2. **SurrealUuid<Self>:**
 
-`SurrealUuid<Self>` provides a high level of uniqueness given the nature of UUIDs. It automatically generates a UUID when a new instance of the struct is created, by implementing the Default trait.
-
-To manually generate a UUID, you can invoke the `create_uuid` method directly on the struct, which returns an instance of `SurrealUuid<Self>`.
+`SurrealUuid<Self>` auto-generates a UUID when a new instance of the struct is created. You can also manually generate it using the `create_uuid()` function on the struct.
 
 Example struct:
 
 ```rust
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "account")]
 pub struct Account {
@@ -52,7 +54,16 @@ pub struct Account {
 }
 ```
 
-Creating an instance of Account with a UUID:
+Creating an instance of Account with an auto-generated UUID (implicit):
+
+```rust
+let account = Account {
+    // other fields
+    ..Default::default()
+};
+```
+
+Creating an instance of Account with a manually generated UUID (explicit):
 
 ```rust
 let account = Account {
@@ -63,39 +74,46 @@ let account = Account {
 
 3. **SurrealUlid<Self>:**
 
-`SurrealUlid<Self>` provides a high level of uniqueness given the nature of ULIDs. It automatically generates a ULID when a new instance of the struct is created, by implementing the Default trait.
-
-To manually generate a ULID, you can invoke the `create_ulid` method directly on the struct, which returns an instance of `SurrealUlid<Self>`.
+`SurrealUlid<Self>` auto-generates a ULID when a new instance of the struct is created. You can also manually generate it using the `create_ulid()` function on the struct.
 
 Example struct:
 
 ```rust
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-#[surrealdb(table_name = "account")]
-pub struct Account {
+#[surrealdb(table_name = "spaceship")]
+pub struct SpaceShip {
     pub id: SurrealUlid<Self>,
     // other fields
 }
 ```
 
-Creating an instance of Account with a UUID:
+Creating an instance of SpaceShip with an auto-generated ULID (implicit):
 
 ```rust
-let account = Account {
-    id: Account::create_uuid(),
+let spaceship = SpaceShip {
+    // other fields
+    ..Default::default()
+};
+```
+
+Creating an instance of SpaceShip with a manually generated ULID (explicit):
+
+```rust
+let spaceship = SpaceShip {
+    id: SpaceShip::create_ulid(),
     // other fields
 };
 ```
 
 4. **SurrealId<Self, T>:**
 
-This is the most flexible ID type, allowing for any arbitrary serializable type `T` as the ID. It's useful when your ID needs to include specific information or adhere to a certain format. This ID type doesn't implement the Default trait, thus instances of this type must be manually created using the `create_id` method.
+This is the most flexible ID type, allowing for any arbitrary serializable type `T` as the ID. However, it doesn't implement the Default trait, which means you must manually create instances of this type using the `create_id()` function.
 
 Example struct:
 
 ```rust
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(SurrealdbNode, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
@@ -104,13 +122,20 @@ pub struct Weapon {
 }
 ```
 
-Creating an instance of Weapon with a specific ID:
+Creating an
+
+instance of Weapon with a manually created ID (explicit):
 
 ```rust
 let weapon = Weapon {
-    id: Weapon::create_id("laser_weapon"),
+    id: Weapon::create_id("sword".into()),
     // other fields
 };
 ```
 
-The SurrealID types in SurrealDB are designed to be flexible and accommodating to various needs for entity identification and linking within the database. The `create_id` methods offer a convenient way to create and manage these identifiers.
+These ID types provide various options for users to meet the needs of different
+scenarios when working with entities in SurrealDB. Whether you want auto-generated
+identifiers or prefer to create them manually, there's an ID type to suit your requirements.
+
+The SurrealID types in SurrealDB are designed to be flexible and accommodating to various
+needs for entity identification and linking within the database.
