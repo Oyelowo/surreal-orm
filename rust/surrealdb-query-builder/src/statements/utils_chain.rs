@@ -187,7 +187,7 @@ mod tests {
         chain, cond, statements::select, traits::Buildable, All, Field, Operatable, ToRaw,
     };
     use insta::assert_display_snapshot;
-    use select::{order, CanOrder};
+    use select::CanOrder;
     use surrealdb::sql;
 
     #[test]
