@@ -1,5 +1,1 @@
-# Edge
-
-## Edge
-
-{{#include ../../../../src/docs/surrealdb_edge.md}}
+{{#include ../../../../src/docs/edge_description.md}}

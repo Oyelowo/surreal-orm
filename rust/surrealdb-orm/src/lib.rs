@@ -184,10 +184,14 @@
 #![recursion_limit = "256"]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-#[doc = include_str!("docs/surrealdb_edge.md")]
+#[doc = include_str!("docs/edge_description.md")]
+#[doc = include_str!("docs/edge_struct_attributes.md")]
+#[doc = include_str!("docs/edge_field_attributes.md")]
 pub use surrealdb_derive::SurrealdbEdge;
 
-#[doc = include_str!("docs/surrealdb_node.md")]
+#[doc = include_str!("docs/node_description.md")]
+#[doc = include_str!("docs/node_struct_attributes.md")]
+#[doc = include_str!("docs/node_field_attributes.md")]
 pub use surrealdb_derive::SurrealdbNode;
 
 #[doc = include_str!("docs/object_description.md")]

@@ -1,3 +1,1 @@
-# Node
-
-{{#include ../../../../src/docs/surrealdb_node.md}}
+{{#include ../../../../src/docs/node_description.md}}
