@@ -43,7 +43,8 @@ pub struct User {
 
 ## 3. Advanced Schema Definitions
 
-SurrealDB ORM supports more complex data types including links between different models. Here's a detailed example using a `Student` and a `Book`:
+SurrealDB ORM supports more complex data types including links between different models.
+Here's a detailed example using a `Student` and a `Book`:
 
 ```rust
 #[derive(SurrealdbNode, Serialize, Deserialize)]
