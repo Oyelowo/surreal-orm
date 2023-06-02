@@ -190,7 +190,9 @@ pub use surrealdb_derive::SurrealdbEdge;
 #[doc = include_str!("docs/surrealdb_node.md")]
 pub use surrealdb_derive::SurrealdbNode;
 
-#[doc = include_str!("docs/surrealdb_object.md")]
+#[doc = include_str!("docs/object_description.md")]
+#[doc = include_str!("docs/object_struct_attributes.md")]
+#[doc = include_str!("docs/object_field_attributes.md")]
 pub use surrealdb_derive::SurrealdbObject;
 
 #[doc(hidden)]

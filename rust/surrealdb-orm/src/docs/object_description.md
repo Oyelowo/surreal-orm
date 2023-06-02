@@ -44,15 +44,3 @@ Notably, the use of `nest_object` or `nest_array` is validated at compile time.
 This ensures that `nest_object` is used correctly for the specific Object and
 `nest_array` corresponds to a vector of that Object, providing a guarantee of the
 validity of your data structures before your program runs.
-
-## Struct Attributes
-
-| Attribute  | Description                                                                                                                                                                                | Type   | Optional |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | -------- |
-| rename_all | Renames all the struct's fields according to the given case convention. The possible values are "lowercase", "UPPERCASE", "PascalCase", "camelCase", "snake_case", "SCREAMING_SNAKE_CASE". | string | Y        |
-
-## Field Attributes
-
-| Attribute | Description        | Type     | Optional |
-| --------- | ------------------ | -------- | -------- |
-| rename    | Renames the field. | `string` | Y        |

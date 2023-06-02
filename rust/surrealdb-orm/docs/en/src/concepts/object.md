@@ -1,3 +1,1 @@
-# Object
-
-{{#include ../../../../src/docs/surrealdb_object.md}}
+{{#include ../../../../src/docs/object_description.md}}

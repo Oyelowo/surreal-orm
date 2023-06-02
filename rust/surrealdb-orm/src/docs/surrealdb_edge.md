@@ -1,10 +1,54 @@
 # SurrealdbEdge
 
-An Edge in Surrealdb is a bridge between two nodes. It represents a relationship or connection between the entities denoted by the nodes. An Edge can be thought of as a join operation in SQL, connecting two tables based on a common attribute.
+Edges in Surrealdb represent relationships between Nodes. They are useful when you want to model many-to-many relationships or when you want to store additional information about the relationship itself. Edges can be seen as "relationship tables" in a relational database context, holding metadata about the relationship between two entities. Edges are defined by a Rust struct that implements the `SurrealdbEdge` trait.
 
-To define an edge, you create a Rust struct and decorate it with SurrealdbEdge struct attributes and field attributes. The struct attributes serve the same purpose as in a Node, with the addition of `as` and `as_fn` that can be used to create a projection using a statement or an external function, respectively.
+Here's a detailed example:
 
-The field attributes in an Edge have a similar role as in a Node, with additional attributes to specify relationships between Nodes.
+```rust
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "alien")]
+pub struct Alien {
+    pub id: SurrealSimpleId<Self>,
+    pub name: String,
+
+    // This is a read-only field
+    #[surrealdb(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]
+    #[serde(skip_serializing, default)]
+    pub planets_to_visit: Relate<Planet>,
+}
+
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "planet")]
+pub struct Planet {
+    pub id: SurrealSimpleId<Self>,
+    pub population: u64,
+}
+
+// Visits
+#[derive(SurrealdbEdge, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "visits")]
+pub struct Visits<In: SurrealdbNode, Out: SurrealdbNode> {
+    pub id: SurrealSimpleId<Self>,
+    #[serde(rename = "in")]
+    pub in_: LinkOne<In>,
+    pub out: LinkOne<Out>,
+    pub time_visited: Duration,
+}
+
+// Connects Alien to Planet via Visits
+pub type AlienVisitsPlanet = Visits<Alien, Planet>;
+```
+
+The `Alien` Node has a field `planets_to_visit` which is of type `Relate<Planet>`. This field doesn't represent a direct link from `Alien` to `Planet`. Instead, it represents an indirect relationship via the `Visits` Edge. This indirect relationship is defined by the `Relate` annotation on the `planets_to_visit` field in the `Alien` Node.
+
+The `#[surrealdb(relate(model = "AlienVisitsPlanet", connection = "->visits->planet"))]` attribute on the `planets_to_visit` field in the `Alien` Node tells Surrealdb that this field represents the `Planet` Nodes that are connected to the `Alien` Node via the `AlienVisitsPlanet` Edge. The `connection = "->visits->planet"` part defines the path of the relationship from the `Alien` Node, through the `Visits` Edge (represented by "visits"), and finally to the `Planet` Node.
+
+The `Visits` Edge struct defines the structure of this relationship. It implements `SurrealdbEdge` and specifies two type parameters: `In` and `Out` which represent the source and target Node types of the relationship, respectively. In this example, `Alien` is the source and `Planet` is the target. The `Visits` Edge also has a `time_visited` field, which can store additional information about each visit.
+
+In summary, Surrealdb Edges provide a flexible way to model complex relationships between Nodes, such as when an `Alien` visits a `Planet`. They allow for relationships to be modeled with additional information (like the `time_visited` field in the `Visits` Edge) and can represent both direct and indirect
 
 ## Struct Attributes
 
