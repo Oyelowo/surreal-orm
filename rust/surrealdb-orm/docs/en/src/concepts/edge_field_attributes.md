@@ -1,1 +1,1 @@
-# Field Attributes
+{{#include ../../../../src/docs/edge_field_attributes.md}}

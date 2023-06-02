@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+    <!-- Nodes -->
+    <circle cx="200" cy="150" r="50" style="fill:lightblue;stroke:black;stroke-width:3;" />
+    <text x="185" y="155" font-family="Verdana" font-size="24">Node1</text>
+
+    <circle cx="600" cy="150" r="50" style="fill:lightblue;stroke:black;stroke-width:3;" />
+    <text x="585" y="155" font-family="Verdana" font-size="24">Node2</text>
+
+    <!-- Edge -->
+    <line x1="250" y1="150" x2="550" y2="150" style="stroke:black;stroke-width:2" />
+    <text x="375" y="130" font-family="Verdana" font-size="20">Edge</text>
+
+    <!-- Model explanation -->
+    <rect x="300" y="250" width="200" height="100" style="fill:lightgreen;stroke:black;stroke-width:3;" />
+    <text x="310" y="300" font-family="Verdana" font-size="24">Model:</text>
+    <text x="310" y="340" font-family="Verdana" font-size="20">Node1, Edge, Node2</text>
+</svg>
