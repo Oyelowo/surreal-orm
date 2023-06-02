@@ -55,7 +55,7 @@ pub struct Student {
     last_name: String,
     age: u8,
 
-    #[surrealdb(link_self = "Student")")]
+    #[surrealdb(link_self = "Student")]
     best_friend: LinkSelf<Student>,
 
     #[surrealdb(link_one = "Book")]
