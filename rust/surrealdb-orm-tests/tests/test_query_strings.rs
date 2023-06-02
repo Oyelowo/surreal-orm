@@ -11,7 +11,7 @@ use surrealdb::sql::{thing, Thing};
 use surrealdb_models::{book_schema, student_schema, Book, Student, StudentWritesBook};
 use surrealdb_orm::{
     cond,
-    statements::{order, relate, select},
+    statements::{order, relate, select, CanOrder},
     *,
 };
 
@@ -38,7 +38,7 @@ fn multiplication_tests1() {
                 .or(firstName.equal_to("Oyelowo"))
                 .and(lastName.equal_to("Oyedayo")),
         )
-        .order_by(order(lastName).desc())
+        .order_by(lastName.desc())
         .limit(50)
         .start(20)
         .timeout(Duration::from_secs(9))
@@ -85,12 +85,12 @@ fn multiplication_tests1() {
         // .where_(
         //     cond!(age q!(>=) "12:00" OR firstName LIKE "oyelowo" AND lastName q!(~) "oyedyao"  AND age q!(>) 150),
         // )
-        .order_by(order(firstName).rand().desc())
-        .order_by(order(lastName).collate().asc())
-        .order_by(order(id).numeric().desc())
-        .order_by(vec![order(id).numeric().desc()])
-        .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
-        .order_by(&[order(id).numeric().desc(), order(firstName).desc()])
+        .order_by(firstName.rand().desc())
+        .order_by(lastName.collate().asc())
+        .order_by(id.numeric().desc())
+        .order_by(vec![id.numeric().desc()])
+        .order_by(&[id.numeric().desc(), firstName.desc()])
+        .order_by(&[id.numeric().desc(), firstName.desc()])
         .group_by(course)
         .group_by(firstName)
         .group_by(arr![lastName, unoBook])

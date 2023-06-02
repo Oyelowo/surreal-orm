@@ -3,6 +3,7 @@ use geo::line_string;
 use geo::point;
 use geo::polygon;
 use serde::{Deserialize, Serialize};
+use surrealdb_orm::statements::CanOrder;
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
@@ -1085,7 +1086,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealdbOrmResul
 
     let selected_aliens: Option<Alien> = select(arr![All, Alien::schema().spaceShips.all().all()])
         .from(Alien::table_name())
-        .order_by(order(created).asc())
+        .order_by(created.asc())
         .return_first(db.clone())
         .await?;
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
