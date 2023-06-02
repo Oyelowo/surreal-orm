@@ -48,4 +48,8 @@ The `#[surrealdb(relate(model = "AlienVisitsPlanet", connection = "->visits->pla
 
 The `Visits` Edge struct defines the structure of this relationship. It implements `SurrealdbEdge` and specifies two type parameters: `In` and `Out` which represent the source and target Node types of the relationship, respectively. In this example, `Alien` is the source and `Planet` is the target. The `Visits` Edge also has a `time_visited` field, which can store additional information about each visit.
 
-In summary, Surrealdb Edges provide a flexible way to model complex relationships between Nodes, such as when an `Alien` visits a `Planet`. They allow for relationships to be modeled with additional information (like the `time_visited` field in the `Visits` Edge) and can represent both direct and indirect
+In summary, Surrealdb Edges provide a flexible way to model complex relationships
+between Nodes, such as when an `Alien` visits a `Planet`.
+They allow for relationships to be modeled with additional
+information (like the `time_visited` field in the `Visits` Edge) and
+can represent both direct and indirect connections between Nodes.

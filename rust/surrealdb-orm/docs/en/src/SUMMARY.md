@@ -19,6 +19,8 @@
   - [Object](./concepts/object.md)
     - [Struct Attributes](./concepts/object_struct_attributes.md)
     - [Field Attributes](./concepts/object_field_attributes.md)
+  - [Record Ids](./concepts/record_ids.md)
+  - [Model Schema](./concepts/model_schema.md)
 
 # API
 
