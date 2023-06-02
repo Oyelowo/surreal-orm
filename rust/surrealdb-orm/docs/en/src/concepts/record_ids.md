@@ -61,7 +61,34 @@ let account = Account {
 };
 ```
 
-3. **SurrealId<Self, T>:**
+3. **SurrealUlid<Self>:**
+
+`SurrealUlid<Self>` provides a high level of uniqueness given the nature of ULIDs. It automatically generates a ULID when a new instance of the struct is created, by implementing the Default trait.
+
+To manually generate a ULID, you can invoke the `create_ulid` method directly on the struct, which returns an instance of `SurrealUlid<Self>`.
+
+Example struct:
+
+```rust
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "account")]
+pub struct Account {
+    pub id: SurrealUlid<Self>,
+    // other fields
+}
+```
+
+Creating an instance of Account with a UUID:
+
+```rust
+let account = Account {
+    id: Account::create_uuid(),
+    // other fields
+};
+```
+
+4. **SurrealId<Self, T>:**
 
 This is the most flexible ID type, allowing for any arbitrary serializable type `T` as the ID. It's useful when your ID needs to include specific information or adhere to a certain format. This ID type doesn't implement the Default trait, thus instances of this type must be manually created using the `create_id` method.
 
