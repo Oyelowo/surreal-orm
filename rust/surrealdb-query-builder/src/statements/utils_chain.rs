@@ -187,7 +187,7 @@ mod tests {
         chain, cond, statements::select, traits::Buildable, All, Field, Operatable, ToRaw,
     };
     use insta::assert_display_snapshot;
-    use select::order;
+    use select::{order, CanOrder};
     use surrealdb::sql;
 
     #[test]
@@ -206,7 +206,7 @@ mod tests {
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
             )
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(153)
             .start(10)
             .parallel();
@@ -214,7 +214,7 @@ mod tests {
         let statement2 = select(All)
             .from(fake_id2)
             .where_(country.is("INDONESIA"))
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(20)
             .start(5);
 

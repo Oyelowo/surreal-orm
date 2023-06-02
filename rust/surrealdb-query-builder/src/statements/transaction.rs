@@ -216,10 +216,9 @@ impl fmt::Display for TransactionCompletion {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        statements::{order, select},
-        *,
-    };
+    use select::CanOrder;
+
+    use crate::{statements::select, *};
 
     use super::*;
 
@@ -238,7 +237,7 @@ mod tests {
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
             )
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(153)
             .start(10)
             .parallel();
@@ -246,7 +245,7 @@ mod tests {
         let statement2 = select(All)
             .from(fake_id2)
             .where_(country.is("INDONESIA"))
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(20)
             .start(5);
 
@@ -276,7 +275,7 @@ mod tests {
                     .and(city.is("NewFoundland"))
                     .or(city.like("Toronto")),
             )
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(153)
             .start(10)
             .parallel();
@@ -284,7 +283,7 @@ mod tests {
         let statement2 = select(All)
             .from(fake_id2)
             .where_(country.is("INDONESIA"))
-            .order_by(order(&age).numeric())
+            .order_by(age.numeric().asc())
             .limit(20)
             .start(5);
 
