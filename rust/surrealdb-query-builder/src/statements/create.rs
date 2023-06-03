@@ -20,24 +20,30 @@ use crate::{
 };
 
 struct SetterCreator(Vec<Setter>);
-impl<T: Into<Vec<Setter>>> From<T> for SetterCreator {
-    fn from(sets: T) -> Self {
-        let sets = sets.into();
-        Self(sets)
+
+impl From<Setter> for SetterCreator {
+    fn from(set: Setter) -> Self {
+        SetterCreator(vec![set])
     }
 }
 
-// impl<const N: usize> From<[Setter; N]> for SetterCreator {
-//     fn from(sets: [Setter; N]) -> Self {
-//         sets.to_vec()
-//     }
-// }
+impl From<Vec<Setter>> for SetterCreator {
+    fn from(sets: Vec<Setter>) -> Self {
+        SetterCreator(sets)
+    }
+}
 
-// impl From<&[Setter]> for SetterCreator {
-//     fn from(sets: &[Setter]) -> Self {
-//         sets.to_vec()
-//     }
-// }
+impl<const N: usize> From<[Setter; N]> for SetterCreator {
+    fn from(sets: [Setter; N]) -> Self {
+        SetterCreator(sets.to_vec())
+    }
+}
+
+impl<const N: usize> From<&[Setter; N]> for SetterCreator {
+    fn from(sets: &[Setter; N]) -> Self {
+        SetterCreator(sets.to_vec())
+    }
+}
 
 /// Creates a new CREATE SQL statement for a given type.
 ///
