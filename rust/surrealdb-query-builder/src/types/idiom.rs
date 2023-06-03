@@ -97,6 +97,12 @@ impl<'a, const N: usize> From<&[Table; N]> for Tables {
     }
 }
 
+impl<const N: usize> From<[Table; N]> for Tables {
+    fn from(value: [Table; N]) -> Self {
+        Self(value.to_vec())
+    }
+}
+
 impl<'a, const N: usize> From<&[&Table; N]> for Tables {
     fn from(value: &[&Table; N]) -> Self {
         Self(value.map(Into::into).to_vec())

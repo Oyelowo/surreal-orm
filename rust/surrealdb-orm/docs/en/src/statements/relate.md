@@ -84,7 +84,7 @@ The `any_other_edges` function allows you to filter relationships based on multi
 
 ```rust
 let aliased_connection = Student::with(student_id)
-    .writes__(any_other_edges(&[visits, likes]).where_(timeWritten.less_than_or_equal(50)))
+    .writes__(any_other_edges([visits, likes]).where_(timeWritten.less_than_or_equal(50)))
     .book(book_id)
     .__as__(Student::aliases().writtenBooks);
 ```
