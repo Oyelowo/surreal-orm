@@ -354,15 +354,15 @@ mod tests {
                 select(All)
                     .from(fake_id2)
                     .where_(country.is("INDONESIA"))
-                    .order_by(order(&age).numeric().desc())
+                    .order_by(age.numeric().desc())
                     .limit(20)
                     .start(5),
             )
             .schemafull()
             .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-            .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-            .permissions(&[
-                for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+            .permissions(for_([Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions([
+                for_([Create, Delete]).where_(name.is("Oyedayo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
             ]);
 

@@ -43,6 +43,12 @@ impl<'a, const N: usize> From<&[CrudType; N]> for ForArgs {
     }
 }
 
+impl<const N: usize> From<[CrudType; N]> for ForArgs {
+    fn from(value: [CrudType; N]) -> Self {
+        Self::ForOptions(value.to_vec())
+    }
+}
+
 pub struct ForStart(ForData);
 
 impl ForStart {
@@ -183,6 +189,12 @@ impl<'a, const N: usize> From<&[For; N]> for PermissionType {
     }
 }
 
+impl<const N: usize> From<[For; N]> for PermissionType {
+    fn from(value: [For; N]) -> Self {
+        Self::Fors(value.to_vec())
+    }
+}
+
 impl From<Raw> for PermissionType {
     fn from(value: Raw) -> Self {
         Self::RawStatement(value)
@@ -203,6 +215,12 @@ impl From<&Vec<Raw>> for PermissionType {
 
 impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
     fn from(value: &[Raw; N]) -> Self {
+        Self::RawStatementList(value.to_vec())
+    }
+}
+
+impl<const N: usize> From<[Raw; N]> for PermissionType {
+    fn from(value: [Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
