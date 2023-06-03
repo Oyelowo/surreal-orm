@@ -2,6 +2,29 @@
 
 This chapter will cover how to use the `create` statement in our SurrealDB ORM and Query Builder. We'll look at how to create new entries in the database using this statement, as well as various associated features and functionalities.
 
+# CreateStatement
+
+`CreateStatement` allows you to construct a database record creation statement in a fluent style. Here's a high-level overview of its usage:
+
+```rust
+create()
+   .content(Value) // The record content to be created
+   .set(settables) // The values of the fields to be updated
+   .return_type(return_types) // The desired return type for the query
+   .timeout(seconds) // Timeout for the query execution
+   .parallel(); // Indicate if the query should be executed in parallel
+```
+
+Here's what each method does:
+
+- `content(Value)`: Sets the content of the record to be created.
+- `set(settables)`: Sets the values of the fields to be updated in the record.
+- `return_type(return_types)`: Sets the return type for the query.
+- `timeout(seconds)`: Sets the timeout duration for the query.
+- `parallel()`: Indicates that the query should be executed in parallel.
+
+This fluent style makes your code more readable and easier to maintain.
+
 ## Table of Contents
 
 1. [Basic `create` Statement](#basic-create-statement)
@@ -272,3 +295,19 @@ Ok(())
 ```
 
 This is just a glimpse of the possibilities with the `create` statement in SurrealDB. You can create and manipulate data in many different ways depending on your application's requirements.
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
