@@ -11,7 +11,7 @@ use surrealdb::sql::{thing, Thing};
 use surrealdb_models::{book_schema, student_schema, Book, Student, StudentWritesBook};
 use surrealdb_orm::{
     cond,
-    statements::{order, relate, select, CanOrder},
+    statements::{order, relate, select},
     *,
 };
 

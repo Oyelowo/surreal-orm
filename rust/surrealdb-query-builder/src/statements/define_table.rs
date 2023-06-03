@@ -354,7 +354,7 @@ mod tests {
                 select(All)
                     .from(fake_id2)
                     .where_(country.is("INDONESIA"))
-                    .order_by(order(&age).numeric().desc())
+                    .order_by(age.numeric().desc())
                     .limit(20)
                     .start(5),
             )
