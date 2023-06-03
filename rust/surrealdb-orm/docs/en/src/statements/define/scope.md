@@ -32,6 +32,7 @@ The `define_scope` statement supports the following features:
 To define a scope on a namespace with signup and signin operations, you can use the following code:
 
 ```rust
+block! {
 let user_schema::User { email, pass } = &User::schema();
 let email = "oyelowo@codebreather.com";
 let password = "very-strong";
@@ -51,6 +52,7 @@ let token_def = define_scope("oyelowo_scope")
                 .and(crypto::argon2::compare!(pass, password)),
         ),
     );
+}
 ```
 
 In the example above, the `define_scope` statement defines a scope named "oyelowo_scope" on the namespace. The scope includes a session duration of 45 seconds. It also defines signup and signin operations within the scope. The signup operation uses the `create` statement with a non-raw query to create a new user record. The `email` and `pass` fields are set using parameter placeholders. The `pass` field is generated using the `crypto::argon2::generate` function. The signin operation performs a select query with conditions.
