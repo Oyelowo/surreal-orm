@@ -300,7 +300,7 @@ mod tests {
     use super::*;
 
     use crate::{
-        statements::{for_, order, select},
+        statements::{for_, select},
         *,
     };
     use surrealdb::sql;
