@@ -103,97 +103,94 @@ In this example, we're creating a new `Alien` that has links to three `SpaceShip
 Here is the code for this example:
 
 ```rust
-#[tokio::test]
-async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
-    let db = Surreal::
+let db = Surreal::new::<Mem>(()).await.unwrap();
+db.use_ns("test").use_db("test").await.unwrap();
 
-new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await.unwrap();
-    let spaceship_id_1 = SpaceShip::create_id("spaceship1".into());
-    let spaceship_id_2 = SpaceShip::create_id("spaceship2".into());
-    let spaceship_id_3 = SpaceShip::create_id("spaceship3".into());
+let spaceship_id_1 = SpaceShip::create_id("spaceship1".into());
+let spaceship_id_2 = SpaceShip::create_id("spaceship2".into());
+let spaceship_id_3 = SpaceShip::create_id("spaceship3".into());
 
-    let space_ship1 = SpaceShip {
-        id: spaceship_id_1,
-        name: "SpaceShip1".to_string(),
-        created: Utc::now(),
-    };
+let space_ship1 = SpaceShip {
+    id: spaceship_id_1,
+    name: "SpaceShip1".to_string(),
+    created: Utc::now(),
+};
 
-    let space_ship2 = SpaceShip {
-        id: spaceship_id_2,
-        name: "SpaceShip2".to_string(),
-        created: Utc::now(),
-        ..Default::default()
-    };
+let space_ship2 = SpaceShip {
+    id: spaceship_id_2,
+    name: "SpaceShip2".to_string(),
+    created: Utc::now(),
+    ..Default::default()
+};
 
-    let space_ship3 = SpaceShip {
-        id: spaceship_id_3,
-        name: "Oyelowo".to_string(),
-        created: Utc::now(),
-        ..Default::default()
-    };
+let space_ship3 = SpaceShip {
+    id: spaceship_id_3,
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    ..Default::default()
+};
 
-    let point = point! {
-        x: 40.02f64,
-        y: 116.34,
-    };
+let point = point! {
+    x: 40.02f64,
+    y: 116.34,
+};
 
-    let created_spaceship1 = create()
-        .content(space_ship1.clone())
-        .get_one(db.clone())
-        .await?;
-    let created_spaceship2 = create()
-        .content(space_ship2.clone())
-        .get_one(db.clone())
-        .await?;
+let created_spaceship1 = create()
+    .content(space_ship1.clone())
+    .get_one(db.clone())
+    .await?;
+let created_spaceship2 = create()
+    .content(space_ship2.clone())
+    .get_one(db.clone())
+    .await?;
 
-    let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
-    let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
-    let unsaved_alien = Alien {
-        id: Alien::create_simple_id(),
-        name: "Oyelowo".to_string(),
-        age: 20,
-        created: Utc::now(),
-        line_polygon: territory.into(),
-        life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
-        tags: vec!["tag1".into(), "tag".into()],
-        ally: LinkSelf::null(),
-        weapon: LinkOne::null(),
-        space_ships: LinkMany::from(vec![
-            created_spaceship1.clone(),
-            created_spaceship2.clone(),
-            space_ship3.clone(),
-        ]),
-        planets_to_visit: Relate::null(),
-    };
+let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+let polygon = polygon![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
+let unsaved_alien = Alien {
+    id: Alien::create_simple_id(),
+    name: "Oyelowo".to_string(),
+    age: 20,
+    created: Utc::now(),
+    line_polygon: territory.into(),
+    life_expectancy: Duration::from_secs(100),
+    territory_area: polygon.into(),
+    home: point.into(),
+    tags: vec!["tag1".into(), "tag".into()],
+    ally: LinkSelf::null(),
+    weapon: LinkOne::null(),
+    space_ships: LinkMany::from(vec![
+        created_spaceship1.clone(),
+        created_spaceship2.clone(),
+        space_ship3.clone(),
+    ]),
+    planets_to_visit: Relate::null(),
+};
 
-    let created_alien_with_fetched_links = create()
-        .content(unsaved_alien.clone())
-        .load_link_manys()?
-        .return_one(db.clone())
-        .await?;
+let created_alien_with_fetched_links = create()
+    .content(unsaved_alien.clone())
+    .load_link_manys()?
+    .return_one(db.clone())
+    .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
-    assert_eq!(alien_spaceships.iter().count(), 3);
-    assert_eq!(alien_spaceships.values().iter().count(), 3);
-    assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
-    assert_eq!(alien_spaceships.keys().len(), 3);
-    assert_eq!(alien_spaceships.keys_truthy().len(), 0);
+let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+assert_eq!(alien_spaceships.iter().count(), 3);
+assert_eq!(alien_spaceships.values().iter().count(), 3);
+assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
+assert_eq!(alien_spaceships.keys().len(), 3);
+assert_eq!(alien_spaceships.keys_truthy().len(), 0);
 
-    let selected_aliens = read::<Alien>()
-        .filter(vec![
-            id.equal_to(created_alien_with_fetched_links.id.clone()),
-        ])
-        .load_link_manys()?
-        .return_many(db.clone())
-        .await?;
+let selected_aliens = read::<Alien>()
+    .filter(vec![
+        id.equal_to(created_alien_with_fetched_links.id.clone()),
+    ])
+    .load_link_manys()?
+    .return_many(db.clone())
+    .await?;
 
-    assert_eq!(selected_aliens.len(), 1);
+assert_eq!(selected_aliens.len(), 1);
 
-    Ok(())
+Ok(())
 }
 
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone)]
