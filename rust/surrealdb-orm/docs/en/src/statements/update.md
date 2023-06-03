@@ -2,6 +2,21 @@
 
 The `UpdateStatement` in SurrealDB ORM allows you to modify existing records in your database.
 This page provides an overview of the `UpdateStatement` and its various operations.
+**Syntax**
+
+```rust, ignore
+update()
+    .content(Value) // Set the content of the update statement
+    .merge(merge) // Perform a merge operation to update specific fields
+    .replace(merge) // Replace the entire object with a new one
+    .set(settables) // Set the values of the fields to be updated
+    .patch(patch_op) // Apply patch operations to the record
+    .where_(condition) // Add a condition to the update statement
+    .return_type(return_type) // Specify the desired return type for the query
+    .timeout(duration) // Set the timeout duration for the query
+    .parallel(); // Execute the query in parallel
+
+```
 
 ## Table of Contents
 
