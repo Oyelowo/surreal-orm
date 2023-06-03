@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Buildable, Projections};
+use crate::{Buildable, Projections, Valuex};
 use std::fmt::{self, Display};
 
 /// Return type
@@ -21,6 +21,12 @@ pub enum ReturnType {
     Diff,
     /// Return the listed fields/projection
     Projections(Projections),
+}
+
+impl From<Vec<Valuex>> for ReturnType {
+    fn from(valuex: Vec<Valuex>) -> Self {
+        ReturnType::Projections(Projections(valuex))
+    }
 }
 
 impl Display for ReturnType {

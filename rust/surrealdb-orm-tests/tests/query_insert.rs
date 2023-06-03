@@ -3,7 +3,6 @@ use geo::line_string;
 use geo::point;
 use geo::polygon;
 use serde::{Deserialize, Serialize};
-use surrealdb_orm::statements::CanOrder;
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
@@ -11,6 +10,7 @@ use surrealdb_models::weapon_schema;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::insert;
 use surrealdb_orm::statements::order;
+use surrealdb_orm::statements::CanOrder;
 use surrealdb_orm::{statements::select, *};
 
 #[tokio::test]

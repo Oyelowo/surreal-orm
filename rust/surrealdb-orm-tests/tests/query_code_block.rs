@@ -36,7 +36,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
         LET strengths = select_value(strength).from(weapon);
         LET total = math::sum!(strengths);
         LET count = count!(strengths);
@@ -90,7 +90,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
         LET strengths = select_value(strength).from(weapon);
         LET total = math::sum!(strengths);
         LET count = count!(strengths);
@@ -135,7 +135,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealdbOrmResult<()> {
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
         LET strengths = select_value(strength).from(weapon);
         LET total = math::sum!(strengths);
         LET count = count!(strengths);
@@ -185,7 +185,7 @@ async fn test_code_block_with_macro() -> SurrealdbOrmResult<()> {
     let returned = return_(bracket(total.divide(&count)));
     let code_block = block(chain(strengths).chain(total).chain(count).chain(returned));
 
-    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(code_block));
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(code_block));
 
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
@@ -238,7 +238,7 @@ async fn test_code_block_simplified() -> SurrealdbOrmResult<()> {
             .chain(return_value),
     );
 
-    let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(code_block));
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(code_block));
 
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
@@ -290,7 +290,7 @@ async fn test_code_block() -> SurrealdbOrmResult<()> {
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
-    let created_stats_statement = create::<WeaponStats>(
+    let created_stats_statement = create::<WeaponStats>().set(
         averageStrength.equal_to(block(
             chain(step1_assign_strengths)
                 .chain(step2_assign_total)

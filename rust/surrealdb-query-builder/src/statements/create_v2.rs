@@ -19,29 +19,56 @@ use crate::{
     ErrorList, Setter, ToRaw,
 };
 
-struct SetterCreator(Vec<Setter>);
+#[derive(Debug, Clone)]
+pub enum ContentOrSets<T> {
+    /// serializable surrealdb node struct used with CONTENT in create statement.
+    Content(T),
+    /// serializable surrealdb node struct used with SET in create statement.
+    Sets(Vec<Setter>),
+}
 
-impl From<Setter> for SetterCreator {
-    fn from(set: Setter) -> Self {
-        SetterCreator(vec![set])
+impl<T> From<T> for ContentOrSets<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn from(content: T) -> Self {
+        ContentOrSets::Content(content)
     }
 }
 
-impl From<Vec<Setter>> for SetterCreator {
+impl<T> From<Vec<Setter>> for ContentOrSets<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn from(sets: Vec<Setter>) -> Self {
-        SetterCreator(sets)
+        ContentOrSets::Sets(sets)
     }
 }
 
-impl<const N: usize> From<[Setter; N]> for SetterCreator {
+impl<T> From<Setter> for ContentOrSets<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn from(set: Setter) -> Self {
+        ContentOrSets::Sets(vec![set])
+    }
+}
+
+impl<const N: usize, T> From<[Setter; N]> for ContentOrSets<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     fn from(sets: [Setter; N]) -> Self {
-        SetterCreator(sets.to_vec())
+        ContentOrSets::Sets(sets.to_vec())
     }
 }
 
-impl<const N: usize> From<&[Setter; N]> for SetterCreator {
-    fn from(sets: &[Setter; N]) -> Self {
-        SetterCreator(sets.to_vec())
+impl<T> From<&[Setter]> for ContentOrSets<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
+    fn from(sets: &[Setter]) -> Self {
+        ContentOrSets::Sets(sets.to_vec())
     }
 }
 
@@ -60,33 +87,56 @@ impl<const N: usize> From<&[Setter; N]> for SetterCreator {
 ///         age: 192
 ///     });
 /// ```
-pub fn create<T>() -> CreateStatement<T>
+pub fn create_v2<T>(content: impl Into<ContentOrSets<T>>) -> CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    CreateStatement::<T> {
+    let content: ContentOrSets<T> = content.into();
+    let mut errors = vec![];
+    let mut bindings = vec![];
+    let content_or_set;
+
+    match content {
+        ContentOrSets::Content(content) => {
+            let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+            let binding = Binding::new(sql_value);
+            content_or_set = ContentOrSetString::Content(binding.get_param_dollarised());
+            bindings.push(binding);
+        }
+        ContentOrSets::Sets(sets) => {
+            bindings.extend(sets.get_bindings());
+            errors.extend(sets.get_errors());
+            content_or_set = ContentOrSetString::Sets(sets.build());
+        }
+    };
+
+    CreateStatementV2::<T> {
         target: T::table_name().to_string(),
-        content: "".to_string(),
-        set: vec![],
+        content: content_or_set,
         return_type: None,
         timeout: None,
         parallel: false,
-        bindings: vec![],
+        bindings,
         errors: vec![],
         __model_return_type: PhantomData,
     }
 }
 
+#[derive(Debug, Clone)]
+enum ContentOrSetString {
+    Content(String),
+    Sets(String),
+}
+
 /// Represents a CREATE SQL statement that can be executed. It implements various traits such as
 /// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
 #[derive(Debug, Clone)]
-pub struct CreateStatement<T>
+pub struct CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     target: String,
-    content: String,
-    set: Vec<String>,
+    content: ContentOrSetString,
     return_type: Option<ReturnType>,
     timeout: Option<String>,
     parallel: bool,
@@ -95,86 +145,12 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
+impl<T> Queryable for CreateStatementV2<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
 
-impl<T> CreateStatement<T>
+impl<T> CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    /// Sets the content of the record to be created.
-    /// When using this, the type can be automatically inferred unlike the `set` method.
-    ///
-    /// # Arguments
-    ///
-    /// * `content` - a serializable surrealdb node model.
-    /// # Examples
-    ///
-    /// ```rust, ignore
-    /// create().content(User{
-    ///         name: "Oylowo".to_string(),
-    ///         age: 192
-    ///     });
-    /// ```
-    pub fn content(mut self, content: T) -> CreateStatement<T> {
-        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
-        let binding = Binding::new(sql_value);
-        self.content = binding.get_param_dollarised();
-        self.bindings.push(binding);
-        self
-    }
-
-    /// Sets the values of the fields to be updated in the record.
-    ///
-    /// # Arguments
-    ///
-    /// * `settables` - an instance of `Setter` trait. This can be created using a single
-    /// `equal_to` helper method on a field or a list of `equal_to` methods for multiple fields
-    ///
-    /// # Examples
-    ///
-    /// Setting single field
-    /// ```rust, ignore
-    /// assert_eq!(create::<User>().set(name.equal("Oyelowo")).to_raw().build(), "CREATE user SET name='Oyelowo'")
-    /// ```
-    ///
-    /// Setting multiple fields by chaining `set` method
-    /// ```rust, ignore
-    /// assert_eq!(create::<User>()
-    ///             .set(name.equal_to("Oyelowo"))
-    ///             .set(age.equal_to(192))
-    ///         ).to_raw().build(), "Create user SET name='Oyelowo', age=192")
-    /// ```
-    ///
-    /// Setting multiple fields by using a list of updaters in a single `set` method
-    /// ```rust, ignore
-    /// assert_eq!(create::<User>()
-    ///             .set(vec![
-    ///                     name.equal_to("Oyelowo"),
-    ///                     age.equal_to(192)
-    ///                 ],
-    ///         ).to_raw().build(), "CREATE user SET name='Oyelowo', age=192")
-    /// ```
-
-    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> Self {
-        let settable: Vec<Setter> = settables.into();
-
-        let (settable, bindings, errors) = settable.into_iter().fold(
-            (Vec::new(), Vec::new(), Vec::new()),
-            |(mut settable, mut bindings, mut errors), s| {
-                settable.push(s.build());
-                bindings.extend(s.get_bindings());
-                errors.extend(s.get_errors());
-                (settable, bindings, errors)
-            },
-        );
-
-        self.bindings.extend(bindings);
-        self.errors.extend(errors);
-        self.set.extend(settable);
-
-        self
-    }
-
     /// Sets the return type for the query.
     ///
     /// # Arguments
@@ -250,17 +226,20 @@ where
     }
 }
 
-impl<T> Buildable for CreateStatement<T>
+impl<T> Buildable for CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn build(&self) -> String {
         let mut query = format!("CREATE {}", &self.target);
 
-        if !self.content.is_empty() {
-            query = format!("{query} CONTENT {content}", content = &self.content);
-        } else if !self.set.is_empty() {
-            query = format!("{query} SET {set}", set = &self.set.join(", "));
+        match &self.content {
+            ContentOrSetString::Content(content) => {
+                query = format!("{query} CONTENT {content}");
+            }
+            ContentOrSetString::Sets(sets) => {
+                query = format!("{query} SET {sets}");
+            }
         }
 
         if let Some(return_type) = &self.return_type {
@@ -279,7 +258,7 @@ where
     }
 }
 
-impl<T> std::fmt::Display for CreateStatement<T>
+impl<T> std::fmt::Display for CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -288,7 +267,7 @@ where
     }
 }
 
-impl<T> Parametric for CreateStatement<T>
+impl<T> Parametric for CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -297,7 +276,7 @@ where
     }
 }
 
-impl<T> Erroneous for CreateStatement<T>
+impl<T> Erroneous for CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -306,14 +285,14 @@ where
     }
 }
 
-impl<T> ReturnableDefault<T> for CreateStatement<T>
+impl<T> ReturnableDefault<T> for CreateStatementV2<T>
 where
     Self: Parametric + Buildable,
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
 }
 
-impl<T> ReturnableStandard<T> for CreateStatement<T>
+impl<T> ReturnableStandard<T> for CreateStatementV2<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {

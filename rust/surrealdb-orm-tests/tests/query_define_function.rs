@@ -25,7 +25,7 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
                 .then(person.with_path::<SpaceShip>(index(0)))
             .else_(
-                create::<SpaceShip>(
+                create::<SpaceShip>().set(
                     vec![
                         SpaceShip::schema().id.equal_to(&first_arg),
                         SpaceShip::schema().name.equal_to(&last_arg),
