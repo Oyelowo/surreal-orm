@@ -8,6 +8,7 @@ The `define_function!` statement is used to define a custom function in SurrealD
 - [Examples](#examples)
   - [Define Function with Parameters and Logic](#define-function-with-parameters-and-logic)
   - [Define Function with Complex Logic](#define-function-with-complex-logic)
+- [Using the Generated Function](#using-the-generated-function)
 
 ## Syntax
 
@@ -91,9 +92,8 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
 });
 ```
 
-In the example above, the `define_function!` statement defines a function named "get_person" with three parameters: `first_arg`, `last_arg`, and `birthday_arg`. The function body consists of a complex logic that includes a SELECT statement, conditional checks,
-
-and the creation of a new record if the condition is not met.
+In the example above, the `define_function!` statement defines a function named "get_person" with three parameters:
+`first_arg`, `last_arg`, and `birthday_arg`. The function body consists of a complex logic that includes a SELECT statement, conditional checks, and the creation of a new record if the condition is not met.
 
 This will generate the following SQL statement:
 
@@ -107,4 +107,36 @@ DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg:
 
 You can then use the defined function in queries by calling it with the appropriate arguments.
 
-This concludes the documentation for the `define_function!` statement. Use this statement to define custom functions in SurrealDB with reusable logic.
+## Using the Generated Function
+
+To use the function defined using `define_function!`, you need to execute the generated statement before
+you can use the function in your queries. Here's an example of how to use the defined function:
+
+```rust
+// Define the function
+let fn_statement = get_it_statement();
+
+// Execute the statement to define the function
+// This statement needs to be executed before the function can be used
+surrealdb_orm::execute(fn_statement.clone());
+
+// Use the defined function in a query
+let get_it_function = get_it(false, "3".to_string(), "3".to_string());
+
+// Verify the generated function can be used in a query
+assert_eq!(get_it_function.to_raw().build(), "get_it(false, '3', '3')");
+assert_eq!(
+    get_it_function.fine_tune_params(),
+    "get_it($_param_00000001, $_param_00000002, $_param_00000003)"
+);
+```
+
+In this example, we first define the function using `get_it_statement()` macro. Then, we execute the generated statement using `surrealdb_orm::execute()` to define the function in SurrealDB. After that, we can use the defined function `get_it()` in our queries.
+
+Make sure to execute the statement to define the function before using it in your queries.
+
+---
+
+Now you have learned how to define custom functions using the `define_function!` macro and how to use the generated function in your queries.
+
+Refer to the SurrealDB documentation for more information on custom functions and their usage.
