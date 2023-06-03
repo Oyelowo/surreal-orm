@@ -8,6 +8,7 @@ The `define_table` statement is used to define a table in SurrealDB. It allows y
 - [Examples](#examples)
   - [Schemaless Table](#schemaless-table)
   - [Schemaless Table with Permissions](#schemaless-table-with-permissions)
+  - [Define Table with Projection](#define-table-with-projection)
   - [Define Table with Multiple Permissions](#define-table-with-multiple-permissions)
 
 ## Syntax
@@ -63,6 +64,26 @@ This will generate the following SQL statement:
 DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;
 ```
 
+### Define Table with Projection
+
+A projection allows you to define a table based on a subset of columns from another table. It is similar to creating a view in a relational database. You can specify a projection using the `as_` method and provide a `SELECT` statement as the projection definition. The selected columns and rows will be used to populate the defined table.
+
+Here's an example that demonstrates how to define a table with a projection:
+
+```rust
+let user_table = Table::from("user");
+let projection_statement = select(All).from(user_table).where_(age.greater_than(18));
+let statement = define_table(user_table).as_(projection_statement);
+```
+
+This will generate the following SQL statement:
+
+```sql
+DEFINE TABLE user AS SELECT * FROM user WHERE age > 18;
+```
+
+In the example above, the `define_table` statement defines a table named "user" with a projection based on a `SELECT` statement. Only the rows that satisfy the condition `age > 18` will be included in the table.
+
 ### Define Table with Multiple Permissions
 
 You can define a table with multiple permissions using the `permissions` method. The following example demonstrates various permission configurations:
@@ -85,8 +106,8 @@ let statement = define_table(user_table)
             .start(5),
     )
     .schemafull()
-    .permissions(for_(Select).where_(age.greater_than_or_equal(18)))
-    .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo")))
+    .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+    .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) // Multiple
     .permissions(&[
         for_(&[Create, Delete]).where_(name.is("Oyedayo")),
         for_(Update).where_(age.less_than_or_equal(130)),
@@ -106,13 +127,11 @@ PERMISSIONS
     FOR create, delete
         WHERE name IS 'Oyedayo'
     FOR create, delete
-
-
- WHERE name IS 'Oyedayo'
+        WHERE name IS 'Oyedayo'
     FOR update
         WHERE age <= 130;
 ```
 
 In the example above, the `define_table` statement defines a table named "user". It drops the existing table, populates it with data from a `SELECT` statement, and sets various permissions based on conditions.
 
-This concludes the documentation for the `define_table` statement. Use this statement to define tables in SurrealDB and specify the desired permissions and configurations.
+This concludes the documentation for the `define_table` statement. Use this statement to define tables in SurrealDB and specify the desired permissions, configurations, and projections.
