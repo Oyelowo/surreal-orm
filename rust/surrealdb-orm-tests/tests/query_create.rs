@@ -114,7 +114,8 @@ async fn test_create_alien_with_id_specified_as_uuid() -> SurrealdbOrmResult<()>
 }
 
 #[tokio::test]
-async fn test_creation_with_returning_selected_fields() -> SurrealdbOrmResult<()> {
+async fn test_creation_with_returning_selected_fields_with_helper_method() -> SurrealdbOrmResult<()>
+{
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
@@ -136,6 +137,37 @@ async fn test_creation_with_returning_selected_fields() -> SurrealdbOrmResult<()
         .content(space_ship.clone())
         .return_one_projections::<ReturnedSpaceShip>(db.clone(), arr![name])
         .await?;
+    assert_eq!(created_ship.clone().unwrap().name, "SpaceShipCode");
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_creation_with_returning_selected_fields_with_run_take_surreal_helper_methods(
+) -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let space_ship = SpaceShip {
+        name: "SpaceShipCode".to_string(),
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    assert_eq!(space_ship.id.to_thing().tb, "space_ship");
+    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+    struct ReturnedSpaceShip {
+        name: String,
+    }
+    // Return only specified fields
+    let created_ship = create()
+        .content(space_ship.clone())
+        .return_type(arr![name])
+        .run(db.clone())
+        .await?
+        .take::<Option<ReturnedSpaceShip>>(0)
+        .unwrap();
 
     assert_eq!(created_ship.clone().unwrap().name, "SpaceShipCode");
     Ok(())
