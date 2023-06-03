@@ -23,17 +23,17 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
     let amount_to_transfer = 300.00;
     let transaction_query = begin_transaction()
         .query(block!(
-            let balance = create(Balance {
+            let balance = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
             });
 
-            create(Account {
+            create().content(Account {
                 id: id1.clone(),
                 balance: 135_605.16,
             });
 
-            create(Account {
+            create().content(Account {
                 id: id2.clone(),
                 balance: 91_031.31,
             });
@@ -100,11 +100,11 @@ async fn test_transaction_with_block_macro() -> SurrealdbOrmResult<()> {
     block! {
         BEGIN TRANSACTION;
 
-        LET acc1 = create(Account {
+        LET acc1 = create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        LET acc2 = create(Account {
+        LET acc2 = create().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         });
@@ -143,11 +143,11 @@ async fn test_transaction_commit_increment_and_decrement_update() -> SurrealdbOr
     let acc = Account::schema();
 
     begin_transaction()
-        .query(create(Account {
+        .query(create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         }))
-        .query(create(Account {
+        .query(create().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         }))
@@ -182,11 +182,11 @@ async fn test_transaction_cancellation_increment_and_decrement_update() -> Surre
     let acc = Account::schema();
 
     begin_transaction()
-        .query(create(Account {
+        .query(create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         }))
-        .query(create(Account {
+        .query(create().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         }))

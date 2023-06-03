@@ -48,7 +48,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
 
-    let created_weapon = create(weapon).get_one(db.clone()).await.unwrap();
+    let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
     assert_eq!(created_weapon.name, "Laser");
     assert_eq!(created_weapon.strength, 0);
     //
@@ -256,7 +256,7 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let unsaved_alien = create_test_alien(20, "Oyelowo".into());
-    let created_alien = create(unsaved_alien).get_one(db.clone()).await?;
+    let created_alien = create().content(unsaved_alien).get_one(db.clone()).await?;
     assert_eq!(created_alien.name, "Oyelowo");
     assert_eq!(
         created_alien.tags,
@@ -410,7 +410,7 @@ async fn test_update_single_id_content() -> SurrealdbOrmResult<()> {
     };
 
     // Create weapon
-    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    let created_weapon = create().content(weapon.clone()).get_one(db.clone()).await?;
     assert_eq!(created_weapon.name, "Laser");
     assert_eq!(created_weapon.id.to_thing(), weapon.id.to_thing());
     assert_eq!(created_weapon.strength, 20);
@@ -622,7 +622,7 @@ async fn test_update_single_id_merge_no_fields_skip() -> SurrealdbOrmResult<()> 
     };
 
     // Create weapon
-    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    let created_weapon = create().content(weapon.clone()).get_one(db.clone()).await?;
     assert_eq!(created_weapon.name, "Laser");
     assert_eq!(created_weapon.id.to_string(), weapon.id.to_string());
     assert_eq!(created_weapon.strength, 20);
@@ -676,7 +676,7 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealdbOrmResult<()> {
     };
 
     // Create weapon
-    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    let created_weapon = create().content(weapon.clone()).get_one(db.clone()).await?;
     assert_eq!(created_weapon.name, "Laser");
     assert_eq!(created_weapon.id.to_thing(), weapon.id.to_thing());
     assert_eq!(created_weapon.strength, 20);
@@ -726,7 +726,10 @@ async fn test_update_single_id_replace() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
     // Create old weapon
-    let old_weapon = create(weapon_old.clone()).get_one(db.clone()).await?;
+    let old_weapon = create()
+        .content(weapon_old.clone())
+        .get_one(db.clone())
+        .await?;
     assert_eq!(old_weapon.name, "Laser");
     assert_eq!(old_weapon.strength, 20);
     assert_eq!(old_weapon.id.to_thing().tb, "weapon");
@@ -838,7 +841,7 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
     };
 
     // Create weapon
-    let created_weapon = create(weapon.clone()).get_one(db.clone()).await?;
+    let created_weapon = create().content(weapon.clone()).get_one(db.clone()).await?;
     assert_eq!(created_weapon.name, "test");
     assert_eq!(created_weapon.id.to_thing(), weapon.id.to_thing());
     assert_eq!(created_weapon.strength, 20);
@@ -900,7 +903,10 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
     // Create old weapon
-    let old_weapon = create(weapon_old.clone()).get_one(db.clone()).await?;
+    let old_weapon = create()
+        .content(weapon_old.clone())
+        .get_one(db.clone())
+        .await?;
     assert_eq!(old_weapon.name, "Laser");
     assert_eq!(old_weapon.id.to_string(), weapon_old.id.to_string());
     assert_eq!(old_weapon.strength, 20);
@@ -1026,7 +1032,10 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
         ..Default::default()
     };
     // Create weapon
-    let old_weapon = create(weapon_old.clone()).get_one(db.clone()).await?;
+    let old_weapon = create()
+        .content(weapon_old.clone())
+        .get_one(db.clone())
+        .await?;
     assert_eq!(old_weapon.name, "Laser");
     assert_eq!(old_weapon.id.to_thing(), weapon_old.id.to_thing());
     assert_eq!(old_weapon.strength, 20);

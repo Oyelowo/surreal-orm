@@ -19,58 +19,25 @@ use crate::{
     ErrorList, Setter, ToRaw,
 };
 
-#[derive(Debug, Clone)]
-pub enum ContentOrSets<T> {
-    /// serializable surrealdb node struct used with CONTENT in create statement.
-    Content(T),
-    /// serializable surrealdb node struct used with SET in create statement.
-    Sets(Vec<Setter>),
-}
-
-impl<T> From<T> for ContentOrSets<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbNode,
-{
-    fn from(content: T) -> Self {
-        ContentOrSets::Content(content)
+struct SetterCreator(Vec<Setter>);
+impl<T: Into<Vec<Setter>>> From<T> for SetterCreator {
+    fn from(sets: T) -> Self {
+        let sets = sets.into();
+        Self(sets)
     }
 }
 
-impl<T> From<Vec<Setter>> for ContentOrSets<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbNode,
-{
-    fn from(sets: Vec<Setter>) -> Self {
-        ContentOrSets::Sets(sets)
-    }
-}
+// impl<const N: usize> From<[Setter; N]> for SetterCreator {
+//     fn from(sets: [Setter; N]) -> Self {
+//         sets.to_vec()
+//     }
+// }
 
-impl<T> From<Setter> for ContentOrSets<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbNode,
-{
-    fn from(set: Setter) -> Self {
-        ContentOrSets::Sets(vec![set])
-    }
-}
-
-impl<const N: usize, T> From<[Setter; N]> for ContentOrSets<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbNode,
-{
-    fn from(sets: [Setter; N]) -> Self {
-        ContentOrSets::Sets(sets.to_vec())
-    }
-}
-
-impl<T> From<&[Setter]> for ContentOrSets<T>
-where
-    T: Serialize + DeserializeOwned + SurrealdbNode,
-{
-    fn from(sets: &[Setter]) -> Self {
-        ContentOrSets::Sets(sets.to_vec())
-    }
-}
+// impl From<&[Setter]> for SetterCreator {
+//     fn from(sets: &[Setter]) -> Self {
+//         sets.to_vec()
+//     }
+// }
 
 /// Creates a new CREATE SQL statement for a given type.
 ///
@@ -87,7 +54,7 @@ where
 ///         age: 192
 ///     });
 /// ```
-pub fn create<T>(content: impl Into<ContentOrSets<T>>) -> CreateStatement<T>
+pub fn create<T>() -> CreateStatement<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -102,12 +69,6 @@ where
         errors: vec![],
         __model_return_type: PhantomData,
     }
-}
-
-#[derive(Debug, Clone)]
-enum ContentOrSetString {
-    Content(String),
-    Sets(String),
 }
 
 /// Represents a CREATE SQL statement that can be executed. It implements various traits such as
@@ -151,7 +112,7 @@ where
     pub fn content(mut self, content: T) -> CreateStatement<T> {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
-        self.content = binding.get_param().to_owned();
+        self.content = binding.get_param_dollarised();
         self.bindings.push(binding);
         self
     }

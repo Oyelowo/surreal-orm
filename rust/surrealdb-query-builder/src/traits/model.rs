@@ -133,7 +133,7 @@ impl<T> SurrealdbCrud for T where T: Sized + Serialize + DeserializeOwned + Surr
 pub trait SurrealdbCrudNode: Sized + Serialize + DeserializeOwned + SurrealdbNode {
     /// Creates or updates a model/table in the database.
     fn create(self) -> CreateStatement<Self> {
-        create(self)
+        create().content(self)
     }
 }
 impl<T> SurrealdbCrudNode for T where T: Sized + Serialize + DeserializeOwned + SurrealdbNode {}

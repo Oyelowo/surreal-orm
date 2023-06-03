@@ -201,27 +201,29 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealdbOrmRe
         })
         .collect::<Vec<_>>();
 
-    let _ = create(User {
-        id: User::create_id("oyelowo".to_string()),
-        name: "oyelowo".to_string(),
-        tags: vec!["developer".to_string()],
-        ..Default::default()
-    })
-    .run(db.clone())
-    .await;
+    let _ = create()
+        .content(User {
+            id: User::create_id("oyelowo".to_string()),
+            name: "oyelowo".to_string(),
+            tags: vec!["developer".to_string()],
+            ..Default::default()
+        })
+        .run(db.clone())
+        .await;
 
     let devs = insert(generated_developers).return_many(db.clone()).await?;
     let sample = devs.into_iter().take(2).collect::<Vec<_>>();
 
     // Create company
-    let codebreather = create(Company {
-        id: Company::create_simple_id(),
-        name: "codebreather".to_string(),
-        users: LinkMany::from(sample.clone()),
-        ..Default::default()
-    })
-    .get_one(db.clone())
-    .await?;
+    let codebreather = create()
+        .content(Company {
+            id: Company::create_simple_id(),
+            name: "codebreather".to_string(),
+            users: LinkMany::from(sample.clone()),
+            ..Default::default()
+        })
+        .get_one(db.clone())
+        .await?;
 
     let user_schema::User { tags, id, .. } = User::schema();
     let company_schema::Company { users, .. } = Company::schema();
