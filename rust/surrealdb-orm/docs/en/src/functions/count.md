@@ -5,7 +5,7 @@ This chapter introduces the `count` macros provided by SurrealDB ORM. The `count
 ## Table of Contents
 
 - [count!()](#count)
-- [count!().\_\_as\_\_alias)](#count-alias)
+- [count!().\_\_as\_\_(alias)](#count-alias)
 - [count!(field)](#count-field)
 - [count!(field.operation(value))](#count-field-operation)
 - [count!(condition1.and(condition2))](#count-condition-and)
@@ -21,12 +21,18 @@ use surrealdb_orm::{count, *};
 let result = count!();
 ```
 
+Generated SQL query:
+
+```sql
+count()
+```
+
 The `count!()` macro provides the following functionality:
 
 - `fine_tune_params()`: Returns the fine-tuned parameters for the `count` function. In this case, it would be `"count()"`.
 - `to_raw().to_string()`: Converts the `count` macro into a raw SQL query string. In this case, it would be `"count()"`.
 
-## count!().\_\_as\_\_alias)
+## count!().\_\_as\_\_(alias)
 
 The `count!().__as__(alias)` macro allows you to specify an alias for the count result. It generates the SQL query `count() AS alias`.
 
@@ -35,6 +41,12 @@ use surrealdb_orm::{count, AliasName};
 
 let head_count = AliasName::new("head_count");
 let result = count!().__as__(head_count);
+```
+
+Generated SQL query:
+
+```sql
+count() AS head_count
 ```
 
 The `count!().__as__(alias)` macro provides the same functionality as `count!()`, but with an additional `AS` clause to specify the alias for the count result.
@@ -50,6 +62,12 @@ let email = Field::new("email");
 let result = count!(email);
 ```
 
+Generated SQL query:
+
+```sql
+count(email)
+```
+
 The `count!(field)` macro provides the same functionality as `count!()`, but with a specific field to count records on.
 
 ## count!(field.operation(value))
@@ -61,6 +79,12 @@ use surrealdb_orm::{count, Field};
 
 let email = Field::new("email");
 let result = count!(email.greater_than(15));
+```
+
+Generated SQL query:
+
+```sql
+count(email > 15)
 ```
 
 The `count!(field.operation(value))` macro provides the same functionality as `count!(field)`, but with a filter operation applied to the field.
@@ -77,7 +101,15 @@ let age = Field::new("age");
 let result = count!(cond(age.greater_than(15)).and(email.like("oyelowo@example.com")));
 ```
 
-The `count!(condition1.and(condition2))` macro provides the same functionality as `count!(field.operation(value))`, but with multiple conditions combined using the logical AND operator.
+Generated SQL query:
+
+```sql
+count((age > 15) AND (email ~ 'oyelowo@example.com'))
+```
+
+The `count!(condition1.and(condition2))
+
+`macro provides the same functionality as`count!(field.operation(value))`, but with multiple conditions combined using the `AND` operator.
 
 ## count!(array)
 
@@ -87,6 +119,12 @@ The `count!(array)` macro counts the number of elements in an array. It generate
 use surrealdb_orm::{count, array};
 
 let result = count!(array![1, 2, 3, 4, 5]);
+```
+
+Generated SQL query:
+
+```sql
+count([1, 2, 3, 4, 5])
 ```
 
 The `count!(array)` macro provides the same functionality as `count!()`, but with an array as the input for counting.
