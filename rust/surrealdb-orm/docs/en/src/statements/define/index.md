@@ -16,17 +16,17 @@ The `define_index` statement is used to define an index in SurrealDB. Indexes ar
 The basic syntax of the `define_index` statement is as follows:
 
 ```rust
-define_index(index_name: &str)
-    .on_table(table_name: &str)
-    .fields(fields: &[Field])
-    .columns(columns: &[Field])
+define_index(index_name: Index)
+    .on_table(table_name: Table)
+    .fields(arr![fields: Field])
+    .columns(arr![columns: Field])
     .unique()
 ```
 
 - `index_name`: The name of the index to define.
 - `table_name`: The name of the table on which the index is defined.
-- `fields`: A list of fields to include in the index.
-- `columns`: A list of columns to include in the index.
+- `fields`: An array of fields to include in the index.
+- `columns`: An array of columns to include in the index.
 - `unique`: Specifies that the index should enforce uniqueness.
 
 The `define_index` statement supports the following features:
@@ -90,7 +90,7 @@ let dob = Field::new("dob");
 
 let query = define_index("alien_index")
     .on_table("alien")
-    .fields([age, name, email, dob])
+    .fields(arr![age, name, email, dob])
     .unique();
 ```
 
@@ -104,11 +104,11 @@ DEFINE INDEX alien_index ON TABLE alien FIELDS age, name, email, dob UNIQUE;
 
 ### Define Index with Multiple Columns
 
-To define an index with multiple columns, you can use the following code:
+To define an index with multiple columns, you can use the
+
+following code:
 
 ```rust
-
-
 let age = Field::new("age");
 let name = Field::new("name");
 let email = Field::new("email");
@@ -116,7 +116,7 @@ let dob = Field::new("dob");
 
 let query = define_index("alien_index")
     .on_table("alien")
-    .columns([age, name, email, dob])
+    .columns(arr![age, name, email, dob])
     .unique();
 ```
 
