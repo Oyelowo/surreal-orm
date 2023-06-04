@@ -71,7 +71,7 @@ Here's an example of using the `let_!` macro to define variables within a code b
 let_!(strengths = select_value(strength).from(alien));
 let_!(total = math::sum!(strengths));
 let_!(count = count!(strengths));
-let_!(let name = "Oyelowo");
+let_!(name = "Oyelowo");
 chain(strengths).chain(total).chain(count).chain(name)
 ```
 
