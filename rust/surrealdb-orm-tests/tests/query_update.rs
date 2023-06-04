@@ -56,7 +56,7 @@ async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
     let ref id = created_weapon.clone().id;
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
 
-    update::<Weapon>(id)
+    update::<Weapon>(created_weapon)
         .set(strength.increment_by(5u64))
         .run(db.clone())
         .await?;

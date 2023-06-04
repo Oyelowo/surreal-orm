@@ -10,6 +10,7 @@ This documentation provides an overview of the syntax and usage of the `update` 
 - [Examples](#examples)
   - [Updating a Single Object](#updating-a-single-object)
     - [Using the Update Content](#using-the-update-content)
+    - [Using the Set Operation](#using-the-set-operation)
     - [Using the Merge Operation](#using-the-merge-operation)
     - [Using the Replace Operation](#using-the-replace-operation)
     - [Using the Patch Operation](#using-the-patch-operation)
@@ -48,7 +49,7 @@ The `update` statement supports the following methods:
 - `.timeout(duration)`: Sets the timeout duration for the query.
 - `.parallel()`: Executes the query in parallel.
 
-Note: Only one of the .content(), .merge(), .replace(), .set(), or .patch() methods should be used at a time.
+Note: Only one of the .content(), .merge(), .replace(), .set(), or .patch() methods can be used at a time.
 
 ## Examples
 
@@ -77,6 +78,60 @@ let updated_weapon = update::<Weapon>(created_weapon.clone().id)
 
 In the above example, the `content` method is used to specify the fields to be updated in the `created_weapon` object using the `weapon_to_update` object.
 
+#### Using the Set Operation
+
+The `update` statement also supports the `set` method, which allows you to perform 3 major kinds of updates
+including, overwriting a field with an `equal_to` method, `increment` and `decrement` method operations for
+numbers, `append` and `remove` methods for arrays. All the arguments to these methods are type-checked at compile-
+time to make sure they are valid for the respective fields
+
+1. Use set method for a single field
+
+```rust
+let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+
+let weapon_to_update = Weapon {
+    name: "Oyelowo".to_string(),
+    created: Utc::now(),
+    strength: 1000,
+    ..Default::default()
+};
+
+update::<Weapon>(weapon_to_update.id)
+    .set(strength.increment_by(5u64))
+    .run(db.clone())
+    .await?;
+
+// You can even pass the entire model instance as an argument
+update::<Weapon>(weapon_to_update)
+    .set(strength.increment_by(5u64))
+    .run(db.clone())
+    .await?;
+```
+
+2. Use set methods for updating multiple fields
+
+```rust
+update::<Weapon>(id)
+    .set([
+        strength.increment_by(5u64),
+        name.equal("Oyedayo"),
+    ])
+    .run(db.clone())
+    .await?;
+
+// In addition to array const `[T]`,you can also use a `vec!`.
+update::<Weapon>(id)
+    .set(vec![
+        strength.increment_by(5u64),
+        name.equal("Oyedayo"),
+    ])
+    .run(db.clone())
+    .await?;
+```
+
+In the above example, the `set` method is used to specify the fields to be updated in the `created_weapon` object using the `weapon_to_update` object.
+
 #### Using the Merge Operation
 
 The `merge` operation allows you to update a single object by merging new values into the existing object.
@@ -93,11 +148,10 @@ let weapon_to_update = Weapon {
 };
 
 let updated_weapon = update::<Weapon>(created_weapon.clone().id)
-    .merge(weapon
-
-_to_update)
+    .merge(weapon_to_update)
     .get_one(db.clone())
     .await?;
+
 ```
 
 In the above example, the `merge` operation is used to update the `created_weapon` object with the
@@ -137,6 +191,8 @@ changes to string fields, replacing field values, removing fields, or adding new
 
 The `patch_add` operation adds a new field to the object. It allows you to include additional fields during the update.
 
+1. Applying single patch
+
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
 
@@ -144,6 +200,16 @@ let updated_weapon = update::<Weapon>(created_weapon.clone().id)
     .patch(nice.patch_add(true))
     .get_one(db.clone())
     .await?;
+```
+
+2. Applying multiple patches
+
+```rust
+let ref _updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
+    .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(56)])
+    .return_one(db.clone())
+    .await;
+
 ```
 
 In the above example, the `patch_add` operation adds the `nice` field with the value `true` to the `created_weapon` object.
