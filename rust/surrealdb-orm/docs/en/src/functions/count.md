@@ -29,8 +29,7 @@ count()
 
 The `count!()` macro provides the following functionality:
 
-- `fine_tune_params()`: Returns the fine-tuned parameters for the `count` function. In this case, it would be `"count()"`.
-- `to_raw().to_string()`: Converts the `count` macro into a raw SQL query string. In this case, it would be `"count()"`.
+- `to_raw().build()`: Converts the `count` macro into a raw SQL query string. In this case, it would be `"count()"`.
 
 ## count!().\_\_as\_\_(alias)
 
