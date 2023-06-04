@@ -1,6 +1,8 @@
 # Update Statement
 
-The `update` statement in SurrealDB ORM allows you to modify existing records in your database. It provides various operations to update fields and perform incremental changes to the data. This documentation provides an overview of the syntax and usage of the `update` statement.
+The `update` statement in SurrealDB ORM allows you to modify existing records in your database.
+It provides various operations to update fields and perform incremental changes to the data.
+This documentation provides an overview of the syntax and usage of the `update` statement.
 
 ## Table of Contents
 
@@ -54,7 +56,8 @@ Note: Only one of the .content(), .merge(), .replace(), .set(), or .patch() meth
 
 #### Using the Update Content
 
-The `update` statement also supports the `content` method, which allows you to specify the updated fields using a separate object. This provides a convenient way to define the fields to be updated.
+The `update` statement also supports the `content` method, which allows you to specify the updated fields using a separate object.
+This provides a convenient way to define the fields to be updated.
 
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
@@ -76,7 +79,8 @@ In the above example, the `content` method is used to specify the fields to be u
 
 #### Using the Merge Operation
 
-The `merge` operation allows you to update a single object by merging new values into the existing object. The new values overwrite the old ones, while fields not present in the new object are unaffected.
+The `merge` operation allows you to update a single object by merging new values into the existing object.
+The new values overwrite the old ones, while fields not present in the new object are unaffected.
 
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
@@ -96,11 +100,13 @@ _to_update)
     .await?;
 ```
 
-In the above example, the `merge` operation is used to update the `created_weapon` object with the fields from `weapon_to_update`. The result is stored in `updated_weapon`.
+In the above example, the `merge` operation is used to update the `created_weapon` object with the
+fields from `weapon_to_update`. The result is stored in `updated_weapon`.
 
 #### Using the Replace Operation
 
-The `replace` operation allows you to replace an existing object entirely with a new one. This operation removes all fields not present in the new object.
+The `replace` operation allows you to replace an existing object entirely with a new one.
+This operation removes all fields not present in the new object.
 
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
@@ -118,11 +124,14 @@ let updated_weapon = update::<Weapon>(created_weapon.clone().id)
     .await?;
 ```
 
-In the above example, the `replace` operation replaces the `created_weapon` object with the fields from `weapon_to_replace`. The result is stored in `updated_weapon`.
+In the above example, the `replace` operation replaces the `created_weapon` object with the fields
+from `weapon_to_replace`. The result is stored in `updated_weapon`.
 
 #### Using the Patch Operation
 
-The `patch` operation allows you to perform detailed modifications on fields using methods such as `patch_change`, `patch_replace`, `patch_remove`, and `patch_add`. It enables incremental changes to string fields, replacing field values, removing fields, or adding new fields.
+The `patch` operation allows you to perform detailed modifications on fields using methods
+such as `patch_change`, `patch_replace`, `patch_remove`, and `patch_add`. It enables incremental
+changes to string fields, replacing field values, removing fields, or adding new fields.
 
 ##### Using the Patch Add Operation
 
@@ -156,7 +165,9 @@ In the above example, the `patch_replace` operation replaces the value of the `s
 
 ##### Using the Patch Remove Operation
 
-The `patch_remove` operation removes a field from the object entirely. This operation is destructive, and the field will no longer be available after the update. Make sure that the struct used here does not require that field to be present. You can create a copy of the existing struct but without the new field.
+The `patch_remove` operation removes a field from the object entirely. This operation is destructive,
+and the field will no longer be available after the update. Make sure that the struct used here does not
+require that field to be present. You can create a copy of the existing struct but without the new field.
 
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
@@ -206,4 +217,5 @@ In the above example, the `update` statement updates all `Weapon` objects that m
 
 Please note that the above code snippets are for illustration purposes and may need to be adapted to your specific use case.
 
-You have now learned how to use the `update` statement to modify existing records in your SurrealDB database. Use the various operations and methods provided by the `update` statement to perform precise updates and incremental changes to your data.
+You have now learned how to use the `update` statement to modify existing records in your SurrealDB database.
+Use the various operations and methods provided by the `update` statement to perform precise updates and incremental changes to your data.
