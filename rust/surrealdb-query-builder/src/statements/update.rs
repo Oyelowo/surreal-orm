@@ -171,6 +171,15 @@ pub enum TargettablesForUpdate {
     SurrealId(sql::Thing),
 }
 
+impl<T> From<T> for TargettablesForUpdate
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: T) -> Self {
+        Self::SurrealId(value.get_id_as_thing())
+    }
+}
+
 impl From<crate::Table> for TargettablesForUpdate {
     fn from(value: crate::Table) -> Self {
         Self::Table(value.into())
