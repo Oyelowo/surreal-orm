@@ -84,7 +84,7 @@ use crate::{
 ///          }
 ///     );
 /// ```
-pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatement<T>
+pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -118,7 +118,7 @@ where
         }
     };
 
-    UpdateStatement {
+    UpdateStatementInit {
         target: param,
         content: None,
         merge: None,
@@ -135,9 +135,9 @@ where
     }
 }
 
-/// Update statement builder
+/// Update statement initializer
 #[derive(Debug, Clone)]
-pub struct UpdateStatement<T>
+pub struct UpdateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
@@ -162,13 +162,22 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn get_errors(&self) -> ErrorList {
-        self.errors.to_vec()
+        self.0.errors.to_vec()
     }
 }
 
 pub enum TargettablesForUpdate {
     Table(sql::Table),
     SurrealId(sql::Thing),
+}
+
+impl<T> From<T> for TargettablesForUpdate
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: T) -> Self {
+        Self::SurrealId(value.get_id_as_thing())
+    }
 }
 
 impl From<crate::Table> for TargettablesForUpdate {
@@ -281,39 +290,39 @@ impl From<sql::Table> for TargettablesForUpdate {
     }
 }
 
-impl<T> UpdateStatement<T>
+impl<T> UpdateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     /// Caution! Overrides all data even with default. Use with care. You may prefer `merge` with Updater instead e.g `UserUpdater`.
     /// Specify the full record data using the CONTENT keyword. The content must be serializable
     /// and implement SurrealdbModel trait.
-    pub fn content(mut self, content: T) -> Self {
+    pub fn content(mut self, content: T) -> UpdateStatement<T> {
         let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.content = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
-        self
+        self.into()
     }
 
     /// merge-update only specific fields by using the MERGE keyword and specifying only the fields which are to be updated.
-    pub fn merge(mut self, merge: impl Serialize) -> Self {
+    pub fn merge(mut self, merge: impl Serialize) -> UpdateStatement<T> {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.merge = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
-        self
+        self.into()
     }
 
     /// Caution!
     /// Fully replaces weapon table with completely new object and data. This will remove all fields
     /// that are not present in the new object. This is a destructive operation.
-    pub fn replace(mut self, merge: impl Serialize) -> Self {
+    pub fn replace(mut self, merge: impl Serialize) -> UpdateStatement<T> {
         let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
         let binding = Binding::new(sql_value);
         self.replace = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
-        self
+        self.into()
     }
 
     /// When specifying fields to update using the SET clause,
@@ -322,7 +331,7 @@ where
     /// To increment a numeric value, or to add an item to an array,
     /// use the `append` or incremenet (i.e +=) operator. To decrement a numeric value,
     /// or to remove an value from an array, use the `decrement` or `remove` (i.e -=) operator.
-    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> Self {
+    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> UpdateStatement<T> {
         let settable: Vec<Setter> = settables.into();
 
         let (settable, bindings) = settable.into_iter().fold(
@@ -336,7 +345,7 @@ where
 
         self.bindings.extend(bindings);
         self.set.extend(settable);
-        self
+        self.into()
     }
 
     /// Specify the patch operations to be applied to the record using the PATCH keyword.
@@ -355,7 +364,7 @@ where
     /// name.patch_remove();
     /// // regex search and replace
     /// name.patch_change("@@ -1,4 +1,4 @@\n te\n-s\n+x\n t\n");
-    pub fn patch(mut self, patch_op: impl Into<Vec<PatchOp>>) -> Self {
+    pub fn patch(mut self, patch_op: impl Into<Vec<PatchOp>>) -> UpdateStatement<T> {
         let patch_op: Vec<PatchOp> = patch_op.into();
         for patch_op in patch_op {
             self.bindings.extend(patch_op.get_bindings());
@@ -363,9 +372,28 @@ where
             self.patch_ops.push(patch_op.build());
         }
 
-        self
+        self.into()
     }
+}
 
+/// A builder for update statements.
+pub struct UpdateStatement<T>(UpdateStatementInit<T>)
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel;
+
+impl<T> From<UpdateStatementInit<T>> for UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
+    fn from(value: UpdateStatementInit<T>) -> Self {
+        Self(value)
+    }
+}
+
+impl<T> UpdateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbModel,
+{
     /// Adds a condition to the `` clause of the query.
     ///
     /// # Arguments
@@ -384,12 +412,12 @@ where
     pub fn where_(mut self, condition: impl Conditional) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = Filter::new(condition);
-        self.where_ = Some(condition.build());
+        self.0.where_ = Some(condition.build());
         self
     }
 
     fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
-        self.bindings.extend(bindings);
+        self.0.bindings.extend(bindings);
         self
     }
 
@@ -432,7 +460,7 @@ where
     /// ```
     pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
-        self.return_type = Some(return_type);
+        self.0.return_type = Some(return_type);
         self
     }
 
@@ -457,13 +485,13 @@ where
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: DurationLike = duration.into();
-        self.timeout = Some(duration.to_raw().build());
+        self.0.timeout = Some(duration.to_raw().build());
         self
     }
 
     /// Indicates that the query should be executed in parallel.
     pub fn parallel(mut self) -> Self {
-        self.parallel = true;
+        self.0.parallel = true;
         self
     }
 }
@@ -473,35 +501,36 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn build(&self) -> String {
-        let mut query = format!("UPDATE {}", self.target);
+        let ref statement = self.0;
+        let mut query = format!("UPDATE {}", statement.target);
 
-        if let Some(content) = &self.content {
+        if let Some(content) = &statement.content {
             query = format!("{query} CONTENT  {content}",);
-        } else if let Some(merge) = &self.merge {
+        } else if let Some(merge) = &statement.merge {
             query = format!("{query} MERGE {merge}");
-        } else if let Some(replace) = &self.replace {
+        } else if let Some(replace) = &statement.replace {
             query = format!("{query} REPLACE {replace}");
-        } else if !self.set.is_empty() {
-            let set_vec = self.set.join(", ");
+        } else if !statement.set.is_empty() {
+            let set_vec = statement.set.join(", ");
             query = format!("{query} SET {set_vec}");
-        } else if !self.patch_ops.is_empty() {
-            let patch_vec = self.patch_ops.join(", ");
+        } else if !statement.patch_ops.is_empty() {
+            let patch_vec = statement.patch_ops.join(", ");
             query = format!("{query} PATCH [{patch_vec}]");
         }
 
-        if let Some(condition) = &self.where_ {
+        if let Some(condition) = &statement.where_ {
             query = format!("{query} WHERE {condition}");
         }
 
-        if let Some(return_type) = &self.return_type {
+        if let Some(return_type) = &statement.return_type {
             query = format!("{query} {return_type}");
         }
 
-        if let Some(timeout) = &self.timeout {
+        if let Some(timeout) = &statement.timeout {
             query = format!("{query} TIMEOUT {timeout}");
         }
 
-        if self.parallel {
+        if statement.parallel {
             query.push_str(" PARALLEL");
         }
 
@@ -523,7 +552,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel,
 {
     fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
+        self.0.bindings.to_vec()
     }
 }
 
@@ -537,11 +566,11 @@ where
     T: Serialize + DeserializeOwned + SurrealdbModel + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
-        self.return_type = Some(return_type);
+        self.0.return_type = Some(return_type);
         self
     }
 
     fn get_return_type(&self) -> ReturnType {
-        self.return_type.clone().unwrap_or(ReturnType::None)
+        self.0.return_type.clone().unwrap_or(ReturnType::None)
     }
 }
