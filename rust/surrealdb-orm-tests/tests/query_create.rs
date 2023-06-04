@@ -1061,14 +1061,13 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
     let spaceship_id_1 = SpaceShip::create_id("spaceship1".to_string());
     let spaceship_id_2 = SpaceShip::create_id("spaceship2".to_string());
-    let spaceship_id_3 = SpaceShip::create_id("spaceship3".to_string());
 
     let spaceship_schema::SpaceShip {
         id, name, created, ..
     } = SpaceShip::schema();
 
     let space_ship1 = create::<SpaceShip>()
-        .set(vec![
+        .set([
             id.equal_to(spaceship_id_1),
             name.equal_to("SpaceShip1".to_string()),
             created.equal_to(Utc::now()),
@@ -1078,7 +1077,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     assert_eq!(space_ship1.name, "SpaceShip1");
 
     let space_ship2 = create::<SpaceShip>()
-        .set([
+        .set(vec![
             id.equal_to(spaceship_id_2),
             name.equal_to("SpaceShip2".to_string()),
             created.equal_to(Utc::now()),
@@ -1087,23 +1086,14 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
         .await?;
     assert_eq!(space_ship2.name, "SpaceShip2");
 
-    let space_ship3 = create::<SpaceShip>()
-        .set(id.equal_to(spaceship_id_3))
-        .set(name.equal_to("SpaceShip3".to_string()))
-        .set(created.equal_to(Utc::now()))
-        .get_one(db.clone())
-        .await?;
-    assert_eq!(space_ship3.name, "SpaceShip3");
-
     let selected_spaceships: Vec<SpaceShip> = select(All)
         .from(SpaceShip::table_name())
         .order_by(order(created).desc())
         .return_many(db.clone())
         .await?;
 
-    assert_eq!(selected_spaceships.len(), 3);
-    assert_eq!(selected_spaceships[0].name, "SpaceShip3");
-    assert_eq!(selected_spaceships[1].name, "SpaceShip2");
-    assert_eq!(selected_spaceships[2].name, "SpaceShip1");
+    assert_eq!(selected_spaceships.len(), 2);
+    assert_eq!(selected_spaceships[0].name, "SpaceShip2");
+    assert_eq!(selected_spaceships[1].name, "SpaceShip1");
     Ok(())
 }

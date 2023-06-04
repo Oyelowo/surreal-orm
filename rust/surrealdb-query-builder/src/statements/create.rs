@@ -60,11 +60,11 @@ impl<const N: usize> From<&[Setter; N]> for SetterCreator {
 ///         age: 192
 ///     });
 /// ```
-pub fn create<T>() -> CreateStatement<T>
+pub fn create<T>() -> CreateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
-    CreateStatement::<T> {
+    CreateStatementInit::<T> {
         target: T::table_name().to_string(),
         content: "".to_string(),
         set: vec![],
@@ -77,10 +77,9 @@ where
     }
 }
 
-/// Represents a CREATE SQL statement that can be executed. It implements various traits such as
-/// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
+/// Initializes the create statement
 #[derive(Debug, Clone)]
-pub struct CreateStatement<T>
+pub struct CreateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -95,9 +94,7 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
-
-impl<T> CreateStatement<T>
+impl<T> CreateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
@@ -120,7 +117,8 @@ where
         let binding = Binding::new(sql_value);
         self.content = binding.get_param_dollarised();
         self.bindings.push(binding);
-        self
+
+        CreateStatement(self)
     }
 
     /// Sets the values of the fields to be updated in the record.
@@ -155,7 +153,7 @@ where
     ///         ).to_raw().build(), "CREATE user SET name='Oyelowo', age=192")
     /// ```
 
-    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> Self {
+    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> CreateStatement<T> {
         let settable: Vec<Setter> = settables.into();
 
         let (settable, bindings, errors) = settable.into_iter().fold(
@@ -172,9 +170,20 @@ where
         self.errors.extend(errors);
         self.set.extend(settable);
 
-        self
+        CreateStatement(self)
     }
+}
 
+/// Represents a CREATE SQL statement that can be executed. It implements various traits such as
+/// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
+pub struct CreateStatement<T>(CreateStatementInit<T>)
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode;
+
+impl<T> CreateStatement<T>
+where
+    T: Serialize + DeserializeOwned + SurrealdbNode,
+{
     /// Sets the return type for the query.
     ///
     /// # Arguments
@@ -214,7 +223,7 @@ where
     /// ```
     pub fn return_type(mut self, return_type: impl Into<ReturnType>) -> Self {
         let return_type = return_type.into();
-        self.return_type = Some(return_type);
+        self.0.return_type = Some(return_type);
         self
     }
 
@@ -239,13 +248,13 @@ where
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: DurationLike = duration.into();
-        self.timeout = Some(duration.to_raw().build());
+        self.0.timeout = Some(duration.to_raw().build());
         self
     }
 
     /// Indicates that the query should be executed in parallel.
     pub fn parallel(mut self) -> Self {
-        self.parallel = true;
+        self.0.parallel = true;
         self
     }
 }
@@ -255,23 +264,24 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn build(&self) -> String {
-        let mut query = format!("CREATE {}", &self.target);
+        let statement = &self.0;
+        let mut query = format!("CREATE {}", statement.target);
 
-        if !self.content.is_empty() {
-            query = format!("{query} CONTENT {content}", content = &self.content);
-        } else if !self.set.is_empty() {
-            query = format!("{query} SET {set}", set = &self.set.join(", "));
+        if !statement.content.is_empty() {
+            query = format!("{query} CONTENT {content}", content = statement.content);
+        } else if !statement.set.is_empty() {
+            query = format!("{query} SET {set}", set = statement.set.join(", "));
         }
 
-        if let Some(return_type) = &self.return_type {
-            query = format!("{query} {}", &return_type);
+        if let Some(ref return_type) = statement.return_type {
+            query = format!("{query} {}", return_type);
         }
 
-        if let Some(timeout) = &self.timeout {
+        if let Some(ref timeout) = statement.timeout {
             query = format!("{query} TIMEOUT {}", &timeout);
         }
 
-        if self.parallel {
+        if statement.parallel {
             query = format!("{query} PARALLEL");
         }
 
@@ -293,7 +303,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
+        self.0.bindings.to_vec()
     }
 }
 
@@ -302,7 +312,7 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode,
 {
     fn get_errors(&self) -> ErrorList {
-        self.errors.to_vec()
+        self.0.errors.to_vec()
     }
 }
 
@@ -318,11 +328,13 @@ where
     T: Serialize + DeserializeOwned + SurrealdbNode + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
-        self.return_type = Some(return_type);
+        self.0.return_type = Some(return_type);
         self
     }
 
     fn get_return_type(&self) -> ReturnType {
-        self.return_type.clone().unwrap_or(ReturnType::None)
+        self.0.return_type.clone().unwrap_or(ReturnType::None)
     }
 }
+
+impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealdbNode {}
