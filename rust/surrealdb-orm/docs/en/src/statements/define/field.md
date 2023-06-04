@@ -8,6 +8,9 @@ The `define_field` statement is used to define a field in SurrealDB. It allows y
 - [Examples](#examples)
   - [Define Field with Full Configuration](#define-field-with-full-configuration)
   - [Define Field with Simple Configuration](#define-field-with-simple-configuration)
+- [Field Types](#field-types)
+- [Geometry Types](#geometry-types)
+- [Permission Types](#permission-types)
 
 ## Syntax
 
@@ -52,11 +55,11 @@ let statement = define_field(email)
     .type_(String)
     .value("example@codebreather.com")
     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-    .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-    .permissions(for_(&[Create, Update]).where_(name.is("Oyedayo"))) // Multiple
+    .permissions(for_(Permission::Select).where_(age.greater_than_or_equal(18))) // Single permission
+    .permissions(for_(&[Permission::Create, Permission::Update]).where_(name.is("Oyedayo"))) // Multiple permissions
     .permissions(&[
-        for_(&[Create, Delete]).where_(name.is("Oyedayo")),
-        for_(Update).where_(age.less_than_or_equal(130)),
+        for_(&[Permission::Create, Permission::Delete]).where_(name.is("Oyedayo")),
+        for_(Permission::Update).where_(age.less_than_or_equal(130)),
     ]);
 ```
 
@@ -76,7 +79,9 @@ PERMISSIONS
         WHERE age <= 130;
 ```
 
-In the example above, the `define_field` statement defines a field named "email" on the "user" table. It specifies the field type as `String`, sets a default value of `'example@codebreather.com'`, and adds an assertion condition. It also sets different permissions for the field based on conditions.
+In the example above, the `define_field` statement defines a field named "email" on the "user" table. It specifies the field type as `String`, sets a default value of `'example@codebreather.com'`, and adds an
+
+assertion condition. It also sets different permissions for the field based on conditions.
 
 ### Define Field with Simple Configuration
 
@@ -98,4 +103,46 @@ DEFINE FIELD email ON TABLE user TYPE string;
 
 In the example above, the `define_field` statement defines a field named "email" on the "user" table. It specifies the field type as `String` without setting a default value, assertion condition, or permissions.
 
-This concludes the documentation for the `define_field` statement. Use this statement to define fields in SurrealDB and specify their configurations and permissions.
+## Field Types
+
+The `define_field` statement supports various field types in SurrealDB. The available field types are:
+
+- `any`: Allows any data type supported by SurrealDB.
+- `array`: Represents a list.
+- `bool`: Represents true or false values.
+- `datetime`: Represents an ISO 8601 compliant date with time and time zone.
+- `decimal`: Represents any real number with arbitrary precision.
+- `duration`: Represents a length of time that can be added or subtracted from datetimes or other durations.
+- `float`: Represents a value stored in a 64-bit float.
+- `int`: Represents a value stored in a 64-bit integer.
+- `number`: Represents numbers without specifying the type, allowing SurrealDB to detect and store the number based on its minimal representation.
+- `object`: Represents formatted objects containing values of any supported type.
+- `string`: Represents a string value.
+- `record`: Represents a reference to another record in any table.
+- `geometry`: Represents a geometry type conforming to the GeoJSON format.
+
+## Geometry Types
+
+The `geometry` field type allows you to define geometric fields in SurrealDB. The available geometry types are:
+
+- `feature`: Represents any geometric type.
+- `point`: Represents a point.
+- `line`: Represents a line.
+- `polygon`: Represents a polygon.
+- `multipoint`: Represents a multipoint.
+- `multiline`: Represents a multiline.
+- `multipolygon`: Represents a multipolygon.
+- `collection`: Represents a collection of geometry types.
+
+## Permission Types
+
+The `define_field` statement allows you to define permissions for the field using permission types. The available permission types are:
+
+- `Create`: Allows creating new records with the field.
+- `Read`: Allows reading the field value from existing records.
+- `Update`: Allows updating the field value in existing records.
+- `Delete`: Allows deleting records that have the field.
+
+These permission types can be used in the `permissions` method to define the desired access control for the field.
+
+You have now learned how to define fields using the `define_field` statement, including different configuration options, field types, geometry types, and permission types. Use this statement to define fields in SurrealDB and specify their configurations and permissions.
