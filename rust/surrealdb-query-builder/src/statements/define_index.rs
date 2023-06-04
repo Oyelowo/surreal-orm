@@ -15,6 +15,7 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, Table, TableIndex},
+    Valuex,
 };
 
 /// Define a new database index.
@@ -84,6 +85,48 @@ impl From<Field> for Columns {
 impl<const N: usize> From<&[Field; N]> for Columns {
     fn from(value: &[Field; N]) -> Self {
         Self::Fields(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
+    }
+}
+
+impl<const N: usize> From<[Field; N]> for Columns {
+    fn from(value: [Field; N]) -> Self {
+        Self::Fields(value.to_vec())
+    }
+}
+
+impl<const N: usize> From<[Valuex; N]> for Columns {
+    fn from(value: [Valuex; N]) -> Self {
+        Self::Fields(
+            value
+                .into_iter()
+                .map(|v| {
+                    Field::new(v.build())
+                        .with_bindings(v.get_bindings())
+                        .with_errors(v.get_errors())
+                })
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
+impl From<Vec<Valuex>> for Columns {
+    fn from(value: Vec<Valuex>) -> Self {
+        Self::Fields(
+            value
+                .into_iter()
+                .map(|v| {
+                    Field::new(v.build())
+                        .with_bindings(v.get_bindings())
+                        .with_errors(v.get_errors())
+                })
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
+impl From<Vec<Field>> for Columns {
+    fn from(value: Vec<Field>) -> Self {
+        Self::Fields(value)
     }
 }
 
@@ -183,6 +226,8 @@ impl Erroneous for DefineIndexStatement {}
 
 #[cfg(test)]
 mod tests {
+    use crate::arr;
+
     use super::*;
 
     #[test]
@@ -226,7 +271,7 @@ mod tests {
 
         let query = define_index("alien_index")
             .on_table("alien")
-            .fields(&[age, name, email, dob])
+            .fields(arr![age, name, email, dob])
             .unique();
 
         assert_eq!(
@@ -245,7 +290,7 @@ mod tests {
 
         let query = define_index("alien_index")
             .on_table("alien")
-            .columns(&[age, name, email, dob])
+            .columns([age, name, email, dob])
             .unique();
 
         assert_eq!(
