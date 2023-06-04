@@ -1,10 +1,11 @@
 # For Statement (Permissions)
 
-The `for` statement is used to define permissions for a specific action or CRUD operation in SurrealDB. It allows you to specify the desired permissions and conditions for the action. This documentation provides an overview of the syntax and usage of the `for` statement.
+The `for` statement is used to define permissions for a specific action or CRUD operation in SurrealDB. It allows you to specify the desired permissions and conditions for the action. This statement is commonly used when defining tables or fields in SurrealDB, but it may also be used for access control for other objects in the future. This documentation provides an overview of the syntax and usage of the `for` statement.
 
 ## Table of Contents
 
 - [Syntax](#syntax)
+- [Permission Types](#permission-types)
 - [Examples](#examples)
   - [Define Permission for Single Action](#define-permission-for-single-action)
   - [Define Permissions for Multiple Actions](#define-permissions-for-multiple-actions)
@@ -24,6 +25,17 @@ for_(permission_type)
 The `for` statement supports the following methods:
 
 - `.where_(condition)`: Specifies the condition or criteria for the permission.
+
+## Permission Types
+
+SurrealDB uses permission types to define different actions or CRUD operations that can be performed on tables or fields. Here are the available permission types:
+
+- `Create`: Grants permission to create new records or objects.
+- `Read` (or `Select`): Grants permission to read or retrieve data from records or objects.
+- `Update`: Grants permission to modify or update existing records or objects.
+- `Delete`: Grants permission to delete records or objects.
+
+These permission types allow you to define fine-grained access control for different actions in your database.
 
 ## Examples
 
@@ -68,6 +80,8 @@ assert_eq!(
 );
 ```
 
-In the example above, the `for` statement defines permissions for multiple actions: `Create`, `Delete`, `Select`, and `Update`. It specifies the condition that the field "name" should be equal to "Oyedayo". This means that the permissions for these actions will be granted only when the field "name" matches the specified value.
+In the example above, the `for` statement defines permissions for multiple actions: `Create`, `Delete`, `Select`, and `Update`. It specifies the condition that the field "name" should be equal to "Oyedayo". This means that
 
-You have now learned how to define permissions using the `for` statement in SurrealDB. Use this statement to specify the desired access control for different actions or CRUD operations in your database.
+the permissions for these actions will be granted only when the field "name" matches the specified value.
+
+You have now learned how to define permissions using the `for` statement in SurrealDB. Use this statement to specify the desired access control for different actions or CRUD operations in your database. While it is commonly used when defining tables or fields, it may also be utilized for access control for other objects in the future.
