@@ -294,20 +294,5 @@ assert_eq!(space_ship1.unwrap().id, spaceship_id_1);
 Ok(())
 ```
 
-This is just a glimpse of the possibilities with the `create` statement in SurrealDB. You can create and manipulate data in many different ways depending on your application's requirements.
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
+This is just a glimpse of the possibilities with the `create` statement in SurrealDB.
+You can create and manipulate data in many different ways depending on your application's requirements.
