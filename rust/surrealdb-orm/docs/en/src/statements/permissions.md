@@ -50,14 +50,14 @@ use CrudType::*;
 let name = Field::new("name");
 
 let for_res = for_(Create).where_(name.like("Oyelowo"));
-assert_eq!(
-    for_res.fine_tune_params(),
-    "FOR create\n\tWHERE name ~ $_param_00000001"
-);
-assert_eq!(
-    for_res.to_raw().build(),
-    "FOR create\n\tWHERE name ~ 'Oyelowo'"
-);
+println!("{}", for_res.to_raw().build());
+```
+
+The above code will generate the following raw statement:
+
+```
+FOR create
+    WHERE name ~ 'Oyelowo'
 ```
 
 In the example above, the `for` statement defines permissions for the `Create` action. It specifies the condition that the field "name" should be matched with the pattern "Oyelowo". This means that the permission to create records will be granted only when the field "name" matches the pattern.
@@ -73,17 +73,21 @@ let name = Field::new("name");
 let for_res = for_(Select).where_(age.greater_than_or_equal(18))
     .permissions(for_(Create).where_(name.is("Oyedayo")))
     .permissions(for_(Update).where_(age.less_than_or_equal(130)));
-assert_eq!(
-    for_res.fine_tune_params(),
-    "FOR select\n\tWHERE age >= 18\nPERMISSIONS\n\tFOR create\n\t\tWHERE name IS $_param
+println!("{}", for_res.to_raw().build());
+```
 
-_00000002\n\tFOR update\n\t\tWHERE age <= 130"
-);
+The above code will generate the following raw statement:
 
-assert_eq!(
-    for_res.to_raw().build(),
-    "FOR select\n\tWHERE age >= 18\nPERMISSIONS\n\tFOR create\n\t\tWHERE name IS 'Oyedayo'\n\tFOR update\n\t\tWHERE age <= 130"
-);
+```
+FOR select
+    WHERE age >= 18
+PERMISSIONS
+    FOR create
+        WHERE name IS 'Oyedayo'
+    FOR update
+
+
+ WHERE age <= 130
 ```
 
 In the example above, the `for` statement defines permissions for the `Select` action, as well as individual permissions for the `Create` and `Update` actions. It specifies different conditions for each action. This means that the permissions for these actions will be granted only when the specified conditions are met.
@@ -97,15 +101,14 @@ use CrudType::*;
 let name = Field::new("name");
 
 let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
-assert_eq!(
-    for_res.fine_tune_params(),
-    "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001"
-);
+println!("{}", for_res.to_raw().build());
+```
 
-assert_eq!(
-    for_res.to_raw().build(),
-    "FOR create, delete, select, update\n\tWHERE name IS 'Oyedayo'"
-);
+The above code will generate the following raw statement:
+
+```
+FOR create, delete, select, update
+    WHERE name IS 'Oyedayo'
 ```
 
 In the example above, the `for` statement defines permissions for multiple actions (`Create`, `Delete`, `Select`, and `Update`) using an array. It specifies a common condition for all the actions. This means that the permissions for these actions will be granted only when the field "name" is equal to "Oyedayo".
@@ -120,15 +123,17 @@ let name = Field::new("name");
 
 let for_res = for_(&[Create, Delete]).where_(name.is("Oyedayo"))
     .permissions(for_(Update).where_(age.less_than_or_equal(130)));
-assert_eq!(
-    for_res.fine_tune_params(),
-    "FOR create, delete\n\tWHERE name IS $_param_00000001\nPERMISSIONS\n\tFOR update\n\t\tWHERE age <= 130"
-);
+println!("{}", for_res.to_raw().build());
+```
 
-assert_eq!(
-    for_res.to_raw().build(),
-    "FOR create, delete\n\tWHERE name IS 'Oyedayo'\nPERMISSIONS\n\tFOR update\n\t\tWHERE age <= 130"
-);
+The above code will generate the following raw statement:
+
+```
+FOR create, delete
+    WHERE name IS 'Oyedayo'
+PERMISSIONS
+    FOR update
+        WHERE age <= 130
 ```
 
 In the example above, the `for` statement defines individual permissions for the `Create` and `Delete` actions, and an array of permissions for the `Update` action. It specifies different conditions for each action. This means that the permissions for these actions will be granted only when the specified conditions are met.
