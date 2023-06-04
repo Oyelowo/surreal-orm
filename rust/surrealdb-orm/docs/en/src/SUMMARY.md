@@ -40,6 +40,7 @@
   - [Update](./statements/update.md)
   - [Relate](./statements/relate.md)
   - [Delete](./statements/delete.md)
+  - [For/Permissions](./statements/permissions.md)
   - [Define](./statements/define.md)
     - [Define Namespace](./statements/define/namespace.md)
     - [Define Database](./statements/define/database.md)
