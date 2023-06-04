@@ -198,9 +198,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 2));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(name.equal_to("Rook"))
-        .set(tags.append("street"))
-        // .set(updater(tags).append("street"))
+        .set([name.equal_to("Rook"), tags.append("street")])
         .where_(cond(alien.weapon().strength.equal_to(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
@@ -227,10 +225,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealdbOrmResu
         .all(|alien| alien.tags.len() == 3));
 
     let weak_aliens = update::<Alien>(Alien::table_name())
-        .set(name.equal_to("Kiwi"))
-        .set(tags.remove("street"))
-        // .set(updater(name).equal("Kiwi"))
-        // .set(updater(tags).remove("street"))
+        .set([name.equal_to("Kiwi"), tags.remove("street")])
         .where_(cond(alien.weapon().strength.equal_to(5u64)).and(age.greater_than(3)))
         .return_many(db.clone())
         .await?;
@@ -275,24 +270,30 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
     } = Alien::schema();
 
     update::<Alien>(alien_id)
-        .set(tags.append("tag3"))
-        .set(weapon.equal_to(Weapon::create_id("agi")))
-        .set(spaceShips.append(SpaceShip::create_id("cali".into())))
-        .set(spaceShips.append(SpaceShip::create_id("codebreather".into())))
-        .set(spaceShips.append(SpaceShip::create_id("blayz".into())))
-        .set(spaceShips.append(SpaceShip::create_id("anam".into())))
+        .set([
+            tags.append("tag3"),
+            weapon.equal_to(Weapon::create_id("agi")),
+            spaceShips.append(SpaceShip::create_id("cali".into())),
+            spaceShips.append(SpaceShip::create_id("codebreather".into())),
+            spaceShips.append(SpaceShip::create_id("blayz".into())),
+            spaceShips.append(SpaceShip::create_id("anam".into())),
+        ])
         .run(db.clone())
         .await?;
 
     update::<Alien>(alien_id)
-        .set(tags.append("rust"))
-        .set(spaceShips.append(SpaceShip::create_id("anam".into())))
+        .set([
+            tags.append("rust"),
+            spaceShips.append(SpaceShip::create_id("anam".into())),
+        ])
         .run(db.clone())
         .await?;
 
     let ref updated = update::<Alien>(alien_id)
-        .set(tags.append("rice"))
-        .set(spaceShips.append(SpaceShip::create_id("cali".into())))
+        .set([
+            tags.append("rice"),
+            spaceShips.append(SpaceShip::create_id("cali".into())),
+        ])
         .return_one(db.clone())
         .await?;
 
@@ -338,10 +339,12 @@ async fn test_add_and_remove_to_array() -> SurrealdbOrmResult<()> {
 
     // Try removing
     let updated = update::<Alien>(alien_id)
-        .set((tags).remove("tag1"))
-        // removes one of calis. There should be 2 before this
-        .set(spaceShips.remove(SpaceShip::create_id("cali".into())))
-        .set(spaceShips.remove(SpaceShip::create_id("nonexistent".into())))
+        .set([
+            tags.remove("tag1"),
+            // removes one of calis. There should be 2 before this
+            spaceShips.remove(SpaceShip::create_id("cali".into())),
+            spaceShips.remove(SpaceShip::create_id("nonexistent".into())),
+        ])
         .return_one(db.clone())
         .await?;
 
@@ -881,8 +884,10 @@ async fn test_update_single_id_patch_replace_change() -> SurrealdbOrmResult<()> 
         "weapon:lowo"
     );
     let updated_weapon = update::<Weapon>(created_weapon.clone().id)
-        .patch(strength.patch_replace(921u64))
-        .patch(name.patch_change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"))
+        .patch([
+            strength.patch_replace(921u64),
+            name.patch_change("@@ -1,4 +1,4 @@\n te\n-x\n+o\n t\n"),
+        ])
         .get_one(db.clone())
         .await?;
     assert_eq!(updated_weapon.name, "teot");
@@ -963,8 +968,7 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
     // This is not how you should use the patch remove. Merely used for testing. Check the latter
     // place for a good example where the new weapon struct is used.
     let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(nice.patch_remove())
-        .patch(bunchOfOtherFields.patch_remove())
+        .patch([nice.patch_remove(), bunchOfOtherFields.patch_remove()])
         .return_one(db.clone())
         .await
         .unwrap_err();
@@ -979,8 +983,7 @@ async fn test_update_single_id_patch_remove() -> SurrealdbOrmResult<()> {
 
     // that are not present in the new object. This is a destructive operation.
     let ref updated_weapon = update::<Weapon>(old_weapon.clone().id)
-        .patch(nice.patch_remove())
-        .patch(bunchOfOtherFields.patch_remove())
+        .patch([nice.patch_remove(), bunchOfOtherFields.patch_remove()])
         .get_one(db.clone())
         .await?;
 
@@ -1085,14 +1088,12 @@ async fn test_update_single_id_patch_add() -> SurrealdbOrmResult<()> {
 
     // bunchOfOtherFields is not string
     let ref _updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(nice.patch_add(true))
-        .patch(bunchOfOtherFields.patch_add(56))
+        .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(56)])
         .return_one(db.clone())
         .await;
 
     let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
-        .patch(nice.patch_add(true))
-        .patch(bunchOfOtherFields.patch_add(45))
+        .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(45)])
         .get_one(db.clone())
         .await?;
 
