@@ -9,6 +9,7 @@ The `define_token` statement is used to define a token in SurrealDB. Tokens are 
   - [Define Token on Namespace](#define-token-on-namespace)
   - [Define Token on Database](#define-token-on-database)
   - [Define Token on Scope](#define-token-on-scope)
+- [Token Types](#token-types)
 
 ## Syntax
 
@@ -94,12 +95,32 @@ let statement = define_token("oyelowo_token")
 
 In the example above, the `define_token` statement defines a token named "oyelowo_token" on the scope "planet". The token type is set to `TokenType::EDDSA` and the value is set to "abcde".
 
-This will generate the following SQL statement:
+This will generate the following SQL
+
+statement:
 
 ```sql
-
-
 DEFINE TOKEN oyelowo_token ON SCOPE planet TYPE EDDSA VALUE 'abcde';
 ```
 
-You have now learned how to define tokens using the `define_token` statement. Tokens are essential for authentication and authorization in SurrealDB, allowing you to secure your data and control access to resources. Define Token
+## Token Types
+
+The `TokenType` enum represents the available token types in SurrealDB. Each token type corresponds to a specific algorithm or cryptographic scheme used for token generation and validation. The following token types are available:
+
+- `EDDSA`: EdDSA (Edwards-curve Digital Signature Algorithm)
+- `ES256`: ECDSA using P-256 and SHA-256
+- `ES384`: ECDSA using P-384 and SHA-384
+- `ES512`: ECDSA using P-521 and SHA-512
+- `HS256`: HMAC using SHA-256
+- `HS384`: HMAC using SHA-384
+- `HS512`: HMAC using SHA-512
+- `PS256`: RSASSA-PSS using SHA-256 and MGF1 with SHA-256
+- `PS384`: RSASSA-PSS using SHA-384 and MGF1 with SHA-384
+- `PS512`: RSASSA-PSS using SHA-512 and MGF1 with SHA-512
+- `RS256`: RSASSA-PKCS1-v1_5 using SHA-256
+- `RS384`: RSASSA-PKCS1-v1_5 using SHA-384
+- `RS512`: RSASSA-PKCS1-v1_5 using SHA-512
+
+You can specify the desired token type when using the `define_token` statement by providing the corresponding `TokenType` enum variant.
+
+You have now learned how to define tokens using the `define_token` statement. Tokens are essential for authentication and authorization in SurrealDB, allowing you to secure your data and control access to resources.
