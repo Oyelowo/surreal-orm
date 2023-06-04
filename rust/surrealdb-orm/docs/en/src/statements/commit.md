@@ -90,8 +90,6 @@ let amount_to_transfer = 300.00;
 
 let transaction_query = begin_transaction()
     .query(block! {
-        BEGIN TRANSACTION;
-
         LET acc1 = create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
@@ -103,8 +101,6 @@ let transaction_query = begin_transaction()
 
         LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(amount_to_transfer));
         LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
-
-        COMMIT TRANSACTION;
     })
     .commit_transaction();
 
