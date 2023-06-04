@@ -135,7 +135,7 @@ where
     }
 }
 
-/// Update statement builder
+/// Update statement initializer
 #[derive(Debug, Clone)]
 pub struct UpdateStatementInit<T>
 where
@@ -367,6 +367,7 @@ where
     }
 }
 
+/// A builder for update statements.
 pub struct UpdateStatement<T>(UpdateStatementInit<T>)
 where
     T: Serialize + DeserializeOwned + SurrealdbModel;
