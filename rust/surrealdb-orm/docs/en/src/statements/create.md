@@ -101,20 +101,8 @@ let space_ship1 = create::<SpaceShip>()
     .await?;
 ```
 
-3. Chaining multiple `set` methods:
-
-```rust
-let space_ship3 = create::<SpaceShip>()
-    .set(id.equal_to(spaceship_id_3))
-    .set(name.equal_to("SpaceShip3".to_string()))
-    .set(created.equal_to(Utc::now()))
-    .get_one(db.clone())
-    .await?;
-```
-
 In these examples, we demonstrate different ways to use the `set` method. You can use an
-array const (`&[T]`) or a `Vec` to provide a list of setter statements, or you can chain multiple
-set`methods. Each`set` call sets specific fields of the record being created with the provided values.
+array const (`[T]` or `&[T]`) or a `Vec` to provide a list of setter statements.
 
 This concludes the documentation for the `create` statement. Use this statement to add new entries
 to the SurrealDB database with desired content and additional properties.
