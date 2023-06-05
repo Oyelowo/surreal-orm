@@ -1038,15 +1038,15 @@ impl SelectStatement {
     /// # let fake_id2 = TestUser::create_id("oyedayo");
     /// // Supports simpler where clause without `cond` helper function
     /// # let select2 = select(All)
-    /// #   .from(fake_id2)
+    /// #   .from(fake_id)
     ///     .where_(country.is("INDONESIA"));
     ///
     /// // Supports more complex where clause using `cond` helper function
-    /// # let select1 = select(All)
-    ///     .where_(cond(city.is("Prince Edward Island"))
-    ///                 .and(city.is("NewFoundland"))
-    ///                 .or(city.like("Toronto"))
-    ///     );
+    /// # let select1 = select(All).from(fake_id2)
+    ///                     .where_(cond(city.is("Prince Edward Island"))
+    ///                     .and(city.is("NewFoundland"))
+    ///                     .or(city.like("Toronto"))
+    ///                 );
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = Filter::new(condition);
