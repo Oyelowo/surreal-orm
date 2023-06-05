@@ -87,11 +87,13 @@ macro_rules! create_time_fn_with_single_datetime_arg {
             #[cfg(test)]
             mod [<test_ $function_name _fn>] {
                 use $crate::*;
+                use crate::functions::time;
+
 
                 #[test]
                 fn [<test_ $function_name _fn_with_datetime_field>]() {
                     let rebirth_date = $crate::Field::new("rebirth_date");
-                    let result = [<time_ $function_name>]!(rebirth_date);
+                    let result = time::[<$function_name>]!(rebirth_date);
 
                     assert_eq!(result.fine_tune_params(), format!("time::{}(rebirth_date)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("time::{}(rebirth_date)", $function_name));
@@ -103,7 +105,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                         chrono::Utc,
                     );
-                    let result = [<time_ $function_name>]!(dt);
+                    let result = time::[<$function_name>]!(dt);
                     assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_name));
                     assert_eq!(
                         result.to_raw().build(),
@@ -838,13 +840,14 @@ pub use time_group as group;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::functions::time;
     use crate::*;
 
     #[test]
     fn test_floor_macro_with_datetime_field() {
         let rebirth_date = Field::new("rebirth_date");
         let duration = Field::new("duration");
-        let result = floor!(rebirth_date, duration);
+        let result = time::floor!(rebirth_date, duration);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -863,7 +866,7 @@ mod tests {
             chrono::Utc,
         );
         let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
-        let result = floor!(dt, duration);
+        let result = time::floor!(dt, duration);
         assert_eq!(
             result.fine_tune_params(),
             "time::floor($_param_00000001, $_param_00000002)"
@@ -878,7 +881,7 @@ mod tests {
     fn test_round_macro_with_datetime_field() {
         let rebirth_date = Field::new("rebirth_date");
         let duration = Field::new("duration");
-        let result = round!(rebirth_date, duration);
+        let result = time::round!(rebirth_date, duration);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -897,7 +900,7 @@ mod tests {
             chrono::Utc,
         );
         let duration = std::time::Duration::from_secs(24 * 60 * 60 * 7);
-        let result = round!(dt, duration);
+        let result = time::round!(dt, duration);
         assert_eq!(
             result.fine_tune_params(),
             "time::round($_param_00000001, $_param_00000002)"
@@ -912,7 +915,7 @@ mod tests {
     fn test_group_macro_with_datetime_field() {
         let rebirth_date = Field::new("rebirth_date");
         let duration = Field::new("duration");
-        let result = group!(rebirth_date, duration);
+        let result = time::group!(rebirth_date, duration);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -928,7 +931,7 @@ mod tests {
     fn test_group_macro_with_datetime_params() {
         let rebirth_date = Param::new("rebirth_date");
         let duration = Param::new("duration");
-        let result = group!(rebirth_date, duration);
+        let result = time::group!(rebirth_date, duration);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -949,7 +952,7 @@ mod tests {
                         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                         chrono::Utc,
                     );
-                    let result = group!(dt, $interval);
+                    let result = time::group!(dt, $interval);
                     assert_eq!(
                         result.fine_tune_params(),
                         "time::group($_param_00000001, $_param_00000002)"
@@ -981,14 +984,14 @@ mod tests {
 
     #[test]
     fn test_now_fn() {
-        let result = now_fn();
+        let result = time::now_fn();
         assert_eq!(result.fine_tune_params(), "now()");
         assert_eq!(result.to_raw().build(), "now()");
     }
 
     #[test]
     fn test_now_macro() {
-        let result = now!();
+        let result = time::now!();
         assert_eq!(result.fine_tune_params(), "now()");
         assert_eq!(result.to_raw().build(), "now()");
     }
