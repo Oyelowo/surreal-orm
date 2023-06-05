@@ -760,7 +760,7 @@ enum SelectionType {
     SelectValue,
 }
 
-/// The query builder struct used to construct complex database queries.
+/// Select statement initializer
 #[derive(Debug, Clone)]
 pub struct SelectStatementInit {
     selection_type: SelectionType,
@@ -797,13 +797,13 @@ impl Conditional for SelectStatement {
 
 impl Erroneous for SelectStatement {
     fn get_errors(&self) -> Vec<String> {
-        self.errors.to_vec()
+        self.0.errors.to_vec()
     }
 }
 
 impl Parametric for SelectStatement {
     fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
+        self.0.bindings.to_vec()
     }
 }
 
@@ -1007,6 +1007,8 @@ impl SelectStatementInit {
     }
 }
 
+/// The query builder struct used to construct complex database queries.
+#[derive(Debug, Clone)]
 pub struct SelectStatement(SelectStatementInit);
 
 impl From<SelectStatementInit> for SelectStatement {
@@ -1402,33 +1404,33 @@ impl Display for SelectStatement {
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
         let ref statement = self.0;
-        let select = match self.selection_type {
+        let select = match statement.selection_type {
             SelectionType::Select => "SELECT",
             SelectionType::SelectValue => "SELECT VALUE",
         };
 
         let mut query = format!(
             "{select} {} FROM {}",
-            self.projections,
-            self.targets.join(", ")
+            statement.projections,
+            statement.targets.join(", ")
         );
 
-        if let Some(condition) = &self.where_ {
+        if let Some(condition) = &statement.where_ {
             query = format!("{query} WHERE {condition}");
         }
 
-        if !self.split.is_empty() {
-            query = format!("{query} SPLIT {}", &self.split.join(", "));
+        if !statement.split.is_empty() {
+            query = format!("{query} SPLIT {}", &statement.split.join(", "));
         }
 
-        if !self.group_by.is_empty() {
-            query = format!("{query} GROUP BY {}", &self.group_by.join(", "));
+        if !statement.group_by.is_empty() {
+            query = format!("{query} GROUP BY {}", &statement.group_by.join(", "));
         }
 
-        if !self.order_by.is_empty() {
+        if !statement.order_by.is_empty() {
             query = format!(
                 "{query} ORDER BY {}",
-                &self
+                &statement
                     .order_by
                     .iter()
                     .map(|o| o.to_string())
@@ -1437,23 +1439,23 @@ impl Buildable for SelectStatement {
             );
         }
 
-        if let Some(limit_value) = &self.limit {
+        if let Some(ref limit_value) = statement.limit {
             query = format!("{query} LIMIT {}", limit_value);
         }
 
-        if let Some(start_value) = &self.start {
+        if let Some(ref start_value) = statement.start {
             query = format!("{query} START AT {}", start_value);
         }
 
-        if !self.fetch.is_empty() {
-            query = format!("{query} FETCH {}", &self.fetch.join(", "));
+        if !statement.fetch.is_empty() {
+            query = format!("{query} FETCH {}", statement.fetch.join(", "));
         }
 
-        if let Some(timeout_value) = &self.timeout {
+        if let Some(timeout_value) = &statement.timeout {
             query = format!("{query} TIMEOUT {}", timeout_value);
         }
 
-        if self.parallel {
+        if statement.parallel {
             query = format!("{query} PARALLEL");
         }
 
@@ -1472,14 +1474,14 @@ impl<T: SurrealdbModel> SelectStatementMini<T> {
         self.0.update_bindings(orderables.get_bindings());
 
         let orders: Vec<Order> = orderables.into();
-        self.0.order_by.extend(orders);
+        self.0 .0.order_by.extend(orders);
         self
     }
 
     /// Starts the result at the offset
     pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
         let start: NumberLike = start.into();
-        self.0.start = Some(start.build());
+        self.0 .0.start = Some(start.build());
         self.0.update_bindings(start.get_bindings());
         self
     }
@@ -1487,14 +1489,14 @@ impl<T: SurrealdbModel> SelectStatementMini<T> {
     /// Limits the number of results returned
     pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
         let limit: NumberLike = limit.into();
-        self.0.limit = Some(limit.build());
+        self.0 .0.limit = Some(limit.build());
         self.0.update_bindings(limit.get_bindings());
         self
     }
 
     /// Parallelizes the query
     pub fn parallel(mut self) -> Self {
-        self.0.parallel = true;
+        self.0 .0.parallel = true;
         self
     }
 }
@@ -1535,7 +1537,7 @@ where
 {
     fn set_return_type(mut self, return_type: crate::ReturnType) -> Self {
         if let crate::ReturnType::Projections(projection) = return_type {
-            self.0.projections = format!("{}, {}", self.0.projections, projection.build());
+            self.0 .0.projections = format!("{}, {}", self.0 .0.projections, projection.build());
         }
         self
     }
