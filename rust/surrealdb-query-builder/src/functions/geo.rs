@@ -359,12 +359,13 @@ pub mod hash {
 mod tests {
     use super::*;
     use crate::*;
-    use geo::{point, polygon};
+    use ::geo::{point, polygon};
+    use functions::geo;
 
     #[test]
     fn test_area_with_field() {
         let city = Field::new("city");
-        let result = area_fn(city);
+        let result = geo::area_fn(city);
 
         assert_eq!(result.fine_tune_params(), "geo::area(city)");
         assert_eq!(result.to_raw().build(), "geo::area(city)");
@@ -388,7 +389,7 @@ mod tests {
                 ],
             ],
         );
-        let result = area_fn(poly);
+        let result = geo::area_fn(poly);
         assert_eq!(
             result.fine_tune_params(),
             "geo::area($_param_00000001)"
@@ -417,7 +418,7 @@ mod tests {
                 ],
             ],
         );
-        let result = area!(poly);
+        let result = geo::area!(poly);
         assert_eq!(result.fine_tune_params(), "geo::area($_param_00000001)");
         assert_eq!(
         result.to_raw().build(),
@@ -428,7 +429,7 @@ mod tests {
     #[test]
     fn test_area_macro_with_fields() {
         let poly = Field::new("poly");
-        let result = area!(poly);
+        let result = geo::area!(poly);
         assert_eq!(result.fine_tune_params(), "geo::area(poly)");
         assert_eq!(result.to_raw().build(), "geo::area(poly)");
     }
@@ -436,7 +437,7 @@ mod tests {
     #[test]
     fn test_area_macro_with_params() {
         let poly = Param::new("poly");
-        let result = area!(poly);
+        let result = geo::area!(poly);
         assert_eq!(result.fine_tune_params(), "geo::area($poly)");
         assert_eq!(result.to_raw().build(), "geo::area($poly)");
     }
@@ -452,7 +453,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = bearing_fn(point1, point2);
+        let result = geo::bearing_fn(point1, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::bearing($_param_00000001, $_param_00000002)"
@@ -471,7 +472,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = bearing_fn(hometown, point2);
+        let result = geo::bearing_fn(hometown, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::bearing(hometown, $_param_00000001)"
@@ -493,7 +494,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = bearing!(point1, point2);
+        let result = geo::bearing!(point1, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::bearing($_param_00000001, $_param_00000002)"
@@ -512,7 +513,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = bearing!(hometown, point2);
+        let result = geo::bearing!(hometown, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::bearing(hometown, $_param_00000001)"
@@ -528,7 +529,7 @@ mod tests {
         let hometown = Param::new("hometown");
         let point2 = Param::new("point2");
 
-        let result = bearing!(hometown, point2);
+        let result = geo::bearing!(hometown, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::bearing($hometown, $point2)"
@@ -563,7 +564,7 @@ mod tests {
                 ],
             ],
         );
-        let result = centroid_fn(poly);
+        let result = geo::centroid_fn(poly);
         assert_eq!(
             result.fine_tune_params(),
             "geo::centroid($_param_00000001)"
@@ -577,7 +578,7 @@ mod tests {
     #[test]
     fn test_centroid_macro_with_field() {
         let city = Field::new("city");
-        let result = centroid!(city);
+        let result = geo::centroid!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::centroid(city)");
         assert_eq!(result.to_raw().build(), "geo::centroid(city)");
@@ -586,7 +587,7 @@ mod tests {
     #[test]
     fn test_centroid_macro_with_param() {
         let city = Param::new("city");
-        let result = centroid!(city);
+        let result = geo::centroid!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::centroid($city)");
         assert_eq!(result.to_raw().build(), "geo::centroid($city)");
@@ -610,7 +611,7 @@ mod tests {
                 ],
             ],
         );
-        let result = centroid!(poly);
+        let result = geo::centroid!(poly);
         assert_eq!(result.fine_tune_params(), "geo::centroid($_param_00000001)");
         assert_eq!(
         result.to_raw().build(),
@@ -629,7 +630,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = distance_fn(point1, point2);
+        let result = geo::distance_fn(point1, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::distance($_param_00000001, $_param_00000002)"
@@ -648,7 +649,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = distance_fn(hometown, point2);
+        let result = geo::distance_fn(hometown, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::distance(hometown, $_param_00000001)"
@@ -664,7 +665,7 @@ mod tests {
         let hometown = Field::new("hometown");
         let yukon = Field::new("yukon");
 
-        let result = distance_fn(hometown, yukon);
+        let result = geo::distance_fn(hometown, yukon);
         assert_eq!(result.fine_tune_params(), "geo::distance(hometown, yukon)");
         assert_eq!(result.to_raw().build(), "geo::distance(hometown, yukon)");
     }
@@ -680,7 +681,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = distance!(point1, point2);
+        let result = geo::distance!(point1, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::distance($_param_00000001, $_param_00000002)"
@@ -699,7 +700,7 @@ mod tests {
             x: 80.02f64,
             y: 103.19,
         };
-        let result = distance!(hometown, point2);
+        let result = geo::distance!(hometown, point2);
         assert_eq!(
             result.fine_tune_params(),
             "geo::distance(hometown, $_param_00000001)"
@@ -715,7 +716,7 @@ mod tests {
         let hometown = Field::new("hometown");
         let yukon = Field::new("yukon");
 
-        let result = distance!(hometown, yukon);
+        let result = geo::distance!(hometown, yukon);
         assert_eq!(result.fine_tune_params(), "geo::distance(hometown, yukon)");
         assert_eq!(result.to_raw().build(), "geo::distance(hometown, yukon)");
     }
@@ -725,7 +726,7 @@ mod tests {
         let hometown = Param::new("hometown");
         let yukon = Param::new("yukon");
 
-        let result = distance!(hometown, yukon);
+        let result = geo::distance!(hometown, yukon);
         assert_eq!(
             result.fine_tune_params(),
             "geo::distance($hometown, $yukon)"
@@ -736,7 +737,7 @@ mod tests {
     #[test]
     fn test_hash_decode_with_field() {
         let city = Field::new("city");
-        let result = hash::decode_fn(city);
+        let result = geo::hash::decode_fn(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::decode(city)");
         assert_eq!(result.to_raw().build(), "geo::hash::decode(city)");
@@ -755,7 +756,7 @@ mod tests {
     #[test]
     fn test_hash_decode_macro_with_field() {
         let city = Field::new("city");
-        let result = hash::decode!(city);
+        let result = geo::hash::decode!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::decode(city)");
         assert_eq!(result.to_raw().build(), "geo::hash::decode(city)");
@@ -764,7 +765,7 @@ mod tests {
     #[test]
     fn test_hash_decode_macro_with_param() {
         let city = Param::new("city");
-        let result = hash::decode!(city);
+        let result = geo::hash::decode!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::decode($city)");
         assert_eq!(result.to_raw().build(), "geo::hash::decode($city)");
@@ -772,7 +773,7 @@ mod tests {
 
     #[test]
     fn test_hash_decode_macro_with_string() {
-        let result = hash::decode!("mpuxk4s24f51");
+        let result = geo::hash::decode!("mpuxk4s24f51");
         assert_eq!(
             result.fine_tune_params(),
             "geo::hash::decode($_param_00000001)"
@@ -783,7 +784,7 @@ mod tests {
     #[test]
     fn test_hash_encode_with_field_and_empty_accuracy() {
         let city = Field::new("city");
-        let result = hash::encode_fn(city, None as Option<NumberLike>);
+        let result = geo::hash::encode_fn(city, None as Option<NumberLike>);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
         assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
@@ -793,7 +794,7 @@ mod tests {
     fn test_hash_encode_with_field_and_field_accuracy() {
         let city = Field::new("city");
         let accuracy = Field::new("accuracy");
-        let result = hash::encode_fn(city, Some(accuracy));
+        let result = geo::hash::encode_fn(city, Some(accuracy));
 
         assert_eq!(
             result.fine_tune_params(),
@@ -805,7 +806,7 @@ mod tests {
     #[test]
     fn test_hash_encode_with_field_and_number_accuracy() {
         let city = Field::new("city");
-        let result = hash::encode_fn(city, Some(5));
+        let result = geo::hash::encode_fn(city, Some(5));
 
         assert_eq!(
             result.fine_tune_params(),
@@ -821,7 +822,7 @@ mod tests {
             y: 116.34,
         };
 
-        let result = hash::encode_fn(point, Some(5));
+        let result = geo::hash::encode_fn(point, Some(5));
         assert_eq!(
             result.fine_tune_params(),
             "geo::hash::encode($_param_00000001, $_param_00000002)"
@@ -835,7 +836,7 @@ mod tests {
     #[test]
     fn test_hash_encode_macro_with_field_and_empty_accuracy_not_mentioned_at_all() {
         let city = Field::new("city");
-        let result = hash::encode!(city);
+        let result = geo::hash::encode!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
         assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
@@ -844,7 +845,7 @@ mod tests {
     #[test]
     fn test_hash_encode_macro_with_field_and_empty_accuracy() {
         let city = Field::new("city");
-        let result = hash::encode!(city);
+        let result = geo::hash::encode!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::encode(city)");
         assert_eq!(result.to_raw().build(), "geo::hash::encode(city)");
@@ -854,7 +855,7 @@ mod tests {
     fn test_hash_encode_macro_with_field_and_field_accuracy() {
         let city = Field::new("city");
         let accuracy = Field::new("accuracy");
-        let result = hash::encode!(city, accuracy);
+        let result = geo::hash::encode!(city, accuracy);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -866,7 +867,7 @@ mod tests {
     #[test]
     fn test_hash_encode_macro_with_param_and_no_accuracy_listed() {
         let city = Param::new("city");
-        let result = hash::encode!(city);
+        let result = geo::hash::encode!(city);
 
         assert_eq!(result.fine_tune_params(), "geo::hash::encode($city)");
         assert_eq!(result.to_raw().build(), "geo::hash::encode($city)");
@@ -875,7 +876,7 @@ mod tests {
     #[test]
     fn test_hash_encode_macros_with_field_and_number_accuracy() {
         let city = Field::new("city");
-        let result = hash::encode!(city, 5);
+        let result = geo::hash::encode!(city, 5);
 
         assert_eq!(
             result.fine_tune_params(),
@@ -891,7 +892,7 @@ mod tests {
             y: 116.34,
         };
 
-        let result = hash::encode!(point, 5);
+        let result = geo::hash::encode!(point, 5);
         assert_eq!(
             result.fine_tune_params(),
             "geo::hash::encode($_param_00000001, $_param_00000002)"
