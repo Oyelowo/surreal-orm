@@ -722,11 +722,12 @@ pub use string_replace as replace;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::functions::string;
     use crate::*;
     #[test]
     fn test_concat_macro() {
         let title = Field::new("title");
-        let result = self::concat!(title, "one", 3, 4.15385, "  ", true);
+        let result = string::concat!(title, "one", 3, 4.15385, "  ", true);
         assert_eq!(result.fine_tune_params(), "string::concat(title, $_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005)");
         assert_eq!(
             result.to_raw().build(),
@@ -736,7 +737,7 @@ mod tests {
 
     #[test]
     fn test_concat_macro_with_array() {
-        let result = self::concat!(arr!["one", "two", 3, 4.15385, "five", true]);
+        let result = string::concat!(arr!["one", "two", 3, 4.15385, "five", true]);
         assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
@@ -747,7 +748,7 @@ mod tests {
     #[test]
     fn test_join_macro() {
         let title = Field::new("title");
-        let result = join!(title, "one", 3, 4.15385, "  ", true);
+        let result = string::join!(title, "one", 3, 4.15385, "  ", true);
         assert_eq!(result.fine_tune_params(), "string::join(title, $_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005)");
         assert_eq!(
             result.to_raw().build(),
@@ -757,7 +758,7 @@ mod tests {
 
     #[test]
     fn test_join_macro_with_array() {
-        let result = join!(arr!["one", "two", 3, 4.15385, "five", true]);
+        let result = string::join!(arr!["one", "two", 3, 4.15385, "five", true]);
         assert_eq!(result.fine_tune_params(), "string::join($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
@@ -768,7 +769,7 @@ mod tests {
     #[test]
     fn test_ends_with_macro_with_field_and_string() {
         let name = Field::new("name");
-        let result = ends_with!(name, "lowo");
+        let result = string::ends_with!(name, "lowo");
         assert_eq!(
             result.fine_tune_params(),
             "string::ends_with(name, $_param_00000001)"
@@ -778,7 +779,7 @@ mod tests {
 
     #[test]
     fn test_ends_with_macro_with_plain_strings() {
-        let result = ends_with!("Oyelowo", "lowo");
+        let result = string::ends_with!("Oyelowo", "lowo");
         assert_eq!(
             result.fine_tune_params(),
             "string::ends_with($_param_00000001, $_param_00000002)"
@@ -792,7 +793,7 @@ mod tests {
     #[test]
     fn test_starts_with_macro_with_field_and_string() {
         let name = Field::new("name");
-        let result = starts_with!(name, "lowo");
+        let result = string::starts_with!(name, "lowo");
         assert_eq!(
             result.fine_tune_params(),
             "string::starts_with(name, $_param_00000001)"
@@ -802,7 +803,7 @@ mod tests {
 
     #[test]
     fn test_starts_with_macro_with_plain_strings() {
-        let result = starts_with!("Oyelowo", "Oye");
+        let result = string::starts_with!("Oyelowo", "Oye");
         assert_eq!(
             result.fine_tune_params(),
             "string::starts_with($_param_00000001, $_param_00000002)"
@@ -815,7 +816,7 @@ mod tests {
     #[test]
     fn test_split_macro_with_field_and_string() {
         let phrase = Field::new("phrase");
-        let result = split!(phrase, ", ");
+        let result = string::split!(phrase, ", ");
         assert_eq!(
             result.fine_tune_params(),
             "string::split(phrase, $_param_00000001)"
@@ -825,7 +826,7 @@ mod tests {
 
     #[test]
     fn test_split_macro_with_plain_strings() {
-        let result = split!("With great power, comes great responsibility", ", ");
+        let result = string::split!("ith great power, comes great responsibility", ", ");
         assert_eq!(
             result.fine_tune_params(),
             "string::split($_param_00000001, $_param_00000002)"
@@ -839,14 +840,14 @@ mod tests {
     #[test]
     fn test_length_with_macro_with_field() {
         let name = Field::new("name");
-        let result = len!(name);
+        let result = string::len!(name);
         assert_eq!(result.fine_tune_params(), "string::length(name)");
         assert_eq!(result.to_raw().build(), "string::length(name)");
     }
 
     #[test]
     fn test_length_with_macro_with_plain_string() {
-        let result = len!("toronto");
+        let result = string::len!("toonto");
         assert_eq!(
             result.fine_tune_params(),
             "string::length($_param_00000001)"
@@ -857,14 +858,14 @@ mod tests {
     #[test]
     fn test_reverse_with_macro_with_field() {
         let name = Field::new("name");
-        let result = reverse!(name);
+        let result = string::reverse!(name);
         assert_eq!(result.fine_tune_params(), "string::reverse(name)");
         assert_eq!(result.to_raw().build(), "string::reverse(name)");
     }
 
     #[test]
     fn test_reverse_with_macro_with_plain_string() {
-        let result = reverse!("oyelowo");
+        let result = string::reverse!("oyelowo");
         assert_eq!(
             result.fine_tune_params(),
             "string::reverse($_param_00000001)"
@@ -875,14 +876,14 @@ mod tests {
     #[test]
     fn test_trim_with_macro_with_field() {
         let name = Field::new("name");
-        let result = trim!(name);
+        let result = string::trim!(name);
         assert_eq!(result.fine_tune_params(), "string::trim(name)");
         assert_eq!(result.to_raw().build(), "string::trim(name)");
     }
 
     #[test]
     fn test_trim_with_macro_with_plain_string() {
-        let result = trim!("oyelowo");
+        let result = string::trim!("oyelowo");
         assert_eq!(result.fine_tune_params(), "string::trim($_param_00000001)");
         assert_eq!(result.to_raw().build(), "string::trim('oyelowo')");
     }
@@ -890,14 +891,14 @@ mod tests {
     #[test]
     fn test_slug_with_macro_with_field() {
         let name = Field::new("name");
-        let result = slug!(name);
+        let result = string::slug!(name);
         assert_eq!(result.fine_tune_params(), "string::slug(name)");
         assert_eq!(result.to_raw().build(), "string::slug(name)");
     }
 
     #[test]
     fn test_slug_with_macro_with_plain_string() {
-        let result = slug!("Codebreather is from #Jupiter");
+        let result = string::slug!("Cdebreather is from #Jupiter");
         assert_eq!(result.fine_tune_params(), "string::slug($_param_00000001)");
         assert_eq!(
             result.to_raw().build(),
@@ -908,14 +909,14 @@ mod tests {
     #[test]
     fn test_lowercase_with_macro_with_field() {
         let name = Field::new("name");
-        let result = lowercase!(name);
+        let result = string::lowercase!(name);
         assert_eq!(result.fine_tune_params(), "string::lowercase(name)");
         assert_eq!(result.to_raw().build(), "string::lowercase(name)");
     }
 
     #[test]
     fn test_lowercase_with_macro_with_plain_string() {
-        let result = lowercase!("OYELOWO");
+        let result = string::lowercase!("OYELOWO");
         assert_eq!(
             result.fine_tune_params(),
             "string::lowercase($_param_00000001)"
@@ -926,14 +927,14 @@ mod tests {
     #[test]
     fn test_uppercase_with_macro_with_field() {
         let name = Field::new("name");
-        let result = uppercase!(name);
+        let result = string::uppercase!(name);
         assert_eq!(result.fine_tune_params(), "string::uppercase(name)");
         assert_eq!(result.to_raw().build(), "string::uppercase(name)");
     }
 
     #[test]
     fn test_uppercase_with_macro_with_plain_string() {
-        let result = uppercase!("oyelowo");
+        let result = string::uppercase!("oyelowo");
         assert_eq!(
             result.fine_tune_params(),
             "string::uppercase($_param_00000001)"
@@ -944,14 +945,14 @@ mod tests {
     #[test]
     fn test_words_with_macro_with_field() {
         let sentence = Field::new("sentence");
-        let result = words!(sentence);
+        let result = string::words!(sentence);
         assert_eq!(result.fine_tune_params(), "string::words(sentence)");
         assert_eq!(result.to_raw().build(), "string::words(sentence)");
     }
 
     #[test]
     fn test_words_with_macro_with_plain_string() {
-        let result = words!(
+        let result = string::words!(
             "This is the first day of the rest of my life. I will make every single moment count!"
         );
         assert_eq!(result.fine_tune_params(), "string::words($_param_00000001)");
@@ -962,14 +963,14 @@ mod tests {
     fn test_repeat_with_macro_with_fields() {
         let name = Field::new("name");
         let count = Field::new("count");
-        let result = repeat!(name, count);
+        let result = string::repeat!(name, count);
         assert_eq!(result.fine_tune_params(), "string::repeat(name, count)");
         assert_eq!(result.to_raw().build(), "string::repeat(name, count)");
     }
 
     #[test]
     fn test_repeat_with_macro_with_plain_string() {
-        let result = repeat!("Oyelowo", 5);
+        let result = string::repeat!("Oyelowo", 5);
         assert_eq!(
             result.fine_tune_params(),
             "string::repeat($_param_00000001, $_param_00000002)"
@@ -983,7 +984,7 @@ mod tests {
         let last_name = Field::new("last_name");
         let first_name = Field::new("first_name");
 
-        let result = replace!(name, last_name, first_name);
+        let result = string::replace!(name, last_name, first_name);
         assert_eq!(
             result.fine_tune_params(),
             "string::replace(name, last_name, first_name)"
@@ -996,7 +997,7 @@ mod tests {
 
     #[test]
     fn test_slice_with_macro_with_plain_string() {
-        let result = slice!("Oyelowo", 3, 5);
+        let result = string::slice!("yelowo", 3, 5);
         assert_eq!(
             result.fine_tune_params(),
             "string::slice($_param_00000001, $_param_00000002, $_param_00000003)"
@@ -1010,7 +1011,7 @@ mod tests {
         let last_name = Field::new("last_name");
         let first_name = Field::new("first_name");
 
-        let result = slice!(name, last_name, first_name);
+        let result = string::slice!(name, last_name, first_name);
         assert_eq!(
             result.fine_tune_params(),
             "string::slice(name, last_name, first_name)"
@@ -1023,7 +1024,7 @@ mod tests {
 
     #[test]
     fn test_replace_with_macro_with_plain_strings() {
-        let result = replace!("Oyelowo Oyedayo", "Oyelowo", "Oyedayo");
+        let result = string::replace!("Oyelowo Oyedayo", "Oyelowo", "Oyedayo");
         assert_eq!(
             result.fine_tune_params(),
             "string::replace($_param_00000001, $_param_00000002, $_param_00000003)"
