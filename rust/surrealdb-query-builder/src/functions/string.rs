@@ -826,7 +826,7 @@ mod tests {
 
     #[test]
     fn test_split_macro_with_plain_strings() {
-        let result = string::split!("ith great power, comes great responsibility", ", ");
+        let result = string::split!("With great power, comes great responsibility", ", ");
         assert_eq!(
             result.fine_tune_params(),
             "string::split($_param_00000001, $_param_00000002)"
@@ -847,7 +847,7 @@ mod tests {
 
     #[test]
     fn test_length_with_macro_with_plain_string() {
-        let result = string::len!("toonto");
+        let result = string::len!("toronto");
         assert_eq!(
             result.fine_tune_params(),
             "string::length($_param_00000001)"
@@ -898,7 +898,7 @@ mod tests {
 
     #[test]
     fn test_slug_with_macro_with_plain_string() {
-        let result = string::slug!("Cdebreather is from #Jupiter");
+        let result = string::slug!("Codebreather is from #Jupiter");
         assert_eq!(result.fine_tune_params(), "string::slug($_param_00000001)");
         assert_eq!(
             result.to_raw().build(),
@@ -997,7 +997,7 @@ mod tests {
 
     #[test]
     fn test_slice_with_macro_with_plain_string() {
-        let result = string::slice!("yelowo", 3, 5);
+        let result = string::slice!("Oyelowo", 3, 5);
         assert_eq!(
             result.fine_tune_params(),
             "string::slice($_param_00000001, $_param_00000002, $_param_00000003)"

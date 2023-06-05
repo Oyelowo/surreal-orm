@@ -514,7 +514,7 @@ mod tests {
         let away = Field::new("away");
         let result = type_::point!(home, away);
         assert_eq!(result.fine_tune_params(), "type::point(home, away)");
-        assert_eq!(result.to_raw().build(), "type::type_::point(home, away)");
+        assert_eq!(result.to_raw().build(), "type::point(home, away)");
     }
 
     #[test]
