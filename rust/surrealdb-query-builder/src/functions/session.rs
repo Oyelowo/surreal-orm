@@ -45,17 +45,18 @@ macro_rules! create_function {
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
+                use crate::functions::session;
 
                 #[test]
                 fn [<test_ $function_name _fn>]() {
-                    let result = [<$function_name _fn>]();
+                    let result = session::[<$function_name _fn>]();
                     assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
                     assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _macro>]() {
-                    let result = [<$function_name>]!();
+                    let result = session::[<$function_name>]!();
                     assert_eq!(result.fine_tune_params(), format!("{}()", $function_name));
                     assert_eq!(result.to_raw().build(), format!("{}()", $function_name));
                 }
