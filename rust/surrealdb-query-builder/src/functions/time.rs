@@ -87,11 +87,13 @@ macro_rules! create_time_fn_with_single_datetime_arg {
             #[cfg(test)]
             mod [<test_ $function_name _fn>] {
                 use $crate::*;
+                use crate::functions::time;
+
 
                 #[test]
                 fn [<test_ $function_name _fn_with_datetime_field>]() {
                     let rebirth_date = $crate::Field::new("rebirth_date");
-                    let result = [<time_ $function_name>]!(rebirth_date);
+                    let result = time::[<$function_name>]!(rebirth_date);
 
                     assert_eq!(result.fine_tune_params(), format!("time::{}(rebirth_date)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("time::{}(rebirth_date)", $function_name));
@@ -103,7 +105,7 @@ macro_rules! create_time_fn_with_single_datetime_arg {
                         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                         chrono::Utc,
                     );
-                    let result = [<time_ $function_name>]!(dt);
+                    let result = time::[<$function_name>]!(dt);
                     assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_name));
                     assert_eq!(
                         result.to_raw().build(),
