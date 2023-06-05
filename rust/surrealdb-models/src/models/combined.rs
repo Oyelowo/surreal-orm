@@ -35,7 +35,7 @@ fn gama() -> SelectStatement {
     crypto::argon2::compare!("Rer", "Erer");
     // All
 
-    select(All)
+    select(All).from(Table::new("user"))
 }
 fn full() -> u32 {
     54

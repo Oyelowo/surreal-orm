@@ -760,9 +760,9 @@ enum SelectionType {
     SelectValue,
 }
 
-/// The query builder struct used to construct complex database queries.
+/// Select statement initializer
 #[derive(Debug, Clone)]
-pub struct SelectStatement {
+pub struct SelectStatementInit {
     selection_type: SelectionType,
     projections: String,
     targets: Vec<String>,
@@ -797,13 +797,13 @@ impl Conditional for SelectStatement {
 
 impl Erroneous for SelectStatement {
     fn get_errors(&self) -> Vec<String> {
-        self.errors.to_vec()
+        self.0.errors.to_vec()
     }
 }
 
 impl Parametric for SelectStatement {
     fn get_bindings(&self) -> BindingsList {
-        self.bindings.to_vec()
+        self.0.bindings.to_vec()
     }
 }
 
@@ -876,10 +876,10 @@ impl Parametric for SelectStatement {
 ///  select(vec![gender, country])
 ///     .from(user);
 /// ```
-pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
+pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
     let selectables: Selectables = selectables.into();
 
-    SelectStatement {
+    SelectStatementInit {
         selection_type: SelectionType::Select,
         projections: selectables.build(),
         targets: vec![],
@@ -898,10 +898,10 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatement {
 }
 
 /// Just like normal select statement but useful for selecting a single value out of the returned object.
-pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
+pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
     let selectables: Field = selectable_value.into();
 
-    SelectStatement {
+    SelectStatementInit {
         selection_type: SelectionType::SelectValue,
         projections: selectables.build(),
         targets: vec![],
@@ -919,7 +919,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatement {
     }
 }
 
-impl SelectStatement {
+impl SelectStatementInit {
     /// Specifies the table to select from.
     ///
     /// # Arguments
@@ -948,7 +948,7 @@ impl SelectStatement {
     ///  // or a list of tables, ids or subqueries
     ///  select(All).from(![user, user_id, select(All).from(alien)]);
     /// ```
-    pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> Self {
+    pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
         let targets: TargettablesForSelect = targettables.into();
         let mut targets_bindings = vec![];
 
@@ -995,9 +995,29 @@ impl SelectStatement {
 
         self.update_bindings(targets_bindings);
         self.targets.extend(target_names);
-        self
+        self.into()
     }
 
+    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
+        // let mut updated_params = vec![];
+        // updated_params.extend(self.________params_accumulator.to_vec());
+        // updated_params.extend(parametric_value.get_bindings());
+        self.bindings.extend(bindings);
+        self
+    }
+}
+
+/// The query builder struct used to construct complex database queries.
+#[derive(Debug, Clone)]
+pub struct SelectStatement(SelectStatementInit);
+
+impl From<SelectStatementInit> for SelectStatement {
+    fn from(value: SelectStatementInit) -> Self {
+        Self(value)
+    }
+}
+
+impl SelectStatement {
     /// Adds a condition to the `` clause of the SQL query.
     ///
     /// # Arguments
@@ -1018,27 +1038,19 @@ impl SelectStatement {
     /// # let fake_id2 = TestUser::create_id("oyedayo");
     /// // Supports simpler where clause without `cond` helper function
     /// # let select2 = select(All)
-    /// #   .from(fake_id2)
+    /// #   .from(fake_id)
     ///     .where_(country.is("INDONESIA"));
     ///
     /// // Supports more complex where clause using `cond` helper function
-    /// # let select1 = select(All)
-    ///     .where_(cond(city.is("Prince Edward Island"))
-    ///                 .and(city.is("NewFoundland"))
-    ///                 .or(city.like("Toronto"))
-    ///     );
+    /// # let select1 = select(All).from(fake_id2)
+    ///                     .where_(cond(city.is("Prince Edward Island"))
+    ///                     .and(city.is("NewFoundland"))
+    ///                     .or(city.like("Toronto"))
+    ///                 );
     pub fn where_(mut self, condition: impl Conditional + Clone) -> Self {
         self.update_bindings(condition.get_bindings());
         let condition = Filter::new(condition);
-        self.where_ = Some(condition.build());
-        self
-    }
-
-    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
-        // let mut updated_params = vec![];
-        // updated_params.extend(self.________params_accumulator.to_vec());
-        // updated_params.extend(parametric_value.get_bindings());
-        self.bindings.extend(bindings);
+        self.0.where_ = Some(condition.build());
         self
     }
 
@@ -1083,7 +1095,7 @@ impl SelectStatement {
         };
 
         fields.iter().for_each(|f| {
-            self.split.push(f.to_string());
+            self.0.split.push(f.to_string());
         });
         self
     }
@@ -1160,7 +1172,7 @@ impl SelectStatement {
         };
 
         fields.iter().for_each(|f| {
-            self.group_by.push(f.to_string());
+            self.0.group_by.push(f.to_string());
         });
         self
     }
@@ -1215,7 +1227,7 @@ impl SelectStatement {
         self.update_bindings(orderables.get_bindings());
 
         let orders: Vec<Order> = orderables.into();
-        self.order_by.extend(orders);
+        self.0.order_by.extend(orders);
         self
     }
 
@@ -1247,7 +1259,7 @@ impl SelectStatement {
     /// ```
     pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
         let limit: NumberLike = limit.into();
-        self.limit = Some(limit.build());
+        self.0.limit = Some(limit.build());
         self.update_bindings(limit.get_bindings());
         self
     }
@@ -1273,7 +1285,7 @@ impl SelectStatement {
     /// ```
     pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
         let start: NumberLike = start.into();
-        self.start = Some(start.build());
+        self.0.start = Some(start.build());
         self.update_bindings(start.get_bindings());
         self
     }
@@ -1336,9 +1348,9 @@ impl SelectStatement {
         };
 
         fields.iter().for_each(|f| {
-            self.fetch.push(f.build());
-            self.bindings.extend(f.get_bindings());
-            self.errors.extend(f.get_errors());
+            self.0.fetch.push(f.build());
+            self.0.bindings.extend(f.get_bindings());
+            self.0.errors.extend(f.get_errors());
         });
         self
     }
@@ -1364,16 +1376,25 @@ impl SelectStatement {
     /// ```
     pub fn timeout(mut self, duration: impl Into<DurationLike>) -> Self {
         let duration: DurationLike = duration.into();
-        self.timeout = Some(duration.to_raw().build());
+        self.0.timeout = Some(duration.to_raw().build());
         self
     }
 
     /// Indicates that the query should be executed in parallel.
     pub fn parallel(mut self) -> Self {
-        self.parallel = true;
+        self.0.parallel = true;
+        self
+    }
+
+    fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
+        // let mut updated_params = vec![];
+        // updated_params.extend(self.________params_accumulator.to_vec());
+        // updated_params.extend(parametric_value.get_bindings());
+        self.0.bindings.extend(bindings);
         self
     }
 }
+
 impl Display for SelectStatement {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.build())
@@ -1382,33 +1403,34 @@ impl Display for SelectStatement {
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
-        let select = match self.selection_type {
+        let ref statement = self.0;
+        let select = match statement.selection_type {
             SelectionType::Select => "SELECT",
             SelectionType::SelectValue => "SELECT VALUE",
         };
 
         let mut query = format!(
             "{select} {} FROM {}",
-            self.projections,
-            self.targets.join(", ")
+            statement.projections,
+            statement.targets.join(", ")
         );
 
-        if let Some(condition) = &self.where_ {
+        if let Some(condition) = &statement.where_ {
             query = format!("{query} WHERE {condition}");
         }
 
-        if !self.split.is_empty() {
-            query = format!("{query} SPLIT {}", &self.split.join(", "));
+        if !statement.split.is_empty() {
+            query = format!("{query} SPLIT {}", &statement.split.join(", "));
         }
 
-        if !self.group_by.is_empty() {
-            query = format!("{query} GROUP BY {}", &self.group_by.join(", "));
+        if !statement.group_by.is_empty() {
+            query = format!("{query} GROUP BY {}", &statement.group_by.join(", "));
         }
 
-        if !self.order_by.is_empty() {
+        if !statement.order_by.is_empty() {
             query = format!(
                 "{query} ORDER BY {}",
-                &self
+                &statement
                     .order_by
                     .iter()
                     .map(|o| o.to_string())
@@ -1417,23 +1439,23 @@ impl Buildable for SelectStatement {
             );
         }
 
-        if let Some(limit_value) = &self.limit {
+        if let Some(ref limit_value) = statement.limit {
             query = format!("{query} LIMIT {}", limit_value);
         }
 
-        if let Some(start_value) = &self.start {
+        if let Some(ref start_value) = statement.start {
             query = format!("{query} START AT {}", start_value);
         }
 
-        if !self.fetch.is_empty() {
-            query = format!("{query} FETCH {}", &self.fetch.join(", "));
+        if !statement.fetch.is_empty() {
+            query = format!("{query} FETCH {}", statement.fetch.join(", "));
         }
 
-        if let Some(timeout_value) = &self.timeout {
+        if let Some(timeout_value) = &statement.timeout {
             query = format!("{query} TIMEOUT {}", timeout_value);
         }
 
-        if self.parallel {
+        if statement.parallel {
             query = format!("{query} PARALLEL");
         }
 
@@ -1452,14 +1474,14 @@ impl<T: SurrealdbModel> SelectStatementMini<T> {
         self.0.update_bindings(orderables.get_bindings());
 
         let orders: Vec<Order> = orderables.into();
-        self.0.order_by.extend(orders);
+        self.0 .0.order_by.extend(orders);
         self
     }
 
     /// Starts the result at the offset
     pub fn start(mut self, start: impl Into<NumberLike>) -> Self {
         let start: NumberLike = start.into();
-        self.0.start = Some(start.build());
+        self.0 .0.start = Some(start.build());
         self.0.update_bindings(start.get_bindings());
         self
     }
@@ -1467,14 +1489,14 @@ impl<T: SurrealdbModel> SelectStatementMini<T> {
     /// Limits the number of results returned
     pub fn limit(mut self, limit: impl Into<NumberLike>) -> Self {
         let limit: NumberLike = limit.into();
-        self.0.limit = Some(limit.build());
+        self.0 .0.limit = Some(limit.build());
         self.0.update_bindings(limit.get_bindings());
         self
     }
 
     /// Parallelizes the query
     pub fn parallel(mut self) -> Self {
-        self.0.parallel = true;
+        self.0 .0.parallel = true;
         self
     }
 }
@@ -1515,7 +1537,7 @@ where
 {
     fn set_return_type(mut self, return_type: crate::ReturnType) -> Self {
         if let crate::ReturnType::Projections(projection) = return_type {
-            self.0.projections = format!("{}, {}", self.0.projections, projection.build());
+            self.0 .0.projections = format!("{}, {}", self.0 .0.projections, projection.build());
         }
         self
     }

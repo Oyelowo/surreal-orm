@@ -52,8 +52,8 @@ fn multiplication_tests1() {
     insta::assert_display_snapshot!(&query1.fine_tune_params());
 
     let ref student_table = Student::get_table_name();
-    let ref book_table = Book::get_table_name();
-    let ref book_id = thing("book:1").unwrap();
+    let ref _book_table = Book::get_table_name();
+    let ref _book_id = thing("book:1").unwrap();
 
     let mut query = select(arr![All, content, age, lastName, firstName, course])
         // Also work
@@ -62,13 +62,13 @@ fn multiplication_tests1() {
         // .select(&[firstName, unoBook])
         // .select(vec![firstName, unoBook])
         .from(student_table)
-        .from(&[student_table, book_table])
-        .from(vec![student_table, book_table])
-        .from(book_id)
+        // .from(&[student_table, book_table])
+        // .from(vec![student_table, book_table])
+        // .from(book_id)
         // .from(&[book_id, student_id])
         // .from(vec![book_id, student_id])
         // .from(vec![thing("book:1")])
-        .from(query1)
+        // .from(query1)
         .where_(
             cond(
                 age.greater_than(age)
