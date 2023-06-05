@@ -56,18 +56,19 @@ macro_rules! create_type {
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
+                use crate::functions::type_;
 
                 #[test]
                 fn [<test_ $function_name _with_field>]() {
                     let name = Field::new("name");
-                    let result = [<$function_name _fn>](name);
+                    let result = type_::[<$function_name _fn>](name);
                     assert_eq!(result.fine_tune_params(), format!("type::{}(name)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("type::{}(name)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _with_plain_string>]() {
-                    let result = [<$function_name _fn>]($test_data_input);
+                    let result = type_::[<$function_name _fn>]($test_data_input);
                     assert_eq!(result.fine_tune_params(), format!("type::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("type::{}({})", $function_name, $test_stringified_data_output));
                 }
@@ -438,26 +439,26 @@ pub use type_thing as thing;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::functions::type_;
     use crate::*;
 
     #[test]
     fn test_bool_with_macro_with_plain_number() {
-        let result = bool!(43545);
+        let result = type_::bool!(43545);
         assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
         assert_eq!(result.to_raw().build(), "type::bool(43545)");
     }
 
     #[test]
     fn test_bool_with_macro_with_plain_false() {
-        let result = bool!(false);
+        let result = type_::bool!(false);
         assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
         assert_eq!(result.to_raw().build(), "type::bool(false)");
     }
 
     #[test]
     fn test_bool_with_macro_with_plain_true() {
-        let result = bool!(true);
+        let result = type_::bool!(true);
         assert_eq!(result.fine_tune_params(), "type::bool($_param_00000001)");
         assert_eq!(result.to_raw().build(), "type::bool(true)");
     }
@@ -468,7 +469,7 @@ mod tests {
             chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
             chrono::Utc,
         );
-        let result = datetime!(value);
+        let result = type_::datetime!(value);
         assert_eq!(
             result.fine_tune_params(),
             "type::datetime($_param_00000001)"
@@ -482,7 +483,7 @@ mod tests {
     #[test]
     fn test_datetime_macro_with_datetime_field() {
         let rebirth_date = Field::new("rebirth_date");
-        let result = datetime!(rebirth_date);
+        let result = type_::datetime!(rebirth_date);
 
         assert_eq!(result.fine_tune_params(), "type::datetime(rebirth_date)");
         assert_eq!(result.to_raw().build(), "type::datetime(rebirth_date)");
@@ -491,7 +492,7 @@ mod tests {
     #[test]
     fn test_datetime_macro_with_param() {
         let rebirth_date = Param::new("rebirth_date");
-        let result = datetime!(rebirth_date);
+        let result = type_::datetime!(rebirth_date);
 
         assert_eq!(result.fine_tune_params(), "type::datetime($rebirth_date)");
         assert_eq!(result.to_raw().build(), "type::datetime($rebirth_date)");
@@ -499,7 +500,7 @@ mod tests {
 
     #[test]
     fn test_point_macro_with_plain_values() {
-        let result = point!(51.509865, -0.118092);
+        let result = type_::point!(51.509865, -0.118092);
         assert_eq!(
             result.fine_tune_params(),
             "type::point($_param_00000001, $_param_00000002)"
@@ -511,16 +512,16 @@ mod tests {
     fn test_point_macro_with_fields() {
         let home = Field::new("home");
         let away = Field::new("away");
-        let result = point!(home, away);
+        let result = type_::point!(home, away);
         assert_eq!(result.fine_tune_params(), "type::point(home, away)");
-        assert_eq!(result.to_raw().build(), "type::point(home, away)");
+        assert_eq!(result.to_raw().build(), "type::type_::point(home, away)");
     }
 
     #[test]
     fn test_thing_macro_with_plain_values() {
         let user = Table::from("user");
         let id = "oyelowo";
-        let result = thing!(user, id);
+        let result = type_::thing!(user, id);
         assert_eq!(
             result.fine_tune_params(),
             "type::thing($_param_00000001, $_param_00000002)"
@@ -532,7 +533,7 @@ mod tests {
     fn test_thing_macro_with_datetime_field() {
         let table = Table::new("table");
         let id = Field::new("id");
-        let result = thing!(table, id);
+        let result = type_::thing!(table, id);
 
         assert_eq!(
             result.fine_tune_params(),
