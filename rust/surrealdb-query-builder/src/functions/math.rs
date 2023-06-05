@@ -132,11 +132,12 @@ macro_rules! create_test_for_fn_with_single_arg {
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
+                use crate::functions::math;
 
                 #[test]
                 fn [<test_ $function_name _fn_with_field_data >] () {
                     let temparate = Field::new("temperature");
-                    let result = [<$function_name _fn>](temparate);
+                    let result = math::[<$function_name _fn>](temparate);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}(temperature)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(temperature)", $function_name));
@@ -144,14 +145,14 @@ macro_rules! create_test_for_fn_with_single_arg {
 
                 #[test]
                 fn [<test_ $function_name _fn_with_fraction>]() {
-                    let result = [<$function_name _fn>](45.23);
+                    let result = math::[<$function_name _fn>](45.23);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(45.23)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _fn_with_negative_number>]() {
-                    let result = [<$function_name _fn>](-454);
+                    let result = math::[<$function_name _fn>](-454);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(-454)", $function_name));
                 }
@@ -160,7 +161,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 #[test]
                 fn [<test_ $function_name _macro_with_field_data >] () {
                     let temparate = Field::new("temperature");
-                    let result = [<$function_name>]!(temparate);
+                    let result = math::[<$function_name>]!(temparate);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}(temperature)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(temperature)", $function_name));
@@ -169,7 +170,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 #[test]
                 fn [<test_ $function_name _macro_with_param >] () {
                     let temparate = Param::new("temperature");
-                    let result = [<$function_name>]!(temparate);
+                    let result = math::[<$function_name>]!(temparate);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}($temperature)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}($temperature)", $function_name));
@@ -177,14 +178,14 @@ macro_rules! create_test_for_fn_with_single_arg {
 
                 #[test]
                 fn [<test_ $function_name _macro_with_fraction>]() {
-                    let result = [<$function_name>]!(45.23);
+                    let result = math::[<$function_name>]!(45.23);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(45.23)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _macro_with_negative_number>]() {
-                    let result = [<$function_name>]!(-454);
+                    let result = math::[<$function_name>]!(-454);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(-454)", $function_name));
                 }
@@ -357,11 +358,12 @@ macro_rules! create_test_for_fn_with_single_array_arg {
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
+                use crate::functions::math;
 
                 #[test]
                 fn [<test_ $function_name _fn_with_field_data >] () {
                     let size_list = Field::new("size_list");
-                    let result = [<$function_name _fn>](size_list);
+                    let result = math::[<$function_name _fn>](size_list);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}(size_list)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(size_list)", $function_name));
@@ -370,7 +372,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 #[test]
                 fn [<test_ $function_name _fn_with_number_array>]() {
                     let arr1 = array![1, 2, 3, 3.5];
-                    let result = [<$function_name _fn>](arr1);
+                    let result = math::[<$function_name _fn>](arr1);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
                 }
@@ -379,7 +381,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 fn [<test_ $function_name _fn_with_mixed_array>]() {
                     let age = Field::new("age");
                     let arr = arr![1, 2, "4334", "Oyelowo", age];
-                    let result = [<$function_name _fn>](arr);
+                    let result = math::[<$function_name _fn>](arr);
                     assert_eq!(result.fine_tune_params(),
                         format!("math::{}([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, age])", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, '4334', 'Oyelowo', age])", $function_name));
@@ -389,7 +391,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 #[test]
                 fn [<test_ $function_name _macro_with_field_data >] () {
                     let size_list = Field::new("size_list");
-                    let result = [<$function_name>]!(size_list);
+                    let result = math::[<$function_name>]!(size_list);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}(size_list)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}(size_list)", $function_name));
@@ -398,7 +400,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 #[test]
                 fn [<test_ $function_name _macro_with_param >] () {
                     let size_list = Param::new("size_list");
-                    let result = [<$function_name>]!(size_list);
+                    let result = math::[<$function_name>]!(size_list);
 
                     assert_eq!(result.fine_tune_params(), format!("math::{}($size_list)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}($size_list)", $function_name));
@@ -407,7 +409,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 #[test]
                 fn [<test_ $function_name _macro_with_number_array>]() {
                     let arr1 = array![1, 2, 3, 3.5];
-                    let result = [<$function_name>]!(arr1);
+                    let result = math::[<$function_name>]!(arr1);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
                 }
@@ -416,7 +418,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                 fn [<test_ $function_name _macro_with_mixed_array>]() {
                     let age = Field::new("age");
                     let arr = arr![1, 2, "4334", "Oyelowo", age];
-                    let result = [<$function_name>]!(arr);
+                    let result = math::[<$function_name>]!(arr);
                     assert_eq!(result.fine_tune_params(),
                         format!("math::{}([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, age])", $function_name));
                     assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, '4334', 'Oyelowo', age])", $function_name));
