@@ -57,11 +57,12 @@ macro_rules! create_validation_with_tests {
             mod [<test_ $function_name>] {
                 use super::*;
                 use crate::*;
+                use crate::functions::is;
 
                 #[test]
                 fn [<test_ $function_name _with_field>] ()  {
                     let username = Field::new("username");
-                    let result = [<$function_name _fn>](username);
+                    let result = is::[<$function_name _fn>](username);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
@@ -69,7 +70,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _string_username>] ()  {
-                    let result = [<$function_name _fn>]("oyelowo1234");
+                    let result = is::[<$function_name _fn>]("oyelowo1234");
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
@@ -77,7 +78,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _with_number>] ()  {
-                    let result = [<$function_name _fn>](123456423);
+                    let result = is::[<$function_name _fn>](123456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
@@ -85,7 +86,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _with_fraction>] ()  {
-                    let result = [<$function_name _fn>](12.3456423);
+                    let result = is::[<$function_name _fn>](12.3456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
@@ -95,7 +96,7 @@ macro_rules! create_validation_with_tests {
                 #[test]
                 fn [<test_ $function_name _macro_with_field>] ()  {
                     let username = Field::new("username");
-                    let result = [<$function_name>]!(username);
+                    let result = is::[<$function_name>]!(username);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
@@ -103,7 +104,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _macro_string_username>] ()  {
-                    let result = [<$function_name>]!("oyelowo1234");
+                    let result = is::[<$function_name>]!("oyelowo1234");
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
@@ -111,7 +112,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _macro_with_number>] ()  {
-                    let result = [<$function_name>]!(123456423);
+                    let result = is::[<$function_name>]!(123456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
@@ -119,7 +120,7 @@ macro_rules! create_validation_with_tests {
 
                 #[test]
                 fn [<test_ $function_name _macro_with_fraction>] ()  {
-                    let result = [<$function_name>]!(12.3456423);
+                    let result = is::[<$function_name>]!(12.3456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
                     assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
