@@ -769,6 +769,7 @@ pub struct SelectStatementInit {
     where_: Option<String>,
     split: Vec<String>,
     group_by: Vec<String>,
+    group_all: bool,
     order_by: Vec<Order>,
     limit: Option<String>,
     start: Option<String>,
@@ -886,6 +887,7 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
         where_: None,
         split: vec![],
         group_by: vec![],
+        group_all: false,
         order_by: vec![],
         limit: None,
         start: None,
@@ -908,6 +910,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
         where_: None,
         split: vec![],
         group_by: vec![],
+        group_all: false,
         order_by: vec![],
         limit: None,
         start: None,
@@ -1177,6 +1180,12 @@ impl SelectStatement {
         self
     }
 
+    ///
+    pub fn group_all(mut self) -> Self {
+        self.0.group_all = true;
+        self
+    }
+
     /// Sets the ORDER BY clause for the query. Multiple values can also be set within same call.
     /// Repeated calls are accumulated
     ///
@@ -1425,6 +1434,8 @@ impl Buildable for SelectStatement {
 
         if !statement.group_by.is_empty() {
             query = format!("{query} GROUP BY {}", &statement.group_by.join(", "));
+        } else if statement.group_all {
+            query = format!("{query} GROUP ALL");
         }
 
         if !statement.order_by.is_empty() {
