@@ -6,15 +6,17 @@
  */
 
 use crate::{
+    count,
     statements::{
         create::{create, CreateStatement},
         delete::{delete, DeleteStatementMini},
         select::select,
+        select_value,
         update::{update, UpdateStatement},
         SelectStatementMini,
     },
-    Alias, All, Conditional, Field, NodeClause, Raw, SurrealId, SurrealSimpleId, SurrealUlid,
-    SurrealUuid, SurrealdbOrmResult, Table, Valuex,
+    Alias, All, Conditional, Field, Filter, NodeClause, Raw, SurrealId, SurrealSimpleId,
+    SurrealUlid, SurrealUuid, SurrealdbOrmResult, Table, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
@@ -109,6 +111,20 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
     /// Finds records by filtering.
     fn find_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
         select(All).from(Self::table_name()).where_(filter).into()
+    }
+
+    /// Count records by filtering.
+    fn count_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
+        // select(Field::count(All))
+        //     .from(Self::table_name())
+        //     .where_(filter)
+        //     .into()
+        let selection = select_value(Field::new("count")).from(
+            select(count!(Filter::new(filter)))
+                .from(Self::table_name())
+                .group_all(),
+        );
+        selection.into()
     }
 
     /// Delete the current record by instance.
