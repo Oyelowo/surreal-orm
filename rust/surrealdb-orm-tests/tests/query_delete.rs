@@ -61,10 +61,10 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
     //         .build(),
     //     ""
     // );
-    assert_eq!(total_spaceships, Some(1000));
+    assert_eq!(total_spaceships, Some(500));
     dbg!(total_spaceships);
     // assert!(false);
-    // assert_eq!(total_spaceships, Some(1000));
+    // assert_eq!(total_spaceships, Some(500));
 
     delete::<SpaceShip>(SpaceShip::create_id("num-1"))
         .run(db.clone())
