@@ -27,25 +27,26 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
 
     create_test_data(db.clone()).await;
 
-    let weapon_schema::Weapon { id, .. } = &Weapon::schema();
+    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+    let ref count = Field::new("count");
 
     let total_spaceships = Weapon::find_where(id.is_not(NONE))
         .return_many(db.clone())
         .await?
         .len();
     assert_eq!(total_spaceships, 1000);
-    let total_spaceships: Option<i32> = select_value(Field::new("count"))
+    let total_spaceships: Option<i32> = select_value(count)
         .from(
-            select(count!(Field::new("strength").gte(500)))
+            select(count!(strength.gte(500)))
                 .from(Weapon::table_name())
                 .group_all(),
         )
         // .group_by(id)
         .return_one(db.clone())
         .await?;
-    let total_spaceships: Option<i32> = select_value(Field::new("count"))
+    let total_spaceships: Option<i32> = select_value(count)
         .from(
-            select(count!(Field::new("strength").gte(500)))
+            select(count!(strength.gte(500)))
                 .from(Weapon::table_name())
                 .group_all(),
         )
