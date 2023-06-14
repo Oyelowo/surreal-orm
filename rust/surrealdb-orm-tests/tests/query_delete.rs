@@ -50,7 +50,6 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
                 .from(Weapon::table_name())
                 .group_all(),
         )
-        // .group_by(id)
         .return_one(db.clone())
         .await?;
 
