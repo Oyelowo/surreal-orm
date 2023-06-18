@@ -16,7 +16,7 @@ use crate::{
         SelectStatementMini,
     },
     Alias, All, Conditional, Field, Filter, NodeClause, Raw, SurrealId, SurrealSimpleId,
-    SurrealUlid, SurrealUuid, SurrealdbOrmResult, Table, Valuex,
+    SurrealUlid, SurrealUuid, SurrealdbOrmResult, Table, ToRaw, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
@@ -124,6 +124,13 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
                 .from(Self::table_name())
                 .group_all(),
         );
+        selection.into()
+    }
+
+    /// Count all records.
+    fn count_all() -> SelectStatementCount {
+        let selection = select_value(Field::new("count"))
+            .from(select(count!()).from(Self::table_name()).group_all());
         selection.into()
     }
 
