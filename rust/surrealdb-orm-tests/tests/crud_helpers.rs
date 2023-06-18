@@ -1,7 +1,21 @@
-use surrealdb::{engine::local::Mem, Surreal};
-use surrealdb_models::{spaceship_schema, SpaceShip};
-use surrealdb_orm::*;
+use surrealdb::{
+    engine::local::{Db, Mem},
+    Surreal,
+};
+use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
+use surrealdb_orm::{statements::insert, *};
 
+async fn create_test_data(db: Surreal<Db>) {
+    let space_ships = (0..1000)
+        .map(|i| Weapon {
+            // id: Weapon::create_id(format!("num-{}", i)),
+            name: format!("weapon-{}", i),
+            strength: i,
+            ..Default::default() // created: chrono::Utc::now(),
+        })
+        .collect::<Vec<Weapon>>();
+    insert(space_ships).run(db.clone()).await.unwrap();
+}
 #[tokio::test]
 async fn test_create() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -115,6 +129,69 @@ async fn test_find_where() -> SurrealdbOrmResult<()> {
         .await?;
 
     assert_eq!(found_spaceship.id.to_thing(), spaceship.id.to_thing());
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_count_where() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    create_test_data(db.clone()).await;
+    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+
+    let weapons_query = Weapon::count_where(strength.gte(500));
+    let weapons_count = weapons_query.get(db.clone()).await?;
+
+    assert_eq!(
+        weapons_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+    );
+
+    assert_eq!(weapons_count, 500);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_count_where_complex() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    create_test_data(db.clone()).await;
+    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+
+    let weapons_query = Weapon::count_where(cond(strength.gte(500)).and(strength.lt(734)));
+    let weapons_count = weapons_query.get(db.clone()).await?;
+
+    assert_eq!(
+        weapons_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count((strength >= 500) AND (strength < 734)) FROM weapon GROUP BY );"
+    );
+
+    assert_eq!(weapons_count, 234);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_count_all() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    create_test_data(db.clone()).await;
+    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+
+    let weapons_query = Weapon::count_all();
+    let weapons_count = weapons_query.get(db.clone()).await?;
+
+    assert_eq!(
+        weapons_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count() FROM weapon GROUP BY );"
+    );
+
+    assert_eq!(weapons_count, 1000);
+
     Ok(())
 }
 
