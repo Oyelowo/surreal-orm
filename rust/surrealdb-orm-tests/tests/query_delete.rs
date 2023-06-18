@@ -44,10 +44,17 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
         // .group_by(id)
         .return_one(db.clone())
         .await?;
-    let total_spaceships_count: Option<i32> = select_value(count)
-        .from(select(count!()).from(Weapon::table_name()).group_all())
-        .return_one(db.clone())
-        .await?;
+    let total_spaceships_query = select_value(count).from(
+        select(count!(strength.gte(500)))
+            .from(Weapon::table_name())
+            .group_all(),
+    );
+    assert_eq!(
+        total_spaceships_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+    );
+
+    let total_spaceships_count: Option<i32> = total_spaceships_query.return_one(db.clone()).await?;
 
     // assert_eq!(
     //     select(All)
@@ -58,6 +65,26 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
     //     ""
     // );
     assert_eq!(total_spaceships_count, Some(500));
+
+    let total_spaceships_query = Weapon::count_where(strength.gte(500));
+
+    assert_eq!(
+        total_spaceships_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+    );
+
+    let total_spaceships_count = total_spaceships_query.get(db.clone()).await?;
+
+    // assert_eq!(
+    //     select(All)
+    //         .from(count!(SpaceShip::table_name()))
+    //         // .group_all()
+    //         .to_raw()
+    //         .build(),
+    //     ""
+    // );
+    assert_eq!(total_spaceships_count, 500);
+
     dbg!(total_spaceships_count);
     // assert!(false);
     // assert_eq!(total_spaceships, Some(500));
