@@ -10,7 +10,7 @@ use crate::{
     statements::{
         create::{create, CreateStatement},
         delete::{delete, DeleteStatementMini},
-        select::select,
+        select::{select, SelectStatementCount},
         select_value,
         update::{update, UpdateStatement},
         SelectStatementMini,
@@ -114,7 +114,7 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
     }
 
     /// Count records by filtering.
-    fn count_where(filter: impl Conditional + Clone) -> SelectStatementMini<Self> {
+    fn count_where(filter: impl Conditional + Clone) -> SelectStatementCount {
         // select(Field::count(All))
         //     .from(Self::table_name())
         //     .where_(filter)

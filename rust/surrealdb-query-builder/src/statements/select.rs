@@ -32,13 +32,13 @@ use std::{
 };
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
+use surrealdb::{engine::local::Db, sql, Surreal};
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
     ErrorList, Field, Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect,
     ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel,
-    Table, ToRaw, Valuex,
+    SurrealdbOrmResult, Table, ToRaw, Valuex,
 };
 
 use super::Subquery;
@@ -1555,6 +1555,41 @@ where
 
     fn get_return_type(&self) -> crate::ReturnType {
         crate::ReturnType::After
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SelectStatementCount(SelectStatement);
+
+impl SelectStatementCount {
+    // /// Gets count of the records that would be returned by the select statement.
+    // /// Defaults to zero if there is no result or query is invalid.
+    pub async fn get(&self, db: Surreal<Db>) -> SurrealdbOrmResult<usize> {
+        Ok(self.0.return_one(db).await?.unwrap_or_default())
+    }
+}
+
+impl Erroneous for SelectStatementCount {}
+
+impl Parametric for SelectStatementCount {
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl Buildable for SelectStatementCount {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl Queryable for SelectStatementCount {}
+
+impl ReturnableSelect for SelectStatementCount {}
+
+impl From<SelectStatement> for SelectStatementCount {
+    fn from(value: SelectStatement) -> Self {
+        Self(value)
     }
 }
 
