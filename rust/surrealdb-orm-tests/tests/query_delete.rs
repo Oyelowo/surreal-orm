@@ -44,12 +44,8 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
         // .group_by(id)
         .return_one(db.clone())
         .await?;
-    let total_spaceships: Option<i32> = select_value(count)
-        .from(
-            select(count!(strength.gte(500)))
-                .from(Weapon::table_name())
-                .group_all(),
-        )
+    let total_spaceships_count: Option<i32> = select_value(count)
+        .from(select(count!()).from(Weapon::table_name()).group_all())
         .return_one(db.clone())
         .await?;
 
@@ -61,8 +57,8 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
     //         .build(),
     //     ""
     // );
-    assert_eq!(total_spaceships, Some(500));
-    dbg!(total_spaceships);
+    assert_eq!(total_spaceships_count, Some(500));
+    dbg!(total_spaceships_count);
     // assert!(false);
     // assert_eq!(total_spaceships, Some(500));
 
