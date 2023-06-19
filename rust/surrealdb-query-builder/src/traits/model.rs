@@ -113,12 +113,8 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
         select(All).from(Self::table_name()).where_(filter).into()
     }
 
-    /// Count records by filtering.
+    /// Count filtered records.
     fn count_where(filter: impl Conditional + Clone) -> SelectStatementCount {
-        // select(Field::count(All))
-        //     .from(Self::table_name())
-        //     .where_(filter)
-        //     .into()
         let selection = select_value(Field::new("count")).from(
             select(count!(Filter::new(filter)))
                 .from(Self::table_name())
