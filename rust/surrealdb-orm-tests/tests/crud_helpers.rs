@@ -11,7 +11,6 @@ use surrealdb_orm::{
 async fn create_test_data(db: Surreal<Db>) {
     let space_ships = (0..1000)
         .map(|i| Weapon {
-            // id: Weapon::create_id(format!("num-{}", i)),
             name: format!("weapon-{}", i),
             strength: i,
             ..Default::default() // created: chrono::Utc::now(),
@@ -177,7 +176,7 @@ async fn test_count_where() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(strength.gte(500));
     let weapons_count = weapons_query.get(db.clone()).await?;
@@ -198,7 +197,7 @@ async fn test_count_where_complex() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(cond(strength.gte(500)).and(strength.lt(734)));
     let weapons_count = weapons_query.get(db.clone()).await?;
@@ -219,7 +218,6 @@ async fn test_count_all() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_all();
     let weapons_count = weapons_query.get(db.clone()).await?;
