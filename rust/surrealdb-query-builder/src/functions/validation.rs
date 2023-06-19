@@ -55,7 +55,6 @@ macro_rules! create_validation_with_tests {
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
-                use super::*;
                 use crate::*;
                 use crate::functions::is;
 

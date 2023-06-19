@@ -54,7 +54,6 @@ macro_rules! create_test_for_fn_with_single_arg {
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
-                use super::*;
                 use crate::*;
                 use crate::functions::parse;
 

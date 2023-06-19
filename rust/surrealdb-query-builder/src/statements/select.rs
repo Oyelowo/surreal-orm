@@ -32,13 +32,13 @@ use std::{
 };
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
+use surrealdb::{engine::local::Db, sql, Surreal};
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
     ErrorList, Field, Filter, Function, NumberLike, Parametric, Queryable, ReturnableSelect,
     ReturnableStandard, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, SurrealdbModel,
-    Table, ToRaw, Valuex,
+    SurrealdbOrmResult, Table, ToRaw, Valuex,
 };
 
 use super::Subquery;
@@ -769,6 +769,7 @@ pub struct SelectStatementInit {
     where_: Option<String>,
     split: Vec<String>,
     group_by: Vec<String>,
+    group_all: bool,
     order_by: Vec<Order>,
     limit: Option<String>,
     start: Option<String>,
@@ -886,6 +887,7 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
         where_: None,
         split: vec![],
         group_by: vec![],
+        group_all: false,
         order_by: vec![],
         limit: None,
         start: None,
@@ -908,6 +910,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
         where_: None,
         split: vec![],
         group_by: vec![],
+        group_all: false,
         order_by: vec![],
         limit: None,
         start: None,
@@ -1177,6 +1180,12 @@ impl SelectStatement {
         self
     }
 
+    ///
+    pub fn group_all(mut self) -> Self {
+        self.0.group_all = true;
+        self
+    }
+
     /// Sets the ORDER BY clause for the query. Multiple values can also be set within same call.
     /// Repeated calls are accumulated
     ///
@@ -1425,6 +1434,8 @@ impl Buildable for SelectStatement {
 
         if !statement.group_by.is_empty() {
             query = format!("{query} GROUP BY {}", &statement.group_by.join(", "));
+        } else if statement.group_all {
+            query = format!("{query} GROUP ALL");
         }
 
         if !statement.order_by.is_empty() {
@@ -1544,6 +1555,41 @@ where
 
     fn get_return_type(&self) -> crate::ReturnType {
         crate::ReturnType::After
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SelectStatementCount(SelectStatement);
+
+impl SelectStatementCount {
+    // /// Gets count of the records that would be returned by the select statement.
+    // /// Defaults to zero if there is no result or query is invalid.
+    pub async fn get(&self, db: Surreal<Db>) -> SurrealdbOrmResult<usize> {
+        Ok(self.0.return_one(db).await?.unwrap_or_default())
+    }
+}
+
+impl Erroneous for SelectStatementCount {}
+
+impl Parametric for SelectStatementCount {
+    fn get_bindings(&self) -> crate::BindingsList {
+        self.0.get_bindings()
+    }
+}
+
+impl Buildable for SelectStatementCount {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl Queryable for SelectStatementCount {}
+
+impl ReturnableSelect for SelectStatementCount {}
+
+impl From<SelectStatement> for SelectStatementCount {
+    fn from(value: SelectStatement) -> Self {
+        Self(value)
     }
 }
 

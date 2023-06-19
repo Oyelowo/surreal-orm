@@ -16,7 +16,10 @@ where
     Self: Queryable,
 {
     /// Runs the statement against the database.
-    async fn run(&self, db: Surreal<Db>) -> SurrealdbOrmResult<surrealdb::Response> {
+    async fn run(
+        &self,
+        db: Surreal<impl surrealdb::Connection>,
+    ) -> SurrealdbOrmResult<surrealdb::Response> {
         let query_builder_error = self.get_errors();
 
         if !query_builder_error.is_empty() {
@@ -366,7 +369,10 @@ where
     }
 
     /// Runs the statement against the database and returns the one result.
-    async fn return_one<T>(&self, db: Surreal<Db>) -> SurrealdbOrmResult<Option<T>>
+    async fn return_one<T>(
+        &self,
+        db: Surreal<impl surrealdb::Connection>,
+    ) -> SurrealdbOrmResult<Option<T>>
     where
         T: Serialize + DeserializeOwned,
     {

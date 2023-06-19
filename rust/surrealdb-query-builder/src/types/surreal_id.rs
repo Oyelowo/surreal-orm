@@ -33,6 +33,26 @@ where
     }
 }
 
+impl<T, Id> From<&SurrealId<T, Id>> for sql::Value
+where
+    T: SurrealdbModel,
+    Id: Into<sql::Id>,
+{
+    fn from(value: &SurrealId<T, Id>) -> Self {
+        value.0.clone().into()
+    }
+}
+
+// impl<T, Id> From<SurrealId<T, Id>> for Valuex
+// where
+//     T: SurrealdbModel,
+//     Id: Into<sql::Id>,
+// {
+//     fn from(value: SurrealId<T, Id>) -> Self {
+//         value.0.into()
+//     }
+// }
+
 impl<T, Id> Serialize for SurrealId<T, Id>
 where
     T: SurrealdbModel,
@@ -214,6 +234,15 @@ where
 {
     fn from(simple_id: SurrealSimpleId<T>) -> Self {
         simple_id.0 .0
+    }
+}
+
+impl<T> From<&SurrealSimpleId<T>> for sql::Thing
+where
+    T: SurrealdbModel,
+{
+    fn from(simple_id: &SurrealSimpleId<T>) -> Self {
+        simple_id.0 .0.clone()
     }
 }
 
