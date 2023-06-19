@@ -2,22 +2,21 @@ use surrealdb::{
     engine::local::{Db, Mem},
     Surreal,
 };
-use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
+use surrealdb_models::{weapon_schema, Weapon};
 use surrealdb_orm::{
-    statements::{delete, insert, select, select_value},
+    statements::{delete, insert},
     *,
 };
 
-async fn create_test_data(db: Surreal<Db>) {
+async fn create_test_data(db: Surreal<Db>) -> Vec<Weapon> {
     let space_ships = (0..1000)
         .map(|i| Weapon {
-            // id: Weapon::create_id(format!("num-{}", i)),
             name: format!("weapon-{}", i),
             strength: i,
             ..Default::default() // created: chrono::Utc::now(),
         })
         .collect::<Vec<Weapon>>();
-    insert(space_ships).run(db.clone()).await.unwrap();
+    insert(space_ships).return_many(db.clone()).await.unwrap()
 }
 
 #[tokio::test]
@@ -25,77 +24,25 @@ async fn test_delete_one_by_id() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    create_test_data(db.clone()).await;
+    let weapons = create_test_data(db.clone()).await;
+    let weapon1 = weapons.first().unwrap();
+    let ref weapon1_id = weapon1.id.clone();
 
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
-    let ref count = Field::new("count");
+    let weapon_schema::Weapon { id, .. } = &Weapon::schema();
 
-    let total_spaceships = Weapon::find_where(id.is_not(NONE))
-        .return_many(db.clone())
-        .await?
-        .len();
-    assert_eq!(total_spaceships, 1000);
-    let total_spaceships: Option<i32> = select_value(count)
-        .from(
-            select(count!(strength.gte(500)))
-                .from(Weapon::table_name())
-                .group_all(),
-        )
-        // .group_by(id)
-        .return_one(db.clone())
-        .await?;
-    let total_spaceships_query = select_value(count).from(
-        select(count!(strength.gte(500)))
-            .from(Weapon::table_name())
-            .group_all(),
-    );
-    assert_eq!(
-        total_spaceships_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
-    );
+    let deleted_weapon_count = || async {
+        Weapon::count_where(id.eq(weapon1_id))
+            .get(db.clone())
+            .await
+            .unwrap()
+    };
+    assert_eq!(deleted_weapon_count().await, 1);
 
-    let total_spaceships_count: Option<i32> = total_spaceships_query.return_one(db.clone()).await?;
+    delete::<Weapon>(weapon1_id).run(db.clone()).await?;
 
-    // assert_eq!(
-    //     select(All)
-    //         .from(count!(SpaceShip::table_name()))
-    //         // .group_all()
-    //         .to_raw()
-    //         .build(),
-    //     ""
-    // );
-    assert_eq!(total_spaceships_count, Some(500));
-
-    let total_spaceships_query = Weapon::count_where(strength.gte(500));
-
-    assert_eq!(
-        total_spaceships_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
-    );
-
-    let total_spaceships_count = total_spaceships_query.get(db.clone()).await?;
-
-    // assert_eq!(
-    //     select(All)
-    //         .from(count!(SpaceShip::table_name()))
-    //         // .group_all()
-    //         .to_raw()
-    //         .build(),
-    //     ""
-    // );
-    assert_eq!(total_spaceships_count, 500);
-
-    dbg!(total_spaceships_count);
-    // assert!(false);
-    // assert_eq!(total_spaceships, Some(500));
-
-    delete::<SpaceShip>(SpaceShip::create_id("num-1"))
-        .run(db.clone())
-        .await
-        .unwrap();
-
-    let found_spaceships = SpaceShip::find_by_id(SpaceShip::create_id("num-1"));
-    assert_eq!(found_spaceships.return_many(db.clone()).await?.len(), 0);
+    // let found_spaceships = Weapon::find_by_id(weapon1_id);
+    // assert_eq!(found_spaceships.return_many(db.clone()).await?.len(), 0);
+    assert_eq!(deleted_weapon_count().await, 0);
 
     Ok(())
 }
