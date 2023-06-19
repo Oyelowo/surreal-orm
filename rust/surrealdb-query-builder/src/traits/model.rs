@@ -131,7 +131,7 @@ pub trait SurrealdbCrud: Sized + Serialize + DeserializeOwned + SurrealdbModel {
     }
 
     /// Delete the current record by instance.
-    fn delete(self) -> DeleteStatementMini<Self> {
+    fn delete(&self) -> DeleteStatementMini<Self> {
         delete::<Self>(self.get_id_as_thing()).into()
     }
 
