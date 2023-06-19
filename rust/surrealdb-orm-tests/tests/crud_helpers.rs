@@ -3,7 +3,10 @@ use surrealdb::{
     Surreal,
 };
 use surrealdb_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
-use surrealdb_orm::{statements::insert, *};
+use surrealdb_orm::{
+    statements::{insert, select, select_value},
+    *,
+};
 
 async fn create_test_data(db: Surreal<Db>) {
     let space_ships = (0..1000)
@@ -129,6 +132,42 @@ async fn test_find_where() -> SurrealdbOrmResult<()> {
         .await?;
 
     assert_eq!(found_spaceship.id.to_thing(), spaceship.id.to_thing());
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_find_where_complex() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    create_test_data(db.clone()).await;
+
+    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+    let ref count = Field::new("count");
+
+    let total_spaceships = Weapon::find_where(id.is_not(NONE))
+        .return_many(db.clone())
+        .await?;
+    assert_eq!(total_spaceships.len(), 1000);
+    let total_spaceships_query = select_value(count).from(
+        select(count!(strength.gte(500)))
+            .from(Weapon::table_name())
+            .group_all(),
+    );
+    assert_eq!(
+        total_spaceships_query.to_raw().build(),
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+    );
+
+    let total_spaceships_count: Option<i32> = total_spaceships_query.return_one(db.clone()).await?;
+
+    assert_eq!(total_spaceships_count, Some(500));
+
+    let total_spaceships_count = Weapon::count_where(strength.gte(500))
+        .get(db.clone())
+        .await?;
+
+    assert_eq!(total_spaceships_count, 500);
     Ok(())
 }
 
