@@ -16,7 +16,7 @@ use crate::{
         SelectStatementMini,
     },
     Alias, All, Conditional, Field, Filter, NodeClause, Raw, SurrealId, SurrealSimpleId,
-    SurrealUlid, SurrealUuid, SurrealdbOrmResult, Table, ToRaw, Valuex,
+    SurrealUlid, SurrealUuid, SurrealdbOrmResult, Table, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};

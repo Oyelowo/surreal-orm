@@ -43,7 +43,6 @@ macro_rules! create_function {
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
-                use super::*;
                 use crate::*;
                 use crate::functions::session;
 

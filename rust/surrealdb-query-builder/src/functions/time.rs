@@ -839,7 +839,6 @@ pub use time_group as group;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::functions::time;
     use crate::*;
 

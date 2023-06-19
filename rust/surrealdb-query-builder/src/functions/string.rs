@@ -721,7 +721,6 @@ pub use string_replace as replace;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::functions::string;
     use crate::*;
     #[test]

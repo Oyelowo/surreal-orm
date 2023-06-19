@@ -600,7 +600,6 @@ pub mod uuid {
 mod tests {
     use crate::{arr, Buildable, Field, NumberLike, ToRaw};
 
-    use super::*;
     use crate::functions::rand;
 
     #[test]
@@ -763,7 +762,6 @@ macro_rules! create_test_for_fn_with_two_args {
             mod [<test_ $function_ident _fn>] {
                 use crate::*;
                 use crate::functions::rand;
-                use super::*;
 
                 #[test]
                 fn [<test_rand_ $function_ident _function_empty>]() {
