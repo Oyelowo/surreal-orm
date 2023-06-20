@@ -1066,12 +1066,20 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
         id, name, created, ..
     } = SpaceShip::schema();
 
+    // let space_ship1 = create::<SpaceShip>()
+    //     .set([
+    //         id.equal_to(spaceship_id_1),
+    //         name.equal_to("SpaceShip1".to_string()),
+    //         created.equal_to(Utc::now()),
+    //     ])
+    //     .get_one(db.clone())
+    //     .await?;
     let space_ship1 = create::<SpaceShip>()
-        .set([
-            id.equal_to(spaceship_id_1),
-            name.equal_to("SpaceShip1".to_string()),
-            created.equal_to(Utc::now()),
-        ])
+        .set(object!(SpaceShip {
+            id: spaceship_id_1,
+            name: "SpaceShip1".to_string(),
+            created: Utc::now(),
+        }))
         .get_one(db.clone())
         .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
