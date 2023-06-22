@@ -2,7 +2,7 @@
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
+* Licensed under the MIT license
  */
 
 #![allow(dead_code)]
@@ -111,6 +111,8 @@ impl ToTokens for NodeToken{
         let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
         let test_function_name = format_ident!("test_{module_name}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
+        let serializable_fields_count = serializable_fields.len();
+        let serializable_fields_as_str = serializable_fields.iter().map(|f|f.to_string()).collect::<Vec<_>>();
 
         
         let table_definitions = self.get_table_definition_token();
@@ -199,6 +201,13 @@ impl ToTokens for NodeToken{
                 ) *
             } 
 
+            impl #struct_name_ident {
+                  // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
+            
+                pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
+                    [#( #serializable_fields_as_str), *]
+                }
+            }
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
                 type Id = #table_id_type;

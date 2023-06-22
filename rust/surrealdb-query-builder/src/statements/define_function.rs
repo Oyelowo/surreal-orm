@@ -184,7 +184,7 @@ macro_rules! define_function_ {
                 unreachable!();
             }};
         }
-        $crate::internal_tools::paste::paste! {
+        $crate::internal_tools::paste! {
             pub fn [<$function_name _statement>]() -> $crate::statements::DefineFunctionStatement{
                 {
                     $(

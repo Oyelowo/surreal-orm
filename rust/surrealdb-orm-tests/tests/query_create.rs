@@ -1062,20 +1062,28 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     let spaceship_id_1 = SpaceShip::create_id("spaceship1".to_string());
     let spaceship_id_2 = SpaceShip::create_id("spaceship2".to_string());
 
-    let spaceship_schema::SpaceShip {
-        id, name, created, ..
-    } = SpaceShip::schema();
-
+    // let space_ship1 = create::<SpaceShip>()
+    //     .set([
+    //         id.equal_to(spaceship_id_1),
+    //         name.equal_to("SpaceShip1".to_string()),
+    //         created.equal_to(Utc::now()),
+    //     ])
+    //     .get_one(db.clone())
+    //     .await?;
+    // SpaceShip::get_serializable_fields()
     let space_ship1 = create::<SpaceShip>()
-        .set([
-            id.equal_to(spaceship_id_1),
-            name.equal_to("SpaceShip1".to_string()),
-            created.equal_to(Utc::now()),
-        ])
+        .set(object!(SpaceShip {
+            id: spaceship_id_1,
+            name: "SpaceShip1".to_string(),
+            created: Utc::now(),
+        }))
         .get_one(db.clone())
         .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
+    let spaceship_schema::SpaceShip {
+        id, name, created, ..
+    } = SpaceShip::schema();
     let space_ship2 = create::<SpaceShip>()
         .set(vec![
             id.equal_to(spaceship_id_2),

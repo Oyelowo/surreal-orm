@@ -74,3 +74,26 @@ pub fn is_float<T: Float>() {}
 pub fn assert_is_vec<T: IntoIterator>() {
     let _ = <T as IntoIterator>::into_iter;
 }
+
+/// This function can only be called with two arrays of the same length.
+pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T; N]) {
+    println!("Both arrays have the same length of {}", N);
+}
+
+/// Checks that all idents are unique.
+#[macro_export]
+macro_rules! check_unique_idents {
+    // Base case: single element, always unique
+    ($_ident:ident) => {};
+
+    // Recursive case: check head against the rest and recurse
+    ($head:ident, $($tail:ident),+ $(,)?) => {
+        // Generate a unique constant for $head
+        $crate::internal_tools::paste! {
+            const [<UNIQUE_ $head>]: () = ();
+        }
+
+        // Recurse with the tail
+        $crate::check_unique_idents!($($tail),*);
+    };
+}
