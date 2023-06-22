@@ -1062,10 +1062,6 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     let spaceship_id_1 = SpaceShip::create_id("spaceship1".to_string());
     let spaceship_id_2 = SpaceShip::create_id("spaceship2".to_string());
 
-    let spaceship_schema::SpaceShip {
-        id, name, created, ..
-    } = SpaceShip::schema();
-
     // let space_ship1 = create::<SpaceShip>()
     //     .set([
     //         id.equal_to(spaceship_id_1),
@@ -1085,6 +1081,9 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
         .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
+    let spaceship_schema::SpaceShip {
+        id, name, created, ..
+    } = SpaceShip::schema();
     let space_ship2 = create::<SpaceShip>()
         .set(vec![
             id.equal_to(spaceship_id_2),
