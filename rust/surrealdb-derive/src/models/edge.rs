@@ -136,10 +136,19 @@ impl ToTokens for EdgeToken {
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
+        let serializable_fields_count = serializable_fields.len();
+        let serializable_fields_as_str = serializable_fields.iter().map(|f|f.to_string()).collect::<Vec<_>>();
         
 
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _};
+        
+                impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #struct_name_ident<In, Out> {
+                      // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
+                    pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
+                        [#( #serializable_fields_as_str), *]
+                    }
+                }
         
                 impl<In: #crate_name::SurrealdbNode, Out: #crate_name::SurrealdbNode> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
                     type Schema = #module_name::#struct_name_ident;
