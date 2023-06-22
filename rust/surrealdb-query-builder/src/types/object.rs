@@ -16,3 +16,22 @@ macro_rules! object {
         }
     };
 }
+
+/// object_partial! macro is just like `object!` macro but allow omitting some fields and is
+/// a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`) for setting values in a `create` or `update` but provides
+/// much more flexibility than using the basic struct to initialize values
+/// This also allows using `parameter` or `field` as value.
+#[macro_export]
+macro_rules! object_partial {
+    ($struct_name:ident { $($key:ident: $value:expr),* $(,)? }) => {
+        {
+            $crate::check_unique_idents!($($key), *);
+            $crate::validators::assert_fields!($struct_name : $( $key ),*);
+            let schema = &$struct_name::schema();
+
+            [
+                $( schema.$key .equal_to($value) ),*
+            ]
+        }
+    };
+}
