@@ -8,9 +8,10 @@ macro_rules! object {
             $crate::validators::assert_same_length_arrays($struct_name:: __get_serializable_field_names(), [ $( stringify!($key) ),*]);
             $crate::check_unique_idents!($($key), *);
             $crate::validators::assert_fields!($struct_name : $( $key ),*);
+            let schema = &$struct_name::schema();
 
             [
-                $( $key .equal_to($value) ),*
+                $( schema.$key .equal_to($value) ),*
             ]
         }
     };
