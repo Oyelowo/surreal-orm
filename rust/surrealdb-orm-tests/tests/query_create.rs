@@ -1074,6 +1074,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     //     ])
     //     .get_one(db.clone())
     //     .await?;
+    // SpaceShip::get_serializable_fields()
     let space_ship1 = create::<SpaceShip>()
         .set(object!(SpaceShip {
             id: spaceship_id_1,
