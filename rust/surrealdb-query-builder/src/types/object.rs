@@ -1,25 +1,14 @@
-// strength.equal_to(923u64)
-
-///
+/// object! macro is a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`) for setting values in a `create` or `update` but provides
+/// much more flexibility than using the basic struct to initialize values
+/// This also allows using `parameter` or `field` as value.
 #[macro_export]
 macro_rules! object {
     ($struct_name:ident { $($key:ident: $value:expr),* $(,)? }) => {
         {
-
-            // let mut output = vec![];
-            // let fields = $struct_name::get_serializable_fields().iter().map(|field| field.to_string()).collect::<std::collections::HashSet<String>>();
-
-            $(
-               const _: () = {
-                        match (stringify!($key), &$struct_name::ALLOWED_FIELDS) {
-                        // match (stringify!($key), &ALLOWED_FIELDS) {
-                            (field, fields) if fields.contains(&field) => {},
-                            _ => [()][1], // Cause compile-time error
-                        }
-                    };
-            )*
-
+            $crate::validators::assert_same_length_arrays($struct_name:: __get_serializable_field_names(), [ $( stringify!($key) ),*]);
+            $crate::check_unique_idents!($($key), *);
             $crate::validators::assert_fields!($struct_name : $( $key ),*);
+
             [
                 $( $key .equal_to($value) ),*
             ]
