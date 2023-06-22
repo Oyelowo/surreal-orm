@@ -76,7 +76,7 @@ pub fn assert_is_vec<T: IntoIterator>() {
 }
 
 /// This function can only be called with two arrays of the same length.
-pub fn assert_same_length_arrays<T, const N: usize>(array1: [T; N], array2: [T; N]) {
+pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T; N]) {
     println!("Both arrays have the same length of {}", N);
 }
 
