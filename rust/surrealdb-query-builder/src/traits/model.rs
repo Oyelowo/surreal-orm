@@ -26,6 +26,11 @@ use surrealdb::sql::{self, Thing};
 pub trait SurrealdbModel: Sized {
     /// The id of the model/table
     type Id;
+    /// Used for updating a model/table. Useful when you want to skip optional fields
+    /// when updating a model/table.
+    type NonNullUpdater;
+    /// For checking renamed struct field names
+    type StructRenamedCreator;
     /// The name of the model/table
     fn table_name() -> Table;
 

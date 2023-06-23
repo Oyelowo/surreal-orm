@@ -1074,7 +1074,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
     let space_ship1 = create::<SpaceShip>()
         .set(object!(SpaceShip {
             id: spaceship_id_1,
-            name: "SpaceShip1".to_string(),
+            name: "SpaceShip1",
             created: Utc::now(),
         }))
         .get_one(db.clone())
@@ -1085,7 +1085,7 @@ async fn test_create_set_statement() -> SurrealdbOrmResult<()> {
         id, name, created, ..
     } = SpaceShip::schema();
     let space_ship2 = create::<SpaceShip>()
-        .set(vec![
+        .set([
             id.equal_to(spaceship_id_2),
             name.equal_to("SpaceShip2".to_string()),
             created.equal_to(Utc::now()),
