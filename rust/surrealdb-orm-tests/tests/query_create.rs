@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
-use surrealdb_models::WeaponStats;
 use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
 use surrealdb_orm::statements::order;
 use surrealdb_orm::{
