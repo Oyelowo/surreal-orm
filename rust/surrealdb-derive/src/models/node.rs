@@ -92,6 +92,7 @@ impl ToTokens for NodeToken{
             field_definitions,
             fields_relations_aliased,
             non_null_updater_fields,
+            renamed_serialized_fields,
             table_id_type,
             ..
         } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node);
@@ -108,9 +109,10 @@ impl ToTokens for NodeToken{
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
-        let aliases_struct_name = format_ident!("{}Aliases", struct_name_ident);
+        let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
         let test_function_name = format_ident!("test_{module_name}_edge_name");
-        let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
+        let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
+        let struct_with_renamed_serialized_fields = format_ident!("{struct_name_ident}RenamedCreator");
         let serializable_fields_count = serializable_fields.len();
         let serializable_fields_as_str = serializable_fields.iter().map(|f|f.to_string()).collect::<Vec<_>>();
 
@@ -200,6 +202,14 @@ impl ToTokens for NodeToken{
                     #non_null_updater_fields
                 ) *
             } 
+        
+            #[allow(non_snake_case)]
+            #[derive(Serialize, Deserialize, Debug, Clone)]
+            pub struct #struct_with_renamed_serialized_fields {
+               #( 
+                    #renamed_serialized_fields
+                ) *
+            } 
 
             impl #struct_name_ident {
                   // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
@@ -211,6 +221,9 @@ impl ToTokens for NodeToken{
 
             impl #crate_name::SurrealdbModel for #struct_name_ident {
                 type Id = #table_id_type;
+                type NonNullUpdater = #non_null_updater_struct_name;
+                type StructRenamedCreator = #struct_with_renamed_serialized_fields;
+            
                 fn table_name() -> #crate_name::Table {
                     #table_name_str.into()
                 }

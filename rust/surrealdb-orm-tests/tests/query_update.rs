@@ -37,6 +37,62 @@ fn create_test_alien(age: u8, name: String) -> Alien {
 
 // test Increment update and decrement update
 #[tokio::test]
+async fn test_increment_and_decrement_update_set_with_object_partial() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let weapon = Weapon {
+        name: "Laser".to_string(),
+        strength: 0,
+        created: Utc::now(),
+        ..Default::default()
+    };
+
+    let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
+    assert_eq!(created_weapon.name, "Laser");
+    assert_eq!(created_weapon.strength, 0);
+    //
+    // // Increment by 5;
+    let ref id = created_weapon.clone().id;
+    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+
+    update::<Weapon>(created_weapon)
+        .set(strength.increment_by(5u64))
+        .run(db.clone())
+        .await?;
+
+    update::<Weapon>(id)
+        .set(strength.increment_by(5u64))
+        .run(db.clone())
+        .await?;
+
+    let updated = update::<Weapon>(id)
+        .set(strength.decrement_by(2u64))
+        .return_one(db.clone())
+        .await?;
+
+    let selected: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(updated.unwrap().strength, 8);
+    assert_eq!(selected.unwrap().strength, 8);
+
+    // Try setting
+    let updated = update::<Weapon>(id)
+        .set(object_partial!(Weapon { strength: 923u64 }))
+        .return_one(db.clone())
+        .await?;
+
+    let selected: Option<Weapon> = select(All)
+        .from(Weapon::table_name())
+        .return_one(db.clone())
+        .await?;
+    assert_eq!(updated.unwrap().strength, 923);
+    assert_eq!(selected.unwrap().strength, 923);
+    Ok(())
+}
+#[tokio::test]
 async fn test_increment_and_decrement_update() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();

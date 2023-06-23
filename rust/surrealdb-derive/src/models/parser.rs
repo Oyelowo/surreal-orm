@@ -279,6 +279,7 @@ pub struct SchemaFieldsProperties {
     pub node_edge_metadata: NodeEdgeMetadataStore,
     pub fields_relations_aliased: Vec<TokenStream>,
     pub non_null_updater_fields: Vec<TokenStream>,
+    pub renamed_serialized_fields: Vec<TokenStream>,
     pub table_id_type: TokenStream,
 }
 
@@ -656,8 +657,13 @@ impl SchemaFieldsProperties {
                 let mut insert_non_null_updater_token = |updater_field_token:  TokenStream| {
                     let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
                     if !is_invalid {
-                        store.non_null_updater_fields.push(updater_field_token);
+                        store.non_null_updater_fields.push(updater_field_token.clone());
+                        
                     }
+                    // We dont care about the field type. We just use this struct to check for
+                    // renamed serialed field names at compile time by asserting that the a field
+                    // exist.
+                    store.renamed_serialized_fields.push(quote!(pub #field_ident_normalised: &'static str, ));
                 };
 
                 update_ser_field_type(&mut store.serializable_fields);
