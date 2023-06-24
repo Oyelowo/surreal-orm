@@ -24,8 +24,8 @@ use crate::{
         Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable,
         SurrealdbEdge,
     },
-    types::{DurationLike, ReturnType, Updateables},
-    ReturnableDefault, ReturnableStandard, ToRaw,
+    types::{DurationLike, ReturnType},
+    ReturnableDefault, ReturnableStandard, Setter, ToRaw,
 };
 
 /// Creates a new RELATE statement.
@@ -131,16 +131,21 @@ where
     /// // or alias
     /// updater(friends_names).minus_equal("Oyedayo")
     /// ```
-    pub fn set(mut self, settables: impl Into<Updateables>) -> Self {
-        let settable: Updateables = settables.into();
-        self.bindings.extend(settable.get_bindings());
+    pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> Self {
+        let settable: Vec<Setter> = settables.into();
 
-        let setter_query = match settable {
-            Updateables::Updater(up) => vec![up.build()],
-            Updateables::Updaters(ups) => ups.into_iter().map(|u| u.build()).collect::<Vec<_>>(),
-        };
-        self.set.extend(setter_query);
-        self
+        let (settable, bindings) = settable.into_iter().fold(
+            (Vec::new(), Vec::new()),
+            |(mut settable, mut bindings), s| {
+                settable.push(s.build());
+                bindings.extend(s.get_bindings());
+                (settable, bindings)
+            },
+        );
+
+        self.bindings.extend(bindings);
+        self.set.extend(settable);
+        self.into()
     }
 
     /// Sets the return type for the query.
