@@ -56,7 +56,7 @@ async fn test_save() -> SurrealdbOrmResult<()> {
     let ss_id = SpaceShip::create_id(format!("num-{}", 1));
     let spaceship = SpaceShip {
         id: ss_id.clone(),
-        name: format!("spaceship-{}", 1),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
@@ -77,8 +77,8 @@ async fn test_find_by_id() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let spaceship = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 1)),
-        name: format!("spaceship-{}", 1),
+        id: SpaceShip::create_id("num-1".into()),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
@@ -98,13 +98,13 @@ async fn test_find_where() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let spaceship = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 1)),
-        name: format!("spaceship-{}", 1),
+        id: SpaceShip::create_id("num-1".into()),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
     let _spaceship2 = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 2)),
-        name: format!("spaceship-{}", 2),
+        id: SpaceShip::create_id("num-2".into()),
+        name: "spaceship-2".into(),
         created: chrono::Utc::now(),
     }
     .save()
@@ -238,8 +238,8 @@ async fn test_delete() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let spaceship = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 1)),
-        name: format!("spaceship-{}", 1),
+        id: SpaceShip::create_id("num-1".into()),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
@@ -267,8 +267,8 @@ async fn test_delete_by_id() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let spaceship = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 1)),
-        name: format!("spaceship-{}", 1),
+        id: SpaceShip::create_id("num-1".into()),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
@@ -295,8 +295,8 @@ async fn test_delete_where() -> SurrealdbOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let spaceship = SpaceShip {
-        id: SpaceShip::create_id(format!("num-{}", 1)),
-        name: format!("spaceship-{}", 1),
+        id: SpaceShip::create_id("num-1".into()),
+        name: "spaceship-1".into(),
         created: chrono::Utc::now(),
     };
 
