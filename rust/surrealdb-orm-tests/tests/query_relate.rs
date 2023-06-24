@@ -110,7 +110,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBlog::schema();
     // Using the set method
     relate(Student::with(&student_id2).writes__(Empty).blog(&blog_id))
-        // .set(updater(timeWritten).equal(sql::Duration::from(Duration::from_secs(47))))
+        .set(timeWritten.equal_to(sql::Duration::from(Duration::from_secs(47))))
         .content(write_blog)
         .parallel();
     let writes_schema::Writes { count, .. } = StudentWritesBlog::schema();
