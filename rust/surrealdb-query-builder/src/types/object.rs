@@ -1,6 +1,19 @@
-/// object! macro is a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`) for setting values in a `create` or `update` but provides
-/// much more flexibility than using the basic struct to initialize values
-/// This also allows using `parameter` or `field` as value.
+/// object! macro is a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`)
+/// for setting values in a `create` or `update` statement but provides
+/// stricter checking  - to ensure that all fields are provided and
+/// belong to the struct -  than using the basic struct to initialize values
+/// Compared to using a normal struct, this also allows using `parameter` or `field` as value.
+/// Example
+/// ```rust, ignore
+/// let space_ship1 = create::<SpaceShip>()
+///     .set(object!(SpaceShip {
+///            id: spaceship_id_1,
+///            name: "SpaceShip1",
+///            created: Utc::now(),
+///        }))
+///     .get_one(db.clone())
+///     .await?;
+/// ```
 #[macro_export]
 macro_rules! object {
     ($struct_name:ident { $($key:ident: $value:expr),* $(,)? }) => {
@@ -21,9 +34,12 @@ macro_rules! object {
 }
 
 /// object_partial! macro is just like `object!` macro but allow omitting some fields and is
-/// a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`) for setting values in a `create` or `update` but provides
-/// much more flexibility than using the basic struct to initialize values
-/// This also allows using `parameter` or `field` as value.
+/// a syntactic sugar for array of setters (e.g`[age.equal_to(4), name.equal_to(param)]`) for
+/// setting values in a `create` or `update` statement but provides
+/// stricter checking  - to ensure that all fields are provided and
+/// belong to the struct -  than using the basic struct to initialize values
+/// Compared to using a normal struct, this also allows using `parameter` or `field` as value.
+
 /// Example
 /// ```rust, ignore
 ///     let updated = update::<Weapon>(id)
