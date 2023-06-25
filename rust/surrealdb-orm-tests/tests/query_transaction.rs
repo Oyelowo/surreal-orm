@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{Account, Balance};
 use surrealdb_orm::{
