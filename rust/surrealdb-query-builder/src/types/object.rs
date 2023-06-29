@@ -44,7 +44,7 @@ macro_rules! object {
 /// ```rust, ignore
 ///     let updated = update::<Weapon>(id)
 /// .set(object_partial!(Weapon { strength: 923u64 }))
-///.return_one(db.clone())
+/// .return_one(db.clone())
 /// .await?;
 ///
 ///
