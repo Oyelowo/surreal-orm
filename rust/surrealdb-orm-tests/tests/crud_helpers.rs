@@ -53,7 +53,7 @@ async fn test_save() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ss_id = SpaceShip::create_id(format!("num-{}", 1));
+    let ss_id = SpaceShip::create_id("num-1".into());
     let spaceship = SpaceShip {
         id: ss_id.clone(),
         name: "spaceship-1".into(),
