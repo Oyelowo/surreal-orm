@@ -760,7 +760,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
         .await?;
 
     let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    // Hast not yet been saved.
+    // Has not yet been saved.
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
