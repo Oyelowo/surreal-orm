@@ -278,7 +278,7 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     assert!(unsaved_alien.weapon.value().is_none());
 
     // Check fields value fetching
-    let weapon = Alien::schema().weapon;
+    let alien_schema::Alien { weapon, .. } = Alien::schema();
     let created_alien = create()
         .content(unsaved_alien.clone())
         .load_links(vec![weapon])?

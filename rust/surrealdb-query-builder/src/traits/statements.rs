@@ -243,7 +243,7 @@ where
 
     /// Sets the return type to projections and fetches the all record links values
     /// for link_self fields. Defaults to null if the reference does not exist.
-    fn load_line_selfs(self) -> SurrealdbOrmResult<Self> {
+    fn load_link_selfs(self) -> SurrealdbOrmResult<Self> {
         self.load_links(T::get_link_self_fields())
     }
 
