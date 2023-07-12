@@ -6,6 +6,7 @@
  */
 // -- Define a global function which can be used in any query
 
+use pretty_assertions::assert_eq;
 use surrealdb_models::SpaceShip;
 use surrealdb_orm::{
     cond, index,

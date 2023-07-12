@@ -6,6 +6,7 @@
  */
 
 use insta;
+use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surrealdb::sql::{thing, Thing};
 use surrealdb_models::{book_schema, student_schema, Book, Student, StudentWritesBook};

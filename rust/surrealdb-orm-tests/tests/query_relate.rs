@@ -8,6 +8,7 @@
 #![allow(non_snake_case)]
 use chrono::{DateTime, NaiveDateTime, Utc};
 use insta;
+use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surrealdb::sql;
 use surrealdb::{engine::local::Mem, Surreal};

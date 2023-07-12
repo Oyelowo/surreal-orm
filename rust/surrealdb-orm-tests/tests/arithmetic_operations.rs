@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use pretty_assertions::assert_eq;
 use surrealdb_models::{rocket, Rocket};
 use surrealdb_orm::*;
 

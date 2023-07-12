@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use pretty_assertions::assert_eq;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{weapon_schema, weaponstats_schema, Weapon, WeaponStats};
 use surrealdb_orm::{

@@ -1,9 +1,8 @@
-use std::time::Duration;
-
 use chrono::{DateTime, Utc};
 use geo::Point;
 use geo::Polygon;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use surrealdb::sql;
 use surrealdb_orm::*;
 

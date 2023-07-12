@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use geo::line_string;
 use geo::point;
 use geo::polygon;
+use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;
@@ -304,11 +305,10 @@ async fn test_create_fetch_record_links() -> SurrealdbOrmResult<()> {
     let created_spaceship2 = create_v2(space_ship2.clone())
         .return_one(db.clone())
         .await?;
-    
+
     let created_spaceship3 = create_v2(space_ship3.clone())
         .return_one(db.clone())
         .await?;
-    
 
     let point = point! {
         x: 40.02f64,
@@ -403,11 +403,10 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
     let created_spaceship2 = create_v2(space_ship2.clone())
         .return_one(db.clone())
         .await?;
-    
+
     let created_spaceship3 = create_v2(space_ship3.clone())
         .return_one(db.clone())
         .await?;
-    
 
     let point = point! {
         x: 40.02f64,
@@ -547,15 +546,14 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     create_v2(space_ship1.clone())
         .return_one(db.clone())
         .await?;
-    
+
     create_v2(space_ship2.clone())
         .return_one(db.clone())
         .await?;
-    
+
     create_v2(space_ship3.clone())
         .return_one(db.clone())
         .await?;
-    
 
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
@@ -753,11 +751,11 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let created_spaceship1 = create_v2(space_ship1.clone())
         .return_one(db.clone())
         .await?;
-    
+
     let created_spaceship2 = create_v2(space_ship2.clone())
         .return_one(db.clone())
         .await?;
-    
+
     // let created_spaceship3 = create_v2(space_ship3.clone()).return_one(db.clone()).await?;
 
     let territory = line_string![(x: 40.02, y: 116.34), (x: 40.02, y: 116.35), (x: 40.03, y: 116.35), (x: 40.03, y: 116.34), (x: 40.02, y: 116.34)];
