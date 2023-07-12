@@ -1,4 +1,4 @@
-# Links and Relations
+# Links, Nestings and Relations
 
 - `LinkOne`: It is an attribute used to define a one-to-one relationship between
   two Nodes. For example, consider the `Alien` struct with the field `weapon`:
