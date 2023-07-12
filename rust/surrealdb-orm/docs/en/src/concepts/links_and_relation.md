@@ -6,7 +6,7 @@
 ```rust
 use surrealdb_orm::{Serialize, Deserialize,LinkOne, SurrealSimpleId, SurrealdbNode};
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -17,7 +17,7 @@ pub struct Alien {
 }
 
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
@@ -33,9 +33,9 @@ relationship is represented by a foreign key in the database table, and the
   `space_ships` field:
 
 ```rust
-use surrealdb_orm::{Serialize, Deserialize,LinkMany, SurrealSimpleId, SurrealdbNode};
+use surrealdb_orm::{Serialize, Deserialize, LinkMany, SurrealSimpleId, SurrealdbNode};
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -44,7 +44,7 @@ pub struct Alien {
     pub space_ships: LinkMany<SpaceShip>,
 }
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
@@ -62,7 +62,7 @@ the relationship.
 ```rust
 use surrealdb_orm::{Serialize, Deserialize,SurrealSimpleId, SurrealdbNode, SurrealdbObject};
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -70,7 +70,7 @@ pub struct Alien {
     pub favorite_rocket: Rocket,
 }
 
-#[derive(SurrealdbObject, Debug)]
+#[derive(SurrealdbObject, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "rocket")]
 pub struct Rocket {
 }
@@ -88,7 +88,7 @@ Node in the database.
 ```rust
 use surrealdb_orm::{Serialize, Deserialize,SurrealSimpleId, SurrealdbNode, SurrealdbObject};
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -97,7 +97,7 @@ pub struct Alien {
     pub big_rockets: Vec<Rocket>,
 }
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "rocket")]
 pub struct Rocket {
 }
@@ -109,7 +109,7 @@ pub struct Rocket {
 ```rust
 use surrealdb_orm::{Serialize, Deserialize, SurrealSimpleId, SurrealdbNode, SurrealdbEdge, Relate};
 
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -159,7 +159,7 @@ flexible database schema designs.
 use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, NestArray, NestOne, Relate, SurrealSimpleId, SurrealdbNode};
 
 // Alien
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
@@ -175,7 +175,7 @@ pub struct Alien {
 }
 
 // Weapon
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "weapon")]
 pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
@@ -184,7 +184,7 @@ pub struct Weapon {
 }
 
 // SpaceShip
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealSimpleId<Self>,
@@ -192,7 +192,7 @@ pub struct SpaceShip {
 }
 
 // Rocket
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "rocket")]
 pub struct Rocket {
     pub id: SurrealSimpleId<Self>,
@@ -201,7 +201,7 @@ pub struct Rocket {
 }
 
 // Planet
-#[derive(SurrealdbNode, Debug)]
+#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
 #[surrealdb(table_name = "planet")]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
