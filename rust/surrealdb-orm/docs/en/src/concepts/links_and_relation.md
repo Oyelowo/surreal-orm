@@ -1,7 +1,8 @@
 # Links, Nestings and Relations
 
-- `LinkOne`: It is an attribute used to define a one-to-one relationship between
-  two Nodes. For example, consider the `Alien` struct with the field `weapon`:
+- `link_one`: It is an attribute used to define a one-to-one relationship
+  between two Nodes. For example, consider the `Alien` struct with the field
+  `weapon`:
 
 ```rust
 use surrealdb_orm::{Serialize, Deserialize,LinkOne, SurrealSimpleId, SurrealdbNode};
@@ -28,7 +29,7 @@ This attribute indicates that an `Alien` can have a single best `Weapon`. The
 relationship is represented by a foreign key in the database table, and the
 `type` attribute specifies the database type for the relationship.
 
-- `LinkMany`: It is an attribute used to define a one-to-many relationship
+- `link_many`: It is an attribute used to define a one-to-many relationship
   between two Nodes. For instance, in the `Alien` struct, we have the
   `space_ships` field:
 
@@ -56,7 +57,7 @@ associated with it. The relationship is represented by a foreign key or a join
 table in the database, and the `type` attribute specifies the database type for
 the relationship.
 
-- `NestObject`: It is an attribute used to embed a single Object within a Node.
+- `nest_object`: It is an attribute used to embed a single Object within a Node.
   In the `Alien` struct, we have the `weapon` field:
 
 ```rust
@@ -80,7 +81,7 @@ This attribute specifies that an `Alien2` has a nested `Rocket` object
 representing its weapon. The `Rocket` object is stored as part of the `Alien2`
 Node in the database.
 
-- `NestArray`: It is an attribute used to embed multiple Objects within a Node.
+- `nest_array`: It is an attribute used to embed multiple Objects within a Node.
   Although not explicitly used in the provided code examples, it would be
   similar to `NestObject`, but with a collection type field (e.g.,
   `Vec<Rocket>`).
@@ -103,7 +104,7 @@ pub struct Rocket {
 }
 ```
 
-- `Relate`: It is an attribute used to define a read-only relationship between
+- `relate`: It is an attribute used to define a read-only relationship between
   two Nodes. In the `Alien` struct, we have the `planets_to_visit` field:
 
 ```rust
@@ -152,60 +153,3 @@ serialized.
 These attributes provide additional information to Surrealdb for modeling
 relationships and embedding Objects within Nodes, allowing for more complex and
 flexible database schema designs.
-
----
-
-```rust
-use surrealdb_orm::{LinkMany, LinkOne, LinkSelf, NestArray, NestOne, Relate, SurrealSimpleId, SurrealdbNode};
-
-// Alien
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
-#[surrealdb(table_name = "alien")]
-pub struct Alien {
-    pub id: SurrealSimpleId<Self>,
-    pub name: String,
-    pub weapon: LinkOne<Weapon>,
-    pub space_ships: LinkMany<SpaceShip>,
-    pub allies: LinkMany<Alien>,
-    pub best_friend: LinkSelf<Alien>,
-    pub rockets: NestMany<Rocket>,
-    pub favorite_planet: NestOne<Planet>,
-    pub visited_planets: NestArray<Planet>,
-    pub enemy_planets: Relate<Planet>,
-}
-
-// Weapon
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
-#[surrealdb(table_name = "weapon")]
-pub struct Weapon {
-    pub id: SurrealSimpleId<Self>,
-    pub name: String,
-    pub strength: u64,
-}
-
-// SpaceShip
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
-#[surrealdb(table_name = "space_ship")]
-pub struct SpaceShip {
-    pub id: SurrealSimpleId<Self>,
-    pub name: String,
-}
-
-// Rocket
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
-#[surrealdb(table_name = "rocket")]
-pub struct Rocket {
-    pub id: SurrealSimpleId<Self>,
-    pub name: String,
-    pub fuel_capacity: u64,
-}
-
-// Planet
-#[derive(SurrealdbNode, Serialize, Deserialize, Debug)]
-#[surrealdb(table_name = "planet")]
-pub struct Planet {
-    pub id: SurrealSimpleId<Self>,
-    pub name: String,
-    pub population: u64,
-}
-```
