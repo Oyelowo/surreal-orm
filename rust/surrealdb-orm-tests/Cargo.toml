@@ -28,6 +28,7 @@ proc-macro2 = { workspace = true }
 proc-macro-crate = { workspace = true }
 
 
+pretty_assertions = { workspace = true }
 test-case = { workspace = true }
 regex = "1.7.1"
 insta = "1.28.0"

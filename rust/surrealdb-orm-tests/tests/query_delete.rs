@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use surrealdb::{
     engine::local::{Db, Mem},
     Surreal,

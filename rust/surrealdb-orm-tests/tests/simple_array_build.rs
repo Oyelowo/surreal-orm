@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use surrealdb_models::Alien;
 use surrealdb_orm::{
     index, this, where_, All, AllGetter, Buildable, Last, Operatable, SchemaGetter, ToRaw,

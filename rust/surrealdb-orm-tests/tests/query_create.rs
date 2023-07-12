@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use geo::line_string;
 use geo::point;
 use geo::polygon;
+use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surrealdb::engine::local::Mem;

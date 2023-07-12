@@ -162,7 +162,7 @@ bevy_reflect = "0.9.1"
 geo = { version = "0.23.1", features = ["use-serde"] }
 
 insta = "1.28.0"
-# Maceos metapogramming lib
+# Macros metapogramming lib
 syn = "1.0"
 quote = "1.0"
 proc-macro2 = "1.0.47"
@@ -177,7 +177,7 @@ strum = "0.24.1"
 strum_macros = "0.24"
 # You can also use the "derive" feature, and import the macros directly from "strum"
 # strum = { version = "0.24", features = ["derive"] }
-pretty_assertions = "1.3.0"
+pretty_assertions = "1.4.0"
 tokio-test = "0.4.2"
 wiremock = "0.5.15"
 test-case = "2.2.2"

@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{weapon_schema, SpaceShip, Weapon};

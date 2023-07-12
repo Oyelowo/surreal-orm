@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use surrealdb_models::Student;
 use surrealdb_orm::{index, this, Buildable, ToRaw, E};
 

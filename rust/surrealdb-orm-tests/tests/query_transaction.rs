@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use pretty_assertions::assert_eq;
 use surrealdb::{engine::local::Mem, Surreal};
 use surrealdb_models::{Account, Balance};
 use surrealdb_orm::{

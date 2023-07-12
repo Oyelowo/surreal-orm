@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use surrealdb_models::Organization;
 use surrealdb_orm::{Buildable, Field, SchemaGetter, SetterAssignable, ToRaw};
 
