@@ -89,7 +89,7 @@ pub struct Planet {
 }
 
 #[tokio::test]
-async fn test_node_atttributes() -> SurrealdbOrmResult<()> {
+async fn test_node_atttributes_auto_inferred() -> SurrealdbOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     Alien::define_fields();
@@ -117,6 +117,40 @@ DEFINE FIELD ally ON TABLE alien;
 DEFINE FIELD weapon ON TABLE alien;
 DEFINE FIELD spaceShips ON TABLE alien;
 DEFINE FIELD spaceShips.* ON TABLE alien TYPE record (space_ship);"
+    );
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_atttributes_explicit() -> SurrealdbOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    Alien::define_fields();
+    assert_eq!(
+        AlienWithExplicitAttributes::define_table().to_raw().build(),
+        "DEFINE TABLE alien_with_explicit_attributes;"
+    );
+
+    assert_eq!(
+        AlienWithExplicitAttributes::define_fields()
+            .iter()
+            .map(|x| x.to_raw().build())
+            .collect::<Vec<_>>()
+            .join("\n"),
+        "DEFINE FIELD id ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD name ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD age ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD created ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD lifeExpectancy ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD linePolygon ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD territoryArea ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD home ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD tags ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD ally ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD spaceShips.* ON TABLE alien_with_explicit_attributes TYPE record (space_ship);"
     );
 
     Ok(())
