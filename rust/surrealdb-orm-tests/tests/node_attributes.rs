@@ -143,13 +143,12 @@ DEFINE FIELD name ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD age ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD created ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD lifeExpectancy ON TABLE alien_with_explicit_attributes;
-DEFINE FIELD linePolygon ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD territoryArea ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD home ON TABLE alien_with_explicit_attributes;
 DEFINE FIELD tags ON TABLE alien_with_explicit_attributes;
-DEFINE FIELD ally ON TABLE alien_with_explicit_attributes;
-DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes;
-DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes;
+DEFINE FIELD ally ON TABLE alien_with_explicit_attributes TYPE record (alien_with_explicit_attributes);
+DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes TYPE record (weapon);
+DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes TYPE array;
 DEFINE FIELD spaceShips.* ON TABLE alien_with_explicit_attributes TYPE record (space_ship);"
     );
 
