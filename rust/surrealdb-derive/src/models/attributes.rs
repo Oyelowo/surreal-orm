@@ -497,6 +497,7 @@ impl MyFieldReceiver {
             || self.type_.as_ref().map_or(false, |t| {
                 t.parse::<FieldType>().unwrap_or(FieldType::Any).is_array()
             })
+            || self.link_many.is_some()
     }
 
     pub fn raw_type_is_list(&self) -> bool {
@@ -677,6 +678,12 @@ impl MyFieldReceiver {
 
     pub fn get_array_content_type(&self) -> Option<TokenStream> {
         let ty = &self.ty;
+        // if let Some(links_type) = self.link_many.clone() {
+        //     let links_type = syn::parse_str::<syn::Type>(&links_type).unwrap();
+        //     // let links_type = format_ident!("{links_type}");
+        //     return Some(quote!(#links_type));
+        // }
+
         get_vector_item_type(ty).map(|t| t.into_token_stream())
         // match ty {
         //     syn::Type::Array(array) => {
