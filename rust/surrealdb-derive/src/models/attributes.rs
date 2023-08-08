@@ -659,11 +659,13 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                     field_content_type: None,
                     static_assertion: quote!(),
                 }
-            } else if let Some(_ref_node_type) = link_many {
-                // let ref_struct_name = format_ident!("{}", self.link_many.clone());
+            } else if let Some(ref_node_type) = link_many {
+                let ref_struct_name = format_ident!("{ref_node_type}");
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Array),
-                    field_content_type: None,
+                    field_content_type: Some(
+                        quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
+                    ),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = nest_object {
