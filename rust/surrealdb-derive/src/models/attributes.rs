@@ -392,8 +392,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
             // Gather assertions for all field types
             let raw_type = &self.ty;
-            let mut field_type =
-                FieldType::from_str(&type_.to_string()).expect("Invalid field type");
+            let mut field_type = FieldType::from_str(&type_.to_string()).unwrap();
 
             let static_assertion = match field_type {
                 FieldType::Any => {
