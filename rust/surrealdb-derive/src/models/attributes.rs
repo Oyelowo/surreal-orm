@@ -392,7 +392,8 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
             // Gather assertions for all field types
             let raw_type = &self.ty;
-            let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+            let mut field_type =
+                FieldType::from_str(&type_.to_string()).expect("Invalid field type");
 
             let static_assertion = match field_type {
                 FieldType::Any => {
@@ -592,10 +593,14 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                 field_content_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
-        } else if self.raw_type_is_list() {
+        } else if self.raw_type_is_list() || self.content_type.is_some() {
+            let content_type = self.content_type.as_ref().map(|ct| {
+                let ct = ct.to_string();
+                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
+            });
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Array),
-                field_content_type: None,
+                field_content_type: content_type,
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
@@ -723,6 +728,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
             || self.raw_type_is_list()
+            || self.content_type.is_some()
             || self.raw_type_is_object()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
