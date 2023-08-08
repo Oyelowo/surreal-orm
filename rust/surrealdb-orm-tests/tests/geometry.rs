@@ -102,7 +102,7 @@ fn create_test_company(geom: impl Into<sql::Geometry>) -> Company {
             .unwrap()
             .into(),
         name: "Mana Inc.".to_string(),
-        founded: "1967-05-03".into(),
+        founded: "1967-05-03".try_into().unwrap(),
         founders: vec![
             Person {
                 name: "John Doe".to_string(),
@@ -194,21 +194,21 @@ async fn polygon() -> surrealdb::Result<()> {
     // insta::assert_snapshot!(company);
 
     let _poly = polygon!(
-            exterior: [
-                (x: -111., y: 45.),
-                (x: -111., y: 41.),
-                (x: -104., y: 41.),
-                (x: -104., y: 45.),
+        exterior: [
+            (x: -111., y: 45.),
+            (x: -111., y: 41.),
+            (x: -104., y: 41.),
+            (x: -104., y: 45.),
+        ],
+        interiors: [
+            [
+                (x: -110., y: 44.),
+                (x: -110., y: 42.),
+                (x: -105., y: 42.),
+                (x: -105., y: 44.),
             ],
-            interiors: [
-                [
-                    (x: -110., y: 44.),
-                    (x: -110., y: 42.),
-                    (x: -105., y: 42.),
-                    (x: -105., y: 44.),
-                ],
-            ],
-        );
+        ],
+    );
 
     // let company_complex = create_geom_test(poly).await?;
     // println!(
@@ -272,21 +272,21 @@ async fn multipolygon() -> surrealdb::Result<()> {
         vec![],
     );
     let poly3 = polygon!(
-            exterior: [
-                (x: -111., y: 45.),
-                (x: -111., y: 41.),
-                (x: -104., y: 41.),
-                (x: -104., y: 45.),
+        exterior: [
+            (x: -111., y: 45.),
+            (x: -111., y: 41.),
+            (x: -104., y: 41.),
+            (x: -104., y: 45.),
+        ],
+        interiors: [
+            [
+                (x: -110., y: 44.),
+                (x: -110., y: 42.43),
+                (x: -105., y: 42.),
+                (x: -105., y: 44.),
             ],
-            interiors: [
-                [
-                    (x: -110., y: 44.),
-                    (x: -110., y: 42.43),
-                    (x: -105., y: 42.),
-                    (x: -105., y: 44.),
-                ],
-            ],
-        );
+        ],
+    );
     let multi_polygon = MultiPolygon(vec![polygon1, polygon2, poly3]);
     insta::assert_snapshot!(serde_json::to_string(&multi_polygon).unwrap());
     // let company = create_geom_test(multi_polygon).await?;
@@ -311,7 +311,7 @@ async fn insert_many() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(32),
             name: "Acme Inc.".to_string(),
-            founded: "1967-05-03".into(),
+            founded: "1967-05-03".try_into().unwrap(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -329,7 +329,7 @@ async fn insert_many() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
-            founded: "1967-05-03".into(),
+            founded: "1967-05-03".try_into().unwrap(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -361,7 +361,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
-            founded: "1967-05-03".into(),
+            founded: "1967-05-03".try_into().unwrap(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
@@ -379,7 +379,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
-            founded: "1967-05-03".into(),
+            founded: "1967-05-03".try_into().unwrap(),
             founders: vec![
                 Person {
                     name: "John Doe".to_string(),
