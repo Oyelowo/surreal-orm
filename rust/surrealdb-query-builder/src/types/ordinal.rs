@@ -7,7 +7,7 @@
 
 use super::Field;
 use crate::{Binding, Buildable, Parametric, Valuex};
-use bigdecimal::BigDecimal;
+// use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
 /// A value that cen be ordered
@@ -77,7 +77,8 @@ macro_rules! impl_number_or_field_from {
 // impl<T: Into<sql::Number>> From<T> for Ordinal and that creates
 // a conflict and ambiguity with the From<sql::Number> for Ordinal impl.
 impl_number_or_field_from!(
-    i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
+    i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32,
+    f64 // i8, i16, i32, i64, isize, u8, u16, u32, u64, usize, f32, f64, BigDecimal
 );
 
 impl<T: Into<Field>> From<T> for Ordinal {
