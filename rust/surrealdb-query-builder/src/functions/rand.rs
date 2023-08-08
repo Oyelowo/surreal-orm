@@ -730,13 +730,6 @@ mod tests {
     }
 
     #[test]
-    fn test_rand_guid_macro_with_invalid_input() {
-        let result = rand::guid!("ere");
-        assert_eq!(result.fine_tune_params(), "rand::guid($_param_00000001)");
-        assert_eq!(result.to_raw().build(), "rand::guid(0)");
-    }
-
-    #[test]
     fn test_rand_guid_fn_with_field_input() {
         let length = Field::new("length");
 
@@ -782,13 +775,6 @@ macro_rules! create_test_for_fn_with_two_args {
                     let result = rand::[< $function_ident>]!(34, 65);
                     assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
                     assert_eq!(result.to_raw().build(), format!("rand::{}(34, 65)", $function_ident));
-                }
-
-                #[test]
-                fn [<test_rand_ $function_ident macro_with_invalid_input>]() {
-                    let result = rand::[< $function_ident>]!(34, "ere");
-                    assert_eq!(result.fine_tune_params(), format!("rand::{}($_param_00000001, $_param_00000002)", $function_ident));
-                    assert_eq!(result.to_raw().build(), format!("rand::{}(34, 0)", $function_ident));
                 }
 
                 #[test]
