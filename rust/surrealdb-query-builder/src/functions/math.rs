@@ -147,7 +147,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 fn [<test_ $function_name _fn_with_fraction>]() {
                     let result = math::[<$function_name _fn>](45.23);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().build(), format!("math::{}(45.23)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("math::{}(45.23f)", $function_name));
                 }
 
                 #[test]
@@ -180,7 +180,7 @@ macro_rules! create_test_for_fn_with_single_arg {
                 fn [<test_ $function_name _macro_with_fraction>]() {
                     let result = math::[<$function_name>]!(45.23);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().build(), format!("math::{}(45.23)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("math::{}(45.23f)", $function_name));
                 }
 
                 #[test]
@@ -374,7 +374,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                     let arr1 = array![1, 2, 3, 3.5];
                     let result = math::[<$function_name _fn>](arr1);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5f])", $function_name));
                 }
 
                 #[test]
@@ -411,7 +411,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
                     let arr1 = array![1, 2, 3, 3.5];
                     let result = math::[<$function_name>]!(arr1);
                     assert_eq!(result.fine_tune_params(), format!("math::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5])", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("math::{}([1, 2, 3, 3.5f])", $function_name));
                 }
 
                 #[test]
@@ -627,7 +627,7 @@ mod tests {
             result.fine_tune_params(),
             "math::fixed($_param_00000001, $_param_00000002)"
         );
-        assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
+        assert_eq!(result.to_raw().build(), "math::fixed(13.45423f, 4)");
     }
 
     #[test]
@@ -683,7 +683,7 @@ mod tests {
             result.fine_tune_params(),
             "math::fixed($_param_00000001, $_param_00000002)"
         );
-        assert_eq!(result.to_raw().build(), "math::fixed(13.45423, 4)");
+        assert_eq!(result.to_raw().build(), "math::fixed(13.45423f, 4)");
     }
 
     #[test]
