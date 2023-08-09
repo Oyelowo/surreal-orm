@@ -83,7 +83,7 @@ mod tests {
     fn expression_from_float() {
         let expression = Expression::from(1.02);
         assert_eq!(expression.fine_tune_params(), "$_param_00000001");
-        assert_eq!(expression.to_raw().build(), "1.02");
+        assert_eq!(expression.to_raw().build(), "1.02f");
     }
 
     #[test]

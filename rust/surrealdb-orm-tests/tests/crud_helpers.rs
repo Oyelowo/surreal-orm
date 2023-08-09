@@ -155,7 +155,7 @@ async fn test_find_where_complex() -> SurrealdbOrmResult<()> {
     );
     assert_eq!(
         total_spaceships_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP ALL);"
     );
 
     let total_spaceships_count: Option<i32> = total_spaceships_query.return_one(db.clone()).await?;
@@ -183,7 +183,7 @@ async fn test_count_where() -> SurrealdbOrmResult<()> {
 
     assert_eq!(
         weapons_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP BY );"
+        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP ALL);"
     );
 
     assert_eq!(weapons_count, 500);
@@ -204,7 +204,7 @@ async fn test_count_where_complex() -> SurrealdbOrmResult<()> {
 
     assert_eq!(
         weapons_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count((strength >= 500) AND (strength < 734)) FROM weapon GROUP BY );"
+        "SELECT VALUE count FROM (SELECT count((strength >= 500) AND (strength < 734)) FROM weapon GROUP ALL);"
     );
 
     assert_eq!(weapons_count, 234);
@@ -224,7 +224,7 @@ async fn test_count_all() -> SurrealdbOrmResult<()> {
 
     assert_eq!(
         weapons_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count() FROM weapon GROUP BY );"
+        "SELECT VALUE count FROM (SELECT count() FROM weapon GROUP ALL);"
     );
 
     assert_eq!(weapons_count, 1000);

@@ -191,7 +191,7 @@ create_type!(
     /// assert_eq!(result.to_raw().build(), "type::float($float_param)");
     /// ```
     =>
-    "float", NumberLike, 43.5, 43.5
+    "float", NumberLike, 43.5, "43.5f"
 );
 
 create_type!(
@@ -505,7 +505,10 @@ mod tests {
             result.fine_tune_params(),
             "type::point($_param_00000001, $_param_00000002)"
         );
-        assert_eq!(result.to_raw().build(), "type::point(51.509865, -0.118092)");
+        assert_eq!(
+            result.to_raw().build(),
+            "type::point(51.509865f, -0.118092f)"
+        );
     }
 
     #[test]

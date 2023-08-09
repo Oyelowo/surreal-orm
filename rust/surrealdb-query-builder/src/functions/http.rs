@@ -142,7 +142,7 @@ macro_rules! create_fn_with_url_and_head {
 
                 #[test]
                 fn [<test_ $function_name _method_with_plain_custom_header>]() {
-                    let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let headers = hash_map::HashMap::from([("x-my-header".to_string(), "some unique string".into())]);
                     let result = http::[< $function_name _fn>]("https://codebreather.com", Some(headers));
                     assert_eq!(
                         result.fine_tune_params(),
@@ -189,7 +189,7 @@ macro_rules! create_fn_with_url_and_head {
 
                 #[test]
                 fn [<test_ $function_name _macro_method_with_plain_custom_header>]() {
-                    let headers = hash_map::HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let headers = hash_map::HashMap::from([("x-my-header".to_string(), "some unique string".into())]);
                     let result = http::[<$function_name>]!("https://codebreather.com", headers);
                     assert_eq!(
                         result.fine_tune_params(),
@@ -399,11 +399,11 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                 #[test]
                 fn [<test_ $function_name _method_with_body_and_custom_headers_as_plain_values>]() {
                     let body = HashMap::from([
-                        ("id".into(), 1.into()),
-                        ("body".into(), "This is some awesome thinking!".into()),
-                        ("postId".into(), 100.into()),
+                        ("id".to_string(), 1.into()),
+                        ("body".to_string(), "This is some awesome thinking!".into()),
+                        ("postId".to_string(), 100.into()),
                     ]);
-                    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let headers = HashMap::from([("x-my-header".to_string(), "some unique string".into())]);
                     let result = [<$function_name _fn>]("https://codebreather.com", Some(body), Some(headers));
 
                     assert_eq!(
@@ -485,11 +485,11 @@ macro_rules! create_fn_with_3args_url_body_and_head {
                 #[test]
                 fn [<test_ $function_name _macro_method_with_body_and_custom_headers_as_plain_values>]() {
                     let body = HashMap::from([
-                        ("id".into(), 1.into()),
-                        ("body".into(), "This is some awesome thinking!".into()),
-                        ("postId".into(), 100.into()),
+                        ("id".to_string(), 1.into()),
+                        ("body".to_string(), "This is some awesome thinking!".into()),
+                        ("postId".to_string(), 100.into()),
                     ]);
-                    let headers = HashMap::from([("x-my-header".into(), "some unique string".into())]);
+                    let headers = HashMap::from([("x-my-header".to_string(), "some unique string".into())]);
                     let result = [<$function_name>]!("https://codebreather.com", body, headers);
 
                     assert_eq!(

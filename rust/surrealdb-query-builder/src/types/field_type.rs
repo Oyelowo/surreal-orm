@@ -185,7 +185,13 @@ impl FromStr for FieldType {
                     .collect();
                 FieldType::Geometry(geoms?)
             }
-            _ => return Err(format!("Invalid/Unsupported database type: {s}")),
+            _ => {
+                return Err(format!(
+                "Invalid/Unsupported database type: {s}. Please use one of the following: {types}",
+                s = s,
+                types = FieldType::variants().join(", ")
+            ))
+            }
         };
         Ok(db_type)
     }
