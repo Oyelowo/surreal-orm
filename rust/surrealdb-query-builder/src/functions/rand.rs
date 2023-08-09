@@ -678,7 +678,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
-            "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+            "rand::enum('one', 'two', 3, 4.15385f, 'five', true)"
         );
     }
 
@@ -688,7 +688,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "rand::enum($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
-            "rand::enum('one', 'two', 3, 4.15385, 'five', true)"
+            "rand::enum('one', 'two', 3, 4.15385f, 'five', true)"
         );
     }
 
