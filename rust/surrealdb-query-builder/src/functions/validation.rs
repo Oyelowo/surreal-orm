@@ -88,7 +88,7 @@ macro_rules! create_validation_with_tests {
                     let result = is::[<$function_name _fn>](12.3456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423f)", $function_name));
                 }
 
                 // Macro versions
@@ -122,7 +122,7 @@ macro_rules! create_validation_with_tests {
                     let result = is::[<$function_name>]!(12.3456423);
 
                     assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423f)", $function_name));
                 }
             }
 
