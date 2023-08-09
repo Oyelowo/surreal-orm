@@ -115,8 +115,12 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::datetime!("2022-04-27T00:00:00Z");
-    /// assert_eq!(result.to_raw().build(), "type::datetime('2022-04-27T00:00:00Z')");
+    /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_utc(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///    chrono::Utc,
+    /// );
+    /// let result = type_::datetime!(datetime);
+    /// assert_eq!(result.to_raw().build(), "type::datetime('1970-01-01T00:01:01Z')");
     ///
     /// let datetime_field = Field::new("datetime_field");
     /// let result = type_::datetime!(datetime_field);
@@ -149,7 +153,9 @@ create_type!(
     /// ```rust
     /// # use surrealdb_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let result = type_::duration!("1h");
+    ///
+    /// let duration = std::time::Duration::from_secs(60 * 60);
+    /// let result = type_::duration!(duration);
     /// assert_eq!(result.to_raw().build(), "type::duration(1h)");
     ///
     /// let duration_field = Field::new("duration_field");
