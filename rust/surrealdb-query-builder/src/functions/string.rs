@@ -730,7 +730,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "string::concat(title, $_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005)");
         assert_eq!(
             result.to_raw().build(),
-            "string::concat(title, 'one', 3, 4.15385, '  ', true)"
+            "string::concat(title, 'one', 3, 4.15385f, '  ', true)"
         );
     }
 
@@ -740,7 +740,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "string::concat($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
-            "string::concat('one', 'two', 3, 4.15385, 'five', true)"
+            "string::concat('one', 'two', 3, 4.15385f, 'five', true)"
         );
     }
 
@@ -751,7 +751,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "string::join(title, $_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005)");
         assert_eq!(
             result.to_raw().build(),
-            "string::join(title, 'one', 3, 4.15385, '  ', true)"
+            "string::join(title, 'one', 3, 4.15385f, '  ', true)"
         );
     }
 
@@ -761,7 +761,7 @@ mod tests {
         assert_eq!(result.fine_tune_params(), "string::join($_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005, $_param_00000006)");
         assert_eq!(
             result.to_raw().build(),
-            "string::join('one', 'two', 3, 4.15385, 'five', true)"
+            "string::join('one', 'two', 3, 4.15385f, 'five', true)"
         );
     }
 
