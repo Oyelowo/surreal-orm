@@ -71,7 +71,7 @@ pub trait SurrealdbModel: Sized {
 
     ///
     fn create_id<V: Into<sql::Id>>(id: V) -> SurrealId<Self, V> {
-        SurrealId::new(id).into()
+        SurrealId::new(id)
     }
 
     /// Create a new surreal Thing/compound id from a Uuid
