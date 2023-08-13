@@ -222,35 +222,56 @@ where
     let mut serialized_field_names = T::get_serializable_fields();
     serialized_field_names.sort_by(|a, b| a.build().cmp(&b.build()));
 
-    let value = serde_json::to_value(node).ok().map_or_else(
+    let value = sql::to_value(node).ok().map_or_else(
         || {
             errors.push("Unable to convert node to json".to_string());
-            serde_json::Value::Null
+            sql::Value::Null
         },
         |v| v,
     );
-    let object = value.as_object().map_or_else(
-        || {
-            errors.push("Unable to convert node to json object".to_string());
-            serde_json::Map::new()
-        },
-        |v| v.to_owned(),
-    );
+    // dbg!(&value);
+    // value.
+    let object = sql::json(&value.to_string())
+        .unwrap()
+        .into_json()
+        .as_object()
+        .map_or_else(
+            || {
+                errors.push("Unable to convert node to json object".to_string());
+                serde_json::Map::new()
+            },
+            |v| v.to_owned(),
+        );
+    // let object = value.pick(&["id".into(), "type".into(), "properties".into()]);
+    let objec = value.pick(&["founded".into()]);
+    // let objec = value.pick(
+    //     serialized_field_names
+    //         .iter()
+    //         .map(|f| f.build().into())
+    //         .collect::<Vec<_>>()
+    //         .as_slice(),
+    // );
+    dbg!(&objec);
 
     let (field_names, bindings): (Vec<String>, BindingsList) = serialized_field_names
         .iter()
         .map(|key| {
             let ref key = key.build();
-            let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
-            let value = sql::json(&value1.to_string()).ok().map_or_else(
-                || {
-                    errors.push(format!("Unable to convert value to json {}", value1));
-                    sql::Value::None
-                },
-                |v| v,
-            );
+            // let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
+            let value = value.pick(&[key.as_str().into()]);
+            // let value = sql::json(&sql::to_value(value1).unwrap().to_string())
+            //     .ok()
+            //     .map_or_else(
+            //         || {
+            //             errors.push(format!("Unable to convert value to json {}", value1));
+            //             sql::Value::None
+            //         },
+            //         |v| v,
+            //     );
 
-            let binding = if key == "id" && value1 == &serde_json::Value::Null {
+            dbg!(&value);
+
+            let binding = if key == "id" && value == sql::Value::Null {
                 Binding::new(sql::Value::None).with_name(key.into())
             } else {
                 Binding::new(value).with_name(key.into())
@@ -259,6 +280,7 @@ where
             (key.to_string(), binding)
         })
         .unzip();
+    dbg!(&bindings);
 
     NodeBindings {
         field_names,
