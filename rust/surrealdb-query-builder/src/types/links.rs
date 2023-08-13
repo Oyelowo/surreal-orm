@@ -276,13 +276,32 @@ macro_rules! impl_utils_for_ref_vec {
                     .collect::<Vec<Option<&sql::Thing>>>()
             }
 
-            /// Returns only the keys that exist
-            pub fn keys_truthy(&self) -> Vec<&sql::Thing> {
+            /// Returns only the keys that are non-None ids.
+            /// It does not check if the ids actually exist in the
+            /// foreign table.
+            pub fn keys_truthy(&self) -> Vec<sql::Thing> {
                 self.0
                     .iter()
                     .filter_map(|m| match m {
-                        Reference::FetchedValue(_) => None,
-                        Reference::Id(id) => Some(id),
+                        Reference::FetchedValue(fetched_value) => {
+                            Some(fetched_value.get_id_as_thing())
+                        }
+                        Reference::Id(id) => Some(id.to_owned()),
+                        Reference::Null => None,
+                    })
+                    .collect::<Vec<_>>()
+            }
+
+            /// Returns only the keys that exist if foreign links are fetched
+            /// and available.
+            pub fn keys_checked(&self) -> Vec<sql::Thing> {
+                self.0
+                    .iter()
+                    .filter_map(|m| match m {
+                        Reference::FetchedValue(fetched_value) => {
+                            Some(fetched_value.get_id_as_thing())
+                        }
+                        Reference::Id(id) => None,
                         Reference::Null => None,
                     })
                     .collect::<Vec<_>>()
