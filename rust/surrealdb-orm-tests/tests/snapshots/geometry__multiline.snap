@@ -2,4 +2,4 @@
 source: surrealdb-orm-tests/tests/geometry.rs
 expression: company
 ---
-{"id":"company:32","nam":"285cfebe-a7f2-4100-aeb3-7f73998fff02","name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"type":"MultiLineString","coordinates":[[[0.0,0.0],[1.0,1.0],[2.0,2.0]],[[3.0,3.0],[4.0,4.0],[5.0,5.0]]]}}
+{"id":{"tb":"company","id":{"Object":{"id":{"Object":{"Number":{"Number":{"Int":32}}}},"tb":{"Strand":"company"}}}},"nam":[40,92,254,190,167,242,65,0,174,179,127,115,153,143,255,2],"name":"Mana Inc.","founded":[-84153600,0],"founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"MultiLine":[[{"x":0.0,"y":0.0},{"x":1.0,"y":1.0},{"x":2.0,"y":2.0}],[{"x":3.0,"y":3.0},{"x":4.0,"y":4.0},{"x":5.0,"y":5.0}]]}}

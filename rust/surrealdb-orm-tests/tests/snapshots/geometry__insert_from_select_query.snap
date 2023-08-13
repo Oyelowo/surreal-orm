@@ -8,8 +8,27 @@ expression: results
             SurrealId(
                 Thing {
                     tb: "gen_z_company",
-                    id: Number(
-                        1,
+                    id: Object(
+                        Object(
+                            {
+                                "id": Object(
+                                    Object(
+                                        {
+                                            "Number": Number(
+                                                Int(
+                                                    1,
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                "tb": Strand(
+                                    Strand(
+                                        "company",
+                                    ),
+                                ),
+                            },
+                        ),
                     ),
                 },
                 PhantomData<geometry::GenZCompany>,
@@ -51,8 +70,27 @@ expression: results
             SurrealId(
                 Thing {
                     tb: "gen_z_company",
-                    id: Number(
-                        2,
+                    id: Object(
+                        Object(
+                            {
+                                "id": Object(
+                                    Object(
+                                        {
+                                            "Number": Number(
+                                                Int(
+                                                    2,
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                "tb": Strand(
+                                    Strand(
+                                        "company",
+                                    ),
+                                ),
+                            },
+                        ),
                     ),
                 },
                 PhantomData<geometry::GenZCompany>,

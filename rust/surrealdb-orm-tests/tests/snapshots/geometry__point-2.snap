@@ -1,0 +1,10 @@
+---
+source: surrealdb-orm-tests/tests/geometry.rs
+expression: point
+---
+Point(
+    Coord {
+        x: 40.02,
+        y: 116.34,
+    },
+)

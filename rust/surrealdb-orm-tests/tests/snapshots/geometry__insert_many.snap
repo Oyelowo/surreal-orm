@@ -7,8 +7,27 @@ expression: results
         id: SurrealId(
             Thing {
                 tb: "company",
-                id: Number(
-                    32,
+                id: Object(
+                    Object(
+                        {
+                            "id": Object(
+                                Object(
+                                    {
+                                        "Number": Number(
+                                            Int(
+                                                32,
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                            "tb": Strand(
+                                Strand(
+                                    "company",
+                                ),
+                            ),
+                        },
+                    ),
                 ),
             },
             PhantomData<geometry::Company>,
@@ -48,8 +67,27 @@ expression: results
         id: SurrealId(
             Thing {
                 tb: "company",
-                id: Number(
-                    2,
+                id: Object(
+                    Object(
+                        {
+                            "id": Object(
+                                Object(
+                                    {
+                                        "Number": Number(
+                                            Int(
+                                                2,
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ),
+                            "tb": Strand(
+                                Strand(
+                                    "company",
+                                ),
+                            ),
+                        },
+                    ),
                 ),
             },
             PhantomData<geometry::Company>,

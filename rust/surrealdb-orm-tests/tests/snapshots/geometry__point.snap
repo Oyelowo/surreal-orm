@@ -1,0 +1,5 @@
+---
+source: surrealdb-orm-tests/tests/geometry.rs
+expression: company
+---
+{"id":{"tb":"company","id":{"Number":32}},"name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"x":40.02,"y":116.34}}
