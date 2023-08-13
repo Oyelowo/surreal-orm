@@ -488,7 +488,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
             .unwrap();
     insta::assert_debug_snapshot!(selected_original);
 
-    let results = insert::<GenZCompany>(select_query)
+    insert::<GenZCompany>(select_query)
         .return_one(db.clone())
         .await
         .expect_err("Too many items returned. Therefore, you should not use return_one method since there are multiple entries");
