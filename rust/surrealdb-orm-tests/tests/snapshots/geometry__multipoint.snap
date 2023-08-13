@@ -1,5 +1,38 @@
 ---
 source: surrealdb-orm-tests/tests/geometry.rs
-expression: company
+expression: geom
 ---
-{"id":{"tb":"company","id":{"Object":{"id":{"Object":{"Number":{"Number":{"Int":32}}}},"tb":{"Strand":"company"}}}},"nam":[40,92,254,190,167,242,65,0,174,179,127,115,153,143,255,2],"name":"Mana Inc.","founded":[-84153600,0],"founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"MultiPoint":[{"x":0.0,"y":0.0},{"x":1.0,"y":1.0},{"x":2.0,"y":35.0}]}}
+TestMultipoint {
+    id: SurrealId(
+        Thing {
+            tb: "test_multipoint",
+            id: Number(
+                32,
+            ),
+        },
+        PhantomData<geometry::TestMultipoint>,
+        PhantomData<i32>,
+    ),
+    home_multipoint: MultiPoint(
+        [
+            Point(
+                Coord {
+                    x: 0.0,
+                    y: 0.0,
+                },
+            ),
+            Point(
+                Coord {
+                    x: 1.0,
+                    y: 1.0,
+                },
+            ),
+            Point(
+                Coord {
+                    x: 2.0,
+                    y: 35.0,
+                },
+            ),
+        ],
+    ),
+}

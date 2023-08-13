@@ -143,6 +143,14 @@ struct TestMultipolygon {
     home_multipolygon: geo::MultiPolygon,
 }
 
+#[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surrealdb(table_name = "test_geometrycollection")]
+struct TestGeometrycollection {
+    id: SurrealId<Self, i32>,
+    home_geometrycollection: Vec<geo::Geometry>,
+}
+
 #[derive(SurrealdbNode, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surrealdb(table_name = "book")]
@@ -311,6 +319,24 @@ async fn polygon() -> surrealdb::Result<()> {
     Ok(())
 }
 
+macro_rules! create_test_data_assertion {
+    ($test_data: expr) => {
+        // let geom = TestPolygon {
+        //     id: TestPolygon::create_id(32),
+        //     home_polygon: polygon,
+        // };
+        let geom = $test_data;
+        insta::assert_debug_snapshot!(geom);
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await?;
+
+        let results = insert(geom).return_one(db).await;
+
+        let res_string = serde_json::to_string(&results.unwrap()).unwrap();
+        insta::assert_snapshot!(res_string);
+    };
+}
+
 #[tokio::test]
 async fn polygon_with_exterior_interior() -> surrealdb::Result<()> {
     let polygon = polygon!(
@@ -330,106 +356,105 @@ async fn polygon_with_exterior_interior() -> surrealdb::Result<()> {
         ],
     );
 
-    let geom = TestPolygon {
+    create_test_data_assertion!(TestPolygon {
         id: TestPolygon::create_id(32),
         home_polygon: polygon,
-    };
-    insta::assert_debug_snapshot!(geom);
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
-
-    let results = insert(geom).return_one(db).await;
-
-    let res_string = serde_json::to_string(&results.unwrap()).unwrap();
-    insta::assert_snapshot!(res_string);
+    });
     Ok(())
 }
 
-// #[tokio::test]
-// async fn multipoint() -> surrealdb::Result<()> {
-//     let points = MultiPoint(vec![
-//         Point::new(0.0, 0.0),
-//         Point::new(1.0, 1.0),
-//         (2.0, 35.0).into(),
-//     ]);
-//
-//     let company = create_geom_test(points).await?;
-//     insta::assert_snapshot!(company);
-//     Ok(())
-// }
-//
-// #[tokio::test]
-// async fn multiline() -> surrealdb::Result<()> {
-//     let linestring1 = LineString(vec![
-//         Coord { x: 0.0, y: 0.0 },
-//         Coord { x: 1.0, y: 1.0 },
-//         Coord { x: 2.0, y: 2.0 },
-//     ]);
-//     let linestring2 = LineString(vec![
-//         Coord { x: 3.0, y: 3.0 },
-//         Coord { x: 4.0, y: 4.0 },
-//         Coord { x: 5.0, y: 5.0 },
-//     ]);
-//     let multiline_string = MultiLineString(vec![linestring1, linestring2]);
-//
-//     let company = create_geom_test(multiline_string).await?;
-//     insta::assert_snapshot!(company);
-//     Ok(())
-// }
-//
-// #[tokio::test]
-// async fn multipolygon() -> surrealdb::Result<()> {
-//     let polygon1 = Polygon::new(
-//         LineString(vec![
-//             Coord { x: 0.0, y: 0.0 },
-//             Coord { x: 1.0, y: 1.0 },
-//             Coord { x: 2.0, y: 2.0 },
-//             Coord { x: 0.0, y: 0.0 },
-//         ]),
-//         vec![],
-//     );
-//     let polygon2 = Polygon::new(
-//         LineString(vec![
-//             Coord { x: 3.0, y: 3.0 },
-//             Coord { x: 4.0, y: 4.0 },
-//             Coord { x: 5.0, y: 5.0 },
-//             Coord { x: 3.0, y: 3.0 },
-//         ]),
-//         vec![],
-//     );
-//     let poly3 = polygon!(
-//         exterior: [
-//             (x: -111., y: 45.),
-//             (x: -111., y: 41.),
-//             (x: -104., y: 41.),
-//             (x: -104., y: 45.),
-//         ],
-//         interiors: [
-//             [
-//                 (x: -110., y: 44.),
-//                 (x: -110., y: 42.43),
-//                 (x: -105., y: 42.),
-//                 (x: -105., y: 44.),
-//             ],
-//         ],
-//     );
-//     let multi_polygon = MultiPolygon(vec![polygon1, polygon2, poly3]);
-//     insta::assert_snapshot!(serde_json::to_string(&multi_polygon).unwrap());
-//     // let company = create_geom_test(multi_polygon).await?;
-//     // insta::assert_snapshot!(company);
-//     Ok(())
-// }
-//
-// #[tokio::test]
-// async fn geom_collection() -> surrealdb::Result<()> {
-//     let point = Point(Coord { x: 0.0, y: 0.0 });
-//     let linestring = LineString(vec![Coord { x: 1.0, y: 1.0 }, Coord { x: 2.0, y: 2.0 }]);
-//     let geometry_collection = vec![sql::Geometry::Point(point), sql::Geometry::Line(linestring)];
-//     let geometry_collection = sql::Geometry::Collection(geometry_collection);
-//     let company = create_geom_test(geometry_collection).await?;
-//     insta::assert_snapshot!(company);
-//     Ok(())
-// }
+#[tokio::test]
+async fn multipoint() -> surrealdb::Result<()> {
+    let points = MultiPoint(vec![
+        Point::new(0.0, 0.0),
+        Point::new(1.0, 1.0),
+        (2.0, 35.0).into(),
+    ]);
+
+    create_test_data_assertion!(TestMultipoint {
+        id: TestMultipoint::create_id(32),
+        home_multipoint: points,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn multiline() -> surrealdb::Result<()> {
+    let linestring1 = LineString(vec![
+        Coord { x: 0.0, y: 0.0 },
+        Coord { x: 1.0, y: 1.0 },
+        Coord { x: 2.0, y: 2.0 },
+    ]);
+    let linestring2 = LineString(vec![
+        Coord { x: 3.0, y: 3.0 },
+        Coord { x: 4.0, y: 4.0 },
+        Coord { x: 5.0, y: 5.0 },
+    ]);
+    let multiline_string = MultiLineString(vec![linestring1, linestring2]);
+
+    create_test_data_assertion!(TestMultilinestring {
+        id: TestMultilinestring::create_id(32),
+        home_multilinestring: multiline_string,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn multipolygon() -> surrealdb::Result<()> {
+    let polygon1 = Polygon::new(
+        LineString(vec![
+            Coord { x: 0.0, y: 0.0 },
+            Coord { x: 1.0, y: 1.0 },
+            Coord { x: 2.0, y: 2.0 },
+            Coord { x: 0.0, y: 0.0 },
+        ]),
+        vec![],
+    );
+    let polygon2 = Polygon::new(
+        LineString(vec![
+            Coord { x: 3.0, y: 3.0 },
+            Coord { x: 4.0, y: 4.0 },
+            Coord { x: 5.0, y: 5.0 },
+            Coord { x: 3.0, y: 3.0 },
+        ]),
+        vec![],
+    );
+    let poly3 = polygon!(
+        exterior: [
+            (x: -111., y: 45.),
+            (x: -111., y: 41.),
+            (x: -104., y: 41.),
+            (x: -104., y: 45.),
+        ],
+        interiors: [
+            [
+                (x: -110., y: 44.),
+                (x: -110., y: 42.43),
+                (x: -105., y: 42.),
+                (x: -105., y: 44.),
+            ],
+        ],
+    );
+    let multi_polygon = MultiPolygon(vec![polygon1, polygon2, poly3]);
+    create_test_data_assertion!(TestMultipolygon {
+        id: TestMultipolygon::create_id(32),
+        home_multipolygon: multi_polygon,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn geom_collection() -> surrealdb::Result<()> {
+    let point = Point(Coord { x: 0.0, y: 0.0 });
+    let linestring = LineString(vec![Coord { x: 1.0, y: 1.0 }, Coord { x: 2.0, y: 2.0 }]);
+    let geometry_collection = vec![geo::Geometry::Point(point), geo::Geometry::LineString(linestring)];
+    
+    create_test_data_assertion!(TestGeometrycollection {
+        id: TestGeometrycollection::create_id(32),
+        home_geometrycollection: geometry_collection,
+    });
+    Ok(())
+}
 // //
 // // #[tokio::test]
 // // async fn insert_many() -> surrealdb::Result<()> {
