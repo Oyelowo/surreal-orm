@@ -113,7 +113,7 @@ where
     ///     });
     /// ```
     pub fn content(mut self, content: T) -> CreateStatement<T> {
-        let sql_value = sql::json(&sql::to_value(&content).unwrap().to_string()).unwrap();
+        let sql_value = sql::to_value(&content).unwrap();
         let binding = Binding::new(sql_value);
         self.content = binding.get_param_dollarised();
         self.bindings.push(binding);
