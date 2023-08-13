@@ -1,5 +1,22 @@
 ---
 source: surrealdb-orm-tests/tests/geometry.rs
-expression: company
+expression: geom
 ---
-{"id":{"tb":"company","id":{"Number":32}},"name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"x":40.02,"y":116.34}}
+TestPoint {
+    id: SurrealId(
+        Thing {
+            tb: "test_point",
+            id: Number(
+                32,
+            ),
+        },
+        PhantomData<geometry::TestPoint>,
+        PhantomData<i32>,
+    ),
+    home_point: Point(
+        Coord {
+            x: 40.02,
+            y: 116.34,
+        },
+    ),
+}

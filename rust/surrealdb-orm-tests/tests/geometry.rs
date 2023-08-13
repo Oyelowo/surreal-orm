@@ -20,7 +20,6 @@ use surrealdb::engine::local::Mem;
 use surrealdb::sql;
 use surrealdb::sql::Datetime;
 use surrealdb_orm::SurrealdbCrudNode;
-// use surrealdb::sql::Geometry;
 use std::time::Duration;
 use surrealdb::sql::Uuid;
 use surrealdb::Surreal;
@@ -46,11 +45,6 @@ struct Company {
     founders: Vec<Person>,
     tags: Vec<String>,
     home: geo::Point,
-    // home_linestring: geo::LineString,
-    // home_polygon: geo::Polygon,
-    // home_multilinestring: geo::MultiLineString,
-    // home_multipoint: geo::MultiPoint,
-    // home_multipolygon: geo::MultiPolygon,
 }
 
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
@@ -58,37 +52,13 @@ struct Company {
 #[surrealdb(table_name = "gen_z_company")]
 struct GenZCompany {
     id: SurrealSimpleId<Self>,
-    // #[surrealdb(type = "string")]
-    // nam: UuidWrapper,
     name: String,
-    founded: Datetime,
+    founded: chrono::DateTime<chrono::Utc>,
     founders: Vec<Person>,
     tags: Vec<String>,
-    home: sql::Geometry,
+    home: geo::Point,
 }
 
-// #[derive(Debug, Serialize, Deserialize, Clone)]
-// pub struct UuidWrapper(Uuid);
-//
-// impl From<Uuid> for UuidWrapper {
-//     fn from(uuid: Uuid) -> Self {
-//         UuidWrapper(uuid)
-//     }
-// }
-//
-// impl From<UuidWrapper> for String {
-//     fn from(uuid: UuidWrapper) -> Self {
-//         uuid.to_string()
-//     }
-// }
-//
-// impl std::ops::Deref for UuidWrapper {
-//     type Target = Uuid;
-//
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }
 
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -96,11 +66,6 @@ struct GenZCompany {
 struct TestPoint {
     id: SurrealId<Self, i32>,
     home_point: geo::Point,
-    // home_linestring: geo::LineString,
-    // home_polygon: geo::Polygon,
-    // home_multilinestring: geo::MultiLineString,
-    // home_multipoint: geo::MultiPoint,
-    // home_multipolygon: geo::MultiPolygon,
 }
 
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
@@ -163,11 +128,7 @@ pub struct Book {
 fn create_test_company(geom: impl Into<geo::Point>) -> Company {
     let company = Company {
         id: Company::create_id(32),
-        // nam: Uuid::try_from("285cfebe-a7f2-4100-aeb3-7f73998fff02")
-        //     .unwrap()
-        //     .into(),
         name: "Mana Inc.".to_string(),
-        // founded: "1967-05-03".try_into().unwrap(),
         founded: chrono::DateTime::from_utc(
             chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
                 .unwrap()
@@ -201,130 +162,9 @@ async fn create_geom_test(geom: impl Into<geo::Point>) -> surrealdb::Result<Stri
     Ok(serde_json::to_string(&results).unwrap())
 }
 
-// async fn create_geom_testxx(geom: impl Into<geo::Point>) -> surrealdb::Result<String> {
-//     let company = create_test_company(geom);
-//     let db = Surreal::new::<Mem>(()).await.unwrap();
-//     db.use_ns("test").use_db("test").await?;
-//
-//     // let results = company.create().get_one(db).await.unwrap();
-//     let results = insert(company).return_one(db).await;
-//
-//     Ok(serde_json::to_string(&results).unwrap())
-// }
-
-#[tokio::test]
-async fn point() -> surrealdb::Result<()> {
-    let point = point! {
-        x: 40.02f64,
-        y: 116.34,
-    };
-
-    let company = create_geom_test(point).await?;
-    insta::assert_snapshot!(company);
-    insta::assert_debug_snapshot!(point);
-    Ok(())
-}
-
-#[tokio::test]
-async fn linestring() -> surrealdb::Result<()> {
-    let ls = LineString(vec![
-        Coord {
-            x: -122.33583,
-            y: 47.60621,
-        },
-        Coord {
-            x: -122.33583,
-            y: 47.60622,
-        },
-        Coord {
-            x: -122.33584,
-            y: 47.60622,
-        },
-        Coord {
-            x: -122.33584,
-            y: 47.60621,
-        },
-        Coord {
-            x: -122.33583,
-            y: 47.60621,
-        },
-    ]);
-
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
-
-    let geom = TestLinestring {
-        id: TestLinestring::create_id(32),
-        home_linestring: ls,
-    };
-    let results = insert(geom).return_one(db).await;
-
-    let res_string = serde_json::to_string(&results.unwrap()).unwrap();
-    insta::assert_snapshot!(res_string);
-    Ok(())
-}
-
-#[tokio::test]
-async fn polygon() -> surrealdb::Result<()> {
-    let polygon = polygon![
-            (x: -111., y: 45.),
-            (x: -111., y: 41.),
-            (x: -104., y: 41.),
-            (x: -104., y: 45.),
-        (x: 0.0, y: 0.0),
-        (x: 4.0, y: 0.0),
-        (x: 4.0, y: 1.0),
-        (x: 1.0, y: 1.0),
-        (x: 1.0, y: 4.0),
-        (x: 0.0, y: 4.0),
-        (x: 0.0, y: 0.0),
-    ];
-
-    let geom = TestPolygon {
-        id: TestPolygon::create_id(32),
-        home_polygon: polygon,
-    };
-    insta::assert_debug_snapshot!(geom);
-
-    let _poly = polygon!(
-        exterior: [
-            (x: -111., y: 45.),
-            (x: -111., y: 41.),
-            (x: -104., y: 41.),
-            (x: -104., y: 45.),
-        ],
-        interiors: [
-            [
-                (x: -110., y: 44.),
-                (x: -110., y: 42.),
-                (x: -105., y: 42.),
-                (x: -105., y: 44.),
-            ],
-        ],
-    );
-
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
-
-    let results = insert(geom).return_one(db).await;
-
-    let res_string = serde_json::to_string(&results.unwrap()).unwrap();
-    insta::assert_snapshot!(res_string);
-    // let company_complex = create_geom_test(poly).await?;
-    // println!(
-    //     "ZMZMZMZM {}",
-    //     serde_json::to_string(&company_complex).unwrap()
-    // );
-    // insta::assert_snapshot!(company_complex);
-    Ok(())
-}
 
 macro_rules! create_test_data_assertion {
     ($test_data: expr) => {
-        // let geom = TestPolygon {
-        //     id: TestPolygon::create_id(32),
-        //     home_polygon: polygon,
-        // };
         let geom = $test_data;
         insta::assert_debug_snapshot!(geom);
         let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -374,6 +214,75 @@ async fn multipoint() -> surrealdb::Result<()> {
     create_test_data_assertion!(TestMultipoint {
         id: TestMultipoint::create_id(32),
         home_multipoint: points,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn point() -> surrealdb::Result<()> {
+    let point = point! {
+        x: 40.02f64,
+        y: 116.34,
+    };
+
+    create_test_data_assertion!(TestPoint {
+        id: TestPoint::create_id(32),
+        home_point: point,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn linestring() -> surrealdb::Result<()> {
+    let ls = LineString(vec![
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60622,
+        },
+        Coord {
+            x: -122.33584,
+            y: 47.60621,
+        },
+        Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+    ]);
+
+    create_test_data_assertion!(TestLinestring {
+        id: TestLinestring::create_id(32),
+        home_linestring: ls,
+    });
+    Ok(())
+}
+
+#[tokio::test]
+async fn polygon() -> surrealdb::Result<()> {
+    let polygon = polygon![
+            (x: -111., y: 45.),
+            (x: -111., y: 41.),
+            (x: -104., y: 41.),
+            (x: -104., y: 45.),
+        (x: 0.0, y: 0.0),
+        (x: 4.0, y: 0.0),
+        (x: 4.0, y: 1.0),
+        (x: 1.0, y: 1.0),
+        (x: 1.0, y: 4.0),
+        (x: 0.0, y: 4.0),
+        (x: 0.0, y: 0.0),
+    ];
+
+    create_test_data_assertion!(TestPolygon {
+        id: TestPolygon::create_id(32),
+        home_polygon: polygon,
     });
     Ok(())
 }
@@ -455,154 +364,145 @@ async fn geom_collection() -> surrealdb::Result<()> {
     });
     Ok(())
 }
-// //
-// // #[tokio::test]
-// // async fn insert_many() -> surrealdb::Result<()> {
-// //     let companies = vec![
-// //         Company {
-// //             id: Company::create_id(32),
-// //             name: "Acme Inc.".to_string(),
-// //             founded: "1967-05-03".try_into().unwrap(),
-// //             founders: vec![
-// //                 Person {
-// //                     name: "John Doe".to_string(),
-// //                 },
-// //                 Person {
-// //                     name: "Jane Doe".to_string(),
-// //                 },
-// //             ],
-// //             tags: vec!["foo".to_string(), "bar".to_string()],
-// //             nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02")
-// //                 .unwrap()
-// //                 .into(),
-// //             home: (45.3, 78.1).into(),
-// //         },
-// //         Company {
-// //             id: Company::create_id(2),
-// //             name: "Apple Inc.".to_string(),
-// //             founded: "1967-05-03".try_into().unwrap(),
-// //             founders: vec![
-// //                 Person {
-// //                     name: "John Doe".to_string(),
-// //                 },
-// //                 Person {
-// //                     name: "Jane Doe".to_string(),
-// //                 },
-// //             ],
-// //             tags: vec!["foo".to_string(), "bar".to_string()],
-// //             nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02")
-// //                 .unwrap()
-// //                 .into(),
-// //             home: (63.0, 21.0).into(),
-// //         },
-// //     ];
-// //
-// //     let db = Surreal::new::<Mem>(()).await.unwrap();
-// //     db.use_ns("test").use_db("test").await?;
-// //
-// //     let results = insert(companies).return_many(db).await.unwrap();
-// //
-// //     insta::assert_debug_snapshot!(results);
-// //     Ok(())
-// // }
-// //
-// // #[tokio::test]
-// // async fn insert_from_select_query() -> surrealdb::Result<()> {
-// //     let companies = vec![
-// //         Company {
-// //             id: Company::create_id(1),
-// //             name: "Acme Inc.".to_string(),
-// //             // founded: "1967-05-03".try_into().unwrap(),
-// //             founded: "2020-01-01T00:00:00Z".try_into().unwrap(),
-// //             founders: vec![
-// //                 Person {
-// //                     name: "John Doe".to_string(),
-// //                 },
-// //                 Person {
-// //                     name: "Jane Doe".to_string(),
-// //                 },
-// //             ],
-// //             tags: vec!["foo".to_string(), "bar".to_string()],
-// //             nam: Uuid::try_from("725cfebe-a7f2-4100-aeb3-7f73998fff02")
-// //                 .unwrap()
-// //                 .into(),
-// //             home: (45.3, 78.1).into(),
-// //         },
-// //         Company {
-// //             id: Company::create_id(2),
-// //             name: "Apple Inc.".to_string(),
-// //             // founded: "1967-05-03".try_into().unwrap(),
-// //             // founded: surrealdb::sql::Datetime::now(),
-// //             founded: "2020-01-01T00:00:00Z".try_into().unwrap(),
-// //             founders: vec![
-// //                 Person {
-// //                     name: "John Doe".to_string(),
-// //                 },
-// //                 Person {
-// //                     name: "Jane Doe".to_string(),
-// //                 },
-// //             ],
-// //             tags: vec!["foo".to_string(), "bar".to_string()],
-// //             nam: Uuid::try_from("375cfebe-a7f2-4100-aeb3-7f73998fff02")
-// //                 .unwrap()
-// //                 .into(),
-// //             home: (63.0, 21.0).into(),
-// //         },
-// //     ];
-// //
-// //     let db = Surreal::new::<Mem>(()).await.unwrap();
-// //     db.use_ns("test").use_db("test").await?;
-// //     // Insert companies
-// //     // let results = insert(companies).return_many(db.clone()).await.unwrap();
-// //     let results = insert(companies).return_many(db.clone()).await.unwrap();
-// //     // results.into_iter().collect();
-// //
-// //     // let results = insert(companies)
-// //     //     .return_many(db.clone())
-// //     //     // .return_many_test::<Vec<_>>(db.clone())
-// //     //     .await
-// //     //     .unwrap();
-// //
-// //     println!("QQQQQQINS {:?}", results);
-// //     // db.clone()
-// //     //     .query(format!("{}", CommitStatement))
-// //     //     .await
-// //     //     .unwrap();
-// //     //
-// //     let c = Company::schema();
-// //     let ref select_query = select(All)
-// //         .from(Company::get_table_name())
-// //         .where_(c.tags.any_like("foo"))
-// //         .timeout(Duration::from_secs(20))
-// //         .parallel();
-// //
-// //     println!("BindSel {:?}", select_query.get_bindings());
-// //     println!(
-// //         "SSSSSSS {:?}",
-// //         select_query
-// //             .return_many::<Company>(db.clone())
-// //             .await
-// //             .unwrap()
-// //     );
-// //     // TODO: The fall back to return_one if list returned not working. Investigate.
-// //     // let results = insert::<GenZCompany>(select_query)
-// //     //     .return_one(db.clone())
-// //     //     .await
-// //     //     .unwrap();
-// //     let _results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
-// //
-// //     let _results = insert::<GenZCompany>(select_query)
-// //         .return_many(db.clone())
-// //         .await
-// //         .unwrap();
-// //
-// //     let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
-// //     // let results = insert::<GenZCompany>(select_query)
-// //     //     .return_many(db.clone())
-// //     //     // .return_many_explicit::<Vec<GenZCompany>>(db.clone())
-// //     //     .await
-// //     //     .unwrap();
-// //
-// //     insta::assert_debug_snapshot!(results);
-// //     Ok(())
-// // }
+
+#[tokio::test]
+async fn insert_many() -> surrealdb::Result<()> {
+    let companies = vec![
+        Company {
+            id: Company::create_id(32),
+            name: "Acme Inc.".to_string(),
+            founded: chrono::DateTime::from_utc(
+                chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
+                    .unwrap()
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap(),
+                chrono::Utc
+            ),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            home: (45.3, 78.1).into(),
+        },
+        Company {
+            id: Company::create_id(2),
+            name: "Apple Inc.".to_string(),
+            founded: chrono::DateTime::from_utc(
+                chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
+                    .unwrap()
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap(),
+                chrono::Utc
+            ),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            home: (63.0, 21.0).into(),
+        },
+    ];
+
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await?;
+
+    let results = insert(companies).return_many(db).await.unwrap();
+
+    insta::assert_debug_snapshot!(results);
+    Ok(())
+}
+
+#[tokio::test]
+async fn insert_from_select_query() -> surrealdb::Result<()> {
+    let companies = vec![
+        Company {
+            id: Company::create_id(1),
+            name: "Acme Inc.".to_string(),
+            founded: chrono::DateTime::from_utc(
+                chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
+                    .unwrap()
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap(),
+                chrono::Utc
+            ),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            home: (45.3, 78.1).into(),
+        },
+        Company {
+            id: Company::create_id(2),
+            name: "Apple Inc.".to_string(),
+            founded: chrono::DateTime::from_utc(
+                chrono::NaiveDate::from_ymd_opt(1974, 5, 3)
+                    .unwrap()
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap(),
+                chrono::Utc
+            ),
+            founders: vec![
+                Person {
+                    name: "John Doe".to_string(),
+                },
+                Person {
+                    name: "Jane Doe".to_string(),
+                },
+            ],
+            tags: vec!["foo".to_string(), "bar".to_string()],
+            home: (63.0, 21.0).into(),
+        },
+    ];
+
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await?;
+    
+    // Insert companies
+    let results = insert(companies).return_many(db.clone()).await.unwrap();
+
+    let c = Company::schema();
+    let ref select_query = select(All)
+        .from(Company::get_table_name())
+        .where_(c.tags.any_like("foo"))
+        .timeout(Duration::from_secs(20))
+        .parallel();
+
+
+    let selected_original  = select_query
+            .return_many::<Company>(db.clone())
+            .await
+            .unwrap();
+    insta::assert_debug_snapshot!(selected_original);
+
+    let results = insert::<GenZCompany>(select_query)
+        .return_one(db.clone())
+        .await
+        .expect_err("Too many items returned. Therefore, you should not use return_one method since there are multiple entries");
+    
+    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    insta::assert_debug_snapshot!(results);
+
+    let results = insert::<GenZCompany>(select_query)
+        .return_many(db.clone())
+        .await
+        .unwrap();
+    insta::assert_debug_snapshot!(results);
+
+    let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
+    insta::assert_debug_snapshot!(results);
+    Ok(())
+}
