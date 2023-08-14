@@ -10,8 +10,8 @@ use crate::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
         RelateStatement, SelectStatement, UpdateStatement,
     },
-    Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Node, Operation, Param,
-    Parametric, SurrealModel, Valuex,
+    Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Model, Node, Operation,
+    Param, Parametric, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -138,7 +138,7 @@ macro_rules! create_value_like_struct {
 
             impl<T> From<UpdateStatement<T>> for [<$sql_type_name Like>]
             where
-                T: SurrealModel + Serialize + DeserializeOwned,
+                T: Model + Serialize + DeserializeOwned,
             {
                 fn from(statement: UpdateStatement<T>) -> Self {
                     [<$sql_type_name Like>](statement.into(), ValueType::UpdateStatement)
@@ -147,7 +147,7 @@ macro_rules! create_value_like_struct {
 
             impl<T> From<DeleteStatement<T>> for [<$sql_type_name Like>]
             where
-                T: SurrealModel + Serialize + DeserializeOwned,
+                T: Model + Serialize + DeserializeOwned,
             {
                 fn from(statement: DeleteStatement<T>) -> Self {
                     [<$sql_type_name Like>](statement.into(), ValueType::DeleteStatement)
@@ -264,7 +264,7 @@ where
 
 impl<T> From<UpdateStatement<T>> for BoolLike
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: UpdateStatement<T>) -> Self {
         BoolLike(statement.into())
@@ -273,7 +273,7 @@ where
 
 impl<T> From<DeleteStatement<T>> for BoolLike
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
         BoolLike(statement.into())
@@ -403,7 +403,7 @@ where
 
 impl<T> From<UpdateStatement<T>> for ArrayLike
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: UpdateStatement<T>) -> Self {
         Self(statement.into())
@@ -412,7 +412,7 @@ where
 
 impl<T> From<DeleteStatement<T>> for ArrayLike
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
         Self(statement.into())

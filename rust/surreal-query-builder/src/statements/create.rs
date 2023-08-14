@@ -51,7 +51,7 @@ impl<const N: usize> From<&[Setter; N]> for SetterCreator {
 ///
 /// # Arguments
 ///
-/// * `content` - a serializable surrealdb node model. Type must implement SurrealModel
+/// * `content` - a serializable surrealdb node model. Type must implement Model
 /// # Examples
 ///
 /// ```rust, ignore

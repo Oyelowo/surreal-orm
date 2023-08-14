@@ -5,14 +5,14 @@
  * Licensed under the MIT license
  */
 
-use crate::{Node, SurrealId, SurrealModel};
+use crate::{Model, Node, SurrealId};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
 /// A reference to foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
-pub enum Reference<V: SurrealModel> {
+pub enum Reference<V: Model> {
     /// the id of the foreign node. The defualt if foreign node is not fetched
     Id(sql::Thing),
     // Id(SurrealId<V>),
@@ -31,7 +31,7 @@ where
     /// # Panics
     ///
     /// Panics if .
-    pub fn from_model(model: impl SurrealModel) -> Self {
+    pub fn from_model(model: impl Model) -> Self {
         let id: sql::Thing = model.get_id_as_thing();
         Self::Id(id)
     }

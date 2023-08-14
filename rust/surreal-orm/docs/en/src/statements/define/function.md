@@ -74,7 +74,7 @@ use surreal_models::SpaceShip;
 use surreal_orm::{
     cond, index,
     statements::{create, define_function, if_, select},
-    All, Buildable, Operatable, SchemaGetter, SetterAssignable, SurrealModel, ToRaw, NONE,
+    All, Buildable, Operatable, SchemaGetter, SetterAssignable, Model, ToRaw, NONE,
 };
 
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {

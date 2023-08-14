@@ -24,8 +24,8 @@ use surrealdb::sql;
 
 use crate::{
     Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, ErrorList, Filter,
-    Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard, Setter,
-    SurrealId, SurrealModel, SurrealSimpleId, SurrealUlid, SurrealUuid, ToRaw,
+    Model, Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard,
+    Setter, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -86,7 +86,7 @@ use crate::{
 /// ```
 pub fn update<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     let table_name = T::table_name();
     let targettables: TargettablesForUpdate = targettables.into();
@@ -139,7 +139,7 @@ where
 #[derive(Debug, Clone)]
 pub struct UpdateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     target: String,
     content: Option<String>,
@@ -156,10 +156,10 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + SurrealModel {}
+impl<T> Queryable for UpdateStatement<T> where T: Serialize + DeserializeOwned + Model {}
 impl<T> Erroneous for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_errors(&self) -> ErrorList {
         self.0.errors.to_vec()
@@ -173,7 +173,7 @@ pub enum TargettablesForUpdate {
 
 impl<T> From<T> for TargettablesForUpdate
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn from(value: T) -> Self {
         Self::SurrealId(value.get_id_as_thing())
@@ -212,7 +212,7 @@ impl From<sql::Thing> for TargettablesForUpdate {
 
 impl<T, Id> From<SurrealId<T, Id>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
     Id: Into<sql::Id>,
 {
     fn from(value: SurrealId<T, Id>) -> Self {
@@ -222,7 +222,7 @@ where
 
 impl<T, Id> From<&SurrealId<T, Id>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
     Id: Into<sql::Id>,
 {
     fn from(value: &SurrealId<T, Id>) -> Self {
@@ -232,7 +232,7 @@ where
 
 impl<T> From<SurrealSimpleId<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: SurrealSimpleId<T>) -> Self {
         Self::SurrealId(value.to_thing())
@@ -241,7 +241,7 @@ where
 
 impl<T> From<&SurrealSimpleId<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: &SurrealSimpleId<T>) -> Self {
         Self::SurrealId(value.to_owned().to_thing())
@@ -250,7 +250,7 @@ where
 
 impl<T> From<SurrealUuid<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: SurrealUuid<T>) -> Self {
         Self::SurrealId(value.to_thing())
@@ -259,7 +259,7 @@ where
 
 impl<T> From<&SurrealUuid<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: &SurrealUuid<T>) -> Self {
         Self::SurrealId(value.to_owned().to_thing())
@@ -268,7 +268,7 @@ where
 
 impl<T> From<SurrealUlid<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: SurrealUlid<T>) -> Self {
         Self::SurrealId(value.to_thing())
@@ -277,7 +277,7 @@ where
 
 impl<T> From<&SurrealUlid<T>> for TargettablesForUpdate
 where
-    T: SurrealModel,
+    T: Model,
 {
     fn from(value: &SurrealUlid<T>) -> Self {
         Self::SurrealId(value.to_owned().to_thing())
@@ -292,11 +292,11 @@ impl From<sql::Table> for TargettablesForUpdate {
 
 impl<T> UpdateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     /// Caution! Overrides all data even with default. Use with care. You may prefer `merge` with Updater instead e.g `UserUpdater`.
     /// Specify the full record data using the CONTENT keyword. The content must be serializable
-    /// and implement SurrealModel trait.
+    /// and implement Model trait.
     pub fn content(mut self, content: T) -> UpdateStatement<T> {
         // let sql_value = sql::json(
         //     &sql::to_value(&content)
@@ -385,11 +385,11 @@ where
 /// A builder for update statements.
 pub struct UpdateStatement<T>(UpdateStatementInit<T>)
 where
-    T: Serialize + DeserializeOwned + SurrealModel;
+    T: Serialize + DeserializeOwned + Model;
 
 impl<T> From<UpdateStatementInit<T>> for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn from(value: UpdateStatementInit<T>) -> Self {
         Self(value)
@@ -398,7 +398,7 @@ where
 
 impl<T> UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     /// Adds a condition to the `` clause of the query.
     ///
@@ -504,7 +504,7 @@ where
 
 impl<T> Buildable for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn build(&self) -> String {
         let ref statement = self.0;
@@ -546,7 +546,7 @@ where
 
 impl<T> std::fmt::Display for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
@@ -555,21 +555,18 @@ where
 
 impl<T> Parametric for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
     }
 }
 
-impl<T> ReturnableDefault<T> for UpdateStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealModel
-{
-}
+impl<T> ReturnableDefault<T> for UpdateStatement<T> where T: Serialize + DeserializeOwned + Model {}
 
 impl<T> ReturnableStandard<T> for UpdateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel + Send + Sync,
+    T: Serialize + DeserializeOwned + Model + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.0.return_type = Some(return_type);

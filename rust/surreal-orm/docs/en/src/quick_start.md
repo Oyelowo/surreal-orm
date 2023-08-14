@@ -50,15 +50,15 @@ to your setup.
 ## Defining a Model
 
 A model in SurrealDB ORM represents a database table. You can define a model by
-creating a Rust struct and implementing the `SurrealModel` trait. Here's an
-example of defining a `SpaceShip` model:
+creating a Rust struct and implementing the `Model` trait. Here's an example of
+defining a `SpaceShip` model:
 
 ```rust
 use chrono::Utc;
-use surreal_orm::SurrealModel;
+use surreal_orm::Model;
 use surreal_orm::types::DateTime;
 
-#[derive(SurrealModel)]
+#[derive(Model)]
 #[surreal_orm(table_name = "space_ship")]
 struct SpaceShip {
     id: String,
@@ -67,9 +67,9 @@ struct SpaceShip {
 }
 ```
 
-In this example, we define a `SpaceShip` struct and annotate it with the
-`SurrealModel` derive macro. The `table_name` attribute specifies the name of
-the corresponding database table.
+In this example, we define a `SpaceShip` struct and annotate it with the `Model`
+derive macro. The `table_name` attribute specifies the name of the corresponding
+database table.
 
 ## Querying Data
 

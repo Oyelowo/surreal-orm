@@ -10,7 +10,7 @@ use std::marker::PhantomData;
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealModel},
+    traits::{BindingsList, Buildable, Erroneous, Model, Parametric, Queryable},
     types::{DurationLike, Filter, ReturnType},
     Binding, Conditional, ErrorList, ReturnableDefault, ReturnableStandard, ToRaw,
 };
@@ -44,7 +44,7 @@ DELETE @targets
 /// ```
 pub fn delete<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     let table_name = T::table_name();
     let targettables: TargettablesForUpdate = targettables.into();
@@ -92,7 +92,7 @@ where
 #[derive(Debug, Clone)]
 pub struct DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     target: String,
     where_: Option<String>,
@@ -104,11 +104,11 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + SurrealModel {}
+impl<T> Queryable for DeleteStatement<T> where T: Serialize + DeserializeOwned + Model {}
 
 impl<T> Erroneous for DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
@@ -117,7 +117,7 @@ where
 
 impl<T> DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     /// Adds a condition to the delete statement.
     ///
@@ -226,7 +226,7 @@ where
 
 impl<T> Buildable for DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn build(&self) -> String {
         let mut query = format!("DELETE {}", self.target);
@@ -253,7 +253,7 @@ where
 
 impl<T> std::fmt::Display for DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))
@@ -262,21 +262,18 @@ where
 
 impl<T> Parametric for DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl<T> ReturnableDefault<T> for DeleteStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealModel
-{
-}
+impl<T> ReturnableDefault<T> for DeleteStatement<T> where T: Serialize + DeserializeOwned + Model {}
 
 impl<T> ReturnableStandard<T> for DeleteStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel + Send + Sync,
+    T: Serialize + DeserializeOwned + Model + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);
@@ -292,11 +289,11 @@ where
 #[derive(Debug, Clone)]
 pub struct DeleteStatementMini<T>(DeleteStatement<T>)
 where
-    T: Serialize + DeserializeOwned + SurrealModel;
+    T: Serialize + DeserializeOwned + Model;
 
 impl<T> From<DeleteStatement<T>> for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
         Self(statement)
@@ -305,7 +302,7 @@ where
 
 impl<T> Parametric for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_bindings(&self) -> BindingsList {
         self.0.get_bindings()
@@ -314,23 +311,21 @@ where
 
 impl<T> Erroneous for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn get_errors(&self) -> ErrorList {
         self.0.get_errors()
     }
 }
 
-impl<T> Queryable for DeleteStatementMini<T> where T: Serialize + DeserializeOwned + SurrealModel {}
+impl<T> Queryable for DeleteStatementMini<T> where T: Serialize + DeserializeOwned + Model {}
 
-impl<T> ReturnableDefault<T> for DeleteStatementMini<T> where
-    T: Serialize + DeserializeOwned + SurrealModel
-{
-}
+impl<T> ReturnableDefault<T> for DeleteStatementMini<T> where T: Serialize + DeserializeOwned + Model
+{}
 
 impl<T> ReturnableStandard<T> for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel + Send + Sync,
+    T: Serialize + DeserializeOwned + Model + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.0.return_type = Some(return_type);
@@ -344,7 +339,7 @@ where
 
 impl<T> Buildable for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn build(&self) -> String {
         self.0.build()
@@ -353,7 +348,7 @@ where
 
 impl<T> std::fmt::Display for DeleteStatementMini<T>
 where
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))

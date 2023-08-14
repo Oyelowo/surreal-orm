@@ -21,7 +21,7 @@ macro_rules! object {
             $crate::validators::assert_same_length_arrays($struct_name:: __get_serializable_field_names(), [ $( stringify!($key) ),*]);
             $crate::check_unique_idents!($($key), *);
 
-            type __StructNameRenamedFields = <$struct_name as $crate::SurrealModel>::StructRenamedCreator;
+            type __StructNameRenamedFields = <$struct_name as $crate::Model>::StructRenamedCreator;
             $crate::validators::assert_fields!(__StructNameRenamedFields : $( $key ),*);
 
             let schema = &$struct_name::schema();
@@ -54,7 +54,7 @@ macro_rules! object_partial {
     ($struct_name:ident { $($key:ident: $value:expr),* $(,)? }) => {
         {
             $crate::check_unique_idents!($($key), *);
-            type __StructNameRenamedFields = <$struct_name as $crate::SurrealModel>::NonNullUpdater;
+            type __StructNameRenamedFields = <$struct_name as $crate::Model>::NonNullUpdater;
             $crate::validators::assert_fields!(__StructNameRenamedFields : $( $key ),*);
 
             let schema = &$struct_name::schema();

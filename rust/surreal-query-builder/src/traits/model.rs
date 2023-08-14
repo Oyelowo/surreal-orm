@@ -21,9 +21,9 @@ use crate::{
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
 
-/// SurrealModel is a trait signifying superset of Node and Edge.
-/// i.e both are SurrealModel
-pub trait SurrealModel: Sized {
+/// Model is a trait signifying superset of Node and Edge.
+/// i.e both are Model
+pub trait Model: Sized {
     /// The id of the model/table
     type Id;
     /// Used for updating a model/table. Useful when you want to skip optional fields
@@ -102,7 +102,7 @@ pub trait SurrealModel: Sized {
 }
 
 /// DB convenience helper methods.
-pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + SurrealModel {
+pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + Model {
     /// Creates or updates a model/table in the database.
     fn save(self) -> UpdateStatement<Self> {
         update::<Self>(self.get_id_as_thing()).content(self)
@@ -151,7 +151,7 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + SurrealModel {
     }
 }
 
-impl<T> SurrealCrud for T where T: Sized + Serialize + DeserializeOwned + SurrealModel {}
+impl<T> SurrealCrud for T where T: Sized + Serialize + DeserializeOwned + Model {}
 
 /// DB convenience helper methods.
 pub trait SurrealCrudNode: Sized + Serialize + DeserializeOwned + Node {
@@ -164,7 +164,7 @@ impl<T> SurrealCrudNode for T where T: Sized + Serialize + DeserializeOwned + No
 
 /// Node is a trait signifying a node in the graph
 #[async_trait::async_trait]
-pub trait Node: SurrealModel + Serialize + SchemaGetter {
+pub trait Node: Model + Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
     /// The type of the schema
@@ -263,7 +263,7 @@ pub trait Node: SurrealModel + Serialize + SchemaGetter {
 }
 
 /// Edge is a trait signifying an edge in the graph
-pub trait Edge: SurrealModel + Serialize + SchemaGetter {
+pub trait Edge: Model + Serialize + SchemaGetter {
     /// The Origin node
     type In;
     /// The Destination node

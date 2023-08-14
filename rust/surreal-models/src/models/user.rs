@@ -7,7 +7,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    Edge, LinkMany, LinkOne, Node, Object, Relate, SurrealId, SurrealModel, SurrealSimpleId,
+    Edge, LinkMany, LinkOne, Model, Node, Object, Relate, SurrealId, SurrealSimpleId,
 };
 use surrealdb::sql;
 

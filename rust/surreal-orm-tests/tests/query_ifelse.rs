@@ -11,8 +11,8 @@ use surreal_models::{weapon_schema, SpaceShip, Weapon};
 use surreal_orm::{
     block, chain,
     statements::{if_, insert, let_, order, select, update, LetStatement},
-    All, Buildable, Operatable, ReturnableSelect, Runnable, SchemaGetter, SetterAssignable,
-    SurrealModel, SurrealOrmResult, ToRaw,
+    All, Buildable, Model, Operatable, ReturnableSelect, Runnable, SchemaGetter, SetterAssignable,
+    SurrealOrmResult, ToRaw,
 };
 use surrealdb::{engine::local::Mem, Surreal};
 

@@ -716,7 +716,7 @@ impl SchemaFieldsProperties {
                         let foreign_node = format_ident!("{node_object}");
                         update_ser_field_type(&mut store.link_many_fields);
                         update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(Some(quote!(<#foreign_node as #crate_name::SurrealModel>::Id)));
+                        update_field_names_fields_types_kv(Some(quote!(<#foreign_node as #crate_name::Model>::Id)));
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         

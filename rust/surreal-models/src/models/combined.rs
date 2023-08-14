@@ -96,7 +96,7 @@ fn erer() -> Filter {
     cond(value().is_not(NONE)).and(value().like("email"))
 }
 fn define_age() -> DefineFieldStatement {
-    use surreal_orm::{Node, SurrealModel};
+    use surreal_orm::{Model, Node};
     use CrudType::*;
     let student_schema::Student { age, firstName, .. } = Student::schema();
 

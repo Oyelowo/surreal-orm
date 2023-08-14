@@ -1,7 +1,7 @@
 use super::{Buildable, Parametric};
 use crate::{
-    AllGetter, Field, Projections, Queryable, ReturnType, SurrealModel, SurrealOrmError,
-    SurrealOrmResult, Valuex,
+    AllGetter, Field, Model, Projections, Queryable, ReturnType, SurrealOrmError, SurrealOrmResult,
+    Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -45,7 +45,7 @@ impl<Q> Runnable for Q where Q: Queryable {}
 pub trait ReturnableStandard<T>
 where
     Self: Parametric + Buildable + Sized + Send + Sync + Runnable,
-    T: Serialize + DeserializeOwned + SurrealModel,
+    T: Serialize + DeserializeOwned + Model,
 {
     /// Runs the statement against the database and returns the first result before the change.
     // async fn return_first_before(self, db: Surreal<Db>) -> SurrealOrmResult<Option<T>> {

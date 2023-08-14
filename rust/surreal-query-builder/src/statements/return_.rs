@@ -103,7 +103,7 @@ mod tests {
         block, bracket, chain,
         functions::{count, math},
         statements::{define_field, let_, select},
-        Field, Operatable, SurrealModel, Table, TestUser, ToRaw,
+        Field, Model, Operatable, Table, TestUser, ToRaw,
     };
 
     use super::*;

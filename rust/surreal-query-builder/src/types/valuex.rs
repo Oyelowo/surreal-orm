@@ -11,7 +11,7 @@ use crate::{
         RelateStatement, SelectStatement, Subquery, UpdateStatement,
     },
     Alias, All, Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Filter,
-    Function, Node, Operation, Param, Parametric, SurrealModel, E, NONE, NULL,
+    Function, Model, Node, Operation, Param, Parametric, E, NONE, NULL,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -262,7 +262,7 @@ where
 
 impl<T> From<UpdateStatement<T>> for Valuex
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: UpdateStatement<T>) -> Self {
         statement_to_valuex(statement)
@@ -271,7 +271,7 @@ where
 
 impl<T> From<DeleteStatement<T>> for Valuex
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
         statement_to_valuex(statement)

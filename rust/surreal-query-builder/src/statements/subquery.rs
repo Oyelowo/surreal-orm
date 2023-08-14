@@ -9,8 +9,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    Binding, BindingsList, Block, Buildable, Edge, Erroneous, ErrorList, Node, Parametric,
-    SurrealModel, SurrealOrmError, ToRaw, Valuex,
+    Binding, BindingsList, Block, Buildable, Edge, Erroneous, ErrorList, Model, Node, Parametric,
+    SurrealOrmError, ToRaw, Valuex,
 };
 
 use super::{
@@ -113,7 +113,7 @@ where
 
 impl<T> From<UpdateStatement<T>> for Subquery
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: UpdateStatement<T>) -> Self {
         statement_to_subquery(statement)
@@ -122,7 +122,7 @@ where
 
 impl<T> From<DeleteStatement<T>> for Subquery
 where
-    T: SurrealModel + Serialize + DeserializeOwned,
+    T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
         statement_to_subquery(statement)

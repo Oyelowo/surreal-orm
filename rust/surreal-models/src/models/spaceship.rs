@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{Node, SurrealId, SurrealModel};
+use surreal_orm::{Model, Node, SurrealId};
 use surrealdb::sql;
 
 // #[derive(Serialize, Deserialize)]

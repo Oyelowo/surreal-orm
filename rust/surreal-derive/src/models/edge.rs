@@ -199,7 +199,7 @@ impl ToTokens for EdgeToken {
                 } 
         
                 #[allow(non_snake_case)]
-                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SurrealModel for #struct_name_ident<In, Out> {
+                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Model for #struct_name_ident<In, Out> {
                     type Id = #table_id_type;
                     type NonNullUpdater = #non_null_updater_struct_name;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;

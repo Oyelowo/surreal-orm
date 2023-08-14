@@ -8,14 +8,14 @@
 use std::ops::Bound;
 
 use crate::{
-    statements::select::TargettablesForSelect, Binding, SurrealId, SurrealModel, SurrealSimpleId,
+    statements::select::TargettablesForSelect, Binding, Model, SurrealId, SurrealSimpleId,
     SurrealUlid, SurrealUuid, Valuex,
 };
 use surrealdb::sql;
 
 impl<T, V> From<std::ops::RangeInclusive<SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeInclusive<SurrealId<T, V>>) -> Self {
@@ -36,7 +36,7 @@ where
 
 impl<T, V> From<std::ops::RangeFrom<SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeFrom<SurrealId<T, V>>) -> Self {
@@ -57,7 +57,7 @@ where
 
 impl<T, V> From<std::ops::RangeTo<SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeTo<SurrealId<T, V>>) -> Self {
@@ -78,7 +78,7 @@ where
 
 impl<T, V> From<std::ops::RangeToInclusive<SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeToInclusive<SurrealId<T, V>>) -> Self {
@@ -99,7 +99,7 @@ where
 
 impl<T, V> From<std::ops::Range<SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::Range<SurrealId<T, V>>) -> Self {
@@ -120,7 +120,7 @@ where
 
 impl<T, V> From<std::ops::RangeInclusive<&SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeInclusive<&SurrealId<T, V>>) -> Self {
@@ -141,7 +141,7 @@ where
 
 impl<T, V> From<std::ops::RangeFrom<&SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeFrom<&SurrealId<T, V>>) -> Self {
@@ -162,7 +162,7 @@ where
 
 impl<T, V> From<std::ops::RangeTo<&SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeTo<&SurrealId<T, V>>) -> Self {
@@ -183,7 +183,7 @@ where
 
 impl<T, V> From<std::ops::RangeToInclusive<&SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::RangeToInclusive<&SurrealId<T, V>>) -> Self {
@@ -204,7 +204,7 @@ where
 
 impl<T, V> From<std::ops::Range<&SurrealId<T, V>>> for TargettablesForSelect
 where
-    T: SurrealModel,
+    T: Model,
     V: Into<sql::Id>,
 {
     fn from(range: std::ops::Range<&SurrealId<T, V>>) -> Self {
@@ -228,7 +228,7 @@ macro_rules! create_range {
     ($id_type:ident) => {
         impl<T> From<std::ops::RangeInclusive<$id_type<T>>> for TargettablesForSelect
         where
-            T: SurrealModel,
+            T: Model,
         {
             fn from(range: std::ops::RangeInclusive<$id_type<T>>) -> Self {
                 // e.g user:1..=5
@@ -248,7 +248,7 @@ macro_rules! create_range {
 
         impl<T> From<std::ops::RangeFrom<$id_type<T>>> for TargettablesForSelect
         where
-            T: SurrealModel,
+            T: Model,
         {
             fn from(range: std::ops::RangeFrom<$id_type<T>>) -> Self {
                 // e.g user:1..
@@ -268,7 +268,7 @@ macro_rules! create_range {
 
         impl<T> From<std::ops::RangeTo<$id_type<T>>> for TargettablesForSelect
         where
-            T: SurrealModel,
+            T: Model,
         {
             fn from(range: std::ops::RangeTo<$id_type<T>>) -> Self {
                 // e.g user:..5
@@ -288,7 +288,7 @@ macro_rules! create_range {
 
         impl<T> From<std::ops::RangeToInclusive<$id_type<T>>> for TargettablesForSelect
         where
-            T: SurrealModel,
+            T: Model,
         {
             fn from(range: std::ops::RangeToInclusive<$id_type<T>>) -> Self {
                 // e.g user:..=5
@@ -308,7 +308,7 @@ macro_rules! create_range {
 
         impl<T> From<std::ops::Range<$id_type<T>>> for TargettablesForSelect
         where
-            T: SurrealModel,
+            T: Model,
         {
             fn from(range: std::ops::Range<$id_type<T>>) -> Self {
                 // e.g user:1..5

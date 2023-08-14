@@ -19,8 +19,8 @@ use serde::Serialize;
 use std::time::Duration;
 use surreal_orm::{
     statements::{insert, select},
-    All, Node, Object, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter, SurrealId,
-    SurrealModel, SurrealSimpleId, ToRaw,
+    All, Model, Node, Object, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter,
+    SurrealId, SurrealSimpleId, ToRaw,
 };
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;

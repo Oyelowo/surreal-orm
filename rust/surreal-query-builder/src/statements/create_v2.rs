@@ -78,7 +78,7 @@ where
 ///
 /// # Arguments
 ///
-/// * `content` - a serializable surrealdb node model. Type must implement SurrealModel
+/// * `content` - a serializable surrealdb node model. Type must implement Model
 /// # Examples
 ///
 /// ```rust, ignore

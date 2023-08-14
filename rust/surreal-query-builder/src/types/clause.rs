@@ -9,8 +9,8 @@ use std::ops::Deref;
 
 use crate::{
     statements::{LetStatement, Subquery},
-    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Operatable, Operation,
-    Param, Parametric, Setter, SurrealModel, Table,
+    Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList, Model, Operatable,
+    Operation, Param, Parametric, Setter, Table,
 };
 
 use super::{Filter, NumberLike, SurrealId};
@@ -162,7 +162,7 @@ impl NodeClause {
 
 impl<T, Id> From<SurrealId<T, Id>> for NodeClause
 where
-    T: SurrealModel,
+    T: Model,
     Id: Into<sql::Id>,
 {
     fn from(value: SurrealId<T, Id>) -> Self {
@@ -172,7 +172,7 @@ where
 
 impl<T, Id> From<&SurrealId<T, Id>> for NodeClause
 where
-    T: SurrealModel,
+    T: Model,
     Id: Into<sql::Id>,
 {
     fn from(value: &SurrealId<T, Id>) -> Self {

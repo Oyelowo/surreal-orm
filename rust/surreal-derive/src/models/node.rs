@@ -119,7 +119,7 @@ impl ToTokens for NodeToken{
         
         let table_definitions = self.get_table_definition_token();
 
-        // #[derive(SurrealModel, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+        // #[derive(Model, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // #[surreal_orm(table_name = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
@@ -219,7 +219,7 @@ impl ToTokens for NodeToken{
                 }
             }
 
-            impl #crate_name::SurrealModel for #struct_name_ident {
+            impl #crate_name::Model for #struct_name_ident {
                 type Id = #table_id_type;
                 type NonNullUpdater = #non_null_updater_struct_name;
                 type StructRenamedCreator = #struct_with_renamed_serialized_fields;
