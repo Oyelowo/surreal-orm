@@ -234,7 +234,7 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     assert!(created_alien.ally.get_id().is_none());
     // .value() is None because ally is not created.
     assert!(created_alien.ally.value().is_none());
-
+    //
     // Weapon is created at weapon field and also loaded.
     // get_id  is None because weapon is loaded.
     assert!(created_alien.weapon.get_id().is_none());
@@ -765,12 +765,15 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
     assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
-    assert!(alien_spaceships.keys_truthy().is_empty());
+    assert_eq!(alien_spaceships.keys_truthy().iter().count(), 2);
+    assert_eq!(alien_spaceships.keys_checked().iter().count(), 2);
+    assert!(!alien_spaceships.keys_truthy().is_empty());
 
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
+
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 0);
@@ -789,11 +792,12 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     assert_eq!(selected_aliens_spaceships.values_truthy_count(), 2);
     // Empty keys because we values have being fetched leaving [None, None, None]
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
-    assert!(selected_aliens_spaceships.keys()[0].is_none());
-    assert!(selected_aliens_spaceships.keys()[1].is_none());
+    assert!(selected_aliens_spaceships.keys()[0].is_some());
+    assert!(selected_aliens_spaceships.keys()[1].is_some());
     assert!(selected_aliens_spaceships.keys()[2].is_none());
     // Nones have been filtered out.
-    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 0);
+    assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
+    assert_eq!(selected_aliens_spaceships.keys_checked().len(), 2);
     let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
 
     assert_eq!(selected_aliens_spaceships_values.len(), 3);
