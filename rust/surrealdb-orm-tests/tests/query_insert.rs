@@ -443,7 +443,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealdbOrmR
             .space_ships
             .keys_truthy()
             .len(),
-        0
+        3
     );
     assert_eq!(created_alien_with_fetched_links.age, 20);
     assert_eq!(created_alien_with_fetched_links.name, "Oyelowo");
@@ -539,7 +539,8 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     // the are now created, so the reference should be valid now.
     insert(space_ship1.clone()).return_one(db.clone()).await?;
     insert(space_ship2.clone()).return_one(db.clone()).await?;
-    insert(space_ship3.clone()).return_one(db.clone()).await?;
+    let xx = insert(space_ship3.clone()).return_one(db.clone()).await?;
+    dbg!("loggggg", &xx);
 
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
@@ -597,7 +598,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
             .filter(Option::is_some)
             .collect::<Vec<_>>()
             .len(),
-        0
+        3
     );
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
     let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
