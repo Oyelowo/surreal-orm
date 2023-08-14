@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowooyedayo@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use pretty_assertions::assert_eq;
 use surreal_models::Organization;
 use surreal_orm::{Buildable, Field, SchemaGetter, SetterAssignable, ToRaw};
