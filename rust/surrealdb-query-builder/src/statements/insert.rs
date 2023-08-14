@@ -258,7 +258,7 @@ where
         .map(|key| {
             let ref key = key.build();
             let value = value.pick(&[key.as_str().into()]);
-            dbg!(&key, &value);
+            // dbg!(&key, &value);
 
             // let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
             // let value = sql::json(&sql::to_value(value1).unwrap().to_string())

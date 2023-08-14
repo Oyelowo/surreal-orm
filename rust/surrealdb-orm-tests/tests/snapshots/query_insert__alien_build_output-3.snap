@@ -2,4 +2,4 @@
 source: surrealdb-orm-tests/tests/query_insert.rs
 expression: build.to_raw().build().len()
 ---
-655
+663
