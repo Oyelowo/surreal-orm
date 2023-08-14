@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{SurrealId, SurrealModel, SurrealNode};
+use surreal_orm::{Node, SurrealId, SurrealModel};
 use surrealdb::sql;
 
 // #[derive(Serialize, Deserialize)]
@@ -12,7 +12,7 @@ use surrealdb::sql;
 // }
 
 // SpaceShip
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "space_ship")]
 pub struct SpaceShip {
@@ -31,7 +31,7 @@ impl Default for SpaceShip {
     }
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_raw_id")]
 pub struct TestRawId {

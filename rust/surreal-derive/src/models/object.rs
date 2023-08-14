@@ -92,7 +92,7 @@ impl ToTokens for ObjectToken{
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 
         
-        // #[derive(SurrealObject, Serialize, Deserialize, Debug, Clone)]
+        // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // pub struct Student {
         //     first_name: String,
@@ -114,7 +114,7 @@ impl ToTokens for ObjectToken{
                 }
             }
         
-            impl #crate_name::SurrealObject for #struct_name_ident {
+            impl #crate_name::Object for #struct_name_ident {
                 // type Schema = #module_name::#struct_name_ident;
                 // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;

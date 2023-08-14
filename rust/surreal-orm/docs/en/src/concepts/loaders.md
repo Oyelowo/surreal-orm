@@ -25,7 +25,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    #[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+    #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table_name = "alien")]
     pub struct Alien {
@@ -47,7 +47,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
         pub planets_to_visit: Relate<Planet>,
     }
 
-    #[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table_name = "weapon")]
     pub struct Weapon {
@@ -63,7 +63,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
     type Strength = u64;
 
 
-    #[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+    #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "camelCase")]
     #[surreal_orm(table_name = "space_ship")]
     pub struct SpaceShip {

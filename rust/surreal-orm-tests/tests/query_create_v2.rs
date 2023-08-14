@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-// TODO: Validate in SurrealNode and Edge if id, skip_serializing_if = "Option::is_none" must be
+// TODO: Validate in Node and Edge if id, skip_serializing_if = "Option::is_none" must be
 // set and if relate, skip_serializing
 use chrono::{DateTime, Utc};
 use geo::line_string;

@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{SurrealNode, SurrealSimpleId};
+use surreal_orm::{Node, SurrealSimpleId};
 
 // Planet
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {

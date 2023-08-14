@@ -6,8 +6,8 @@ use crate::{
         DeleteStatement, IfElseStatement, InsertStatement, LetStatement, RelateStatement,
         SelectStatement, Subquery, UpdateStatement,
     },
-    Binding, BindingsList, Block, Buildable, Conditional, Erroneous, ErrorList, Field, Param,
-    Parametric, SurrealEdge, SurrealNode,
+    Binding, BindingsList, Block, Buildable, Conditional, Edge, Erroneous, ErrorList, Field, Node,
+    Param, Parametric,
 };
 
 /// A helper struct for generating SQL update statements.
@@ -125,7 +125,7 @@ impl<T: Serialize> From<SelectStatement> for SetterArg<T> {
 impl<T, V> From<UpdateStatement<V>> for SetterArg<T>
 where
     T: Serialize,
-    V: SurrealNode + Serialize + DeserializeOwned,
+    V: Node + Serialize + DeserializeOwned,
 {
     fn from(value: UpdateStatement<V>) -> Self {
         Self::Subquery(value.into())
@@ -135,7 +135,7 @@ where
 impl<T, V> From<DeleteStatement<V>> for SetterArg<T>
 where
     T: Serialize,
-    V: SurrealNode + Serialize + DeserializeOwned,
+    V: Node + Serialize + DeserializeOwned,
 {
     fn from(value: DeleteStatement<V>) -> Self {
         Self::Subquery(value.into())
@@ -145,7 +145,7 @@ where
 impl<T, V> From<InsertStatement<V>> for SetterArg<T>
 where
     T: Serialize,
-    V: SurrealNode + Serialize + DeserializeOwned,
+    V: Node + Serialize + DeserializeOwned,
 {
     fn from(value: InsertStatement<V>) -> Self {
         Self::Subquery(value.into())
@@ -155,7 +155,7 @@ where
 impl<T, V> From<RelateStatement<V>> for SetterArg<T>
 where
     T: Serialize,
-    V: SurrealEdge + Serialize + DeserializeOwned,
+    V: Edge + Serialize + DeserializeOwned,
 {
     fn from(value: RelateStatement<V>) -> Self {
         Self::Subquery(value.into())

@@ -12,8 +12,8 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, ReturnableDefault,
-        ReturnableStandard, SurrealNode,
+        Binding, BindingsList, Buildable, Erroneous, Node, Parametric, Queryable,
+        ReturnableDefault, ReturnableStandard,
     },
     types::{DurationLike, ReturnType},
     ErrorList, Setter, ToRaw,
@@ -29,7 +29,7 @@ pub enum ContentOrSets<T> {
 
 impl<T> From<T> for ContentOrSets<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(content: T) -> Self {
         ContentOrSets::Content(content)
@@ -38,7 +38,7 @@ where
 
 impl<T> From<Vec<Setter>> for ContentOrSets<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(sets: Vec<Setter>) -> Self {
         ContentOrSets::Sets(sets)
@@ -47,7 +47,7 @@ where
 
 impl<T> From<Setter> for ContentOrSets<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(set: Setter) -> Self {
         ContentOrSets::Sets(vec![set])
@@ -56,7 +56,7 @@ where
 
 impl<const N: usize, T> From<[Setter; N]> for ContentOrSets<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(sets: [Setter; N]) -> Self {
         ContentOrSets::Sets(sets.to_vec())
@@ -65,7 +65,7 @@ where
 
 impl<T> From<&[Setter]> for ContentOrSets<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(sets: &[Setter]) -> Self {
         ContentOrSets::Sets(sets.to_vec())
@@ -89,7 +89,7 @@ where
 /// ```
 pub fn create_v2<T>(content: impl Into<ContentOrSets<T>>) -> CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     let content: ContentOrSets<T> = content.into();
     let mut errors = vec![];
@@ -133,7 +133,7 @@ enum ContentOrSetString {
 #[derive(Debug, Clone)]
 pub struct CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     target: String,
     content: ContentOrSetString,
@@ -145,11 +145,11 @@ where
     __model_return_type: PhantomData<T>,
 }
 
-impl<T> Queryable for CreateStatementV2<T> where T: Serialize + DeserializeOwned + SurrealNode {}
+impl<T> Queryable for CreateStatementV2<T> where T: Serialize + DeserializeOwned + Node {}
 
 impl<T> CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     /// Sets the return type for the query.
     ///
@@ -228,7 +228,7 @@ where
 
 impl<T> Buildable for CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn build(&self) -> String {
         let mut query = format!("CREATE {}", &self.target);
@@ -260,7 +260,7 @@ where
 
 impl<T> std::fmt::Display for CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))
@@ -269,7 +269,7 @@ where
 
 impl<T> Parametric for CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -278,7 +278,7 @@ where
 
 impl<T> Erroneous for CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
@@ -288,13 +288,13 @@ where
 impl<T> ReturnableDefault<T> for CreateStatementV2<T>
 where
     Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
 }
 
 impl<T> ReturnableStandard<T> for CreateStatementV2<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode + Send + Sync,
+    T: Serialize + DeserializeOwned + Node + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);

@@ -145,14 +145,14 @@ impl ToTokens for EdgeToken {
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _};
         
-                impl<In: #crate_name::SurrealNode, Out: #crate_name::SurrealNode> #struct_name_ident<In, Out> {
+                impl<In: #crate_name::Node, Out: #crate_name::Node> #struct_name_ident<In, Out> {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
                     pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
                         [#( #serializable_fields_as_str), *]
                     }
                 }
         
-                impl<In: #crate_name::SurrealNode, Out: #crate_name::SurrealNode> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
+                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
                     type Schema = #module_name::#struct_name_ident;
                 
                     fn schema() -> Self::Schema {
@@ -165,7 +165,7 @@ impl ToTokens for EdgeToken {
                 }
                         
                 #[allow(non_snake_case)]
-                impl<In: #crate_name::SurrealNode, Out: #crate_name::SurrealNode> #crate_name::SurrealEdge for #struct_name_ident<In, Out> {
+                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Edge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
                     type TableNameChecker = #module_name::TableNameStaticChecker;
@@ -199,7 +199,7 @@ impl ToTokens for EdgeToken {
                 } 
         
                 #[allow(non_snake_case)]
-                impl<In: #crate_name::SurrealNode, Out: #crate_name::SurrealNode> #crate_name::SurrealModel for #struct_name_ident<In, Out> {
+                impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SurrealModel for #struct_name_ident<In, Out> {
                     type Id = #table_id_type;
                     type NonNullUpdater = #non_null_updater_struct_name;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
@@ -253,7 +253,7 @@ impl ToTokens for EdgeToken {
                 
                 #[allow(non_snake_case)]
                 pub mod #module_name {
-                    use #crate_name::SurrealNode;
+                    use #crate_name::Node;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;

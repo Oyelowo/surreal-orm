@@ -270,9 +270,9 @@ impl MyFieldReceiver {
             // id: record(student)
             // in: record
             // out: record
-            // link_one => record(book) = static_assertions::assert_has_field(<Book as SurrealNode>::TableNameChecker, book);
-            // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealNode>::TableNameChecker, student);
-            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealNode>::TableNameChecker, book);
+            // link_one => record(book) = static_assertions::assert_has_field(<Book as Node>::TableNameChecker, book);
+            // link_self => record(student) = static_assertions::assert_has_field(<Student as Node>::TableNameChecker, student);
+            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as Node>::TableNameChecker, book);
             // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
 
             match self {
@@ -324,9 +324,9 @@ impl MyFieldReceiver {
                                 // time
                                 // Check that the link name in the type is same used lin
                                 // link_one attribute e.g record(book), when link_one="Book",
-                                // which gives <Book as SurrealNode>::TableNameChecker
+                                // which gives <Book as Node>::TableNameChecker
                                 static_assertions.push(quote!(
-                                type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealNode>::TableNameChecker;
+                                type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
                                 ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
                                            ));
                             }
@@ -353,7 +353,7 @@ impl MyFieldReceiver {
                                             let ref_node_token: TokenStream = ref_node.into();
 
                                             static_assertions.push(quote!(
-                                                            type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::SurrealNode>::TableNameChecker;
+                                                            type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
                                                             ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_content_table_name);
                                                        ));
                                         }
@@ -561,7 +561,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
                     field_content_type: None,
                     static_assertion: quote!(),
                 }
-                // TODO: Only do this for SurrealEdge
+                // TODO: Only do this for Edge
             } else if field_name_normalized == "out" || field_name_normalized == "in" {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
@@ -997,7 +997,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             }
             FieldType::Object => {
                 quote!(#crate_name::sql::Object)
-                // quote!(#crate_name::SurrealObject)
+                // quote!(#crate_name::Object)
             }
             FieldType::Record(_) => {
                 quote!(::std::convert::Option<#crate_name::sql::Thing>)
@@ -1511,7 +1511,7 @@ impl ReferencedNodeMeta {
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealNode);
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::Node);
             ),
 
             record_link_default_alias_as_method,
@@ -1591,7 +1591,7 @@ impl ReferencedNodeMeta {
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::SurrealObject);
+                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::Object);
             ),
 
             record_link_default_alias_as_method,

@@ -1,7 +1,7 @@
-# SurrealObject
+# Object
 
 In Surreal, an Object is a complex nested data structure that can be embedded
-within Nodes, modeled by the `SurrealObject` trait in Rust. Unlike Nodes, which
+within Nodes, modeled by the `Object` trait in Rust. Unlike Nodes, which
 represent database tables, Objects do not represent tables on their own.
 However, they are crucial in modeling more complex data within a Node. They can
 be used directly as a field type or as an element within an array, enabling you
@@ -13,9 +13,9 @@ array of Rocket objects:
 
 ```rust, editable
 use serde::{Deserialize, Serialize};
-use surreal_orm::{SurrealSimpleId, SurrealNode};
+use surreal_orm::{SurrealSimpleId, Node};
 
-#[derive(SurrealNode, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
@@ -28,7 +28,7 @@ pub struct Alien {
     pub strong_rockets: Vec<Rocket>,
 }
 
-#[derive(SurrealObject, Serialize, Deserialize)]
+#[derive(Object, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rocket {
     pub name: String,

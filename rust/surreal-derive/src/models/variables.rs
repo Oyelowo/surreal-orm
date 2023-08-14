@@ -10,9 +10,9 @@ use quote::format_ident;
 pub(crate) struct VariablesModelMacro {
     /// This joins present model to the currently built graph.
     /// e.g Account->likes->Book.name
-    /// For SurrealNode, this is usually just concatenating dot and the model fields i.e
+    /// For Node, this is usually just concatenating dot and the model fields i.e
     /// Mode.fieldname1, Model.fieldname2
-    /// For edges, it usually surrounds the SurrealEdge with arrows e.g ->writes-> or <-writes<-
+    /// For edges, it usually surrounds the Edge with arrows e.g ->writes-> or <-writes<-
     /// Overall, this helps us do the graph traversal
     pub __________connect_node_to_graph_traversal_string: syn::Ident,
     pub __________connect_edge_to_graph_traversal_string: syn::Ident,

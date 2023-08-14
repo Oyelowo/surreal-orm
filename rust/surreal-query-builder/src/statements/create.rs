@@ -12,8 +12,8 @@ use surrealdb::sql;
 
 use crate::{
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, ReturnableDefault,
-        ReturnableStandard, SurrealNode,
+        Binding, BindingsList, Buildable, Erroneous, Node, Parametric, Queryable,
+        ReturnableDefault, ReturnableStandard,
     },
     types::{DurationLike, ReturnType},
     ErrorList, Setter, ToRaw,
@@ -62,7 +62,7 @@ impl<const N: usize> From<&[Setter; N]> for SetterCreator {
 /// ```
 pub fn create<T>() -> CreateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     CreateStatementInit::<T> {
         target: T::table_name().to_string(),
@@ -81,7 +81,7 @@ where
 #[derive(Debug, Clone)]
 pub struct CreateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     target: String,
     content: String,
@@ -96,7 +96,7 @@ where
 
 impl<T> CreateStatementInit<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     /// Sets the content of the record to be created.
     /// When using this, the type can be automatically inferred unlike the `set` method.
@@ -178,11 +178,11 @@ where
 /// `Queryable`, `Buildable`, `Runnable`, and others to support its functionality.
 pub struct CreateStatement<T>(CreateStatementInit<T>)
 where
-    T: Serialize + DeserializeOwned + SurrealNode;
+    T: Serialize + DeserializeOwned + Node;
 
 impl<T> CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     /// Sets the return type for the query.
     ///
@@ -261,7 +261,7 @@ where
 
 impl<T> Buildable for CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn build(&self) -> String {
         let statement = &self.0;
@@ -291,7 +291,7 @@ where
 
 impl<T> std::fmt::Display for CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))
@@ -300,7 +300,7 @@ where
 
 impl<T> Parametric for CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
@@ -309,7 +309,7 @@ where
 
 impl<T> Erroneous for CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_errors(&self) -> ErrorList {
         self.0.errors.to_vec()
@@ -319,13 +319,13 @@ where
 impl<T> ReturnableDefault<T> for CreateStatement<T>
 where
     Self: Parametric + Buildable,
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
 }
 
 impl<T> ReturnableStandard<T> for CreateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode + Send + Sync,
+    T: Serialize + DeserializeOwned + Node + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.0.return_type = Some(return_type);
@@ -337,4 +337,4 @@ where
     }
 }
 
-impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + SurrealNode {}
+impl<T> Queryable for CreateStatement<T> where T: Serialize + DeserializeOwned + Node {}

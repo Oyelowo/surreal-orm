@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{SurrealId, SurrealModel, SurrealNode};
+use crate::{Node, SurrealId, SurrealModel};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql;
 
@@ -24,7 +24,7 @@ pub enum Reference<V: SurrealModel> {
 
 impl<V> Reference<V>
 where
-    V: SurrealNode,
+    V: Node,
 {
     /// .
     ///
@@ -61,7 +61,7 @@ where
     }
 }
 
-impl<V: SurrealNode> Default for Reference<V> {
+impl<V: Node> Default for Reference<V> {
     fn default() -> Self {
         Self::Null
     }
@@ -69,7 +69,7 @@ impl<V: SurrealNode> Default for Reference<V> {
 
 macro_rules! implement_deref_for_link {
     ($reference_ty:ty; $target:ty) => {
-        impl<V: SurrealNode> std::ops::Deref for $reference_ty {
+        impl<V: Node> std::ops::Deref for $reference_ty {
             type Target = $target;
 
             fn deref(&self) -> &Self::Target {
@@ -77,7 +77,7 @@ macro_rules! implement_deref_for_link {
             }
         }
 
-        impl<V: SurrealNode> std::ops::DerefMut for $reference_ty {
+        impl<V: Node> std::ops::DerefMut for $reference_ty {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 &mut self.0
             }
@@ -87,13 +87,13 @@ macro_rules! implement_deref_for_link {
 
 macro_rules! implement_bidirectional_conversion {
     ($from:ty, $to:ty) => {
-        impl<V: SurrealNode> std::convert::From<$from> for $to {
+        impl<V: Node> std::convert::From<$from> for $to {
             fn from(value: $from) -> Self {
                 value.0
             }
         }
 
-        impl<V: SurrealNode> std::convert::From<$to> for $from {
+        impl<V: Node> std::convert::From<$to> for $from {
             fn from(value: $to) -> Self {
                 Self(value)
             }
@@ -103,7 +103,7 @@ macro_rules! implement_bidirectional_conversion {
 
 macro_rules! impl_from_model_for_ref_type {
     ($surreal_node_generics:ty, $reference_type:ty) => {
-        impl<V: SurrealNode> std::convert::From<$surreal_node_generics> for $reference_type {
+        impl<V: Node> std::convert::From<$surreal_node_generics> for $reference_type {
             fn from(model: $surreal_node_generics) -> Self {
                 // let id = model.get_id::<SurrealId<$surreal_node_generics>>();
                 let id: sql::Thing = model.get_id_as_thing();
@@ -112,9 +112,7 @@ macro_rules! impl_from_model_for_ref_type {
             }
         }
 
-        impl<V: SurrealNode + Clone> std::convert::From<&$surreal_node_generics>
-            for $reference_type
-        {
+        impl<V: Node + Clone> std::convert::From<&$surreal_node_generics> for $reference_type {
             fn from(model: &$surreal_node_generics) -> Self {
                 let id: sql::Thing = model.clone().get_id_as_thing();
                 let reference = Reference::Id(id.to_owned());
@@ -124,7 +122,7 @@ macro_rules! impl_from_model_for_ref_type {
     };
 }
 
-impl<V: SurrealNode> std::convert::From<Vec<V>> for LinkMany<V> {
+impl<V: Node> std::convert::From<Vec<V>> for LinkMany<V> {
     fn from(model_vec: Vec<V>) -> Self {
         let xx = model_vec
             .into_iter()
@@ -138,7 +136,7 @@ impl<V: SurrealNode> std::convert::From<Vec<V>> for LinkMany<V> {
     }
 }
 
-impl<V: SurrealNode> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
+impl<V: Node> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
     fn from(model_vec: Vec<sql::Thing>) -> Self {
         let xx = model_vec
             .into_iter()
@@ -150,14 +148,14 @@ impl<V: SurrealNode> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
 }
 /// A reference to a foreign node which can either be an ID or a fetched value itself or null.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct LinkOne<V: SurrealNode>(Reference<V>);
+pub struct LinkOne<V: Node>(Reference<V>);
 
 implement_deref_for_link!(LinkOne<V>; Reference<V>);
 implement_bidirectional_conversion!(LinkOne<V>, Reference<V>);
 impl_from_model_for_ref_type!(V, LinkOne<V>);
 // implement_from_for_reference_type!(Vec<V>, LinkMany<V>);
 
-impl<V: SurrealNode> From<LinkOne<V>> for Option<sql::Thing> {
+impl<V: Node> From<LinkOne<V>> for Option<sql::Thing> {
     fn from(link: LinkOne<V>) -> Self {
         match link.0 {
             Reference::Id(id) => Some(id),
@@ -168,7 +166,7 @@ impl<V: SurrealNode> From<LinkOne<V>> for Option<sql::Thing> {
 
 impl<T, Id> From<SurrealId<T, Id>> for LinkOne<T>
 where
-    T: SurrealNode,
+    T: Node,
     Id: Into<sql::Id>,
 {
     fn from(id: SurrealId<T, Id>) -> Self {
@@ -177,7 +175,7 @@ where
     }
 }
 
-impl<V: SurrealNode> LinkOne<V> {
+impl<V: Node> LinkOne<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct
     /// and you dont want the field be serialized
     pub fn null() -> LinkOne<V> {
@@ -188,9 +186,9 @@ impl<V: SurrealNode> LinkOne<V> {
 /// a reference to current struct as foreign node in a one-to-one relationship which can be either an ID or a fetched value itself or null.
 /// It is similar to `LinkOne` is boxed to avoid infinite recursion.
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct LinkSelf<V: SurrealNode>(Box<Reference<V>>);
+pub struct LinkSelf<V: Node>(Box<Reference<V>>);
 
-impl<V: SurrealNode> From<LinkSelf<V>> for Option<sql::Thing> {
+impl<V: Node> From<LinkSelf<V>> for Option<sql::Thing> {
     fn from(link: LinkSelf<V>) -> Self {
         match link.0.as_ref() {
             Reference::Id(id) => Some(id.clone()),
@@ -199,7 +197,7 @@ impl<V: SurrealNode> From<LinkSelf<V>> for Option<sql::Thing> {
     }
 }
 
-impl<V: SurrealNode> LinkSelf<V> {
+impl<V: Node> LinkSelf<V> {
     /// returns nothing. Useful for satisfying types when instantiating a struct
     pub fn null() -> Self {
         Self(Reference::Null.into())
@@ -208,7 +206,7 @@ impl<V: SurrealNode> LinkSelf<V> {
 
 impl<T, Id> From<SurrealId<T, Id>> for LinkSelf<T>
 where
-    T: SurrealNode,
+    T: Node,
     Id: Into<sql::Id>,
 {
     fn from(id: SurrealId<T, Id>) -> Self {
@@ -217,7 +215,7 @@ where
     }
 }
 
-// impl<V: SurrealNode> Default for LinkSelf<V> {}
+// impl<V: Node> Default for LinkSelf<V> {}
 implement_deref_for_link!(LinkSelf<V>; Box<Reference<V>>);
 implement_bidirectional_conversion!(LinkSelf<V>, Box<Reference<V>>);
 impl_from_model_for_ref_type!(Box<V>, LinkSelf<V>);
@@ -225,7 +223,7 @@ impl_from_model_for_ref_type!(V, LinkSelf<V>);
 
 macro_rules! impl_utils_for_ref_vec {
     ($ref_vec:ident) => {
-        impl<V: SurrealNode> $ref_vec<V> {
+        impl<V: Node> $ref_vec<V> {
             /// Returns an empty vector
             pub fn null() -> Self {
                 $ref_vec(vec![])
@@ -316,9 +314,9 @@ macro_rules! impl_utils_for_ref_vec {
 /// Returns either the foreign values if fetched, id keys of the foreign Field if not fetched,
 /// empty Vec if not available
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct LinkMany<V: SurrealNode>(Vec<Reference<V>>);
+pub struct LinkMany<V: Node>(Vec<Reference<V>>);
 
-impl<V: SurrealNode> IntoIterator for LinkMany<V> {
+impl<V: Node> IntoIterator for LinkMany<V> {
     type Item = Reference<V>;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
@@ -327,7 +325,7 @@ impl<V: SurrealNode> IntoIterator for LinkMany<V> {
     }
 }
 
-impl<V: SurrealNode> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
+impl<V: Node> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
     fn from(link: LinkMany<V>) -> Self {
         link.0
             .into_iter()
@@ -339,7 +337,7 @@ impl<V: SurrealNode> From<LinkMany<V>> for Vec<Option<sql::Thing>> {
     }
 }
 
-// impl<V: SurrealNode> From<Vec<V>> for LinkMany<V> {}
+// impl<V: Node> From<Vec<V>> for LinkMany<V> {}
 
 implement_deref_for_link!(LinkMany<V>; Vec<Reference<V>>);
 impl_utils_for_ref_vec!(LinkMany);
@@ -347,7 +345,7 @@ implement_bidirectional_conversion!(LinkMany<V>, Vec<Reference<V>>);
 
 /// reference to a foreign node in a one-to-many relationship via an edge
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
-pub struct Relate<V: SurrealNode>(Vec<Reference<V>>);
+pub struct Relate<V: Node>(Vec<Reference<V>>);
 
 implement_deref_for_link!(Relate<V>; Vec<Reference<V>>);
 implement_bidirectional_conversion!(Relate<V>, Vec<Reference<V>>);

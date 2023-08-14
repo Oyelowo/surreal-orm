@@ -1,10 +1,10 @@
-# SurrealNode
+# Node
 
 In Surreal, your database is represented using Nodes, Edges, and Objects:
 
 - Nodes: These correspond to database tables, defined as Rust structs
-  implementing the `SurrealNode` trait. Nodes can link to other Nodes and
-  incorporate Objects for complex nested data structures.
+  implementing the `Node` trait. Nodes can link to other Nodes and incorporate
+  Objects for complex nested data structures.
 
 - Edges: Edges represent relationships between Nodes and are used for modeling
   many-to-many relationships or storing additional information about the
@@ -15,10 +15,10 @@ In Surreal, your database is represented using Nodes, Edges, and Objects:
   within a Node.
 
 Nodes are the heart of your database model in Surreal. They're Rust structs
-decorated with `SurrealNode` attributes for overall configuration and
-field-specific attributes for property definition. There are three types of
-links that you can use to define relationships between Nodes: `LinkSelf`,
-`LinkOne`, and `LinkMany`.
+decorated with `Node` attributes for overall configuration and field-specific
+attributes for property definition. There are three types of links that you can
+use to define relationships between Nodes: `LinkSelf`, `LinkOne`, and
+`LinkMany`.
 
 - `LinkSelf`: This is a self-referential link within the same Node (table). For
   example, if an `Alien` can be friends with other aliens, you would use
@@ -35,9 +35,9 @@ For example:
 ```rust
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{LinkMany, LinkOne, LinkSelf, SurrealSimpleId, SurrealNode};
+use surreal_orm::{LinkMany, LinkOne, LinkSelf, SurrealSimpleId, Node};
 
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
@@ -53,7 +53,7 @@ pub struct Alien {
     pub space_ships: LinkMany<SpaceShip>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon")]
 pub struct Weapon {
@@ -62,7 +62,7 @@ pub struct Weapon {
     pub strength: u64,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "space_ship")]
 pub struct SpaceShip {

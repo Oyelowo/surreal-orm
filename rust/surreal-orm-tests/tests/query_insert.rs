@@ -1128,7 +1128,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealOrmResult<
     Ok(())
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "strong_weapon")]
 pub struct StrongWeapon {

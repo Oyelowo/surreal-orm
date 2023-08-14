@@ -1,11 +1,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{SurrealId, SurrealNode, SurrealObject, SurrealSimpleId};
+use surreal_orm::{Node, Object, SurrealId, SurrealSimpleId};
 
 use serde_aux::prelude::deserialize_number_from_string;
 
 // Weapon
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon")]
 pub struct Weapon {
@@ -20,7 +20,7 @@ pub struct Weapon {
 }
 type Strength = u64;
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon", relax_table_name)]
 pub struct WeaponOld {
@@ -35,7 +35,7 @@ pub struct WeaponOld {
     pub rocket: Rocket,
 }
 
-#[derive(SurrealObject, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Rocket {
     pub name: String,
@@ -45,7 +45,7 @@ pub struct Rocket {
     pub created: DateTime<Utc>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon_stats")]
 pub struct WeaponStats {
@@ -55,7 +55,7 @@ pub struct WeaponStats {
     pub average_strength: f64,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "account")]
 pub struct Account {
@@ -64,7 +64,7 @@ pub struct Account {
     pub balance: f64,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "balance")]
 pub struct Balance {

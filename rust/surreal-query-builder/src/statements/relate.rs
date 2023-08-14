@@ -20,9 +20,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{
-        Binding, BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, SurrealEdge,
-    },
+    traits::{Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Parametric, Queryable},
     types::{DurationLike, ReturnType},
     ReturnableDefault, ReturnableStandard, Setter, ToRaw,
 };
@@ -55,7 +53,7 @@ use crate::{
 /// ```
 pub fn relate<T>(connection: impl Buildable + Parametric + Erroneous) -> RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     let errors = connection.get_errors();
     RelateStatement {
@@ -75,7 +73,7 @@ where
 #[derive(Debug, Clone)]
 pub struct RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     relation: String,
     content_param: Option<String>,
@@ -90,9 +88,9 @@ where
 
 impl<T> RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
-    /// Set a serailizable surrealdb edge model. It must implement the SurrealEdge trait.
+    /// Set a serailizable surrealdb edge model. It must implement the Edge trait.
     pub fn content(mut self, content: T) -> Self {
         let sql_value = sql::to_value(&content).unwrap();
         let binding = Binding::new(sql_value);
@@ -222,11 +220,11 @@ where
     }
 }
 
-impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + SurrealEdge {}
+impl<T> Queryable for RelateStatement<T> where T: Serialize + DeserializeOwned + Edge {}
 
 impl<T> Erroneous for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
@@ -235,7 +233,7 @@ where
 
 impl<T> std::fmt::Display for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.build()))
@@ -244,7 +242,7 @@ where
 
 impl<T> Parametric for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
@@ -253,7 +251,7 @@ where
 
 impl<T> Buildable for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge,
+    T: Serialize + DeserializeOwned + Edge,
 {
     fn build(&self) -> String {
         let mut query = format!("RELATE {}", self.relation);
@@ -284,13 +282,13 @@ where
 }
 
 impl<T> ReturnableDefault<T> for RelateStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealEdge + Send + Sync
+    T: Serialize + DeserializeOwned + Edge + Send + Sync
 {
 }
 
 impl<T> ReturnableStandard<T> for RelateStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealEdge + Send + Sync,
+    T: Serialize + DeserializeOwned + Edge + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);

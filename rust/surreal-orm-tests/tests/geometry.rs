@@ -19,19 +19,19 @@ use serde::Serialize;
 use std::time::Duration;
 use surreal_orm::{
     statements::{insert, select},
-    All, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter, SurrealId, SurrealModel,
-    SurrealNode, SurrealObject, SurrealSimpleId, ToRaw,
+    All, Node, Object, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter, SurrealId,
+    SurrealModel, SurrealSimpleId, ToRaw,
 };
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 
 use geo::Coord;
 
-#[derive(SurrealObject, Debug, Serialize, Deserialize, Clone)]
+#[derive(Object, Debug, Serialize, Deserialize, Clone)]
 pub struct Person {
     name: String,
 }
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "company")]
 struct Company {
@@ -43,7 +43,7 @@ struct Company {
     home: geo::Point,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "gen_z_company")]
 struct GenZCompany {
@@ -55,7 +55,7 @@ struct GenZCompany {
     home: geo::Point,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_point")]
 struct TestPoint {
@@ -63,7 +63,7 @@ struct TestPoint {
     home_point: geo::Point,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_linestring")]
 struct TestLinestring {
@@ -71,7 +71,7 @@ struct TestLinestring {
     home_linestring: geo::LineString,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_polygon")]
 struct TestPolygon {
@@ -79,7 +79,7 @@ struct TestPolygon {
     home_polygon: geo::Polygon,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_multilinestring")]
 struct TestMultilinestring {
@@ -87,7 +87,7 @@ struct TestMultilinestring {
     home_multilinestring: geo::MultiLineString,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_multipoint")]
 struct TestMultipoint {
@@ -95,7 +95,7 @@ struct TestMultipoint {
     home_multipoint: geo::MultiPoint,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_multipolygon")]
 struct TestMultipolygon {
@@ -103,7 +103,7 @@ struct TestMultipolygon {
     home_multipolygon: geo::MultiPolygon,
 }
 
-#[derive(SurrealNode, Debug, Serialize, Deserialize, Clone)]
+#[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_geometrycollection")]
 struct TestGeometrycollection {
@@ -111,7 +111,7 @@ struct TestGeometrycollection {
     home_geometrycollection: Vec<geo::Geometry>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "book")]
 pub struct Book {

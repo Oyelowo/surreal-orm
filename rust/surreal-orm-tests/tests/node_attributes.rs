@@ -13,7 +13,7 @@ use surrealdb::Surreal;
 // Explicityly specifying all field types. Most of it can be inferred.
 // So, you usually wouldn't have to annotate the type manually. (See Alien).
 // Adding this for testing purpose.
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien_with_explicit_attributes")]
 pub struct AlienWithExplicitAttributes {
@@ -62,10 +62,10 @@ pub struct AlienWithExplicitAttributes {
     space_ships: LinkMany<SpaceShip>,
 }
 
-#[derive(SurrealEdge, Serialize, Deserialize, Debug, Clone)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "visits")]
-pub struct Visits<In: SurrealNode, Out: SurrealNode> {
+pub struct Visits<In: Node, Out: Node> {
     id: sql::Thing,
     #[serde(rename = "in")]
     in_: LinkOne<In>,
@@ -73,7 +73,7 @@ pub struct Visits<In: SurrealNode, Out: SurrealNode> {
     time_visited: Duration,
 }
 //
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {

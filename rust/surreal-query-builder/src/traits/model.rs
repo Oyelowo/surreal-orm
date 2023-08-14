@@ -21,7 +21,7 @@ use crate::{
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
 
-/// SurrealModel is a trait signifying superset of SurrealNode and SurrealEdge.
+/// SurrealModel is a trait signifying superset of Node and Edge.
 /// i.e both are SurrealModel
 pub trait SurrealModel: Sized {
     /// The id of the model/table
@@ -154,17 +154,17 @@ pub trait SurrealCrud: Sized + Serialize + DeserializeOwned + SurrealModel {
 impl<T> SurrealCrud for T where T: Sized + Serialize + DeserializeOwned + SurrealModel {}
 
 /// DB convenience helper methods.
-pub trait SurrealCrudNode: Sized + Serialize + DeserializeOwned + SurrealNode {
+pub trait SurrealCrudNode: Sized + Serialize + DeserializeOwned + Node {
     /// Creates or updates a model/table in the database.
     fn create(self) -> CreateStatement<Self> {
         create().content(self)
     }
 }
-impl<T> SurrealCrudNode for T where T: Sized + Serialize + DeserializeOwned + SurrealNode {}
+impl<T> SurrealCrudNode for T where T: Sized + Serialize + DeserializeOwned + Node {}
 
-/// SurrealNode is a trait signifying a node in the graph
+/// Node is a trait signifying a node in the graph
 #[async_trait::async_trait]
-pub trait SurrealNode: SurrealModel + Serialize + SchemaGetter {
+pub trait Node: SurrealModel + Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
     /// The type of the schema
@@ -202,7 +202,7 @@ pub trait SurrealNode: SurrealModel + Serialize + SchemaGetter {
     /// ```rust, ignore
     /// Aliases would be published_books and written_blogs in this case.
     ///
-    /// #[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+    /// #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     /// struct UserSchema {
     ///    ...,
     ///    #[surreal_orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
@@ -249,7 +249,7 @@ pub trait SurrealNode: SurrealModel + Serialize + SchemaGetter {
     /// ```rust, ignore
     /// /// field relations would be `->published->book AS published_books` and `->writes->blog AS written_blogs` in this case.
     ///
-    /// #[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+    /// #[derive(Node, Serialize, Deserialize, Debug, Clone)]
     /// struct UserSchema {
     ///    ...,
     ///    #[surreal_orm(relate(model = "StudentPublishedBook", connection = "->published->book"))]
@@ -262,8 +262,8 @@ pub trait SurrealNode: SurrealModel + Serialize + SchemaGetter {
     fn get_fields_relations_aliased() -> Vec<Alias>;
 }
 
-/// SurrealEdge is a trait signifying an edge in the graph
-pub trait SurrealEdge: SurrealModel + Serialize + SchemaGetter {
+/// Edge is a trait signifying an edge in the graph
+pub trait Edge: SurrealModel + Serialize + SchemaGetter {
     /// The Origin node
     type In;
     /// The Destination node
@@ -281,8 +281,8 @@ pub trait SurrealEdge: SurrealModel + Serialize + SchemaGetter {
     fn get_table_name() -> Table;
 }
 
-/// SurrealObject is a trait signifying a nested object in the graph
-pub trait SurrealObject: Serialize + SchemaGetter {
+/// Object is a trait signifying a nested object in the graph
+pub trait Object: Serialize + SchemaGetter {
     /// For merge update of object
     type NonNullUpdater;
     // The type of the schema

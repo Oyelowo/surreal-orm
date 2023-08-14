@@ -16,7 +16,7 @@ use surrealdb::{
     sql::{self, Id},
     Result, Surreal,
 };
-// use surreal_derive::{SurrealEdge, SurrealNode};
+// use surreal_derive::{Edge, Node};
 
 use std::fmt::{Debug, Display};
 use surreal_orm::{
@@ -96,7 +96,7 @@ fn erer() -> Filter {
     cond(value().is_not(NONE)).and(value().like("email"))
 }
 fn define_age() -> DefineFieldStatement {
-    use surreal_orm::{SurrealModel, SurrealNode};
+    use surreal_orm::{Node, SurrealModel};
     use CrudType::*;
     let student_schema::Student { age, firstName, .. } = Student::schema();
 
@@ -139,7 +139,7 @@ fn define_age() -> DefineFieldStatement {
     statement
 }
 
-#[derive(SurrealNode, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student"
@@ -224,10 +224,10 @@ impl Default for Student {
     }
 }
 
-#[derive(SurrealEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(surreal_orm::Edge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "writes")]
-pub struct Writes<In: SurrealNode, Out: SurrealNode> {
+pub struct Writes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Writes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
@@ -241,10 +241,10 @@ pub struct Writes<In: SurrealNode, Out: SurrealNode> {
 pub type StudentWritesBook = Writes<Student, Book>;
 pub type StudentWritesBlog = Writes<Student, Blog>;
 
-#[derive(SurrealEdge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "likes")]
-pub struct Likes<In: SurrealNode, Out: SurrealNode> {
+pub struct Likes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Likes<In, Out>>,
 
     #[serde(rename = "in", skip_serializing)]
@@ -255,7 +255,7 @@ pub struct Likes<In: SurrealNode, Out: SurrealNode> {
 }
 pub type StudentLiksBook = Likes<Student, Book>;
 
-#[derive(SurrealNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "book")]
 pub struct Book {
@@ -264,7 +264,7 @@ pub struct Book {
     content: String,
 }
 
-#[derive(SurrealNode, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "blog")]
 pub struct Blog {

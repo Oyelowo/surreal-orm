@@ -7,12 +7,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    LinkMany, LinkOne, Relate, SurrealEdge, SurrealId, SurrealModel, SurrealNode, SurrealObject,
-    SurrealSimpleId,
+    Edge, LinkMany, LinkOne, Node, Object, Relate, SurrealId, SurrealModel, SurrealSimpleId,
 };
 use surrealdb::sql;
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "user")]
 pub struct User {
@@ -35,10 +34,10 @@ impl Default for User {
     }
 }
 
-#[derive(SurrealEdge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "like")]
-pub struct Like<In: SurrealNode, Out: SurrealNode> {
+pub struct Like<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in", skip_serializing)]
     pub in_: LinkOne<In>,
@@ -49,7 +48,7 @@ pub struct Like<In: SurrealNode, Out: SurrealNode> {
 }
 pub type CompanyLikeUser = Like<Company, User>;
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(surreal_orm::Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "company")]
 pub struct Company {
@@ -62,14 +61,14 @@ pub struct Company {
     pub devs: Relate<User>,
 }
 
-#[derive(SurrealObject, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(surreal_orm::Object, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Time {
     // pub name: String,
     pub connected: DateTime<Utc>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "organization")]
 pub struct Organization {

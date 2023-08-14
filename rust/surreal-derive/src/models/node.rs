@@ -154,7 +154,7 @@ impl ToTokens for NodeToken{
                 }
             }
         
-            impl #crate_name::SurrealNode for #struct_name_ident {
+            impl #crate_name::Node for #struct_name_ident {
                 type TableNameChecker = #module_name::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
                 type Aliases = #module_name::#aliases_struct_name;

@@ -1,16 +1,16 @@
-# SurrealEdge
+# Edge
 
 Edges in Surreal represent relationships between Nodes. They are useful when you
 want to model many-to-many relationships or when you want to store additional
 information about the relationship itself. Edges can be seen as "relationship
 tables" in a relational database context, holding metadata about the
 relationship between two entities. Edges are defined by a Rust struct that
-implements the `SurrealEdge` trait.
+implements the `Edge` trait.
 
 Here's a detailed example:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
@@ -23,7 +23,7 @@ pub struct Alien {
     pub planets_to_visit: Relate<Planet>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {
@@ -32,10 +32,10 @@ pub struct Planet {
 }
 
 // Visits
-#[derive(SurrealEdge, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "visits")]
-pub struct Visits<In: SurrealNode, Out: SurrealNode> {
+pub struct Visits<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
     pub in_: LinkOne<In>,
@@ -62,7 +62,7 @@ defines the path of the relationship from the `Alien` Node, through the `Visits`
 Edge (represented by "visits"), and finally to the `Planet` Node.
 
 The `Visits` Edge struct defines the structure of this relationship. It
-implements `SurrealEdge` and specifies two type parameters: `In` and `Out` which
+implements `Edge` and specifies two type parameters: `In` and `Out` which
 represent the source and target Node types of the relationship, respectively. In
 this example, `Alien` is the source and `Planet` is the target. The `Visits`
 Edge also has a `time_visited` field, which can store additional information

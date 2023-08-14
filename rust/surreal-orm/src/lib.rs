@@ -187,17 +187,17 @@
 #[doc = include_str!("docs/edge_description.md")]
 #[doc = include_str!("docs/edge_struct_attributes.md")]
 #[doc = include_str!("docs/edge_field_attributes.md")]
-pub use surreal_derive::SurrealEdge;
+pub use surreal_derive::Edge;
 
 #[doc = include_str!("docs/node_description.md")]
 #[doc = include_str!("docs/node_struct_attributes.md")]
 #[doc = include_str!("docs/node_field_attributes.md")]
-pub use surreal_derive::SurrealNode;
+pub use surreal_derive::Node;
 
 #[doc = include_str!("docs/object_description.md")]
 #[doc = include_str!("docs/object_struct_attributes.md")]
 #[doc = include_str!("docs/object_field_attributes.md")]
-pub use surreal_derive::SurrealObject;
+pub use surreal_derive::Object;
 
 #[doc(hidden)]
 pub use serde;

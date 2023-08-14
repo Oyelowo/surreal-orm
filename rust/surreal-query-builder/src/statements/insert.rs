@@ -18,7 +18,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, SurrealNode},
+    traits::{Binding, BindingsList, Buildable, Erroneous, Node, Parametric, Queryable},
     types::Updateables,
     ErrorList, ReturnType, ReturnableDefault, ReturnableStandard,
 };
@@ -29,7 +29,7 @@ use super::{SelectStatement, Subquery};
 #[derive(Debug, Clone)]
 pub struct InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     on_duplicate_key_update: Vec<String>,
     return_type: Option<ReturnType>,
@@ -78,7 +78,7 @@ where
 /// ```
 pub fn insert<T>(insertables: impl Into<Insertables<T>>) -> InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     let mut field_names = vec![];
     let mut errors = vec![];
@@ -120,24 +120,21 @@ where
     }
 }
 
-impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + SurrealNode {}
+impl<T> Queryable for InsertStatement<T> where T: Serialize + DeserializeOwned + Node {}
 impl<T> Erroneous for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
     }
 }
 
-impl<T> ReturnableDefault<T> for InsertStatement<T> where
-    T: Serialize + DeserializeOwned + SurrealNode
-{
-}
+impl<T> ReturnableDefault<T> for InsertStatement<T> where T: Serialize + DeserializeOwned + Node {}
 
 impl<T> ReturnableStandard<T> for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode + Send + Sync,
+    T: Serialize + DeserializeOwned + Node + Send + Sync,
 {
     fn set_return_type(mut self, return_type: ReturnType) -> Self {
         self.return_type = Some(return_type);
@@ -151,7 +148,7 @@ where
 
 impl<T> Display for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
@@ -163,7 +160,7 @@ where
 #[derive(Debug)]
 pub enum Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     /// A single surrealdb node
     Node(T),
@@ -175,7 +172,7 @@ where
 
 impl<T> From<Vec<T>> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(value: Vec<T>) -> Self {
         Self::Nodes(value)
@@ -184,7 +181,7 @@ where
 
 impl<T> From<T> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(value: T) -> Self {
         Self::Node(value)
@@ -193,7 +190,7 @@ where
 
 impl<T> From<SelectStatement> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(value: SelectStatement) -> Self {
         Self::FromSubQuery(value.into())
@@ -202,7 +199,7 @@ where
 
 impl<T> From<&SelectStatement> for Insertables<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn from(value: &SelectStatement) -> Self {
         Self::FromSubQuery(value.to_owned().into())
@@ -216,7 +213,7 @@ struct NodeBindings {
 }
 fn create_bindings_for_node<T>(node: &T) -> NodeBindings
 where
-    T: SurrealNode + DeserializeOwned + Serialize,
+    T: Node + DeserializeOwned + Serialize,
 {
     let mut errors = vec![];
     let mut serialized_field_names = T::get_serializable_fields();
@@ -255,7 +252,7 @@ where
 
 impl<T> InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     /// Generates ON DUPLICATE KEY UPDATE clause.
     /// This updates records which already exist by specifying an ON DUPLICATE KEY UPDATE clause.
@@ -341,7 +338,7 @@ where
 
 impl<T> Buildable for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn build(&self) -> String {
         // if self.bindings.is_empty() {
@@ -386,7 +383,7 @@ where
 
 impl<T> Parametric for InsertStatement<T>
 where
-    T: Serialize + DeserializeOwned + SurrealNode,
+    T: Serialize + DeserializeOwned + Node,
 {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()

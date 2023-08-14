@@ -43,27 +43,27 @@ struct NodeEdgeMetadata {
     /// in the calling location e.g
     /// for a model field annotation e.g relate(edge="StudentWritesBook", link="->writes->book")
     /// So we can do
-    /// type Writes = <StudentWritesBook as SurrealEdge>::Schema;
+    /// type Writes = <StudentWritesBook as Edge>::Schema;
     edge_relation_model_selected_ident: syn::Ident,
     /// Example Generated:
     /// ```
-    ///   type BookModel = <StudentWritesBook as surreal_macros::SurrealEdge>::Out;
-    ///   type Book = <BookModel as surreal_macros::SurrealNode>::Schema;
+    ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///   type Book = <BookModel as surreal_macros::Node>::Schema;
     ///
-    ///   type BlogModel = <StudentWritesBlog as surreal_macros::SurrealEdge>::Out;
-    ///   type Blog = <BlogModel as surreal_macros::SurrealNode>::Schema;
+    ///   type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///   type Blog = <BlogModel as surreal_macros::Node>::Schema;
     /// ```
     ///
     /// Example Value:
     /// ```
     /// vec![
     ///    quote!(
-    ///       type BookModel = <StudentWritesBook as surreal_macros::SurrealEdge>::Out;
-    ///       type Book = <BookModel as surreal_macros::SurrealNode>::Schema;
+    ///       type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
+    ///       type Book = <BookModel as surreal_macros::Node>::Schema;
     ///     ),
     ///     quote!(
-    ///       type BlogModel = <StudentWritesBlog as surreal_macros::SurrealEdge>::Out;
-    ///       type Blog = <BlogModel as surreal_macros::SurrealNode>::Schema;
+    ///       type BlogModel = <StudentWritesBlog as surreal_macros::Edge>::Out;
+    ///       type Blog = <BlogModel as surreal_macros::Node>::Schema;
     ///     ),
     /// ],
     /// ```
@@ -132,7 +132,7 @@ pub struct SchemaFieldsProperties {
     pub link_many_fields: Vec<TokenStream>,
     /// Generated example: pub timeWritten: Field,
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
-    /// to build up struct for generating fields of a Schema of the SurrealEdge
+    /// to build up struct for generating fields of a Schema of the Edge
     /// The full thing can look like:
     /// ```
     /// mod _______field_module {
@@ -229,19 +229,19 @@ pub struct SchemaFieldsProperties {
     /// Generated example:
     /// ```
     /// // For relate field
-    /// type StudentWritesBlogTableName = <StudentWritesBlog as SurrealEdge>::TableNameChecker;
+    /// type StudentWritesBlogTableName = <StudentWritesBlog as Edge>::TableNameChecker;
     /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
     ///
-    /// type StudentWritesBlogInNode = <StudentWritesBlog as SurrealEdge>::In;
+    /// type StudentWritesBlogInNode = <StudentWritesBlog as Edge>::In;
     /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
     ///
-    /// type StudentWritesBlogOutNode = <StudentWritesBlog as SurrealEdge>::Out;
+    /// type StudentWritesBlogOutNode = <StudentWritesBlog as Edge>::Out;
     /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
     ///
     ///
-    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: SurrealEdge);
-    /// ::static_assertions::assert_impl_one!(Student: SurrealNode);
-    /// ::static_assertions::assert_impl_one!(Blog: SurrealNode);
+    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: Edge);
+    /// ::static_assertions::assert_impl_one!(Student: Node);
+    /// ::static_assertions::assert_impl_one!(Blog: Node);
     /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
     /// ```
     /// Perform all necessary static checks
@@ -249,11 +249,11 @@ pub struct SchemaFieldsProperties {
 
     /// Generated example:
     /// ```
-    /// type Book = <super::Book as SurrealNode>::Schema;
+    /// type Book = <super::Book as Node>::Schema;
     /// ```
     /// We need imports to be unique, hence the hashset
-    /// Used when you use a SurrealNode in field e.g: favourite_book: LinkOne<Book>,
-    /// e.g: type Book = <super::Book as SurrealNode>::Schema;
+    /// Used when you use a Node in field e.g: favourite_book: LinkOne<Book>,
+    /// e.g: type Book = <super::Book as Node>::Schema;
     pub imports_referenced_node_schema: HashSet<TokenStreamHashable>,
 
     /// This generates a function that is usually called by other Nodes/Structs
@@ -729,7 +729,7 @@ impl SchemaFieldsProperties {
                         store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
                         update_field_names_fields_types_kv(None);
                         
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::SurrealObject>::NonNullUpdater>, ));
+                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ));
                         
                         get_nested_meta_with_defs(&node_object, false)
                     },
@@ -837,31 +837,31 @@ impl NodeEdgeMetadataStore {
         //                   fav_books: Relate<Book>
         //              }
         let static_assertions = &[
-            // type HomeIdent = <StudentWritesBook  as surreal_macros::SurrealEdge>::In;
+            // type HomeIdent = <StudentWritesBook  as surreal_macros::Edge>::In;
             // type HomeNodeTableChecker = <HomeIdent as
-            // surreal_macros::SurrealNode>::TableNameChecker;
+            // surreal_macros::Node>::TableNameChecker;
             // ::static_assertions::assert_type_eq_all!(HomeIdent, Student);
-            // ::static_assertions::assert_impl_one!(HomeIdent, surreal_macros::SurrealNode);
+            // ::static_assertions::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
-             type #home_node_ident = <#relation_model as #crate_name::SurrealEdge>::#home_node_associated_type_ident;
-             type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::SurrealNode>::TableNameChecker;
+             type #home_node_ident = <#relation_model as #crate_name::Edge>::#home_node_associated_type_ident;
+             type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::Node>::TableNameChecker;
              ::static_assertions::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
-             ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::SurrealNode);
+             ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::Node);
             ),
             quote!(
-             type #foreign_node_ident = <#relation_model as #crate_name::SurrealEdge>::#foreign_node_associated_type_ident;
-             type #foreign_node_table_name_checker_ident = <#foreign_node_ident as #crate_name::SurrealNode>::TableNameChecker;
+             type #foreign_node_ident = <#relation_model as #crate_name::Edge>::#foreign_node_associated_type_ident;
+             type #foreign_node_table_name_checker_ident = <#foreign_node_ident as #crate_name::Node>::TableNameChecker;
              ::static_assertions::assert_fields!(#foreign_node_table_name_checker_ident: #foreign_node_table_name);
-             ::static_assertions::assert_impl_one!(#foreign_node_ident: #crate_name::SurrealNode);
+             ::static_assertions::assert_impl_one!(#foreign_node_ident: #crate_name::Node);
             ),
             quote!(
-             type #edge_table_name_checker_ident = <#relation_model as #crate_name::SurrealEdge>::TableNameChecker;
+             type #edge_table_name_checker_ident = <#relation_model as #crate_name::Edge>::TableNameChecker;
              ::static_assertions::assert_fields!(#edge_table_name_checker_ident: #edge_table_name);
             ),
             // assert field type and attribute reference match
             // e.g Relate<Book> should match from attribute link = "->Writes->Book"
             quote!(
-             ::static_assertions::assert_impl_one!(#relation_model: #crate_name::SurrealEdge);
+             ::static_assertions::assert_impl_one!(#relation_model: #crate_name::Edge);
              ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_ident>);
             ),
         ];
@@ -917,7 +917,7 @@ impl NodeEdgeMetadataStore {
         // the outer outer module because all edge related functionalities are nested
         let destination_node_schema_one = || {
             quote!(
-            type #destination_node_model_ident = <super::super::#relation_model as #crate_name::SurrealEdge>::#foreign_node_in_or_out;
+            type #destination_node_model_ident = <super::super::#relation_model as #crate_name::Edge>::#foreign_node_in_or_out;
             type #destination_node_schema_ident = <#destination_node_model_ident as #crate_name::SchemaGetter>::Schema;
             )
         };

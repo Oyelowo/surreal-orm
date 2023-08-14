@@ -10,8 +10,8 @@ use crate::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
         RelateStatement, SelectStatement, Subquery, UpdateStatement,
     },
-    Alias, All, Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Filter, Function,
-    Operation, Param, Parametric, SurrealEdge, SurrealModel, SurrealNode, E, NONE, NULL,
+    Alias, All, Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Filter,
+    Function, Node, Operation, Param, Parametric, SurrealModel, E, NONE, NULL,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -253,7 +253,7 @@ impl From<SelectStatement> for Valuex {
 
 impl<T> From<CreateStatement<T>> for Valuex
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: CreateStatement<T>) -> Self {
         statement_to_valuex(statement)
@@ -280,7 +280,7 @@ where
 
 impl<T> From<RelateStatement<T>> for Valuex
 where
-    T: SurrealEdge + Serialize + DeserializeOwned,
+    T: Edge + Serialize + DeserializeOwned,
 {
     fn from(statement: RelateStatement<T>) -> Self {
         statement_to_valuex(statement)
@@ -289,7 +289,7 @@ where
 
 impl<T> From<InsertStatement<T>> for Valuex
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: InsertStatement<T>) -> Self {
         statement_to_valuex(statement)

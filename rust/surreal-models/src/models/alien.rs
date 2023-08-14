@@ -3,10 +3,10 @@ use std::time::Duration;
 use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surreal_orm::{LinkMany, LinkOne, LinkSelf, Relate, SurrealNode, SurrealSimpleId};
+use surreal_orm::{LinkMany, LinkOne, LinkSelf, Node, Relate, SurrealSimpleId};
 
 // Alien
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
@@ -40,7 +40,7 @@ pub struct Alien {
     pub planets_to_visit: Relate<Planet>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize, Debug, Clone)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien_2")]
 pub struct Alien2 {

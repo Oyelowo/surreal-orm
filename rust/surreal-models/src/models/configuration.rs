@@ -1,10 +1,10 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
-use surreal_orm::SurrealObject;
+use surreal_orm::Object;
 
 // Configuration
-#[derive(SurrealObject, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     length: u64,

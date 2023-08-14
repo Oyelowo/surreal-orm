@@ -20,7 +20,7 @@ on the struct.
 Example struct:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
@@ -56,7 +56,7 @@ the struct.
 Example struct:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "account")]
 pub struct Account {
@@ -92,7 +92,7 @@ the struct.
 Example struct:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "spaceship")]
 pub struct SpaceShip {
@@ -128,7 +128,7 @@ must manually create instances of this type using the `create_id()` function.
 Example struct:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon")]
 pub struct Weapon {

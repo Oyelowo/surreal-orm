@@ -29,7 +29,7 @@ Start by defining a `User` struct representing a user in your application.
 extern crate surreal_orm;
 use surreal_orm::*;
 
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "user")]
 pub struct User {
@@ -47,7 +47,7 @@ SurrealDB ORM supports more complex data types including links between different
 models. Here's a detailed example using a `Student` and a `Book`:
 
 ```rust
-#[derive(SurrealNode, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize)]
 #[surreal_orm(table_name = "student")]
 pub struct Student {
     id: SurrealSimpleId<Self>,
@@ -68,7 +68,7 @@ pub struct Student {
     sem_courses: LinkMany<Book>,
 }
 
-#[derive(SurrealNode, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize)]
 #[surreal_orm(table_name = "book")]
 pub struct Book {
     id: SurrealSimpleId<Self>,
@@ -246,7 +246,7 @@ Executing a select statement is straightforward. Here's an example that uses
 extern crate surreal_orm;
 use surreal_orm::{*, statements::{select, insert}};
 
-#[derive(SurrealNode, Serialize, Deserialize, Default)]
+#[derive(Node, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "weapon")]
 pub struct Weapon {

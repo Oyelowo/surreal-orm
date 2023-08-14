@@ -10,8 +10,8 @@ use crate::{
         CreateStatement, DeleteStatement, IfElseStatement, InsertStatement, LetStatement,
         RelateStatement, SelectStatement, UpdateStatement,
     },
-    Binding, BindingsList, Buildable, Erroneous, ErrorList, Field, Operation, Param, Parametric,
-    SurrealEdge, SurrealModel, SurrealNode, Valuex,
+    Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Node, Operation, Param,
+    Parametric, SurrealModel, Valuex,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -121,7 +121,7 @@ macro_rules! create_value_like_struct {
 
             impl<T> From<CreateStatement<T>> for [<$sql_type_name Like>]
             where
-                T: SurrealNode + Serialize + DeserializeOwned,
+                T: Node + Serialize + DeserializeOwned,
             {
                 fn from(statement: CreateStatement<T>) -> Self {
                     [<$sql_type_name Like>](statement.into(), ValueType::CreateStatement)
@@ -156,7 +156,7 @@ macro_rules! create_value_like_struct {
 
             impl<T> From<RelateStatement<T>> for [<$sql_type_name Like>]
             where
-                T: SurrealEdge + Serialize + DeserializeOwned,
+                T: Edge + Serialize + DeserializeOwned,
             {
                 fn from(statement: RelateStatement<T>) -> Self {
                     [<$sql_type_name Like>](statement.into(), ValueType::RelateStatement)
@@ -165,7 +165,7 @@ macro_rules! create_value_like_struct {
 
             impl<T> From<InsertStatement<T>> for [<$sql_type_name Like>]
             where
-                T: SurrealNode + Serialize + DeserializeOwned,
+                T: Node + Serialize + DeserializeOwned,
             {
                 fn from(statement: InsertStatement<T>) -> Self {
                     [<$sql_type_name Like>](statement.into(), ValueType::InsertStatement)
@@ -255,7 +255,7 @@ impl From<&Field> for BoolLike {
 
 impl<T> From<CreateStatement<T>> for BoolLike
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: CreateStatement<T>) -> Self {
         BoolLike(statement.into())
@@ -282,7 +282,7 @@ where
 
 impl<T> From<RelateStatement<T>> for BoolLike
 where
-    T: SurrealEdge + Serialize + DeserializeOwned,
+    T: Edge + Serialize + DeserializeOwned,
 {
     fn from(statement: RelateStatement<T>) -> Self {
         BoolLike(statement.into())
@@ -291,7 +291,7 @@ where
 
 impl<T> From<InsertStatement<T>> for BoolLike
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: InsertStatement<T>) -> Self {
         BoolLike(statement.into())
@@ -394,7 +394,7 @@ impl From<SelectStatement> for ArrayLike {
 
 impl<T> From<CreateStatement<T>> for ArrayLike
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: CreateStatement<T>) -> Self {
         Self(statement.into())
@@ -421,7 +421,7 @@ where
 
 impl<T> From<RelateStatement<T>> for ArrayLike
 where
-    T: SurrealEdge + Serialize + DeserializeOwned,
+    T: Edge + Serialize + DeserializeOwned,
 {
     fn from(statement: RelateStatement<T>) -> Self {
         Self(statement.into())
@@ -430,7 +430,7 @@ where
 
 impl<T> From<InsertStatement<T>> for ArrayLike
 where
-    T: SurrealNode + Serialize + DeserializeOwned,
+    T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: InsertStatement<T>) -> Self {
         Self(statement.into())
