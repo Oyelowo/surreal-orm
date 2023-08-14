@@ -298,7 +298,13 @@ where
     /// Specify the full record data using the CONTENT keyword. The content must be serializable
     /// and implement SurrealdbModel trait.
     pub fn content(mut self, content: T) -> UpdateStatement<T> {
-        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+        // let sql_value = sql::json(
+        //     &sql::to_value(&content)
+        //         .expect("Problem converting to value")
+        //         .to_string(),
+        // )
+        // .expect("Problem converting to JSON");
+        let sql_value = sql::to_value(&content).unwrap();
         let binding = Binding::new(sql_value);
         self.content = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
@@ -307,7 +313,7 @@ where
 
     /// merge-update only specific fields by using the MERGE keyword and specifying only the fields which are to be updated.
     pub fn merge(mut self, merge: impl Serialize) -> UpdateStatement<T> {
-        let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
+        let sql_value = sql::to_value(&merge).unwrap();
         let binding = Binding::new(sql_value);
         self.merge = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
@@ -317,8 +323,8 @@ where
     /// Caution!
     /// Fully replaces weapon table with completely new object and data. This will remove all fields
     /// that are not present in the new object. This is a destructive operation.
-    pub fn replace(mut self, merge: impl Serialize) -> UpdateStatement<T> {
-        let sql_value = sql::json(&serde_json::to_string(&merge).unwrap()).unwrap();
+    pub fn replace(mut self, replacement: impl Serialize) -> UpdateStatement<T> {
+        let sql_value = sql::to_value(&replacement).unwrap();
         let binding = Binding::new(sql_value);
         self.replace = Some(binding.get_param_dollarised());
         self.bindings.push(binding);

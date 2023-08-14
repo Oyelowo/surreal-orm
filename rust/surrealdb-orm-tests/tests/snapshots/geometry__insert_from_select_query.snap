@@ -1,30 +1,21 @@
 ---
 source: surrealdb-orm-tests/tests/geometry.rs
-expression: results
+expression: selected_original
 ---
 [
-    GenZCompany {
-        id: SurrealSimpleId(
-            SurrealId(
-                Thing {
-                    tb: "gen_z_company",
-                    id: Number(
-                        1,
-                    ),
-                },
-                PhantomData<geometry::GenZCompany>,
-                PhantomData<alloc::string::String>,
-            ),
-        ),
-        nam: UuidWrapper(
-            Uuid(
-                725cfebe-a7f2-4100-aeb3-7f73998fff02,
-            ),
+    Company {
+        id: SurrealId(
+            Thing {
+                tb: "company",
+                id: Number(
+                    1,
+                ),
+            },
+            PhantomData<geometry::Company>,
+            PhantomData<i32>,
         ),
         name: "Acme Inc.",
-        founded: Datetime(
-            1967-05-03T00:00:00Z,
-        ),
+        founded: 1967-05-03T00:00:00Z,
         founders: [
             Person {
                 name: "John Doe",
@@ -38,36 +29,25 @@ expression: results
             "bar",
         ],
         home: Point(
-            Point(
-                Coord {
-                    x: 45.3,
-                    y: 78.1,
-                },
-            ),
+            Coord {
+                x: 45.3,
+                y: 78.1,
+            },
         ),
     },
-    GenZCompany {
-        id: SurrealSimpleId(
-            SurrealId(
-                Thing {
-                    tb: "gen_z_company",
-                    id: Number(
-                        2,
-                    ),
-                },
-                PhantomData<geometry::GenZCompany>,
-                PhantomData<alloc::string::String>,
-            ),
-        ),
-        nam: UuidWrapper(
-            Uuid(
-                375cfebe-a7f2-4100-aeb3-7f73998fff02,
-            ),
+    Company {
+        id: SurrealId(
+            Thing {
+                tb: "company",
+                id: Number(
+                    2,
+                ),
+            },
+            PhantomData<geometry::Company>,
+            PhantomData<i32>,
         ),
         name: "Apple Inc.",
-        founded: Datetime(
-            1967-05-03T00:00:00Z,
-        ),
+        founded: 1974-05-03T00:00:00Z,
         founders: [
             Person {
                 name: "John Doe",
@@ -81,12 +61,10 @@ expression: results
             "bar",
         ],
         home: Point(
-            Point(
-                Coord {
-                    x: 63.0,
-                    y: 21.0,
-                },
-            ),
+            Coord {
+                x: 63.0,
+                y: 21.0,
+            },
         ),
     },
 ]

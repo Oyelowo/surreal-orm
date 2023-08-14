@@ -95,7 +95,7 @@ where
 {
     /// Set a serailizable surrealdb edge model. It must implement the SurrealdbEdge trait.
     pub fn content(mut self, content: T) -> Self {
-        let sql_value = sql::json(&serde_json::to_string(&content).unwrap()).unwrap();
+        let sql_value = sql::to_value(&content).unwrap();
         let binding = Binding::new(sql_value);
         self.content_param = Some(binding.get_param_dollarised().to_owned());
         self.bindings.push(binding);

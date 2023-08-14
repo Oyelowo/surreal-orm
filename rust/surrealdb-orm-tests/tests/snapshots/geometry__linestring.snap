@@ -1,5 +1,40 @@
 ---
 source: surrealdb-orm-tests/tests/geometry.rs
-expression: company
+expression: geom
 ---
-{"id":"company:32","nam":"285cfebe-a7f2-4100-aeb3-7f73998fff02","name":"Mana Inc.","founded":"1967-05-03T00:00:00Z","founders":[{"name":"John Doe"},{"name":"Jane Doe"}],"tags":["foo","bar"],"home":{"type":"LineString","coordinates":[[-122.33583,47.60621],[-122.33583,47.60622],[-122.33584,47.60622],[-122.33584,47.60621],[-122.33583,47.60621]]}}
+TestLinestring {
+    id: SurrealId(
+        Thing {
+            tb: "test_linestring",
+            id: Number(
+                32,
+            ),
+        },
+        PhantomData<geometry::TestLinestring>,
+        PhantomData<i32>,
+    ),
+    home_linestring: LineString(
+        [
+            Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+            Coord {
+                x: -122.33583,
+                y: 47.60622,
+            },
+            Coord {
+                x: -122.33584,
+                y: 47.60622,
+            },
+            Coord {
+                x: -122.33584,
+                y: 47.60621,
+            },
+            Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+        ],
+    ),
+}

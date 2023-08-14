@@ -64,11 +64,11 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealdbOrmResult<()>
     assert_eq!(
         transaction_query.to_raw().build(),
         "BEGIN TRANSACTION;\n\n\
-            LET $balance = (CREATE balance CONTENT { amount: 300.0, id: balance:balance1 });\n\n\
-            CREATE account CONTENT { balance: 135605.16, id: account:one };\n\n\
-            CREATE account CONTENT { balance: 91031.31, id: account:two };\n\n\
+            LET $balance = (CREATE balance CONTENT { amount: 300f, id: balance:balance1 });\n\n\
+            CREATE account CONTENT { balance: 135605.16f, id: account:one };\n\n\
+            CREATE account CONTENT { balance: 91031.31f, id: account:two };\n\n\
             UPDATE account:one SET balance += $balance.amount;\n\n\
-            UPDATE account:two SET balance -= 300.0;\n\n\
+            UPDATE account:two SET balance -= 300f;\n\n\
             COMMIT TRANSACTION;\n\t"
     );
 

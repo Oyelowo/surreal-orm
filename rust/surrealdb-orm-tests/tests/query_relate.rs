@@ -77,10 +77,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         "student:⟨1⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨2⟩");
-    let id = result.clone().id.to_string();
+    let id = serde_json::to_string(&result.clone().id).unwrap();
     assert_eq!(
         serde_json::to_string(&result).unwrap(),
-        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":343,\"nanos\":0}},\"count\":0}}")
+        format!("{{\"id\":{id},\"timeWritten\":{{\"secs\":343,\"nanos\":0}},\"count\":0}}")
     );
 
     // Student 2 writes book1
@@ -101,10 +101,10 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
         "student:⟨2⟩"
     );
     assert_eq!(result.clone().out.get_id().unwrap().to_string(), "book:⟨1⟩");
-    let id = result.clone().id.to_string();
+    let id = &result.clone().id.to_string();
     assert_eq!(
-        serde_json::to_string(&result).unwrap(),
-        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":923,\"nanos\":0}},\"count\":0}}")
+        sql::to_value(&result).unwrap().to_string(),
+        format!("{{ count: 0, id: {id}, timeWritten: {{ nanos: 0, secs: 923 }} }}")
     );
 
     // Student 2 writes blog1
@@ -146,8 +146,8 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> Surrealdb
     );
     let id = result.clone().unwrap().id.to_string();
     assert_eq!(
-        serde_json::to_string(&result).unwrap(),
-        format!("{{\"id\":\"{id}\",\"timeWritten\":{{\"secs\":47,\"nanos\":0}},\"count\":545}}")
+        sql::to_value(&result).unwrap().to_string(),
+        format!("{{ count: 545, id: {id}, timeWritten: {{ nanos: 0, secs: 47 }} }}")
     );
 
     let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();

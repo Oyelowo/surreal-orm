@@ -1,0 +1,22 @@
+---
+source: surrealdb-orm-tests/tests/geometry.rs
+expression: geom
+---
+TestPoint {
+    id: SurrealId(
+        Thing {
+            tb: "test_point",
+            id: Number(
+                32,
+            ),
+        },
+        PhantomData<geometry::TestPoint>,
+        PhantomData<i32>,
+    ),
+    home_point: Point(
+        Coord {
+            x: 40.02,
+            y: 116.34,
+        },
+    ),
+}
