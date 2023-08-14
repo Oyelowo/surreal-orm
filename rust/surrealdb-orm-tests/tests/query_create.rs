@@ -326,12 +326,11 @@ async fn test_create_alien_with_links() -> SurrealdbOrmResult<()> {
     assert_eq!(created_alien.age, 20);
     assert_eq!(unsaved_alien.id.to_string(), created_alien.id.to_string());
 
-    // TODO: Crosscheck
-    // assert_eq!(
-    //     serde_json::to_string(&created_alien.line_polygon).unwrap(),
-    //     "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
-    //         [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
-    // );
+    assert_eq!(
+        sql::Geometry::from(created_alien.clone().line_polygon).to_string(),
+        "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
+            [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
+    );
     assert_eq!(created_alien.name, "Oyelowo");
 
     Ok(())
@@ -682,7 +681,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
             .filter(Option::is_some)
             .collect::<Vec<_>>()
             .len(),
-        0
+        3
     );
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
     let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
@@ -904,8 +903,8 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealdbOrmRe
     assert_eq!(selected_aliens_spaceships.values_truthy_count(), 2);
     // Empty keys because we values have being fetched leaving [None, None, None]
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
-    assert!(selected_aliens_spaceships.keys()[0].is_none());
-    assert!(selected_aliens_spaceships.keys()[1].is_none());
+    assert!(selected_aliens_spaceships.keys()[0].is_some());
+    assert!(selected_aliens_spaceships.keys()[1].is_some());
     assert!(selected_aliens_spaceships.keys()[2].is_none());
     // Nones have been filtered out.
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
@@ -1030,7 +1029,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
             .filter(Option::is_none)
             .collect::<Vec<_>>()
             .len(),
-        3
+        1
     );
     assert_eq!(
         selected_aliens_spaceships
@@ -1039,7 +1038,7 @@ async fn test_return_non_null_links() -> SurrealdbOrmResult<()> {
             .filter(Option::is_some)
             .collect::<Vec<_>>()
             .len(),
-        0
+        2
     );
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
 

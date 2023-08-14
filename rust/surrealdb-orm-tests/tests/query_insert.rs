@@ -271,7 +271,7 @@ async fn test_insert_alien_with_links() -> SurrealdbOrmResult<()> {
     assert_eq!(unsaved_alien.id.to_string(), created_alien.id.to_string());
 
     assert_eq!(
-        created_alien.line_polygon.to_string(),
+        sql::Geometry::from(created_alien.clone().line_polygon).to_string(),
         "{ type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], \
             [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }"
     );
