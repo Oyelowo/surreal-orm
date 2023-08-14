@@ -303,7 +303,7 @@ macro_rules! impl_utils_for_ref_vec {
                         Reference::FetchedValue(fetched_value) => {
                             Some(fetched_value.get_id_as_thing())
                         }
-                        Reference::Id(id) => None,
+                        Reference::Id(_id) => None,
                         Reference::Null => None,
                     })
                     .collect::<Vec<_>>()
