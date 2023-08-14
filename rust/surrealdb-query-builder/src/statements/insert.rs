@@ -271,9 +271,9 @@ where
             //         |v| v,
             //     );
 
-            let binding = if key == "id" {
-                Binding::new(sql::Value::None).with_name(key.into())
-            } else if value == sql::Value::None {
+            // let binding = if key == "id" {
+            //     Binding::new(sql::Value::None).with_name(key.into())
+            let binding = if value == sql::Value::None {
                 Binding::new(sql::Value::Null).with_name(key.into())
             } else {
                 Binding::new(value).with_name(key.into())
