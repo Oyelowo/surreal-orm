@@ -1,0 +1,5 @@
+---
+source: surreal-query-builder/src/statements/define_field.rs
+expression: statement.fine_tune_params()
+---
+DEFINE FIELD email ON TABLE user TYPE string;

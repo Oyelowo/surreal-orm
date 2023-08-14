@@ -1,0 +1,5 @@
+---
+source: surreal-orm/src/lib.rs
+expression: select_statement
+---
+SELECT * FROM  WHERE (email ~ '@oyelowo') AND (email IS 'Oyedayo') GROUP BY email PARALLEL;

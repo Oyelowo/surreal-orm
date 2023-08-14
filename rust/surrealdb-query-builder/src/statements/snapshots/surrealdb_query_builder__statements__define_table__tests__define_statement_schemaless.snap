@@ -1,5 +1,0 @@
----
-source: surrealdb-query-builder/src/statements/define_table.rs
-expression: statement
----
-DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;

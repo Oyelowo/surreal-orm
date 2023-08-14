@@ -1,0 +1,5 @@
+---
+source: surreal-query-builder/src/statements/define_index.rs
+expression: query.get_bindings()
+---
+[]

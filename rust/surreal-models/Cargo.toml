@@ -1,0 +1,40 @@
+[package]
+name = "surreal-models"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = { workspace = true }
+documentation = { workspace = true }
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+surreal-orm = { workspace = true }
+surrealdb = { workspace = true }
+tokio = { workspace = true }
+
+bigdecimal = { workspace = true }
+async-graphql = { workspace = true }
+serde = { workspace = true }
+serde-aux = { workspace = true }
+serde_json = { workspace = true }
+static_assertions = "1.1.0"
+typed-builder = { workspace = true }
+thiserror = { workspace = true }
+
+
+test-case = { workspace = true }
+regex = "1.9.1"
+insta = "1.30.0"
+chrono.workspace = true
+geo = { workspace = true }
+derive_builder = "0.12.0"
+geojson = "0.24.1"
+uuid.workspace = true
+async-trait.workspace = true
+fake = "2.6.1"
+rand.workspace = true
+
+[lib]
+doctest = false

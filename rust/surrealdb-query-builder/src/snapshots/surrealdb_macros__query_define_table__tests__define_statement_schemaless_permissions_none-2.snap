@@ -1,5 +1,0 @@
----
-source: surrealdb-macros/src/query_define_table.rs
-expression: statement.get_bindings()
----
-[]

@@ -1,0 +1,13 @@
+---
+source: surreal-orm-tests/tests/query_code_block.rs
+expression: created_stats_statement.fine_tune_params()
+---
+CREATE weapon_stats SET averageStrength = {
+LET $strengths = $_param_00000001;
+
+LET $total = math::sum($strengths);
+
+LET $count = count($strengths);
+
+RETURN ($total / $count);
+};
