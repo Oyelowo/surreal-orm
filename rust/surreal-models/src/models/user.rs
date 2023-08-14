@@ -61,7 +61,7 @@ pub struct Company {
     pub devs: Relate<User>,
 }
 
-#[derive(surreal_orm::Object, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Object, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Time {
     // pub name: String,
