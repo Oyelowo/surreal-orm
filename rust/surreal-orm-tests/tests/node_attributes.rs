@@ -22,7 +22,6 @@ async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
 
     db.use_ns("test").use_db("test").await.unwrap();
-    Alien::define_fields();
     assert_eq!(
         Alien::define_table().to_raw().build(),
         "DEFINE TABLE alien;"
@@ -56,7 +55,6 @@ DEFINE FIELD spaceShips.* ON TABLE alien TYPE record (space_ship);"
 async fn test_node_atttributes_explicit() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
-    Alien::define_fields();
     assert_eq!(
         AlienWithExplicitAttributes::define_table().to_raw().build(),
         "DEFINE TABLE alien_with_explicit_attributes;"
