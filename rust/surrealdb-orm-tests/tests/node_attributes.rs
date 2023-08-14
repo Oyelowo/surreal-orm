@@ -7,8 +7,7 @@ use std::time::Duration;
 use surrealdb::engine::local::Mem;
 use surrealdb::sql;
 use surrealdb::Surreal;
-use surrealdb_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
-use surrealdb_orm::statements::order;
+use surrealdb_models::{Alien, SpaceShip, Weapon};
 use surrealdb_orm::*;
 
 // Explicityly specifying all field types. Most of it can be inferred.

@@ -274,7 +274,6 @@ impl MyFieldReceiver {
             // link_self => record(student) = static_assertions::assert_has_field(<Student as SurrealdbNode>::TableNameChecker, student);
             // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as SurrealdbNode>::TableNameChecker, book);
             // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
-            // let xx = field_name_normalized
 
             match self {
                 MyFieldReceiver {
@@ -305,9 +304,6 @@ impl MyFieldReceiver {
                         FieldType::variants()
                     );
                     let error = error.as_str();
-                    // let field_type =
-                    //     quote!(#type_.parse::<#crate_name::FieldType>().expect(#error));
-
                     let field_type = FieldType::from_str(type_.to_string()).expect(error);
                     // .expect("Field type should have been validated here. If not, report bug");
                     let ref_node_table_name_checker_ident =
@@ -392,7 +388,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
 
             // Gather assertions for all field types
             let raw_type = &self.ty;
-            let mut field_type = FieldType::from_str(&type_.to_string()).unwrap();
+            let field_type = FieldType::from_str(&type_.to_string()).unwrap();
 
             let static_assertion = match field_type {
                 FieldType::Any => {
@@ -474,82 +470,7 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
                 // #( # define_array_field_content_methods) *
             })
         } else if self.type_is_inferrable(&field_name_normalized.to_string()) {
-            // None
             Some(self.infer_surreal_type_heuristically(field_name_normalized))
-        } else {
-            None
-        }
-    }
-    pub fn extract_schema_type(&self) -> Option<FieldTypeDerived> {
-        // let type_ = self.type_
-        let crate_name = get_crate_name(false);
-
-        if let Some(ref type_) = self.type_ {
-            let raw_type = &self.ty;
-            let field_type = FieldType::from_str(type_.to_string()).unwrap();
-            // let xx = match field_type {
-            //     FieldType::Array => {
-            //         quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
-            //     }
-            // };
-            let static_assertion = match field_type {
-                FieldType::Any => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
-                }
-                FieldType::String => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
-                }
-                FieldType::Int => {
-                    quote!(
-                        #crate_name::validators::is_int::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                    )
-                }
-                FieldType::Float => {
-                    quote!(
-                        #crate_name::validators::is_float::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                    )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
-                }
-                FieldType::Bool => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
-                }
-                FieldType::Array => {
-                    quote!(
-                        #crate_name::validators::assert_is_vec::<#raw_type>();
-                    )
-                }
-                FieldType::DateTime => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
-                }
-                FieldType::Decimal => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
-                }
-                FieldType::Duration => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
-                }
-                FieldType::Number => {
-                    quote!(
-                        #crate_name::validators::is_number::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
-                    )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
-                }
-                FieldType::Object => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
-                }
-                FieldType::Record(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
-                }
-                FieldType::RecordAny => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
-                }
-                FieldType::Geometry(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
-                }
-            };
-            todo!()
         } else {
             None
         }
@@ -562,11 +483,6 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
     ) -> FieldTypeDerived {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
-        // self.content_type
-        // record (book)
-        // quote!(self.ty::table_name()
-        // let ref_struct_name = format_ident!("{}", self.link_one.clone());
-        // quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())
 
         if self.raw_type_is_bool() {
             FieldTypeDerived {
@@ -638,7 +554,6 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
         } = self
         {
             let field_name_normalized = field_name_normalized.as_str();
-            // let _struct_ident = format_ident!("{struct_name_ident_str}");
 
             if field_name_normalized == "id" {
                 FieldTypeDerived {
@@ -735,15 +650,10 @@ e.g `#[surrealdb(type=array, content_type=\"int\")]`",
     }
     pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
-        // let xx = FieldType::from_str(self.type_.clone().unwrap_or_default().0.as_str());
         let surreal_field_type = match &self.type_ {
             Some(x) => FieldType::from_str(x.0.as_str()).unwrap_or(FieldType::Any),
             None => FieldType::Any,
         };
-        // dbg!(
-        //     &self.ident.to_token_stream().to_string(),
-        //     &surreal_field_type
-        // );
 
         let type_is_numeric = match ty {
             syn::Type::Path(ref p) => {
@@ -1214,7 +1124,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        struct_name_ident: &Ident,
+        _struct_name_ident: &Ident,
         field_name_normalized: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
@@ -1222,42 +1132,6 @@ impl ReferencedNodeMeta {
         let mut define_field_methods = vec![];
         let mut define_array_field_content_methods = vec![];
         let mut static_assertions = vec![];
-        let mut field_type_resolved = quote!();
-        // println!("first...ty: {:?}", field_type_resolved.to_string());
-
-        // Provide default for links when type not provided
-        // if let Some(ref type_) = field_receiver.type_ {
-        //     let type_ = &type_.0;
-        //     let error = format!(
-        //         "Invalid type. Expected one of - `{:?}`",
-        //         FieldType::variants()
-        //     );
-        //     let error = error.as_str();
-        //     field_type_resolved = quote!(#type_.parse::<#crate_name::FieldType>().expect(#error));
-        //     // define_field_methods
-        //     // .push();
-        //     // static_assertions.push(static_assertion);
-        // } else if field_receiver.type_is_inferrable(field_name_normalized) {
-        //     let FieldTypeDerived {
-        //         field_type,
-        //         static_assertion,
-        //         ..
-        //         // field_content_type: _,
-        //     } = field_receiver.infer_surreal_type_heuristically(
-        //         &struct_name_ident.to_string(),
-        //         field_name_normalized,
-        //     );
-        //
-        //     field_type_resolved = quote!(#field_type);
-        //     static_assertions.push(static_assertion);
-        // } else {
-        //     if field_receiver.type_.is_none() && field_receiver.relate.is_none() {
-        //         panic!(
-        //                     "Field type for the field - `{}` - cannot be inferred and is not provided. Please provide a type for the field - {}",
-        //                     field_name_normalized, field_name_normalized
-        //                 );
-        //     }
-        // };
 
         let field_type_resolved =
             if let Some(type_data) = field_receiver.get_type(field_name_normalized) {
@@ -1393,43 +1267,11 @@ impl ReferencedNodeMeta {
                 if define_fn.to_token_stream().to_string().is_empty() {
                     panic!("define_fn attribute is empty. Please provide a define_fn attribute.");
                 }
-                println!("AAAAAPPPPPPP {}", field_type_resolved.to_string());
 
-                // panic!("rer", );
                 define_field = Some(quote!(#define_fn().type_(#field_type_resolved).to_raw()));
             }
             _ => {}
         };
-
-        // let surreal_type = if field_receiver.type_is_inferrable(field_name_normalized) {
-        //     field_receiver.infer_surreal_type_heuristically()
-        // } else {
-        //     if field_receiver.type_.is_none() {
-        //         panic!("Field type is not provided. Please provide a type for the field.");
-        //         // field_receiver.type_.as_ref().unwrap().0.to_string()
-        //     }
-        //     // field_receiver.type_.as_ref().unwrap().0.to_string()
-        //     (FieldType::Any, quote!())
-        // };
-        // // Generate schema type. If type attribute not provided, set some defaults that can be
-        // derived at compile time.
-
-        // todo:
-        // let FieldTypeDerived { field_type, .. } = field_receiver.infer_surreal_type_heuristically(
-        //     &struct_name_ident.to_string(),
-        //     field_name_normalized,
-        // );
-        // // define_field_methods.push(quote!(.type_(#field_type)));
-        // // define_field_methods.push(quote!(.type_(#crate_name::FieldType::String)));
-        //
-        // let FieldTypeDerived {
-        //     field_type: ft,
-        //     static_assertion: sa,
-        //     field_content_type,
-        // } = field_receiver.infer_surreal_type_heuristically(
-        //     &struct_name_ident.to_string(),
-        //     field_name_normalized,
-        // );
 
         match field_receiver {
             MyFieldReceiver {
@@ -1454,33 +1296,6 @@ impl ReferencedNodeMeta {
             }
             _ => {}
         };
-
-        // match field_receiver {
-        //     MyFieldReceiver {
-        //         content_type: Some(content_type),
-        //         ..
-        //     } => {
-        //         // This may not be necessary since we can reliably auto generate the record type
-        //         // but I want to give users the option to not set the record reference Node type
-        //         // i.e record instead of e.g record(book)
-        //         let content_type = content_type.0.to_string();
-        //         define_array_field_content_methods.push(quote!(.type_(#content_type.parse::<#crate_name::FieldType>()
-        //                                                 .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
-        //                                      )
-        //                               );
-        //     }
-        //     MyFieldReceiver {
-        //         content_type: None,
-        //         link_many: Some(ref_node_type),
-        //         ..
-        //     } => {
-        //         let ref_node_type = format_ident!("{ref_node_type}");
-        //         define_array_field_content_methods.push(
-        //             quote!(.type_(#crate_name::FieldType::Record(#ref_node_type::table_name()))),
-        //         );
-        //     }
-        //     _ => {}
-        // }
 
         // Gather default values
         match field_receiver {
@@ -1582,12 +1397,6 @@ impl ReferencedNodeMeta {
 
         self.field_type_validation_asserts.extend(static_assertions);
 
-        // println!(
-        //     "structnam - {:?} field name- {:?} .. ty: {:?}",
-        //     struct_name_ident.to_string(),
-        //     field_name_normalized.to_string(),
-        //     field_type_resolved.to_string()
-        // );
         self
     }
 

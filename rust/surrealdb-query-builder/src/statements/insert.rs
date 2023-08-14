@@ -229,56 +229,18 @@ where
         },
         |v| v,
     );
-    // dbg!(&value);
-    // value.
-    // let object = sql::json(&value.to_string())
-    //     .unwrap()
-    //     .into_json()
-    //     .as_object()
-    //     .map_or_else(
-    //         || {
-    //             errors.push("Unable to convert node to json object".to_string());
-    //             serde_json::Map::new()
-    //         },
-    //         |v| v.to_owned(),
-    //     );
-    // // let object = value.pick(&["id".into(), "type".into(), "properties".into()]);
-    // let objec = value.pick(&["founded".into()]);
-    // let objec = value.pick(
-    //     serialized_field_names
-    //         .iter()
-    //         .map(|f| f.build().into())
-    //         .collect::<Vec<_>>()
-    //         .as_slice(),
-    // );
-    // dbg!(&objec);
 
     let (field_names, bindings): (Vec<String>, BindingsList) = serialized_field_names
         .iter()
         .map(|key| {
             let ref key = key.build();
             let value = value.pick(&[key.as_str().into()]);
-            // dbg!(&key, &value);
 
-            // let value1 = object.get(key).unwrap_or(&serde_json::Value::Null);
-            // let value = sql::json(&sql::to_value(value1).unwrap().to_string())
-            //     .ok()
-            //     .map_or_else(
-            //         || {
-            //             errors.push(format!("Unable to convert value to json {}", value1));
-            //             sql::Value::None
-            //         },
-            //         |v| v,
-            //     );
-
-            // let binding = if key == "id" {
-            //     Binding::new(sql::Value::None).with_name(key.into())
             let binding = if value == sql::Value::None {
                 Binding::new(sql::Value::Null).with_name(key.into())
             } else {
                 Binding::new(value).with_name(key.into())
             };
-            // Binding::new(value).with_name(key.into());
             (key.to_string(), binding)
         })
         .unzip();

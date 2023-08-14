@@ -1,6 +1,6 @@
 mod alien;
 mod combined;
-mod configuration;
+pub mod configuration;
 mod planet;
 mod spaceship;
 mod user;

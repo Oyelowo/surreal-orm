@@ -16,17 +16,13 @@ use geo::point;
 use geo::polygon;
 use serde::Deserialize;
 use serde::Serialize;
-use surrealdb::engine::local::Mem;
-use surrealdb::sql;
-use surrealdb::sql::Datetime;
-use surrealdb_orm::SurrealdbCrudNode;
 use std::time::Duration;
-use surrealdb::sql::Uuid;
+use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
 use surrealdb_orm::{
     statements::{insert, select},
-    All, Geometry, Operatable, Parametric, ReturnableSelect, ReturnableStandard, SchemaGetter,
-    SurrealId, SurrealSimpleId, SurrealdbModel, SurrealdbNode, SurrealdbObject, ToRaw,
+    All, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter, SurrealId,
+    SurrealSimpleId, SurrealdbModel, SurrealdbNode, SurrealdbObject, ToRaw,
 };
 
 use geo::Coord;
@@ -58,7 +54,6 @@ struct GenZCompany {
     tags: Vec<String>,
     home: geo::Point,
 }
-
 
 #[derive(SurrealdbNode, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -124,44 +119,6 @@ pub struct Book {
     title: String,
     content: String,
 }
-
-fn create_test_company(geom: impl Into<geo::Point>) -> Company {
-    let company = Company {
-        id: Company::create_id(32),
-        name: "Mana Inc.".to_string(),
-        founded: chrono::DateTime::from_utc(
-            chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap(),
-            chrono::Utc,
-        ),
-        founders: vec![
-            Person {
-                name: "John Doe".to_string(),
-            },
-            Person {
-                name: "Jane Doe".to_string(),
-            },
-        ],
-        tags: vec!["foo".to_string(), "bar".to_string()],
-        home: geom.into(),
-        // home: geo::point!(x: 40.02f64, y: 116.34),
-    };
-    company
-}
-
-async fn create_geom_test(geom: impl Into<geo::Point>) -> surrealdb::Result<String> {
-    let company = create_test_company(geom);
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await?;
-
-    // let results = company.create().get_one(db).await.unwrap();
-    let results = insert(company).return_one(db).await.unwrap().unwrap();
-
-    Ok(serde_json::to_string(&results).unwrap())
-}
-
 
 macro_rules! create_test_data_assertion {
     ($test_data: expr) => {
@@ -356,8 +313,11 @@ async fn multipolygon() -> surrealdb::Result<()> {
 async fn geom_collection() -> surrealdb::Result<()> {
     let point = Point(Coord { x: 0.0, y: 0.0 });
     let linestring = LineString(vec![Coord { x: 1.0, y: 1.0 }, Coord { x: 2.0, y: 2.0 }]);
-    let geometry_collection = vec![geo::Geometry::Point(point), geo::Geometry::LineString(linestring)];
-    
+    let geometry_collection = vec![
+        geo::Geometry::Point(point),
+        geo::Geometry::LineString(linestring),
+    ];
+
     create_test_data_assertion!(TestGeometrycollection {
         id: TestGeometrycollection::create_id(32),
         home_geometrycollection: geometry_collection,
@@ -376,7 +336,7 @@ async fn insert_many() -> surrealdb::Result<()> {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap(),
-                chrono::Utc
+                chrono::Utc,
             ),
             founders: vec![
                 Person {
@@ -397,7 +357,7 @@ async fn insert_many() -> surrealdb::Result<()> {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap(),
-                chrono::Utc
+                chrono::Utc,
             ),
             founders: vec![
                 Person {
@@ -432,7 +392,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap(),
-                chrono::Utc
+                chrono::Utc,
             ),
             founders: vec![
                 Person {
@@ -453,7 +413,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap(),
-                chrono::Utc
+                chrono::Utc,
             ),
             founders: vec![
                 Person {
@@ -470,9 +430,9 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
 
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await?;
-    
+
     // Insert companies
-    let results = insert(companies).return_many(db.clone()).await.unwrap();
+    insert(companies).return_many(db.clone()).await.unwrap();
 
     let c = Company::schema();
     let ref select_query = select(All)
@@ -481,18 +441,17 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         .timeout(Duration::from_secs(20))
         .parallel();
 
-
-    let selected_original  = select_query
-            .return_many::<Company>(db.clone())
-            .await
-            .unwrap();
+    let selected_original = select_query
+        .return_many::<Company>(db.clone())
+        .await
+        .unwrap();
     insta::assert_debug_snapshot!(selected_original);
 
     insert::<GenZCompany>(select_query)
         .return_one(db.clone())
         .await
         .expect_err("Too many items returned. Therefore, you should not use return_one method since there are multiple entries");
-    
+
     let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
     insta::assert_debug_snapshot!(results);
 
