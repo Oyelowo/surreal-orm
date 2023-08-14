@@ -1,0 +1,6 @@
+---
+source: surreal-macros/src/query_for.rs
+expression: for_res
+---
+FOR create
+	WHERE name ~ $_param_00000000

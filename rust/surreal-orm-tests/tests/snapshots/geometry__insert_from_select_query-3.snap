@@ -1,0 +1,74 @@
+---
+source: surreal-orm-tests/tests/geometry.rs
+expression: results
+---
+[
+    GenZCompany {
+        id: SurrealSimpleId(
+            SurrealId(
+                Thing {
+                    tb: "gen_z_company",
+                    id: Number(
+                        1,
+                    ),
+                },
+                PhantomData<geometry::GenZCompany>,
+                PhantomData<alloc::string::String>,
+            ),
+        ),
+        name: "Acme Inc.",
+        founded: 1967-05-03T00:00:00Z,
+        founders: [
+            Person {
+                name: "John Doe",
+            },
+            Person {
+                name: "Jane Doe",
+            },
+        ],
+        tags: [
+            "foo",
+            "bar",
+        ],
+        home: Point(
+            Coord {
+                x: 45.3,
+                y: 78.1,
+            },
+        ),
+    },
+    GenZCompany {
+        id: SurrealSimpleId(
+            SurrealId(
+                Thing {
+                    tb: "gen_z_company",
+                    id: Number(
+                        2,
+                    ),
+                },
+                PhantomData<geometry::GenZCompany>,
+                PhantomData<alloc::string::String>,
+            ),
+        ),
+        name: "Apple Inc.",
+        founded: 1974-05-03T00:00:00Z,
+        founders: [
+            Person {
+                name: "John Doe",
+            },
+            Person {
+                name: "Jane Doe",
+            },
+        ],
+        tags: [
+            "foo",
+            "bar",
+        ],
+        home: Point(
+            Coord {
+                x: 63.0,
+                y: 21.0,
+            },
+        ),
+    },
+]

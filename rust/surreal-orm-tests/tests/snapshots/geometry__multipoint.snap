@@ -1,0 +1,38 @@
+---
+source: surreal-orm-tests/tests/geometry.rs
+expression: geom
+---
+TestMultipoint {
+    id: SurrealId(
+        Thing {
+            tb: "test_multipoint",
+            id: Number(
+                32,
+            ),
+        },
+        PhantomData<geometry::TestMultipoint>,
+        PhantomData<i32>,
+    ),
+    home_multipoint: MultiPoint(
+        [
+            Point(
+                Coord {
+                    x: 0.0,
+                    y: 0.0,
+                },
+            ),
+            Point(
+                Coord {
+                    x: 1.0,
+                    y: 1.0,
+                },
+            ),
+            Point(
+                Coord {
+                    x: 2.0,
+                    y: 35.0,
+                },
+            ),
+        ],
+    ),
+}

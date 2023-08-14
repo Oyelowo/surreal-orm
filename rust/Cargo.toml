@@ -7,11 +7,11 @@ members = [
   # "lib-common",
   # "lib-my-macros",
   # "lib-my-macros/derive",
-  "surrealdb-orm",
-  "surrealdb-query-builder",
-  "surrealdb-derive",
-  "surrealdb-models",
-  "surrealdb-orm-tests",
+  "surreal-orm",
+  "surreal-query-builder",
+  "surreal-derive",
+  "surreal-models",
+  "surreal-orm-tests",
 ]
 
 [workspace.package]
@@ -25,11 +25,11 @@ documentation = "https://codebreather.com/oyelowo"
 [workspace.dependencies]
 # lib-common = { path = "./lib-common" }
 # lib-my-macros = { path = "./lib-my-macros" }
-surrealdb-derive = { path = "./surrealdb-derive" }
-surrealdb-orm = { path = "./surrealdb-orm" }
-surrealdb-query-builder = { path = "./surrealdb-query-builder" }
-surrealdb-models = { path = "./surrealdb-models" }
-surrealdb-orm-tests = { path = "./surrealdb-orm-tests" }
+surreal-derive = { path = "./surreal-derive" }
+surreal-orm = { path = "./surreal-orm" }
+surreal-query-builder = { path = "./surreal-query-builder" }
+surreal-models = { path = "./surreal-models" }
+surreal-orm-tests = { path = "./surreal-orm-tests" }
 
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
   "protocol-ws",

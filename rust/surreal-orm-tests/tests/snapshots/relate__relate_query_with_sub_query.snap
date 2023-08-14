@@ -1,0 +1,5 @@
+---
+source: surreal-orm-tests/tests/relate.rs
+expression: relate_more
+---
+[]
