@@ -265,15 +265,17 @@ macro_rules! impl_utils_for_ref_vec {
             }
 
             /// Returns just the keys of the foreign field. Some links may not exist
-            pub fn keys(&self) -> Vec<Option<&sql::Thing>> {
+            pub fn keys(&self) -> Vec<Option<sql::Thing>> {
                 self.0
                     .iter()
                     .map(|m| match m {
-                        Reference::FetchedValue(_) => None,
-                        Reference::Id(id) => Some(id),
+                        Reference::FetchedValue(fetched_value) => {
+                            Some(fetched_value.get_id_as_thing())
+                        }
+                        Reference::Id(id) => Some(id.to_owned()),
                         Reference::Null => None,
                     })
-                    .collect::<Vec<Option<&sql::Thing>>>()
+                    .collect::<Vec<Option<sql::Thing>>>()
             }
 
             /// Returns only the keys that are non-None ids.
