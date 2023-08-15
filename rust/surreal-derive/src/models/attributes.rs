@@ -12,6 +12,7 @@ use std::{ops::Deref, str::FromStr};
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     get_crate_name, parse_lit_to_tokenstream,
+    parser::DataType,
     relations::NodeTypeName,
     variables::VariablesModelMacro,
 };
@@ -261,7 +262,12 @@ pub struct FieldTypeDerived {
 }
 
 impl MyFieldReceiver {
-    pub fn get_type(&self, field_name_normalized: &String) -> Option<FieldTypeDerived> {
+    pub fn get_type(
+        &self,
+        field_name_normalized: &String,
+        model_type: &DataType,
+        table: &String,
+    ) -> Option<FieldTypeDerived> {
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
 
@@ -390,6 +396,29 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             let raw_type = &self.ty;
             let field_type = FieldType::from_str(&type_.to_string()).unwrap();
 
+            if let DataType::Edge = model_type {
+                match field_name_normalized.as_str() {
+                    "id" => {
+                        if !field_type.is_record_of_the_table(table) && !field_type.is_record_any()
+                        {
+                            panic!(
+                                "`id` field must be of type `record({})` or `record()`",
+                                table
+                            );
+                        }
+                    }
+                    "in" | "out" => {
+                        if !field_type.is_record() {
+                            panic!(
+                                "`{}` field must be of type `record()`",
+                                field_name_normalized
+                            );
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
             let static_assertion = match field_type {
                 FieldType::Any => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
@@ -438,10 +467,18 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
                     quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
                 }
                 FieldType::Record(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    if let DataType::Edge = model_type {
+                        quote!()
+                    } else {
+                        quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    }
                 }
                 FieldType::RecordAny => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    if let DataType::Edge = model_type {
+                        quote!()
+                    } else {
+                        quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                    }
                 }
                 FieldType::Geometry(_) => {
                     quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
@@ -1126,6 +1163,8 @@ impl ReferencedNodeMeta {
         field_receiver: &MyFieldReceiver,
         _struct_name_ident: &Ident,
         field_name_normalized: &String,
+        data_type: &DataType,
+        table: &String,
     ) -> Self {
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
@@ -1133,28 +1172,29 @@ impl ReferencedNodeMeta {
         let mut define_array_field_content_methods = vec![];
         let mut static_assertions = vec![];
 
-        let field_type_resolved =
-            if let Some(type_data) = field_receiver.get_type(field_name_normalized) {
-                let FieldTypeDerived {
-                    field_type,
-                    field_content_type,
-                    static_assertion,
-                } = type_data;
+        let field_type_resolved = if let Some(type_data) =
+            field_receiver.get_type(field_name_normalized, data_type, table)
+        {
+            let FieldTypeDerived {
+                field_type,
+                field_content_type,
+                static_assertion,
+            } = type_data;
 
-                define_field_methods.push(quote!(.type_(#field_type)));
-                static_assertions.push(static_assertion);
+            define_field_methods.push(quote!(.type_(#field_type)));
+            static_assertions.push(static_assertion);
 
-                if let Some(field_content_type) = field_content_type {
-                    define_array_field_content_methods.push(quote!(.type_(#field_content_type)));
-                }
-                // Return field_type for later overriding type information in define_fn/define
-                // attributes in case user uses either of those attributes. This is cause the type
-                // attribute should supersede as it is what is used to validate field data at compile
-                // time. Doing that with the `define` function attributes at compile-time may be tricky/impossible.
-                field_type
-            } else {
-                panic!("Invalid type provided");
-            };
+            if let Some(field_content_type) = field_content_type {
+                define_array_field_content_methods.push(quote!(.type_(#field_content_type)));
+            }
+            // Return field_type for later overriding type information in define_fn/define
+            // attributes in case user uses either of those attributes. This is cause the type
+            // attribute should supersede as it is what is used to validate field data at compile
+            // time. Doing that with the `define` function attributes at compile-time may be tricky/impossible.
+            field_type
+        } else {
+            panic!("Invalid type provided");
+        };
 
         match field_receiver {
             MyFieldReceiver {

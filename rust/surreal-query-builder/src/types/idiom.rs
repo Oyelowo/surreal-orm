@@ -33,7 +33,7 @@ pub struct Token(sql::Idiom);
 pub struct Scope(sql::Idiom);
 
 /// Surreal table
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Table(sql::Table);
 
 /// Surreal event
