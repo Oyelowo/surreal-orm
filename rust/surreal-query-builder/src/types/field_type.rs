@@ -128,15 +128,12 @@ impl FieldType {
 
     /// Returns true if the field_type is a record
     pub fn is_record_any(&self) -> bool {
-        // TODO: Check why this does not work as expected. i.e self matching RecordAny when type is
-        // record()
         matches!(self, Self::RecordAny)
     }
 
     /// Returns true if the field_type is a record
     pub fn is_record_of_the_table<'a>(&self, table_name: &'a String) -> bool {
         match self {
-            // Self::RecordAny => true,
             Self::Record(t) if &t.to_string() == table_name => true,
             _ => false,
         }
@@ -163,8 +160,8 @@ impl Display for FieldType {
             FieldType::Number => "number".to_string(),
             FieldType::Object => "object".to_string(),
             FieldType::String => "string".to_string(),
-            FieldType::Record(table) => format!("record ({table})"),
             FieldType::RecordAny => "record()".to_string(),
+            FieldType::Record(table) => format!("record ({table})"),
             FieldType::Geometry(geometries) => format!(
                 "geometry ({})",
                 geometries
@@ -184,7 +181,7 @@ impl FromStr for FieldType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let type_stringified = s.replace(" ", "");
-        let mut type_with_content = type_stringified.trim_end_matches(")").split("(");
+        let mut type_with_content = type_stringified.trim_end_matches(")").split_terminator("(");
 
         let db_type = match (type_with_content.next(), type_with_content.next()) {
             (Some("any"), None) => FieldType::Any,
@@ -197,7 +194,7 @@ impl FromStr for FieldType {
             (Some("object"), None) => FieldType::Object,
             (Some("string"), None) => FieldType::String,
             (Some("array"), None) => FieldType::Array,
-            (Some("record()"), None) => FieldType::RecordAny,
+            (Some("record"), None) => FieldType::RecordAny,
             (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
