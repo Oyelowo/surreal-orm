@@ -399,13 +399,20 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             if let DataType::Edge = model_type {
                 match field_name_normalized.as_str() {
                     "id" => {
-                        if !field_type.is_record_of_the_table(table) || !field_type.is_record() {
-                            panic!("`id` field must be of type record({})", table);
+                        if !field_type.is_record_of_the_table(table) && !field_type.is_record_any()
+                        {
+                            panic!(
+                                "`id` field must be of type `record({})` or `record()`",
+                                table
+                            );
                         }
                     }
                     "in" | "out" => {
                         if !field_type.is_record() {
-                            panic!("`{}` field must be of type record()", field_name_normalized);
+                            panic!(
+                                "`{}` field must be of type `record()`",
+                                field_name_normalized
+                            );
                         }
                     }
                     _ => {}
