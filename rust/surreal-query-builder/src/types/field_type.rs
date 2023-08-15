@@ -120,6 +120,27 @@ impl FieldType {
     pub fn is_array(&self) -> bool {
         matches!(self, Self::Array)
     }
+
+    /// Returns true if the field_type is a record
+    pub fn is_record(&self) -> bool {
+        matches!(self, Self::RecordAny | Self::Record(_))
+    }
+
+    /// Returns true if the field_type is a record
+    pub fn is_record_any(&self) -> bool {
+        // TODO: Check why this does not work as expected. i.e self matching RecordAny when type is
+        // record()
+        matches!(self, Self::RecordAny)
+    }
+
+    /// Returns true if the field_type is a record
+    pub fn is_record_of_the_table<'a>(&self, table_name: &'a String) -> bool {
+        match self {
+            // Self::RecordAny => true,
+            Self::Record(t) if &t.to_string() == table_name => true,
+            _ => false,
+        }
+    }
 }
 
 impl From<FieldType> for String {

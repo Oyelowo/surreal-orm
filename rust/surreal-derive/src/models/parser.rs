@@ -325,9 +325,10 @@ pub struct SchemaPropertiesArgs<'a> {
     pub struct_level_casing: Option<CaseString>,
     pub struct_name_ident: &'a syn::Ident,
     // pub table_name_ident: &'a syn::Ident,
+    pub table_name: String,
 }
 
-pub(crate) enum DataType{
+pub enum DataType{
     Node,
     Edge,
     Object
@@ -344,6 +345,7 @@ impl SchemaFieldsProperties {
             data,
             struct_level_casing,
             struct_name_ident,
+            table_name,
             ..
         } = args;
 
@@ -375,12 +377,12 @@ impl SchemaFieldsProperties {
         
                 let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
                         ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident, is_list) 
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                 };
                 
                 let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
                         ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident, is_list) 
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                 };
 
                 let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
@@ -754,7 +756,7 @@ impl SchemaFieldsProperties {
                                                 ReferencedNodeMeta::default()
                                             };
                         ref_node_meta
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str)                                        
+                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                     }
                 };
                 

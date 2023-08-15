@@ -66,6 +66,7 @@ impl ToTokens for ObjectToken{
             data,
             struct_level_casing,
             struct_name_ident,
+            table_name: "".to_string()
             // table_name_ident,
         };
 

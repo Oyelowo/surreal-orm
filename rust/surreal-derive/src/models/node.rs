@@ -67,7 +67,8 @@ impl ToTokens for NodeToken{
         let schema_props_args = SchemaPropertiesArgs {
             data,
             struct_level_casing,
-            struct_name_ident
+            struct_name_ident,
+            table_name: table_name_str.to_string()
         };
 
         let SchemaFieldsProperties {
