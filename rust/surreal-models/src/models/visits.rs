@@ -38,4 +38,4 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
 }
 
 // Connects Alien to Planet via Visits
-pub type AlienVisitsPlanetExplicit = Visits<Alien, Planet>;
+pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet>;
