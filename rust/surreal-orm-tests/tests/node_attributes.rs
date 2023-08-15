@@ -5,17 +5,10 @@
  * Licensed under the MIT license
  */
 
-use chrono::{DateTime, Utc};
-use geo::Point;
-use geo::Polygon;
 use pretty_assertions::assert_eq;
-use serde::{Deserialize, Serialize};
-use std::time::Duration;
-use surreal_models::{Alien, AlienWithExplicitAttributes, SpaceShip, Weapon};
+use surreal_models::{Alien, AlienWithExplicitAttributes};
 use surreal_orm::*;
-use surrealdb::engine::local::Mem;
-use surrealdb::sql;
-use surrealdb::Surreal;
+use surrealdb::{engine::local::Mem, Surreal};
 
 #[tokio::test]
 async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
