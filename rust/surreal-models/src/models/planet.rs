@@ -12,8 +12,8 @@ pub struct Planet {
     // area: Polygon,
     // #[surreal_orm(type = "any")]
     // #[surreal_orm(type = "array")]
-    // #[surreal_orm(type = "array", content_type = "int")]
-    // #[surreal_orm(type = "array", content_type = "int")]
+    // #[surreal_orm(type = "array", item_type = "int")]
+    // #[surreal_orm(type = "array", item_type = "int")]
     // #[surreal_orm(type = "int")]
     // pub population: Population,
     // pub population: PopArray,

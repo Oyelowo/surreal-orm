@@ -539,8 +539,8 @@ impl SchemaFieldsProperties {
                     
                     // Only works for vectors
                     let array_trait = if field_receiver.is_list() { array_element
-                        .or_else(||field_receiver.get_array_content_type())
-                        .or_else(|| Some(field_receiver.get_fallback_array_content_concrete_type()))
+                        .or_else(||field_receiver.get_array_item_type())
+                        .or_else(|| Some(field_receiver.get_fallback_array_item_concrete_type()))
                         .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         })

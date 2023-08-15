@@ -40,7 +40,7 @@ use surreal_orm::{Serialize, Deserialize, LinkMany, SurrealSimpleId, Node};
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(link_many = "SpaceShip", type = "array", content_type = "record(space_ship)")]
+    // #[surreal_orm(link_many = "SpaceShip", type = "array", item_type = "record(space_ship)")]
     #[surreal_orm(link_many = "SpaceShip")]
     pub space_ships: LinkMany<SpaceShip>,
 }
