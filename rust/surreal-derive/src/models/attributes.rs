@@ -157,7 +157,7 @@ impl FromMeta for Relate {
 //     #[orm(type="list", content=(type="string", assert_fn="my_assert()"))]
 //     names: List<names>,
 //
-//     #[orm(type="list", content_type="string", content_assert="my_assert()")]
+//     #[orm(type="list", item_type="string", item_assert="my_assert()")]
 //     names2: List<names>
 // }
 // fn my_assert() {
@@ -236,13 +236,13 @@ pub struct MyFieldReceiver {
     pub(crate) permissions_fn: Option<PermissionsFn>,
 
     #[darling(default)]
-    pub(crate) content_type: Option<FieldTypeWrapper>,
+    pub(crate) item_type: Option<FieldTypeWrapper>,
 
     #[darling(default)]
-    content_assert: Option<syn::LitStr>,
+    item_assert: Option<syn::LitStr>,
 
     #[darling(default)]
-    content_assert_fn: Option<syn::Path>,
+    item_assert_fn: Option<syn::Path>,
 
     #[darling(default)]
     skip_serializing_if: ::darling::util::Ignored,
@@ -257,7 +257,7 @@ pub struct MyFieldReceiver {
 
 pub struct FieldTypeDerived {
     field_type: TokenStream,
-    field_content_type: Option<TokenStream>,
+    field_item_type: Option<TokenStream>,
     static_assertion: TokenStream,
 }
 
@@ -284,23 +284,23 @@ impl MyFieldReceiver {
             match self {
                 MyFieldReceiver {
                     type_: Some(type_),
-                    content_type,
-                    content_assert,
-                    content_assert_fn,
+                    item_type,
+                    item_assert,
+                    item_assert_fn,
                     ..
                 } if !type_.0.trim().to_string().starts_with("array")
-                    & (content_type.is_some()
-                        || content_assert.is_some()
-                        || content_assert_fn.is_some()) =>
+                    & (item_type.is_some()
+                        || item_assert.is_some()
+                        || item_assert_fn.is_some()) =>
                 {
-                    panic!("attributes `content_type`, `content_assert`, or `content_assert_fn` can only be used when type is array.")
+                    panic!("attributes `item_type`, `item_assert`, or `item_assert_fn` can only be used when type is array.")
                 }
                 MyFieldReceiver {
                     type_: Some(type_),
                     link_one,
                     link_self,
                     link_many,
-                    content_type,
+                    item_type,
                     ..
                 } => {
                     let linked_node = link_one.clone().or(link_self.clone());
@@ -343,28 +343,28 @@ impl MyFieldReceiver {
                     } else if let Some(link_many_ref_node) = link_many {
                         match field_type {
                             FieldType::Array => {
-                                if let Some(content_type) = content_type {
+                                if let Some(item_type) = item_type {
                                     // Check content type if of array type. link_many is used for
                                     // array types. e.g link_many = "Blog"
-                                    let content_type =
-                                        FieldType::from_str(&content_type.0.to_string()).unwrap();
+                                    let item_type =
+                                        FieldType::from_str(&item_type.0.to_string()).unwrap();
 
-                                    match content_type {
-                                        FieldType::Record(array_content_table_name) => {
-                                            let array_content_table_name = format_ident!(
+                                    match item_type {
+                                        FieldType::Record(array_item_table_name) => {
+                                            let array_item_table_name = format_ident!(
                                                 "{}",
-                                                array_content_table_name.to_string()
+                                                array_item_table_name.to_string()
                                             );
                                             let ref_node = NodeTypeName::from(link_many_ref_node);
                                             let ref_node_token: TokenStream = ref_node.into();
 
                                             static_assertions.push(quote!(
                                                             type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
-                                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_content_table_name);
+                                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_item_table_name);
                                                        ));
                                         }
                                         _ => {
-                                            panic!("when link_many attribute is provided, content_type must be of type record or record(<ref_node_table_name>)");
+                                            panic!("when link_many attribute is provided, item_type must be of type record or record(<ref_node_table_name>)");
                                         }
                                     }
                                 }
@@ -375,14 +375,14 @@ impl MyFieldReceiver {
                         }
                     } else {
                         if let FieldType::Array = field_type {
-                            if self.content_type.is_none()
+                            if self.item_type.is_none()
                                 && !self.type_is_inferrable(field_name_normalized)
                             {
                                 panic!(
                                     "Not able to infer array content type. Content type must 
 be provided when type is array and the compiler cannot infer the type. 
-Please, provide `content_type` for the field - {}. 
-e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
+Please, provide `item_type` for the field - {}. 
+e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                                     &field_name_normalized
                                 );
                             }
@@ -498,13 +498,13 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
                 field_type: quote!(#type_.parse::<#crate_name::FieldType>()
                                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
 
-                field_content_type: self.content_type.as_ref().map(|content_type| {
-                    let ref content_type = content_type.0;
-                    quote!(#content_type.parse::<#crate_name::FieldType>()
+                field_item_type: self.item_type.as_ref().map(|item_type| {
+                    let ref item_type = item_type.0;
+                    quote!(#item_type.parse::<#crate_name::FieldType>()
                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                 }),
                 static_assertion: quote!( # ( #static_assertions ) *),
-                // #( # define_array_field_content_methods) *
+                // #( # define_array_field_item_methods) *
             })
         } else if self.type_is_inferrable(&field_name_normalized.to_string()) {
             Some(self.infer_surreal_type_heuristically(field_name_normalized))
@@ -524,60 +524,60 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
         if self.raw_type_is_bool() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Bool),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Float),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Int),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::String),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
-        } else if self.raw_type_is_list() || self.content_type.is_some() {
-            let content_type = self.content_type.as_ref().map(|ct| {
+        } else if self.raw_type_is_list() || self.item_type.is_some() {
+            let item_type = self.item_type.as_ref().map(|ct| {
                 let ct = ct.to_string();
                 quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
             });
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Array),
-                field_content_type: content_type,
+                field_item_type: item_type,
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
         } else if self.raw_type_is_object() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Object),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Duration),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::DateTime),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else if let MyFieldReceiver {
@@ -595,7 +595,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             if field_name_normalized == "id" {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Record(Self::table_name())),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
                 // TODO: Only do this for Edge
@@ -604,7 +604,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
                 // record for edge in and out
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::RecordAny),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
@@ -612,14 +612,14 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
 
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Record(#ref_node_type::table_name())),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_many {
                 let ref_struct_name = format_ident!("{ref_node_type}");
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Array),
-                    field_content_type: Some(
+                    field_item_type: Some(
                         quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
                     ),
                     static_assertion: quote!(),
@@ -627,39 +627,39 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             } else if let Some(_ref_node_type) = nest_object {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Object),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = nest_array {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Array),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_one {
                 FieldTypeDerived {
                     // #crate_name::SurrealId<#foreign_node>
                     field_type: quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_self {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             } else {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Any),
-                    field_content_type: None,
+                    field_item_type: None,
                     static_assertion: quote!(),
                 }
             }
         } else {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Any),
-                field_content_type: None,
+                field_item_type: None,
                 static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
             }
         }
@@ -679,7 +679,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
             || self.raw_type_is_list()
-            || self.content_type.is_some()
+            || self.item_type.is_some()
             || self.raw_type_is_object()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
@@ -968,7 +968,7 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
         }
     }
 
-    pub fn get_array_content_type(&self) -> Option<TokenStream> {
+    pub fn get_array_item_type(&self) -> Option<TokenStream> {
         let ty = &self.ty;
         // if let Some(links_type) = self.link_many.clone() {
         //     let links_type = syn::parse_str::<syn::Type>(&links_type).unwrap();
@@ -986,10 +986,10 @@ e.g `#[surreal_orm(type=array, content_type=\"int\")]`",
         // }
     }
 
-    pub fn get_fallback_array_content_concrete_type(&self) -> TokenStream {
+    pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
         let field_type = FieldType::from_str(
             &self
-                .content_type
+                .item_type
                 .clone()
                 .unwrap_or("any".into())
                 .to_string(),
@@ -1169,7 +1169,7 @@ impl ReferencedNodeMeta {
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
-        let mut define_array_field_content_methods = vec![];
+        let mut define_array_field_item_methods = vec![];
         let mut static_assertions = vec![];
 
         let field_type_resolved = if let Some(type_data) =
@@ -1177,15 +1177,15 @@ impl ReferencedNodeMeta {
         {
             let FieldTypeDerived {
                 field_type,
-                field_content_type,
+                field_item_type,
                 static_assertion,
             } = type_data;
 
             define_field_methods.push(quote!(.type_(#field_type)));
             static_assertions.push(static_assertion);
 
-            if let Some(field_content_type) = field_content_type {
-                define_array_field_content_methods.push(quote!(.type_(#field_content_type)));
+            if let Some(field_item_type) = field_item_type {
+                define_array_field_item_methods.push(quote!(.type_(#field_item_type)));
             }
             // Return field_type for later overriding type information in define_fn/define
             // attributes in case user uses either of those attributes. This is cause the type
@@ -1207,9 +1207,9 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
-                // content_type,
-                content_assert,
-                content_assert_fn,
+                // item_type,
+                item_assert,
+                item_assert_fn,
                 ..
             } if (define_fn.is_some() || define.is_some())
                 && (
@@ -1223,9 +1223,9 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        // || content_type.is_some()
-                        || content_assert.is_some()
-                        || content_assert_fn.is_some()
+                        // || item_type.is_some()
+                        || item_assert.is_some()
+                        || item_assert_fn.is_some()
                 ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
@@ -1235,8 +1235,8 @@ impl ReferencedNodeMeta {
     value_fn,
     permissions,
     permissions_fn,
-    content_assert,
-    content_assert_fn");
+    item_assert,
+    item_assert_fn");
             }
             MyFieldReceiver {
                 define,
@@ -1248,9 +1248,9 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
-                // content_type,
-                content_assert,
-                content_assert_fn,
+                // item_type,
+                item_assert,
+                item_assert_fn,
                 relate,
                 ..
             } if (relate.is_some())
@@ -1264,9 +1264,9 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        // || content_type.is_some()
-                        || content_assert.is_some()
-                        || content_assert_fn.is_some()
+                        // || item_type.is_some()
+                        || item_assert.is_some()
+                        || item_assert_fn.is_some()
                 ) =>
             {
                 panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
@@ -1278,8 +1278,8 @@ impl ReferencedNodeMeta {
     value_fn,
     permissions,
     permissions_fn,
-    content_assert,
-    content_assert_fn");
+    item_assert,
+    item_assert_fn");
             }
             MyFieldReceiver {
                 define: Some(_),
@@ -1315,24 +1315,24 @@ impl ReferencedNodeMeta {
 
         match field_receiver {
             MyFieldReceiver {
-                content_assert: Some(_),
-                content_assert_fn: Some(_),
+                item_assert: Some(_),
+                item_assert_fn: Some(_),
                 ..
             } => {
-                panic!("content_assert and content_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                panic!("item_assert and item_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
-                content_assert: Some(content_assert),
+                item_assert: Some(item_assert),
                 ..
             } => {
-                let content_assert = parse_lit_to_tokenstream(content_assert).unwrap();
-                define_array_field_content_methods.push(quote!(.assert(#content_assert)));
+                let item_assert = parse_lit_to_tokenstream(item_assert).unwrap();
+                define_array_field_item_methods.push(quote!(.assert(#item_assert)));
             }
             MyFieldReceiver {
-                content_assert_fn: Some(content_assert_fn),
+                item_assert_fn: Some(item_assert_fn),
                 ..
             } => {
-                define_array_field_content_methods.push(quote!(.assert(#content_assert_fn())));
+                define_array_field_item_methods.push(quote!(.assert(#item_assert_fn())));
             }
             _ => {}
         };
@@ -1411,17 +1411,17 @@ impl ReferencedNodeMeta {
         };
 
         // Helps to define the schema definition of the content
-        let array_field_content_str = format!("{field_name_normalized}.*");
+        let array_field_item_str = format!("{field_name_normalized}.*");
         // Im putting coma before this to separate from the top field array type definition in case
         // it is present
-        let array_content_definition = if define_array_field_content_methods.is_empty() {
+        let array_item_definition = if define_array_field_item_methods.is_empty() {
             quote!()
         } else {
             quote!(
                     ,
-                #crate_name::statements::define_field(#crate_name::Field::new(#array_field_content_str))
+                #crate_name::statements::define_field(#crate_name::Field::new(#array_field_item_str))
                                         .on_table(#crate_name::Table::from(Self::table_name()))
-                                        #( # define_array_field_content_methods) *
+                                        #( # define_array_field_item_methods) *
                                         .to_raw()
 
             )
@@ -1432,7 +1432,7 @@ impl ReferencedNodeMeta {
                                             .on_table(#crate_name::Table::from(Self::table_name()))
                                             #( # define_field_methods) *
                                             .to_raw()
-                    #array_content_definition
+                    #array_item_definition
             ));
 
         self.field_type_validation_asserts.extend(static_assertions);
