@@ -587,6 +587,12 @@ impl From<Index> for Clause {
     }
 }
 
+impl From<[u128; 1]> for Clause {
+    fn from(value: [u128; 1]) -> Self {
+        index(value[0]).into()
+    }
+}
+
 /// Create an index
 pub fn index(index: impl Into<NumberLike>) -> Index {
     Index(index.into())
