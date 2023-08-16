@@ -81,3 +81,8 @@ define_param!(
     /// $event: Represents the type of table event triggered on an event
     => event
 );
+
+define_param!(
+    /// $this: Represents the current record in a query
+    => this
+);
