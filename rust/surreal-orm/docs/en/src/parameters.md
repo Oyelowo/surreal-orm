@@ -6,42 +6,9 @@ streamlined.
 
 ## Table of Contents
 
-- [Database Setup and Data Creation](#database-setup-and-data-creation)
-- [Query Creation and Execution](#query-creation-and-execution)
-- [Raw Query Translation](#raw-query-translation)
+- [Parameters in Query Creation and Execution](#query-creation-and-execution)
 - [Native ORM Parameters](#native-orm-parameters)
 - [Advanced Parameter Creation](#advanced-parameter-creation)
-
-## Database Setup and Data Creation
-
-In the ORM, initializing a database and setting it up is a straightforward
-process.
-
-```rust
-let db = Surreal::new::<Mem>(()).await.unwrap();
-db.use_ns("test").use_db("test").await.unwrap();
-```
-
-Once the database is set up, the ORM allows for easy data definition and
-insertion:
-
-```rust
-let ref weapon = Weapon::table_name();
-let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-let weaponstats_schema::WeaponStats {
-    averageStrength, ..
-} = WeaponStats::schema();
-
-let generated_weapons = (0..=14)
-    .map(|i| Weapon {
-        name: format!("weapon_{}", i),
-        strength: i,
-        ..Default::default()
-    })
-    .collect::<Vec<_>>();
-
-insert(generated_weapons).return_many(db.clone()).await?;
-```
 
 ## Query Creation and Execution
 
@@ -49,25 +16,35 @@ The ORM abstracts away much of the complexity involved in crafting queries. To
 calculate the average strength of weapons, for instance:
 
 ```rust
+# let db = Surreal::new::<Mem>(()).await.unwrap();
+# db.use_ns("test").use_db("test").await.unwrap();
+# 
+# let ref weapon = Weapon::table_name();
+# let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
+# let weaponstats_schema::WeaponStats {
+#     averageStrength, ..
+# } = WeaponStats::schema();
+# 
+# let generated_weapons = (0..=14)
+#     .map(|i| Weapon {
+#         name: format!("weapon_{}", i),
+#         strength: i,
+#         ..Default::default()
+#     })
+#     .collect::<Vec<_>>();
+# 
+# insert(generated_weapons).return_many(db.clone()).await?;
+
+
 let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
     LET strengths = select_value(strength).from(weapon);
     LET total = math::sum!(strengths);
     LET count = count!(strengths);
+    LET distance = 65;
     RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
 }));
-```
 
-This block of code demonstrates the ORM's ability to define and utilize
-parameters within queries.
 
-## Raw Query Translation
-
-To ensure the ORM's high-level operations are correctly translated to raw
-SurrealQL queries, the code uses verification checks:
-
-```rust
-insta::assert_display_snapshot!(created_stats_statement.to_raw());
-insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
 assert_eq!(
     created_stats_statement.to_raw().build(),
     "CREATE weapon_stats SET averageStrength = {\n\
@@ -88,6 +65,9 @@ assert_eq!(
             };"
 );
 ```
+
+This block of code demonstrates the ORM's ability to define and utilize
+parameters within queries.
 
 ## Native ORM Parameters
 
