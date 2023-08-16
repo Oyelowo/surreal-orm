@@ -22,6 +22,7 @@
   - [Record Ids](./concepts/record_ids.md)
   - [Fields and Model Schema](./concepts/fields_and_model_schema.md)
   - [Links and Relations](./concepts/links_and_relation.md)
+  - [Field Traversal](./concepts/field_traversal.md)
   - [Loaders](./concepts/loaders.md)
   - [Return Types](./concepts/return_types.md)
 
