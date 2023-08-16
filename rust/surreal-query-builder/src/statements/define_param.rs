@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
+use std::{fmt::Display, ops::Deref};
 
 use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable, Valuex};
 
@@ -44,8 +44,8 @@ use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Qu
 /// let statement = define_param(endpoint_base).value("https://dummyjson.com");
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn define_param(param_name: impl Into<Param>) -> DefineParamStatement {
-    let param_name: Param = param_name.into();
+pub fn define_param(param_name: impl Deref<Target = Param>) -> DefineParamStatement {
+    let param_name: &Param = param_name.deref();
     DefineParamStatement {
         name: param_name.to_string(),
         value: None,
@@ -107,19 +107,25 @@ impl Display for DefineParamStatement {
 
 #[cfg(test)]
 mod tests {
-    use crate::ToRaw;
+    use crate::{create_param_name, ToRaw};
 
     use super::*;
-    fn endpoint_base() -> Param {
-        Param::new("endpoint_base")
-    }
+    // fn endpoint_base() -> Param {
+    //     Param::new("endpoint_base")
+    // }
+
+    create_param_name!(
+        /// endpoint of codebreather.com
+        =>
+        endpoint_base
+    );
 
     #[test]
     fn test_define_param_statement() {
-        let statement = define_param(endpoint_base()).value("https://dummyjson.com");
+        let statement = define_param(endpoint_base()).value("https://codebreather.com");
         assert_eq!(
             statement.to_raw().build(),
-            "DEFINE PARAM $endpoint_base VALUE 'https://dummyjson.com';"
+            "DEFINE PARAM $endpoint_base VALUE 'https://codebreather.com';"
         );
 
         assert_eq!(

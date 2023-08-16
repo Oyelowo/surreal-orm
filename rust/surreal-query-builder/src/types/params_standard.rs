@@ -26,6 +26,7 @@
 macro_rules! create_param_name {
     ($(#[$attr:meta])* => $value:expr) => {
         $crate::internal_tools::paste! {
+            #[allow(non_camel_case_types)]
             $(#[$attr])*
             pub struct [< Param $value >]($crate::Param);
 

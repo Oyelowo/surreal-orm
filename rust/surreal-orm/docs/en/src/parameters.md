@@ -105,7 +105,20 @@ intricacies of the database language.
 
 For those requiring further customization, the `create_param_name!()` macro is
 available. This macro not only aids in generating custom parameter names but
-also supports field traversal using parameter paths.
+also supports field traversal using parameter paths. Typically though, you will
+use this with the `define_param` statement when you want to define a constant
+global variable. However, in a typical `let statement` (e.g used within the
+`block!` macro), this is automatically handled.
+
+Suppose you want to create a custom parameter name for a user's age. Using the
+macro:
+
+```rust
+create_param_name!(
+    /// $userAge represents the age of a user
+    => userAge
+);
+```
 
 This means that any parameter name created with this macro can be used for field
 traversal. For more information on field traversal, refer to the
