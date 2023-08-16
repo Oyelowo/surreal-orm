@@ -41,9 +41,9 @@ use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Qu
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, CrudType::*, statements::{define_param}};
 ///   // First create the param name as rust function i.e endpoint_base()
-///   create_param_name!(endpoint_base);
+///   create_param_name_fn!(endpoint_base);
 ///   // Can also we wwriten as below if you want to add a doc comment.
-///   // create_param_name!(
+///   // create_param_name_fn!(
 ///   //  /// endpoint of codebreather.com
 ///   //  =>
 ///   //  endpoint_base
@@ -114,14 +114,14 @@ impl Display for DefineParamStatement {
 
 #[cfg(test)]
 mod tests {
-    use crate::{create_param_name, ToRaw};
+    use crate::{create_param_name_fn, ToRaw};
 
     use super::*;
     // fn endpoint_base() -> Param {
     //     Param::new("endpoint_base")
     // }
 
-    create_param_name!(endpoint_base_without_doc);
+    create_param_name_fn!(endpoint_base_without_doc);
 
     #[test]
     fn test_define_param_statement_without_doc() {
@@ -137,7 +137,7 @@ mod tests {
         );
     }
 
-    create_param_name!(
+    create_param_name_fn!(
         /// endpoint of codebreather.com
         =>
         endpoint_base_with_doc

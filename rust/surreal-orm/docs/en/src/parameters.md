@@ -8,7 +8,7 @@ streamlined.
 
 - [Parameters in Query Creation and Execution](#query-creation-and-execution)
 - [Native ORM Parameters](#native-orm-parameters)
-- [Advanced Parameter Creation](#advanced-parameter-creation)
+- [Advanced Parameter Name Creation](#advanced-parameter-name-creation)
 
 ## Query Creation and Execution
 
@@ -18,13 +18,13 @@ calculate the average strength of weapons, for instance:
 ```rust
 # let db = Surreal::new::<Mem>(()).await.unwrap();
 # db.use_ns("test").use_db("test").await.unwrap();
-# 
+#
 # let ref weapon = Weapon::table_name();
 # let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
 # let weaponstats_schema::WeaponStats {
 #     averageStrength, ..
 # } = WeaponStats::schema();
-# 
+#
 # let generated_weapons = (0..=14)
 #     .map(|i| Weapon {
 #         name: format!("weapon_{}", i),
@@ -32,7 +32,7 @@ calculate the average strength of weapons, for instance:
 #         ..Default::default()
 #     })
 #     .collect::<Vec<_>>();
-# 
+#
 # insert(generated_weapons).return_many(db.clone()).await?;
 
 
@@ -103,8 +103,8 @@ intricacies of the database language.
 
 ## Advanced Parameter Name Creation
 
-For those requiring further customization, the `create_param_name!()` macro is
-available. This macro not only aids in generating custom parameter names but
+For those requiring further customization, the `create_param_name_fn!()` macro
+is available. This macro not only aids in generating custom parameter names but
 also supports field traversal using parameter paths. Typically though, you will
 use this with the `define_param` statement when you want to define a constant
 global variable. However, in a typical `let statement` (e.g used within the
@@ -114,11 +114,19 @@ Suppose you want to create a custom parameter name for a user's age. Using the
 macro:
 
 ```rust
-create_param_name!(
-    /// $userAge represents the age of a user
+create_param_name_fn!(user_age);
+```
+
+If you would like to add a rust doc comment, you can do so as shown below:
+
+```rust
+create_param_name_fn!(
+    /// $user_age represents the age of a user
     => userAge
 );
 ```
+
+To use the param name created above, you can invoke it as `user_age`
 
 This means that any parameter name created with this macro can be used for field
 traversal. For more information on field traversal, refer to the
