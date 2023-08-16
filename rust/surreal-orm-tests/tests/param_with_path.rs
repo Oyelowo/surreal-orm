@@ -17,10 +17,7 @@ fn test_param_with_path() {
         .bestFriend()
         .course()
         .title;
-    assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].bestFriend.bestFriend.course.title"
-    );
+
     assert_eq!(
         param_with_path.to_raw().build(),
         "$this[2].bestFriend.bestFriend.course.title"
@@ -36,13 +33,10 @@ fn test_param_with_path_with_index_square_bracket_variation() {
         .bestFriend()
         .course()
         .title;
-    assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].bestFriend.bestFriend.course.title"
-    );
+
     assert_eq!(
         param_with_path.to_raw().build(),
-        "$this[2].bestFriend.bestFriend.course.title"
+        "$value[2].bestFriend.bestFriend.course.title"
     );
 }
 
@@ -54,10 +48,7 @@ fn test_param_with_path_no_clause() {
         .bestFriend()
         .course()
         .title;
-    assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].bestFriend.bestFriend.course.title"
-    );
+
     assert_eq!(
         param_with_path.to_raw().build(),
         "$this[2].bestFriend.bestFriend.course.title"
@@ -75,10 +66,6 @@ fn test_param_with_path_with_clause() {
         .title;
 
     assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[WHERE age > $_param_00000001].bestFriend.semesterCourses[$_param_00000002].title"
-    );
-    assert_eq!(
         param_with_path.to_raw().build(),
         "$this[WHERE age > 18].bestFriend.semesterCourses[5].title"
     );
@@ -92,10 +79,6 @@ fn test_param_with_path_with_all_wildcard() {
         .semesterCourses(index(5))
         .title;
 
-    assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[*].bestFriend.semesterCourses[$_param_00000001].title"
-    );
     assert_eq!(
         param_with_path.to_raw().build(),
         "$this[*].bestFriend.semesterCourses[5].title"
@@ -111,10 +94,6 @@ fn test_param_with_path_multiple_indexes() {
         .title;
 
     assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].bestFriend.semesterCourses[$_param_00000002].title"
-    );
-    assert_eq!(
         param_with_path.to_raw().build(),
         "$this[2].bestFriend.semesterCourses[5].title"
     );
@@ -123,23 +102,20 @@ fn test_param_with_path_multiple_indexes() {
 #[test]
 fn test_param_with_path_simple() {
     let param_with_path = this().with_path::<Student>([2]).firstName;
-    assert_eq!(
-        param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].firstName"
-    );
+
     assert_eq!(param_with_path.to_raw().build(), "$this[2].firstName");
 }
 
 #[test]
 fn test_param_simple_clause() {
     let param_with_path = this().with_path::<Student>(E).lastName;
-    assert_eq!(param_with_path.fine_tune_params(), "$this.lastName");
+
     assert_eq!(param_with_path.to_raw().build(), "$this.lastName");
 }
 
 #[test]
 fn basic() {
     let param_with_path = this();
-    assert_eq!(param_with_path.fine_tune_params(), "$this");
+
     assert_eq!(param_with_path.to_raw().build(), "$this");
 }

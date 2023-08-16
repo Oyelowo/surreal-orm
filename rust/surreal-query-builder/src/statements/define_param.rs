@@ -40,8 +40,15 @@ use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Qu
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, CrudType::*, statements::{define_param}};
-/// let endpoint_base = Param::new("endpointBase");
-/// let statement = define_param(endpoint_base).value("https://dummyjson.com");
+///   // First create the param name as rust function i.e endpoint_base()
+///   create_param_name!(endpoint_base);
+///   // Can also we wwriten as below if you want to add a doc comment.
+///   // create_param_name!(
+///   //  /// endpoint of codebreather.com
+///   //  =>
+///   //  endpoint_base
+///   // );
+/// let statement = define_param(endpoint_base()).value("https://dummyjson.com");
 /// assert!(!statement.build().is_empty());
 /// ```
 pub fn define_param(param_name: impl Deref<Target = Param>) -> DefineParamStatement {
@@ -114,23 +121,39 @@ mod tests {
     //     Param::new("endpoint_base")
     // }
 
-    create_param_name!(
-        /// endpoint of codebreather.com
-        =>
-        endpoint_base
-    );
+    create_param_name!(endpoint_base_without_doc);
 
     #[test]
-    fn test_define_param_statement() {
-        let statement = define_param(endpoint_base()).value("https://codebreather.com");
+    fn test_define_param_statement_without_doc() {
+        let statement = define_param(endpoint_base_without_doc()).value("https://codebreather.com");
         assert_eq!(
             statement.to_raw().build(),
-            "DEFINE PARAM $endpoint_base VALUE 'https://codebreather.com';"
+            "DEFINE PARAM $endpoint_base_without_doc VALUE 'https://codebreather.com';"
         );
 
         assert_eq!(
             statement.fine_tune_params(),
-            "DEFINE PARAM $endpoint_base VALUE $_param_00000001;"
+            "DEFINE PARAM $endpoint_base_without_doc VALUE $_param_00000001;"
+        );
+    }
+
+    create_param_name!(
+        /// endpoint of codebreather.com
+        =>
+        endpoint_base_with_doc
+    );
+
+    #[test]
+    fn test_define_param_statement() {
+        let statement = define_param(endpoint_base_with_doc()).value("https://codebreather.com");
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE PARAM $endpoint_base_with_doc VALUE 'https://codebreather.com';"
+        );
+
+        assert_eq!(
+            statement.fine_tune_params(),
+            "DEFINE PARAM $endpoint_base_with_doc VALUE $_param_00000001;"
         );
     }
 }

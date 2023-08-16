@@ -14,6 +14,8 @@
 /// # Examples
 ///
 /// ```
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::*;
 /// create_param_name!(
 ///     /// $auth: Represents the currently authenticated scope user
 ///     => auth
@@ -40,6 +42,25 @@ macro_rules! create_param_name {
 
 
             $(#[$attr])*
+            pub fn $value() -> [< Param $value >] {
+                [< Param $value >]($crate::Param::new(stringify!($value)))
+            }
+        }
+    };
+    ($value:expr) => {
+        $crate::internal_tools::paste! {
+            #[allow(non_camel_case_types)]
+            pub struct [< Param $value >]($crate::Param);
+
+            impl ::std::ops::Deref for [< Param $value >] {
+                type Target = $crate::Param;
+
+                fn deref(&self) -> &Self::Target {
+                    &self.0
+                }
+            }
+
+
             pub fn $value() -> [< Param $value >] {
                 [< Param $value >]($crate::Param::new(stringify!($value)))
             }
