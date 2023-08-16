@@ -7,7 +7,7 @@
 
 use pretty_assertions::assert_eq;
 use surreal_models::{student_schema, Student};
-use surreal_orm::{index, this, where_, All, Buildable, Operatable, SchemaGetter, ToRaw, E};
+use surreal_orm::{index, this, value, where_, All, Buildable, Operatable, SchemaGetter, ToRaw, E};
 
 #[test]
 fn test_param_with_path() {
@@ -30,7 +30,7 @@ fn test_param_with_path() {
 #[test]
 fn test_param_with_path_with_index_square_bracket_variation() {
     // You can also use `[2]` instead of `index(2)`.
-    let param_with_path = this()
+    let param_with_path = value()
         .with_path::<Student>([2])
         .bestFriend()
         .bestFriend()
