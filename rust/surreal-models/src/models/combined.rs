@@ -191,7 +191,7 @@ pub struct Student {
         item_type = "record(book)",
         item_assert_fn = "erer"
     )]
-    #[serde(rename = "semCoures")]
+    #[serde(rename = "semesterCourses")]
     all_semester_courses: LinkMany<Book>,
 
     #[surreal_orm(relate(model = "StudentWritesBook", connection = "->writes->book"))]
