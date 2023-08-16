@@ -9,66 +9,75 @@ use std::ops::Deref;
 
 use crate::Param;
 
-/// stands for surrealdb native `$value`
-pub struct ValueParam(Param);
+use paste::paste;
 
-impl Deref for ValueParam {
-    type Target = Param;
+macro_rules! define_param {
+    ($(#[$attr:meta])* => $value:expr) => {
+        paste! {
+            $(#[$attr])*
+            pub struct [< Param $value >](Param);
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+            impl Deref for [< Param $value >] {
+                type Target = Param;
+
+                fn deref(&self) -> &Self::Target {
+                    &self.0
+                }
+            }
+
+
+            $(#[$attr])*
+            pub fn $value() -> [< Param $value >] {
+                [< Param $value >](Param::new(stringify!($value)))
+            }
+        }
+    };
 }
+// SurrealDB employs a set of predefined variables.
+// While these variables can be utilized within your queries,
+// it's important to note that you cannot declare new parameters with any of the names listed below:
 
-/// creates surrealdb native `$value`
-pub fn value() -> ValueParam {
-    ValueParam(Param::new("value"))
-}
+define_param!(
+    /// $auth: Represents the currently authenticated scope user
+    => auth
+);
 
-/// stands for surrealdb native `$before`
-pub struct BeforeParam(Param);
+define_param!(
+    /// $token: Represents values held inside the JWT token used for the current session
+    => token
+);
 
-impl Deref for BeforeParam {
-    type Target = Param;
+define_param!(
+    /// $session: Represents values from the session functions as an object
+    => session
+);
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+define_param!(
+    /// $before: Represents the value before a mutation on a field
+    => before
+);
 
-/// creates surrealdb native `$before`
-pub fn before() -> BeforeParam {
-    BeforeParam(Param::new("before"))
-}
+define_param!(
+    /// $after: Represents the value after a mutation on a field
+    => after
+);
 
-/// stands for surrealdb native `$after`
-pub struct AfterParam(Param);
+define_param!(
+    /// $value: Represents the value after a mutation on a field (identical to $after in the case of an event)
+    => value
+);
 
-impl Deref for AfterParam {
-    type Target = Param;
+define_param!(
+    /// $input: Represents the initially inputted value in a field definition, as the value clause could have modified the $value variable
+    => input
+);
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+define_param!(
+    /// $parent: Represents the parent record in a subquery
+    => parent
+);
 
-/// creates surrealdb native `$after`
-pub fn after() -> AfterParam {
-    AfterParam(Param::new("after"))
-}
-
-/// stands for surrealdb native `$this`
-pub struct ThisParam(Param);
-
-impl Deref for ThisParam {
-    type Target = Param;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-/// creates surrealdb native `$this`
-pub fn this() -> ThisParam {
-    ThisParam(Param::new("this"))
-}
+define_param!(
+    /// $event: Represents the type of table event triggered on an event
+    => event
+);
