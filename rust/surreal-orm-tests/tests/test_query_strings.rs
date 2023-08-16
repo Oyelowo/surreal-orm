@@ -25,7 +25,7 @@ fn multiplication_tests1() {
         bestFriend,
         unoBook,
         course,
-        semCoures,
+        semesterCourses,
         ref age,
         ..
     } = &Student::schema();
@@ -108,10 +108,10 @@ fn multiplication_tests1() {
         // .fetch(vec![age, unoBook])
         .split(lastName)
         .split(firstName)
-        .split(arr![firstName, semCoures])
-        .split(arr![firstName, semCoures])
-        // .split(&[firstName, semCoures])
-        // .split(vec![firstName, semCoures])
+        .split(arr![firstName, semesterCourses])
+        .split(arr![firstName, semesterCourses])
+        // .split(&[firstName, semesterCourses])
+        // .split(vec![firstName, semesterCourses])
         .timeout(Duration::from_secs(8))
         .parallel();
 

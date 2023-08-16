@@ -71,16 +71,16 @@ fn test_param_with_path_with_clause() {
     let param_with_path = this()
         .with_path::<Student>(where_(age.greater_than(18)))
         .bestFriend()
-        .allSemesterCourses([5])
+        .semesterCourses([5])
         .title;
 
     assert_eq!(
         param_with_path.fine_tune_params(),
-        "$this[WHERE age > $_param_00000001].bestFriend.allSemesterCourses[$_param_00000002].title"
+        "$this[WHERE age > $_param_00000001].bestFriend.semesterCourses[$_param_00000002].title"
     );
     assert_eq!(
         param_with_path.to_raw().build(),
-        "$this[WHERE age > 18].bestFriend.allSemesterCourses[5].title"
+        "$this[WHERE age > 18].bestFriend.semesterCourses[5].title"
     );
 }
 
@@ -89,16 +89,16 @@ fn test_param_with_path_with_all_wildcard() {
     let param_with_path = this()
         .with_path::<Student>(All)
         .bestFriend()
-        .allSemesterCourses(index(5))
+        .semesterCourses(index(5))
         .title;
 
     assert_eq!(
         param_with_path.fine_tune_params(),
-        "$this[*].bestFriend.allSemesterCourses[$_param_00000001].title"
+        "$this[*].bestFriend.semesterCourses[$_param_00000001].title"
     );
     assert_eq!(
         param_with_path.to_raw().build(),
-        "$this[*].bestFriend.allSemesterCourses[5].title"
+        "$this[*].bestFriend.semesterCourses[5].title"
     );
 }
 
@@ -107,16 +107,16 @@ fn test_param_with_path_multiple_indexes() {
     let param_with_path = this()
         .with_path::<Student>([2])
         .bestFriend()
-        .allSemesterCourses([5])
+        .semesterCourses([5])
         .title;
 
     assert_eq!(
         param_with_path.fine_tune_params(),
-        "$this[$_param_00000001].bestFriend.allSemesterCourses[$_param_00000002].title"
+        "$this[$_param_00000001].bestFriend.semesterCourses[$_param_00000002].title"
     );
     assert_eq!(
         param_with_path.to_raw().build(),
-        "$this[2].bestFriend.allSemesterCourses[5].title"
+        "$this[2].bestFriend.semesterCourses[5].title"
     );
 }
 
