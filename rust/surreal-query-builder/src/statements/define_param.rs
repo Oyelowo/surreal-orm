@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
+use std::{fmt::Display, ops::Deref};
 
 use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable, Valuex};
 
@@ -40,12 +40,19 @@ use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Qu
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, CrudType::*, statements::{define_param}};
-/// let endpoint_base = Param::new("endpointBase");
-/// let statement = define_param(endpoint_base).value("https://dummyjson.com");
+///   // First create the param name as rust function i.e endpoint_base()
+///   create_param_name_fn!(endpoint_base);
+///   // Can also we wwriten as below if you want to add a doc comment.
+///   // create_param_name_fn!(
+///   //  /// endpoint of codebreather.com
+///   //  =>
+///   //  endpoint_base
+///   // );
+/// let statement = define_param(endpoint_base()).value("https://dummyjson.com");
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn define_param(param_name: impl Into<Param>) -> DefineParamStatement {
-    let param_name: Param = param_name.into();
+pub fn define_param(param_name: impl Deref<Target = Param>) -> DefineParamStatement {
+    let param_name: &Param = param_name.deref();
     DefineParamStatement {
         name: param_name.to_string(),
         value: None,
@@ -107,24 +114,46 @@ impl Display for DefineParamStatement {
 
 #[cfg(test)]
 mod tests {
-    use crate::ToRaw;
+    use crate::{create_param_name_fn, ToRaw};
 
     use super::*;
-    fn endpoint_base() -> Param {
-        Param::new("endpoint_base")
-    }
+    // fn endpoint_base() -> Param {
+    //     Param::new("endpoint_base")
+    // }
+
+    create_param_name_fn!(endpoint_base_without_doc);
 
     #[test]
-    fn test_define_param_statement() {
-        let statement = define_param(endpoint_base()).value("https://dummyjson.com");
+    fn test_define_param_statement_without_doc() {
+        let statement = define_param(endpoint_base_without_doc()).value("https://codebreather.com");
         assert_eq!(
             statement.to_raw().build(),
-            "DEFINE PARAM $endpoint_base VALUE 'https://dummyjson.com';"
+            "DEFINE PARAM $endpoint_base_without_doc VALUE 'https://codebreather.com';"
         );
 
         assert_eq!(
             statement.fine_tune_params(),
-            "DEFINE PARAM $endpoint_base VALUE $_param_00000001;"
+            "DEFINE PARAM $endpoint_base_without_doc VALUE $_param_00000001;"
+        );
+    }
+
+    create_param_name_fn!(
+        /// endpoint of codebreather.com
+        =>
+        endpoint_base_with_doc
+    );
+
+    #[test]
+    fn test_define_param_statement() {
+        let statement = define_param(endpoint_base_with_doc()).value("https://codebreather.com");
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE PARAM $endpoint_base_with_doc VALUE 'https://codebreather.com';"
+        );
+
+        assert_eq!(
+            statement.fine_tune_params(),
+            "DEFINE PARAM $endpoint_base_with_doc VALUE $_param_00000001;"
         );
     }
 }
