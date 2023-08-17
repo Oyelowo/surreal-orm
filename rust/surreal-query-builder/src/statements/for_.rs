@@ -144,7 +144,7 @@ impl Display for For {
 /// Permission types which can be a a single For statement
 /// list of `for` statements
 #[derive(Clone, Debug)]
-pub enum PermissionType {
+pub enum Permissions {
     /// Single `for` statement
     For(For),
     /// List of `for` statements
@@ -155,19 +155,19 @@ pub enum PermissionType {
     RawStatementList(Vec<Raw>),
 }
 
-impl ToRaw for PermissionType {
-    fn to_raw(self: &PermissionType) -> Raw {
+impl ToRaw for Permissions {
+    fn to_raw(self: &Permissions) -> Raw {
         match self {
-            PermissionType::For(for_one) => for_one.to_raw(),
-            PermissionType::Fors(for_many) => Raw::new(
+            Permissions::For(for_one) => for_one.to_raw(),
+            Permissions::Fors(for_many) => Raw::new(
                 for_many
                     .into_iter()
                     .map(|f| f.to_raw().build())
                     .collect::<Vec<_>>()
                     .join(", "),
             ),
-            PermissionType::RawStatement(r) => r.to_raw(),
-            PermissionType::RawStatementList(raw_list) => Raw::new(
+            Permissions::RawStatement(r) => r.to_raw(),
+            Permissions::RawStatementList(raw_list) => Raw::new(
                 raw_list
                     .into_iter()
                     .map(|f| f.to_raw().build())
@@ -178,55 +178,55 @@ impl ToRaw for PermissionType {
     }
 }
 
-impl From<For> for PermissionType {
+impl From<For> for Permissions {
     fn from(value: For) -> Self {
         Self::For(value)
     }
 }
 
-impl From<Vec<For>> for PermissionType {
+impl From<Vec<For>> for Permissions {
     fn from(value: Vec<For>) -> Self {
         Self::Fors(value)
     }
 }
 
-impl<'a, const N: usize> From<&[For; N]> for PermissionType {
+impl<'a, const N: usize> From<&[For; N]> for Permissions {
     fn from(value: &[For; N]) -> Self {
         Self::Fors(value.to_vec())
     }
 }
 
-impl<const N: usize> From<[For; N]> for PermissionType {
+impl<const N: usize> From<[For; N]> for Permissions {
     fn from(value: [For; N]) -> Self {
         Self::Fors(value.to_vec())
     }
 }
 
-impl From<Raw> for PermissionType {
+impl From<Raw> for Permissions {
     fn from(value: Raw) -> Self {
         Self::RawStatement(value)
     }
 }
 
-impl From<Vec<Raw>> for PermissionType {
+impl From<Vec<Raw>> for Permissions {
     fn from(value: Vec<Raw>) -> Self {
         Self::RawStatementList(value)
     }
 }
 
-impl From<&Vec<Raw>> for PermissionType {
+impl From<&Vec<Raw>> for Permissions {
     fn from(value: &Vec<Raw>) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[Raw; N]> for PermissionType {
+impl<'a, const N: usize> From<&[Raw; N]> for Permissions {
     fn from(value: &[Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
 }
 
-impl<const N: usize> From<[Raw; N]> for PermissionType {
+impl<const N: usize> From<[Raw; N]> for Permissions {
     fn from(value: [Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }
