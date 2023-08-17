@@ -1,10 +1,14 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowooyedayo@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
+# Helper Methods in `surreal-orm`
 
+The `surreal-orm` library offers a set of utility functions encapsulated in the
+`SurrealCrud` and `SurrealCrudNode` traits. These methods provide a high-level
+abstraction over raw database statements, simplifying CRUD operations.
+
+## Preparations
+
+Before we dive into the helper methods, let's set up our environment:
+
+```rust
 use surreal_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
 use surreal_orm::{
     statements::{insert, select, select_value},
@@ -20,41 +24,21 @@ async fn create_test_data(db: Surreal<Db>) {
         .map(|i| Weapon {
             name: format!("weapon-{}", i),
             strength: i,
-            ..Default::default() // created: chrono::Utc::now(),
+            ..Default::default()
         })
         .collect::<Vec<Weapon>>();
     insert(space_ships).run(db.clone()).await.unwrap();
 }
-#[tokio::test]
-async fn test_create() -> SurrealOrmResult<()> {
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await.unwrap();
+```
 
-    let ss_id = SpaceShip::create_id(format!("num-{}", 1));
-    let spaceship = SpaceShip {
-        id: ss_id.clone(),
-        name: format!("spaceship-{}", 1),
-        created: chrono::Utc::now(),
-    };
+---
 
-    let spaceship = spaceship.create().get_one(db.clone()).await?;
-    // Second attempt should fail since it will be duplicate.
-    spaceship
-        .clone()
-        .create()
-        .get_one(db.clone())
-        .await
-        .expect_err("should fail");
+## 1. `save` Method
 
-    let saved_spaceship = SpaceShip::find_by_id(ss_id.clone())
-        .get_one(db.clone())
-        .await?;
+The `save` method can either create a new record or update an existing one in
+the database. You can think of it as an upsert method.
 
-    assert_eq!(spaceship.id.to_thing(), saved_spaceship.id.to_thing());
-    assert_eq!(spaceship.name, saved_spaceship.name);
-    Ok(())
-}
-
+```rust
 #[tokio::test]
 async fn test_save() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -77,7 +61,15 @@ async fn test_save() -> SurrealOrmResult<()> {
     assert_eq!(spaceship.name, saved_spaceship.name);
     Ok(())
 }
+```
 
+---
+
+## 2. `find_by_id` Method
+
+Retrieve a record by its ID:
+
+```rust
 #[tokio::test]
 async fn test_find_by_id() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -98,7 +90,15 @@ async fn test_find_by_id() -> SurrealOrmResult<()> {
     assert_eq!(spaceship.id.to_thing(), found_spaceship.id.to_thing());
     Ok(())
 }
+```
 
+---
+
+## 3. `find_where` Method
+
+Retrieve records based on specific conditions:
+
+```rust
 #[tokio::test]
 async fn test_find_where() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -140,43 +140,15 @@ async fn test_find_where() -> SurrealOrmResult<()> {
     assert_eq!(found_spaceship.id.to_thing(), spaceship.id.to_thing());
     Ok(())
 }
+```
 
-#[tokio::test]
-async fn test_find_where_complex() -> SurrealOrmResult<()> {
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await.unwrap();
+---
 
-    create_test_data(db.clone()).await;
+## 4. `count_where` Method
 
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
-    let ref count = Field::new("count");
+Count records based on specific conditions:
 
-    let total_spaceships = Weapon::find_where(id.is_not(NONE))
-        .return_many(db.clone())
-        .await?;
-    assert_eq!(total_spaceships.len(), 1000);
-    let total_spaceships_query = select_value(count).from(
-        select(count!(strength.gte(500)))
-            .from(Weapon::table_name())
-            .group_all(),
-    );
-    assert_eq!(
-        total_spaceships_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count(strength >= 500) FROM weapon GROUP ALL);"
-    );
-
-    let total_spaceships_count: Option<i32> = total_spaceships_query.return_one(db.clone()).await?;
-
-    assert_eq!(total_spaceships_count, Some(500));
-
-    let total_spaceships_count = Weapon::count_where(strength.gte(500))
-        .get(db.clone())
-        .await?;
-
-    assert_eq!(total_spaceships_count, 500);
-    Ok(())
-}
-
+```rust
 #[tokio::test]
 async fn test_count_where() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -197,28 +169,15 @@ async fn test_count_where() -> SurrealOrmResult<()> {
 
     Ok(())
 }
+```
 
-#[tokio::test]
-async fn test_count_where_complex() -> SurrealOrmResult<()> {
-    let db = Surreal::new::<Mem>(()).await.unwrap();
-    db.use_ns("test").use_db("test").await.unwrap();
+---
 
-    create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+## 5. `count_all` Method
 
-    let weapons_query = Weapon::count_where(cond(strength.gte(500)).and(strength.lt(734)));
-    let weapons_count = weapons_query.get(db.clone()).await?;
+Count all records:
 
-    assert_eq!(
-        weapons_query.to_raw().build(),
-        "SELECT VALUE count FROM (SELECT count((strength >= 500) AND (strength < 734)) FROM weapon GROUP ALL);"
-    );
-
-    assert_eq!(weapons_count, 234);
-
-    Ok(())
-}
-
+```rust
 #[tokio::test]
 async fn test_count_all() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -238,7 +197,13 @@ async fn test_count_all() -> SurrealOrmResult<()> {
 
     Ok(())
 }
+```
 
+## 6. `delete` Method
+
+This method deletes the current record instance from the database.
+
+```rust
 #[tokio::test]
 async fn test_delete() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -267,7 +232,15 @@ async fn test_delete() -> SurrealOrmResult<()> {
     assert_eq!(found_spaceship.len(), 0);
     Ok(())
 }
+```
 
+---
+
+## 7. `delete_by_id` Method
+
+This method deletes a record by its ID.
+
+```rust
 #[tokio::test]
 async fn test_delete_by_id() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -295,7 +268,15 @@ async fn test_delete_by_id() -> SurrealOrmResult<()> {
     assert_eq!(found_spaceships.len(), 0);
     Ok(())
 }
+```
 
+---
+
+## 8. `delete_where` Method
+
+This method deletes records based on a specific condition.
+
+```rust
 #[tokio::test]
 async fn test_delete_where() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -325,3 +306,47 @@ async fn test_delete_where() -> SurrealOrmResult<()> {
     assert_eq!(found_spaceships.len(), 0);
     Ok(())
 }
+```
+
+---
+
+## 9. `create` Method
+
+This method creates a new record in the database. It's specifically for nodes.
+
+```rust
+#[tokio::test]
+async fn test_create() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let ss_id = SpaceShip::create_id(format!("num-{}", 1));
+    let spaceship = SpaceShip {
+        id: ss_id.clone(),
+        name: format!("spaceship-{}", 1),
+        created: chrono::Utc::now(),
+    };
+
+    let spaceship = spaceship.create().get_one(db.clone()).await?;
+    // Second attempt should fail since it will be duplicate.
+    spaceship
+        .clone()
+        .create()
+        .get_one(db.clone())
+        .await
+        .expect_err("should fail");
+
+    let saved_spaceship = SpaceShip::find_by_id(ss_id.clone())
+        .get_one(db.clone())
+        .await?;
+
+    assert_eq!(spaceship.id.to_thing(), saved_spaceship.id.to_thing());
+    assert_eq!(spaceship.name, saved_spaceship.name);
+    Ok(())
+}
+```
+
+---
+
+This wraps up the explanations and demonstrations for all the helper methods in
+surreal-orm.

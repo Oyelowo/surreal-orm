@@ -26,6 +26,24 @@
   - [Loaders](./concepts/loaders.md)
   - [Return Types](./concepts/return_types.md)
 
+# Query Helper Methods
+
+- [Utils](./utility_functions.md)
+- [Introduction to Utility Functions](./query_helpers/introduction_to_utility_functions.md)
+- [Read Methods](./query_helpers/other_utility_functions.md)
+  - [`find_by_id`](./query_helpers/find_by_id.md)
+  - [`find_where`](./query_helpers/find_where.md)
+- [Create, Update Methods](./query_helpers/other_utility_functions.md)
+  - [`save`](./query_helpers/save.md)
+  - [`create`](./query_helpers/create.md)
+- [Delete Methods](./query_helpers/delete_helper_functions.md)
+  - [`delete`](./query_helpers/delete.md)
+  - [`delete_by_id`](./query_helpers/delete_by_id.md)
+  - [`delete_where`](./query_helpers/delete_where.md)
+- [Count and Aggregation Methods](./query_helpers/count_and_aggregation_helpers.md)
+  - [`count_where`](./query_helpers/count_where.md)
+  - [`count_all`](./query_helpers/count_all.md)
+
 # API
 
 - [Statements](./statements.md)
