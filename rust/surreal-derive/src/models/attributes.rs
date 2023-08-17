@@ -1100,7 +1100,7 @@ impl Permissions {
             }
             Self::FnName(permissions) => {
                 let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                quote!(.permissions_for(#permissions.to_raw()))
+                quote!(.permissions(#permissions.to_raw()))
             }
         }
     }
@@ -1713,7 +1713,7 @@ impl PermissionsFn {
                 quote!(.permissions_none())
             }
             Self::FnPath(permissions_fn) => {
-                quote!(.permissions_for(#permissions_fn().to_raw()))
+                quote!(.permissions(#permissions_fn().to_raw()))
             }
         }
     }

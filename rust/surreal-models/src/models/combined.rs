@@ -107,13 +107,13 @@ fn define_age() -> DefineFieldStatement {
     //     .type_(String)
     //     .value("example@codebreather.com")
     //     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-    //     // .permissions_for(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-    //     .permissions_for(PermissionForables::from(
+    //     // .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+    //     .permissions(PermissionForables::from(
     //         for_(&[Create, Update])
     //             .where_(firstName.is("Oyedayo"))
     //             .to_raw(),
     //     )) //Multiple
-    //     .permissions_for(
+    //     .permissions(
     //         PermissionForables::from(&[
     //             for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
     //             for_(Update).where_(age.less_than_or_equal(130)),
