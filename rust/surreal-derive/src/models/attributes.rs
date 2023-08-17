@@ -987,14 +987,9 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
     }
 
     pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
-        let field_type = FieldType::from_str(
-            &self
-                .item_type
-                .clone()
-                .unwrap_or("any".into())
-                .to_string(),
-        )
-        .unwrap();
+        let field_type =
+            FieldType::from_str(&self.item_type.clone().unwrap_or("any".into()).to_string())
+                .unwrap();
         let crate_name = get_crate_name(false);
         match field_type {
             FieldType::Any => {
@@ -1350,13 +1345,14 @@ impl ReferencedNodeMeta {
                 value: Some(value), ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value))));
+                define_field_methods.push(quote!(.value(#crate_name::sql::Value::from(#value))));
             }
             MyFieldReceiver {
                 value_fn: Some(value_fn),
                 ..
             } => {
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
+                define_field_methods
+                    .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
             }
             _ => {}
         };
