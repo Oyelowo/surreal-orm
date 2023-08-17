@@ -430,7 +430,7 @@ macro_rules! create_test_for_fn_with_single_array_arg {
 
 create_test_for_fn_with_single_array_arg!(
 /// The math::mean function returns the average of a set of numbers.
-/// This function is aliased as `math_max!`.
+/// This function is aliased as `math_mean!`.
 /// math::mean(number) -> number
 /// The following example shows this function, and its output, when used in a select statement:
 /// SELECT * FROM math::mean([26.164, 13.746189, 23, 16.4, 41.42]);
@@ -536,6 +536,33 @@ create_test_for_fn_with_single_array_arg!(
 /// math::min!(scores_param);
 /// ```
 => "min"
+);
+
+create_test_for_fn_with_single_array_arg!(
+/// The math::max function returns the minimum number in a set of numbers.
+/// This function is aliased as `math_max!`.
+/// math::max(array) -> number
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM math::max([26.164, 13.746189, 23, 16.4, 41.42]);
+/// 13.746189
+///
+/// # Arguments
+/// * `array` - The array of numbers from which to calculate the maximum. Can be an array of numbers or field or parameter
+/// representing an array of numbers.
+///
+/// # Example
+/// ```rust
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::{*, functions::math};
+///
+/// math::max!(vec![1, 2, 3, 4, 5]);
+/// math::max!(arr![1, 2, 3, 4, 5]);
+/// let scores_field = Field::new("scores_field");
+/// math::max!(scores_field);
+/// let scores_param = Param::new("scores_param");
+/// math::max!(scores_param);
+/// ```
+=> "max"
 );
 
 create_test_for_fn_with_single_array_arg!(
