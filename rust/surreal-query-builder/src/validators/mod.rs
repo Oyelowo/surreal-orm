@@ -90,6 +90,7 @@ macro_rules! check_unique_idents {
     ($head:ident, $($tail:ident),+ $(,)?) => {
         // Generate a unique constant for $head
         $crate::internal_tools::paste! {
+        #[allow(non_upper_case_globals)]
             const [<UNIQUE_ $head>]: () = ();
         }
 
