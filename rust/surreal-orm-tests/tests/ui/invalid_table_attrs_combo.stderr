@@ -1,0 +1,36 @@
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:27:10
+   |
+27 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+warning: unused import: `select`
+ --> tests/ui/invalid_table_attrs_combo.rs:3:24
+  |
+3 |     statements::{for_, select, Permissions},
+  |                        ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+error[E0277]: the trait bound `StudentTest: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:39:9
+   |
+39 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             Student
+             TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`

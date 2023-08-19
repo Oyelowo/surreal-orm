@@ -1,0 +1,399 @@
+error: proc-macro derive panicked
+  --> tests/ui/invalid_field_attrs_combo.rs:62:10
+   |
+62 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+               assert,
+               assert_fn,
+               value,
+               value_fn,
+               permissions,
+               permissions_fn,
+               item_assert,
+               item_assert_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_field_attrs_combo.rs:85:10
+   |
+85 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+               assert,
+               assert_fn,
+               value,
+               value_fn,
+               permissions,
+               permissions_fn,
+               item_assert,
+               item_assert_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_field_attrs_combo.rs:95:10
+   |
+95 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+               assert,
+               assert_fn,
+               value,
+               value_fn,
+               permissions,
+               permissions_fn,
+               item_assert,
+               item_assert_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:108:10
+    |
+108 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                item_assert,
+                item_assert_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:122:10
+    |
+122 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                item_assert,
+                item_assert_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:137:10
+    |
+137 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                item_assert,
+                item_assert_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:146:10
+    |
+146 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                item_assert,
+                item_assert_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:159:10
+    |
+159 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                assert,
+                assert_fn,
+                value,
+                value_fn,
+                permissions,
+                permissions_fn,
+                item_assert,
+                item_assert_fn
+
+error: Unable to parse attribute: expected `,`
+   --> tests/ui/invalid_field_attrs_combo.rs:180:9
+    |
+180 |         define_fn = "define_age"
+    |         ^^^^^^^^^
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:186:10
+    |
+186 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:198:10
+    |
+198 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_field_attrs_combo.rs:210:10
+    |
+210 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.
+
+warning: unused import: `select`
+ --> tests/ui/invalid_field_attrs_combo.rs:3:38
+  |
+3 |     statements::{define_field, for_, select, DefineFieldStatement, Permissions},
+  |                                      ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `Node`
+  --> tests/ui/invalid_field_attrs_combo.rs:38:30
+   |
+38 |     use surreal_orm::{Model, Node};
+   |                              ^^^^
+
+warning: the item `Model` is imported redundantly
+  --> tests/ui/invalid_field_attrs_combo.rs:38:23
+   |
+4  |     *,
+   |     - the item `Model` is already imported here
+...
+38 |     use surreal_orm::{Model, Node};
+   |                       ^^^^^
+
+warning: the item `Node` is imported redundantly
+  --> tests/ui/invalid_field_attrs_combo.rs:38:30
+   |
+4  |     *,
+   |     - the item `Node` is already imported here
+...
+38 |     use surreal_orm::{Model, Node};
+   |                              ^^^^
+
+error[E0601]: `main` function not found in crate `$CRATE`
+   --> tests/ui/invalid_field_attrs_combo.rs:220:2
+    |
+220 | }
+    |  ^ consider adding a `main` function to `$DIR/tests/ui/invalid_field_attrs_combo.rs`
+
+error[E0277]: the trait bound `StudentTest0: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_field_attrs_combo.rs:66:9
+   |
+66 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest0`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             surreal_models::Alien
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Alien2
+             surreal_models::StudentWithGranularAttributes
+             surreal_models::StudentWithDefineAttr
+             TestUser
+             surreal_models::StudentWithDefineFnAttr
+             surreal_models::Student
+           and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest1: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_field_attrs_combo.rs:89:9
+   |
+89 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest1`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             surreal_models::Alien
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Alien2
+             surreal_models::StudentWithGranularAttributes
+             surreal_models::StudentWithDefineAttr
+             TestUser
+             surreal_models::StudentWithDefineFnAttr
+             surreal_models::Student
+           and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest2: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_field_attrs_combo.rs:99:9
+   |
+99 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest2`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             surreal_models::Alien
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Alien2
+             surreal_models::StudentWithGranularAttributes
+             surreal_models::StudentWithDefineAttr
+             TestUser
+             surreal_models::StudentWithDefineFnAttr
+             surreal_models::Student
+           and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest3: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:112:9
+    |
+112 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest3`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest4: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:126:9
+    |
+126 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest4`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest5: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:141:9
+    |
+141 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest5`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest6: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:150:9
+    |
+150 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest6`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest7: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:163:9
+    |
+163 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest7`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest8: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_field_attrs_combo.rs:176:9
+    |
+176 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest8`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              surreal_models::Alien
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Alien2
+              surreal_models::StudentWithGranularAttributes
+              surreal_models::StudentWithDefineAttr
+              TestUser
+              surreal_models::StudentWithDefineFnAttr
+              surreal_models::Student
+            and $N others
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0433]: failed to resolve: use of undeclared crate or module `studenttest0_schema`
+  --> tests/ui/invalid_field_attrs_combo.rs:40:9
+   |
+40 |     let studenttest0_schema::StudentTest0 {
+   |         ^^^^^^^^^^^^^^^^^^^ use of undeclared crate or module `studenttest0_schema`
