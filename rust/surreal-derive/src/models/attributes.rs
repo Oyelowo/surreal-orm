@@ -1342,17 +1342,61 @@ impl ReferencedNodeMeta {
                 panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
-                value: Some(value), ..
+                value: Some(value),
+                type_: Some(type_),
+                ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                define_field_methods.push(quote!(.value(#crate_name::sql::Value::from(#value))));
+                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                let type_of = match field_type {
+                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
+                    FieldType::String => quote!(#crate_name::sql::String::from(#value)),
+                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value)),
+                    FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value)),
+                    FieldType::Decimal => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Number => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Object => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value)),
+                };
+
+                define_field_methods
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
+                    .push(quote!(.value(#crate_name::sql::to_value(&#value).unwrap())));
             }
             MyFieldReceiver {
                 value_fn: Some(value_fn),
+                type_: Some(type_),
                 ..
             } => {
+                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                // FIXME: check this.
+                let type_of = match field_type {
+                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
+                    FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
+                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_fn())),
+                    FieldType::Array => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value_fn())),
+                    FieldType::Decimal => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Number => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Object => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
+                };
+
                 define_field_methods
-                    .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
+                    .push(quote!(.value(#crate_name::sql::to_value(&#value_fn()).unwrap())));
             }
             _ => {}
         };
