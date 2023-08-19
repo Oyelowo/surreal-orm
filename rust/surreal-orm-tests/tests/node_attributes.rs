@@ -131,21 +131,6 @@ async fn test_node_attributes_with_define_fn_attribute() -> SurrealOrmResult<()>
     Ok(())
 }
 
-// #[test]
-// fn test_stuff() {
-//     ui();
-// }
-//
-// /// more
-// /// ```rust, compile_fail
-// /// let mut x = 5;
-// /// ```
-// pub fn ui() {}
-
-/// more
-/// ```rust, compile_fail
-/// let mut x = 5;
-/// ```
 #[test]
 fn ui() {
     let t = trybuild::TestCases::new();

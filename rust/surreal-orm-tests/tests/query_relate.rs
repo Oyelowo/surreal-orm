@@ -28,7 +28,7 @@ fn can_get_structs_relations() {
             .map(|r| r.to_raw().build())
             .collect::<Vec<_>>()
             .join(", "),
-        "->writes->book AS writtenBooks, ->writes->blog AS blogsssss"
+        "->writes->book AS writtenBooks, ->writes->blog AS blogs"
     );
 }
 
