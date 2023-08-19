@@ -1,10 +1,9 @@
 #[allow(dead_code)]
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display};
 use std::time::Duration;
 use surreal_orm::{
     statements::{
-        define_field, define_table, for_, select, DefineFieldStatement, DefineTableStatement, For,
+        define_field, define_table, for_, select, DefineFieldStatement, DefineTableStatement,
         Permissions, SelectStatement,
     },
     *,
@@ -295,8 +294,6 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
         ref lastName,
         ..
     } = StudentWithDefineAttr::schema();
-
-    use FieldType::*;
 
     let statement = define_field(lastName)
         .on_table(StudentWithDefineAttr::table_name())

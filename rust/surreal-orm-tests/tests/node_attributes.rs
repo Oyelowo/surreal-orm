@@ -6,13 +6,12 @@
  */
 
 use pretty_assertions::assert_eq;
-use serde::{Deserialize, Serialize};
 use surreal_models::{
     Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
     StudentWithGranularAttributes,
 };
 use surreal_orm::{
-    statements::{for_, select, Permissions},
+    statements::{for_, select},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};
