@@ -6,12 +6,12 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{Alien, AlienWithExplicitAttributes};
+use surreal_models::{Alien, AlienWithExplicitAttributes, StudentWithGranularAttributes};
 use surreal_orm::*;
 use surrealdb::{engine::local::Mem, Surreal};
 
 #[tokio::test]
-async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
+async fn test_node_type_atttribute_auto_inferred() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
 
     db.use_ns("test").use_db("test").await.unwrap();
@@ -45,7 +45,7 @@ DEFINE FIELD spaceShips.* ON TABLE alien TYPE record (space_ship);"
 }
 
 #[tokio::test]
-async fn test_node_atttributes_explicit() -> SurrealOrmResult<()> {
+async fn test_node_type_atttribute_explicit() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     assert_eq!(
@@ -73,6 +73,23 @@ DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes TYPE record (weapon)
 DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes TYPE array;
 DEFINE FIELD spaceShips.* ON TABLE alien_with_explicit_attributes TYPE record (space_ship);"
     );
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithGranularAttributes::define_table()
+        .to_raw()
+        .build());
+
+    insta::assert_snapshot!(StudentWithGranularAttributes::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
 
     Ok(())
 }

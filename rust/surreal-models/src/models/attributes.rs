@@ -144,8 +144,9 @@ fn get_age_by_group_default_value(group: AgeGroup) -> u8 {
 #[surreal_orm(
     table_name = "student_with_granular_attributes",
     drop,
+    // flexible,
     schemafull,
-    as = "select(All)",
+    as = "select(All).from(Student::table_name())",
     permissions = "student_permissions()",
     // define = "define_student()"
 )]
