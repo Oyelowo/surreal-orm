@@ -6,11 +6,15 @@
  */
 
 use pretty_assertions::assert_eq;
+use serde::{Deserialize, Serialize};
 use surreal_models::{
     Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
     StudentWithGranularAttributes,
 };
-use surreal_orm::*;
+use surreal_orm::{
+    statements::{for_, select, Permissions},
+    *,
+};
 use surrealdb::{engine::local::Mem, Surreal};
 
 #[tokio::test]
@@ -125,4 +129,25 @@ async fn test_node_attributes_with_define_fn_attribute() -> SurrealOrmResult<()>
         .join("\n"));
 
     Ok(())
+}
+
+// #[test]
+// fn test_stuff() {
+//     ui();
+// }
+//
+// /// more
+// /// ```rust, compile_fail
+// /// let mut x = 5;
+// /// ```
+// pub fn ui() {}
+
+/// more
+/// ```rust, compile_fail
+/// let mut x = 5;
+/// ```
+#[test]
+fn ui() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/*.rs");
 }

@@ -12,35 +12,35 @@ FOR create, delete
 DEFINE FIELD ageDefaultExternalFunctionInvokedExpr ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 18 ASSERT ($value IS NOT NONE) AND ($value >= 18)
 PERMISSIONS
 FOR create, delete
-	WHERE name IS 'Oyelowo'
+	WHERE firstName IS 'Oyelowo'
 FOR update
-	WHERE age <= 130;
+	WHERE ageInlineExpr <= 130;
 DEFINE FIELD ageTeenExternalFunctionInvokedExpr ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 18 ASSERT ($value IS NOT NONE) AND ($value >= 18)
 PERMISSIONS
 FOR create, delete
-	WHERE name IS 'Oyelowo'
+	WHERE firstName IS 'Oyelowo'
 FOR update
-	WHERE age <= 130;
+	WHERE ageInlineExpr <= 130;
 DEFINE FIELD ageSeniorExternalFunctionInvokedExpr ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 60 ASSERT ($value IS NOT NONE) AND ($value >= 18);
 DEFINE FIELD ageChildExternalFunctionInvokedExpr ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 10
 PERMISSIONS
 FOR create, delete
-	WHERE name IS 'Oyelowo'
+	WHERE firstName IS 'Oyelowo'
 FOR update
-	WHERE age <= 130;
+	WHERE ageInlineExpr <= 130;
 DEFINE FIELD ageAdultExternalFunctionInvokedExpr ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 30;
 DEFINE FIELD ageExternalFnAttrs ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 18 ASSERT ($value IS NOT NONE) AND ($value >= 18)
 PERMISSIONS
 FOR create, delete
-	WHERE name IS 'Oyelowo'
+	WHERE firstName IS 'Oyelowo'
 FOR update
-	WHERE age <= 130;
+	WHERE ageInlineExpr <= 130;
 DEFINE FIELD ageMixAndMatchExternalFnInlineAttrs ON TABLE student_with_granular_attributes TYPE int VALUE $value OR 18 ASSERT ($value IS NOT NONE) AND ($value >= 18)
 PERMISSIONS
 FOR create, delete
-	WHERE name IS 'Oyelowo'
+	WHERE firstName IS 'Oyelowo'
 FOR update
-	WHERE age <= 130;
+	WHERE ageInlineExpr <= 130;
 DEFINE FIELD timeToKelowna ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR { nanos: 0, secs: 604800 } ASSERT $value IS NOT NONE;
 DEFINE FIELD timeToKelownaInline ON TABLE student_with_granular_attributes TYPE duration VALUE $value OR { nanos: 0, secs: 604800 } ASSERT $value IS NOT NONE;
 DEFINE FIELD bestFriend ON TABLE student_with_granular_attributes TYPE record (student_with_granular_attributes);

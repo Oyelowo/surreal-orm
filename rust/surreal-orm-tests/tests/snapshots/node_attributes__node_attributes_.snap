@@ -6,6 +6,6 @@ DEFINE TABLE student_with_granular_attributes DROP SCHEMAFULL AS
 	SELECT * FROM student
 PERMISSIONS
 FOR select, update
-	WHERE name IS 'Oyedayo'
+	WHERE firstName IS 'Oyedayo'
 FOR create, delete
-	WHERE age <= 57;
+	WHERE ageInlineExpr <= 57;

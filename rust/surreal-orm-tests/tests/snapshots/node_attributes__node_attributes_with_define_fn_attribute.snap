@@ -1,0 +1,15 @@
+---
+source: surreal-orm-tests/tests/node_attributes.rs
+expression: "StudentWithDefineFnAttr::define_table().to_raw().build()"
+---
+DEFINE TABLE student_with_define_attr DROP SCHEMAFULL AS 
+	SELECT * FROM student WHERE firstName IS 'Rust' ORDER BY age NUMERIC DESC LIMIT 20 START AT 5
+PERMISSIONS
+FOR select
+	WHERE age >= 18
+FOR create, delete
+	WHERE lastName IS 'Oye'
+FOR create, delete
+	WHERE lastName IS 'Oyedayo'
+FOR update
+	WHERE age <= 130;

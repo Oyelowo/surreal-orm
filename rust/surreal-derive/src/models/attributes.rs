@@ -1223,7 +1223,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     assert,
     assert_fn,
     value,
@@ -1264,7 +1264,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     define,
     define_fn,
     assert,
@@ -1855,7 +1855,7 @@ impl TableDeriveAttributes {
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
-            panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+            panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             as,
                             as_fn,
