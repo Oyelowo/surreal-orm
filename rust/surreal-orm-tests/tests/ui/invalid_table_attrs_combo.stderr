@@ -1,7 +1,7 @@
 error: proc-macro derive panicked
-  --> tests/ui/invalid_table_attrs_combo.rs:27:10
+  --> tests/ui/invalid_table_attrs_combo.rs:28:10
    |
-27 | #[derive(Node, Serialize, Deserialize)]
+28 | #[derive(Node, Serialize, Deserialize)]
    |          ^^^^
    |
    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
@@ -12,6 +12,140 @@ error: proc-macro derive panicked
                                        permissions,
                                        permissions_fn
 
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:44:10
+   |
+44 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:66:10
+   |
+66 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:73:10
+   |
+73 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:80:10
+   |
+80 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+error: proc-macro derive panicked
+  --> tests/ui/invalid_table_attrs_combo.rs:92:10
+   |
+92 | #[derive(Node, Serialize, Deserialize)]
+   |          ^^^^
+   |
+   = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                       drop,
+                                       as,
+                                       as_fn,
+                                       schemafull,
+                                       permissions,
+                                       permissions_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_table_attrs_combo.rs:103:10
+    |
+103 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_table_attrs_combo.rs:115:10
+    |
+115 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                        drop,
+                                        as,
+                                        as_fn,
+                                        schemafull,
+                                        permissions,
+                                        permissions_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_table_attrs_combo.rs:122:10
+    |
+122 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                        drop,
+                                        as,
+                                        as_fn,
+                                        schemafull,
+                                        permissions,
+                                        permissions_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_table_attrs_combo.rs:133:10
+    |
+133 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                        drop,
+                                        as,
+                                        as_fn,
+                                        schemafull,
+                                        permissions,
+                                        permissions_fn
+
+error: proc-macro derive panicked
+   --> tests/ui/invalid_table_attrs_combo.rs:144:10
+    |
+144 | #[derive(Node, Serialize, Deserialize)]
+    |          ^^^^
+    |
+    = help: message: Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+                                        drop,
+                                        as,
+                                        as_fn,
+                                        schemafull,
+                                        permissions,
+                                        permissions_fn
+
 warning: unused import: `select`
  --> tests/ui/invalid_table_attrs_combo.rs:3:24
   |
@@ -20,11 +154,17 @@ warning: unused import: `select`
   |
   = note: `#[warn(unused_imports)]` on by default
 
-error[E0277]: the trait bound `StudentTest: surreal_orm::Model` is not satisfied
-  --> tests/ui/invalid_table_attrs_combo.rs:39:9
+error[E0601]: `main` function not found in crate `$CRATE`
+   --> tests/ui/invalid_table_attrs_combo.rs:153:2
+    |
+153 | }
+    |  ^ consider adding a `main` function to `$DIR/tests/ui/invalid_table_attrs_combo.rs`
+
+error[E0277]: the trait bound `StudentTest0: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:40:9
    |
-39 |     id: SurrealSimpleId<Self>,
-   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest`
+40 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest0`
    |
    = help: the following other types implement trait `surreal_orm::Model`:
              Student
@@ -34,3 +174,153 @@ note: required by a bound in `surreal_orm::SurrealSimpleId`
    |
    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest1: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:56:9
+   |
+56 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest1`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             Student
+             TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest2: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:70:9
+   |
+70 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest2`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             Student
+             TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest3: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:77:9
+   |
+77 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest3`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             Student
+             TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest4: surreal_orm::Model` is not satisfied
+  --> tests/ui/invalid_table_attrs_combo.rs:89:9
+   |
+89 |     id: SurrealSimpleId<Self>,
+   |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest4`
+   |
+   = help: the following other types implement trait `surreal_orm::Model`:
+             Student
+             TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+  --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+   |
+   | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+   |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest5: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:100:9
+    |
+100 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest5`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest6: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:111:9
+    |
+111 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest6`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest7: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:119:9
+    |
+119 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest7`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest8: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:130:9
+    |
+130 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest8`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest9: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:141:9
+    |
+141 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest9`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`
+
+error[E0277]: the trait bound `StudentTest10: surreal_orm::Model` is not satisfied
+   --> tests/ui/invalid_table_attrs_combo.rs:152:9
+    |
+152 |     id: SurrealSimpleId<Self>,
+    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest10`
+    |
+    = help: the following other types implement trait `surreal_orm::Model`:
+              Student
+              TestUser
+note: required by a bound in `surreal_orm::SurrealSimpleId`
+   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
+    |
+    | pub struct SurrealSimpleId<T: Model>(SurrealId<T, String>);
+    |                               ^^^^^ required by this bound in `SurrealSimpleId`

@@ -14,20 +14,21 @@ fn get_age_assertion() -> Filter {
 
 fn age_permissions() -> Permissions {
     for_([CrudType::Create, CrudType::Delete])
-        .where_(StudentTest::schema().firstName.is("Oyelowo"))
+        .where_(StudentTest2::schema().firstName.is("Oyelowo"))
         .into()
 }
 
 fn student_permissions() -> Permissions {
     for_([CrudType::Create, CrudType::Delete])
-        .where_(StudentTest::schema().firstName.is("Oyelowo"))
+        .where_(StudentTest2::schema().firstName.is("Oyelowo"))
         .into()
 }
 
+// when define is used, no other attributes should exist except table_name and relax_table_name
 #[derive(Node, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
-    table_name = "student_test",
+    table_name = "student_test_0",
     drop,
     // flexible,
     schemafull,
@@ -35,27 +36,24 @@ fn student_permissions() -> Permissions {
     permissions = "student_permissions()",
     define = "define_student()"
 )]
-pub struct StudentTest {
+pub struct StudentTest0 {
     id: SurrealSimpleId<Self>,
-    first_name: String,
-    last_name: String,
-    #[surreal_orm(
-        type = "int",
-        value = "18",
-        assert = "cond(value().is_not(NONE)).and(value().gte(18))",
-        permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest::schema().firstName.is(\"Oyelowo\"))",
-        // define = "define_age()"
-    )]
-    age_inline_expr: u8,
+}
 
-    #[surreal_orm(
-        type = "int",
-        value = "get_age_default_value()",
-        assert = "get_age_assertion()",
-        permissions = "age_permissions()",
-        // define = "define_age()"
-    )]
-    age_default_external_function_invoked_expr: u8,
+// when define is used, no other attributes should exist except table_name and relax_table_name
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_1",
+    drop,
+    // flexible,
+    schemafull,
+    as = "select(All).from(Student::table_name())",
+    permissions = "student_permissions()",
+    define_fn = "define_student"
+)]
+pub struct StudentTest1 {
+    id: SurrealSimpleId<Self>,
 }
 
 #[derive(Node, Serialize, Deserialize)]
@@ -65,4 +63,91 @@ pub struct Student {
     id: SurrealSimpleId<Self>,
 }
 
-fn main() {}
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "student_test_2", drop, define = "define_student()")]
+pub struct StudentTest2 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "student_test_3", schemafull, define = "define_student()")]
+pub struct StudentTest3 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_4",
+    as = "select(All).from(Student::table_name())",
+    // permissions = "student_permissions()",
+    define = "define_student()"
+)]
+pub struct StudentTest4 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_5",
+    permissions = "student_permissions()",
+    define = "define_student()"
+)]
+pub struct StudentTest5 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_6",
+    define_fn = "define_student",
+    define = "define_student()"
+)]
+pub struct StudentTest6 {
+    id: SurrealSimpleId<Self>,
+}
+
+// do same for define_fn. When define_fn exists, no other attributes should exist except table_name and relax_table_name.
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "student_test_7", drop, define_fn = "define_student")]
+pub struct StudentTest7 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_8",
+    schemafull,
+    define_fn = "define_student"
+)]
+pub struct StudentTest8 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_9",
+    as = "select(All).from(Student::table_name())",
+    define_fn = "define_student"
+)]
+pub struct StudentTest9 {
+    id: SurrealSimpleId<Self>,
+}
+
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_test_10",
+    permissions = "student_permissions()",
+    define_fn = "define_student"
+)]
+pub struct StudentTest10 {
+    id: SurrealSimpleId<Self>,
+}
