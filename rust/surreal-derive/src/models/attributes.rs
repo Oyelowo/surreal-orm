@@ -1156,7 +1156,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        _struct_name_ident: &Ident,
+        struct_name_ident: &Ident,
         field_name_normalized: &String,
         data_type: &DataType,
         table: &String,
@@ -1293,7 +1293,9 @@ impl ReferencedNodeMeta {
                     // if there are less than 3 characters.
                     panic!("define attribute is empty. Please provide a define_fn attribute.");
                 }
-                define_field = Some(quote!(#define.type_(#field_type_resolved).to_raw()));
+                define_field = Some(
+                    quote!(#define.on_table(#struct_name_ident::table_name()).type_(#field_type_resolved).to_raw()),
+                );
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
