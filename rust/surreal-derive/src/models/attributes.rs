@@ -1348,22 +1348,26 @@ impl ReferencedNodeMeta {
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
                 let field_type = FieldType::from_str(&type_.to_string()).unwrap();
-                let type_of = match field_type {
+                let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
                     FieldType::String => quote!(#crate_name::sql::String::from(#value)),
                     FieldType::Int => quote!(#crate_name::sql::Number::from(#value)),
                     FieldType::Float => quote!(#crate_name::sql::Number::from(#value)),
                     FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value)),
-                    FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Array => quote!(),
+                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
                     FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value)),
-                    FieldType::Decimal => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Number => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Object => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Record(_) => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::RecordAny => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Geometry(_) => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Object => quote!(),
+                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value)),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Thing::from(#value)),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value)),
                     FieldType::Any => quote!(#crate_name::sql::Value::from(#value)),
                 };
+
+                static_assertions.push(quote!(#static_assertion;));
 
                 define_field_methods
                     // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
@@ -1375,21 +1379,22 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let field_type = FieldType::from_str(&type_.to_string()).unwrap();
-                // FIXME: check this.
                 let type_of = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
                     FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
                     FieldType::Int => quote!(#crate_name::sql::Number::from(#value_fn())),
                     FieldType::Float => quote!(#crate_name::sql::Number::from(#value_fn())),
                     FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_fn())),
-                    FieldType::Array => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Array => quote!(),
+                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
                     FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value_fn())),
-                    FieldType::Decimal => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Number => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Object => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Record(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::RecordAny => quote!(#crate_name::sql::Value::from(#value_fn())),
-                    FieldType::Geometry(_) => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Object => quote!(),
+                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value_fn())),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Thing::from(#value_fn())),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_fn())),
                     FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
                 };
 
