@@ -10,10 +10,7 @@ use surreal_models::{
     Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
     StudentWithGranularAttributes,
 };
-use surreal_orm::{
-    statements::{for_, select},
-    *,
-};
+use surreal_orm::*;
 use surrealdb::{engine::local::Mem, Surreal};
 
 #[tokio::test]

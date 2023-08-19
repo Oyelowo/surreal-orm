@@ -4,17 +4,13 @@ use std::time::Duration;
 use surreal_orm::{
     statements::{
         define_field, define_table, for_, select, DefineFieldStatement, DefineTableStatement,
-        Permissions, SelectStatement,
+        Permissions,
     },
     *,
 };
 use surreal_orm::{Model, Node};
-use surrealdb::{
-    sql::{self, Id},
-    Surreal,
-};
+use surrealdb::sql;
 
-use test_case::test_case;
 use typed_builder::TypedBuilder;
 
 fn age_permissions() -> Permissions {
