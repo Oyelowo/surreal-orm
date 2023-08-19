@@ -6,7 +6,10 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{Alien, AlienWithExplicitAttributes, StudentWithGranularAttributes};
+use surreal_models::{
+    Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
+    StudentWithGranularAttributes,
+};
 use surreal_orm::*;
 use surrealdb::{engine::local::Mem, Surreal};
 
@@ -86,6 +89,36 @@ async fn test_node_attributes_() -> SurrealOrmResult<()> {
         .build());
 
     insta::assert_snapshot!(StudentWithGranularAttributes::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_with_define_attribute() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithDefineAttr::define_table().to_raw().build());
+
+    insta::assert_snapshot!(StudentWithDefineAttr::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_with_define_fn_attribute() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithDefineFnAttr::define_table().to_raw().build());
+
+    insta::assert_snapshot!(StudentWithDefineFnAttr::define_fields()
         .iter()
         .map(|x| x.to_raw().build())
         .collect::<Vec<_>>()

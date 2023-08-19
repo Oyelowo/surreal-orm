@@ -1,0 +1,49 @@
+---
+source: surreal-orm-tests/tests/node_attributes.rs
+expression: "StudentWithDefineAttr::define_fields().iter().map(|x|\n                x.to_raw().build()).collect::<Vec<_>>().join(\"\\n\")"
+---
+DEFINE FIELD id ON TABLE student_with_define_attr TYPE record (student_with_define_attr);
+DEFINE FIELD firstName ON TABLE student_with_define_attr TYPE string VALUE $value OR 'Oyelowo' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+FOR select
+	WHERE ageDefineInline >= 18
+FOR create, update
+	WHERE firstName IS 'Oyedayo';
+DEFINE FIELD lastName ON TABLE student_with_define_attr TYPE string VALUE $value OR 'Oyedayo' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+FOR select
+	WHERE ageDefineInline >= 18
+FOR create, update
+	WHERE lastName IS 'Oyedayo';
+DEFINE FIELD lastName ON TABLE student_with_define_attr TYPE string VALUE $value OR 'Oyedayo' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+FOR select
+	WHERE ageDefineInline >= 18
+FOR create, update
+	WHERE lastName IS 'Oyedayo';
+DEFINE FIELD ageDefineInline ON TABLE student_with_define_attr TYPE int VALUE $value OR 'oyelowo@codebreather.com';
+DEFINE FIELD ageDefineExternalInvoke ON TABLE student_with_define_attr TYPE int VALUE $value OR 'oyelowo@codebreather.com' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+FOR select
+	WHERE age >= 18
+FOR create, update
+	WHERE firstName IS 'Oyedayo'
+FOR create, delete
+	WHERE firstName IS 'Oyelowo'
+FOR update
+	WHERE age <= 130;
+DEFINE FIELD ageDefineInline ON TABLE student TYPE int VALUE $value OR 'oyelowo@codebreather.com' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
+PERMISSIONS
+FOR select
+	WHERE ageDefineInline >= 18
+FOR create, update
+	WHERE firstName IS 'Oyedayo'
+FOR create, delete
+	WHERE firstName IS 'Oyelowo'
+FOR update
+	WHERE ageDefineInline <= 130;
+DEFINE FIELD bestFriend ON TABLE student_with_define_attr TYPE record (student_with_define_attr);
+DEFINE FIELD unoBook ON TABLE student_with_define_attr TYPE record (book);
+DEFINE FIELD course ON TABLE student_with_define_attr TYPE record (book);
+DEFINE FIELD semesterCourses ON TABLE student_with_define_attr TYPE array;
+DEFINE FIELD semesterCourses.* ON TABLE student_with_define_attr TYPE record (book);

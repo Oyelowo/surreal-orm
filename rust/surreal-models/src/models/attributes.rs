@@ -25,41 +25,32 @@ use surreal_orm::{
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-fn gama() -> SelectStatement {
-    crypto::argon2::compare!("Rer", "Erer");
-    // All
-
-    select(All).from(Table::new("user"))
-}
-fn full() -> u32 {
-    54
-}
 fn age_permissions() -> Permissions {
     use CrudType::*;
-    let name = Field::new("name");
-    let age = Field::new("age");
-    // vec![
-    //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-    //     for_(Update).where_(age.less_than_or_equal(130)),
-    // ]
-    // .into_iter()
-    // .map(|e| e.to_raw())
-    // .collect::<Vec<_>>()
-    // .to_vec()
-    Permissions::from(vec![
-        for_([Create, Delete]).where_(name.is("Oyelowo")),
-        for_(Update).where_(age.less_than_or_equal(130)),
-    ])
+    let studentwithgranularattributes_schema::StudentWithGranularAttributes {
+        ageInlineExpr,
+        firstName,
+        ..
+    } = StudentWithGranularAttributes::schema();
+
+    [
+        for_([Create, Delete]).where_(firstName.is("Oyelowo")),
+        for_(Update).where_(ageInlineExpr.less_than_or_equal(130)),
+    ]
+    .into()
 }
 
 fn student_permissions() -> Permissions {
     use CrudType::*;
-    let name = Field::new("name");
-    let age = Field::new("age");
+    let studentwithgranularattributes_schema::StudentWithGranularAttributes {
+        ageInlineExpr,
+        firstName,
+        ..
+    } = StudentWithGranularAttributes::schema();
 
     Permissions::from(vec![
-        for_([Select, Update]).where_(name.is("Oyedayo")),
-        for_([Create, Delete]).where_(age.lte(57)),
+        for_([Select, Update]).where_(firstName.is("Oyedayo")),
+        for_([Create, Delete]).where_(ageInlineExpr.lte(57)),
     ])
 }
 
@@ -68,26 +59,51 @@ fn default_duration_value() -> Duration {
     Duration::from_secs(60 * 60 * 24 * 7)
 }
 
-fn erer() -> Filter {
-    cond(value().is_not(NONE)).and(value().like("email"))
-}
-fn define_age() -> DefineFieldStatement {
-    use surreal_orm::{Model, Node};
+fn age_define_external_fn_path() -> DefineFieldStatement {
     use CrudType::*;
-    let student_schema::Student { age, firstName, .. } = Student::schema();
+    let studentwithdefinefnattr_schema::StudentWithDefineFnAttr {
+        ref ageDefineInline,
+        ref firstName,
+        ..
+    } = StudentWithDefineFnAttr::schema();
 
     use FieldType::*;
 
-    let statement = define_field(Student::schema().age)
+    let statement = define_field(ageDefineInline)
         .on_table(Student::table_name())
         .type_(Int)
         .value("oyelowo@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_(Select).where_(ageDefineInline.greater_than_or_equal(18))) // Single works
         .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
         .permissions([
             for_([Create, Delete]).where_(firstName.is("Oyelowo")),
-            for_(Update).where_(age.less_than_or_equal(130)),
+            for_(Update).where_(ageDefineInline.less_than_or_equal(130)),
+        ]);
+    statement
+}
+
+fn define_age_define_external_fn_path() -> DefineFieldStatement {
+    use CrudType::*;
+    let studentwithdefineattr_schema::StudentWithDefineAttr {
+        ref ageDefineInline,
+        ref firstName,
+        ..
+    } = StudentWithDefineAttr::schema();
+
+    use FieldType::*;
+
+    // let statement = define_field(Student::schema().age)
+    let statement = define_field(ageDefineInline)
+        .on_table(Student::table_name())
+        .type_(Int)
+        .value("oyelowo@codebreather.com")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions(for_(Select).where_(ageDefineInline.greater_than_or_equal(18))) // Single works
+        .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions([
+            for_([Create, Delete]).where_(firstName.is("Oyelowo")),
+            for_(Update).where_(ageDefineInline.less_than_or_equal(130)),
         ]);
     statement
 }
@@ -251,14 +267,14 @@ pub struct StudentWithGranularAttributes {
 pub type StudentWithGranularAttributesWritesBook = Writes<StudentWithGranularAttributes, Book>;
 pub type StudentWithGranularAttributesWritesBlog = Writes<StudentWithGranularAttributes, Blog>;
 
-fn define_first_name(table: Table) -> DefineFieldStatement {
+fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatement {
     use surreal_orm::{Model, Node};
     use CrudType::*;
-    let student_schema::Student {
-        ref age,
+    let studentwithdefineattr_schema::StudentWithDefineAttr {
+        ref ageDefineInline,
         ref firstName,
         ..
-    } = Student::schema();
+    } = StudentWithDefineAttr::schema();
 
     use FieldType::*;
 
@@ -268,7 +284,7 @@ fn define_first_name(table: Table) -> DefineFieldStatement {
         .value("Oyelowo")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
         .permissions([
-            for_(Select).where_(age.gte(18)),
+            for_(Select).where_(ageDefineInline.gte(18)),
             for_([Create, Update]).where_(firstName.is("Oyedayo")),
         ]);
     statement
@@ -277,11 +293,11 @@ fn define_first_name(table: Table) -> DefineFieldStatement {
 fn define_last_name() -> DefineFieldStatement {
     use surreal_orm::{Model, Node};
     use CrudType::*;
-    let student_schema::Student {
-        ref age,
+    let studentwithdefineattr_schema::StudentWithDefineAttr {
+        ref ageDefineInline,
         ref lastName,
         ..
-    } = Student::schema();
+    } = StudentWithDefineAttr::schema();
 
     use FieldType::*;
 
@@ -291,12 +307,34 @@ fn define_last_name() -> DefineFieldStatement {
         .value("Oyedayo")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
         .permissions([
-            for_(Select).where_(age.gte(18)),
+            for_(Select).where_(ageDefineInline.gte(18)),
             for_([Create, Update]).where_(lastName.is("Oyedayo")),
         ]);
     statement
 }
 
+fn define_last_name_external_fn_attr() -> DefineFieldStatement {
+    use surreal_orm::{Model, Node};
+    use CrudType::*;
+    let studentwithdefineattr_schema::StudentWithDefineAttr {
+        ref ageDefineInline,
+        ref lastName,
+        ..
+    } = StudentWithDefineAttr::schema();
+
+    use FieldType::*;
+
+    let statement = define_field(lastName)
+        .on_table(StudentWithDefineAttr::table_name())
+        .type_(FieldType::String)
+        .value("Oyedayo")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions([
+            for_(Select).where_(ageDefineInline.gte(18)),
+            for_([Create, Update]).where_(lastName.is("Oyedayo")),
+        ]);
+    statement
+}
 fn define_student_with_define_attr() -> DefineTableStatement {
     let student_schema::Student {
         ref age,
@@ -325,6 +363,26 @@ fn define_student_with_define_attr() -> DefineTableStatement {
         ])
 }
 
+fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
+    use surreal_orm::{Model, Node};
+    use CrudType::*;
+    let student_schema::Student { age, firstName, .. } = Student::schema();
+
+    use FieldType::*;
+
+    let statement = define_field(field)
+        .on_table(Student::table_name())
+        .type_(Int)
+        .value("oyelowo@codebreather.com")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions([
+            for_([Create, Delete]).where_(firstName.is("Oyelowo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ]);
+    statement
+}
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
@@ -335,14 +393,14 @@ pub struct StudentWithDefineAttr {
     id: SurrealId<StudentWithDefineAttr, String>,
     #[surreal_orm(
         type = "string",
-        define = "define_first_name(StudentWithDefineAttr::table_name())"
+        define = "define_first_name(StudentWithDefineAttr::schema().firstName, StudentWithDefineAttr::table_name())"
     )]
     first_name: String,
 
     #[surreal_orm(type = "string", define = "define_last_name()")]
     last_name: String,
 
-    #[surreal_orm(type = "string", define_fn = "define_last_name")]
+    #[surreal_orm(type = "string", define_fn = "define_last_name_external_fn_attr")]
     last_name_external_fn_attr: String,
 
     #[surreal_orm(
@@ -351,10 +409,13 @@ pub struct StudentWithDefineAttr {
     )]
     age_define_inline: u8,
 
-    #[surreal_orm(type = "int", define = "define_age()")]
+    #[surreal_orm(
+        type = "int",
+        define = "define_age(StudentWithDefineAttr::schema().ageDefineExternalInvoke)"
+    )]
     age_define_external_invoke: u8,
 
-    #[surreal_orm(type = "int", define_fn = "define_age")]
+    #[surreal_orm(type = "int", define_fn = "define_age_define_external_fn_path")]
     age_define_external_fn_path: u8,
 
     // Even if ypu dont list the type for all links, the types are autogenerated at compile time
@@ -388,7 +449,7 @@ pub struct StudentWithDefineAttr {
         connection = "->writes->blog"
     ))]
     #[serde(skip_serializing)]
-    blogsssss: Relate<Blog>,
+    blogs: Relate<Blog>,
 }
 
 pub type StudentWithDefineAttrWritesBook = Writes<StudentWithDefineAttr, Book>;
@@ -402,17 +463,19 @@ pub type StudentWithDefineAttrWritesBlog = Writes<StudentWithDefineAttr, Blog>;
 )]
 pub struct StudentWithDefineFnAttr {
     id: SurrealId<StudentWithDefineFnAttr, String>,
-    #[surreal_orm(
-        type = "string",
-        define = "define_first_name(StudentWithDefineFnAttr::table_name())"
-    )]
-    first_name: String,
-
+    // can be as simple as this
     #[surreal_orm(type = "string", define = "define_last_name()")]
     last_name: String,
 
     #[surreal_orm(type = "string", define_fn = "define_last_name")]
     last_name_external_fn_attr: String,
+
+    // or go even crazier
+    #[surreal_orm(
+        type = "string",
+        define = "define_first_name(StudentWithDefineFnAttr::schema().firstName, StudentWithDefineFnAttr::table_name())"
+    )]
+    first_name: String,
 
     #[surreal_orm(
         type = "int",
@@ -420,10 +483,13 @@ pub struct StudentWithDefineFnAttr {
     )]
     age_define_inline: u8,
 
-    #[surreal_orm(type = "int", define = "define_age()")]
+    #[surreal_orm(
+        type = "int",
+        define = "define_age(StudentWithDefineFnAttr::schema().ageDefineExternalInvoke)"
+    )]
     age_define_external_invoke: u8,
 
-    #[surreal_orm(type = "int", define_fn = "define_age")]
+    #[surreal_orm(type = "int", define_fn = "age_define_external_fn_path")]
     age_define_external_fn_path: u8,
 
     // Even if ypu dont list the type for all links, the types are autogenerated at compile time
@@ -457,7 +523,7 @@ pub struct StudentWithDefineFnAttr {
         connection = "->writes->blog"
     ))]
     #[serde(skip_serializing)]
-    blogsssss: Relate<Blog>,
+    blogs: Relate<Blog>,
 }
 
 pub type StudentWithDefineFnAttrWritesBook = Writes<StudentWithDefineFnAttr, Book>;
