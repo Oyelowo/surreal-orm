@@ -1381,7 +1381,7 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let field_type = FieldType::from_str(&type_.to_string()).unwrap();
-                let type_of = match field_type {
+                let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
                     FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
                     FieldType::Int => quote!(#crate_name::sql::Number::from(#value_fn())),
@@ -1399,6 +1399,7 @@ impl ReferencedNodeMeta {
                     FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_fn())),
                     FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
                 };
+                static_assertions.push(quote!(#static_assertion;));
 
                 define_field_methods
                     // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
