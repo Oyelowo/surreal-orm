@@ -545,8 +545,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
     // the are now created, so the reference should be valid now.
     insert(space_ship1.clone()).return_one(db.clone()).await?;
     insert(space_ship2.clone()).return_one(db.clone()).await?;
-    let xx = insert(space_ship3.clone()).return_one(db.clone()).await?;
-    dbg!("loggggg", &xx);
+    insert(space_ship3.clone()).return_one(db.clone()).await?;
 
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
@@ -584,7 +583,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .fetch(Alien::schema().spaceShips(All).all())
         .return_first(db.clone())
         .await?;
-    dbg!(&selected_aliens);
+
     let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 3);
     assert_eq!(selected_aliens_spaceships.values().len(), 3);

@@ -979,7 +979,6 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
         get_vector_item_type(ty).map(|t| t.into_token_stream())
         // match ty {
         //     syn::Type::Array(array) => {
-        //         dbg!(&array.elem);
         //         Some(*array.elem.clone())
         //     }
         //     _ => None,

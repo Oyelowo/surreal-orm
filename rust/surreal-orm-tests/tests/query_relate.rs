@@ -356,7 +356,7 @@ fn test_any_edge_filter() {
     );
 
     assert_eq!(
-        dbg!(aliased_connection.clone()).to_raw().build(),
+        aliased_connection.clone().to_raw().build(),
         "student:oye->(writes, visits, likes  WHERE timeWritten <= 50)->book:mars AS writtenBooks"
     );
 
