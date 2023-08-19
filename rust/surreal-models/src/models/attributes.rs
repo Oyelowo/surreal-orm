@@ -71,49 +71,26 @@ fn default_duration_value() -> Duration {
 fn erer() -> Filter {
     cond(value().is_not(NONE)).and(value().like("email"))
 }
-// fn define_age() -> DefineFieldStatement {
-//     use surreal_orm::{Model, Node};
-//     use CrudType::*;
-//     let student_schema::Student { age, firstName, .. } = Student::schema();
-//
-//     use FieldType::*;
-//
-//     // let statement = define_field(Student::schema().age)
-//     //     .on_table(Student::table_name())
-//     //     .type_(String)
-//     //     .value("example@codebreather.com")
-//     //     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-//     //     // .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-//     //     .permissions(PermissionForables::from(
-//     //         for_(&[Create, Update])
-//     //             .where_(firstName.is("Oyedayo"))
-//     //             .to_raw(),
-//     //     )) //Multiple
-//     //     .permissions(
-//     //         PermissionForables::from(&[
-//     //             for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
-//     //             for_(Update).where_(age.less_than_or_equal(130)),
-//     //         ])
-//     //         .to_raw(),
-//     //     );
-//     let statement = define_field(Student::schema().age)
-//         .on_table(Student::table_name())
-//         .type_(String)
-//         .value("example@codebreather.com")
-//         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-//         .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-//         .permissions(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
-//         .permissions(
-//             &[
-//                 for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
-//                 for_(Update).where_(age.less_than_or_equal(130)),
-//             ], // .into_iter()
-//                // .map(|e| e.to_raw())
-//                // .collect::<Vec<_>>()
-//                // .to_vec(),
-//         );
-//     statement
-// }
+fn define_age() -> DefineFieldStatement {
+    use surreal_orm::{Model, Node};
+    use CrudType::*;
+    let student_schema::Student { age, firstName, .. } = Student::schema();
+
+    use FieldType::*;
+
+    let statement = define_field(Student::schema().age)
+        .on_table(Student::table_name())
+        .type_(Int)
+        .value("oyelowo@codebreather.com")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions([
+            for_([Create, Delete]).where_(firstName.is("Oyelowo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ]);
+    statement
+}
 
 fn get_age_default_value() -> u8 {
     18
@@ -274,6 +251,218 @@ pub struct StudentWithGranularAttributes {
 pub type StudentWithGranularAttributesWritesBook = Writes<StudentWithGranularAttributes, Book>;
 pub type StudentWithGranularAttributesWritesBlog = Writes<StudentWithGranularAttributes, Blog>;
 
+fn define_first_name(table: Table) -> DefineFieldStatement {
+    use surreal_orm::{Model, Node};
+    use CrudType::*;
+    let student_schema::Student {
+        ref age,
+        ref firstName,
+        ..
+    } = Student::schema();
+
+    use FieldType::*;
+
+    let statement = define_field(firstName)
+        .on_table(table)
+        .type_(FieldType::String)
+        .value("Oyelowo")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions([
+            for_(Select).where_(age.gte(18)),
+            for_([Create, Update]).where_(firstName.is("Oyedayo")),
+        ]);
+    statement
+}
+
+fn define_last_name() -> DefineFieldStatement {
+    use surreal_orm::{Model, Node};
+    use CrudType::*;
+    let student_schema::Student {
+        ref age,
+        ref lastName,
+        ..
+    } = Student::schema();
+
+    use FieldType::*;
+
+    let statement = define_field(lastName)
+        .on_table(StudentWithDefineAttr::table_name())
+        .type_(FieldType::String)
+        .value("Oyedayo")
+        .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
+        .permissions([
+            for_(Select).where_(age.gte(18)),
+            for_([Create, Update]).where_(lastName.is("Oyedayo")),
+        ]);
+    statement
+}
+
+fn define_student_with_define_attr() -> DefineTableStatement {
+    let student_schema::Student {
+        ref age,
+        ref firstName,
+        ref lastName,
+        ..
+    } = Student::schema();
+    use CrudType::*;
+
+    define_table(StudentWithDefineAttr::table_name())
+        .drop()
+        .as_(
+            select(All)
+                .from(Student::table_name())
+                .where_(firstName.is("Rust"))
+                .order_by(age.numeric().desc())
+                .limit(20)
+                .start(5),
+        )
+        .schemafull()
+        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_([Create, Delete]).where_(lastName.is("Oye"))) //Multiple
+        .permissions([
+            for_([Create, Delete]).where_(lastName.is("Oyedayo")),
+            for_(Update).where_(age.less_than_or_equal(130)),
+        ])
+}
+
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_with_define_attr",
+    define = "define_student_with_define_attr()"
+)]
+pub struct StudentWithDefineAttr {
+    id: SurrealId<StudentWithDefineAttr, String>,
+    #[surreal_orm(
+        type = "string",
+        define = "define_first_name(StudentWithDefineAttr::table_name())"
+    )]
+    first_name: String,
+
+    #[surreal_orm(type = "string", define = "define_last_name()")]
+    last_name: String,
+
+    #[surreal_orm(type = "string", define_fn = "define_last_name")]
+    last_name_external_fn_attr: String,
+
+    #[surreal_orm(
+        type = "int",
+        define = "define_field(StudentWithDefineAttr::schema().ageDefineInline).on_table(Student::table_name()).type_(FieldType::Int).value(\"oyelowo@codebreather.com\")"
+    )]
+    age_define_inline: u8,
+
+    #[surreal_orm(type = "int", define = "define_age()")]
+    age_define_external_invoke: u8,
+
+    #[surreal_orm(type = "int", define_fn = "define_age")]
+    age_define_external_fn_path: u8,
+
+    // Even if ypu dont list the type for all links, the types are autogenerated at compile time
+    // becuase I have enough info from the annotation to derive it
+    #[surreal_orm(
+        link_self = "StudentWithDefineAttr",
+        type = "record(student_with_define_attr)"
+    )]
+    best_friend: LinkSelf<StudentWithDefineAttr>,
+
+    #[surreal_orm(link_one = "Book")]
+    #[serde(rename = "unoBook")]
+    fav_book: LinkOne<Book>,
+
+    #[surreal_orm(link_one = "Book", skip_serializing)]
+    course: LinkOne<Book>,
+
+    #[surreal_orm(link_many = "Book", type = "array", item_type = "record(book)")]
+    #[serde(rename = "semesterCourses")]
+    all_semester_courses: LinkMany<Book>,
+
+    #[surreal_orm(relate(
+        model = "StudentWithDefineAttrWritesBook",
+        connection = "->writes->book"
+    ))]
+    #[serde(skip_serializing)]
+    written_books: Relate<Book>,
+
+    #[surreal_orm(relate(
+        model = "StudentWithDefineAttrWritesBlog",
+        connection = "->writes->blog"
+    ))]
+    #[serde(skip_serializing)]
+    blogsssss: Relate<Blog>,
+}
+
+pub type StudentWithDefineAttrWritesBook = Writes<StudentWithDefineAttr, Book>;
+pub type StudentWithDefineAttrWritesBlog = Writes<StudentWithDefineAttr, Blog>;
+
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_with_define_fn_attr",
+    define_fn = "define_student_with_define_attr"
+)]
+pub struct StudentWithDefineFnAttr {
+    id: SurrealId<StudentWithDefineFnAttr, String>,
+    #[surreal_orm(
+        type = "string",
+        define = "define_first_name(StudentWithDefineFnAttr::table_name())"
+    )]
+    first_name: String,
+
+    #[surreal_orm(type = "string", define = "define_last_name()")]
+    last_name: String,
+
+    #[surreal_orm(type = "string", define_fn = "define_last_name")]
+    last_name_external_fn_attr: String,
+
+    #[surreal_orm(
+        type = "int",
+        define = "define_field(StudentWithDefineFnAttr::schema().ageDefineInline).on_table(Student::table_name()).type_(FieldType::Int).value(\"oyelowo@codebreather.com\")"
+    )]
+    age_define_inline: u8,
+
+    #[surreal_orm(type = "int", define = "define_age()")]
+    age_define_external_invoke: u8,
+
+    #[surreal_orm(type = "int", define_fn = "define_age")]
+    age_define_external_fn_path: u8,
+
+    // Even if ypu dont list the type for all links, the types are autogenerated at compile time
+    // becuase I have enough info from the annotation to derive it
+    #[surreal_orm(
+        link_self = "StudentWithDefineFnAttr",
+        type = "record(student_with_define_fn_attr)"
+    )]
+    best_friend: LinkSelf<StudentWithDefineFnAttr>,
+
+    #[surreal_orm(link_one = "Book")]
+    #[serde(rename = "unoBook")]
+    fav_book: LinkOne<Book>,
+
+    #[surreal_orm(link_one = "Book", skip_serializing)]
+    course: LinkOne<Book>,
+
+    #[surreal_orm(link_many = "Book", type = "array", item_type = "record(book)")]
+    #[serde(rename = "semesterCourses")]
+    all_semester_courses: LinkMany<Book>,
+
+    #[surreal_orm(relate(
+        model = "StudentWithDefineFnAttrWritesBook",
+        connection = "->writes->book"
+    ))]
+    #[serde(skip_serializing)]
+    written_books: Relate<Book>,
+
+    #[surreal_orm(relate(
+        model = "StudentWithDefineFnAttrWritesBlog",
+        connection = "->writes->blog"
+    ))]
+    #[serde(skip_serializing)]
+    blogsssss: Relate<Blog>,
+}
+
+pub type StudentWithDefineFnAttrWritesBook = Writes<StudentWithDefineFnAttr, Book>;
+pub type StudentWithDefineFnAttrWritesBlog = Writes<StudentWithDefineFnAttr, Blog>;
+
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
@@ -401,183 +590,3 @@ pub struct Blog {
     title: String,
     content: String,
 }
-//
-// #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-// #[serde(rename_all = "camelCase")]
-// #[surreal_orm(
-//     table_name = "student"
-//     drop,
-//     schemafull,
-//     as = "select(All)",
-//     permissions = "perm()",
-//     // permissions_fn = "perm",
-//     // define = "define_student()",
-//     // define_fn = "define_student"
-// )]
-// pub struct StudentWithFn {
-//     id: SurrealId<Student, String>,
-//
-//     first_name: String,
-//     last_name: String,
-//     #[surreal_orm(
-//         // type="array(int)",
-//         // type = "geometry(feature, point, collection, polygon)",
-//         // value = "we()",
-//         // value = "Duration::from_secs(54)",
-//         // assert_fn = "erer",
-//         // assert = "erer()",
-//         // assert_fn = "erer",
-//         // assert = "cond(value().is_not(NONE))",
-//         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
-//         // permissions = "perm()",
-//         // permissions_fn = "perm",
-//         // define = "define_age()",
-//         define_fn = "define_age"
-//     )]
-//     age: u8,
-//
-//     // Even if ypu dont list the type for all links, the types are autogenerated at compile time
-//     // becuase I have enough info from the annotation to derive it
-//     #[surreal_orm(link_self = "Student", type = "record(student)")]
-//     best_friend: LinkSelf<Student>,
-//
-//     #[surreal_orm(link_one = "Book")]
-//     #[serde(rename = "unoBook")]
-//     fav_book: LinkOne<Book>,
-//
-//     #[surreal_orm(link_one = "Book", skip_serializing)]
-//     course: LinkOne<Book>,
-//
-//     #[surreal_orm(
-//         link_many = "Book",
-//         type = "array",
-//         item_type = "record(book)",
-//         item_assert_fn = "erer"
-//     )]
-//     #[serde(rename = "semesterCourses")]
-//     all_semester_courses: LinkMany<Book>,
-//
-//     #[surreal_orm(relate(model = "StudentWritesBook", connection = "->writes->book"))]
-//     #[serde(skip_serializing)]
-//     written_books: Relate<Book>,
-//
-//     // #[surreal_orm(relate(model = "StudentWritesBook", connection = "->writes->book"))]
-//     // #[serde(skip_serializing)]
-//     // prof_book: Relate<Book>,
-//     #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
-//     #[serde(skip_serializing)]
-//     blogsssss: Relate<Blog>,
-// }
-//
-// fn define_student() -> DefineTableStatement {
-//     use CrudType::*;
-//     let name = Field::new("name");
-//     let _user_table = Table::from("user");
-//     let age = Field::new("age");
-//     let country = Field::new("country");
-//     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
-//
-//     let statement = define_table(Student::table_name())
-//         .drop()
-//         .as_(
-//             select(All)
-//                 .from(fake_id2)
-//                 .where_(country.is("INDONESIA"))
-//                 .order_by(order(&age).numeric().desc())
-//                 .limit(20)
-//                 .start(5),
-//         )
-//         .schemafull()
-//         .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-//         .permissions(for_([Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
-//         .permissions([
-//             for_([Create, Delete]).where_(name.is("Oyedayo")),
-//             for_(Update).where_(age.less_than_or_equal(130)),
-//         ]);
-//
-//     statement
-// }
-//
-// fn define_score() -> DefineFieldStatement {
-//     use surreal_orm::{Model, Node};
-//     use CrudType::*;
-//     let student_schema::Student { age, firstName, .. } = Student::schema();
-//
-//     use FieldType::*;
-//
-//     let statement = define_field(Student::schema().age)
-//         .on_table(Student::table_name())
-//         .type_(FieldType::String)
-//         .value(18)
-//         .permissions(for_(FieldType::Select).where_(age.gte(50))) // Single works
-//         .permissions(
-//             for_([Create, Update])
-//                 .where_(firstName.is("Oyedayo"))
-//                 .to_raw(),
-//         ) //Multiple
-//         .permissions(
-//             [
-//                 for_([Create, Delete]).where_(firstName.is("Oyelowo")),
-//                 for_(Update).where_(age.less_than_or_equal(130)),
-//             ]
-//             .to_raw(),
-//         );
-//     statement
-// }
-// #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
-// #[serde(rename_all = "camelCase")]
-// #[surreal_orm(table_name = "student_external_defs", define_fn = "define_student")]
-// pub struct StudentExternalDefs {
-//     id: SurrealId<StudentExternalDefs, String>,
-//     first_name: String,
-//     last_name: String,
-//     #[surreal_orm(
-//         // type="array(int)",
-//         // type = "geometry(feature, point, collection, polygon)",
-//         // value = "we()",
-//         // value = "Duration::from_secs(54)",
-//         // assert_fn = "erer",
-//         // assert = "erer()",
-//         // assert_fn = "erer",
-//         // assert = "cond(value().is_not(NONE))",
-//         // assert = "cond(value().is_not(NONE)).and(value().like("is_email"))",
-//         // permissions = "perm()",
-//         // permissions_fn = "perm",
-//         // define = "define_age()",
-//         define_fn = "define_age"
-//     )]
-//     age: u8,
-//
-//     #[surreal_orm(
-//         link_self = "StudentExternalDefs",
-//         type = "record(student_external_defs)"
-//     )]
-//     best_friend: LinkSelf<StudentExternalDefs>,
-//
-//     #[surreal_orm(link_one = "Book")]
-//     #[serde(rename = "unoBook")]
-//     fav_book: LinkOne<Book>,
-//
-//     #[surreal_orm(link_one = "Book", skip_serializing)]
-//     course: LinkOne<Book>,
-//
-//     #[surreal_orm(
-//         link_many = "Book",
-//         type = "array",
-//         item_type = "record(book)",
-//         item_assert_fn = "erer"
-//     )]
-//     #[serde(rename = "semesterCourses")]
-//     all_semester_courses: LinkMany<Book>,
-//
-//     #[surreal_orm(relate(model = "StudentWritesBook", connection = "->writes->book"))]
-//     #[serde(skip_serializing)]
-//     written_books: Relate<Book>,
-//
-//     // #[surreal_orm(relate(model = "StudentWritesBook", connection = "->writes->book"))]
-//     // #[serde(skip_serializing)]
-//     // prof_book: Relate<Book>,
-//     #[surreal_orm(relate(model = "StudentWritesBlog", connection = "->writes->blog"))]
-//     #[serde(skip_serializing)]
-//     blogsssss: Relate<Blog>,
-// }
