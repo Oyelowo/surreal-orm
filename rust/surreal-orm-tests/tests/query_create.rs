@@ -1065,21 +1065,12 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
 }
 
 #[tokio::test]
-async fn test_create_set_statement() -> SurrealOrmResult<()> {
+async fn test_create_set_object_and_array_statement() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     let spaceship_id_1 = SpaceShip::create_id("spaceship1".to_string());
     let spaceship_id_2 = SpaceShip::create_id("spaceship2".to_string());
 
-    // let space_ship1 = create::<SpaceShip>()
-    //     .set([
-    //         id.equal_to(spaceship_id_1),
-    //         name.equal_to("SpaceShip1".to_string()),
-    //         created.equal_to(Utc::now()),
-    //     ])
-    //     .get_one(db.clone())
-    //     .await?;
-    // SpaceShip::get_serializable_fields()
     let space_ship1 = create::<SpaceShip>()
         .set(object!(SpaceShip {
             id: spaceship_id_1,
