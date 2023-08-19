@@ -1369,7 +1369,7 @@ impl ReferencedNodeMeta {
                     FieldType::Any => quote!(#crate_name::sql::Value::from(#value)),
                 };
 
-                static_assertions.push(quote!(#static_assertion;));
+                static_assertions.push(quote!(let _ = #static_assertion;));
 
                 define_field_methods
                     // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
@@ -1399,7 +1399,7 @@ impl ReferencedNodeMeta {
                     FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_fn())),
                     FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
                 };
-                static_assertions.push(quote!(#static_assertion;));
+                static_assertions.push(quote!(let _ = #static_assertion;));
 
                 define_field_methods
                     // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));

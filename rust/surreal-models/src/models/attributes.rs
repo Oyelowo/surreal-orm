@@ -251,7 +251,7 @@ fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatem
         ..
     } = StudentWithDefineAttr::schema();
 
-    let statement = define_field(firstName)
+    let statement = define_field(field)
         .on_table(table)
         .type_(FieldType::String)
         .value("Oyelowo")
