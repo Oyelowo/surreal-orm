@@ -241,7 +241,6 @@ where
             (key.to_string(), binding)
         })
         .unzip();
-    dbg!(&bindings);
 
     NodeBindings {
         field_names,

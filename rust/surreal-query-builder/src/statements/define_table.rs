@@ -12,7 +12,7 @@ use crate::{
     types::Table,
 };
 
-use super::{for_::PermissionType, select::SelectStatement};
+use super::{for_::Permissions, select::SelectStatement};
 
 // DEFINE TABLE statement
 // The DEFINE TABLE statement allows you to declare your table by name, enabling you to apply strict controls to a table's schema by making it SCHEMAFULL, create a foreign table view, and set permissions specifying what operations can be performed on the field.
@@ -197,9 +197,9 @@ impl DefineTableStatement {
     /// ]);
     ///
     /// ```
-    pub fn permissions(mut self, fors: impl Into<PermissionType>) -> Self {
-        use PermissionType::*;
-        let fors: PermissionType = fors.into();
+    pub fn permissions(mut self, fors: impl Into<Permissions>) -> Self {
+        use Permissions::*;
+        let fors: Permissions = fors.into();
         match fors {
             For(one) => {
                 self.permissions_for.push(one.to_string());

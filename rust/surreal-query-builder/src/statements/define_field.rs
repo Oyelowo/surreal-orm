@@ -12,7 +12,7 @@ use crate::{
     Queryable, Table, Valuex,
 };
 
-use super::for_::PermissionType;
+use super::for_::Permissions;
 
 // DEFINE FIELD statement
 // The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
@@ -189,9 +189,9 @@ impl DefineFieldStatement {
     /// ]);
     ///
     /// ```
-    pub fn permissions(mut self, fors: impl Into<PermissionType>) -> Self {
-        use PermissionType::*;
-        let fors: PermissionType = fors.into();
+    pub fn permissions(mut self, fors: impl Into<Permissions>) -> Self {
+        use Permissions::*;
+        let fors: Permissions = fors.into();
         match fors {
             For(one) => {
                 self.permissions_for.push(one.build());

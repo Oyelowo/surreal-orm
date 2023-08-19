@@ -114,7 +114,6 @@ async fn test_subquery_in_select_statement_with_order_functions() -> SurrealOrmR
     );
     let statement = statement.return_many::<SpaceShip>(db.clone()).await?;
 
-    dbg!(&statement[0]);
     assert_eq!(&statement[0].name, "Weapon 4");
     assert_eq!(&statement[1].name, "Weapon 3");
     assert_eq!(&statement[2].name, "Weapon 2");

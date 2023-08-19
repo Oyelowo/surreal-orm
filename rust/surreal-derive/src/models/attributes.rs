@@ -979,7 +979,6 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
         get_vector_item_type(ty).map(|t| t.into_token_stream())
         // match ty {
         //     syn::Type::Array(array) => {
-        //         dbg!(&array.elem);
         //         Some(*array.elem.clone())
         //     }
         //     _ => None,
@@ -987,14 +986,9 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
     }
 
     pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
-        let field_type = FieldType::from_str(
-            &self
-                .item_type
-                .clone()
-                .unwrap_or("any".into())
-                .to_string(),
-        )
-        .unwrap();
+        let field_type =
+            FieldType::from_str(&self.item_type.clone().unwrap_or("any".into()).to_string())
+                .unwrap();
         let crate_name = get_crate_name(false);
         match field_type {
             FieldType::Any => {
@@ -1105,7 +1099,7 @@ impl Permissions {
             }
             Self::FnName(permissions) => {
                 let permissions = parse_lit_to_tokenstream(permissions).unwrap();
-                quote!(.permissions_for(#permissions.to_raw()))
+                quote!(.permissions(#permissions.to_raw()))
             }
         }
     }
@@ -1161,7 +1155,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        _struct_name_ident: &Ident,
+        struct_name_ident: &Ident,
         field_name_normalized: &String,
         data_type: &DataType,
         table: &String,
@@ -1228,7 +1222,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     assert,
     assert_fn,
     value,
@@ -1269,7 +1263,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     define,
     define_fn,
     assert,
@@ -1298,7 +1292,9 @@ impl ReferencedNodeMeta {
                     // if there are less than 3 characters.
                     panic!("define attribute is empty. Please provide a define_fn attribute.");
                 }
-                define_field = Some(quote!(#define.type_(#field_type_resolved).to_raw()));
+                define_field = Some(
+                    quote!(#define.on_table(#struct_name_ident::table_name()).type_(#field_type_resolved).to_raw()),
+                );
             }
             MyFieldReceiver {
                 define_fn: Some(define_fn),
@@ -1347,16 +1343,67 @@ impl ReferencedNodeMeta {
                 panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
-                value: Some(value), ..
+                value: Some(value),
+                type_: Some(type_),
+                ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value))));
+                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                let static_assertion = match field_type {
+                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
+                    FieldType::String => quote!(#crate_name::sql::String::from(#value)),
+                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value)),
+                    FieldType::Array => quote!(),
+                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value)),
+                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value)),
+                    FieldType::Object => quote!(),
+                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value)),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Thing::from(#value)),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value)),
+                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value)),
+                };
+
+                static_assertions.push(quote!(let _ = #static_assertion;));
+
+                define_field_methods
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
+                    .push(quote!(.value(#crate_name::sql::to_value(&#value).unwrap())));
             }
             MyFieldReceiver {
                 value_fn: Some(value_fn),
+                type_: Some(type_),
                 ..
             } => {
-                define_field_methods.push(quote!(.value(#crate_name::Value::from(#value_fn()))));
+                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                let static_assertion = match field_type {
+                    FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
+                    FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
+                    FieldType::Int => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Float => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Bool => quote!(#crate_name::sql::Bool::from(#value_fn())),
+                    FieldType::Array => quote!(),
+                    // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
+                    FieldType::DateTime => quote!(#crate_name::sql::DateTime::from(#value_fn())),
+                    FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Number => quote!(#crate_name::sql::Number::from(#value_fn())),
+                    FieldType::Object => quote!(),
+                    // FieldType::Object => quote!(#crate_name::sql::Value::from(#value_fn())),
+                    FieldType::Record(_) => quote!(#crate_name::sql::Thing::from(#value_fn())),
+                    FieldType::RecordAny => quote!(#crate_name::sql::Thing::from(#value_fn())),
+                    FieldType::Geometry(_) => quote!(#crate_name::sql::Geometry::from(#value_fn())),
+                    FieldType::Any => quote!(#crate_name::sql::Value::from(#value_fn())),
+                };
+                static_assertions.push(quote!(let _ = #static_assertion;));
+
+                define_field_methods
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#value_fn()))));
+                    // .push(quote!(.value(#crate_name::sql::Value::from(#type_of))));
+                    .push(quote!(.value(#crate_name::sql::to_value(&#value_fn()).unwrap())));
             }
             _ => {}
         };
@@ -1717,7 +1764,7 @@ impl PermissionsFn {
                 quote!(.permissions_none())
             }
             Self::FnPath(permissions_fn) => {
-                quote!(.permissions_for(#permissions_fn().to_raw()))
+                quote!(.permissions(#permissions_fn().to_raw()))
             }
         }
     }
@@ -1808,7 +1855,7 @@ impl TableDeriveAttributes {
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
-            panic!("Invalid combinationation. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+            panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             as,
                             as_fn,

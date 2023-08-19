@@ -6,12 +6,15 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{Alien, AlienWithExplicitAttributes};
+use surreal_models::{
+    Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
+    StudentWithGranularAttributes,
+};
 use surreal_orm::*;
 use surrealdb::{engine::local::Mem, Surreal};
 
 #[tokio::test]
-async fn test_node_atttributes_auto_inferred() -> SurrealOrmResult<()> {
+async fn test_node_type_atttribute_auto_inferred() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
 
     db.use_ns("test").use_db("test").await.unwrap();
@@ -45,7 +48,7 @@ DEFINE FIELD spaceShips.* ON TABLE alien TYPE record (space_ship);"
 }
 
 #[tokio::test]
-async fn test_node_atttributes_explicit() -> SurrealOrmResult<()> {
+async fn test_node_type_atttribute_explicit() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
     assert_eq!(
@@ -75,4 +78,57 @@ DEFINE FIELD spaceShips.* ON TABLE alien_with_explicit_attributes TYPE record (s
     );
 
     Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithGranularAttributes::define_table()
+        .to_raw()
+        .build());
+
+    insta::assert_snapshot!(StudentWithGranularAttributes::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_with_define_attribute() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithDefineAttr::define_table().to_raw().build());
+
+    insta::assert_snapshot!(StudentWithDefineAttr::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_node_attributes_with_define_fn_attribute() -> SurrealOrmResult<()> {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+    insta::assert_snapshot!(StudentWithDefineFnAttr::define_table().to_raw().build());
+
+    insta::assert_snapshot!(StudentWithDefineFnAttr::define_fields()
+        .iter()
+        .map(|x| x.to_raw().build())
+        .collect::<Vec<_>>()
+        .join("\n"));
+
+    Ok(())
+}
+
+#[test]
+fn ui() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/*.rs");
 }
