@@ -444,30 +444,43 @@ macro_rules! cond {
 
 
     ($left:tt AND $right:tt) => {
-        cond(cond!($left)).and(cond!($right))
+        $crate::cond(cond!($left)).and(cond!($right))
     };
     ($left:tt OR $right:tt) => {
-        cond(cond!($left)).or(cond!($right))
+        $crate::cond(cond!($left)).or(cond!($right))
     };
 
 
     // Handling recursive connectors
     ($left:tt AND $middle:tt AND $($tail:tt)*) => {
-        cond!($left AND $middle).and(cond!($($tail)*))
+        $crate::cond!($left AND $middle).and($crate::cond!($($tail)*))
     };
     ($left:tt OR $middle:tt OR $($tail:tt)*) => {
-        cond!($left OR $middle).or(cond!($($tail)*))
+        $crate::cond!($left OR $middle).or($crate::cond!($($tail)*))
     };
     ($left:tt AND $middle:tt OR $($tail:tt)*) => {
-        cond!($left AND $middle).or(cond!($($tail)*))
+        $crate::cond!($left AND $middle).or($crate::cond!($($tail)*))
     };
     ($left:tt OR $middle:tt AND $($tail:tt)*) => {
-        cond!($left OR $middle).and(cond!($($tail)*))
+        $crate::cond!($left OR $middle).and($crate::cond!($($tail)*))
+    };
+
+    ($left:tt and $middle:tt and $($tail:tt)*) => {
+        $crate::cond!($left AND $middle).and($crate::cond!($($tail)*))
+    };
+    ($left:tt or $middle:tt or $($tail:tt)*) => {
+        $crate::cond!($left OR $middle).or($crate::cond!($($tail)*))
+    };
+    ($left:tt and $middle:tt or $($tail:tt)*) => {
+        $crate::cond!($left AND $middle).or($crate::cond!($($tail)*))
+    };
+    ($left:tt or $middle:tt and $($tail:tt)*) => {
+        $crate::cond!($left OR $middle).and($crate::cond!($($tail)*))
     };
 
     // Nested conditions
     (($inner:tt)) => {
-        cond!($inner)
+        $crate::cond!($inner)
     };
 
 
@@ -750,6 +763,10 @@ mod tests {
         let filter = cond!((age > 18) OR (title = "Professor") AND (age < 100));
 
         let bracketed_filter = filter.bracketed();
+        assert_eq!(
+            bracketed_filter.fine_tune_params(),
+            "((age > $_param_00000001) OR (title = $_param_00000002) AND (age < $_param_00000003))"
+        );
         assert_eq!(
             bracketed_filter.to_raw().build(),
             "((age > 18) OR (title = 'Professor') AND (age < 100))"
