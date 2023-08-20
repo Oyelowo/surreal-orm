@@ -94,9 +94,6 @@ macro_rules! cond {
     ($field:ident > $value:expr) => {
         $field.greater_than($value)
     };
-    ($field:ident > $value:expr) => {
-        $field.greater_than($value)
-    };
     ($field:ident >= $value:expr) => {
         $field.greater_than_or_equal($value)
     };
@@ -478,12 +475,6 @@ macro_rules! cond {
     ($left:tt or $middle:tt and $($tail:tt)*) => {
         $crate::cond!($left OR $middle).and($crate::cond!($($tail)*))
     };
-
-    // Nested conditions
-    (($inner:tt)) => {
-        $crate::cond!($inner)
-    };
-
 
     // Base condition (a catch-all at the end)
     ($base:tt) => {
