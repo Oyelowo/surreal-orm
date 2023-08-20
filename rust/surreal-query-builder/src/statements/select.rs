@@ -835,7 +835,25 @@ impl Parametric for SelectStatement {
 ///     .limit(153)
 ///     .start(10)
 ///     .parallel();
+///  
+///  // Using cond! macro
+///  select(All)
+///     .from(fake_id)
+///     .where_(
+///         cond!((city IS "Prince Edward Island") AND (city IS "NewFoundland") OR (city ~ "Toronto"))
+///     )
+///     .order_by(order(&age).numeric())
+///     .limit(153)
+///     .start(10)
+///     .parallel();
 ///
+///  // You can even mix using cond! macro with the builder operation
+///  select(All)
+///     .from(fake_id)
+///     .where_(
+///         cond!((city.is("Prince Edward Island")) AND (city IS "NewFoundland") OR (city ~ "Toronto"))
+///     );
+///     
 ///  select(All)
 ///     .from(fake_id2)
 ///     .where_(country.is("INDONESIA"))
