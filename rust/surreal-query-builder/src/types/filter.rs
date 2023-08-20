@@ -602,7 +602,6 @@ mod tests {
     #[test]
     fn test_filter_simple() {
         let age = Field::new("age");
-        let title = Field::new("title");
 
         let filter = age.greater_than(18);
 
@@ -612,8 +611,6 @@ mod tests {
     #[test]
     fn test_filter_simple_with_cond_macro() {
         let age = Field::new("age");
-        let title = Field::new("title");
-
         let filter = cond!(age > 18);
 
         assert_eq!(filter.to_raw().build(), "age > 18");
@@ -639,7 +636,7 @@ mod tests {
         let age = Field::new("age");
         let title = Field::new("title");
 
-        let filter = cond!((age > 18) OR (title == "Professor") AND (age < 100));
+        let filter = cond!((age > 18) OR (title = "Professor") AND (age < 100));
 
         assert_eq!(
             filter.to_raw().build(),
@@ -668,7 +665,7 @@ mod tests {
         let age = Field::new("age");
         let title = Field::new("title");
 
-        let filter = cond!((age > 18) OR (title == "Professor") AND (age < 100));
+        let filter = cond!((age > 18) OR (title = "Professor") AND (age < 100));
 
         let bracketed_filter = filter.bracketed();
         assert_eq!(
