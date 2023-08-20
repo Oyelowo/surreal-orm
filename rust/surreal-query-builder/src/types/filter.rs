@@ -53,6 +53,7 @@ pub fn cond(filterable: impl Conditional) -> Filter {
 ///
 /// let filter = cond!((age > 18) AND (name ~ "%Oyelowo%") OR (title == "Professor"));
 /// let filter_simple = cond!(age > 18);
+/// let filter_mixed = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
 /// ```
 #[macro_export]
 macro_rules! cond {
@@ -783,6 +784,25 @@ mod tests {
         assert_eq!(
             bracketed_filter.to_raw().build(),
             "((age OR age >= 18) OR (title = 'Professor') AND (age < 100))"
+        );
+    }
+
+    #[test]
+    fn test_filter_bracketed_with_cond_macro_mixed() {
+        let age = Field::new("age");
+        let title = Field::new("title");
+
+        let filter = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
+
+        let bracketed_filter = filter.bracketed();
+        assert_eq!(
+            bracketed_filter.fine_tune_params(),
+            "((age OR $_param_00000001 OR $_param_00000002 OR $_param_00000003) OR (title = $_param_00000004) AND (age < $_param_00000005))"
+        );
+
+        assert_eq!(
+            bracketed_filter.to_raw().build(),
+            "((age OR 4 OR 545 OR 232) OR (title = 'Professor') AND (age < 100))"
         );
     }
 }
