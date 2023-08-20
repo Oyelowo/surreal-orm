@@ -442,10 +442,6 @@ macro_rules! cond {
         $field.intersects($value)
     };
 
-       // Nested conditions
-    (($inner:tt)) => {
-        cond!($inner)
-    };
 
     ($left:tt AND $right:tt) => {
         cond(cond!($left)).and(cond!($right))
@@ -467,6 +463,11 @@ macro_rules! cond {
     };
     ($left:tt OR $middle:tt AND $($tail:tt)*) => {
         cond!($left OR $middle).and(cond!($($tail)*))
+    };
+
+    // Nested conditions
+    (($inner:tt)) => {
+        cond!($inner)
     };
 
 
@@ -752,6 +753,19 @@ mod tests {
         assert_eq!(
             bracketed_filter.to_raw().build(),
             "((age > 18) OR (title = 'Professor') AND (age < 100))"
+        );
+    }
+    #[test]
+    fn test_filter_bracketed_with_cond_macro_nested() {
+        let age = Field::new("age");
+        let title = Field::new("title");
+
+        let filter = cond!((age OR cond!(age >= 18)) OR (title = "Professor") AND (age < 100));
+
+        let bracketed_filter = filter.bracketed();
+        assert_eq!(
+            bracketed_filter.to_raw().build(),
+            "((age OR age >= 18) OR (title = 'Professor') AND (age < 100))"
         );
     }
 }
