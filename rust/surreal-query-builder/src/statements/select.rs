@@ -822,7 +822,7 @@ impl Parametric for SelectStatement {
 /// # let age = Field::new("age");
 /// # let country = Field::new("country");
 /// # let city = Field::new("city");
-/// # let fake_id = TestUser::create_id("oyelowo");
+/// # let ref fake_id = TestUser::create_id("oyelowo");
 /// # let fake_id2 = TestUser::create_id("oyedayo");
 ///
 ///  select(All)
