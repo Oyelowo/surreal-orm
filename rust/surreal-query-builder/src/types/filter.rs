@@ -315,49 +315,130 @@ macro_rules! cond {
     (($field:ident AND $value:expr)) => {
         $field.and($value)
     };
+    (($field:ident and $value:expr)) => {
+        $field.and($value)
+    };
     (($field:ident OR $value:expr)) => {
+        $field.or($value)
+    };
+    (($field:ident or $value:expr)) => {
         $field.or($value)
     };
     (($field:ident IS NOT $value:expr)) => {
         $field.is_not($value)
     };
+
+    (($field:ident is not $value:expr)) => {
+        $field.is_not($value)
+    };
+
     (($field:ident CONTAINS $value:expr)) => {
         $field.contains($value)
     };
+
+    (($field:ident contains $value:expr)) => {
+        $field.contains($value)
+    };
+
     (($field:ident CONTAINSNOT $value:expr)) => {
         $field.contains_not($value)
     };
+
+    (($field:ident containsnot $value:expr)) => {
+        $field.contains_not($value)
+    };
+
     (($field:ident CONTAINSALL $value:expr)) => {
         $field.contains_all($value)
     };
+
+    (($field:ident containsall $value:expr)) => {
+        $field.contains_all($value)
+    };
+
     (($field:ident CONTAINSANY $value:expr)) => {
         $field.contains_any($value)
     };
+
+    (($field:ident containsany $value:expr)) => {
+        $field.contains_any($value)
+    };
+
     (($field:ident CONTAINSNONE $value:expr)) => {
         $field.contains_none($value)
     };
+
+
+    (($field:ident containsnone $value:expr)) => {
+        $field.contains_none($value)
+    };
+
+
     (($field:ident INSIDE $value:expr)) => {
         $field.inside($value)
     };
+
+
+    (($field:ident inside $value:expr)) => {
+        $field.inside($value)
+    };
+
+
     (($field:ident IN $value:expr)) => {
         $field.in_($value)
     };
+
+    (($field:ident in $value:expr)) => {
+        $field.in_($value)
+    };
+
+
     (($field:ident NOTINSIDE $value:expr)) => {
         $field.not_inside($value)
     };
+
+    (($field:ident notinside $value:expr)) => {
+        $field.not_inside($value)
+    };
+
+
     (($field:ident ALLINSIDE $value:expr)) => {
         $field.all_inside($value)
     };
+
+    (($field:ident allinside $value:expr)) => {
+        $field.all_inside($value)
+    };
+
     (($field:ident ANYINSIDE $value:expr)) => {
         $field.any_inside($value)
     };
+
+    (($field:ident anyinside $value:expr)) => {
+        $field.any_inside($value)
+    };
+
     (($field:ident NONEINSIDE $value:expr)) => {
         $field.none_inside($value)
     };
+
+    (($field:ident noneinside $value:expr)) => {
+        $field.none_inside($value)
+    };
+
     (($field:ident OUTSIDE $value:expr)) => {
         $field.outside($value)
     };
+
+    (($field:ident outside $value:expr)) => {
+        $field.outside($value)
+    };
+
     (($field:ident INTERSECTS $value:expr)) => {
+        $field.intersects($value)
+    };
+
+    (($field:ident intersects $value:expr)) => {
         $field.intersects($value)
     };
 
