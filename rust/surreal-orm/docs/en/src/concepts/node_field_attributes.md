@@ -54,15 +54,15 @@ Here:
 ## 3. Granular Attributes <a name="granular-attributes"></a>
 
 For a more detailed configuration of a field, you can use granular attributes.
-The `StudentWithGranularAttributes` struct provides various usages:
+The `Student` struct provides various usages:
 
 ```rust
 #[surreal_orm(
-    table_name = "student_with_granular_attributes",
+    table_name = "student",
     permissions = "student_permissions()",
 )]
-pub struct StudentWithGranularAttributes {
-    id: SurrealId<StudentWithGranularAttributes, String>,
+pub struct Student {
+    id: SurrealId<Student, String>,
     first_name: String,
     last_name: String,
     #[surreal_orm(
