@@ -1,10 +1,14 @@
 # Define Event Statement
 
-The `define_event` statement is used to define an event in SurrealDB. It allows you to specify the conditions and actions associated with the event. This documentation provides an overview of the syntax and usage of the `define_event` statement.
+The `define_event` statement is used to define an event in SurrealDB. It allows
+you to specify the conditions and actions associated with the event. This
+documentation provides an overview of the syntax and usage of the `define_event`
+statement.
 
 ## Table of Contents
 
 - [Syntax](#syntax)
+- [Using the `cond!` Macro](#using-the-cond!-macro)
 - [Examples](#examples)
   - [Define Event with State Machine](#define-event-with-state-machine)
 
@@ -30,11 +34,30 @@ The `define_event` statement supports the following methods:
 - `.when(condition)`: Specifies the condition that triggers the event.
 - `.then(action)`: Specifies the action to perform when the event is triggered.
 
+## Using the `cond!` Macro
+
+The `cond!` macro is a handy tool when defining conditions for the `WHEN` clause
+in the `DEFINE EVENT` statement. It provides a concise way to define conditions,
+enhancing readability while ensuring type safety.
+
+Example:
+
+```rust
+let filter = cond!((strength > 5) && (strength < 15));
+```
+
+By using the `cond!` macro, you can effectively and expressively define
+conditions for the `DEFINE EVENT` statement.
+
+For a more in-depth explanation and advanced usage of the `cond!` macro,
+[refer to the dedicated chapter on helper macros](#helper-macros).
+
 ## Examples
 
 ### Define Event with State Machine
 
-To define an event with a state machine-like behavior, you can use the following code:
+To define an event with a state machine-like behavior, you can use the following
+code:
 
 ```rust
 let age = Field::new("age");
@@ -66,6 +89,12 @@ This will generate the following SQL statement:
 DEFINE EVENT email ON TABLE user WHEN age >= 18 THEN SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') LIMIT 153 START AT 10 PARALLEL;
 ```
 
-In the example above, the `define_event` statement defines an event named "email" on the "user" table. It specifies that the event is triggered when the age is greater than or equal to 18. The action associated with the event is to perform a `SELECT` query on the "user:oyelowo" table with certain conditions and settings.
+In the example above, the `define_event` statement defines an event named
+"email" on the "user" table. It specifies that the event is triggered when the
+age is greater than or equal to 18. The action associated with the event is to
+perform a `SELECT` query on the "user:oyelowo" table with certain conditions and
+settings.
 
-This concludes the documentation for the `define_event` statement. Use this statement to define events in SurrealDB and specify their conditions and actions.
+This concludes the documentation for the `define_event` statement. Use this
+statement to define events in SurrealDB and specify their conditions and
+actions.

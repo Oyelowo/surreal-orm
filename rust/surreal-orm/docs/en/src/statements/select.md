@@ -6,6 +6,7 @@
 2. [Defining Your Data](#defining-data)
 3. [Advanced Schema Definitions](#advanced-schema)
 4. [Select Statements](#select-statements)
+   - [Using the cond! Macro](#using-the-cond-macro)
 5. [Advanced Select Queries](#advanced-select-queries)
 6. [Select Value Statements](#select-value-statements)
 7. [Advanced Select Value Queries](#advanced-select-value-queries)
@@ -118,6 +119,36 @@ if is_lowo {
     statement = statement.limit(55).order_by(age.desc());
 }
 ```
+
+<a name="using-the-cond-macro"></a>
+
+### Using the cond! Macro
+
+In Surreal ORM, while the `cond` function provides an elegant way to construct
+filters, there's also a macro alternative called `cond!`. This macro can offer
+more concise and readable representations, especially for complex conditions.
+
+The `cond!` macro provides a convenient syntax for constructing filters, similar
+to standard Rust conditional expressions. It can handle various operations like
+equalities, inequalities, and logical combinations.
+
+Here's a simple example:
+
+```rust
+# use surreal_query_builder as surreal_orm;
+# use surreal_orm::*;
+# let age = Field::new("age");
+# let name = Field::new("name");
+# let title = Field::new("title");
+
+let filter_simple = cond!(age > 18);
+let filter_compound = cond!((age > 18) AND (name ~ "%Oyelowo%") OR (title == "Professor"));
+let filter_mixed = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
+```
+
+This macro provides a more intuitive way of writing conditions, especially when
+compared to chaining methods. The full definition and capabilities of the
+`cond!` macro are documented within the Surreal ORM codebase.
 
 <a name="advanced-select-queries"></a>
 
