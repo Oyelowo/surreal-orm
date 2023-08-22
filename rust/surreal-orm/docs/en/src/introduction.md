@@ -52,8 +52,10 @@ problems it seeks to solve, and the philosophies that molded its creation. It's
 a tale of refusing to settle, of reimagining boundaries, and of sculpting a
 solution when none seemed just right.
 
-So, whether you're a seasoned Rust developer, an ORM enthusiast, or a curious
-soul eager to explore the intersections of innovation and software development,
-this book promises a voyage into the heart of data management with a fresh
-perspective in Rust—a realm where convention meets innovation, culminating in
-the creation of something truly surreal.
+Each chapter, carefully crafted by the very creator of `surreal-orm`, promises a
+deep dive into its intricacies, philosophies, and innovations. So, whether
+you're a seasoned Rust developer, an ORM enthusiast, or a curious soul eager to
+explore the intersections of innovation and software development, this book
+promises a voyage into the heart of data management with a fresh perspective in
+Rust—a realm where convention meets innovation, culminating in the creation of
+something truly surreal.
