@@ -10,6 +10,7 @@
 
 - [Date Model](./data_models.md)
 
+  - [Data Types](./data_models/data_types.md)
   - [Casting](./data_models/casting.md)
 
 - [Concepts](./concepts.md)
