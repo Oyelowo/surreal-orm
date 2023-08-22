@@ -71,7 +71,7 @@ let friends = Person::schema().friends;
 let result = create().set(object!(Person {
     name: String::from("Oyelowo"),
     friends: vec![id1, id2],
-    adult_friends: future(friends(where_(age.gt(18))).name),
+    adult_friends: future(friends(cond(age.gt(18))).name),
 }));
 assert_eq!(result.build(), "CREATE person SET name = 'Oyelowo', friends = [person:dayo, person:yelow], adult_friends = <future> { friends[WHERE age > 18].name }");
 ```
