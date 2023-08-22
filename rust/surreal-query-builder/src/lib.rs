@@ -52,6 +52,10 @@ mod errors;
 /// This module contains the different types of casts that can be used to cast values to
 /// different types.
 pub mod cast;
+
+/// This module contains the different types of data models that can be used to create
+/// tables and columns.
+pub mod data_model;
 pub mod functions;
 mod helpers;
 mod operators_macros;
@@ -63,6 +67,7 @@ mod types;
 /// For compile time validations
 pub mod validators;
 
+pub use data_model::*;
 pub use errors::*;
 pub use helpers::*;
 pub use statements::select::CanOrder;
