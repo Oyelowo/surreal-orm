@@ -49,9 +49,8 @@
 
 mod errors;
 
-/// This module contains the different types of casts that can be used to cast values to
-/// different types.
-pub mod cast;
+/// Contains math constants, all the casting functions and future.
+mod data_model;
 pub mod functions;
 mod helpers;
 mod operators_macros;
@@ -63,6 +62,7 @@ mod types;
 /// For compile time validations
 pub mod validators;
 
+pub use data_model::*;
 pub use errors::*;
 pub use helpers::*;
 pub use statements::select::CanOrder;
