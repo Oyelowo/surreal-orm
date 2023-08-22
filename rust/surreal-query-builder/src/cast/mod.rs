@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+/// This module contains functions for casting values to a future.
 pub mod futures;
 
 pub use futures::*;
