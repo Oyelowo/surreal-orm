@@ -8,6 +8,10 @@
 
 # Concept
 
+- [Date Model](./data_models.md)
+
+  - [Casting](./data_models/casting.md)
+
 - [Concepts](./concepts.md)
   - [Model](./concepts/model.md)
   - [Node](./concepts/node.md)
