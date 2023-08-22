@@ -141,14 +141,14 @@ Here's a simple example:
 # let name = Field::new("name");
 # let title = Field::new("title");
 
-let filter = cond!((age > 18) AND (name ~ "%Oyelowo%") OR (title == "Professor"));
 let filter_simple = cond!(age > 18);
+let filter_compound = cond!((age > 18) AND (name ~ "%Oyelowo%") OR (title == "Professor"));
 let filter_mixed = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
 ```
 
 This macro provides a more intuitive way of writing conditions, especially when
 compared to chaining methods. The full definition and capabilities of the
-`cond!` macro are documented within the SurrealDB ORM codebase.
+`cond!` macro are documented within the Surreal ORM codebase.
 
 <a name="advanced-select-queries"></a>
 

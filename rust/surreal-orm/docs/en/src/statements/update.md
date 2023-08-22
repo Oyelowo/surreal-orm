@@ -9,6 +9,7 @@ and `object_partial!` macros for setting values.
 ## Table of Contents
 
 - [Syntax](#syntax)
+- [Using the `cond!` Macro](#using-the-cond!-macro)
 - [Examples](#examples)
   - [Updating a Single Object](#updating-a-single-object)
     - [Using the Update Content](#using-the-update-content)
@@ -54,6 +55,23 @@ The `update` statement supports the following methods:
 
 Note: Only one of the .content(), .merge(), .replace(), .set(), or .patch()
 methods can be used at a time.
+
+## Using the `cond!` Macro
+
+The `cond!` macro provides a concise way to define conditions for update
+operations. It enhances code readability while ensuring type safety.
+
+Example:
+
+```rust
+let filter = cond!((strength > 5) && (strength < 15));
+```
+
+By using the `cond!` macro, you can define conditions efficiently and
+expressively for the `update` statement.
+
+For a more in-depth explanation and advanced usage of the `cond!` macro,
+[refer to the dedicated chapter on helper macros](#helper-macros).
 
 ## Examples
 
