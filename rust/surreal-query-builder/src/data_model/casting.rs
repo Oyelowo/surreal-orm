@@ -5,11 +5,6 @@
  * Licensed under the MIT license
  */
 
-/// This module contains functions for casting values to a future.
-pub mod futures;
-
-pub use futures::*;
-
 use std::fmt::Display;
 
 use crate::{BindingsList, Buildable, Erroneous, Parametric, Valuex};
@@ -133,7 +128,7 @@ create_cast_function!(
     => "string"
 );
 
-create_cast_function!(
-    /// Casts a value to a future.
-    => "future"
-);
+// create_cast_function!(
+//     /// Casts a value to a future.
+//     => "future"
+// );
