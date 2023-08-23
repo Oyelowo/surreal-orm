@@ -66,7 +66,7 @@ pub struct Student {
     first_name: String,
     last_name: String,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         permissions = "age_permissions()"
@@ -98,7 +98,7 @@ functions. This aids in reusability and cleaner code:
 )]
 pub struct StudentWithDefineFnAttr {
     // ... fields ...
-    #[surreal_orm(type = "int", define_fn = "age_define_external_fn_path")]
+    #[surreal_orm(type_ = "int", define_fn = "age_define_external_fn_path")]
     age_define_external_fn_path: u8,
 }
 ```
@@ -117,28 +117,28 @@ Fields can be defined in multiple ways using `surreal_orm`:
 ### Inline Definitions:
 
 ```rust
-#[surreal_orm(type = "int", value = "18")]
+#[surreal_orm(type_ = "int", value = "18")]
 age: u8,
 ```
 
 ### External Function Invoked:
 
 ```rust
-#[surreal_orm(type = "int", value = "get_age_default_value()")]
+#[surreal_orm(type_ = "int", value = "get_age_default_value()")]
 age_default_external_function_invoked_expr: u8,
 ```
 
 ### Using External Function Attributes:
 
 ```rust
-#[surreal_orm(type = "int", value_fn = "get_age_default_value")]
+#[surreal_orm(type_ = "int", value_fn = "get_age_default_value")]
 age_external_fn_attrs: u8,
 ```
 
 ### Mixing and Matching:
 
 ```rust
-#[surreal_orm(type = "int", value = "get_age_default_value()", assert_fn = "get_age_assertion")]
+#[surreal_orm(type_ = "int", value = "get_age_default_value()", assert_fn = "get_age_assertion")]
 age_mix_and_match_external_fn_inline_attrs: u8,
 ```
 
@@ -167,7 +167,7 @@ In `surreal_orm`, you can use inline expressions to add custom behavior:
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     value = "get_age_by_group_default_value(AgeGroup::Teen)",
     assert = "get_age_assertion()",
 )]
@@ -193,7 +193,7 @@ using both a direct expression and a function at the same time.
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     value = "get_age_default_value()",
     value_fn = "get_age_default_value"
 )]
@@ -207,7 +207,7 @@ the same purpose.
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     assert = "get_age_assertion()",
     assert_fn = "get_age_assertion"
 )]
@@ -221,7 +221,7 @@ not both.
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     permissions = "age_permissions()",
     permissions_fn = "age_permissions"
 )]
@@ -235,7 +235,7 @@ definition, you should use either an inline expression or an external function.
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     define = "define_age()",
     define_fn = "define_age"
 )]
@@ -252,7 +252,7 @@ For example, the following combinations are invalid:
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     value = "18",
     define = "define_age()"
 )]
@@ -261,7 +261,7 @@ age: u8,
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     assert = "cond(value().is_not(NONE)).and(value().gte(18))",
     define = "define_age()"
 )]
@@ -270,7 +270,7 @@ age: u8,
 
 ```rust
 #[surreal_orm(
-    type = "int",
+    type_ = "int",
     permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
     define = "define_age()"
 )]
@@ -300,7 +300,7 @@ a comprehensive overview of the various annotations:
     table_name = "student_with_granular_attributes",
     drop,
     schemafull,
-    as = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table_name())",
     permissions = "student_permissions()",
 )]
 pub struct StudentWithGranularAttributes {
@@ -308,7 +308,7 @@ pub struct StudentWithGranularAttributes {
     first_name: String,
     last_name: String,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is(\"Oyelowo\"))"

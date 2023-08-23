@@ -26,14 +26,14 @@ pub type AlienVisitsPlanet = Visits<Alien, Planet>;
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "visits_explicit")]
 pub struct VisitsExplicit<In: Node, Out: Node> {
-    #[surreal_orm(type = "record(visits_explicit)")]
+    #[surreal_orm(type_ = "record(visits_explicit)")]
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(type = "record()")]
+    #[surreal_orm(type_ = "record()")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(type = "record()")]
+    #[surreal_orm(type_ = "record()")]
     pub out: LinkOne<Out>,
-    #[surreal_orm(type = "duration")]
+    #[surreal_orm(type_ = "duration")]
     pub time_visited: Duration,
 }
 

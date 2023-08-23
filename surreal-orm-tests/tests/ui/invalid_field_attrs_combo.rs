@@ -65,7 +65,7 @@ fn define_age() -> DefineFieldStatement {
 pub struct StudentTest0 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest0::schema().firstName.is(\"Oyelowo\"))",
@@ -73,7 +73,7 @@ pub struct StudentTest0 {
     )]
     age: u8,
     // #[surreal_orm(
-    //     type = "int",
+    //     type_ = "int",
     //     value = "get_age_default_value()",
     //     assert = "get_age_assertion()",
     //     permissions = "age_permissions()",
@@ -87,7 +87,7 @@ pub struct StudentTest0 {
 #[surreal_orm(table_name = "student_test_1")]
 pub struct StudentTest1 {
     id: SurrealSimpleId<Self>,
-    #[surreal_orm(type = "int", value = "18", define = "define_age()")]
+    #[surreal_orm(type_ = "int", value = "18", define = "define_age()")]
     age: u8,
 }
 
@@ -98,7 +98,7 @@ pub struct StudentTest1 {
 pub struct StudentTest2 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         define = "define_age()"
     )]
@@ -111,7 +111,7 @@ pub struct StudentTest2 {
 pub struct StudentTest3 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
         define = "define_age()"
     )]
@@ -125,7 +125,7 @@ pub struct StudentTest3 {
 pub struct StudentTest4 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest4::schema().firstName.is(\"Oyelowo\"))",
@@ -139,7 +139,7 @@ pub struct StudentTest4 {
 #[surreal_orm(table_name = "student_test_5")]
 pub struct StudentTest5 {
     id: SurrealSimpleId<Self>,
-    #[surreal_orm(type = "int", value = "18", define_fn = "define_age")]
+    #[surreal_orm(type_ = "int", value = "18", define_fn = "define_age")]
     age: u8,
 }
 
@@ -149,7 +149,7 @@ pub struct StudentTest5 {
 pub struct StudentTest6 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
         define_fn = "define_age"
     )]
@@ -162,7 +162,7 @@ pub struct StudentTest6 {
 pub struct StudentTest7 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest7::schema().firstName.is(\"Oyelowo\"))",
         define_fn = "define_age"
     )]
@@ -175,7 +175,7 @@ pub struct StudentTest7 {
 pub struct StudentTest8 {
     id: SurrealSimpleId<Self>,
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         define = "define_age()"
         define_fn = "define_age"
     )]
@@ -188,7 +188,7 @@ pub struct StudentTest8 {
 #[surreal_orm(table_name = "student_test_9")]
 pub struct StudentTest9 {
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         value = "get_age_default_value()",
         value_fn = "get_age_default_value"
     )]
@@ -200,7 +200,7 @@ pub struct StudentTest9 {
 #[surreal_orm(table_name = "student_test_10")]
 pub struct StudentTest10 {
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         assert = "get_age_assertion()",
         assert_fn = "get_age_assertion"
     )]
@@ -212,7 +212,7 @@ pub struct StudentTest10 {
 #[surreal_orm(table_name = "student_test_11")]
 pub struct StudentTest11 {
     #[surreal_orm(
-        type = "int",
+        type_ = "int",
         permissions = "age_permissions()",
         permissions_fn = "age_permissions"
     )]

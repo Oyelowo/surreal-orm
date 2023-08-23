@@ -8,7 +8,7 @@ use surreal_orm::Object;
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {
     length: u64,
-    #[surreal_orm(type = "string")]
+    #[surreal_orm(type_ = "string")]
     shape: Shape,
 }
 

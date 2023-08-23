@@ -32,7 +32,7 @@ fn student_permissions() -> Permissions {
     drop,
     // flexible,
     schemafull,
-    as = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table_name())",
     permissions = "student_permissions()",
     define = "define_student()"
 )]
@@ -48,7 +48,7 @@ pub struct StudentTest0 {
     drop,
     // flexible,
     schemafull,
-    as = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table_name())",
     permissions = "student_permissions()",
     define_fn = "define_student"
 )]
@@ -81,7 +81,7 @@ pub struct StudentTest3 {
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student_test_4",
-    as = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table_name())",
     // permissions = "student_permissions()",
     define = "define_student()"
 )]
@@ -134,7 +134,7 @@ pub struct StudentTest8 {
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student_test_9",
-    as = "select(All).from(Student::table_name())",
+    as_ = "select(All).from(Student::table_name())",
     define_fn = "define_student"
 )]
 pub struct StudentTest9 {

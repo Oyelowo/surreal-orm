@@ -94,7 +94,7 @@ inline expression or an invoked external function.
 
 ```rust
 #[derive(Node, Serialize, Deserialize)]
-#[surreal_orm(table_name = "student_test_4", as = "select(All).from(Student::table_name())", define = "define_student()")]
+#[surreal_orm(table_name = "student_test_4", as_ = "select(All).from(Student::table_name())", define = "define_student()")]
 pub struct StudentTest4 {
     id: SurrealSimpleId<Self>,
 }

@@ -54,7 +54,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
         pub id: SurrealSimpleId<Self>,
         pub name: String,
         // pub strength: u64,
-        #[surreal_orm(type = "int")]
+        #[surreal_orm(type_ = "int")]
         pub strength: Strength,
         pub created: DateTime<Utc>,
         #[surreal_orm(nest_object = "Rocket")]

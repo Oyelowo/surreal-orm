@@ -12,7 +12,7 @@ pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // pub strength: u64,
-    #[surreal_orm(type = "int")]
+    #[surreal_orm(type_ = "int")]
     pub strength: Strength,
     pub created: DateTime<Utc>,
     #[surreal_orm(nest_object = "Rocket")]
@@ -26,7 +26,7 @@ type Strength = u64;
 pub struct WeaponOld {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(type = "int")]
+    #[surreal_orm(type_ = "int")]
     pub strength: Strength,
     pub nice: bool,
     pub bunch_of_other_fields: i32,

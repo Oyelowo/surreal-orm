@@ -12,7 +12,7 @@ use surreal_orm::{Serialize, Deserialize,LinkOne, SurrealSimpleId, Node};
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
 
-    // #[surreal_orm(link_one = "Weapon", type = "record(weapon)")]
+    // #[surreal_orm(link_one = "Weapon", type_ = "record(weapon)")]
     #[surreal_orm(link_one = "Weapon")]
     pub best_weapon: LinkOne<Weapon>,
 }
@@ -40,7 +40,7 @@ use surreal_orm::{Serialize, Deserialize, LinkMany, SurrealSimpleId, Node};
 #[surreal_orm(table_name = "alien")]
 pub struct Alien {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(link_many = "SpaceShip", type = "array", item_type = "record(space_ship)")]
+    // #[surreal_orm(link_many = "SpaceShip", type_ = "array", item_type = "record(space_ship)")]
     #[surreal_orm(link_many = "SpaceShip")]
     pub space_ships: LinkMany<SpaceShip>,
 }

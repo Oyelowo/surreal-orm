@@ -10,11 +10,11 @@ pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // area: Polygon,
-    // #[surreal_orm(type = "any")]
-    // #[surreal_orm(type = "array")]
-    // #[surreal_orm(type = "array", item_type = "int")]
-    // #[surreal_orm(type = "array", item_type = "int")]
-    // #[surreal_orm(type = "int")]
+    // #[surreal_orm(type_ = "any")]
+    // #[surreal_orm(type_ = "array")]
+    // #[surreal_orm(type_ = "array", item_type = "int")]
+    // #[surreal_orm(type_ = "array", item_type = "int")]
+    // #[surreal_orm(type_ = "int")]
     // pub population: Population,
     // pub population: PopArray,
     // pub population: Vec<Population>,

@@ -40,7 +40,7 @@ impl FromMeta for Rename {
         })
     }
 
-    fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
+    fn from_list(items: &[darling::ast::NestedMeta]) -> ::darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRename {
             serialize: String,
@@ -77,7 +77,7 @@ impl FromMeta for Relate {
         })
     }
     //TODO: Check to maybe remove cos I probably dont need this
-    fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
+    fn from_list(items: &[darling::ast::NestedMeta]) -> darling::Result<Self> {
         #[derive(FromMeta)]
         struct FullRelate {
             model: String,
@@ -208,7 +208,7 @@ pub struct MyFieldReceiver {
 
     // #[darling(default)]
     // default: ::std::option::Option<syn::Expr>,
-    #[darling(default, rename = "type")]
+    // #[darling(default, rename = "type")]
     pub(crate) type_: Option<FieldTypeWrapper>,
 
     #[darling(default)]
@@ -1812,7 +1812,7 @@ pub struct TableDeriveAttributes {
     #[darling(default)]
     pub(crate) drop: ::std::option::Option<bool>,
 
-    #[darling(default, rename = "as")]
+    // #[darling(default, rename = "as_")]
     pub(crate) as_: ::std::option::Option<syn::LitStr>,
 
     #[darling(default)]

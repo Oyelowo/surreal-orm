@@ -126,7 +126,7 @@ error: proc-macro derive panicked
                 item_assert,
                 item_assert_fn
 
-error: Unable to parse attribute: expected `,`
+error: expected `,`
    --> tests/ui/invalid_field_attrs_combo.rs:180:9
     |
 180 |         define_fn = "define_age"
