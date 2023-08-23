@@ -1,7 +1,0 @@
-.env
-target/
-**/target/
-**/target
-tests/
-Dockerfile
-scripts/

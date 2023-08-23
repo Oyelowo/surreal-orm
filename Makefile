@@ -11,7 +11,7 @@ sync:
 	
 
 dev:
-	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
+	cargo run
 
 format:
 	cargo fmt
@@ -31,7 +31,7 @@ build:
 	cargo build
 
 run:
-	cargo run -p app-graphql-surrealdb --bin app-graphql-surrealdb
+	cargo run
 
 run-surrealdb:
 	# docker run --rm -p 8000:8000 surrealdb/surrealdb:latest start

@@ -4,11 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
-use _core::ops::Deref;
-use insta;
-use regex;
 use serde::{Deserialize, Serialize};
-use static_assertions::*;
 use std::time::Duration;
 use surrealdb::{
     engine::local::{Db, Mem},
@@ -28,7 +24,6 @@ use surreal_orm::{
     *,
 };
 
-use test_case::test_case;
 use typed_builder::TypedBuilder;
 
 fn gama() -> SelectStatement {

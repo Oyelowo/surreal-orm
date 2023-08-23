@@ -276,9 +276,9 @@ impl MyFieldReceiver {
             // id: record(student)
             // in: record
             // out: record
-            // link_one => record(book) = static_assertions::assert_has_field(<Book as Node>::TableNameChecker, book);
-            // link_self => record(student) = static_assertions::assert_has_field(<Student as Node>::TableNameChecker, student);
-            // link_many => Vec<Book> => array(record(book)) = static_assertions::assert_has_field(<Book as Node>::TableNameChecker, book);
+            // link_one => record(book) = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
+            // link_self => record(student) = #crate_name::validators::assert_has_field(<Student as Node>::TableNameChecker, student);
+            // link_many => Vec<Book> => array(record(book)) = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
             // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
 
             match self {
@@ -333,7 +333,7 @@ impl MyFieldReceiver {
                                 // which gives <Book as Node>::TableNameChecker
                                 static_assertions.push(quote!(
                                 type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
-                                ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
+                                #crate_name::validators::assert_fields!(#ref_node_table_name_checker_ident: #link_table_name);
                                            ));
                             }
                             _ => {
@@ -360,7 +360,7 @@ impl MyFieldReceiver {
 
                                             static_assertions.push(quote!(
                                                             type #ref_node_table_name_checker_ident = <#ref_node_token as #crate_name::Node>::TableNameChecker;
-                                                            ::static_assertions::assert_fields!(#ref_node_table_name_checker_ident: #array_item_table_name);
+                                                            #crate_name::validators::assert_fields!(#ref_node_table_name_checker_ident: #array_item_table_name);
                                                        ));
                                         }
                                         _ => {
@@ -421,26 +421,26 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
 
             let static_assertion = match field_type {
                 FieldType::Any => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Value>);)
                 }
                 FieldType::String => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::string::String>);)
                 }
                 FieldType::Int => {
                     quote!(
                         #crate_name::validators::is_int::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
                 }
                 FieldType::Float => {
                     quote!(
                         #crate_name::validators::is_float::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Bool => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<::std::primitive::bool>);)
                 }
                 FieldType::Array => {
                     quote!(
@@ -448,40 +448,40 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                     )
                 }
                 FieldType::DateTime => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Datetime>);)
                 }
                 FieldType::Decimal => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Duration => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Duration>);)
                 }
                 FieldType::Number => {
                     quote!(
                         #crate_name::validators::is_number::<#raw_type>();
-                        // ::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
+                        // #crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::num_traits>);
                     )
-                    // quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
+                    // quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Number>);)
                 }
                 FieldType::Object => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Object>);)
                 }
                 FieldType::Record(_) => {
                     if let DataType::Edge = model_type {
                         quote!()
                     } else {
-                        quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                     }
                 }
                 FieldType::RecordAny => {
                     if let DataType::Edge = model_type {
                         quote!()
                     } else {
-                        quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
+                        quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<Option<#crate_name::sql::Thing>>);)
                     }
                 }
                 FieldType::Geometry(_) => {
-                    quote!(::static_assertions::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
+                    quote!(#crate_name::validators::assert_impl_one!(#raw_type: ::std::convert::Into<#crate_name::sql::Geometry>);)
                 }
             };
 
@@ -525,25 +525,25 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Bool),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Float),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Int),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::String),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
         } else if self.raw_type_is_list() || self.item_type.is_some() {
             let item_type = self.item_type.as_ref().map(|ct| {
@@ -554,31 +554,31 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                 field_type: quote!(#crate_name::FieldType::Array),
                 field_item_type: item_type,
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
-                // quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
+                // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
         } else if self.raw_type_is_object() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Object),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Duration),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::DateTime),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else if let MyFieldReceiver {
             type_: None,
@@ -660,7 +660,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Any),
                 field_item_type: None,
-                static_assertion: quote!(::static_assertions::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
+                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
             }
         }
     }
@@ -1598,7 +1598,7 @@ impl ReferencedNodeMeta {
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::Node);
+                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Node);
             ),
 
             record_link_default_alias_as_method,
@@ -1678,7 +1678,7 @@ impl ReferencedNodeMeta {
             foreign_node_schema_import,
 
             foreign_node_type_validator: quote!(
-                ::static_assertions::assert_impl_one!(#schema_type_ident: #crate_name::Object);
+                #crate_name::validators::assert_impl_one!(#schema_type_ident: #crate_name::Object);
             ),
 
             record_link_default_alias_as_method,

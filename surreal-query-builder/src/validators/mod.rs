@@ -3,6 +3,7 @@ pub use static_assertions::assert_fields;
 pub use static_assertions::assert_impl_all;
 pub use static_assertions::assert_impl_any;
 pub use static_assertions::assert_impl_one;
+pub use static_assertions::assert_type_eq_all;
 
 /// Validate that type is a number at compile time
 ///

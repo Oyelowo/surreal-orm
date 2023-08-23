@@ -1,0 +1,61 @@
+[package]
+name = "surreal-query-builder"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = { workspace = true }
+documentation = { workspace = true }
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+surrealdb = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+geo = { workspace = true }
+regex = { workspace = true }
+async-trait = { workspace = true }
+paste = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+
+static_assertions = { workspace = true }
+num-traits = { workspace = true }
+
+insta = { workspace = true }
+
+
+# tokio = { workspace = true }
+
+# bigdecimal = { workspace = true }
+# syn = { workspace = true }
+# quote = { workspace = true }
+# proc-macro2 = { workspace = true }
+# # Inflector = { workspace = true }
+# # proc-macro-crate = { workspace = true }
+# darling = { workspace = true }
+# convert_case = { workspace = true }
+# serde = { workspace = true }
+# serde_json = { workspace = true }
+# rayon = { workspace = true }
+# typed-builder = { workspace = true }
+# # bevy_reflect = { workspace = true }
+# thiserror = { workspace = true }
+# proc-macro2-diagnostics = { workspace = true }
+
+
+# test-case = { workspace = true }
+# regex = { workspace = true }
+
+# # derive_builder = { workspace = true }
+# uuid.workspace = true
+# async-trait.workspace = true
+# paste = { workspace = true }
+# rand = { workspace = true }
+# [lib]
+# proc-macro = true
+# crate_type = ["proc-macro"]
+[lib]
+doctest = true

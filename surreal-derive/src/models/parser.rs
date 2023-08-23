@@ -230,19 +230,19 @@ pub struct SchemaFieldsProperties {
     /// ```
     /// // For relate field
     /// type StudentWritesBlogTableName = <StudentWritesBlog as Edge>::TableNameChecker;
-    /// ::static_assertions::assert_fields!(StudentWritesBlogTableName: Writes);
+    /// #crate_name::validators::assert_fields!(StudentWritesBlogTableName: Writes);
     ///
     /// type StudentWritesBlogInNode = <StudentWritesBlog as Edge>::In;
-    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogInNode, Student);
+    /// #crate_name::validators::assert_type_eq_all!(StudentWritesBlogInNode, Student);
     ///
     /// type StudentWritesBlogOutNode = <StudentWritesBlog as Edge>::Out;
-    /// ::static_assertions::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
+    /// #crate_name::validators::assert_type_eq_all!(StudentWritesBlogOutNode, Blog);
     ///
     ///
-    /// ::static_assertions::assert_impl_one!(StudentWritesBlog: Edge);
-    /// ::static_assertions::assert_impl_one!(Student: Node);
-    /// ::static_assertions::assert_impl_one!(Blog: Node);
-    /// ::static_assertions::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
+    /// #crate_name::validators::assert_impl_one!(StudentWritesBlog: Edge);
+    /// #crate_name::validators::assert_impl_one!(Student: Node);
+    /// #crate_name::validators::assert_impl_one!(Blog: Node);
+    /// #crate_name::validators::assert_type_eq_all!(LinkOne<Book>, LinkOne<Book>);
     /// ```
     /// Perform all necessary static checks
     pub static_assertions: Vec<TokenStream>,
@@ -689,7 +689,7 @@ impl SchemaFieldsProperties {
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
+                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
                         get_link_meta_with_defs(&node_object, false)
                     }
                     
@@ -709,7 +709,7 @@ impl SchemaFieldsProperties {
                         
                         store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
+                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
                         
                         get_link_meta_with_defs(&node_object, false)
                     }
@@ -722,13 +722,13 @@ impl SchemaFieldsProperties {
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
                         
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
+                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
                         get_link_meta_with_defs(&node_object, true)
                     }                    
                     
                     RelationType::NestObject(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #foreign_node);));
+                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
                         update_field_names_fields_types_kv(None);
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ));
@@ -741,7 +741,7 @@ impl SchemaFieldsProperties {
                         
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
 
-                        store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
+                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
                         
                         update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
                         get_nested_meta_with_defs(&node_object, true)
@@ -762,7 +762,7 @@ impl SchemaFieldsProperties {
                 
                 if field_ident_normalised_as_str == "id" {
                     store.table_id_type =   quote!(#field_type);
-                    // store.static_assertions.push(quote!(::static_assertions::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
+                    // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
                 }
 
                 
@@ -842,29 +842,29 @@ impl NodeEdgeMetadataStore {
             // type HomeIdent = <StudentWritesBook  as surreal_macros::Edge>::In;
             // type HomeNodeTableChecker = <HomeIdent as
             // surreal_macros::Node>::TableNameChecker;
-            // ::static_assertions::assert_type_eq_all!(HomeIdent, Student);
-            // ::static_assertions::assert_impl_one!(HomeIdent, surreal_macros::Node);
+            // #crate_name::validators::assert_type_eq_all!(HomeIdent, Student);
+            // #crate_name::validators::assert_impl_one!(HomeIdent, surreal_macros::Node);
             quote!(
              type #home_node_ident = <#relation_model as #crate_name::Edge>::#home_node_associated_type_ident;
              type #home_node_table_name_checker_ident = <#home_node_ident as #crate_name::Node>::TableNameChecker;
-             ::static_assertions::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
-             ::static_assertions::assert_impl_one!(#home_node_ident: #crate_name::Node);
+             #crate_name::validators::assert_type_eq_all!(#home_node_ident, #origin_struct_ident);
+             #crate_name::validators::assert_impl_one!(#home_node_ident: #crate_name::Node);
             ),
             quote!(
              type #foreign_node_ident = <#relation_model as #crate_name::Edge>::#foreign_node_associated_type_ident;
              type #foreign_node_table_name_checker_ident = <#foreign_node_ident as #crate_name::Node>::TableNameChecker;
-             ::static_assertions::assert_fields!(#foreign_node_table_name_checker_ident: #foreign_node_table_name);
-             ::static_assertions::assert_impl_one!(#foreign_node_ident: #crate_name::Node);
+             #crate_name::validators::assert_fields!(#foreign_node_table_name_checker_ident: #foreign_node_table_name);
+             #crate_name::validators::assert_impl_one!(#foreign_node_ident: #crate_name::Node);
             ),
             quote!(
              type #edge_table_name_checker_ident = <#relation_model as #crate_name::Edge>::TableNameChecker;
-             ::static_assertions::assert_fields!(#edge_table_name_checker_ident: #edge_table_name);
+             #crate_name::validators::assert_fields!(#edge_table_name_checker_ident: #edge_table_name);
             ),
             // assert field type and attribute reference match
             // e.g Relate<Book> should match from attribute link = "->Writes->Book"
             quote!(
-             ::static_assertions::assert_impl_one!(#relation_model: #crate_name::Edge);
-             ::static_assertions::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_ident>);
+             #crate_name::validators::assert_impl_one!(#relation_model: #crate_name::Edge);
+             #crate_name::validators::assert_type_eq_all!(#field_type,  #crate_name::Relate<#foreign_node_ident>);
             ),
         ];
         quote!(
