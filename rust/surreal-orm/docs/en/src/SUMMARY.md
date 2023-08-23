@@ -85,6 +85,7 @@
 - [Parameters](./parameters.md)
 - [Transactions](./transactions.md)
 - [Functions](./functions.md)
+
   - [Overview](./functions/overview.md)
   - [Array functions](./functions/array.md)
   - [Count function](./functions/count.md)
@@ -102,3 +103,7 @@
   - [Time functions](./functions/time.md)
   - [Type functions](./functions/type.md)
   - [Scripting functions](./functions/scripting.md)
+
+  # Conclusion
+
+- [Conclusion](./conclusion.md)
