@@ -120,7 +120,7 @@ impl ToTokens for NodeToken{
         
         let table_definitions = self.get_table_definition_token();
 
-        // #[derive(Model, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+        // #[derive(Model, TypedBuilder, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // #[surreal_orm(table_name = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
@@ -196,7 +196,7 @@ impl ToTokens for NodeToken{
             }
         
             #[allow(non_snake_case)]
-            #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
             pub struct #non_null_updater_struct_name {
                #( 
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -205,7 +205,7 @@ impl ToTokens for NodeToken{
             } 
         
             #[allow(non_snake_case)]
-            #[derive(Serialize, Deserialize, Debug, Clone)]
+            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
             pub struct #struct_with_renamed_serialized_fields {
                #( 
                     #renamed_serialized_fields

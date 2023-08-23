@@ -809,13 +809,13 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength",
         ]
     );
 
@@ -834,13 +834,13 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength"
         ]
     );
 
@@ -880,7 +880,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -889,7 +889,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     Ok(())
@@ -987,13 +987,13 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength"
         ]
     );
 
@@ -1012,13 +1012,13 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength"
         ]
     );
 
@@ -1071,7 +1071,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -1080,7 +1080,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     //
@@ -1113,7 +1113,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
 
     let selected_weapon: Option<Weapon> = select(All)
@@ -1130,7 +1130,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["id", "name", "strength", "created", "rocket"]
+        vec!["created", "id", "name", "rocket", "strength"]
     );
 
     let weaponold_schema::WeaponOld {
@@ -1186,13 +1186,13 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength",
         ]
     );
     assert_eq!(
@@ -1203,13 +1203,13 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "id",
-            "name",
-            "strength",
-            "nice",
             "bunchOfOtherFields",
             "created",
-            "rocket"
+            "id",
+            "name",
+            "nice",
+            "rocket",
+            "strength",
         ]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");

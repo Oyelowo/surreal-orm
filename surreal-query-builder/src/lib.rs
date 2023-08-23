@@ -70,6 +70,7 @@ pub use statements::utils::*;
 pub use traits::*;
 pub use types::*;
 
+pub use serde;
 pub use surrealdb::sql;
 
 #[doc(hidden)]

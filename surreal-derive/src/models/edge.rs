@@ -183,7 +183,7 @@ impl ToTokens for EdgeToken {
                 }
                 
                 #[allow(non_snake_case)]
-                #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+                #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
                 pub struct #non_null_updater_struct_name {
                    #( 
                         #[serde(skip_serializing_if = "Option::is_none")]
@@ -192,7 +192,7 @@ impl ToTokens for EdgeToken {
                 } 
         
                 #[allow(non_snake_case)]
-                #[derive(Serialize, Deserialize, Debug, Clone)]
+                #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
                    #( 
                         #renamed_serialized_fields

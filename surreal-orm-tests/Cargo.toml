@@ -14,11 +14,19 @@ surreal-orm = { workspace = true }
 surreal-models = { workspace = true }
 surrealdb = { workspace = true }
 pretty_assertions = { workspace = true }
-# tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+geo = { workspace = true }
+insta = { workspace = true }
+tokio = { workspace = true }
+trybuild = { workspace = true }
+uuid = { workspace = true }
+rand = { workspace = true }
+
 
 # bigdecimal = { workspace = true }
 # serde = { workspace = true }
-# serde_json = { workspace = true }
 # static_assertions = { workspace = true }
 # trybuild = { workspace = true }
 # typed-builder = { workspace = true }
@@ -32,7 +40,6 @@ pretty_assertions = { workspace = true }
 # test-case = { workspace = true }
 # regex = "1.9.1"
 # insta = "1.30.0"
-# chrono.workspace = true
 # geo = { workspace = true }
 # derive_builder = "0.12.0"
 # geojson = "0.24.1"

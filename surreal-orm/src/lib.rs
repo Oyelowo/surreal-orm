@@ -200,5 +200,5 @@ pub use surreal_derive::Node;
 pub use surreal_derive::Object;
 
 #[doc(hidden)]
-pub use serde;
+// pub use serde;
 pub use surreal_query_builder::*;

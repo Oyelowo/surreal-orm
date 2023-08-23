@@ -126,7 +126,7 @@ impl ToTokens for ObjectToken{
             }
         
             #[allow(non_snake_case)]
-            #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+            #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
             pub struct #non_null_updater_struct_name {
                #( 
                     #[serde(skip_serializing_if = "Option::is_none")]
