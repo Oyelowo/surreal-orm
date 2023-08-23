@@ -10,5 +10,4 @@ documentation.workspace = true
 
 [dependencies]
 surreal-orm = { workspace = true }
-# surreal-orm = { path = "../../../surreal-orm" }
 serde = { workspace = true }

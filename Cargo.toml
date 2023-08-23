@@ -51,12 +51,10 @@ strum_macros = "0.24"
 num-traits = "0.2.15"
 regex = "1.9.1"
 serde-aux = "3.1.0"
-
 derive_builder = "0.12.0"
 geojson = "0.24.1"
 fake = "2.6.1"
 paste = "1.0.13"
-# bigdecimal = "0.3.1"
 chrono = { version = "0.4.26", features = ["serde"] }
 chrono-tz = "0.6.3"
 serde = { version = "1.0.171", features = ["derive"] }
@@ -68,8 +66,6 @@ tokio = { version = "1.29.1", features = ["full"] }
 typed-builder = "0.10.0"
 rand = "0.8.5"
 
-# url = "2.4.0"
-
 # [dev-dependencies]
 geo = { version = "0.23.1", features = ["use-serde"] }
 insta = "1.30.0"
@@ -77,9 +73,3 @@ pretty_assertions = "1.4.0"
 trybuild = "1.0.83"
 static_assertions = "1.1.0"
 tokio-test = "0.4.2"
-
-# tonic-build = "0.8.4"
-# You can also use the "derive" feature, and import the macros directly from "strum"
-# strum = { version = "0.24", features = ["derive"] }
-# wiremock = "0.5.19"
-# test-case = "2.2.2"
