@@ -120,9 +120,7 @@ where
     }
 
     ///
-    fn validate_fields_to_fetch(
-        linked_fields_to_fetch: &[Field],
-    ) -> SurrealOrmResult<Vec<String>> {
+    fn validate_fields_to_fetch(linked_fields_to_fetch: &[Field]) -> SurrealOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
             .iter()
             .map(|n| {

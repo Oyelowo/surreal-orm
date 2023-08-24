@@ -58,9 +58,7 @@ impl Erroneous for Valuex {
 
 impl Erroneous for Vec<Valuex> {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|m| m.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|m| m.get_errors()).collect::<Vec<_>>()
     }
 }
 

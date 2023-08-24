@@ -1,4 +1,4 @@
-// #![feature(rustdoc_missing_doc_code_examples)]
+#![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
@@ -18,7 +18,6 @@
 #![allow(clippy::must_use_candidate)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::needless_pass_by_value)]
-// #![deny(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::option_if_let_else)]
 #![allow(clippy::match_same_arms)]
 #![allow(clippy::default_trait_access)]

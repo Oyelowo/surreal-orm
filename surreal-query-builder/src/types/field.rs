@@ -179,49 +179,37 @@ impl Parametric for Vec<&Field> {
 
 impl Erroneous for Vec<Field> {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 
 impl Erroneous for Vec<&Field> {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 
 impl Erroneous for &[Field] {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 
 impl Erroneous for &[&Field] {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 
 impl<const N: usize> Erroneous for &[Field; N] {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 
 impl<const N: usize> Erroneous for &[&Field; N] {
     fn get_errors(&self) -> ErrorList {
-        self.iter()
-            .flat_map(|f| f.get_errors())
-            .collect::<Vec<_>>()
+        self.iter().flat_map(|f| f.get_errors()).collect::<Vec<_>>()
     }
 }
 

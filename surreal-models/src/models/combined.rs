@@ -62,8 +62,6 @@ fn define_student() -> DefineTableStatement {
     let country = Field::new("country");
     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
 
-    
-
     define_table(Student::table_name())
         .drop()
         .as_(
@@ -115,7 +113,7 @@ fn define_age() -> DefineFieldStatement {
     //         ])
     //         .to_raw(),
     //     );
-    
+
     define_field(Student::schema().age)
         .on_table(Student::table_name())
         .type_(String)

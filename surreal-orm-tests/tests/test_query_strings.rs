@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{book_schema, student_schema, Book, Student, StudentWritesBook};

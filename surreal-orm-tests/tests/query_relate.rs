@@ -193,7 +193,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
                 2 => vec!["manager".to_string()],
                 _ => vec!["developer".to_string()],
             };
-            
+
             User {
                 id: User::create_id(format!("user{}", i)),
                 name: format!("user{}", i),

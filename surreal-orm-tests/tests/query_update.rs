@@ -518,14 +518,11 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let generated_weapons = (0..20)
-        .map(|x| {
-            
-            Weapon {
-                name: "Laser".to_string(),
-                created: Utc::now(),
-                strength: x,
-                ..Default::default()
-            }
+        .map(|x| Weapon {
+            name: "Laser".to_string(),
+            created: Utc::now(),
+            strength: x,
+            ..Default::default()
         })
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
@@ -608,14 +605,11 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     let generated_weapons = (0..20)
-        .map(|x| {
-            
-            Weapon {
-                name: "Laser".to_string(),
-                created: Utc::now(),
-                strength: x,
-                ..Default::default()
-            }
+        .map(|x| Weapon {
+            name: "Laser".to_string(),
+            created: Utc::now(),
+            strength: x,
+            ..Default::default()
         })
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
