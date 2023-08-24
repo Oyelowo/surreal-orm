@@ -514,7 +514,7 @@ impl MyFieldReceiver {
     pub fn infer_surreal_type_heuristically(
         &self,
         // struct_name_ident_str: &String,
-        field_name_normalized: &String,
+        field_name_normalized: &str,
     ) -> FieldTypeDerived {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
@@ -588,8 +588,6 @@ impl MyFieldReceiver {
             ..
         } = self
         {
-            let field_name_normalized = field_name_normalized.as_str();
-
             if field_name_normalized == "id" {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Record(Self::table_name())),
@@ -796,12 +794,11 @@ impl MyFieldReceiver {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                        if let syn::Type::Infer(_) = inner_type {
-                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                            // The list type should have a specified type parameter
-                            return false;
-                        }
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                        // The list type should have a specified type parameter
+                        return false;
                     }
                     last_seg.ident == "Vec"
                 } else {
@@ -825,12 +822,11 @@ impl MyFieldReceiver {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                        if let syn::Type::Infer(_) = inner_type {
-                            // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                            // The list type should have a specified type parameter
-                            return false;
-                        }
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        // if let syn::Type::Infer(_) = inner_type.as_ref() {
+                        // The list type should have a specified type parameter
+                        return false;
                     }
                     last_seg.ident == "HashMap" || last_seg.ident == "BTreeMap"
                 } else {

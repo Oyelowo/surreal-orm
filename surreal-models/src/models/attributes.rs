@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use surreal_orm::{
@@ -57,7 +56,6 @@ fn age_define_external_fn_path() -> DefineFieldStatement {
 
     use FieldType::*;
 
-    
     define_field(ageDefineInline)
         .on_table(Student::table_name())
         .type_(Int)
@@ -82,7 +80,7 @@ fn define_age_define_external_fn_path() -> DefineFieldStatement {
     use FieldType::*;
 
     // let statement = define_field(Student::schema().age)
-    
+
     define_field(ageDefineInline)
         .on_table(Student::table_name())
         .type_(Int)
@@ -251,7 +249,6 @@ fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatem
         ..
     } = StudentWithDefineAttr::schema();
 
-    
     define_field(field)
         .on_table(table)
         .type_(FieldType::String)
@@ -271,7 +268,6 @@ fn define_last_name() -> DefineFieldStatement {
         ..
     } = StudentWithDefineAttr::schema();
 
-    
     define_field(lastName)
         .on_table(StudentWithDefineAttr::table_name())
         .type_(FieldType::String)
@@ -291,7 +287,6 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
         ..
     } = StudentWithDefineAttr::schema();
 
-    
     define_field(lastName)
         .on_table(StudentWithDefineAttr::table_name())
         .type_(FieldType::String)
@@ -336,7 +331,6 @@ fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
 
     use FieldType::*;
 
-    
     define_field(field)
         .on_table(Student::table_name())
         .type_(Int)
