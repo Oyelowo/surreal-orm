@@ -1,17 +1,17 @@
-name: rust
+name: surreal-orm
 
 on:
   workflow_dispatch:
     paths: 
-      - 'rust/**'
+      - '**'
   push:
     branches: [master]
     paths: 
-      - 'rust/**'
+      - '**'
 
   pull_request:
     paths: 
-      - 'rust/**'
+      - '**'
 
 env:
   CARGO_TERM_COLOR: always
@@ -38,10 +38,10 @@ jobs:
       # - name: Install rustfmt
       #   run: rustup component add rustfmt
 
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }} 
+      # - name: Install Protoc
+      #   uses: arduino/setup-protoc@v1
+      #   with:
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }} 
       - uses: Swatinem/rust-cache@v1
 
       - name: Run cargo test
@@ -62,12 +62,6 @@ jobs:
 
       - run: rustup component add rustfmt
 
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }} 
-      - uses: Swatinem/rust-cache@v1
-
       - run: make format
         
         
@@ -84,204 +78,44 @@ jobs:
           profile: minimal 
           toolchain: stable
       
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }} 
-      - uses: Swatinem/rust-cache@v1
-      
       - run: rustup component add clippy
       - run: make check
 
 
-  ############## BUILD AND DEPLOY IMAGES #################
-  build_and_push_rust_applications:
-    if: github.event.pull_request.merged == true
-    needs: [check_and_test_rust_monorepo, format, clippy]
+  versioning:
     runs-on: ubuntu-latest
-
+    needs: [check_and_test_rust_monorepo, format, clippy]
     defaults:
       run:
-        working-directory: rust
-        
+        working-directory: surreal-orm
     steps:
       - uses: actions/checkout@v3
-      # Using other environment variables as input into another 
-      # does not work for normal "env: <value>" setup as the input environment
-      # variable to another would be treated literally by github parser rather than evaluating it.
-      # This is why environment variables are set through shell here and used for most things
-      # for consistency sake.
-      - name: Set environment variables
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: cargo-release
+
+      - name: Bump version and create tag
         run: |
-          CONTAINER_REGISTRY=ghcr.io/oyelowo
-          # For now, they all share the same image as they all get built whenever any is built
-          SERVICES_=$__IMAGE_TAGGITHUB_REF_NAME-$GITHUB_SHA
+          cargo release patch --no-publish --no-push --no-dev-version
+          git tag -l | tail -n 1 > VERSION
 
-
-          echo "SERVICES__GRAPHQL_MONGO__IMAGE_TAG=$SERVICES_" >>__IMAGE_TAG $GITHUB_ENV
-          IMAGE_NAME_GRAPHQL_MONGO=$CONTAINER_REGISTRY/graphql-mongo
-          echo "IMAGE_WITH_TAG_GRAPHQL_MONGO=$IMAGE_NAME_GRAPHQL_MONGO:$SERVICES_, $IMAGE_NAME_GRAPHQL_MONGO__IMAGE_TAG:latest" >> $GITHUB_ENV
-          
-          echo "SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG=$SERVICES_" >>__IMAGE_TAG $GITHUB_ENV
-          IMAGE_NAME_GRAPHQL_POSTGRES=$CONTAINER_REGISTRY/graphql-postgres
-          echo "IMAGE_WITH_TAG_GRAPHQL_POSTGRES=$IMAGE_NAME_GRAPHQL_POSTGRES:$SERVICES_, $IMAGE_NAME_GRAPHQL_POSTGRES__IMAGE_TAG:latest" >> $GITHUB_ENV
-          
-          echo "SERVICES__GRPC_MONGO__IMAGE_TAG=$SERVICES_" >>__IMAGE_TAG $GITHUB_ENV
-          IMAGE_NAME_GRPC_MONGO=$CONTAINER_REGISTRY/grpc-mongo
-          echo "IMAGE_WITH_TAG_GRPC_MONGO=$IMAGE_NAME_GRPC_MONGO:$SERVICES_, $IMAGE_NAME_GRPC_MONGO__IMAGE_TAG:latest" >> $GITHUB_ENV
-
-          
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      
-
-      - name: Build and cache graphql-mongo image
-        uses: docker/build-push-action@v2
-        with:
-          context: rust
-          file: rust/Dockerfile.production
-          target: graphql-mongo
-          tags: ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
-          push: true
-          cache-from: |
-            type=gha,scope=graphql-mongo
-          cache-to: |
-            type=gha,scope=graphql-mongo,mode=max
-
-      - name: Build and cache graphql-postgres image
-        uses: docker/build-push-action@v2
-        with:
-          context: rust
-          file: rust/Dockerfile.production
-          target: graphql-postgres
-          tags: ${{ env.IMAGE_WITH_TAG_GRAPHQL_POSTGRES }}
-          push: true
-          cache-from: |
-            type=gha,scope=graphql-postgres
-          cache-to: |
-            type=gha,scope=graphql-postgres,mode=max
-
-      - name: Build and cache grpc-mongo image
-        uses: docker/build-push-action@v2
-        with:
-          context: rust
-          file: rust/Dockerfile.production
-          target: grpc-mongo
-          tags: ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }}
-          push: true
-          cache-from: |
-            type=gha,scope=grpc-mongo
-          cache-to: |
-            type=gha,scope=grpc-mongo,mode=max
-
-      - name: Update repo with image tags to /kubernetes/imageTags/*
-        run: |
-          echo ${{env.SERVICES__GRAPHQL_MONGO__IMAGE_TAG}} > ../kubernetes/imageTags/SERVICES__GRAPHQL_MONGO__IMAGE_TAG
-          echo ${{env.SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG}} > ../kubernetes/imageTags/SERVICES__GRAPHQL_POSTGRES__IMAGE_TAG
-          echo ${{env.SERVICES__GRPC_MONGO__IMAGE_TAG}} > ../kubernetes/imageTags/SERVICES__GRPC_MONGO__IMAGE_TAG
-
-      - name: Commit files
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add .
-          git commit -m "Update image tags" -a
-          git config pull.rebase false  # merge
-          git pull
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-  # ############## CONTINUOUS DEPLOYMENT #################
-  # deploy_rust_app:
-  #   name: "Generate manifests"
-  #   if: github.event.pull_request.merged ||  ${{ github.ref == 'refs/heads/master' }}
-  #   needs: [check_and_test_rust_monorepo, format, clippy]
+          tags: true
+
+  # publish:
+  #   needs: versioning
   #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-  #   # defaults:
-  #     # run:
-  #       # working-directory: kubernetes
-        
-    # steps:
-      # - uses: actions/checkout@v3
-      #   with:
-      #     persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-      #     fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
-      # - name: Setup Node
-      #   uses: actions/setup-node@v1
-      #   with:
-      #     node-version: 14.x
-      # - run: npm install
-      # - name: Install pulumi
-      #   uses: pulumi/setup-pulumi@v2
-      #   with:
-      #     pulumi-version: 3.27.0
-      # - run: make gen
-
-
-      # - name: Commit files
-      #   run: |
-      #     git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git config --local user.name "github-actions[bot]"
-      #     git commit -m "Add changes" -a
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: ${{ github.ref }}
-      # - name: Prepare for pulumi
-      #   run: |
-      #     make install
-      #     rm -rf ./login
-      #     mkdir ./login
-      #     rm -rf ./rendered
-      #     export ENVIRONMENT="development" && export PULUMI_CONFIG_PASSPHRASE=""
-      # - uses: pulumi/actions@v3
-      #   with:
-      #     command: up
-      #     stack-name: dev
-      #     cloud-url: file://~
-
-      # - uses: pulumi/actions@v3
-      #   with:
-      #     command: preview
-      #     stack-name: dev
-      #   env:
-      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-
-      # - name: Check out code
-      #   uses: actions/checkout@v3
-
-      # # 1. APPLICATION 1: Build and push image for graphql-mongo
-      # - name: build graphql-mongo docker image
-      #   run:  docker build -f Dockerfile.production --target graphql-mongo  -t ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }} .
-
-      # # This step can be removed if I decide I dont want to slimdown the image further anymore or if docker-slim starts to become problematic
-      # - name: Slim down graphql-mongo docker image
-      #   run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/docker-slim build  ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }} --tag ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
-
-      # - name: Push graphql-mongo docker image
-      #   run: docker push  ${{ env.IMAGE_WITH_TAG_GRAPHQL_MONGO }}
-
-      # # 2. APPLICATION 2: Build and push image for grpc-mongo
-      # - name: build grpc-mongo docker image
-      #   run:  docker build -f Dockerfile.production --target grpc-mongo  -t ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }} .
-
-      # - name: Push grpc-mongo docker image
-      #   run: docker push  ${{ env.IMAGE_WITH_TAG_GRPC_MONGO }}
-        
-      # - name: Image digest
-      #   run: echo ${{ steps.docker_build.outputs.digest }}
-
+  #     - name: Publish crate
+  #       run: cargo publish
+  #       env:
+  #         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
