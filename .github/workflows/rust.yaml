@@ -1,4 +1,4 @@
-# name: surreal-orm
+name: surreal-orm
 
 on:
   # workflow_dispatch:
@@ -21,9 +21,9 @@ jobs:
     name: Run code checks for rust workspace
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rust
+    # defaults:
+    #   run:
+    #     working-directory: rust
 
     steps:
       - name: Checkout repository
@@ -50,9 +50,9 @@ jobs:
   format:
     name: Rustfmt
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rust
+    # defaults:
+    #   run:
+    #     working-directory: rust
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -68,9 +68,9 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rust
+    # defaults:
+    #   run:
+    #     working-directory: rust
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
