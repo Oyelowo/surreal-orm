@@ -1,4 +1,5 @@
-#![feature(rustdoc_missing_doc_code_examples)]
+// 24 Aug, 2023. Not yet supported in stable error[E0554]: `#![feature]` may not be used on the stable release channel
+// #![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
