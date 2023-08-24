@@ -6,7 +6,7 @@ use syn::{self, Error, Ident, LitStr};
 
 pub fn parse_lit_to_tokenstream(lit: &LitStr) -> Result<TokenStream, Error> {
     let str = lit.value();
-    let tokens: TokenStream = str.parse().map_err(|err| syn::Error::from(err))?;
+    let tokens: TokenStream = str.parse().map_err(syn::Error::from)?;
     Ok(quote! { (#tokens) })
 }
 

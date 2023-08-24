@@ -20,8 +20,8 @@ use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
     get_crate_name,
-    relations::{EdgeDirection, RelateAttribute, RelationType, NodeTypeName},
-    variables::VariablesModelMacro 
+    relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
+    variables::VariablesModelMacro,
 };
 
 #[allow(dead_code)]
@@ -141,7 +141,7 @@ pub struct SchemaFieldsProperties {
     ///     pub struct Out(pub(super) Field);
     ///     pub struct TimeWritten(pub(super) Field);
     /// }
-    /// 
+    ///
     /// #[derive(Debug, Default)]
     /// pub struct Writes<Model: ::serde::Serialize + Default> {
     ///     pub id: #_____field_module::Id,
@@ -156,7 +156,7 @@ pub struct SchemaFieldsProperties {
     /// Example value:
     /// ```
     /// struct Email(pub(super) Field);
-    /// 
+    ///
     /// impl std::ops::Deref for Email {
     ///     type Target = #crate_name::Field;
     ///
@@ -166,7 +166,7 @@ pub struct SchemaFieldsProperties {
     /// }
     /// impl #crate_name::SetterAssignable<sql::Duration> for Email {}
     /// ```
-     pub field_wrapper_type_custom_implementations: Vec<TokenStream>,
+    pub field_wrapper_type_custom_implementations: Vec<TokenStream>,
 
     /// Generated example: pub timeWritten: "timeWritten".into(),
     /// This is used to build the actual instance of the model during intialization e,g out:
@@ -183,7 +183,7 @@ pub struct SchemaFieldsProperties {
     /// ```
     pub schema_struct_fields_names_kv: Vec<TokenStream>,
     pub schema_struct_fields_names_kv_prefixed: Vec<TokenStream>,
-    
+
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
@@ -208,7 +208,7 @@ pub struct SchemaFieldsProperties {
     pub aliases_struct_fields_types_kv: Vec<TokenStream>,
 
     /// Generated example: pub writtenBooks: "writtenBooks".into(),
-    /// This is used to build the actual instance of the struct with aliases 
+    /// This is used to build the actual instance of the struct with aliases
     /// The full thing can look like and the fields should be in normalized form:
     /// i.e writtenBooks => writtenBooks if serde camelizes
     /// ```
@@ -328,10 +328,10 @@ pub struct SchemaPropertiesArgs<'a> {
     pub table_name: String,
 }
 
-pub enum DataType{
+pub enum DataType {
     Node,
     Edge,
-    Object
+    Object,
 }
 
 impl SchemaFieldsProperties {
@@ -376,13 +376,13 @@ impl SchemaFieldsProperties {
                 
         
                 let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
-                        ReferencedNodeMeta::from_record_link(&node_object, field_ident_normalised, struct_name_ident, is_list) 
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
+                        ReferencedNodeMeta::from_record_link(node_object, field_ident_normalised, struct_name_ident, is_list) 
+                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                 };
                 
                 let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
-                        ReferencedNodeMeta::from_nested(&node_object, field_ident_normalised, struct_name_ident, is_list) 
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
+                        ReferencedNodeMeta::from_nested(node_object, field_ident_normalised, struct_name_ident, is_list) 
+                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                 };
 
                 let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
@@ -695,7 +695,7 @@ impl SchemaFieldsProperties {
                     
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
-                        if node_object.to_string() != struct_name_ident.to_string() {
+                        if *struct_name_ident != node_object.to_string() {
                             panic!("The field - `{field_name_original}` - has a linkself \
                                    attribute or type that is not pointing to the current struct. \
                                    Make sure the field attribute is link_self=\"{struct_name_ident}\" \
@@ -756,7 +756,7 @@ impl SchemaFieldsProperties {
                                                 ReferencedNodeMeta::default()
                                             };
                         ref_node_meta
-                            .with_field_definition(field_receiver, &struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
+                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)                                        
                     }
                 };
                 
@@ -777,7 +777,7 @@ impl SchemaFieldsProperties {
                     .insert(referenced_node_meta.foreign_node_schema_import.into());
                 
                 store.record_link_fields_methods
-                    .push(referenced_node_meta.record_link_default_alias_as_method.into());
+                    .push(referenced_node_meta.record_link_default_alias_as_method);
   
   
 
@@ -815,10 +815,10 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> TokenStream {
         let crate_name = get_crate_name(false);
-        let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
+        let relation_model = &format_ident!("{}", relation.model.as_ref().unwrap());
         let relation_attributes = RelateAttribute::from(relation);
-        let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
-        let ref foreign_node_table_name = TokenStream::from(&relation_attributes.node_table_name);
+        let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
+        let foreign_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
 
         let edge_table_name_checker_ident = format_ident!("{}EdgeTableNameChecker", relation_model);
         let home_node_ident = format_ident!("{}HomeNode", relation_model);
@@ -879,19 +879,18 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> &Self {
         let crate_name = get_crate_name(false);
-        let ref relation_model = format_ident!("{}", relation.model.as_ref().unwrap());
+        let relation_model = &format_ident!("{}", relation.model.as_ref().unwrap());
         let relation_attributes = RelateAttribute::from(relation);
-        let ref edge_table_name = TokenStream::from(&relation_attributes.edge_table_name);
-        
-        let ref destination_node_table_name =
-            TokenStream::from(&relation_attributes.node_table_name);
-        let ref destination_node_table_name_str =  destination_node_table_name.to_string();
+        let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
 
-        let ref edge_direction = relation_attributes.edge_direction;
+        let destination_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
+        let destination_node_table_name_str = &destination_node_table_name.to_string();
+
+        let edge_direction = &relation_attributes.edge_direction;
         let arrow = format!("{}", &edge_direction);
 
-        let ref edge_name_as_method_ident =
-            || self.add_direction_indication_to_ident(edge_table_name, edge_direction);
+        let edge_name_as_method_ident =
+            &(|| self.add_direction_indication_to_ident(edge_table_name, edge_direction));
 
         // represents the schema but aliased as the pascal case of the destination table name
         let destination_node_schema_ident = format_ident!(
@@ -949,7 +948,7 @@ impl NodeEdgeMetadataStore {
                 "{}",
                 &relation_attributes.edge_table_name.clone().to_string()
             ),
-            direction: edge_direction.clone(),
+            direction: *edge_direction,
             destination_node_schema: vec![destination_node_schema_one()],
             foreign_node_connection_method: vec![foreign_node_connection_method()],
             origin_struct_ident: origin_struct_ident.to_owned(),
@@ -957,7 +956,7 @@ impl NodeEdgeMetadataStore {
             edge_name_as_method_ident: format_ident!("{}", edge_name_as_method_ident()),
             imports: vec![imports()],
             edge_relation_model_selected_ident: relation_model.to_owned(),
-            destination_node_name:  destination_node_table_name.to_string()
+            destination_node_name: destination_node_table_name.to_string(),
         };
 
         match self.0.entry(edge_name_as_method_ident()) {

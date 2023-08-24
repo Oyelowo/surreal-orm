@@ -373,19 +373,17 @@ impl MyFieldReceiver {
                                 panic!("type must be `array` when link_many attribute is used")
                             }
                         }
-                    } else {
-                        if let FieldType::Array = field_type {
-                            if self.item_type.is_none()
-                                && !self.type_is_inferrable(field_name_normalized)
-                            {
-                                panic!(
-                                    "Not able to infer array content type. Content type must 
-be provided when type is array and the compiler cannot infer the type. 
-Please, provide `item_type` for the field - {}. 
-e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
-                                    &field_name_normalized
-                                );
-                            }
+                    } else if let FieldType::Array = field_type {
+                        if self.item_type.is_none()
+                            && !self.type_is_inferrable(field_name_normalized)
+                        {
+                            panic!(
+                                "Not able to infer array content type. Content type must 
+                    be provided when type is array and the compiler cannot infer the type. 
+                    Please, provide `item_type` for the field - {}. 
+                    e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
+                                &field_name_normalized
+                            );
                         }
                     }
                 }
@@ -499,7 +497,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
 
                 field_item_type: self.item_type.as_ref().map(|item_type| {
-                    let ref item_type = item_type.0;
+                    let item_type = &item_type.0;
                     quote!(#item_type.parse::<#crate_name::FieldType>()
                         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
                 }),
@@ -805,7 +803,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                             return false;
                         }
                     }
-                    last_seg.ident.to_string() == "Vec"
+                    last_seg.ident == "Vec"
                 } else {
                     false
                 }
@@ -834,8 +832,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                             return false;
                         }
                     }
-                    last_seg.ident.to_string() == "HashMap"
-                        || last_seg.ident.to_string() == "BTreeMap"
+                    last_seg.ident == "HashMap" || last_seg.ident == "BTreeMap"
                 } else {
                     false
                 }
@@ -875,11 +872,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path.path.segments.last().unwrap();
-                if last_segment.ident.to_string().to_lowercase() == "datetime" {
-                    return true;
-                } else {
-                    return false;
-                }
+                last_segment.ident.to_string().to_lowercase() == "datetime"
             }
             _ => false,
         }
@@ -914,11 +907,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path.path.segments.last().unwrap();
-                if last_segment.ident == "Duration" {
-                    return true;
-                } else {
-                    return false;
-                }
+                last_segment.ident == "Duration"
             }
             _ => false,
         }
@@ -935,14 +924,14 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
-                last_seg.ident.to_string() == "Geometry"
-                    || last_seg.ident.to_string() == "Point"
-                    || last_seg.ident.to_string() == "LineString"
-                    || last_seg.ident.to_string() == "Polygon"
-                    || last_seg.ident.to_string() == "MultiPoint"
-                    || last_seg.ident.to_string() == "MultiLineString"
-                    || last_seg.ident.to_string() == "MultiPolygon"
-                    || last_seg.ident.to_string() == "GeometryCollection"
+                last_seg.ident == "Geometry"
+                    || last_seg.ident == "Point"
+                    || last_seg.ident == "LineString"
+                    || last_seg.ident == "Polygon"
+                    || last_seg.ident == "MultiPoint"
+                    || last_seg.ident == "MultiLineString"
+                    || last_seg.ident == "MultiPolygon"
+                    || last_seg.ident == "GeometryCollection"
                 // if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                 //     // if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
                 //     //     if let syn::Type::Infer(_) = inner_type {
@@ -987,7 +976,7 @@ e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
 
     pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
         let field_type =
-            FieldType::from_str(&self.item_type.clone().unwrap_or("any".into()).to_string())
+            FieldType::from_str(self.item_type.clone().unwrap_or("any".into()).to_string())
                 .unwrap();
         let crate_name = get_crate_name(false);
         match field_type {
@@ -1348,7 +1337,7 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                let field_type = FieldType::from_str(type_.to_string()).unwrap();
                 let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
                     FieldType::String => quote!(#crate_name::sql::String::from(#value)),
@@ -1379,7 +1368,7 @@ impl ReferencedNodeMeta {
                 type_: Some(type_),
                 ..
             } => {
-                let field_type = FieldType::from_str(&type_.to_string()).unwrap();
+                let field_type = FieldType::from_str(type_.to_string()).unwrap();
                 let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value_fn())),
                     FieldType::String => quote!(#crate_name::sql::String::from(#value_fn())),
@@ -1543,9 +1532,7 @@ impl ReferencedNodeMeta {
         let schema_type_ident = format_ident!("{node_type_name}");
         let crate_name = get_crate_name(false);
 
-        let foreign_node_schema_import = if node_type_name.to_string()
-            == struct_name_ident.to_string()
-        {
+        let foreign_node_schema_import = if *struct_name_ident == node_type_name.to_string() {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -1624,9 +1611,7 @@ impl ReferencedNodeMeta {
         let normalized_field_name_str = normalized_field_name.to_string();
         let crate_name = get_crate_name(false);
 
-        let foreign_node_schema_import = if node_type_name.to_string()
-            == struct_name_ident.to_string()
-        {
+        let foreign_node_schema_import = if *struct_name_ident == node_type_name.to_string() {
             // Dont import for current struct since that already exists in scope
             quote!()
         } else {
@@ -1711,10 +1696,10 @@ impl NormalisedField {
             || field_ident_cased.into(),
             |renamed| renamed.clone().serialize,
         );
-        let ref field_ident_normalised = format_ident!("{original_field_name_normalised}");
+        let field_ident_normalised = &format_ident!("{original_field_name_normalised}");
 
         let (field_ident_normalised, field_ident_normalised_as_str) =
-            if original_field_name_normalised.trim_start_matches("r#") == "in".to_string() {
+            if original_field_name_normalised.trim_start_matches("r#") == "in" {
                 (format_ident!("in_"), "in".to_string())
             } else {
                 (

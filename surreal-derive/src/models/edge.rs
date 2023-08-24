@@ -7,11 +7,10 @@
  * Licensed under the MIT license
  */
 
-
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::{str::FromStr, ops::Deref};
+use std::{ops::Deref, str::FromStr};
 
 use syn::{self, parse_macro_input};
 
@@ -19,7 +18,7 @@ use super::{
     attributes::TableDeriveAttributes,
     casing::CaseString,
     errors,
-    parser::{SchemaFieldsProperties, SchemaPropertiesArgs, DataType},
+    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
     variables::VariablesModelMacro,
 };
 
@@ -48,7 +47,7 @@ use super::{
 struct EdgeToken(TableDeriveAttributes);
 
 impl Deref for EdgeToken {
-    type Target=TableDeriveAttributes;
+    type Target = TableDeriveAttributes;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -67,7 +66,7 @@ impl ToTokens for EdgeToken {
         } = &self.0;
         let table_definitions = self.get_table_definition_token();
 
-        let ref table_name_ident = format_ident!("{}", table_name.as_ref().unwrap());
+        let table_name_ident = &format_ident!("{}", table_name.as_ref().unwrap());
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
 
@@ -89,14 +88,13 @@ impl ToTokens for EdgeToken {
             ___________bindings,
             ____________update_many_bindings,
             ___________errors,
-        ..
+            ..
         } = VariablesModelMacro::new();
         let schema_props_args = SchemaPropertiesArgs {
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name: table_name_str.to_string()
-            // table_name_ident,
+            table_name: table_name_str.to_string(), // table_name_ident,
         };
 
         let SchemaFieldsProperties {
@@ -138,10 +136,13 @@ impl ToTokens for EdgeToken {
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
-        let struct_with_renamed_serialized_fields = format_ident!("{struct_name_ident}RenamedCreator");
+        let struct_with_renamed_serialized_fields =
+            format_ident!("{struct_name_ident}RenamedCreator");
         let serializable_fields_count = serializable_fields.len();
-        let serializable_fields_as_str = serializable_fields.iter().map(|f|f.to_string()).collect::<Vec<_>>();
-        
+        let serializable_fields_as_str = serializable_fields
+            .iter()
+            .map(|f| f.to_string())
+            .collect::<Vec<_>>();
 
         tokens.extend(quote!( 
                 use #crate_name::{ToRaw as _};
@@ -194,85 +195,85 @@ impl ToTokens for EdgeToken {
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
-                   #( 
+                   #(
                         #renamed_serialized_fields
                     ) *
-                } 
-        
+                }
+
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Model for #struct_name_ident<In, Out> {
                     type Id = #table_id_type;
                     type NonNullUpdater = #non_null_updater_struct_name;
                     type StructRenamedCreator = #struct_with_renamed_serialized_fields;
-                
+
                     fn table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
-                    
+
                     fn get_id(self) -> Self::Id {
                         self.id
                     }
-                
+
                     fn get_id_as_thing(&self) -> #crate_name::sql::Thing {
                         #crate_name::sql::thing(self.id.to_raw().as_str()).unwrap()
                     }
-                
+
                     fn get_serializable_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #serializable_fields), *]
                     }
-                
+
                     fn get_linked_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #linked_fields), *]
                     }
-                
+
                     fn get_link_one_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #link_one_fields), *]
                     }
-                
+
                     fn get_link_self_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #link_self_fields), *]
                     }
-                    
+
                     fn get_link_one_and_self_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #link_one_and_self_fields), *]
                     }
-                
+
                     fn get_link_many_fields() -> Vec<#crate_name::Field> {
                         return vec![#( #link_many_fields), *]
                     }
-                
+
                     fn define_table() -> #crate_name::Raw{
                         #table_definitions
                     }
-                    
+
                     fn define_fields() -> Vec<#crate_name::Raw> {
                         vec![
                            #( #field_definitions), *
                         ]
                     }
                 }
-                
+
                 #[allow(non_snake_case)]
                 pub mod #module_name {
                     use #crate_name::Node;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
                     use #crate_name::Erroneous as _;
-                    
+
                     pub struct TableNameStaticChecker {
                         pub #table_name_ident: String,
                     }
 
-                
+
                     #( #imports_referenced_node_schema) *
-        
+
                     mod #_____field_names {
                         use super::super::*;
                         use #crate_name::Parametric as _;
                         use #crate_name::Buildable as _;
-                    
+
                         #( #field_wrapper_type_custom_implementations) *
-                    } 
+                    }
 
                     #[derive(Debug, Clone)]
                     pub struct #struct_name_ident {
@@ -281,45 +282,45 @@ impl ToTokens for EdgeToken {
                         #___________bindings: #crate_name::BindingsList,
                         #___________errors: Vec<String>,
                     }
-                    
+
                     impl #crate_name::Buildable for #struct_name_ident {
                         fn build(&self) -> ::std::string::String {
                             self.#___________graph_traversal_string.to_string()
                         }
                     }
-            
+
                     impl #crate_name::Parametric for #struct_name_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
                             self.#___________bindings.to_vec()
                         }
                     }
-                    
+
                     impl #crate_name::Erroneous for #struct_name_ident {
                         fn get_errors(&self) -> Vec<::std::string::String> {
                             self.#___________errors.to_vec()
                         }
                     }
-                
+
                     impl #crate_name::Aliasable for &#struct_name_ident {}
-                
+
                     impl #crate_name::Parametric for &#struct_name_ident {
                         fn get_bindings(&self) -> #crate_name::BindingsList {
                             self.#___________bindings.to_vec()
                         }
                     }
-                
+
                     impl #crate_name::Buildable for &#struct_name_ident {
                         fn build(&self) -> ::std::string::String {
                             self.#___________graph_traversal_string.to_string()
                         }
                     }
-                    
+
                     impl #crate_name::Erroneous for &#struct_name_ident {
                         fn get_errors(&self) -> Vec<String> {
                             self.#___________errors.to_vec()
                         }
                     }
-                    
+
                     impl #struct_name_ident {
                         pub fn new() -> Self {
                             Self {
@@ -339,7 +340,7 @@ impl ToTokens for EdgeToken {
                                 #___________errors: vec![],
                             }
                         }
-                
+
                         pub fn empty() -> Self {
                             Self {
                                #( #schema_struct_fields_names_kv_empty) *
@@ -348,7 +349,7 @@ impl ToTokens for EdgeToken {
                                 #___________errors: vec![],
                             }
                         }
-                        
+
                         pub fn #__________connect_edge_to_graph_traversal_string(
                             connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
                             clause: impl Into<#crate_name::EdgeClause>,
@@ -358,35 +359,35 @@ impl ToTokens for EdgeToken {
                             let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                             let bindings = bindings.as_slice();
                             schema_instance.#___________bindings = bindings.into();
-                            
+
                             let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
                             let errors = errors.as_slice();
                             schema_instance.#___________errors = errors.into();
-                        
+
                             let schema_edge_str_with_arrow = format!(
                                 "{}{}",
                                 connection.build(),
                                 clause.build(),
                             );
-                            
+
                             #schema_instance.#___________graph_traversal_string.push_str(schema_edge_str_with_arrow.as_str());
 
                             let #___________graph_traversal_string = &#schema_instance
                                 .#___________graph_traversal_string;
-                    
+
                             // let #___________graph_traversal_string = &#schema_instance
                             //     .#___________graph_traversal_string
                             //     .replace(arrow_direction, "");
 
                             #( #connection_with_field_appended) *
-                            
+
                             #schema_instance
                         }
-                        
+
                         #( #record_link_fields_methods) *
                     }
                 }
-                
+
             fn #test_name() {
                 #( #static_assertions) *
             }

@@ -7,7 +7,7 @@
 
 #![allow(dead_code)]
 
-use darling::{FromDeriveInput, ToTokens, util, ast};
+use darling::{ast, util, FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
@@ -17,7 +17,7 @@ use syn::{self, parse_macro_input};
 use super::{
     attributes::{MyFieldReceiver, Rename},
     casing::CaseString,
-    parser::{SchemaFieldsProperties, SchemaPropertiesArgs, DataType},
+    parser::{DataType, SchemaFieldsProperties, SchemaPropertiesArgs},
     variables::VariablesModelMacro,
 };
 
@@ -38,7 +38,7 @@ pub struct ObjectToken {
     pub(crate) rename_all: ::std::option::Option<Rename>,
 }
 
-impl ToTokens for ObjectToken{
+impl ToTokens for ObjectToken {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let ObjectToken {
             ident: struct_name_ident,
@@ -66,8 +66,7 @@ impl ToTokens for ObjectToken{
             data,
             struct_level_casing,
             struct_name_ident,
-            table_name: "".to_string()
-            // table_name_ident,
+            table_name: "".to_string(), // table_name_ident,
         };
 
         let SchemaFieldsProperties {
@@ -92,7 +91,6 @@ impl ToTokens for ObjectToken{
         let test_function_name = format_ident!("test_{module_name}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 
-        
         // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // pub struct Student {
@@ -100,39 +98,39 @@ impl ToTokens for ObjectToken{
         //     last_name: String,
         //     age: u8,
         // }
-        tokens.extend(quote!( 
+        tokens.extend(quote!(
             use #crate_name::{ToRaw as _};
-            
+
             impl #crate_name::SchemaGetter for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
-            
+
                 fn schema() -> Self::Schema {
                     #module_name::#struct_name_ident::new()
                 }
-                
+
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
                     #module_name::#struct_name_ident::new_prefixed(prefix)
                 }
             }
-        
+
             impl #crate_name::Object for #struct_name_ident {
                 // type Schema = #module_name::#struct_name_ident;
                 // type NonNullUpdater = #module_name::#non_null_updater_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
-                
+
                 // fn schema() -> Self::Schema {
                 //     #module_name::#struct_name_ident::new()
                 // }
             }
-        
+
             #[allow(non_snake_case)]
             #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
             pub struct #non_null_updater_struct_name {
-               #( 
+               #(
                     #[serde(skip_serializing_if = "Option::is_none")]
                     #non_null_updater_fields
                 ) *
-            } 
+            }
 
 
             #[allow(non_snake_case)]
@@ -140,17 +138,17 @@ impl ToTokens for ObjectToken{
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
-            
+
                #( #imports_referenced_node_schema) *
-                
+
                 mod #_____field_names {
                     use super::super::*;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;
-                
+
                     #( #field_wrapper_type_custom_implementations) *
-                } 
-            
+                }
+
                 #[derive(Debug, Clone)]
                 pub struct #struct_name_ident {
                    #( #schema_struct_fields_types_kv) *
@@ -164,19 +162,19 @@ impl ToTokens for ObjectToken{
                         self.#___________bindings.to_vec()
                     }
                 }
-            
+
                 impl #crate_name::Buildable for #struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
-                
+
                 impl #crate_name::Erroneous for #struct_name_ident {
                     fn get_errors(&self) -> Vec<String> {
                         self.#___________errors.to_vec()
                     }
                 }
-                
+
                 impl ::std::fmt::Display for #struct_name_ident {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         f.write_fmt(format_args!("{}", self.#___________graph_traversal_string))
@@ -184,19 +182,19 @@ impl ToTokens for ObjectToken{
                 }
 
                 impl #crate_name::Aliasable for &#struct_name_ident {}
-            
+
                 impl #crate_name::Parametric for &#struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
                         self.#___________bindings.to_vec()
                     }
                 }
-            
+
                 impl #crate_name::Buildable for &#struct_name_ident {
                     fn build(&self) -> ::std::string::String {
                         self.#___________graph_traversal_string.to_string()
                     }
                 }
-                
+
                 impl #crate_name::Erroneous for &#struct_name_ident {
                     fn get_errors(&self) -> Vec<String> {
                         self.#___________errors.to_vec()
@@ -213,7 +211,7 @@ impl ToTokens for ObjectToken{
                             #___________errors: vec![],
                         }
                     }
-                
+
                     pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
                         let prefix: #crate_name::Valuex = prefix.into();
                         Self {
@@ -223,7 +221,7 @@ impl ToTokens for ObjectToken{
                             #___________errors: vec![],
                         }
                     }
-                
+
                     pub fn empty() -> Self {
                         Self {
                            #( #schema_struct_fields_names_kv_empty) *
@@ -232,7 +230,7 @@ impl ToTokens for ObjectToken{
                             #___________errors: vec![],
                         }
                     }
-                    
+
                     pub fn #__________connect_object_to_graph_traversal_string(
                         // store: ::std::string::String,
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
@@ -241,20 +239,19 @@ impl ToTokens for ObjectToken{
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
                     ) -> Self {
-                        let writes = "Rer";
-                        let mut #schema_instance = Self::empty(); 
+                        let mut #schema_instance = Self::empty();
                         let clause: #crate_name::ObjectClause = clause.into();
                         let bindings = [connection.get_bindings().as_slice(), clause.get_bindings().as_slice()].concat();
                         let bindings = bindings.as_slice();
 
                         schema_instance.#___________bindings = bindings.into();
-                        
+
                         let errors = [connection.get_errors().as_slice(), clause.get_errors().as_slice()].concat();
                         let errors = errors.as_slice();
 
                         schema_instance.#___________errors = errors.into();
-                        
-                        
+
+
                     // let connection = if use_table_name {
                     //     // format!("{}{}", store, clause.format_with_model(#table_name_str))
                     //     format!("{}{}", store, clause)
@@ -266,17 +263,17 @@ impl ToTokens for ObjectToken{
                         let connection_str = format!("{}{}", connection.build(), clause.build());
                         #schema_instance.#___________graph_traversal_string.push_str(connection_str.as_str());
                         let #___________graph_traversal_string = &#schema_instance.#___________graph_traversal_string;
-                        
+
                         #( #connection_with_field_appended) *
                         #schema_instance
                     }
-                    
+
                     #( #record_link_fields_methods) *
 
                 }
             }
 
-                
+
             #[test]
             fn #test_function_name() {
                 #( #static_assertions) *
