@@ -46,7 +46,7 @@ struct NodeEdgeMetadata {
     /// type Writes = <StudentWritesBook as Edge>::Schema;
     edge_relation_model_selected_ident: syn::Ident,
     /// Example Generated:
-    /// ```
+    /// ```rust, ignore
     ///   type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
     ///   type Book = <BookModel as surreal_macros::Node>::Schema;
     ///
@@ -55,7 +55,7 @@ struct NodeEdgeMetadata {
     /// ```
     ///
     /// Example Value:
-    /// ```
+    /// ```rust, ignore
     /// vec![
     ///    quote!(
     ///       type BookModel = <StudentWritesBook as surreal_macros::Edge>::Out;
@@ -71,7 +71,7 @@ struct NodeEdgeMetadata {
     destination_node_name: String,
     /// Example Generated:
     ///
-    /// ```
+    /// ```rust, ignore
     /// impl Writes__ {
     ///     fn book(&self, filter: Filter) -> Book {
     ///         Book::__________connect_to_graph_traversal_string(
@@ -90,7 +90,7 @@ struct NodeEdgeMetadata {
     /// ```
     ///
     /// Example Value:
-    /// ```
+    /// ```rust, ignore
     /// vec![
     ///     quote!(
     ///        fn book(&self, filter: Filter) -> Book {
@@ -134,7 +134,7 @@ pub struct SchemaFieldsProperties {
     /// key(normalized_field_name)-value(Field) e.g pub out: Field, of field name and Field type
     /// to build up struct for generating fields of a Schema of the Edge
     /// The full thing can look like:
-    /// ```
+    /// ```rust,ignore
     /// mod _______field_module {
     ///     pub struct Id(pub(super) Field);
     ///     pub struct In(pub(super) Field);
@@ -154,7 +154,7 @@ pub struct SchemaFieldsProperties {
 
     /// Generated Field wrapper type implementations for each fiekd around `Field` type
     /// Example value:
-    /// ```
+    /// ```rust,ignore
     /// struct Email(pub(super) Field);
     ///
     /// impl std::ops::Deref for Email {
@@ -173,7 +173,7 @@ pub struct SchemaFieldsProperties {
     /// "out".into()
     /// The full thing can look like and the fields should be in normalized form:
     /// i.e time_written => timeWritten if serde camelizes
-    /// ```
+    /// ```rust,ignore
     /// Self {
     ///     id: "id".into(),
     ///     r#in: "in".into(),
@@ -187,6 +187,7 @@ pub struct SchemaFieldsProperties {
     /// Used to build up empty string values for all schema fields
     /// Example value: pub timeWritten: "".into(),
     /// Used to build up e.g:
+    /// ```rust,ignore
     /// Self {
     ///     id: "".into(),
     ///     r#in: "".into(),
@@ -199,7 +200,7 @@ pub struct SchemaFieldsProperties {
     /// Generated example: pub writtenBooks: AliasName,
     /// This is used when you have a relate attribute signaling a graph with e.g node->edge->node
     /// The full thing can look like:
-    /// ```
+    /// ```rust,ignore
     ///     #[derive(Debug, Default)]
     ///     pub struct Writes<Model: ::serde::Serialize + Default> {
     ///                pub writtenBooks: AliasName,
@@ -211,7 +212,7 @@ pub struct SchemaFieldsProperties {
     /// This is used to build the actual instance of the struct with aliases
     /// The full thing can look like and the fields should be in normalized form:
     /// i.e writtenBooks => writtenBooks if serde camelizes
-    /// ```
+    /// ```rust, ignore
     /// Self {
     ///                pub writtenBooks: AliasName,
     /// }
@@ -227,7 +228,7 @@ pub struct SchemaFieldsProperties {
     pub serialized_field_names_normalised: Vec<String>,
 
     /// Generated example:
-    /// ```
+    /// ```rust,ignore
     /// // For relate field
     /// type StudentWritesBlogTableName = <StudentWritesBlog as Edge>::TableNameChecker;
     /// #crate_name::validators::assert_fields!(StudentWritesBlogTableName: Writes);
@@ -248,7 +249,7 @@ pub struct SchemaFieldsProperties {
     pub static_assertions: Vec<TokenStream>,
 
     /// Generated example:
-    /// ```
+    /// ```rust,ignore
     /// type Book = <super::Book as Node>::Schema;
     /// ```
     /// We need imports to be unique, hence the hashset
@@ -261,7 +262,7 @@ pub struct SchemaFieldsProperties {
     /// .push_str(format!("{}.drunk_water", xx.___________graph_traversal_string).as_str());
     ///
     /// so that we can do e.g
-    /// ```
+    /// ```rust,ignore
     /// Student.field_name
     /// ```
     pub connection_with_field_appended: Vec<TokenStream>,
@@ -269,7 +270,7 @@ pub struct SchemaFieldsProperties {
     /// When a field references another model as Link, we want to generate a method for that
     /// to be able to access the foreign fields
     /// Generated Example for e.g field with best_student: <Student>
-    /// ```
+    /// ```rust, ignore
     /// pub fn best_student(&self, filter: Filter) -> Student {
     ///     Student::__________connect_to_graph_traversal_string(&self.___________graph_traversal_string, filter)
     /// }
