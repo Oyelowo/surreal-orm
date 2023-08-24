@@ -33,18 +33,18 @@ use crate::{Buildable, Erroneous, Function, NumberLike, Parametric, Valuex};
 ///
 /// SELECT * FROM [{ age: 33 }, { age: 45 }, { age: 39 }] ORDER BY rand();
 /// [
-/// 	{
-/// 		age: 45
-/// 	},
-/// 	{
-/// 		age: 39
-/// 	},
-/// 	{
-/// 		age: 33
-/// 	}
+///     {
+///         age: 45
+///     },
+///    {
+///        age: 39
+///    },
+///    {
+///        age: 33
+///    }
 /// ]
 pub fn rand_fn() -> Function {
-    let query_string = format!("rand()");
+    let query_string = "rand()".to_string();
 
     Function {
         query_string,
@@ -73,7 +73,7 @@ pub use rand_rand as rand;
 
 /// The rand::bool function generates a random boolean value.
 pub fn bool_fn() -> Function {
-    let query_string = format!("rand::bool()");
+    let query_string = "rand::bool()".to_string();
 
     Function {
         query_string,
@@ -102,7 +102,7 @@ pub use rand_bool as bool;
 
 /// The rand::uuid function generates a random UUID.
 pub fn uuid_fn() -> Function {
-    let query_string = format!("rand::uuid()");
+    let query_string = "rand::uuid()".to_string();
 
     Function {
         query_string,
@@ -197,7 +197,7 @@ pub fn float_fn(
             errors.extend(to.get_errors());
             format!("rand::float({}, {})", from.build(), to.build())
         }
-        _ => format!("rand::float()"),
+        _ => "rand::float()".to_string(),
     };
 
     Function {
@@ -270,7 +270,7 @@ pub fn int_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberLi
             errors.extend(to.get_errors());
             format!("rand::int({}, {})", from.build(), to.build())
         }
-        _ => format!("rand::int()"),
+        _ => "rand::int()".to_string(),
     };
 
     Function {
@@ -340,7 +340,7 @@ pub fn time_fn(from: Option<impl Into<NumberLike>>, to: Option<impl Into<NumberL
             errors.extend(to.get_errors());
             query_string
         }
-        _ => format!("rand::time()"),
+        _ => "rand::time()".to_string(),
     };
 
     Function {
@@ -420,7 +420,7 @@ pub fn string_fn(
 
             format!("rand::string({}, {})", from.build(), to.build())
         }
-        _ => format!("rand::string()"),
+        _ => "rand::string()".to_string(),
     };
 
     Function {

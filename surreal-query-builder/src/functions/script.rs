@@ -28,8 +28,7 @@ pub fn function_fn<T: Into<Param>>(args: Vec<T>, jscode_body: impl Into<String>)
         args.into_iter()
             .map(|a| {
                 let a: Param = a.into();
-                let a = a.build();
-                a
+                a.build()
             })
             .collect::<Vec<_>>()
             .join(", "),

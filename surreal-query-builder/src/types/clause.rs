@@ -391,7 +391,7 @@ impl Clause {
             AnyEdgeFilter(edge_tables) => {
                 bindings = edge_tables.get_bindings();
                 errors = edge_tables.get_errors();
-                let build = format!("{}", edge_tables.build());
+                let build = edge_tables.build().to_string();
                 format!("({build})")
             }
         };
@@ -422,7 +422,6 @@ impl Clause {
 
     /// attach the field name to the clause as metadata.
     pub fn with_field(mut self, field_name: String) -> Self {
-        let field_name: String = field_name.into();
         self.model_or_field_name = Some(ModelOrFieldName::Field(field_name));
         self
     }

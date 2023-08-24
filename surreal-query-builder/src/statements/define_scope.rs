@@ -90,7 +90,7 @@ impl DefineScopeStatement {
     pub fn signup(mut self, expression: impl Queryable) -> Self {
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
-        self.signup_expression = Some(format!("{}", expression.build()));
+        self.signup_expression = Some(expression.build());
         self
     }
 
@@ -98,7 +98,7 @@ impl DefineScopeStatement {
     pub fn signin(mut self, expression: impl Queryable) -> Self {
         let bindings = expression.get_bindings();
         self.bindings.extend(bindings);
-        self.signin_expression = Some(format!("{}", expression.build()));
+        self.signin_expression = Some(expression.build());
         self
     }
 }

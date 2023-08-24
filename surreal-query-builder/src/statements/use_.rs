@@ -70,7 +70,7 @@ impl Buildable for UseStatement {
             query.push_str(&format!(" NS {namespace}"));
         }
 
-        query.push_str(";");
+        query.push_str(';');
 
         query
     }

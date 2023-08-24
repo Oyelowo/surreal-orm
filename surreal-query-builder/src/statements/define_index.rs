@@ -84,7 +84,7 @@ impl From<Field> for Columns {
 
 impl<const N: usize> From<&[Field; N]> for Columns {
     fn from(value: &[Field; N]) -> Self {
-        Self::Fields(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
+        Self::Fields(value.iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
 }
 
@@ -135,7 +135,7 @@ impl Parametric for Columns {
         match self {
             Columns::Field(field) => field.get_bindings(),
             Columns::Fields(fields) => fields
-                .into_iter()
+                .iter()
                 .flat_map(|f| f.get_bindings())
                 .collect::<Vec<_>>(),
         }

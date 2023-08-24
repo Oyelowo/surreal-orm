@@ -68,7 +68,7 @@ use crate::{
 ///     .commit_transaction();
 /// ```
 pub fn begin_transaction() -> QueryTransaction {
-    BeginTransactionStatement::new()
+    BeginTransactionStatement::begin()
 }
 
 /// Creates a Transaction statement starting
@@ -148,7 +148,7 @@ impl QueryTransaction {
 pub struct BeginTransactionStatement;
 
 impl BeginTransactionStatement {
-    pub(crate) fn new() -> QueryTransaction {
+    pub(crate) fn begin() -> QueryTransaction {
         QueryTransaction {
             data: TransactionData {
                 transaction_completion_type: None,

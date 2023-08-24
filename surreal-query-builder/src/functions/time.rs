@@ -31,7 +31,7 @@ use crate::{Buildable, DatetimeLike, DurationLike, Erroneous, Function, Parametr
 
 /// The time::now function returns the current datetime as an ISO8601 timestamp.The time::now function returns the current datetime as an ISO8601 timestamp.
 pub fn now_fn() -> Function {
-    let query_string = format!("now()");
+    let query_string = "now()".to_string();
 
     Function {
         query_string,

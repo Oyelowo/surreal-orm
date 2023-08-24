@@ -72,7 +72,7 @@ impl<'de> Deserialize<'de> for Geometry {
                         .iter()
                         .map(|ls| {
                             geo::LineString::from(
-                                ls.into_iter()
+                                ls.iter()
                                     .map(|c| c.parse_value_to_coord())
                                     .collect::<Vec<_>>(),
                             )

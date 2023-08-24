@@ -61,7 +61,7 @@ pub struct Passhash(String);
 
 impl From<String> for Passhash {
     fn from(value: String) -> Self {
-        Self(value.into())
+        Self(value)
     }
 }
 
@@ -80,7 +80,7 @@ impl Display for Passhash {
 pub struct Password(String);
 impl From<String> for Password {
     fn from(value: String) -> Self {
-        Self(value.into())
+        Self(value)
     }
 }
 
@@ -138,7 +138,7 @@ impl DefineLoginStatement {
     pub fn password(mut self, password: impl Into<Password>) -> Self {
         let password: Password = password.into();
         let binding = Binding::new(password.0.clone()).with_description("login password");
-        let password_param = format!("{}", binding.get_param_dollarised());
+        let password_param = binding.get_param_dollarised();
         self.bindings.push(binding);
         self.credential = Some(LoginCredential::Password(password_param.into()));
         self
@@ -148,7 +148,7 @@ impl DefineLoginStatement {
     pub fn passhash(mut self, passhash: impl Into<Passhash>) -> Self {
         let passhash: Passhash = passhash.into();
         let binding = Binding::new(passhash.0.clone());
-        let passhash_param = format!("{}", binding.get_param_dollarised());
+        let passhash_param = binding.get_param_dollarised();
         self.bindings.push(binding);
         self.credential = Some(LoginCredential::Passhash(passhash_param.into()));
         self

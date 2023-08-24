@@ -44,7 +44,7 @@ impl From<ForArgs> for Vec<CrudType> {
     }
 }
 
-impl<'a, const N: usize> From<&[CrudType; N]> for ForArgs {
+impl<const N: usize> From<&[CrudType; N]> for ForArgs {
     fn from(value: &[CrudType; N]) -> Self {
         Self::ForOptions(value.to_vec())
     }
@@ -102,7 +102,7 @@ pub struct For(ForData);
 
 impl Buildable for For {
     fn build(&self) -> String {
-        let mut query = format!("FOR");
+        let mut query = "FOR".to_string();
         if !&self.0.crud_types.is_empty() {
             query = format!(
                 "{query} {}",
@@ -110,10 +110,7 @@ impl Buildable for For {
                     .0
                     .crud_types
                     .iter()
-                    .map(|ct| {
-                        let ct = ct.to_string();
-                        ct
-                    })
+                    .map(|ct| { ct.to_string() })
                     .collect::<Vec<_>>()
                     .join(", ")
             );
@@ -190,7 +187,7 @@ impl From<Vec<For>> for Permissions {
     }
 }
 
-impl<'a, const N: usize> From<&[For; N]> for Permissions {
+impl<const N: usize> From<&[For; N]> for Permissions {
     fn from(value: &[For; N]) -> Self {
         Self::Fors(value.to_vec())
     }
@@ -220,7 +217,7 @@ impl From<&Vec<Raw>> for Permissions {
     }
 }
 
-impl<'a, const N: usize> From<&[Raw; N]> for Permissions {
+impl<const N: usize> From<&[Raw; N]> for Permissions {
     fn from(value: &[Raw; N]) -> Self {
         Self::RawStatementList(value.to_vec())
     }

@@ -507,7 +507,7 @@ where
     T: Serialize + DeserializeOwned + Model,
 {
     fn build(&self) -> String {
-        let ref statement = self.0;
+        let statement = &self.0;
         let mut query = format!("UPDATE {}", statement.target);
 
         if let Some(content) = &statement.content {

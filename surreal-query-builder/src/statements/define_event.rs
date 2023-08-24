@@ -140,7 +140,7 @@ impl Buildable for DefineEventStatement {
         }
 
         if let Some(expression) = &self.0.then_string {
-            query = format!("{query} THEN {}", expression.trim_end_matches(";"));
+            query = format!("{query} THEN {}", expression.trim_end_matches(';'));
         }
 
         query += ";";

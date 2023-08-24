@@ -121,7 +121,7 @@ where
 
     ///
     fn validate_fields_to_fetch(
-        linked_fields_to_fetch: &Vec<Field>,
+        linked_fields_to_fetch: &[Field],
     ) -> SurrealOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
             .iter()
@@ -263,9 +263,9 @@ where
                 all.into_iter()
                     .chain(
                         projections
-                            .to_vec()
-                            .into_iter()
-                            .filter(|p| p.build().to_string() != "*")
+                            .iter()
+                            .cloned()
+                            .filter(|p| p.build() != "*")
                             // .map(|v| v.build())
                             // .map(|v| v.build())
                             .collect::<Vec<_>>(),

@@ -46,9 +46,7 @@ impl FromStr for GeometryType {
             "multiline" => Ok(Self::Multiline),
             "multipolygon" => Ok(Self::Multipolygon),
             "collection" => Ok(Self::Collection),
-            _ => {
-                Err(format!("Invalid geometry type: {}", s))
-            }
+            _ => Err(format!("Invalid geometry type: {}", s)),
         }
     }
 }
@@ -133,10 +131,7 @@ impl FieldType {
 
     /// Returns true if the field_type is a record
     pub fn is_record_of_the_table(&self, table_name: &String) -> bool {
-        match self {
-            Self::Record(t) if &t.to_string() == table_name => true,
-            _ => false,
-        }
+        matches!(self, Self::Record(t) if &t.to_string() == table_name)
     }
 }
 

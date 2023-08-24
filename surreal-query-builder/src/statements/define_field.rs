@@ -257,7 +257,7 @@ impl Buildable for DefineFieldStatement {
         } else if !&self.permissions_for.is_empty() {
             query = format!("{query}\nPERMISSIONS\n{}", self.permissions_for.join("\n"));
         }
-        query.push_str(";");
+        query.push(';');
 
         query
     }

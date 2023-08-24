@@ -53,7 +53,7 @@ where
     let param = match targettables {
         TargettablesForUpdate::Table(table) => {
             let table = table.to_string();
-            if &table != &table_name.to_string() {
+            if table != table_name.to_string() {
                 errors.push(format!(
                     "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
                 ));

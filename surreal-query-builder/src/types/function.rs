@@ -20,6 +20,12 @@ pub struct Function {
     pub(crate) errors: ErrorList,
 }
 
+impl Default for Function {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Function {
     /// Creates a new function with the given query string.
     pub fn new() -> Self {

@@ -259,7 +259,7 @@ impl Buildable for DefineTableStatement {
         };
 
         if let Some(select_statement) = &self.as_ {
-            query = format!("{query} AS \n\t{}", select_statement.trim_end_matches(";"));
+            query = format!("{query} AS \n\t{}", select_statement.trim_end_matches(';'));
         }
 
         if let Some(true) = self.permissions_none {
@@ -269,7 +269,7 @@ impl Buildable for DefineTableStatement {
         } else if !&self.permissions_for.is_empty() {
             query = format!("{query}\nPERMISSIONS\n{}", self.permissions_for.join("\n"));
         }
-        query.push_str(";");
+        query.push(';');
 
         query
     }

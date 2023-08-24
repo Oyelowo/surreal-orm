@@ -363,12 +363,7 @@ where
 
 impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
     fn from(value: &[sql::Thing; N]) -> Self {
-        Self::SurrealIds(
-            value
-                .iter()
-                .map(|t| t.to_owned().into())
-                .collect::<Vec<_>>(),
-        )
+        Self::SurrealIds(value.iter().map(|t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
