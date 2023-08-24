@@ -62,7 +62,9 @@ fn define_student() -> DefineTableStatement {
     let country = Field::new("country");
     let fake_id2 = sql::Thing::from(("user".to_string(), "oyedayo".to_string()));
 
-    let statement = define_table(Student::table_name())
+    
+
+    define_table(Student::table_name())
         .drop()
         .as_(
             select(All)
@@ -74,13 +76,11 @@ fn define_student() -> DefineTableStatement {
         )
         .schemafull()
         .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions(for_(&[Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+        .permissions(for_([Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
         .permissions(&[
-            for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+            for_([Create, Delete]).where_(name.is("Oyedayo")),
             for_(Update).where_(age.less_than_or_equal(130)),
-        ]);
-
-    statement
+        ])
 }
 // use Duration;
 fn we() -> sql::Value {
@@ -115,23 +115,23 @@ fn define_age() -> DefineFieldStatement {
     //         ])
     //         .to_raw(),
     //     );
-    let statement = define_field(Student::schema().age)
+    
+    define_field(Student::schema().age)
         .on_table(Student::table_name())
         .type_(String)
         .value("example@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
         .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions(for_(&[Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
         .permissions(
             &[
-                for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
+                for_([Create, Delete]).where_(firstName.is("Oyelowo")),
                 for_(Update).where_(age.less_than_or_equal(130)),
             ], // .into_iter()
                // .map(|e| e.to_raw())
                // .collect::<Vec<_>>()
                // .to_vec(),
-        );
-    statement
+        )
 }
 
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]

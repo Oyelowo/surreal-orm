@@ -31,10 +31,10 @@ fn create_test_alien(age: u8, name: String) -> Alien {
         name,
         age,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag2".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -61,7 +61,7 @@ async fn test_increment_and_decrement_update_set_with_object_partial() -> Surrea
     assert_eq!(created_weapon.strength, 0);
     //
     // // Increment by 5;
-    let ref id = created_weapon.clone().id;
+    let id = &created_weapon.clone().id;
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
 
     update::<Weapon>(created_weapon)
@@ -117,7 +117,7 @@ async fn test_increment_and_decrement_update() -> SurrealOrmResult<()> {
     assert_eq!(created_weapon.strength, 0);
     //
     // // Increment by 5;
-    let ref id = created_weapon.clone().id;
+    let id = &created_weapon.clone().id;
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
 
     update::<Weapon>(created_weapon)
@@ -325,7 +325,7 @@ async fn test_add_and_remove_to_array() -> SurrealOrmResult<()> {
     assert!(created_alien.space_ships.is_empty());
 
     // Try append
-    let ref alien_id = created_alien.clone().id;
+    let alien_id = &created_alien.clone().id;
     let alien_schema::Alien {
         ref tags,
         ref weapon,
@@ -353,13 +353,13 @@ async fn test_add_and_remove_to_array() -> SurrealOrmResult<()> {
         .run(db.clone())
         .await?;
 
-    let ref updated = update::<Alien>(alien_id)
+    let updated = &(update::<Alien>(alien_id)
         .set([
             tags.append("rice"),
             spaceShips.append(SpaceShip::create_id("cali".into())),
         ])
         .return_one(db.clone())
-        .await?;
+        .await?);
 
     let selected: Option<Alien> = select(All).from(alien_id).return_one(db.clone()).await?;
     assert_eq!(
@@ -412,7 +412,7 @@ async fn test_add_and_remove_to_array() -> SurrealOrmResult<()> {
         .return_one(db.clone())
         .await?;
 
-    let ref selected: Option<Alien> = select(All).from(alien_id).return_one(db.clone()).await?;
+    let selected: &Option<Alien> = &(select(All).from(alien_id).return_one(db.clone()).await?);
     assert_eq!(
         updated.as_ref().unwrap().tags,
         vec!["tag2", "tag3", "rust", "rice"]
@@ -519,19 +519,19 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
 
     let generated_weapons = (0..20)
         .map(|x| {
-            let weapon = Weapon {
+            
+            Weapon {
                 name: "Laser".to_string(),
                 created: Utc::now(),
                 strength: x,
                 ..Default::default()
-            };
-            weapon
+            }
         })
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
 
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
-    let ref filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
+    let filter = &cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
 
     let get_selected_weapons = || async {
         let selected_weapons: Vec<Weapon> = select(All)
@@ -561,7 +561,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
     assert!(
         update_weapons_with_filter
             .iter()
-            .all(|x| x.name.to_string() == "Oyelowo"),
+            .all(|x| x.name == "Oyelowo"),
         "All not equals Oyelowo"
     );
     assert!(
@@ -589,7 +589,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
     assert!(
         update_weapons_with_filter
             .iter()
-            .all(|x| x.name.to_string() == "Oyelowo"),
+            .all(|x| x.name == "Oyelowo"),
         "All not equals Oyelowo"
     );
     assert!(
@@ -609,19 +609,19 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
 
     let generated_weapons = (0..20)
         .map(|x| {
-            let weapon = Weapon {
+            
+            Weapon {
                 name: "Laser".to_string(),
                 created: Utc::now(),
                 strength: x,
                 ..Default::default()
-            };
-            weapon
+            }
         })
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
 
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
-    let ref filter = cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
+    let filter = &cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
 
     let get_selected_weapons = || async {
         let selected_weapons: Vec<Weapon> = select(All)
@@ -654,7 +654,7 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
     assert!(
         update_weapons_with_filter
             .iter()
-            .all(|x| x.name.to_string() == "Oyelowo"),
+            .all(|x| x.name == "Oyelowo"),
         "All not equals Oyelowo"
     );
     assert_eq!(
@@ -827,7 +827,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
         .unwrap();
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
-        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+        serde_json::to_value(selected_weapon.as_ref().unwrap())
             .unwrap()
             .as_object()
             .unwrap()
@@ -854,10 +854,10 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
 
     // Fully replace weapon table with completely new object and data. This will remove all fields
     // that are not present in the new object. This is a destructive operation.
-    let ref updated_weapon = update::<Weapon>(old_weapon.clone().id)
+    let updated_weapon = &(update::<Weapon>(old_weapon.clone().id)
         .replace(weapon_to_update_with_new_fields)
         .get_one(db.clone())
-        .await?;
+        .await?);
 
     let selected_weapon: Option<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -874,7 +874,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
 
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Oyelowo");
     assert_eq!(
-        serde_json::to_value(&updated_weapon)
+        serde_json::to_value(updated_weapon)
             .unwrap()
             .as_object()
             .unwrap()
@@ -1005,7 +1005,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
         .unwrap();
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
-        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+        serde_json::to_value(selected_weapon.as_ref().unwrap())
             .unwrap()
             .as_object()
             .unwrap()
@@ -1031,7 +1031,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
     // Deserializing with old struct should now cause error since there are fields missing.
     // This is not how you should use the patch remove. Merely used for testing. Check the latter
     // place for a good example where the new weapon struct is used.
-    let ref updated_weapon_with_old = update::<WeaponOld>(old_weapon.clone().id)
+    let updated_weapon_with_old = &update::<WeaponOld>(old_weapon.clone().id)
         .patch([nice.patch_remove(), bunchOfOtherFields.patch_remove()])
         .return_one(db.clone())
         .await
@@ -1046,10 +1046,10 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
         .contains("missing field `nice`"));
 
     // that are not present in the new object. This is a destructive operation.
-    let ref updated_weapon = update::<Weapon>(old_weapon.clone().id)
+    let updated_weapon = &(update::<Weapon>(old_weapon.clone().id)
         .patch([nice.patch_remove(), bunchOfOtherFields.patch_remove()])
         .get_one(db.clone())
-        .await?;
+        .await?);
 
     let selected_weapon: Option<Weapon> = select(All)
         .from(Weapon::table_name())
@@ -1065,7 +1065,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
 
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
-        serde_json::to_value(&updated_weapon)
+        serde_json::to_value(updated_weapon)
             .unwrap()
             .as_object()
             .unwrap()
@@ -1124,7 +1124,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
         .unwrap();
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
     assert_eq!(
-        serde_json::to_value(&selected_weapon.as_ref().unwrap())
+        serde_json::to_value(selected_weapon.as_ref().unwrap())
             .unwrap()
             .as_object()
             .unwrap()
@@ -1151,15 +1151,15 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
     );
 
     // bunchOfOtherFields is not string
-    let ref _updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
+    let _updated_weapon = &(update::<WeaponOld>(old_weapon.clone().id)
         .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(56)])
         .return_one(db.clone())
-        .await;
+        .await);
 
-    let ref updated_weapon = update::<WeaponOld>(old_weapon.clone().id)
+    let updated_weapon = &(update::<WeaponOld>(old_weapon.clone().id)
         .patch([nice.patch_add(true), bunchOfOtherFields.patch_add(45)])
         .get_one(db.clone())
-        .await?;
+        .await?);
 
     let selected_weapon: Option<WeaponOld> = select(All)
         .from(WeaponOld::table_name())
@@ -1179,7 +1179,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
     assert_eq!(selected_weapon.as_ref().unwrap().nice, true);
     assert_eq!(selected_weapon.as_ref().unwrap().bunch_of_other_fields, 45);
     assert_eq!(
-        serde_json::to_value(&updated_weapon)
+        serde_json::to_value(updated_weapon)
             .unwrap()
             .as_object()
             .unwrap()

@@ -7,7 +7,7 @@
 
 #![allow(non_snake_case)]
 use chrono::{DateTime, NaiveDateTime, Utc};
-use insta;
+
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{
@@ -185,7 +185,6 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
     db.use_ns("test").use_db("test").await.unwrap();
     // Create a bunch of users as deleoper
     let generated_developers = (0..10)
-        .into_iter()
         .map(|i| {
             // roll through developer, designer, manager, etc
             let tags = match i % 4 {
@@ -194,13 +193,13 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
                 2 => vec!["manager".to_string()],
                 _ => vec!["developer".to_string()],
             };
-            let user = User {
+            
+            User {
                 id: User::create_id(format!("user{}", i)),
                 name: format!("user{}", i),
                 tags,
                 ..Default::default()
-            };
-            user
+            }
         })
         .collect::<Vec<_>>();
 

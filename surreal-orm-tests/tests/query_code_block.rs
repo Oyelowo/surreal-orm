@@ -21,7 +21,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref weapon = Weapon::table_name();
+    let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
@@ -77,7 +77,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref weapon = Weapon::table_name();
+    let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
@@ -122,7 +122,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref weapon = Weapon::table_name();
+    let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
     let weaponstats_schema::WeaponStats {
         averageStrength, ..
@@ -229,9 +229,9 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let ref strengths = let_("strengths").equal_to(select_value(strength).from(weapon));
-    let ref total = let_("total").equal_to(math::sum!(strengths));
-    let ref count = let_("count").equal_to(count!(strengths));
+    let strengths = &let_("strengths").equal_to(select_value(strength).from(weapon));
+    let total = &let_("total").equal_to(math::sum!(strengths));
+    let count = &let_("count").equal_to(count!(strengths));
     let return_value = return_(bracket(total.divide(count)));
 
     let code_block = block(
@@ -278,14 +278,13 @@ async fn test_code_block() -> SurrealOrmResult<()> {
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let ref step1_assign_strengths =
-        let_("strengths").equal_to(select_value(strength).from(weapon));
-    let ref strengths = step1_assign_strengths.get_param();
+    let step1_assign_strengths = &let_("strengths").equal_to(select_value(strength).from(weapon));
+    let strengths = &step1_assign_strengths.get_param();
 
-    let ref step2_assign_total = let_("total").equal_to(math::sum!(strengths));
+    let step2_assign_total = &let_("total").equal_to(math::sum!(strengths));
     let total = step2_assign_total.get_param();
 
-    let ref step3_assign_count = let_("count").equal_to(count!(strengths));
+    let step3_assign_count = &let_("count").equal_to(count!(strengths));
     let count = step3_assign_count.get_param();
 
     let step4_return_last = return_(bracket(total.divide(count)));

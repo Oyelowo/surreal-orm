@@ -149,7 +149,7 @@ async fn test_find_where_complex() -> SurrealOrmResult<()> {
     create_test_data(db.clone()).await;
 
     let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
-    let ref count = Field::new("count");
+    let count = &Field::new("count");
 
     let total_spaceships = Weapon::find_where(id.is_not(NONE))
         .return_many(db.clone())

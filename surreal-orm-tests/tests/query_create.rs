@@ -265,10 +265,10 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag2".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::from(created_weapon.unwrap()),
@@ -291,7 +291,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
         .get_one(db.clone())
         .await?;
 
-    let ref created_alien = created_alien.clone();
+    let created_alien = &created_alien.clone();
     // id is none  because ally field is not created.
     assert!(created_alien.ally.get_id().is_none());
     // .value() is None because ally is not created.
@@ -390,10 +390,10 @@ async fn test_create_fetch_record_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag2".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -433,7 +433,7 @@ async fn test_create_fetch_record_links() -> SurrealOrmResult<()> {
         .return_one_projections(db.clone(), arr![age, name, aliens_spaceships_names_alias])
         .await?;
 
-    let ref space_ship_names = space_ship_names.unwrap();
+    let space_ship_names = &space_ship_names.unwrap();
     assert_eq!(space_ship_names.age, 20);
     assert_eq!(space_ship_names.name, "Oyelowo");
     assert_eq!(space_ship_names.aliens_spaceships_names_alias.len(), 3);
@@ -493,10 +493,10 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealOrmRes
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -514,7 +514,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealOrmRes
         .return_one(db.clone())
         .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+    let created_alien_with_fetched_links = &created_alien_with_fetched_links.unwrap();
     let alien_spaceships = created_alien_with_fetched_links.space_ships.values();
 
     assert_eq!(created_alien_with_fetched_links.space_ships.keys().len(), 3);
@@ -575,10 +575,10 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -596,8 +596,8 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .return_one(db.clone())
         .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
-    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    let created_alien_with_fetched_links = &created_alien_with_fetched_links.unwrap();
+    let alien_spaceships = &created_alien_with_fetched_links.space_ships;
     // Reference ids exist, but we tried to fetch the keys before they were created.
     // so, now we dont have either the keys nor the values since the values don't yet exist.
     assert_eq!(alien_spaceships.keys_truthy().len(), 0);
@@ -634,7 +634,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     // The spaceship values not fetched, so, only ids present
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 3);
     assert_eq!(alien_spaceships.keys().len(), 3);
@@ -667,7 +667,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         // .fetch(Alien::schema().spaceShips)
         .return_first(db.clone())
         .await?;
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 3);
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(
@@ -689,7 +689,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         3
     );
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
-    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
+    let selected_aliens_spaceships_values = &selected_aliens_spaceships.values();
 
     assert_eq!(selected_aliens_spaceships_values.len(), 3);
     assert_eq!(
@@ -762,10 +762,10 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
         created: DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z")
             .unwrap()
             .with_timezone(&Utc),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -854,10 +854,10 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::from(weapon_1),
@@ -877,12 +877,12 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         .return_one(db.clone())
         .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+    let created_alien_with_fetched_links = &created_alien_with_fetched_links.unwrap();
     // Has not yet been saved.
-    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    let alien_spaceships = &created_alien_with_fetched_links.space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
-    assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
-    assert_eq!(alien_spaceships.keys_truthy().iter().count(), 2);
+    assert_eq!(alien_spaceships.values_truthy().len(), 2);
+    assert_eq!(alien_spaceships.keys_truthy().len(), 2);
     assert!(!alien_spaceships.keys_truthy().is_empty());
 
     let selected_aliens: Option<Alien> = select(All)
@@ -890,7 +890,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         .return_first(db.clone())
         .await?;
 
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 0);
     assert_eq!(selected_aliens_spaceships.values_truthy_count(), 0);
@@ -902,7 +902,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
     assert_eq!(selected_aliens_spaceships.values_truthy_count(), 2);
@@ -913,7 +913,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
     assert!(selected_aliens_spaceships.keys()[2].is_none());
     // Nones have been filtered out.
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
-    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values();
+    let selected_aliens_spaceships_values = &selected_aliens_spaceships.values();
 
     assert_eq!(selected_aliens_spaceships_values.len(), 3);
     assert_eq!(
@@ -926,7 +926,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
     );
     assert!(selected_aliens_spaceships_values[2].is_none());
 
-    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values_truthy();
+    let selected_aliens_spaceships_values = &selected_aliens_spaceships.values_truthy();
     assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
     assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");
     Ok(())
@@ -983,10 +983,10 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         name: "Oyelowo".to_string(),
         age: 20,
         created: Utc::now(),
-        line_polygon: territory.into(),
+        line_polygon: territory,
         life_expectancy: Duration::from_secs(100),
-        territory_area: polygon.into(),
-        home: point.into(),
+        territory_area: polygon,
+        home: point,
         tags: vec!["tag1".into(), "tag".into()],
         ally: LinkSelf::null(),
         weapon: LinkOne::null(),
@@ -1005,14 +1005,14 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         .return_one(db.clone())
         .await?;
 
-    let ref created_alien_with_fetched_links = created_alien_with_fetched_links.unwrap();
+    let created_alien_with_fetched_links = &created_alien_with_fetched_links.unwrap();
     // Has not yet been saved.
-    let ref alien_spaceships = created_alien_with_fetched_links.space_ships;
+    let alien_spaceships = &created_alien_with_fetched_links.space_ships;
     assert_eq!(alien_spaceships.iter().count(), 3);
     // Two present values and one null
-    assert_eq!(alien_spaceships.values().iter().count(), 3);
+    assert_eq!(alien_spaceships.values().len(), 3);
     // Two present values
-    assert_eq!(alien_spaceships.values_truthy().iter().count(), 2);
+    assert_eq!(alien_spaceships.values_truthy().len(), 2);
     // array of 3 none keys
     assert_eq!(alien_spaceships.keys().len(), 3);
     // no valid keys
@@ -1023,7 +1023,7 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         .fetch(Alien::schema().spaceShips)
         .return_first(db.clone())
         .await?;
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
@@ -1051,13 +1051,13 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         .from(Alien::table_name())
         .return_first(db.clone())
         .await?;
-    let ref selected_aliens_spaceships = selected_aliens.unwrap().space_ships;
+    let selected_aliens_spaceships = &selected_aliens.unwrap().space_ships;
     assert_eq!(selected_aliens_spaceships.values().len(), 3);
     assert_eq!(selected_aliens_spaceships.values_truthy().len(), 2);
     assert_eq!(selected_aliens_spaceships.keys().len(), 3);
     assert_eq!(selected_aliens_spaceships.keys_truthy().len(), 2);
 
-    let ref selected_aliens_spaceships_values = selected_aliens_spaceships.values_truthy();
+    let selected_aliens_spaceships_values = &selected_aliens_spaceships.values_truthy();
     assert_eq!(selected_aliens_spaceships_values.len(), 2);
     assert_eq!(selected_aliens_spaceships_values[0].name, "SpaceShip1");
     assert_eq!(selected_aliens_spaceships_values[1].name, "SpaceShip2");

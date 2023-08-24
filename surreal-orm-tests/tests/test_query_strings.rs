@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use insta;
+
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{book_schema, student_schema, Book, Student, StudentWritesBook};
@@ -52,9 +52,9 @@ fn multiplication_tests1() {
 
     insta::assert_display_snapshot!(&query1.fine_tune_params());
 
-    let ref student_table = Student::get_table_name();
-    let ref _book_table = Book::get_table_name();
-    let ref _book_id = thing("book:1").unwrap();
+    let student_table = &Student::get_table_name();
+    let _book_table = &Book::get_table_name();
+    let _book_id = &thing("book:1").unwrap();
 
     let mut query = select(arr![All, content, age, lastName, firstName, course])
         // Also work
@@ -127,8 +127,8 @@ fn multiplication_tests1() {
 
 #[tokio::test]
 async fn relate_query_building_for_ids() {
-    let ref student_id = thing("student:1").unwrap();
-    let ref book_id = thing("book:2").unwrap();
+    let student_id = &thing("student:1").unwrap();
+    let book_id = &thing("book:2").unwrap();
     let write = StudentWritesBook {
         time_written: Duration::from_secs(343),
         ..Default::default()
@@ -169,7 +169,7 @@ fn multiplication_tests2() {
         .book(Book::schema().id.equal(Thing::from(("book", "blaze"))))
         .title;
 
-    let ref st_schema = Student::schema();
+    let st_schema = &Student::schema();
     // Another case
     let cursive_relation = st_schema
         .bestFriend()

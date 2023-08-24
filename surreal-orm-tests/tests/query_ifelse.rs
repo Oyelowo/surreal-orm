@@ -39,8 +39,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         .collect::<Vec<_>>();
     insert(generated_weapons).run(db.clone()).await?;
 
-    let ref space_ship = SpaceShip::table_name();
-    let ref weapon = Weapon::table_name();
+    let space_ship = &SpaceShip::table_name();
+    let weapon = &Weapon::table_name();
     let weapon_schema::Weapon {
         ref name,
         ref strength,
@@ -412,7 +412,7 @@ async fn test_if_else_in_update_statement_setter() -> SurrealOrmResult<()> {
     let weapon_schema::Weapon {
         ref strength, name, ..
     } = Weapon::schema();
-    let ref weapon = Weapon::table_name();
+    let weapon = &Weapon::table_name();
 
     let generated_weapons = (0..=100)
         .map(|i| Weapon {

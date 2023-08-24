@@ -24,8 +24,8 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref id1 = Account::create_id("one".into());
-    let ref id2 = Account::create_id("two".into());
+    let id1 = &Account::create_id("one".into());
+    let id2 = &Account::create_id("two".into());
     let acc = Account::schema();
 
     let amount_to_transfer = 300.00;
@@ -99,8 +99,8 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref id1 = Account::create_id("one".into());
-    let ref id2 = Account::create_id("two".into());
+    let id1 = &Account::create_id("one".into());
+    let id2 = &Account::create_id("two".into());
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
@@ -144,8 +144,8 @@ async fn test_transaction_commit_increment_and_decrement_update() -> SurrealOrmR
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref id1 = Account::create_id("one".into());
-    let ref id2 = Account::create_id("two".into());
+    let id1 = &Account::create_id("one".into());
+    let id2 = &Account::create_id("two".into());
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
@@ -184,8 +184,8 @@ async fn test_transaction_cancellation_increment_and_decrement_update() -> Surre
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let ref id1 = Account::create_id("one".into());
-    let ref id2 = Account::create_id("two".into());
+    let id1 = &Account::create_id("one".into());
+    let id2 = &Account::create_id("two".into());
 
     let acc = Account::schema();
 

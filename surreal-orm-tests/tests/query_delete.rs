@@ -34,7 +34,7 @@ async fn test_delete_by_id_helper_function() -> SurrealOrmResult<()> {
 
     let weapons = create_test_data(db.clone()).await;
     let weapon1 = weapons.first().unwrap();
-    let ref weapon1_id = weapon1.id.clone();
+    let weapon1_id = &weapon1.id.clone();
 
     let weapon_schema::Weapon { id, .. } = &Weapon::schema();
 
@@ -60,7 +60,7 @@ async fn test_delete_one_by_id() -> SurrealOrmResult<()> {
 
     let weapons = create_test_data(db.clone()).await;
     let weapon1 = weapons.first().unwrap();
-    let ref weapon1_id = weapon1.id.clone();
+    let weapon1_id = &weapon1.id.clone();
 
     let weapon_schema::Weapon { id, .. } = &Weapon::schema();
 
@@ -86,7 +86,7 @@ async fn test_delete_one_by_model_instance() -> SurrealOrmResult<()> {
 
     let weapons = create_test_data(db.clone()).await;
     let weapon1 = weapons.first().unwrap();
-    let ref weapon1_id = weapon1.id.clone();
+    let weapon1_id = &weapon1.id.clone();
 
     let weapon_schema::Weapon { id, .. } = &Weapon::schema();
 

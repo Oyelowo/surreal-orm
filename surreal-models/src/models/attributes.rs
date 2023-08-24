@@ -57,7 +57,8 @@ fn age_define_external_fn_path() -> DefineFieldStatement {
 
     use FieldType::*;
 
-    let statement = define_field(ageDefineInline)
+    
+    define_field(ageDefineInline)
         .on_table(Student::table_name())
         .type_(Int)
         .value("oyelowo@codebreather.com")
@@ -67,8 +68,7 @@ fn age_define_external_fn_path() -> DefineFieldStatement {
         .permissions([
             for_([Create, Delete]).where_(firstName.is("Oyelowo")),
             for_(Update).where_(ageDefineInline.less_than_or_equal(130)),
-        ]);
-    statement
+        ])
 }
 
 fn define_age_define_external_fn_path() -> DefineFieldStatement {
@@ -82,7 +82,8 @@ fn define_age_define_external_fn_path() -> DefineFieldStatement {
     use FieldType::*;
 
     // let statement = define_field(Student::schema().age)
-    let statement = define_field(ageDefineInline)
+    
+    define_field(ageDefineInline)
         .on_table(Student::table_name())
         .type_(Int)
         .value("oyelowo@codebreather.com")
@@ -92,8 +93,7 @@ fn define_age_define_external_fn_path() -> DefineFieldStatement {
         .permissions([
             for_([Create, Delete]).where_(firstName.is("Oyelowo")),
             for_(Update).where_(ageDefineInline.less_than_or_equal(130)),
-        ]);
-    statement
+        ])
 }
 
 fn get_age_default_value() -> u8 {
@@ -251,7 +251,8 @@ fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatem
         ..
     } = StudentWithDefineAttr::schema();
 
-    let statement = define_field(field)
+    
+    define_field(field)
         .on_table(table)
         .type_(FieldType::String)
         .value("Oyelowo")
@@ -259,8 +260,7 @@ fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatem
         .permissions([
             for_(Select).where_(ageDefineInline.gte(18)),
             for_([Create, Update]).where_(firstName.is("Oyedayo")),
-        ]);
-    statement
+        ])
 }
 
 fn define_last_name() -> DefineFieldStatement {
@@ -271,7 +271,8 @@ fn define_last_name() -> DefineFieldStatement {
         ..
     } = StudentWithDefineAttr::schema();
 
-    let statement = define_field(lastName)
+    
+    define_field(lastName)
         .on_table(StudentWithDefineAttr::table_name())
         .type_(FieldType::String)
         .value("Oyedayo")
@@ -279,8 +280,7 @@ fn define_last_name() -> DefineFieldStatement {
         .permissions([
             for_(Select).where_(ageDefineInline.gte(18)),
             for_([Create, Update]).where_(lastName.is("Oyedayo")),
-        ]);
-    statement
+        ])
 }
 
 fn define_last_name_external_fn_attr() -> DefineFieldStatement {
@@ -291,7 +291,8 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
         ..
     } = StudentWithDefineAttr::schema();
 
-    let statement = define_field(lastName)
+    
+    define_field(lastName)
         .on_table(StudentWithDefineAttr::table_name())
         .type_(FieldType::String)
         .value("Oyedayo")
@@ -299,8 +300,7 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
         .permissions([
             for_(Select).where_(ageDefineInline.gte(18)),
             for_([Create, Update]).where_(lastName.is("Oyedayo")),
-        ]);
-    statement
+        ])
 }
 fn define_student_with_define_attr() -> DefineTableStatement {
     let student_schema::Student {
@@ -336,7 +336,8 @@ fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
 
     use FieldType::*;
 
-    let statement = define_field(field)
+    
+    define_field(field)
         .on_table(Student::table_name())
         .type_(Int)
         .value("oyelowo@codebreather.com")
@@ -346,8 +347,7 @@ fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
         .permissions([
             for_([Create, Delete]).where_(firstName.is("Oyelowo")),
             for_(Update).where_(age.less_than_or_equal(130)),
-        ]);
-    statement
+        ])
 }
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

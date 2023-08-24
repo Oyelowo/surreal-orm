@@ -435,7 +435,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     insert(companies).return_many(db.clone()).await.unwrap();
 
     let c = Company::schema();
-    let ref select_query = select(All)
+    let select_query = &select(All)
         .from(Company::get_table_name())
         .where_(c.tags.any_like("foo"))
         .timeout(Duration::from_secs(20))

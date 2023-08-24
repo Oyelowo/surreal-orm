@@ -377,7 +377,7 @@ fn test_complex() {
 
 #[test]
 fn test_complex_2() {
-    let ref age = Field::new("age");
+    let age = &Field::new("age");
     let name = Field::new("name");
     let email = Param::new("email");
     let surname = Param::new("surname");
