@@ -33,7 +33,7 @@ impl Buildable for Projections {
     fn build(&self) -> String {
         self.0
             .iter()
-            .map(|m| m.build())
+            .map(Buildable::build)
             .collect::<Vec<_>>()
             .join(", ")
     }
@@ -140,7 +140,7 @@ impl From<&[Param]> for Projections {
         Self(
             value
                 .to_vec()
-                .into_iter()
+                .iter()
                 .map(Into::into)
                 .collect::<Vec<_>>(),
         )

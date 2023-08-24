@@ -99,8 +99,7 @@ impl<'de> Deserialize<'de> for Geometry {
 fn deserialize_polygon_from_coords(coords: Vec<Vec<CoordinateValue>>) -> geo::Polygon {
     let exterior = geo::LineString::from(
         coords
-            .iter()
-            .next()
+            .first()
             .unwrap_or(&vec![])
             .iter()
             .map(|c| c.parse_value_to_coord())
@@ -115,7 +114,7 @@ fn deserialize_polygon_from_coords(coords: Vec<Vec<CoordinateValue>>) -> geo::Po
                 .map(|c| c.parse_value_to_coord())
                 .collect::<Vec<_>>()
         })
-        .map(|coords| geo::LineString::from(coords))
+        .map(geo::LineString::from)
         .collect::<Vec<geo::LineString>>();
     geo::Polygon::new(exterior, interiors)
 }
@@ -137,11 +136,10 @@ impl CoordParser for CoordinateValue {
 
 impl CoordParser for (f64, f64) {
     fn parse_value_to_coord(&self) -> geo::Coord {
-        Some(geo::Coord {
+        geo::Coord {
             x: self.0,
             y: self.1,
-        })
-        .expect("Invalid coordinate: {self}")
+        }
     }
 }
 

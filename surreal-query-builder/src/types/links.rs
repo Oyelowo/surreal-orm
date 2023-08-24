@@ -140,7 +140,7 @@ impl<V: Node> std::convert::From<Vec<sql::Thing>> for LinkMany<V> {
     fn from(model_vec: Vec<sql::Thing>) -> Self {
         let xx = model_vec
             .into_iter()
-            .map(|m| Reference::Id(m.into()))
+            .map(|m| Reference::Id(m))
             .collect::<Vec<Reference<V>>>();
 
         Self(xx)
@@ -171,7 +171,7 @@ where
 {
     fn from(id: SurrealId<T, Id>) -> Self {
         let reference = Reference::Id(id.into());
-        Self(reference.into())
+        Self(reference)
     }
 }
 

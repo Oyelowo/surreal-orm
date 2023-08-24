@@ -47,7 +47,7 @@ impl FromStr for GeometryType {
             "multipolygon" => Ok(Self::Multipolygon),
             "collection" => Ok(Self::Collection),
             _ => {
-                return Err(format!("Invalid geometry type: {}", s));
+                Err(format!("Invalid geometry type: {}", s))
             }
         }
     }
@@ -132,7 +132,7 @@ impl FieldType {
     }
 
     /// Returns true if the field_type is a record
-    pub fn is_record_of_the_table<'a>(&self, table_name: &'a String) -> bool {
+    pub fn is_record_of_the_table(&self, table_name: &String) -> bool {
         match self {
             Self::Record(t) if &t.to_string() == table_name => true,
             _ => false,
@@ -169,7 +169,6 @@ impl Display for FieldType {
                     .map(ToString::to_string)
                     .collect::<Vec<_>>()
                     .join(", ")
-                    .to_string()
             ),
         };
         write!(f, "{}", data_type)
@@ -180,8 +179,8 @@ impl FromStr for FieldType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let type_stringified = s.replace(" ", "");
-        let mut type_with_content = type_stringified.trim_end_matches(")").split_terminator("(");
+        let type_stringified = s.replace(' ', "");
+        let mut type_with_content = type_stringified.trim_end_matches(')').split_terminator('(');
 
         let db_type = match (type_with_content.next(), type_with_content.next()) {
             (Some("any"), None) => FieldType::Any,
@@ -198,7 +197,7 @@ impl FromStr for FieldType {
             (Some("record"), Some(record_type)) => FieldType::Record(Table::from(record_type)),
             (Some("geometry"), Some(geom_types)) => {
                 let geoms: Result<Vec<_>, _> = geom_types
-                    .split(",")
+                    .split(',')
                     .map(|g| g.parse::<GeometryType>())
                     .collect();
                 FieldType::Geometry(geoms?)

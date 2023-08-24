@@ -81,13 +81,12 @@ impl Buildable for Clause {
             ClauseType::AnyEdgeFilter(edge_filters) => {
                 format!("({}, {})", connection_name, edge_filters.build(),)
             }
-            ClauseType::Id(_id) => format!(
-                "{}",
-                self.get_bindings()
-                    .pop()
-                    .expect("Id must have only one binding. Has to be an error. Please report.")
-                    .get_param_dollarised()
-            ),
+            ClauseType::Id(_id) => self
+                .get_bindings()
+                .pop()
+                .expect("Id must have only one binding. Has to be an error. Please report.")
+                .get_param_dollarised()
+                .to_string(),
             _ => format!("{}{}", connection_name, self.query_string),
         };
 
@@ -182,13 +181,13 @@ where
 
 impl From<sql::Thing> for NodeClause {
     fn from(value: sql::Thing) -> Self {
-        Self(Clause::new(ClauseType::Id(value.into())))
+        Self(Clause::new(ClauseType::Id(value)))
     }
 }
 
 impl From<&sql::Thing> for NodeClause {
     fn from(value: &sql::Thing) -> Self {
-        Self(Clause::new(ClauseType::Id(value.clone().into())))
+        Self(Clause::new(ClauseType::Id(value.clone())))
     }
 }
 
@@ -368,12 +367,12 @@ impl Clause {
             Param(param) => {
                 bindings = param.get_bindings();
                 errors = param.get_errors();
-                format!("{}", param.build())
+                param.build().to_string()
             }
             Id(surreal_id) => {
                 // The Table name component of the Id comes from the macro. e.g For student:5, the Schema which this is wrapped into provide. So all we need here is the id component, student
                 let id_bindings = Binding::new(surreal_id.clone());
-                let param_string = format!("{}", id_bindings.get_param_dollarised());
+                let param_string = id_bindings.get_param_dollarised().to_string();
                 errors = vec![];
                 bindings = vec![id_bindings];
                 param_string
@@ -383,8 +382,8 @@ impl Clause {
                 errors = subquery.get_errors();
                 subquery.build()
             }
-            All => format!("[*]"),
-            Last => format!("[$]"),
+            All => "[*]".to_string(),
+            Last => "[$]".to_string(),
             Index(index) => {
                 bindings = index.get_bindings();
                 format!("[{}]", index.build())
@@ -643,7 +642,7 @@ impl Buildable for AnyEdgeFilter {
             "{} ",
             self.edge_tables
                 .to_vec()
-                .into_iter()
+                .iter()
                 .map(|t| t.to_string())
                 .collect::<Vec<_>>()
                 .join(", ")

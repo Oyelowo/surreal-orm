@@ -44,7 +44,7 @@ impl Parametric for Valuex {
 
 impl Parametric for Vec<Valuex> {
     fn get_bindings(&self) -> BindingsList {
-        self.into_iter()
+        self.iter()
             .flat_map(|m| m.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -58,7 +58,7 @@ impl Erroneous for Valuex {
 
 impl Erroneous for Vec<Valuex> {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|m| m.get_errors())
             .collect::<Vec<_>>()
     }
@@ -72,7 +72,7 @@ impl Buildable for Valuex {
 
 impl Buildable for Vec<Valuex> {
     fn build(&self) -> String {
-        self.into_iter()
+        self.iter()
             .map(|m| m.build())
             .collect::<Vec<_>>()
             .join(", ")

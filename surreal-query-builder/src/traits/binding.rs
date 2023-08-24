@@ -38,7 +38,7 @@ impl Binding {
 
     // as value as raw
     pub fn as_raw(mut self) -> Self {
-        self.raw_string = format!("{}", &self.value.to_raw_string());
+        self.raw_string = self.value.to_raw_string();
         self
     }
 
@@ -83,7 +83,7 @@ impl Binding {
     }
 
     pub fn get_description(&self) -> String {
-        format!("{}", self.description.as_ref().unwrap_or(&"".into()))
+        self.description.as_ref().unwrap_or(&"".into()).to_string()
     }
 
     pub fn get_value(&self) -> &sql::Value {

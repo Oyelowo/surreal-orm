@@ -60,11 +60,11 @@ impl Parametric for Param {
 impl Param {
     /// Creates a new instance of `Param`
     pub fn new(param: impl Into<sql::Param>) -> Self {
-        let param = sql::Param::from(param.into());
+        let param: sql::Param = param.into();
 
         Self {
             param,
-            bindings: vec![].into(),
+            bindings: vec![],
         }
     }
 

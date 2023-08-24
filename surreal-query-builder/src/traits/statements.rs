@@ -124,7 +124,7 @@ where
         linked_fields_to_fetch: &Vec<Field>,
     ) -> SurrealOrmResult<Vec<String>> {
         let result = linked_fields_to_fetch
-            .into_iter()
+            .iter()
             .map(|n| {
                 let n: Valuex = n.into();
                 n.build()
@@ -151,8 +151,7 @@ where
             .into_iter()
             .map(|field| {
                 let valuex: Valuex = field.into();
-                let field = Field::new(valuex.build()).with_bindings(valuex.get_bindings());
-                field
+                Field::new(valuex.build()).with_bindings(valuex.get_bindings())
             })
             .collect::<Vec<_>>();
         Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
@@ -261,8 +260,7 @@ where
         let all = vec![Valuex::from(Field::new("*"))];
         let selected_fields = match returned_type {
             ReturnType::Projections(projections) => {
-                let fields = all
-                    .into_iter()
+                all.into_iter()
                     .chain(
                         projections
                             .to_vec()
@@ -272,8 +270,7 @@ where
                             // .map(|v| v.build())
                             .collect::<Vec<_>>(),
                     )
-                    .collect::<Vec<_>>();
-                fields
+                    .collect::<Vec<_>>()
             }
             _ => all,
         };

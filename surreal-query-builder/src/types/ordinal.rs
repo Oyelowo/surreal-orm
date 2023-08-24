@@ -53,7 +53,7 @@ impl From<Ordinal> for Valuex {
 
 impl From<sql::Datetime> for Ordinal {
     fn from(value: sql::Datetime) -> Self {
-        Self::Datetime(value.into())
+        Self::Datetime(value)
     }
 }
 

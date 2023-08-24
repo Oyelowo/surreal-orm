@@ -161,7 +161,7 @@ impl ToRaw for Permissions {
             Permissions::For(for_one) => for_one.to_raw(),
             Permissions::Fors(for_many) => Raw::new(
                 for_many
-                    .into_iter()
+                    .iter()
                     .map(|f| f.to_raw().build())
                     .collect::<Vec<_>>()
                     .join("\n"),
@@ -169,7 +169,7 @@ impl ToRaw for Permissions {
             Permissions::RawStatement(r) => r.to_raw(),
             Permissions::RawStatementList(raw_list) => Raw::new(
                 raw_list
-                    .into_iter()
+                    .iter()
                     .map(|f| f.to_raw().build())
                     .collect::<Vec<_>>()
                     .join("\n"),

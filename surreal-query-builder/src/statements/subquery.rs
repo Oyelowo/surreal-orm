@@ -50,13 +50,9 @@ fn statement_str_to_subquery(
     let query = sql::parse(statement).map_err(|err| {
         SurrealOrmError::InvalidSubquery(format!("Problem parsing subquery. Error: {err}"))
     })?;
-    let parsed_statement = query
-        .0
-         .0
-        .first()
-        .ok_or(SurrealOrmError::InvalidSubquery(format!(
-            "Problem parsing subquery. No statement found."
-        )))?;
+    let parsed_statement = query.0 .0.first().ok_or(SurrealOrmError::InvalidSubquery(
+        "Problem parsing subquery. No statement found.".to_string(),
+    ))?;
 
     let subquery = match parsed_statement {
         sql::Statement::Select(s) => sql::Subquery::Select(s.to_owned()),
@@ -75,7 +71,7 @@ fn statement_str_to_subquery(
 fn statement_to_subquery(statement: impl Buildable + Erroneous + Parametric) -> Subquery {
     let mut errors = statement.get_errors();
     let binding = statement_str_to_subquery(&statement.to_raw().build())
-        .map(|subquery| Binding::new(subquery))
+        .map(Binding::new)
         .map_err(|err| errors.push(err.to_string()))
         .unwrap_or(Binding::new(errors.join(", ")));
 
@@ -161,6 +157,6 @@ impl From<ReturnStatement> for Subquery {
 
 impl From<Valuex> for Subquery {
     fn from(statement: Valuex) -> Self {
-        Valuex::from(statement).into()
+        statement.into()
     }
 }

@@ -82,7 +82,7 @@ where
     Id: Into<sql::Id>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0.to_string())
+        write!(f, "{}", self.0)
     }
 }
 
@@ -187,7 +187,7 @@ where
     type Error = SurrealOrmError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        thing(&value.to_string())
+        thing(value)
             .map(|v| SurrealId(v, PhantomData, PhantomData))
             .map_err(|e| SurrealOrmError::InvalidId(e.into()))
     }
@@ -515,7 +515,7 @@ mod tests {
     #[test]
     fn test_create_id_uuid_with_model() {
         let id = TestUser::create_id(Uuid::default());
-        assert_eq!(id.to_string().contains("user:"), true);
+        assert!(id.to_string().contains("user:"));
         assert_eq!(
             id.to_string(),
             "user:⟨00000000-0000-0000-0000-000000000000⟩"
@@ -544,14 +544,14 @@ mod tests {
     #[test]
     fn test_create_surreal_id_with_uuid() {
         let id = TestUserUuid::new();
-        assert_eq!(id.to_string().contains("user:"), true);
+        assert!(id.to_string().contains("user:"));
         assert_eq!(id.to_string().len(), 47);
     }
 
     #[test]
     fn test_create_uuid() {
         let id = SurrealUuid::<TestUser>::new();
-        assert_eq!(id.to_string().contains("user:"), true);
+        assert!(id.to_string().contains("user:"));
         assert_eq!(id.to_string().len(), 47);
     }
 

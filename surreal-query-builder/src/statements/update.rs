@@ -95,7 +95,7 @@ where
     let param = match targettables {
         TargettablesForUpdate::Table(table) => {
             let table = table.to_string();
-            if &table != &table_name.to_string() {
+            if table != table_name.to_string() {
                 errors.push(format!(
                     "table name -{table} does not match the surreal model struct type which belongs to {table_name} table"
                 ));
@@ -200,13 +200,13 @@ impl From<&sql::Table> for TargettablesForUpdate {
 
 impl From<&sql::Thing> for TargettablesForUpdate {
     fn from(value: &sql::Thing) -> Self {
-        Self::SurrealId(value.to_owned().into())
+        Self::SurrealId(value.to_owned())
     }
 }
 
 impl From<sql::Thing> for TargettablesForUpdate {
     fn from(value: sql::Thing) -> Self {
-        Self::SurrealId(value.into())
+        Self::SurrealId(value)
     }
 }
 

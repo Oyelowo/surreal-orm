@@ -95,7 +95,7 @@ impl Parametric for Order {
 
 impl Parametric for &[Order] {
     fn get_bindings(&self) -> BindingsList {
-        self.into_iter()
+        self.iter()
             .flat_map(|o| o.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -103,7 +103,7 @@ impl Parametric for &[Order] {
 
 impl Parametric for Vec<Order> {
     fn get_bindings(&self) -> BindingsList {
-        self.into_iter()
+        self.iter()
             .flat_map(|o| o.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -147,7 +147,7 @@ impl<const N: usize> From<&[Order; N]> for Orderables {
 impl From<Orderables> for Vec<Order> {
     fn from(value: Orderables) -> Self {
         match value {
-            Orderables::Order(o) => vec![o.into()],
+            Orderables::Order(o) => vec![o],
             Orderables::OrdersList(ol) => ol,
         }
     }
@@ -299,24 +299,24 @@ pub enum TargettablesForSelect {
 
 impl From<Vec<sql::Thing>> for TargettablesForSelect {
     fn from(value: Vec<sql::Thing>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+        Self::SurrealIds(value.into_iter().collect::<Vec<_>>())
     }
 }
 
 impl From<&sql::Thing> for TargettablesForSelect {
     fn from(value: &sql::Thing) -> Self {
-        Self::SurrealId(value.to_owned().into())
+        Self::SurrealId(value.to_owned())
     }
 }
 
 impl From<sql::Thing> for TargettablesForSelect {
     fn from(value: sql::Thing) -> Self {
-        Self::SurrealId(value.into())
+        Self::SurrealId(value)
     }
 }
 impl From<Vec<sql::Table>> for TargettablesForSelect {
     fn from(value: Vec<sql::Table>) -> Self {
-        Self::Tables(value.into_iter().map(|t| t.into()).collect::<Vec<_>>())
+        Self::Tables(value.into_iter().collect::<Vec<_>>())
     }
 }
 
@@ -337,7 +337,7 @@ where
     Id: Into<sql::Id>,
 {
     fn from(value: &[SurrealId<T, Id>; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|v| v.into()).collect())
+        Self::SurrealIds(value.iter().map(|v| v.into()).collect())
     }
 }
 
@@ -357,7 +357,7 @@ where
     Id: Into<sql::Id>,
 {
     fn from(value: &[&SurrealId<T, Id>; N]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|&t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -365,7 +365,7 @@ impl<const N: usize> From<&[sql::Thing; N]> for TargettablesForSelect {
     fn from(value: &[sql::Thing; N]) -> Self {
         Self::SurrealIds(
             value
-                .into_iter()
+                .iter()
                 .map(|t| t.to_owned().into())
                 .collect::<Vec<_>>(),
         )
@@ -412,19 +412,19 @@ impl<T: Model> From<Vec<SurrealSimpleId<T>>> for TargettablesForSelect {
 
 impl<T: Model> From<Vec<&SurrealSimpleId<T>>> for TargettablesForSelect {
     fn from(value: Vec<&SurrealSimpleId<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[SurrealSimpleId<T>]> for TargettablesForSelect {
     fn from(value: &[SurrealSimpleId<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[&SurrealSimpleId<T>]> for TargettablesForSelect {
     fn from(value: &[&SurrealSimpleId<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -448,19 +448,19 @@ impl<T: Model> From<Vec<SurrealUuid<T>>> for TargettablesForSelect {
 
 impl<T: Model> From<Vec<&SurrealUuid<T>>> for TargettablesForSelect {
     fn from(value: Vec<&SurrealUuid<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[SurrealUuid<T>]> for TargettablesForSelect {
     fn from(value: &[SurrealUuid<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[&SurrealUuid<T>]> for TargettablesForSelect {
     fn from(value: &[&SurrealUuid<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -485,19 +485,19 @@ impl<T: Model> From<Vec<SurrealUlid<T>>> for TargettablesForSelect {
 
 impl<T: Model> From<Vec<&SurrealUlid<T>>> for TargettablesForSelect {
     fn from(value: Vec<&SurrealUlid<T>>) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[SurrealUlid<T>]> for TargettablesForSelect {
     fn from(value: &[SurrealUlid<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
 impl<T: Model> From<&[&SurrealUlid<T>]> for TargettablesForSelect {
     fn from(value: &[&SurrealUlid<T>]) -> Self {
-        Self::SurrealIds(value.into_iter().map(|t| t.to_thing()).collect::<Vec<_>>())
+        Self::SurrealIds(value.iter().map(|t| t.to_thing()).collect::<Vec<_>>())
     }
 }
 
@@ -536,13 +536,13 @@ impl From<Vec<&sql::Table>> for TargettablesForSelect {
 
 impl<const N: usize> From<&[&sql::Table; N]> for TargettablesForSelect {
     fn from(value: &[&sql::Table; N]) -> Self {
-        Self::Tables(value.into_iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
+        Self::Tables(value.iter().map(|&t| t.to_owned()).collect::<Vec<_>>())
     }
 }
 
 impl<const N: usize> From<&[&Table; N]> for TargettablesForSelect {
     fn from(value: &[&Table; N]) -> Self {
-        Self::Tables(value.to_vec().into_iter().map(|v| v.into()).collect())
+        Self::Tables(value.iter().copied().map(|v| v.into()).collect())
     }
 }
 
@@ -579,13 +579,13 @@ pub enum Splittables {
     Fields(Vec<Field>),
 }
 
-impl<'a, const N: usize> From<&[&Field; N]> for Splittables {
+impl<const N: usize> From<&[&Field; N]> for Splittables {
     fn from(value: &[&Field; N]) -> Self {
         Self::Fields(value.map(Into::into).to_vec())
     }
 }
 
-impl<'a, const N: usize> From<&[Field; N]> for Splittables {
+impl<const N: usize> From<&[Field; N]> for Splittables {
     fn from(value: &[Field; N]) -> Self {
         Self::Fields(value.to_vec())
     }
@@ -668,7 +668,7 @@ impl From<All> for Selectables {
     }
 }
 
-impl<'a, const N: usize> From<&[Field; N]> for Selectables {
+impl<const N: usize> From<&[Field; N]> for Selectables {
     fn from(value: &[Field; N]) -> Self {
         Self(Valuex {
             string: value.build(),
@@ -678,7 +678,7 @@ impl<'a, const N: usize> From<&[Field; N]> for Selectables {
     }
 }
 
-impl<'a, const N: usize> From<&[&Field; N]> for Selectables {
+impl<const N: usize> From<&[&Field; N]> for Selectables {
     fn from(value: &[&Field; N]) -> Self {
         Self(Valuex {
             string: value.build(),
@@ -782,7 +782,7 @@ pub struct SelectStatementInit {
 
 impl Aliasable for SelectStatement {
     fn build_aliasable(&self) -> String {
-        format!("({})", self.build().trim_end_matches(";"))
+        format!("({})", self.build().trim_end_matches(';'))
     }
 }
 
@@ -1430,7 +1430,7 @@ impl Display for SelectStatement {
 
 impl Buildable for SelectStatement {
     fn build(&self) -> String {
-        let ref statement = self.0;
+        let statement = &self.0;
         let select = match statement.selection_type {
             SelectionType::Select => "SELECT",
             SelectionType::SelectValue => "SELECT VALUE",

@@ -107,7 +107,7 @@ impl Buildable for Field {
 
 impl Buildable for Vec<Field> {
     fn build(&self) -> String {
-        self.into_iter()
+        self.iter()
             .map(|f| f.build())
             .collect::<Vec<_>>()
             .join(", ")
@@ -116,46 +116,46 @@ impl Buildable for Vec<Field> {
 
 impl Buildable for Vec<&Field> {
     fn build(&self) -> String {
-        self.into_iter()
+        self.iter()
             .map(|f| f.build())
             .collect::<Vec<_>>()
             .join(", ")
     }
 }
 
-impl<'a, const N: usize> Buildable for &[Field; N] {
+impl<const N: usize> Buildable for &[Field; N] {
     fn build(&self) -> String {
         self.to_vec()
-            .into_iter()
+            .iter()
             .map(|f| f.build())
             .collect::<Vec<_>>()
             .join(", ")
     }
 }
 
-impl<'a, const N: usize> Buildable for &[&Field; N] {
+impl<const N: usize> Buildable for &[&Field; N] {
     fn build(&self) -> String {
         self.to_vec()
-            .into_iter()
+            .iter()
             .map(|f| f.build())
             .collect::<Vec<_>>()
             .join(", ")
     }
 }
 
-impl<'a, const N: usize> Parametric for &[Field; N] {
+impl<const N: usize> Parametric for &[Field; N] {
     fn get_bindings(&self) -> BindingsList {
         self.to_vec()
-            .into_iter()
+            .iter()
             .flat_map(|f| f.get_bindings())
             .collect::<Vec<_>>()
     }
 }
 
-impl<'a, const N: usize> Parametric for &[&Field; N] {
+impl<const N: usize> Parametric for &[&Field; N] {
     fn get_bindings(&self) -> BindingsList {
         self.to_vec()
-            .into_iter()
+            .iter()
             .flat_map(|f| f.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -163,7 +163,7 @@ impl<'a, const N: usize> Parametric for &[&Field; N] {
 
 impl Parametric for Vec<Field> {
     fn get_bindings(&self) -> BindingsList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -171,7 +171,7 @@ impl Parametric for Vec<Field> {
 
 impl Parametric for Vec<&Field> {
     fn get_bindings(&self) -> BindingsList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_bindings())
             .collect::<Vec<_>>()
     }
@@ -179,7 +179,7 @@ impl Parametric for Vec<&Field> {
 
 impl Erroneous for Vec<Field> {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -187,7 +187,7 @@ impl Erroneous for Vec<Field> {
 
 impl Erroneous for Vec<&Field> {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -195,7 +195,7 @@ impl Erroneous for Vec<&Field> {
 
 impl Erroneous for &[Field] {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -203,7 +203,7 @@ impl Erroneous for &[Field] {
 
 impl Erroneous for &[&Field] {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -211,7 +211,7 @@ impl Erroneous for &[&Field] {
 
 impl<const N: usize> Erroneous for &[Field; N] {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -219,7 +219,7 @@ impl<const N: usize> Erroneous for &[Field; N] {
 
 impl<const N: usize> Erroneous for &[&Field; N] {
     fn get_errors(&self) -> ErrorList {
-        self.into_iter()
+        self.iter()
             .flat_map(|f| f.get_errors())
             .collect::<Vec<_>>()
     }
@@ -231,9 +231,9 @@ impl From<&Field> for Idiomx {
     }
 }
 
-impl Into<sql::Idiom> for Field {
-    fn into(self) -> sql::Idiom {
-        self.name.into()
+impl From<Field> for sql::Idiom {
+    fn from(val: Field) -> Self {
+        val.name.into()
     }
 }
 

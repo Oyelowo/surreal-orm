@@ -243,7 +243,7 @@ impl IfStatement {
         let if_condition = self.condition;
 
         let expression: IfElseExpression = expression.into().into();
-        let bindings = vec![if_condition.get_bindings(), expression.get_bindings()].concat();
+        let bindings = [if_condition.get_bindings(), expression.get_bindings()].concat();
 
         let mut flow_data = FlowStatementData::default();
         flow_data.if_data.condition = Some(if_condition);

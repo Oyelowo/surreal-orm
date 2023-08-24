@@ -529,7 +529,7 @@ impl Filter {
         let precendence = self.bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter = filter.build();
+        let filter = &filter.build();
         let query_string = format!("{precendence} OR ({filter})");
 
         Filter {
@@ -558,7 +558,7 @@ impl Filter {
         let precendence = self.bracket_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
-        let ref filter = filter.build();
+        let filter = &filter.build();
         let query_string = format!("{precendence} AND ({filter})");
 
         Filter {

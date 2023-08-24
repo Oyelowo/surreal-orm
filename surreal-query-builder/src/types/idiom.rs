@@ -91,7 +91,7 @@ impl From<Vec<Table>> for Tables {
     }
 }
 
-impl<'a, const N: usize> From<&[Table; N]> for Tables {
+impl<const N: usize> From<&[Table; N]> for Tables {
     fn from(value: &[Table; N]) -> Self {
         Self(value.to_vec())
     }
@@ -103,7 +103,7 @@ impl<const N: usize> From<[Table; N]> for Tables {
     }
 }
 
-impl<'a, const N: usize> From<&[&Table; N]> for Tables {
+impl<const N: usize> From<&[&Table; N]> for Tables {
     fn from(value: &[&Table; N]) -> Self {
         Self(value.map(Into::into).to_vec())
     }
@@ -178,7 +178,7 @@ pub struct Idiomx(sql::Idiom);
 
 impl Display for Idiomx {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.to_string())
+        write!(f, "{}", self.0)
     }
 }
 

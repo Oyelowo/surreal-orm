@@ -142,7 +142,7 @@ where
 
         self.bindings.extend(bindings);
         self.set.extend(settable);
-        self.into()
+        self
     }
 
     /// Sets the return type for the query.

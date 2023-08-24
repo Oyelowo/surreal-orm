@@ -73,7 +73,7 @@ impl Parametric for Updateables {
         match self {
             Updateables::Updater(up) => up.get_bindings(),
             Updateables::Updaters(ups) => ups
-                .into_iter()
+                .iter()
                 .flat_map(|u| u.get_bindings())
                 .collect::<Vec<_>>(),
         }

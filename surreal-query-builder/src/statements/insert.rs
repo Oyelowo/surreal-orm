@@ -217,7 +217,7 @@ where
 {
     let mut errors = vec![];
     let mut serialized_field_names = T::get_serializable_fields();
-    serialized_field_names.sort_by(|a, b| a.build().cmp(&b.build()));
+    serialized_field_names.sort_by_key(|a| a.build());
 
     let value = sql::to_value(node).ok().map_or_else(
         || {
@@ -230,7 +230,7 @@ where
     let (field_names, bindings): (Vec<String>, BindingsList) = serialized_field_names
         .iter()
         .map(|key| {
-            let ref key = key.build();
+            let key = &key.build();
             let value = value.pick(&[key.as_str().into()]);
 
             let binding = if value == sql::Value::None {
@@ -347,7 +347,7 @@ where
         let mut query = format!("INSERT INTO {}", &T::table_name());
 
         if let Some(query_select) = &self.select_query_string {
-            query = format!("{query} ({})", &query_select.trim_end_matches(";"));
+            query = format!("{query} ({})", &query_select.trim_end_matches(';'));
         } else {
             let field_names = self.field_names.clone();
 
