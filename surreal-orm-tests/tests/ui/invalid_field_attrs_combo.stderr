@@ -201,14 +201,14 @@ error[E0277]: the trait bound `StudentTest0: surreal_orm::Model` is not satisfie
    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest0`
    |
    = help: the following other types implement trait `surreal_orm::Model`:
-             surreal_models::Alien
-             surreal_models::AlienWithExplicitAttributes
-             surreal_models::Alien2
-             surreal_models::StudentWithGranularAttributes
-             surreal_models::StudentWithDefineAttr
              TestUser
-             surreal_models::StudentWithDefineFnAttr
-             surreal_models::Student
+             surreal_models::Account
+             surreal_models::Alien
+             surreal_models::Alien2
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Balance
+             surreal_models::Blog
+             surreal_models::Book
            and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -223,14 +223,14 @@ error[E0277]: the trait bound `StudentTest1: surreal_orm::Model` is not satisfie
    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest1`
    |
    = help: the following other types implement trait `surreal_orm::Model`:
-             surreal_models::Alien
-             surreal_models::AlienWithExplicitAttributes
-             surreal_models::Alien2
-             surreal_models::StudentWithGranularAttributes
-             surreal_models::StudentWithDefineAttr
              TestUser
-             surreal_models::StudentWithDefineFnAttr
-             surreal_models::Student
+             surreal_models::Account
+             surreal_models::Alien
+             surreal_models::Alien2
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Balance
+             surreal_models::Blog
+             surreal_models::Book
            and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -245,14 +245,14 @@ error[E0277]: the trait bound `StudentTest2: surreal_orm::Model` is not satisfie
    |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest2`
    |
    = help: the following other types implement trait `surreal_orm::Model`:
-             surreal_models::Alien
-             surreal_models::AlienWithExplicitAttributes
-             surreal_models::Alien2
-             surreal_models::StudentWithGranularAttributes
-             surreal_models::StudentWithDefineAttr
              TestUser
-             surreal_models::StudentWithDefineFnAttr
-             surreal_models::Student
+             surreal_models::Account
+             surreal_models::Alien
+             surreal_models::Alien2
+             surreal_models::AlienWithExplicitAttributes
+             surreal_models::Balance
+             surreal_models::Blog
+             surreal_models::Book
            and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
   --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -267,14 +267,14 @@ error[E0277]: the trait bound `StudentTest3: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest3`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -289,14 +289,14 @@ error[E0277]: the trait bound `StudentTest4: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest4`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -311,14 +311,14 @@ error[E0277]: the trait bound `StudentTest5: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest5`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -333,14 +333,14 @@ error[E0277]: the trait bound `StudentTest6: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest6`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -355,14 +355,14 @@ error[E0277]: the trait bound `StudentTest7: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest7`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
@@ -377,14 +377,14 @@ error[E0277]: the trait bound `StudentTest8: surreal_orm::Model` is not satisfie
     |         ^^^^^^^^^^^^^^^^^^^^^ the trait `surreal_orm::Model` is not implemented for `StudentTest8`
     |
     = help: the following other types implement trait `surreal_orm::Model`:
-              surreal_models::Alien
-              surreal_models::AlienWithExplicitAttributes
-              surreal_models::Alien2
-              surreal_models::StudentWithGranularAttributes
-              surreal_models::StudentWithDefineAttr
               TestUser
-              surreal_models::StudentWithDefineFnAttr
-              surreal_models::Student
+              surreal_models::Account
+              surreal_models::Alien
+              surreal_models::Alien2
+              surreal_models::AlienWithExplicitAttributes
+              surreal_models::Balance
+              surreal_models::Blog
+              surreal_models::Book
             and $N others
 note: required by a bound in `surreal_orm::SurrealSimpleId`
    --> $WORKSPACE/surreal-query-builder/src/types/surreal_id.rs
