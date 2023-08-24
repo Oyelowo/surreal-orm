@@ -525,7 +525,7 @@ mod tests {
     #[test]
     fn test_create_uuid_with_model() {
         let id = TestUser::create_uuid();
-        assert_eq!(id.to_string().contains("user:"), true);
+        assert!(id.to_string().contains("user:"));
         assert_eq!(id.to_string().len(), 47);
     }
 
