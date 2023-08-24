@@ -144,28 +144,28 @@ impl ToTokens for EdgeToken {
             .map(|f| f.to_string())
             .collect::<Vec<_>>();
 
-        tokens.extend(quote!( 
+        tokens.extend(quote!(
                 use #crate_name::{ToRaw as _};
-        
+
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #struct_name_ident<In, Out> {
                       // pub const ALLOWED_FIELDS: [&'static str; 2] = ["name", "strength"];
                     pub const fn __get_serializable_field_names() -> [&'static str; #serializable_fields_count] {
                         [#( #serializable_fields_as_str), *]
                     }
                 }
-        
+
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
                     type Schema = #module_name::#struct_name_ident;
-                
+
                     fn schema() -> Self::Schema {
                         #module_name::#struct_name_ident::new()
                     }
-                    
+
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
                         #module_name::#struct_name_ident::new_prefixed(prefix)
                     }
                 }
-                        
+
                 #[allow(non_snake_case)]
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Edge for #struct_name_ident<In, Out> {
                     type In = In;
@@ -176,22 +176,22 @@ impl ToTokens for EdgeToken {
                     // fn schema() -> Self::Schema {
                     //     #module_name::#struct_name_ident::new()
                     // }
-                    
+
                     #[allow(non_snake_case)]
                     fn get_table_name() -> #crate_name::Table {
                         #table_name_str.into()
                     }
                 }
-                
+
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone, Default)]
                 pub struct #non_null_updater_struct_name {
-                   #( 
+                   #(
                         #[serde(skip_serializing_if = "Option::is_none")]
                         #non_null_updater_fields
                     ) *
-                } 
-        
+                }
+
                 #[allow(non_snake_case)]
                 #[derive(#crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
                 pub struct #struct_with_renamed_serialized_fields {
