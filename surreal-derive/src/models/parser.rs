@@ -360,13 +360,13 @@ impl SchemaFieldsProperties {
                 let field_type = &field_receiver.ty;
                 let field_name_original = field_receiver.ident.as_ref().unwrap();
                 let relationship = RelationType::from(field_receiver);
-                let NormalisedField { 
+                let NormalisedField {
                          ref field_ident_normalised,
                          ref field_ident_normalised_as_str,
                 } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
-                
-                let VariablesModelMacro { 
-                    ___________graph_traversal_string, 
+
+                let VariablesModelMacro {
+                    ___________graph_traversal_string,
                     ____________update_many_bindings,
                     _____field_names,
                     schema_instance,
@@ -754,7 +754,7 @@ impl SchemaFieldsProperties {
                             .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)
                     }
                 };
-                
+
                 if field_ident_normalised_as_str == "id" {
                     store.table_id_type =   quote!(#field_type);
                     // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
