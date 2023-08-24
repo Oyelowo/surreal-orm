@@ -515,7 +515,7 @@ impl<T: Into<sql::Value>> From<Vec<T>> for ArgsList {
     }
 }
 
-impl<'a, const N: usize, T> From<&[T; N]> for ArgsList
+impl<const N: usize, T> From<&[T; N]> for ArgsList
 where
     T: Into<sql::Value> + Clone,
 {

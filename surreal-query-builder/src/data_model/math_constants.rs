@@ -1,56 +1,59 @@
+/// Use mathematical constants from the standard library.
+use std::f32::consts;
+
 /// Represents the mathematical constant e.
-pub const E: f32 = 2.718281828459045;
+pub const E: f32 = consts::E;
 
 /// Represents the reciprocal of π.
-pub const FRAC_1_PI: f32 = 0.3183098861837907;
+pub const FRAC_1_PI: f32 = consts::FRAC_1_PI;
 
 /// Represents the reciprocal of the square root of 2.
-pub const FRAC_1_SQRT_2: f32 = 0.7071067811865476;
+pub const FRAC_1_SQRT_2: f32 = consts::FRAC_1_SQRT_2;
 
 /// Represents 2 times the reciprocal of π.
-pub const FRAC_2_PI: f32 = 0.6366197723675814;
+pub const FRAC_2_PI: f32 = consts::FRAC_2_PI;
 
 /// Represents 2 times the reciprocal of the square root of π.
-pub const FRAC_2_SQRT_PI: f32 = 1.1283791670955126;
+pub const FRAC_2_SQRT_PI: f32 = consts::FRAC_2_SQRT_PI;
 
 /// Represents π divided by 2.
-pub const FRAC_PI_2: f32 = 1.5707963267948966;
+pub const FRAC_PI_2: f32 = consts::FRAC_PI_2;
 
 /// Represents π divided by 3.
-pub const FRAC_PI_3: f32 = 1.0471975511965979;
+pub const FRAC_PI_3: f32 = consts::FRAC_PI_3;
 
 /// Represents π divided by 4.
-pub const FRAC_PI_4: f32 = 0.7853981633974483;
+pub const FRAC_PI_4: f32 = consts::FRAC_PI_4;
 
 /// Represents π divided by 6.
-pub const FRAC_PI_6: f32 = 0.5235987755982989;
+pub const FRAC_PI_6: f32 = consts::FRAC_PI_6;
 
 /// Represents π divided by 8.
-pub const FRAC_PI_8: f32 = 0.39269908169872414;
+pub const FRAC_PI_8: f32 = consts::FRAC_PI_8;
 
 /// Represents the natural logarithm of 10.
-pub const LN_10: f32 = 2.302585092994046;
+pub const LN_10: f32 = consts::LN_10;
 
 /// Represents the natural logarithm of 2.
-pub const LN_2: f32 = 0.6931471805599453;
+pub const LN_2: f32 = consts::LN_2;
 
 /// Represents the base-10 logarithm of 2.
-pub const LOG10_2: f32 = 0.3010299956639812;
+pub const LOG10_2: f32 = consts::LOG10_2;
 
 /// Represents the base-10 logarithm of e.
-pub const LOG10_E: f32 = 0.4342944819032518;
+pub const LOG10_E: f32 = consts::LOG10_E;
 
 /// Represents the base-2 logarithm of 10.
-pub const LOG2_10: f32 = 3.321928094887362;
+pub const LOG2_10: f32 = consts::LOG2_10;
 
 /// Represents the base-2 logarithm of e.
-pub const LOG2_E: f32 = 1.4426950408889634;
+pub const LOG2_E: f32 = consts::LOG2_E;
 
 /// Represents the mathematical constant π.
-pub const PI: f32 = 3.141592653589793;
+pub const PI: f32 = consts::PI;
 
 /// Represents the square root of 2.
-pub const SQRT_2: f32 = 1.4142135623730951;
+pub const SQRT_2: f32 = consts::SQRT_2;
 
-/// Represents 2 times π.
-pub const TAU: f32 = 6.283185307179586;
+/// Represents The full circle constant (τ). Equal to 2π.
+pub const TAU: f32 = consts::TAU;

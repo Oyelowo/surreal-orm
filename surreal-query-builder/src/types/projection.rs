@@ -77,12 +77,7 @@ impl From<&Field> for Projections {
 
 impl From<&[Field]> for Projections {
     fn from(value: &[Field]) -> Self {
-        Self(
-            value
-                .into_iter()
-                .map(Into::into)
-                .collect::<Vec<_>>(),
-        )
+        Self(value.iter().map(Into::into).collect::<Vec<_>>())
     }
 }
 
@@ -112,13 +107,7 @@ impl From<Vec<Function>> for Projections {
 
 impl From<&[Function]> for Projections {
     fn from(value: &[Function]) -> Self {
-        Self(
-            value
-                .iter()
-                .cloned()
-                .map(Into::into)
-                .collect::<Vec<_>>(),
-        )
+        Self(value.iter().cloned().map(Into::into).collect::<Vec<_>>())
     }
 }
 
@@ -136,12 +125,6 @@ impl From<Vec<Param>> for Projections {
 
 impl From<&[Param]> for Projections {
     fn from(value: &[Param]) -> Self {
-        Self(
-            value
-                .to_vec()
-                .iter()
-                .map(Into::into)
-                .collect::<Vec<_>>(),
-        )
+        Self(value.to_vec().iter().map(Into::into).collect::<Vec<_>>())
     }
 }
