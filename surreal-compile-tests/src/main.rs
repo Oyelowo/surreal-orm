@@ -22,7 +22,7 @@ mod check1 {
     #[surreal_orm(table_name = "student")]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define = "field_define_fn()")]
+        #[surreal_orm(type_ = "int", define = "define_field_fn()")]
         age: u8,
     }
 }
@@ -36,7 +36,7 @@ mod check2 {
     #[surreal_orm(table_name = "student")]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define_fn = "field_define_fn")]
+        #[surreal_orm(type_ = "int", define_fn = "define_field_fn")]
         age: u8,
     }
 }

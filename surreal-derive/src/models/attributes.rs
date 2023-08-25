@@ -1140,7 +1140,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        struct_name_ident: &Ident,
+        _struct_name_ident: &Ident,
         field_name_normalized: &String,
         data_type: &DataType,
         table: &String,
