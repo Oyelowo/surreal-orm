@@ -1880,7 +1880,7 @@ impl TableDeriveAttributes {
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {
-                    define_table_methods.push(quote!(#as_fn()));
+                    define_table_methods.push(quote!(.as_(#as_fn())));
             },
             (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
