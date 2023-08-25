@@ -133,7 +133,7 @@ fn as_fn() -> SelectStatement {
     as_fn = "as_fn",
     permissions_fn = "student_permissions"
 )]
-pub struct StudentFnAttrs {
+struct StudentFnAttrs {
     id: SurrealId<StudentFnAttrs, String>,
 }
 
