@@ -45,7 +45,12 @@ impl ToTokens for NodeToken {
             ..
         } = &self.0;
 
-        let table_name_ident = &format_ident!("{}", table_name.as_ref().expect("table_name attribute must be provided"));
+        let table_name_ident = &format_ident!(
+            "{}",
+            table_name
+                .as_ref()
+                .expect("table_name attribute must be provided")
+        );
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
 
@@ -432,7 +437,6 @@ impl ToTokens for NodeToken {
             }
 
 
-            
             // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             fn #test_function_name() {
                 #( #static_assertions) *

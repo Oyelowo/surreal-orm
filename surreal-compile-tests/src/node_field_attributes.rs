@@ -595,3 +595,17 @@ fn _type_mismatch_age_boolean_is_not_datetime() {}
 /// }
 /// ```
 fn _type_mismatch_age_boolean_is_not_duration() {}
+
+/// Test type mismatch. age - bool is not geometry.
+/// ```rust, compile_fail
+/// use surreal_compile_tests::*;
+/// #[derive(Node, Serialize, Deserialize)]
+/// #[serde(rename_all = "camelCase")]
+/// #[surreal_orm(table_name = "student")]
+/// pub struct Student {
+///   id: SurrealSimpleId<Self>,
+///  #[surreal_orm(type_ = "geometry(line)")]
+/// age: bool,
+/// }
+/// ```
+fn _type_mismatch_age_boolean_is_not_geometry() {}

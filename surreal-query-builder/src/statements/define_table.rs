@@ -113,7 +113,7 @@ impl DefineTableStatement {
         self.drop = Some(true);
         self
     }
-    
+
     /// Make table flexible
     pub fn flexible(mut self) -> Self {
         self.drop = Some(true);
