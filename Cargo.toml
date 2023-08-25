@@ -6,6 +6,7 @@ members = [
   "surreal-derive",
   "surreal-models",
   "surreal-orm-tests",
+  "surreal-compile-tests",
 ]
 
 [workspace.package]
@@ -22,6 +23,7 @@ surreal-orm = { path = "./surreal-orm" }
 surreal-query-builder = { path = "./surreal-query-builder" }
 surreal-models = { path = "./surreal-models" }
 surreal-orm-tests = { path = "./surreal-orm-tests" }
+surreal-compile-tests = { path = "./surreal-compile-tests" }
 
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "a12348db8e099f25ec6f32ec3127b405825f1289", features = [
   "protocol-ws",
