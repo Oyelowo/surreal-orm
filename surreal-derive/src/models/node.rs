@@ -45,7 +45,12 @@ impl ToTokens for NodeToken {
             ..
         } = &self.0;
 
-        let table_name_ident = &format_ident!("{}", table_name.as_ref().unwrap());
+        let table_name_ident = &format_ident!(
+            "{}",
+            table_name
+                .as_ref()
+                .expect("table_name attribute must be provided")
+        );
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
 
@@ -110,7 +115,7 @@ impl ToTokens for NodeToken {
 
         let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
         let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
-        let test_function_name = format_ident!("test_{module_name}_edge_name");
+        let test_function_name = format_ident!("_________test_{module_name}_edge_name__________");
         let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");
@@ -432,7 +437,7 @@ impl ToTokens for NodeToken {
             }
 
 
-            #[test]
+            // #[test] // Comment out to make compiler tests fail in doctests. 25th August, 2023.
             fn #test_function_name() {
                 #( #static_assertions) *
                 #node_edge_metadata_static_assertions

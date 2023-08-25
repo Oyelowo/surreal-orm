@@ -553,14 +553,12 @@ async fn test_create_fetch_values_of_one_to_many_record_links_with_alias() -> Su
         id: spaceship_id_2,
         name: "SpaceShip2".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let space_ship3 = SpaceShip {
         id: spaceship_id_3,
         name: "Oyelowo".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let point = point! {
@@ -726,14 +724,12 @@ async fn test_alien_build_output() -> SurrealOrmResult<()> {
         id: spaceship_id_2,
         name: "SpaceShip2".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let space_ship3 = SpaceShip {
         id: spaceship_id_3,
         name: "Oyelowo".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let created_spaceship1 = create()
@@ -807,14 +803,12 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         id: spaceship_id_2,
         name: "SpaceShip2".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let space_ship3 = SpaceShip {
         id: spaceship_id_3,
         name: "Oyelowo".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let weapon_1 = Weapon {
@@ -950,14 +944,12 @@ async fn test_return_non_null_links() -> SurrealOrmResult<()> {
         id: spaceship_id_2,
         name: "SpaceShip2".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let space_ship3 = SpaceShip {
         id: spaceship_id_3,
         name: "Oyelowo".to_string(),
         created: Utc::now(),
-        ..Default::default()
     };
 
     let point = point! {

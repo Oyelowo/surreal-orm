@@ -3,7 +3,7 @@ use std::time::Duration;
 use surreal_orm::{
     statements::{
         define_field, define_table, for_, select, DefineFieldStatement, DefineTableStatement,
-        Permissions,
+        Permissions, SelectStatement,
     },
     *,
 };
@@ -118,15 +118,34 @@ fn get_age_by_group_default_value(group: AgeGroup) -> u8 {
     }
 }
 
+fn as_fn() -> SelectStatement {
+    // would copy from student table to destination table.
+    select(All).from(Student::table_name())
+}
+
+#[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(
+    table_name = "student_fn_attrs",
+    drop,
+    flexible,
+    schemafull,
+    as_fn = "as_fn",
+    permissions_fn = "student_permissions"
+)]
+struct StudentFnAttrs {
+    id: SurrealId<StudentFnAttrs, String>,
+}
+
 #[derive(Node, TypedBuilder, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(
     table_name = "student_with_granular_attributes",
     drop,
-    // flexible,
+    flexible,
     schemafull,
     as_ = "select(All).from(Student::table_name())",
-    permissions = "student_permissions()",
+    permissions = "student_permissions()"
 )]
 pub struct StudentWithGranularAttributes {
     id: SurrealId<StudentWithGranularAttributes, String>,

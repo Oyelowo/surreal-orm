@@ -66,7 +66,12 @@ impl ToTokens for EdgeToken {
         } = &self.0;
         let table_definitions = self.get_table_definition_token();
 
-        let table_name_ident = &format_ident!("{}", table_name.as_ref().unwrap());
+        let table_name_ident = &format_ident!(
+            "{}",
+            table_name
+                .as_ref()
+                .expect("table_name attribute must be provided")
+        );
         let table_name_str =
             errors::validate_table_name(struct_name_ident, table_name, relax_table_name).as_str();
 

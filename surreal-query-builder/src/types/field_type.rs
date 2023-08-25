@@ -180,6 +180,7 @@ impl FromStr for FieldType {
         let db_type = match (type_with_content.next(), type_with_content.next()) {
             (Some("any"), None) => FieldType::Any,
             (Some("datetime"), None) => FieldType::DateTime,
+            (Some("bool"), None) => FieldType::Bool,
             (Some("decimal"), None) => FieldType::Decimal,
             (Some("duration"), None) => FieldType::Duration,
             (Some("float"), None) => FieldType::Float,

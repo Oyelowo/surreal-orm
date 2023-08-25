@@ -126,9 +126,3 @@ async fn test_node_attributes_with_define_fn_attribute() -> SurrealOrmResult<()>
 
     Ok(())
 }
-
-#[test]
-fn ui() {
-    let t = trybuild::TestCases::new();
-    t.compile_fail("tests/ui/*.rs");
-}

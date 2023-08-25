@@ -1140,7 +1140,7 @@ impl ReferencedNodeMeta {
     pub fn with_field_definition(
         mut self,
         field_receiver: &MyFieldReceiver,
-        struct_name_ident: &Ident,
+        _struct_name_ident: &Ident,
         field_name_normalized: &String,
         data_type: &DataType,
         table: &String,
@@ -1278,7 +1278,7 @@ impl ReferencedNodeMeta {
                     panic!("define attribute is empty. Please provide a define_fn attribute.");
                 }
                 define_field = Some(
-                    quote!(#define.on_table(#struct_name_ident::table_name()).type_(#field_type_resolved).to_raw()),
+                    quote!(#define.on_table(Self::table_name()).type_(#field_type_resolved).to_raw()),
                 );
             }
             MyFieldReceiver {
@@ -1793,6 +1793,9 @@ pub struct TableDeriveAttributes {
     #[darling(default)]
     pub(crate) drop: ::std::option::Option<bool>,
 
+    #[darling(default)]
+    pub(crate) flexible: ::std::option::Option<bool>,
+
     // #[darling(default, rename = "as_")]
     pub(crate) as_: ::std::option::Option<syn::LitStr>,
 
@@ -1816,6 +1819,7 @@ impl TableDeriveAttributes {
     pub fn get_table_definition_token(&self) -> TokenStream {
         let TableDeriveAttributes {
             ref drop,
+            ref flexible,
             ref schemafull,
             ref as_,
             ref as_fn,
@@ -1833,11 +1837,13 @@ impl TableDeriveAttributes {
                 || as_.is_some()
                 || as_fn.is_some()
                 || schemafull.is_some()
+                || flexible.is_some()
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
             panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
+                            flexible,
                             as,
                             as_fn,
                             schemafull,
@@ -1864,13 +1870,17 @@ impl TableDeriveAttributes {
             define_table_methods.push(quote!(.drop()))
         }
 
+        if let Some(_flexible) = flexible {
+            define_table_methods.push(quote!(.flexible()))
+        }
+
         match (as_, as_fn){
             (Some(as_), None) => {
                 let as_ = parse_lit_to_tokenstream(as_).unwrap();
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {
-                    define_table_methods.push(quote!(#as_fn()));
+                    define_table_methods.push(quote!(.as_(#as_fn())));
             },
             (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),

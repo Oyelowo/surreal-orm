@@ -1,8 +1,8 @@
 ---
 source: surreal-orm-tests/tests/node_attributes.rs
-expression: "StudentWithGranularAttributes::define_table().to_raw().build()"
+expression: "StudentFnAttrs::define_table().to_raw().build()"
 ---
-DEFINE TABLE student_with_granular_attributes DROP FLEXIBLE SCHEMAFULL AS 
+DEFINE TABLE student_fn_attrs DROP FLEXIBLE SCHEMAFULL AS 
 	SELECT * FROM student
 PERMISSIONS
 FOR select, update
