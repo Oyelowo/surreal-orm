@@ -1,17 +1,17 @@
 name: surreal-orm
 
 on:
-  workflow_dispatch:
-    # paths:
-    #   - '**'
+  # workflow_dispatch:
+  # paths:
+  #   - '**'
   push:
     branches: [master]
     # paths:
     #   - '**'
 
-  pull_request:
-    # paths:
-    #   - '**'
+  # pull_request:
+  #   paths:
+  #     - '**'
 
 env:
   CARGO_TERM_COLOR: always
@@ -19,7 +19,7 @@ env:
 jobs:
   check_and_test_rust_monorepo:
     name: Run code checks for rust workspace
-    timeout-minutes: 50
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     # defaults:
     #   run:
@@ -80,32 +80,32 @@ jobs:
       - run: rustup component add clippy
       - run: make check
 
-  versioning:
-    runs-on: ubuntu-latest
-    needs: [check_and_test_rust_monorepo, format, clippy]
-    defaults:
-      run:
-        working-directory: surreal-orm
-    steps:
-      - uses: actions/checkout@v3
+  # versioning:
+  #   runs-on: ubuntu-latest
+  #   needs: [check_and_test_rust_monorepo, format, clippy]
+  #   defaults:
+  #     run:
+  #       working-directory: surreal-orm
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: cargo-release
+  #     - name: Setup Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         profile: minimal
+  #         toolchain: stable
+  #         components: cargo-release
 
-      - name: Bump version and create tag
-        run: |
-          cargo release patch --no-publish --no-push --no-dev-version
-          git tag -l | tail -n 1 > VERSION
+  #     - name: Bump version and create tag
+  #       run: |
+  #         cargo release patch --no-publish --no-push --no-dev-version
+  #         git tag -l | tail -n 1 > VERSION
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: true
+  #     - name: Push changes
+  #       uses: ad-m/github-push-action@master
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         tags: true
 
   # publish:
   #   needs: versioning
