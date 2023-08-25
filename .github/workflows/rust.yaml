@@ -1,7 +1,7 @@
 name: surreal-orm
 
 on:
-  # workflow_dispatch:
+  workflow_dispatch:
     # paths: 
     #   - '**'
   push:
@@ -9,9 +9,9 @@ on:
     # paths: 
     #   - '**'
 
-  # pull_request:
-  #   paths: 
-  #     - '**'
+  pull_request:
+    # paths: 
+    #   - '**'
 
 env:
   CARGO_TERM_COLOR: always
