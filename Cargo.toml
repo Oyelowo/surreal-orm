@@ -72,6 +72,5 @@ rand = "0.8.5"
 geo = { version = "0.26.0", features = ["use-serde"] }
 insta = "1.31.0"
 pretty_assertions = "1.4.0"
-trybuild = "1.0.83"
 static_assertions = "1.1.0"
 tokio-test = "0.4.3"
