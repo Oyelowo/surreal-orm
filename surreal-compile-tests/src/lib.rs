@@ -8,6 +8,7 @@
 mod node_field_attributes;
 mod node_table_attributes;
 mod edge_field_attributes;
+mod edge_table_attributes;
 
 pub use surreal_orm::{
     serde::{Deserialize, Serialize},

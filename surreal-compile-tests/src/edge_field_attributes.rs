@@ -21,21 +21,6 @@
 // <attr_name> and <attr_name>_fn should not be used together.
 // NOTE: Change this if the logic changes in the future.
 
-// Use this edge:
-use crate::*;
-#[derive(Edge, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "likes")]
-pub struct Likes<In: Node, Out: Node> {
-    pub id: SurrealSimpleId<Likes<In, Out>>,
-
-    #[serde(rename = "in", skip_serializing)]
-    pub in_: LinkOne<In>,
-    #[serde(skip_serializing)]
-    pub out: LinkOne<Out>,
-    pub likes_count: u64,
-}
-
 // Edge attributes
 // define
 // define_fn
@@ -123,8 +108,6 @@ mod check4 {
 }
 
 // <attr_name> and <attr_name>_fn should not be used together
-
-// Do the above for edge attributes too
 
 /// Test for `Likes`
 /// ```rust, compile_fail
@@ -291,7 +274,7 @@ fn _no_other_attributes_when_define_attr_is_used_in_edge_7() {}
 /// }
 fn _no_other_attributes_when_define_attr_is_used_in_edge_8() {}
 
-// Do the same for define_fn
+// same for define_fn
 
 /// Test for `Likes`
 /// ```rust, compile_fail
