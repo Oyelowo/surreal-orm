@@ -1278,7 +1278,7 @@ impl ReferencedNodeMeta {
                     panic!("define attribute is empty. Please provide a define_fn attribute.");
                 }
                 define_field = Some(
-                    quote!(#define.on_table(#struct_name_ident::table_name()).type_(#field_type_resolved).to_raw()),
+                    quote!(#define.on_table(Self::table_name()).type_(#field_type_resolved).to_raw()),
                 );
             }
             MyFieldReceiver {
