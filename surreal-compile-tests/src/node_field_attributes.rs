@@ -33,7 +33,7 @@ mod check1 {
     #[surreal_orm(table_name = "student")]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define = "field_define_fn()")]
+        #[surreal_orm(type_ = "int", define = "define_field_fn()")]
         age: u8,
     }
 }
@@ -46,7 +46,7 @@ mod check2 {
     #[surreal_orm(table_name = "student")]
     pub struct Student {
         id: SurrealSimpleId<Self>,
-        #[surreal_orm(type_ = "int", define_fn = "field_define_fn")]
+        #[surreal_orm(type_ = "int", define_fn = "define_field_fn")]
         age: u8,
     }
 }
@@ -83,7 +83,7 @@ mod check3 {
 ///         value = "18",
 ///         assert = "assert_fn()",
 ///         permissions = "permissions_fn()",
-///         define = "field_define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -102,7 +102,7 @@ fn _no_other_attributes_when_define_attr_is_used_1() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         value = "18",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -122,7 +122,7 @@ fn _no_other_attributes_when_define_attr_is_used_2() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         assert = "assert_fn()",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -142,7 +142,7 @@ fn _no_other_attributes_when_define_attr_is_used_3() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         permissions = "permissions_fn()",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -162,7 +162,7 @@ fn _no_other_attributes_when_define_attr_is_used_4() {}
 ///         type_ = "int",
 ///         value = "18",
 ///         assert = "assert_fn()",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -183,7 +183,7 @@ fn _no_other_attributes_when_define_attr_is_used_5() {}
 ///         type_ = "int",
 ///         assert = "assert_fn()",
 ///         permissions = "permissions_fn()",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -202,7 +202,7 @@ fn _no_other_attributes_when_define_attr_is_used_7() {}
 ///         type_ = "int",
 ///         value = "18",
 ///         permissions = "permissions_fn()",
-///         define = "define_fn()"
+///         define = "define_field_fn()"
 ///     )]
 ///     age: u8,
 /// }
@@ -224,7 +224,7 @@ fn _no_other_attributes_when_define_attr_is_used_8() {}
 ///         value = "18",
 ///         assert = "assert_fn()",
 ///         permissions = "permissions_fn()",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -242,7 +242,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_1() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         value = "18",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -261,7 +261,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_2() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         assert = "assert_fn()",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -279,7 +279,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_3() {}
 ///     #[surreal_orm(
 ///         type_ = "int",
 ///         permissions = "permissions_fn()",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -298,7 +298,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_4() {}
 ///         type_ = "int",
 ///         value = "18",
 ///         assert = "assert_fn",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -317,7 +317,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_5() {}
 ///         type_ = "int",
 ///         assert = "assert_fn()",
 ///         permissions = "permissions_fn()",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -336,7 +336,7 @@ fn _no_other_attributes_when_define_fn_attr_is_used_7() {}
 ///         type_ = "int",
 ///         value = "18",
 ///         permissions = "permissions_fn()",
-///         define_fn = "define_fn"
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }
@@ -355,8 +355,8 @@ fn _no_other_attributes_when_define_fn_attr_is_used_8() {}
 ///     id: SurrealSimpleId<Self>,
 ///     #[surreal_orm(
 ///         type_ = "int",
-///         define = "define_fn()",
-///         define_fn = "define_fn"
+///         define = "define_field_fn()",
+///         define_fn = "define_field_fn"
 ///     )]
 ///     age: u8,
 /// }

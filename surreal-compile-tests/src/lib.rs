@@ -7,6 +7,7 @@
 
 mod node_field_attributes;
 mod node_table_attributes;
+mod edge_field_attributes;
 
 pub use surreal_orm::{
     serde::{Deserialize, Serialize},
@@ -14,7 +15,7 @@ pub use surreal_orm::{
     *,
 };
 
-pub fn field_define_fn() -> DefineFieldStatement {
+pub fn define_field_fn() -> DefineFieldStatement {
     unimplemented!()
 }
 
