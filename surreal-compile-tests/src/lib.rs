@@ -6,14 +6,19 @@
  */
 
 mod node_field_attributes;
+mod node_table_attributes;
 
 pub use surreal_orm::{
     serde::{Deserialize, Serialize},
-    statements::{DefineFieldStatement, Permissions},
+    statements::{DefineFieldStatement, DefineTableStatement, Permissions, SelectStatement},
     *,
 };
 
 pub fn field_define_fn() -> DefineFieldStatement {
+    unimplemented!()
+}
+
+pub fn define_table_fn() -> DefineTableStatement {
     unimplemented!()
 }
 
@@ -26,5 +31,9 @@ pub fn assert_fn() -> Filter {
 }
 
 pub fn value_fn() -> u8 {
+    unimplemented!()
+}
+
+pub fn as_fn() -> SelectStatement {
     unimplemented!()
 }
