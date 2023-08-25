@@ -87,7 +87,7 @@ mod check3 {
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_1() {}
+fn _no_other_attributes_when_define_attr_is_used_1() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -107,7 +107,7 @@ fn no_other_attributes_when_define_attr_is_used_1() {}
 ///     age: u8,
 /// }
 ///
-fn no_other_attributes_when_define_attr_is_used_2() {}
+fn _no_other_attributes_when_define_attr_is_used_2() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -126,7 +126,7 @@ fn no_other_attributes_when_define_attr_is_used_2() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_3() {}
+fn _no_other_attributes_when_define_attr_is_used_3() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -146,7 +146,7 @@ fn no_other_attributes_when_define_attr_is_used_3() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_4() {}
+fn _no_other_attributes_when_define_attr_is_used_4() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -166,7 +166,7 @@ fn no_other_attributes_when_define_attr_is_used_4() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_5() {}
+fn _no_other_attributes_when_define_attr_is_used_5() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -187,7 +187,7 @@ fn no_other_attributes_when_define_attr_is_used_5() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_7() {}
+fn _no_other_attributes_when_define_attr_is_used_7() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -206,7 +206,7 @@ fn no_other_attributes_when_define_attr_is_used_7() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_attr_is_used_8() {}
+fn _no_other_attributes_when_define_attr_is_used_8() {}
 
 // Do the same for define_fn
 
@@ -228,7 +228,7 @@ fn no_other_attributes_when_define_attr_is_used_8() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_1() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_1() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -247,7 +247,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_1() {}
 ///     age: u8,
 /// }
 ///
-fn no_other_attributes_when_define_fn_attr_is_used_2() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_2() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -265,7 +265,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_2() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_3() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_3() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -283,7 +283,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_3() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_4() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_4() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -302,7 +302,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_4() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_5() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_5() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -321,7 +321,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_5() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_7() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_7() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -340,7 +340,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_7() {}
 ///     )]
 ///     age: u8,
 /// }
-fn no_other_attributes_when_define_fn_attr_is_used_8() {}
+fn _no_other_attributes_when_define_fn_attr_is_used_8() {}
 
 // <attr_name> and <attr_name>_fn should not be used together
 
@@ -360,7 +360,7 @@ fn no_other_attributes_when_define_fn_attr_is_used_8() {}
 ///     )]
 ///     age: u8,
 /// }
-fn define_and_define_fn_attrs_should_not_be_used_together_1() {}
+fn _define_and_define_fn_attrs_should_not_be_used_together_1() {}
 
 // do the same for value and value_fn, assert and assert_fn, permissions and permissions_fn
 
@@ -380,7 +380,7 @@ fn define_and_define_fn_attrs_should_not_be_used_together_1() {}
 ///     )]
 ///     age: u8,
 /// }
-fn value_and_value_fn_attrs_should_not_be_used_together() {}
+fn _value_and_value_fn_attrs_should_not_be_used_together() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -398,7 +398,7 @@ fn value_and_value_fn_attrs_should_not_be_used_together() {}
 ///     )]
 ///     age: u8,
 /// }
-fn assert_and_assert_fn_attrs_should_not_be_used_together() {}
+fn _assert_and_assert_fn_attrs_should_not_be_used_together() {}
 
 /// Test for `Student`
 /// ```rust, compile_fail
@@ -416,4 +416,4 @@ fn assert_and_assert_fn_attrs_should_not_be_used_together() {}
 ///     )]
 ///     age: u8,
 /// }
-fn permissions_and_permissions_fn_attrs_should_not_be_used_together() {}
+fn _permissions_and_permissions_fn_attrs_should_not_be_used_together() {}

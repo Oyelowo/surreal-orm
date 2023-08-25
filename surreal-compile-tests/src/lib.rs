@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-mod node_field_attributes_tests;
+mod node_field_attributes;
 
 pub use surreal_orm::{
     serde::{Deserialize, Serialize},
