@@ -40,6 +40,7 @@ use super::{for_::Permissions, select::SelectStatement};
 pub struct DefineTableStatement {
     table_name: String,
     drop: Option<bool>,
+    flexible: Option<bool>,
     schema_type: Option<SchemaType>,
     as_: Option<String>,
     permissions_none: Option<bool>,
@@ -96,6 +97,7 @@ pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
     DefineTableStatement {
         table_name: table.to_string(),
         drop: None,
+        flexible: None,
         schema_type: None,
         as_: None,
         permissions_none: None,
@@ -108,6 +110,12 @@ pub fn define_table(table_name: impl Into<Table>) -> DefineTableStatement {
 impl DefineTableStatement {
     /// Drop the table if it exists and create a new one with the same name.
     pub fn drop(mut self) -> Self {
+        self.drop = Some(true);
+        self
+    }
+    
+    /// Make table flexible
+    pub fn flexible(mut self) -> Self {
         self.drop = Some(true);
         self
     }
@@ -188,11 +196,11 @@ impl DefineTableStatement {
     /// let statement = statement.permissions(for_(Select).where_(age.greater_than_or_equal(18)));
     ///
     /// // Even multiple
-    /// let statement = statement.permissions(for_(&[Create, Update]).where_(name.is("Oyedayo")));
+    /// let statement = statement.permissions(for_([Create, Update]).where_(name.is("Oyedayo")));
     ///
     /// // Multiples multples
     /// let statement = statement.permissions(&[
-    ///     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
+    ///     for_([Create, Delete]).where_(name.is("Oyedayo")),
     ///     for_(Update).where_(age.less_than_or_equal(130)),
     /// ]);
     ///
@@ -246,6 +254,10 @@ impl Buildable for DefineTableStatement {
 
         if self.drop.unwrap_or_default() {
             query = format!("{query} DROP");
+        }
+
+        if self.flexible.unwrap_or_default() {
+            query = format!("{query} FLEXIBLE");
         }
 
         match self.schema_type {

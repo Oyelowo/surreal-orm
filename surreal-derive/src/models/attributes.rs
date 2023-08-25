@@ -1793,6 +1793,9 @@ pub struct TableDeriveAttributes {
     #[darling(default)]
     pub(crate) drop: ::std::option::Option<bool>,
 
+    #[darling(default)]
+    pub(crate) flexible: ::std::option::Option<bool>,
+
     // #[darling(default, rename = "as_")]
     pub(crate) as_: ::std::option::Option<syn::LitStr>,
 
@@ -1816,6 +1819,7 @@ impl TableDeriveAttributes {
     pub fn get_table_definition_token(&self) -> TokenStream {
         let TableDeriveAttributes {
             ref drop,
+            ref flexible,
             ref schemafull,
             ref as_,
             ref as_fn,
@@ -1833,11 +1837,13 @@ impl TableDeriveAttributes {
                 || as_.is_some()
                 || as_fn.is_some()
                 || schemafull.is_some()
+                || flexible.is_some()
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
             panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
+                            flexible,
                             as,
                             as_fn,
                             schemafull,
@@ -1862,6 +1868,10 @@ impl TableDeriveAttributes {
 
         if let Some(_drop) = drop {
             define_table_methods.push(quote!(.drop()))
+        }
+
+        if let Some(_flexible) = flexible {
+            define_table_methods.push(quote!(.flexible()))
         }
 
         match (as_, as_fn){
