@@ -19,7 +19,7 @@ env:
 jobs:
   check_and_test_rust_monorepo:
     name: Run code checks for rust workspace
-    timeout-minutes: 10
+    timeout-minutes: 80
     runs-on: ubuntu-latest
     # defaults:
     #   run:
