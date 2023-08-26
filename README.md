@@ -108,12 +108,12 @@ use surreal_orm::statements::insert;
 
 let spaceships = vec![
     SpaceShip {
-        id: "1".to_string(),
+        id: SpaceShip::create_simple_id(),
         name: "Millennium Falcon".to_string(),
         age: 79,
     },
     SpaceShip {
-        id: "2".to_string(),
+        id: SpaceShip::create_simple_id(),
         name: "Starship Enterprise".to_string(),
         age: 15,
     },
@@ -135,7 +135,7 @@ the updated data as a struct. Here's an example:
 use surreal_orm::statements::update;
 
 let spaceship = SpaceShip {
-    id: "1".to_string(),
+    id: SpaceShip::create_simple_id(),
     name: "Millennium Falcon".to_string(),
     age: 60
 };
@@ -167,6 +167,70 @@ delete(space_ship)
 In this example, we use the `delete` function and specify the table name. We add
 a condition using the `where_` method, and then call the `run` method to execute
 the deletion operation.
+
+## Transactions
+
+Surreal ORM supports transactions, which are a series of operations that are
+treated as a single unit of work. Here's an example of a transaction that
+involves creating two accounts, updating their balances, and then committing the
+transaction:
+
+```rust
+use surreal_orm::{
+    statements::{begin_transaction, create, update},
+    *,
+};
+use surreal_models::Account;
+use surrealdb::{engine::local::Mem, Surreal};
+
+let db = Surreal::new::<Mem>(()).await.unwrap();
+db.use_ns("test").use_db("test").await.unwrap();
+
+let id1 = &Account::create_id("one".into());
+let id2 = &Account::create_id("two".into());
+let amount_to_transfer = 300.00;
+
+let acc = Account::schema();
+
+block! {
+    BEGIN TRANSACTION;
+
+    LET balance = create().content(Balance {
+            id: Balance::create_id("balance1".into()),
+            amount: amount_to_transfer,
+        });
+
+    LET acc1 = create().content(Account {
+        id: id1.clone(),
+        balance: 135_605.16,
+    });
+    LET acc2 = create().content(Account {
+        id: id2.clone(),
+        balance: 91_031.31,
+    });
+
+    // You can reference the balance object by using the $balance variable and pass the amount
+    // as a parameter to the decrement_by function. i.e $balance.amount
+    LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
+            
+    // You can also pass the amount directly to the decrement_by function. i.e 300.00
+    LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+
+    COMMIT TRANSACTION;
+}
+.run(db.clone())
+.await?;
+
+let accounts = select(All)
+    .from(id1..=id2)
+    .return_many::<Account>(db.clone())
+    .await?;
+```
+
+In this example, we begin a transaction and then create two accounts with
+initial balances. We then increment the balance of the first account and
+decrement the balance of the second account by the same amount. Finally, we
+commit the transaction and then verify that the balances were updated correctly.
 
 ## Conclusion
 
