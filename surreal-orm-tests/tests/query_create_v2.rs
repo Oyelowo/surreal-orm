@@ -13,7 +13,7 @@ use geo::polygon;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use surreal_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
+use surreal_models::{alien_schema, space_ship_schema, Alien, SpaceShip, Weapon};
 use surreal_orm::statements::order;
 use surreal_orm::{
     statements::{create_v2, select},
@@ -123,7 +123,7 @@ async fn test_creation_with_returning_selected_fields() -> SurrealOrmResult<()> 
     };
 
     assert_eq!(space_ship.id.to_thing().tb, "space_ship");
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -974,7 +974,7 @@ async fn test_create_set_statement() -> SurrealOrmResult<()> {
     let spaceship_id_2 = SpaceShip::create_id("spaceship2".to_string());
     let spaceship_id_3 = SpaceShip::create_id("spaceship3".to_string());
 
-    let spaceship_schema::SpaceShip {
+    let space_ship_schema::SpaceShip {
         id, name, created, ..
     } = SpaceShip::schema();
 

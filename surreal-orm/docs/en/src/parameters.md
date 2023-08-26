@@ -21,7 +21,7 @@ calculate the average strength of weapons, for instance:
 #
 # let ref weapon = Weapon::table_name();
 # let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-# let weaponstats_schema::WeaponStats {
+# let weapon_stats_schema::WeaponStats {
 #     averageStrength, ..
 # } = WeaponStats::schema();
 #

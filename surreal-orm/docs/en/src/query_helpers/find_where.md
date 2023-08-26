@@ -26,7 +26,7 @@ async fn test_find_where() -> SurrealOrmResult<()> {
     .await?;
 
     let _spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
-    let spaceship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
         .return_many(db.clone())
