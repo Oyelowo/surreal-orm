@@ -1,8 +1,9 @@
 # Info Statement
 
-The `INFO` statement in SurrealDB ORM is used to retrieve information about various elements in the database,
-such as key-value pairs, namespaces, databases, scopes, and tables. This documentation covers
-the usage and examples of the `INFO` statement for each of these elements.
+The `INFO` statement in Surreal ORM is used to retrieve information about
+various elements in the database, such as key-value pairs, namespaces,
+databases, scopes, and tables. This documentation covers the usage and examples
+of the `INFO` statement for each of these elements.
 
 ## Table of Contents
 
@@ -14,7 +15,8 @@ the usage and examples of the `INFO` statement for each of these elements.
 
 ## Info for Key-Value (KV) Pairs
 
-The `INFO FOR KV` statement is used to retrieve information about key-value pairs in the SurrealDB. Here's an example:
+The `INFO FOR KV` statement is used to retrieve information about key-value
+pairs in the SurrealDB. Here's an example:
 
 ```rust
 let statement = info_for().kv().build();
@@ -25,7 +27,8 @@ The generated SQL query for this code block would be `INFO FOR KV;`.
 
 ## Info for Namespaces
 
-The `INFO FOR NS` statement is used to retrieve information about namespaces in the SurrealDB. Here's an example:
+The `INFO FOR NS` statement is used to retrieve information about namespaces in
+the SurrealDB. Here's an example:
 
 ```rust
 let statement = info_for().namespace().build();
@@ -36,7 +39,8 @@ The generated SQL query for this code block would be `INFO FOR NS;`.
 
 ## Info for Databases
 
-The `INFO FOR DB` statement is used to retrieve information about databases in the SurrealDB. Here's an example:
+The `INFO FOR DB` statement is used to retrieve information about databases in
+the SurrealDB. Here's an example:
 
 ```rust
 let statement = info_for().database().build();
@@ -47,25 +51,30 @@ The generated SQL query for this code block would be `INFO FOR DB;`.
 
 ## Info for Scopes
 
-The `INFO FOR SCOPE` statement is used to retrieve information about a specific scope in the SurrealDB. Here's an example:
+The `INFO FOR SCOPE` statement is used to retrieve information about a specific
+scope in the SurrealDB. Here's an example:
 
 ```rust
 let statement = info_for().scope("test_scope").build();
 assert_eq!(statement, "INFO FOR SCOPE test_scope;");
 ```
 
-The generated SQL query for this code block would be `INFO FOR SCOPE test_scope;`.
+The generated SQL query for this code block would be
+`INFO FOR SCOPE test_scope;`.
 
 ## Info for Tables
 
-The `INFO FOR TABLE` statement is used to retrieve information about a specific table in the SurrealDB. Here's an example:
+The `INFO FOR TABLE` statement is used to retrieve information about a specific
+table in the SurrealDB. Here's an example:
 
 ```rust
 let statement = info_for().table("test_table").build();
 assert_eq!(statement, "INFO FOR TABLE test_table;");
 ```
 
-The generated SQL query for this code block would be `INFO FOR TABLE test_table;`.
+The generated SQL query for this code block would be
+`INFO FOR TABLE test_table;`.
 
-That concludes the documentation for the `INFO` statement in SurrealDB ORM. Use the examples and
-explanations provided to retrieve information about key-value pairs, namespaces, databases, scopes, and tables effectively.
+That concludes the documentation for the `INFO` statement in Surreal ORM. Use
+the examples and explanations provided to retrieve information about key-value
+pairs, namespaces, databases, scopes, and tables effectively.

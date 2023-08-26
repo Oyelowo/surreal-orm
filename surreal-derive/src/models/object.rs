@@ -12,6 +12,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::str::FromStr;
 
+use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
@@ -87,7 +88,10 @@ impl ToTokens for ObjectToken {
             .into_iter()
             .collect::<Vec<_>>();
 
-        let module_name = format_ident!("{}", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!(
+            "{}_schema",
+            struct_name_ident.to_string().to_case(Case::Snake)
+        );
         let test_function_name = format_ident!("test_{module_name}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 

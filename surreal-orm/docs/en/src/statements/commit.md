@@ -1,6 +1,6 @@
 # Commit Statement
 
-The `commit` statement in SurrealDB ORM is used to commit a transaction and save
+The `commit` statement in Surreal ORM is used to commit a transaction and save
 the changes made within the transaction. It ensures that the changes are durable
 and permanent in the database.
 
@@ -187,6 +187,6 @@ It is generally recommended to use the recommended approaches with the `block!`
 macro for better readability, automation of variable bindings, and subquery
 handling.
 
-That concludes the documentation for the `commit` statement in SurrealDB ORM.
-Use the recommended approaches to perform transactions and commit changes
+That concludes the documentation for the `commit` statement in Surreal ORM. Use
+the recommended approaches to perform transactions and commit changes
 effectively.

@@ -1,6 +1,6 @@
-# SurrealDB ORM - Insertion Operations
+# Surreal ORM - Insertion Operations
 
-SurrealDB ORM provides various options to perform data insertion operations in
+Surreal ORM provides various options to perform data insertion operations in
 your database. This guide focuses on three main operations:
 
 **Table of Contents**
@@ -55,7 +55,7 @@ strength of 1000.
 
 ## Inserting Multiple Records
 
-In addition to inserting single records, SurrealDB ORM also supports inserting
+In addition to inserting single records, Surreal ORM also supports inserting
 multiple records at once. Here is an example:
 
 ```rust
@@ -99,9 +99,9 @@ values.
 
 ## Inserting from Another Table
 
-SurrealDB ORM allows you to copy data from one table to another using the
-`insert` statement. This is similar to creating a view in PostgreSQL, but
-instead of just a projection, it's copying the data to a new table.
+Surreal ORM allows you to copy data from one table to another using the `insert`
+statement. This is similar to creating a view in PostgreSQL, but instead of just
+a projection, it's copying the data to a new table.
 
 ```rust
 // Required imports

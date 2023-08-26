@@ -6,7 +6,7 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{weapon_schema, weaponstats_schema, Weapon, WeaponStats};
+use surreal_models::{weapon_schema, weapon_stats_schema, Weapon, WeaponStats};
 use surreal_orm::{
     chain,
     functions::math,
@@ -23,7 +23,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
 
     let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
 
@@ -79,7 +79,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
 
     let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
 
@@ -124,7 +124,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
 
     let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
 
@@ -168,7 +168,7 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
 
     let weapon = Weapon::table_name();
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
 
@@ -215,7 +215,7 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
 
     let weapon = Weapon::table_name();
     let weapon_schema::Weapon { strength, .. } = Weapon::schema();
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
 
@@ -289,7 +289,7 @@ async fn test_code_block() -> SurrealOrmResult<()> {
 
     let step4_return_last = return_(bracket(total.divide(count)));
 
-    let weaponstats_schema::WeaponStats {
+    let weapon_stats_schema::WeaponStats {
         averageStrength, ..
     } = WeaponStats::schema();
     let created_stats_statement = create::<WeaponStats>().set(

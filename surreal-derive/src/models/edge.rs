@@ -7,6 +7,7 @@
  * Licensed under the MIT license
  */
 
+use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -139,7 +140,10 @@ impl ToTokens for EdgeToken {
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
-        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!(
+            "{}_schema",
+            struct_name_ident.to_string().to_case(Case::Snake)
+        );
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");

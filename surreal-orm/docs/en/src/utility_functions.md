@@ -9,7 +9,7 @@ abstraction over raw database statements, simplifying CRUD operations.
 Before we dive into the helper methods, let's set up our environment:
 
 ```rust
-use surreal_models::{spaceship_schema, weapon_schema, SpaceShip, Weapon};
+use surreal_models::{space_ship_schema, weapon_schema, SpaceShip, Weapon};
 use surreal_orm::{
     statements::{insert, select, select_value},
     *,
@@ -119,7 +119,7 @@ async fn test_find_where() -> SurrealOrmResult<()> {
     .await?;
 
     let _spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
-    let spaceship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
         .return_many(db.clone())
@@ -289,7 +289,7 @@ async fn test_delete_where() -> SurrealOrmResult<()> {
     };
 
     spaceship.save().run(db.clone()).await.unwrap();
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(name.like("spaceship-1"))
         .return_many(db.clone())

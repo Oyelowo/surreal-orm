@@ -10,7 +10,7 @@ use geo::{line_string, point, polygon};
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{
-    alien_schema, weapon_schema, weaponold_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
+    alien_schema, weapon_old_schema, weapon_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
     WeaponNonNullUpdater, WeaponOld,
 };
 use surreal_orm::{
@@ -1017,7 +1017,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
     );
 
     // Remove some fields from WeaponOld struct.
-    let weaponold_schema::WeaponOld {
+    let weapon_old_schema::WeaponOld {
         ref bunchOfOtherFields,
         ref nice,
         ..
@@ -1127,7 +1127,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
         vec!["created", "id", "name", "rocket", "strength"]
     );
 
-    let weaponold_schema::WeaponOld {
+    let weapon_old_schema::WeaponOld {
         ref bunchOfOtherFields,
         ref nice,
         ..

@@ -269,5 +269,4 @@ let user = User::find(1).load_line_selfs().unwrap();
 In conclusion, loaders provide a flexible way to handle linked records in your
 database. Whether you want to fetch all links, fetch links of a specific type,
 or handle null references in a certain way, loaders have got you covered. They
-are a powerful tool in the SurrealDB ORM, simplifying complex database
-operations.
+are a powerful tool in the Surreal ORM, simplifying complex database operations.

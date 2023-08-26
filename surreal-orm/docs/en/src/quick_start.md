@@ -1,17 +1,17 @@
 # Quick Start
 
-# SurrealDB ORM Documentation
+# Surreal ORM Documentation
 
 ## Introduction
 
-SurrealDB ORM is an Object-Relational Mapping library for Rust that provides a
-high-level API for interacting with SurrealDB, a distributed document database.
-This documentation will guide you through the usage and features of the
-SurrealDB ORM library.
+Surreal ORM is an Object-Relational Mapping and query-building library for Rust
+that provides a high-level API for interacting with SurrealDB, a distributed
+graph database. This documentation will guide you through the usage and features
+of the Surreal ORM library.
 
 ## Getting Started
 
-To use SurrealDB ORM in your Rust project, you need to add it as a dependency in
+To use Surreal ORM in your Rust project, you need to add it as a dependency in
 your `Cargo.toml` file:
 
 ```toml
@@ -49,21 +49,20 @@ to your setup.
 
 ## Defining a Model
 
-A model in SurrealDB ORM represents a database table. You can define a model by
-creating a Rust struct and implementing the `Model` trait. Here's an example of
+A model in Surreal ORM represents a database table. You can define a model by
+creating a Rust struct and implementing the `Node` or `Edge` trait. Here's an example of
 defining a `SpaceShip` model:
 
 ```rust
-use chrono::Utc;
-use surreal_orm::Model;
-use surreal_orm::types::DateTime;
+use surreal_orm::*;
 
-#[derive(Model)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "space_ship")]
-struct SpaceShip {
-    id: String,
-    name: String,
-    created: DateTime<Utc>,
+pub struct SpaceShip {
+    pub id: SurrealSimpleId<Self>,
+    pub name: String,
+    pub age: u8,
 }
 ```
 
@@ -73,17 +72,19 @@ database table.
 
 ## Querying Data
 
-SurrealDB ORM provides a fluent and expressive API for querying data from the
+Surreal ORM provides a fluent and expressive API for querying data from the
 database. You can use the `select` function to start a select statement and
 chain various methods to build the query. Here's an example:
 
 ```rust
 use surreal_orm::statements::{select, All};
 
+let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+
 let statement = select(All)
-    .from("space_ship")
-    .where_("name".eq("Millennium Falcon"))
-    .order_by("created".desc())
+    .from(space_ship)
+    .where_(name.equal("Millennium Falcon"))
+    .order_by(age.desc())
     .limit(10);
 ```
 
@@ -105,18 +106,16 @@ let spaceships = vec![
     SpaceShip {
         id: "1".to_string(),
         name: "Millennium Falcon".to_string(),
-        created: Utc::now(),
+        age: 79,
     },
     SpaceShip {
         id: "2".to_string(),
         name: "Starship Enterprise".to_string(),
-        created: Utc::now(),
-
-
+        age: 15,
     },
 ];
 
-insert(spaceships).run(db.clone()).await?;
+insert(spaceships).return_many(db.clone()).await?;
 ```
 
 In this example, we define a vector of `SpaceShip` structs and pass it to the
@@ -134,7 +133,7 @@ use surreal_orm::statements::update;
 let spaceship = SpaceShip {
     id: "1".to_string(),
     name: "Millennium Falcon".to_string(),
-    created: Utc::now(),
+    age: 60
 };
 
 update(spaceship).run(db.clone()).await?;
@@ -152,10 +151,11 @@ the condition for deletion. Here's an example:
 ```rust
 use surreal_orm::statements::{delete, Field};
 
-let condition = Field::new("name").eq("Millennium Falcon");
+let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+let condition = name.eq("Millennium Falcon");
 
-delete("space_ship")
-    .where_(condition)
+delete(space_ship)
+    .where_(whr(name.equal("Millennium Falcon")).and(age.less_then(50)))
     .run(db.clone())
     .await?;
 ```
@@ -166,6 +166,6 @@ method to execute the deletion operation.
 
 ## Conclusion
 
-This concludes the basic usage and features of the SurrealDB ORM library. You
-can explore more advanced features and methods in the API documentation. If you
-have any further questions or need assistance, feel free to reach out.
+This concludes the basic usage and features of the Surreal ORM library. You can
+explore more advanced features and methods in the API documentation. If you have
+any further questions or need assistance, feel free to reach out.

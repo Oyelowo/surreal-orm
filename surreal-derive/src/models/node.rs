@@ -12,6 +12,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{ops::Deref, str::FromStr};
 
+use convert_case::{Case, Casing};
 use syn::{self, parse_macro_input};
 
 use super::{
@@ -113,7 +114,10 @@ impl ToTokens for NodeToken {
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let module_name = format_ident!("{}_schema", struct_name_ident.to_string().to_lowercase());
+        let module_name = format_ident!(
+            "{}_schema",
+            struct_name_ident.to_string().to_case(Case::Snake)
+        );
         let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
         let test_function_name = format_ident!("_________test_{module_name}_edge_name__________");
         let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");

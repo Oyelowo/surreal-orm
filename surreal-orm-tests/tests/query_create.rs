@@ -14,7 +14,7 @@ use geo::polygon;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use surreal_models::{alien_schema, spaceship_schema, Alien, SpaceShip, Weapon};
+use surreal_models::{alien_schema, space_ship_schema, Alien, SpaceShip, Weapon};
 use surreal_orm::statements::order;
 use surreal_orm::{
     statements::{create, select},
@@ -133,7 +133,7 @@ async fn test_creation_with_returning_selected_fields_with_helper_method() -> Su
     };
 
     assert_eq!(space_ship.id.to_thing().tb, "space_ship");
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -161,7 +161,7 @@ async fn test_creation_with_returning_selected_fields_with_run_take_surreal_help
     };
 
     assert_eq!(space_ship.id.to_thing().tb, "space_ship");
-    let spaceship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -1073,7 +1073,7 @@ async fn test_create_set_object_and_array_statement() -> SurrealOrmResult<()> {
         .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
-    let spaceship_schema::SpaceShip {
+    let space_ship_schema::SpaceShip {
         id, name, created, ..
     } = SpaceShip::schema();
     let space_ship2 = create::<SpaceShip>()
