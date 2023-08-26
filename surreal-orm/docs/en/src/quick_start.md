@@ -54,16 +54,15 @@ creating a Rust struct and implementing the `Model` trait. Here's an example of
 defining a `SpaceShip` model:
 
 ```rust
-use chrono::Utc;
-use surreal_orm::Model;
-use surreal_orm::types::DateTime;
+use surreal_orm::*;
 
-#[derive(Model)]
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "space_ship")]
-struct SpaceShip {
-    id: String,
-    name: String,
-    created: DateTime<Utc>,
+pub struct SpaceShip {
+    pub id: SurrealSimpleId<Self>,
+    pub name: String,
+    pub age: u8,
 }
 ```
 
@@ -80,10 +79,12 @@ chain various methods to build the query. Here's an example:
 ```rust
 use surreal_orm::statements::{select, All};
 
+let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+
 let statement = select(All)
-    .from("space_ship")
-    .where_("name".eq("Millennium Falcon"))
-    .order_by("created".desc())
+    .from(space_ship)
+    .where_(name.equal("Millennium Falcon"))
+    .order_by(age.desc())
     .limit(10);
 ```
 
@@ -105,18 +106,16 @@ let spaceships = vec![
     SpaceShip {
         id: "1".to_string(),
         name: "Millennium Falcon".to_string(),
-        created: Utc::now(),
+        age: 79,
     },
     SpaceShip {
         id: "2".to_string(),
         name: "Starship Enterprise".to_string(),
-        created: Utc::now(),
-
-
+        age: 15,
     },
 ];
 
-insert(spaceships).run(db.clone()).await?;
+insert(spaceships).return_many(db.clone()).await?;
 ```
 
 In this example, we define a vector of `SpaceShip` structs and pass it to the
@@ -134,7 +133,7 @@ use surreal_orm::statements::update;
 let spaceship = SpaceShip {
     id: "1".to_string(),
     name: "Millennium Falcon".to_string(),
-    created: Utc::now(),
+    age: 60
 };
 
 update(spaceship).run(db.clone()).await?;
@@ -152,10 +151,11 @@ the condition for deletion. Here's an example:
 ```rust
 use surreal_orm::statements::{delete, Field};
 
-let condition = Field::new("name").eq("Millennium Falcon");
+let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+let condition = name.eq("Millennium Falcon");
 
-delete("space_ship")
-    .where_(condition)
+delete(space_ship)
+    .where_(whr(name.equal("Millennium Falcon")).and(age.less_then(50)))
     .run(db.clone())
     .await?;
 ```
