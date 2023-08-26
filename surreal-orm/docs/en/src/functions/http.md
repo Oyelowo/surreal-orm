@@ -1,6 +1,8 @@
 # HTTP Functions
 
-This chapter introduces the http macros provided by the SurrealDB ORM. The http macros are used for performing remote HTTP requests such as HEAD, GET, POST, PUT, and PATCH.
+This chapter introduces the http macros provided by the Surreal ORM. The http
+macros are used for performing remote HTTP requests such as HEAD, GET, POST,
+PUT, and PATCH.
 
 ## Table of Contents
 
@@ -13,7 +15,8 @@ This chapter introduces the http macros provided by the SurrealDB ORM. The http 
 
 ## <a name="http-head-macro"></a>http::head!()
 
-The `http::head!()` macro performs a remote HTTP HEAD request. It has the following syntax:
+The `http::head!()` macro performs a remote HTTP HEAD request. It has the
+following syntax:
 
 ```rust
 http::head!("https://codebreather.com");
@@ -27,7 +30,8 @@ http::head("https://codebreather.com", None as Option<ObjectLike>)
 
 ## <a name="http-get-macro"></a>http::get!()
 
-The `http::get!()` macro performs a remote HTTP GET request. It has the following syntax:
+The `http::get!()` macro performs a remote HTTP GET request. It has the
+following syntax:
 
 ```rust
 http::get!("https://codebreather.com");
@@ -41,7 +45,8 @@ http::get("https://codebreather.com", None as Option<ObjectLike>)
 
 ## <a name="http-delete-macro"></a>http::delete!()
 
-The `http::delete!()` macro performs a remote HTTP DELETE request. It has the following syntax:
+The `http::delete!()` macro performs a remote HTTP DELETE request. It has the
+following syntax:
 
 ```rust
 http::delete!("https://codebreather.com");
@@ -55,7 +60,8 @@ http::delete("https://codebreather.com", None as Option<ObjectLike>)
 
 ## <a name="http-post-macro"></a>http::post!()
 
-The `http::post!()` macro performs a remote HTTP POST request. It has the following syntax:
+The `http::post!()` macro performs a remote HTTP POST request. It has the
+following syntax:
 
 ```rust
 http::post!("https://codebreather.com", body);
@@ -69,7 +75,8 @@ http::post("https://codebreather.com", body, None as Option<ObjectLike>)
 
 ## <a name="http-put-macro"></a>http::put!()
 
-The `http::put!()` macro performs a remote HTTP PUT request. It has the following syntax:
+The `http::put!()` macro performs a remote HTTP PUT request. It has the
+following syntax:
 
 ```rust
 http::put!("https://codebreather.com", body);
@@ -83,7 +90,8 @@ http::put("https://codebreather.com", body, None as Option<ObjectLike>)
 
 ## <a name="http-patch-macro"></a>http::patch!()
 
-The `http::patch!()` macro performs a remote HTTP PATCH request. It has the following syntax:
+The `http::patch!()` macro performs a remote HTTP PATCH request. It has the
+following syntax:
 
 ```rust
 http::patch!("https://codebreather.com", body);

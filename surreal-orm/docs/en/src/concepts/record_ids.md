@@ -2,7 +2,7 @@
 
 The `SurrealId` is a wrapper struct that extends the capabilities of
 `surrealdb::sql::Thing` and provides a more ergonomic interface. It's a static
-type representing the id of a model in the SurrealDB ORM and is a combination of
+type representing the id of a model in the Surreal ORM and is a combination of
 the model's table name and the id, where the id can be anything that can be
 converted into a `surrealdb::sql::Id`.
 

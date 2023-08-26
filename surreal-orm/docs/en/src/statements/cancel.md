@@ -1,6 +1,6 @@
 # Cancel Statement
 
-The `cancel` statement in SurrealDB ORM is used to cancel and rollback a
+The `cancel` statement in Surreal ORM is used to cancel and rollback a
 transaction, discarding any changes made within the transaction. It ensures that
 the database remains unaffected by the transaction.
 
@@ -189,5 +189,5 @@ It is generally recommended to use the recommended approaches with the `block!`
 macro for better readability, automation of variable bindings, and subquery
 handling.
 
-That concludes the documentation for the `cancel` statement in SurrealDB ORM.
-Use the recommended approaches to perform transaction cancellation effectively.
+That concludes the documentation for the `cancel` statement in Surreal ORM. Use
+the recommended approaches to perform transaction cancellation effectively.

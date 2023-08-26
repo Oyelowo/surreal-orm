@@ -1,6 +1,6 @@
 # Update Statement
 
-The `update` statement in SurrealDB ORM allows you to modify existing records in
+The `update` statement in Surreal ORM allows you to modify existing records in
 your database. It provides various operations to update fields and perform
 incremental changes to the data. This documentation provides an overview of the
 syntax and usage of the `update` statement, including the use of the `object!`

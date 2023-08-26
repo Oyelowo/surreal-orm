@@ -1,4 +1,4 @@
-# SurrealDB ORM Documentation
+# Surreal ORM Documentation
 
 ## Table of Contents
 
@@ -44,7 +44,7 @@ pub struct User {
 
 ## 3. Advanced Schema Definitions
 
-SurrealDB ORM supports more complex data types including links between different
+Surreal ORM supports more complex data types including links between different
 models. Here's a detailed example using a `Student` and a `Book`:
 
 ```rust
@@ -344,7 +344,7 @@ and get the result.
 
 ## 9. Running and Returning from a Select Statement
 
-The SurrealDB ORM package provides the `ReturnableSelect` trait that defines
+The Surreal ORM package provides the `ReturnableSelect` trait that defines
 several functions to run a select statement and return results in different
 ways. These functions include `return_none`, `return_first`, `return_one`,
 `return_one_unchecked`, and `return_many`.

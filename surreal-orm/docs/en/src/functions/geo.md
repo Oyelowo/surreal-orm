@@ -1,6 +1,8 @@
 # Geo Functions
 
-This chapter introduces the geo macros provided by the SurrealDB ORM. The geo macros are used for geospatial operations such as calculating area, distance, bearing, centroid, and encoding/decoding hashes.
+This chapter introduces the geo macros provided by the Surreal ORM. The geo
+macros are used for geospatial operations such as calculating area, distance,
+bearing, centroid, and encoding/decoding hashes.
 
 ## Table of Contents
 
@@ -13,7 +15,8 @@ This chapter introduces the geo macros provided by the SurrealDB ORM. The geo ma
 
 ## <a name="geo-area-macro"></a>geo::area!()
 
-The `geo::area!()` macro calculates the area of a polygon. It has the following syntax:
+The `geo::area!()` macro calculates the area of a polygon. It has the following
+syntax:
 
 ```rust
 let poly = polygon!(
@@ -43,7 +46,8 @@ geo::area({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 41], 
 
 ## <a name="geo-bearing-macro"></a>geo::bearing!()
 
-The `geo::bearing!()` macro calculates the bearing between two points. It has the following syntax:
+The `geo::bearing!()` macro calculates the bearing between two points. It has
+the following syntax:
 
 ```rust
 let point1 = point! {
@@ -66,7 +70,8 @@ geo::bearing((40.02, 116.34), (80.02, 103.19))
 
 ## <a name="geo-centroid-macro"></a>geo::centroid!()
 
-The `geo::centroid!()` macro calculates the centroid of a polygon. It has the following syntax:
+The `geo::centroid!()` macro calculates the centroid of a polygon. It has the
+following syntax:
 
 ```rust
 let poly = polygon!(
@@ -96,7 +101,8 @@ geo::centroid({ type: 'Polygon', coordinates: [[[-111, 45], [-111, 41], [-104, 4
 
 ## <a name="geo-distance-macro"></a>geo::distance!()
 
-The `geo::distance!()` macro calculates the distance between two points. It has the following syntax:
+The `geo::distance!()` macro calculates the distance between two points. It has
+the following syntax:
 
 ```rust
 let point1 = point! {
@@ -119,7 +125,8 @@ geo::distance((40.02, 116.34), (80.02, 103.19))
 
 ## <a name="geo-hash-decode-macro"></a>geo::hash::decode!()
 
-The `geo::hash::decode!()` macro decodes a geohash string. It has the following syntax:
+The `geo::hash::decode!()` macro decodes a geohash string. It has the following
+syntax:
 
 ```rust
 let result = geo::hash::decode!("mpuxk4s24f51");
@@ -133,7 +140,8 @@ geo::hash::decode('mpuxk4s24f51')
 
 ## <a name="geo-hash-encode-macro"></a>geo::hash::encode!()
 
-The `geo::hash::encode!()` macro encodes a point or polygon into a geohash string. It has the following syntax:
+The `geo::hash::encode!()` macro encodes a point or polygon into a geohash
+string. It has the following syntax:
 
 ```rust
 let point = point! {

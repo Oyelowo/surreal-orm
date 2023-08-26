@@ -1,17 +1,17 @@
 # Quick Start
 
-# SurrealDB ORM Documentation
+# Surreal ORM Documentation
 
 ## Introduction
 
-SurrealDB ORM is an Object-Relational Mapping library for Rust that provides a
-high-level API for interacting with SurrealDB, a distributed document database.
-This documentation will guide you through the usage and features of the
-SurrealDB ORM library.
+Surreal ORM is an Object-Relational Mapping and query-building library for Rust
+that provides a high-level API for interacting with SurrealDB, a distributed
+graph database. This documentation will guide you through the usage and features
+of the Surreal ORM library.
 
 ## Getting Started
 
-To use SurrealDB ORM in your Rust project, you need to add it as a dependency in
+To use Surreal ORM in your Rust project, you need to add it as a dependency in
 your `Cargo.toml` file:
 
 ```toml
@@ -49,8 +49,8 @@ to your setup.
 
 ## Defining a Model
 
-A model in SurrealDB ORM represents a database table. You can define a model by
-creating a Rust struct and implementing the `Model` trait. Here's an example of
+A model in Surreal ORM represents a database table. You can define a model by
+creating a Rust struct and implementing the `Node` or `Edge` trait. Here's an example of
 defining a `SpaceShip` model:
 
 ```rust
@@ -72,7 +72,7 @@ database table.
 
 ## Querying Data
 
-SurrealDB ORM provides a fluent and expressive API for querying data from the
+Surreal ORM provides a fluent and expressive API for querying data from the
 database. You can use the `select` function to start a select statement and
 chain various methods to build the query. Here's an example:
 
@@ -166,6 +166,6 @@ method to execute the deletion operation.
 
 ## Conclusion
 
-This concludes the basic usage and features of the SurrealDB ORM library. You
-can explore more advanced features and methods in the API documentation. If you
-have any further questions or need assistance, feel free to reach out.
+This concludes the basic usage and features of the Surreal ORM library. You can
+explore more advanced features and methods in the API documentation. If you have
+any further questions or need assistance, feel free to reach out.

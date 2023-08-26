@@ -1,6 +1,8 @@
 # Count Function
 
-This chapter introduces the `count` macros provided by SurrealDB ORM. The `count` macros are used to generate SQL queries for counting records in a database table.
+This chapter introduces the `count` macros provided by Surreal ORM. The `count`
+macros are used to generate SQL queries for counting records in a database
+table.
 
 ## Table of Contents
 
@@ -13,7 +15,8 @@ This chapter introduces the `count` macros provided by SurrealDB ORM. The `count
 
 ## count!()
 
-The `count!()` macro counts all records in a table. It generates the SQL query `count()`.
+The `count!()` macro counts all records in a table. It generates the SQL query
+`count()`.
 
 ```rust
 use surreal_orm::{count, *};
@@ -29,11 +32,13 @@ count()
 
 The `count!()` macro provides the following functionality:
 
-- `to_raw().build()`: Converts the `count` macro into a raw SQL query string. In this case, it would be `"count()"`.
+- `to_raw().build()`: Converts the `count` macro into a raw SQL query string. In
+  this case, it would be `"count()"`.
 
 ## count!().\_\_as\_\_(alias)
 
-The `count!().__as__(alias)` macro allows you to specify an alias for the count result. It generates the SQL query `count() AS alias`.
+The `count!().__as__(alias)` macro allows you to specify an alias for the count
+result. It generates the SQL query `count() AS alias`.
 
 ```rust
 use surreal_orm::{count, AliasName};
@@ -48,11 +53,14 @@ Generated SQL query:
 count() AS head_count
 ```
 
-The `count!().__as__(alias)` macro provides the same functionality as `count!()`, but with an additional `AS` clause to specify the alias for the count result.
+The `count!().__as__(alias)` macro provides the same functionality as
+`count!()`, but with an additional `AS` clause to specify the alias for the
+count result.
 
 ## count!(field)
 
-The `count!(field)` macro counts records in a table based on a specific field. It generates the SQL query `count(field)`.
+The `count!(field)` macro counts records in a table based on a specific field.
+It generates the SQL query `count(field)`.
 
 ```rust
 use surreal_orm::{count, Field};
@@ -67,11 +75,14 @@ Generated SQL query:
 count(email)
 ```
 
-The `count!(field)` macro provides the same functionality as `count!()`, but with a specific field to count records on.
+The `count!(field)` macro provides the same functionality as `count!()`, but
+with a specific field to count records on.
 
 ## count!(field.operation(value))
 
-The `count!(field.operation(value))` macro allows you to perform filter operations on the count. It generates the SQL query `count(field.operation(value))`.
+The `count!(field.operation(value))` macro allows you to perform filter
+operations on the count. It generates the SQL query
+`count(field.operation(value))`.
 
 ```rust
 use surreal_orm::{count, Field};
@@ -86,11 +97,14 @@ Generated SQL query:
 count(email > 15)
 ```
 
-The `count!(field.operation(value))` macro provides the same functionality as `count!(field)`, but with a filter operation applied to the field.
+The `count!(field.operation(value))` macro provides the same functionality as
+`count!(field)`, but with a filter operation applied to the field.
 
 ## count!(condition1.and(condition2))
 
-The `count!(condition1.and(condition2))` macro allows you to apply multiple conditions to the count. It generates the SQL query `count(condition1 AND condition2)`.
+The `count!(condition1.and(condition2))` macro allows you to apply multiple
+conditions to the count. It generates the SQL query
+`count(condition1 AND condition2)`.
 
 ```rust
 use surreal_orm::{count, Field, cond};
@@ -108,11 +122,13 @@ count((age > 15) AND (email ~ 'oyelowo@example.com'))
 
 The `count!(condition1.and(condition2))
 
-`macro provides the same functionality as`count!(field.operation(value))`, but with multiple conditions combined using the `AND` operator.
+`macro provides the same functionality as`count!(field.operation(value))`, but with multiple conditions combined using the`AND`
+operator.
 
 ## count!(array)
 
-The `count!(array)` macro counts the number of elements in an array. It generates the SQL query `count(array)`.
+The `count!(array)` macro counts the number of elements in an array. It
+generates the SQL query `count(array)`.
 
 ```rust
 use surreal_orm::{count, array};
@@ -126,4 +142,5 @@ Generated SQL query:
 count([1, 2, 3, 4, 5])
 ```
 
-The `count!(array)` macro provides the same functionality as `count!()`, but with an array as the input for counting.
+The `count!(array)` macro provides the same functionality as `count!()`, but
+with an array as the input for counting.

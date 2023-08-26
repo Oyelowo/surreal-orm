@@ -1,10 +1,10 @@
-# Transaction Management in SurrealDB ORM
+# Transaction Management in Surreal ORM
 
-SurrealDB ORM provides transaction management capabilities to ensure the
-integrity and consistency of database operations. This allows you to group
-multiple database operations into a single atomic unit that can be committed or
-canceled as a whole. This documentation covers the Begin Transaction, Commit
-Statement, and Cancel Transaction features in SurrealDB ORM.
+Surreal ORM provides transaction management capabilities to ensure the integrity
+and consistency of database operations. This allows you to group multiple
+database operations into a single atomic unit that can be committed or canceled
+as a whole. This documentation covers the Begin Transaction, Commit Statement,
+and Cancel Transaction features in Surreal ORM.
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Statement, and Cancel Transaction features in SurrealDB ORM.
 
 ## Begin Transaction
 
-The `begin_transaction` statement in SurrealDB ORM marks the beginning of a
+The `begin_transaction` statement in Surreal ORM marks the beginning of a
 transaction. It sets the context for a series of database operations that should
 be treated as a single atomic unit. By starting a transaction, you can ensure
 the integrity and consistency of your database operations.
@@ -53,7 +53,7 @@ transaction. This sets the context for the subsequent database operations.
 
 ## Commit Statement
 
-The `commit` statement in SurrealDB ORM is used to commit a transaction and save
+The `commit` statement in Surreal ORM is used to commit a transaction and save
 the changes made within the transaction. It ensures that the changes are durable
 and permanent in the database.
 
@@ -215,7 +215,7 @@ handling.
 
 ## Cancel Transaction
 
-The `cancel` transaction feature in SurrealDB ORM allows you to roll back a
+The `cancel` transaction feature in Surreal ORM allows you to roll back a
 transaction and discard the changes made within the transaction. It is useful
 when you want to undo a series of database operations within a transaction.
 
@@ -245,7 +245,7 @@ transaction are discarded, and the database state remains unchanged.
 ## Handling Transactions with Database Operations
 
 When performing database operations within a transaction, it is important to
-ensure that the operations are executed as a single atomic unit. SurrealDB ORM
+ensure that the operations are executed as a single atomic unit. Surreal ORM
 provides transaction management features to facilitate this.
 
 To handle transactions with database operations, you can follow these steps:
@@ -261,6 +261,6 @@ By following these steps, you can ensure the integrity and consistency of your
 database operations and handle transactions effectively.
 
 That concludes the documentation for the Begin Transaction, Commit Statement,
-and Cancel Transaction features in SurrealDB ORM. Use the recommended approaches
+and Cancel Transaction features in Surreal ORM. Use the recommended approaches
 to perform transactions, commit changes, handle cancellations, and manage your
 database operations effectively.

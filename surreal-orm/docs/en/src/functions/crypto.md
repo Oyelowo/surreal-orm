@@ -1,6 +1,8 @@
 # Crypto Functions
 
-This chapter introduces the crypto macros provided by SurrealDB ORM. The crypto macros are used for cryptographic operations such as password hashing and comparison.
+This chapter introduces the crypto macros provided by Surreal ORM. The crypto
+macros are used for cryptographic operations such as password hashing and
+comparison.
 
 ## Table of Contents
 
@@ -15,7 +17,8 @@ This chapter introduces the crypto macros provided by SurrealDB ORM. The crypto 
 
 ## <a name="argon2-compare-macro"></a>argon2::compare!()
 
-The `argon2::compare!()` macro compares two values using the Argon2 hashing algorithm. It has the following syntax:
+The `argon2::compare!()` macro compares two values using the Argon2 hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = argon2::compare!("Oyelowo", "Oyedayo");
@@ -29,7 +32,8 @@ crypto::argon2::compare('Oyelowo', 'Oyedayo')
 
 ## <a name="argon2-generate-macro"></a>argon2::generate!()
 
-The `argon2::generate!()` macro generates a hash value using the Argon2 hashing algorithm. It has the following syntax:
+The `argon2::generate!()` macro generates a hash value using the Argon2 hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = argon2::generate!("Oyelowo");
@@ -43,7 +47,8 @@ crypto::argon2::generate('Oyelowo')
 
 ## <a name="pbkdf2-compare-macro"></a>pbkdf2::compare!()
 
-The `pbkdf2::compare!()` macro compares two values using the PBKDF2 hashing algorithm. It has the following syntax:
+The `pbkdf2::compare!()` macro compares two values using the PBKDF2 hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = pbkdf2::compare!("hash_value", "password");
@@ -57,7 +62,8 @@ crypto::pbkdf2::compare('hash_value', 'password')
 
 ## <a name="pbkdf2-generate-macro"></a>pbkdf2::generate!()
 
-The `pbkdf2::generate!()` macro generates a hash value using the PBKDF2 hashing algorithm. It has the following syntax:
+The `pbkdf2::generate!()` macro generates a hash value using the PBKDF2 hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = pbkdf2::generate!("password");
@@ -71,7 +77,8 @@ crypto::pbkdf2::generate('password')
 
 ## <a name="scrypt-compare-macro"></a>scrypt::compare!()
 
-The `scrypt::compare!()` macro compares two values using the scrypt hashing algorithm. It has the following syntax:
+The `scrypt::compare!()` macro compares two values using the scrypt hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = scrypt::compare!("hash_value", "password");
@@ -85,7 +92,8 @@ crypto::scrypt::compare('hash_value', 'password')
 
 ## <a name="scrypt-generate-macro"></a>scrypt::generate!()
 
-The `scrypt::generate!()` macro generates a hash value using the scrypt hashing algorithm. It has the
+The `scrypt::generate!()` macro generates a hash value using the scrypt hashing
+algorithm. It has the
 
 following syntax:
 
@@ -101,7 +109,8 @@ crypto::scrypt::generate('password')
 
 ## <a name="bcrypt-compare-macro"></a>bcrypt::compare!()
 
-The `bcrypt::compare!()` macro compares two values using the bcrypt hashing algorithm. It has the following syntax:
+The `bcrypt::compare!()` macro compares two values using the bcrypt hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = bcrypt::compare!("hash_value", "password");
@@ -115,7 +124,8 @@ crypto::bcrypt::compare('hash_value', 'password')
 
 ## <a name="bcrypt-generate-macro"></a>bcrypt::generate!()
 
-The `bcrypt::generate!()` macro generates a hash value using the bcrypt hashing algorithm. It has the following syntax:
+The `bcrypt::generate!()` macro generates a hash value using the bcrypt hashing
+algorithm. It has the following syntax:
 
 ```rust
 let result = bcrypt::generate!("password");
