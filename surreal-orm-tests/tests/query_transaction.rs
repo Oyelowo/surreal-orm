@@ -125,7 +125,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         // You can reference the balance object by using the $balance variable and pass the amount
         // as a parameter to the decrement_by function. i.e $balance.amount
         LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
-                
+
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
         LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 
