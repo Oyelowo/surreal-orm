@@ -54,8 +54,8 @@ to your setup.
 ## Defining a Model
 
 A model in Surreal ORM represents a database table. You can define a model by
-creating a Rust struct and implementing the `Node` or `Edge` trait. Here's an example of
-defining a `SpaceShip` model:
+creating a Rust struct and implementing the `Node` or `Edge` trait. Here's an
+example of defining a `SpaceShip` model:
 
 ```rust
 use surreal_orm::*;
@@ -153,20 +153,20 @@ To delete data from the database, you can use the `delete` function and provide
 the condition for deletion. Here's an example:
 
 ```rust
-use surreal_orm::statements::{delete};
+use surreal_orm::{*, statements::{delete}};
 
 let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
 let condition = name.eq("Millennium Falcon");
 
 delete(space_ship)
-    .where_(whr(name.equal("Millennium Falcon")).and(age.less_then(50)))
+    .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
     .run(db.clone())
     .await?;
 ```
 
-In this example, we use the `delete` function and specify the table name. 
-We add a condition using the `where_` method, and then call the `run`
-method to execute the deletion operation.
+In this example, we use the `delete` function and specify the table name. We add
+a condition using the `where_` method, and then call the `run` method to execute
+the deletion operation.
 
 ## Conclusion
 

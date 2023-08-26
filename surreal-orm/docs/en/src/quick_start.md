@@ -155,7 +155,7 @@ let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
 let condition = name.eq("Millennium Falcon");
 
 delete(space_ship)
-    .where_(whr(name.equal("Millennium Falcon")).and(age.less_then(50)))
+    .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
     .run(db.clone())
     .await?;
 ```
