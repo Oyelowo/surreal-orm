@@ -59,3 +59,5 @@ explore the intersections of innovation and software development, this book
 promises a voyage into the heart of data management with a fresh perspective in
 Rust—a realm where convention meets innovation, culminating in the creation of
 something truly surreal.
+
+-- © Oyelowo Oyedayo, 2023.

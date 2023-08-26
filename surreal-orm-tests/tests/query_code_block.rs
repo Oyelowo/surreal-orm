@@ -23,9 +23,9 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
 
     let weapon = &Weapon::table_name();
     let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-    let weapon_stats_schema::WeaponStats {
-        averageStrength, ..
-    } = WeaponStats::schema();
+    // let weapon_stats_schema::WeaponStats {
+    //     averageStrength, ..
+    // } = WeaponStats::schema();
 
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
@@ -37,12 +37,22 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
-        LET strengths = select_value(strength).from(weapon);
-        LET total = math::sum!(strengths);
-        LET count = count!(strengths);
-        RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+    let created_stats_statement = create::<WeaponStats>().set(object!(WeaponStats {
+        id: WeaponStats::create_simple_id(),
+        averageStrength: block! {
+            LET strengths = select_value(strength).from(weapon);
+            LET total = math::sum!(strengths);
+            LET count = count!(strengths);
+            RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+        }
     }));
+
+    // let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
+    //     LET strengths = select_value(strength).from(weapon);
+    //     LET total = math::sum!(strengths);
+    //     LET count = count!(strengths);
+    //     RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+    // }));
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
@@ -72,6 +82,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
 
     Ok(())
 }
+
 #[tokio::test]
 async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
