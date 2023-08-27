@@ -99,72 +99,6 @@ impl FromMeta for Relate {
     }
 }
 
-// #[derive(Debug, Clone)]
-// struct Content {
-//     #[darling(default, rename = "type")]
-//     pub(crate) type_: Option<FieldTypeWrapper>,
-// }
-//
-// #[derive(Debug, Clone)]
-// struct FullContent {
-//     #[darling(default, rename = "type")]
-//     pub(crate) type_: Option<FieldTypeWrapper>,
-//
-//     #[darling(default)]
-//     pub(crate) assert: Option<syn::LitStr>,
-//
-//     #[darling(default)]
-//     pub(crate) assert_fn: Option<syn::Path>,
-// }
-// impl FromMeta for Content {
-//     fn from_string(value: &str) -> ::darling::Result<Self> {
-//         let value = match value.parse::<FieldType>() {
-//             Ok(f) => Ok(Self {
-//                 type_: Some(FieldTypeWrapper(value.to_string())),
-//             }),
-//             Err(e) => Err(darling::Error::unknown_value(&e)),
-//         };
-//     }
-//
-//     fn from_list(items: &[syn::NestedMeta]) -> ::darling::Result<Self> {
-//         #[derive(FromMeta)]
-//         struct FullContent {
-//             serialize: String,
-//
-//             #[darling(default)]
-//             deserialize: util::Ignored, // Ignore deserialize since we only care about the serialized string
-//         }
-//
-//         impl From<FullRename> for Rename {
-//             fn from(v: FullRename) -> Self {
-//                 let FullRename { serialize, .. } = v;
-//                 Self { serialize }
-//             }
-//         }
-//         FullRename::from_list(items).map(Rename::from)
-//     }
-// }
-// struct Oyelowo {
-//     #[orm(type="list")]
-//     names: List<names>,
-//
-//     #[orm(type="list", content="string"))]
-//     names: List<names>,
-//
-//     #[orm(type="list", content=(type="string"))]
-//     names: List<names>,
-//
-//     #[orm(type="list", content=(type="string", assert_fn="my_assert()"))]
-//     names: List<names>,
-//
-//     #[orm(type="list", item_type="string", item_assert="my_assert()")]
-//     names2: List<names>
-// }
-// fn my_assert() {
-//     value > 5
-//
-// }
-
 #[derive(Debug, FromField)]
 #[darling(attributes(surreal_orm, serde), forward_attrs(allow, doc, cfg))]
 pub struct MyFieldReceiver {
@@ -709,21 +643,9 @@ impl MyFieldReceiver {
                 surreal_field_type,
                 FieldType::Int | FieldType::Number | FieldType::Float
             )
-        // let is_numeric = match quote! {#ty}.to_string().as_str() {
-        //     "u8" | "u16" | "u32" | "u64" | "u128" | "i8" | "i16" | "i32" | "i64" | "i128"
-        //     | "f32" | "f64" => true,
-        //     _ => false,
-        // };
-        // is_numeric
     }
 
     pub fn raw_type_is_float(&self) -> bool {
-        // let ty = &self.ty;
-        // let is_float = match quote! {#ty}.to_string().as_str() {
-        //     "f32" | "f64" => true,
-        //     _ => false,
-        // };
-        // is_float
         match self.ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -796,8 +718,6 @@ impl MyFieldReceiver {
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                     if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
                     {
-                        // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                        // The list type should have a specified type parameter
                         return false;
                     }
                     last_seg.ident == "Vec"
@@ -812,20 +732,12 @@ impl MyFieldReceiver {
 
     pub fn raw_type_is_object(&self) -> bool {
         let ty = &self.ty;
-        // let is_object = match quote! {#ty}.to_string().as_str() {
-        //     "HashMap" | "std::collections::HashMap" => true,
-        //     "BTreeMap" | "std::collections::BTreeMap" => true,
-        //     _ => false,
-        // };
-        // is_object
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                     if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
                     {
-                        // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                        // The list type should have a specified type parameter
                         return false;
                     }
                     last_seg.ident == "HashMap" || last_seg.ident == "BTreeMap"
@@ -840,31 +752,6 @@ impl MyFieldReceiver {
 
     pub fn raw_type_is_datetime(&self) -> bool {
         let ty = &self.ty;
-        // let is_datetime = match quote! {#ty}.to_string().as_str() {
-        //     "std::time::Duration" | "chrono::Duration" => true,
-        //     "chrono::NaiveDateTime" | "chrono::DateTime<chrono::Utc>" => true,
-        //     _ => false,
-        // };
-        // is_datetime
-        // match ty {
-        //     syn::Type::Path(path) => {
-        //         let last_seg = path.path.segments.last().unwrap();
-        //         if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-        //             // if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-        //             //     if let syn::Type::Infer(_) = inner_type {
-        //             //         // if let syn::Type::Infer(_) = inner_type.as_ref() {
-        //             //         // The list type should have a specified type parameter
-        //             //         return false;
-        //             //     }
-        //             // }
-        //             last_seg.ident.to_string() == "DateTime"
-        //         } else {
-        //             false
-        //         }
-        //     }
-        //     syn::Type::Array(_) => true,
-        //     _ => false,
-        // }
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path.path.segments.last().unwrap();
@@ -876,30 +763,6 @@ impl MyFieldReceiver {
 
     pub fn raw_type_is_duration(&self) -> bool {
         let ty = &self.ty;
-        // let is_duration = match quote! {#ty}.to_string().as_str() {
-        //     "Duration" => true,
-        //     _ => false,
-        // };
-        // is_duration
-        // match ty {
-        //     syn::Type::Path(path) => {
-        //         let last_seg = path.path.segments.last().unwrap();
-        //         if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-        //             if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-        //                 if let syn::Type::Infer(_) = inner_type {
-        //                     // if let syn::Type::Infer(_) = inner_type.as_ref() {
-        //                     // The list type should have a specified type parameter
-        //                     return false;
-        //                 }
-        //             }
-        //             last_seg.ident.to_string() == "Duration"
-        //         } else {
-        //             false
-        //         }
-        //     }
-        //     syn::Type::Array(_) => true,
-        //     _ => false,
-        // }
         match ty {
             syn::Type::Path(type_path) => {
                 let last_segment = type_path.path.segments.last().unwrap();
@@ -911,12 +774,6 @@ impl MyFieldReceiver {
 
     pub fn raw_type_is_geometry(&self) -> bool {
         let ty = &self.ty;
-        // let is_geometry = match quote! {#ty}.to_string().as_str() {
-        //     "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString"
-        //     | "MultiPolygon" | "GeometryCollection" | "Geometry" => true,
-        //     _ => false,
-        // };
-        // is_geometry
         match ty {
             syn::Type::Path(path) => {
                 let last_seg = path.path.segments.last().unwrap();
@@ -928,25 +785,6 @@ impl MyFieldReceiver {
                     || last_seg.ident == "MultiLineString"
                     || last_seg.ident == "MultiPolygon"
                     || last_seg.ident == "GeometryCollection"
-                // if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                //     // if let Some(syn::GenericArgument::Type(inner_type)) = args.args.first() {
-                //     //     if let syn::Type::Infer(_) = inner_type {
-                //     //         // if let syn::Type::Infer(_) = inner_type.as_ref() {
-                //     //         // The list type should have a specified type parameter
-                //     //         return false;
-                //     //     }
-                //     // }
-                //     last_seg.ident.to_string() == "Geometry"
-                //         || last_seg.ident.to_string() == "Point"
-                //         || last_seg.ident.to_string() == "LineString"
-                //         || last_seg.ident.to_string() == "Polygon"
-                //         || last_seg.ident.to_string() == "MultiPoint"
-                //         || last_seg.ident.to_string() == "MultiLineString"
-                //         || last_seg.ident.to_string() == "MultiPolygon"
-                //         || last_seg.ident.to_string() == "GeometryCollection"
-                // } else {
-                //     false
-                // }
             }
             syn::Type::Array(_) => true,
             _ => false,
@@ -955,19 +793,8 @@ impl MyFieldReceiver {
 
     pub fn get_array_item_type(&self) -> Option<TokenStream> {
         let ty = &self.ty;
-        // if let Some(links_type) = self.link_many.clone() {
-        //     let links_type = syn::parse_str::<syn::Type>(&links_type).unwrap();
-        //     // let links_type = format_ident!("{links_type}");
-        //     return Some(quote!(#links_type));
-        // }
 
         get_vector_item_type(ty).map(|t| t.into_token_stream())
-        // match ty {
-        //     syn::Type::Array(array) => {
-        //         Some(*array.elem.clone())
-        //     }
-        //     _ => None,
-        // }
     }
 
     pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
@@ -1048,23 +875,6 @@ fn get_vector_item_type(ty: &Type) -> Option<Type> {
     };
     Some(item_ty.clone())
 }
-// #[derive(Debug, Clone)]
-// pub struct ValueWrapper(syn::LitStr);
-//
-// impl FromMeta for ValueWrapper {
-//     fn from_value(value: &Lit) -> darling::Result<Self> {
-//         match value {
-//             Lit::Int(i) => i,
-//             Lit::Float(f) => f,
-//             Lit::Bool(b) => b,
-//             Lit::Str(str_lit) => ,
-//             Lit::ByteStr(_) => todo!(),
-//             Lit::Byte(_) => todo!(),
-//             Lit::Char(_) => todo!(),
-//             Lit::Verbatim(_) => todo!(),
-//         }
-//     }
-// }
 
 #[derive(Debug, Clone)]
 pub enum Permissions {
