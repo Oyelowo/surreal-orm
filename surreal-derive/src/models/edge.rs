@@ -229,27 +229,27 @@ impl ToTokens for EdgeToken {
                         #crate_name::sql::thing(self.id.to_raw().as_str()).unwrap()
                     }
 
-                    fn get_serializable_fields() -> Vec<#crate_name::Field> {
+                    fn get_serializable_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #serializable_fields), *]
                     }
 
-                    fn get_linked_fields() -> Vec<#crate_name::Field> {
+                    fn get_linked_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #linked_fields), *]
                     }
 
-                    fn get_link_one_fields() -> Vec<#crate_name::Field> {
+                    fn get_link_one_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #link_one_fields), *]
                     }
 
-                    fn get_link_self_fields() -> Vec<#crate_name::Field> {
+                    fn get_link_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #link_self_fields), *]
                     }
 
-                    fn get_link_one_and_self_fields() -> Vec<#crate_name::Field> {
+                    fn get_link_one_and_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #link_one_and_self_fields), *]
                     }
 
-                    fn get_link_many_fields() -> Vec<#crate_name::Field> {
+                    fn get_link_many_fields() -> ::std::vec::Vec<#crate_name::Field> {
                         return vec![#( #link_many_fields), *]
                     }
 
@@ -257,7 +257,7 @@ impl ToTokens for EdgeToken {
                         #table_definitions
                     }
 
-                    fn define_fields() -> Vec<#crate_name::Raw> {
+                    fn define_fields() -> ::std::vec::Vec<#crate_name::Raw> {
                         vec![
                            #( #field_definitions), *
                         ]
@@ -266,7 +266,15 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 pub mod #module_name_rexported {
-                    pub type Schema = super::#module_name::#struct_name_ident;
+                    use super::#module_name::#_____field_names;
+
+                    #[derive(Debug, Clone)]
+                    pub struct #struct_name_ident {
+                       #( #schema_struct_fields_types_kv) *
+                        #___________graph_traversal_string: ::std::string::String,
+                        #___________bindings: #crate_name::BindingsList,
+                        #___________errors: ::std::vec::Vec<::std::string::String>,
+                    }
                 }
 
 
@@ -278,13 +286,13 @@ impl ToTokens for EdgeToken {
                     use #crate_name::Erroneous as _;
 
                     pub struct TableNameStaticChecker {
-                        pub #table_name_ident: String,
+                        pub #table_name_ident: ::std::string::String,
                     }
 
 
                     #( #imports_referenced_node_schema) *
 
-                    mod #_____field_names {
+                    pub(super) mod #_____field_names {
                         use super::super::*;
                         use #crate_name::Parametric as _;
                         use #crate_name::Buildable as _;
@@ -292,13 +300,7 @@ impl ToTokens for EdgeToken {
                         #( #field_wrapper_type_custom_implementations) *
                     }
 
-                    #[derive(Debug, Clone)]
-                    pub struct #struct_name_ident {
-                       #( #schema_struct_fields_types_kv) *
-                        #___________graph_traversal_string: ::std::string::String,
-                        #___________bindings: #crate_name::BindingsList,
-                        #___________errors: Vec<String>,
-                    }
+                    pub type #struct_name_ident = super::#module_name_rexported::Schema;
 
                     impl #crate_name::Buildable for #struct_name_ident {
                         fn build(&self) -> ::std::string::String {
@@ -333,7 +335,7 @@ impl ToTokens for EdgeToken {
                     }
 
                     impl #crate_name::Erroneous for &#struct_name_ident {
-                        fn get_errors(&self) -> Vec<String> {
+                        fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                             self.#___________errors.to_vec()
                         }
                     }
@@ -405,6 +407,7 @@ impl ToTokens for EdgeToken {
                     }
                 }
 
+            #[allow(non_snake_case)]
             fn #test_name() {
                 #( #static_assertions) *
             }

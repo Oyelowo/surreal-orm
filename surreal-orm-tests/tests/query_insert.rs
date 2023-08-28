@@ -1185,7 +1185,7 @@ async fn test_insert_from_another_table() {
 
     assert_eq!(strong_weapons.len(), 150);
 
-    let strong_weapon_schema::StrongWeapon { strength, .. } = StrongWeapon::schema();
+    let strong_weapon::Schema { strength, .. } = StrongWeapon::schema();
 
     let strong_weapons_count: Vec<StrongWeapon> = select(All)
         .from(StrongWeapon::table_name())

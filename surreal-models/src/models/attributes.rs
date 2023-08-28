@@ -16,7 +16,7 @@ use typed_builder::TypedBuilder;
 use CrudType::*;
 
 fn age_permissions() -> Permissions {
-    let student_with_granular_attributes_schema::StudentWithGranularAttributes {
+    let student_with_granular_attributes::Schema {
         ageInlineExpr,
         firstName,
         ..
@@ -30,7 +30,7 @@ fn age_permissions() -> Permissions {
 }
 
 fn student_permissions() -> Permissions {
-    let student_with_granular_attributes_schema::StudentWithGranularAttributes {
+    let student_with_granular_attributes::Schema {
         ageInlineExpr,
         firstName,
         ..
@@ -48,7 +48,7 @@ fn default_duration_value() -> Duration {
 }
 
 fn age_define_external_fn_path() -> DefineFieldStatement {
-    let student_with_define_fn_attr_schema::StudentWithDefineFnAttr {
+    let student_with_define_fn_attr::Schema {
         ref ageDefineInline,
         ref firstName,
         ..
@@ -71,7 +71,7 @@ fn age_define_external_fn_path() -> DefineFieldStatement {
 
 fn define_age_define_external_fn_path() -> DefineFieldStatement {
     use CrudType::*;
-    let student_with_define_attr_schema::StudentWithDefineAttr {
+    let student_with_define_attr::Schema {
         ref ageDefineInline,
         ref firstName,
         ..
@@ -262,7 +262,7 @@ pub type StudentWithGranularAttributesWritesBlog = Writes<StudentWithGranularAtt
 
 fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatement {
     use CrudType::*;
-    let student_with_define_attr_schema::StudentWithDefineAttr {
+    let student_with_define_attr::Schema {
         ref ageDefineInline,
         ref firstName,
         ..
@@ -281,7 +281,7 @@ fn define_first_name(field: impl Into<Field>, table: Table) -> DefineFieldStatem
 
 fn define_last_name() -> DefineFieldStatement {
     use CrudType::*;
-    let student_with_define_attr_schema::StudentWithDefineAttr {
+    let student_with_define_attr::Schema {
         ref ageDefineInline,
         ref lastName,
         ..
@@ -300,7 +300,7 @@ fn define_last_name() -> DefineFieldStatement {
 
 fn define_last_name_external_fn_attr() -> DefineFieldStatement {
     use CrudType::*;
-    let student_with_define_attr_schema::StudentWithDefineAttr {
+    let student_with_define_attr::Schema {
         ref ageDefineInline,
         ref lastName,
         ..

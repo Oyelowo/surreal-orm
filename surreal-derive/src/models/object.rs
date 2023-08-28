@@ -140,7 +140,16 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub type Schema = super::#module_name::#struct_name_ident;
+                use super::#module_name::#_____field_names;
+        
+                #[allow(non_snake_case)]
+                #[derive(Debug, Clone)]
+                pub struct #struct_name_ident {
+                   #( #schema_struct_fields_types_kv) *
+                    #___________graph_traversal_string: ::std::string::String,
+                    #___________bindings: #crate_name::BindingsList,
+                    #___________errors: ::std::vec::Vec<::std::string::String>,
+                }
             }
 
 
@@ -159,14 +168,9 @@ impl ToTokens for ObjectToken {
 
                     #( #field_wrapper_type_custom_implementations) *
                 }
+        
+                pub type #struct_name_ident = super::#module_name_rexported::Schema;
 
-                #[derive(Debug, Clone)]
-                pub struct #struct_name_ident {
-                   #( #schema_struct_fields_types_kv) *
-                    #___________graph_traversal_string: ::std::string::String,
-                    #___________bindings: #crate_name::BindingsList,
-                    #___________errors: Vec<String>,
-                }
 
                 impl #crate_name::Parametric for #struct_name_ident {
                     fn get_bindings(&self) -> #crate_name::BindingsList {
@@ -181,7 +185,7 @@ impl ToTokens for ObjectToken {
                 }
 
                 impl #crate_name::Erroneous for #struct_name_ident {
-                    fn get_errors(&self) -> Vec<String> {
+                    fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
@@ -207,7 +211,7 @@ impl ToTokens for ObjectToken {
                 }
 
                 impl #crate_name::Erroneous for &#struct_name_ident {
-                    fn get_errors(&self) -> Vec<String> {
+                    fn get_errors(&self) -> ::std::vec::Vec<::std::string::String> {
                         self.#___________errors.to_vec()
                     }
                 }
@@ -285,7 +289,8 @@ impl ToTokens for ObjectToken {
             }
 
 
-            #[test]
+            // #[test]
+            #[allow(non_snake_case)]
             fn #test_function_name() {
                 #( #static_assertions) *
             }
