@@ -96,6 +96,7 @@ impl ToTokens for ObjectToken {
             format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
         let test_function_name = format_ident!("test_{module_name}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
+        let _____schema_def = format_ident!("_____schema_def");
 
         // #[derive(Object, Serialize, Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
@@ -111,11 +112,11 @@ impl ToTokens for ObjectToken {
                 type Schema = #module_name::#struct_name_ident;
 
                 fn schema() -> #module_name_rexported::Schema {
-                    #module_name::#struct_name_ident::new()
+                    #module_name_rexported::Schema::new()
                 }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
-                    #module_name::#struct_name_ident::new_prefixed(prefix)
+                    #module_name_rexported::Schema::new_prefixed(prefix)
                 }
             }
 
@@ -140,7 +141,7 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub use super::#module_name::_____schema_def::Schema;
+                pub use super::#module_name::#_____schema_def::Schema;
             }
 
 
@@ -160,7 +161,7 @@ impl ToTokens for ObjectToken {
                     #( #field_wrapper_type_custom_implementations) *
                 }
 
-                pub mod _____schema_def {
+                pub mod #_____schema_def {
                     use super::#_____field_names;
 
                     #[allow(non_snake_case)]
@@ -172,7 +173,7 @@ impl ToTokens for ObjectToken {
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
                     }
                 }
-                pub type #struct_name_ident = _____schema_def::Schema;
+                pub type #struct_name_ident = #_____schema_def::Schema;
 
 
                 impl #crate_name::Parametric for #struct_name_ident {

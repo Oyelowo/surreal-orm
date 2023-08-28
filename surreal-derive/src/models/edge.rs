@@ -149,6 +149,7 @@ impl ToTokens for EdgeToken {
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");
+        let _____schema_def = format_ident!("_____schema_def");
         let serializable_fields_count = serializable_fields.len();
         let serializable_fields_as_str = serializable_fields
             .iter()
@@ -174,7 +175,6 @@ impl ToTokens for EdgeToken {
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
                         #module_name_rexported::Schema::new_prefixed(prefix)
-                        // #module_name::#struct_name_ident::new_prefixed(prefix)
                     }
                 }
 
@@ -267,7 +267,7 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 pub mod #module_name_rexported {
-                    pub use super::#module_name::_____schema_def::Schema;
+                    pub use super::#module_name::#_____schema_def::Schema;
                 }
 
 
@@ -293,7 +293,7 @@ impl ToTokens for EdgeToken {
                         #( #field_wrapper_type_custom_implementations) *
                     }
 
-                    pub mod _____schema_def {
+                    pub mod #_____schema_def {
                         use super::#_____field_names;
 
                         #[allow(non_snake_case)]
@@ -305,7 +305,7 @@ impl ToTokens for EdgeToken {
                             pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
                         }
                     }
-                    pub type #struct_name_ident = _____schema_def::Schema;
+                    pub type #struct_name_ident = #_____schema_def::Schema;
 
                     impl #crate_name::Buildable for #struct_name_ident {
                         fn build(&self) -> ::std::string::String {

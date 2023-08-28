@@ -126,6 +126,7 @@ impl ToTokens for NodeToken {
         let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");
+        let _____schema_def = format_ident!("_____schema_def");
         let serializable_fields_count = serializable_fields.len();
         let serializable_fields_as_str = serializable_fields
             .iter()
@@ -161,11 +162,11 @@ impl ToTokens for NodeToken {
                 type Schema = #module_name_rexported::Schema;
 
                 fn schema() -> #module_name_rexported::Schema {
-                    Self::Schema::new()
+                    #module_name_rexported::Schema::new()
                 }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
-                    Self::Schema::new_prefixed(prefix)
+                    #module_name_rexported::Schema::new_prefixed(prefix)
                 }
             }
 
@@ -288,7 +289,7 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub use super::#module_name::_____schema_def::Schema;
+                pub use super::#module_name::#_____schema_def::Schema;
             }
 
             #[allow(non_snake_case)]
@@ -312,7 +313,7 @@ impl ToTokens for NodeToken {
                     #( #field_wrapper_type_custom_implementations) *
                 }
 
-                pub mod _____schema_def {
+                pub mod #_____schema_def {
                     use super::#_____field_names;
 
                     #[allow(non_snake_case)]
@@ -324,7 +325,7 @@ impl ToTokens for NodeToken {
                         pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
                     }
                 }
-                pub type #struct_name_ident = _____schema_def::Schema;
+                pub type #struct_name_ident = #_____schema_def::Schema;
 
 
                 #[derive(Debug, Clone)]
