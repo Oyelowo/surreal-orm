@@ -110,11 +110,11 @@ impl ToTokens for ObjectToken {
             impl #crate_name::SchemaGetter for #struct_name_ident {
                 type Schema = #module_name::#struct_name_ident;
 
-                fn schema() -> Self::Schema {
+                fn schema() -> #module_name_rexported::Schema {
                     #module_name::#struct_name_ident::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
                     #module_name::#struct_name_ident::new_prefixed(prefix)
                 }
             }
@@ -140,16 +140,7 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                use super::#module_name::#_____field_names;
-
-                #[allow(non_snake_case)]
-                #[derive(Debug, Clone)]
-                pub struct Schema {
-                   #( #schema_struct_fields_types_kv) *
-                    pub(super) #___________graph_traversal_string: ::std::string::String,
-                    pub(super) #___________bindings: #crate_name::BindingsList,
-                    pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
-                }
+                pub use super::#module_name::_____schema_def::Schema;
             }
 
 
@@ -169,7 +160,19 @@ impl ToTokens for ObjectToken {
                     #( #field_wrapper_type_custom_implementations) *
                 }
 
-                pub type #struct_name_ident = super::#module_name_rexported::Schema;
+                pub mod _____schema_def {
+                    use super::#_____field_names;
+
+                    #[allow(non_snake_case)]
+                    #[derive(Debug, Clone)]
+                    pub struct Schema {
+                       #( #schema_struct_fields_types_kv) *
+                        pub(super) #___________graph_traversal_string: ::std::string::String,
+                        pub(super) #___________bindings: #crate_name::BindingsList,
+                        pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                    }
+                }
+                pub type #struct_name_ident = _____schema_def::Schema;
 
 
                 impl #crate_name::Parametric for #struct_name_ident {

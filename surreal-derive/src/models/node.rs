@@ -164,7 +164,7 @@ impl ToTokens for NodeToken {
                     Self::Schema::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
                     Self::Schema::new_prefixed(prefix)
                 }
             }
@@ -311,10 +311,10 @@ impl ToTokens for NodeToken {
 
                     #( #field_wrapper_type_custom_implementations) *
                 }
-        
+
                 pub mod _____schema_def {
                     use super::#_____field_names;
-        
+
                     #[allow(non_snake_case)]
                     #[derive(Debug, Clone)]
                     pub struct Schema {

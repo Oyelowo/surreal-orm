@@ -295,7 +295,7 @@ impl ToTokens for EdgeToken {
 
                     pub mod _____schema_def {
                         use super::#_____field_names;
-            
+
                         #[allow(non_snake_case)]
                         #[derive(Debug, Clone)]
                         pub struct Schema {
