@@ -15,7 +15,7 @@
 // NOTE: Change this if the logic changes in the future.
 
 mod check1 {
-    use surreal_compile_tests::*;
+    use surreal_orm_compile_tests::*;
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -29,7 +29,7 @@ mod check1 {
 
 mod check2 {
 
-    use surreal_compile_tests::*;
+    use surreal_orm_compile_tests::*;
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -43,7 +43,7 @@ mod check2 {
 
 mod check3 {
 
-    use surreal_compile_tests::*;
+    use surreal_orm_compile_tests::*;
 
     #[derive(Node, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]

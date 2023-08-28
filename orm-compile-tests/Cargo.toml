@@ -1,5 +1,5 @@
 [package]
-name = "surreal-compile-tests"
+name = "surreal-orm-compile-tests"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
