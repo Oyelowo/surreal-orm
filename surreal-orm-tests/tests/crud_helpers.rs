@@ -308,7 +308,6 @@ async fn test_delete_where() -> SurrealOrmResult<()> {
     };
 
     spaceship.save().run(db.clone()).await.unwrap();
-    let m = SpaceShip::schema();
     let space_ship::Schema { name, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(name.like("spaceship-1"))

@@ -141,7 +141,7 @@ impl ToTokens for EdgeToken {
 
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
         let module_name = format_ident!(
-            "{}_schema",
+            "________internal_{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
         let module_name_rexported =

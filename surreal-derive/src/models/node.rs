@@ -115,7 +115,7 @@ impl ToTokens for NodeToken {
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
         let module_name = format_ident!(
-            "{}_schema",
+            "________internal_{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
         let module_name_rexported =
