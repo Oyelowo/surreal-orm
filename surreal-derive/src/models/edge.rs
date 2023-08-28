@@ -168,12 +168,13 @@ impl ToTokens for EdgeToken {
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
                     type Schema = #module_name::#struct_name_ident;
 
-                    fn schema() -> Self::Schema {
-                        #module_name::#struct_name_ident::new()
+                    fn schema() -> #module_name_rexported::Schema {
+                        #module_name_rexported::Schema::new()
                     }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
-                        #module_name::#struct_name_ident::new_prefixed(prefix)
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
+                        #module_name_rexported::Schema::new_prefixed(prefix)
+                        // #module_name::#struct_name_ident::new_prefixed(prefix)
                     }
                 }
 
@@ -266,15 +267,7 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 pub mod #module_name_rexported {
-                    use super::#module_name::#_____field_names;
-
-                    #[derive(Debug, Clone)]
-                    pub struct Schema {
-                       #( #schema_struct_fields_types_kv) *
-                        pub(super) #___________graph_traversal_string: ::std::string::String,
-                        pub(super) #___________bindings: #crate_name::BindingsList,
-                        pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
-                    }
+                    pub use super::#module_name::_____schema_def::Schema;
                 }
 
 
@@ -300,7 +293,19 @@ impl ToTokens for EdgeToken {
                         #( #field_wrapper_type_custom_implementations) *
                     }
 
-                    pub type #struct_name_ident = super::#module_name_rexported::Schema;
+                    pub mod _____schema_def {
+                        use super::#_____field_names;
+            
+                        #[allow(non_snake_case)]
+                        #[derive(Debug, Clone)]
+                        pub struct Schema {
+                           #( #schema_struct_fields_types_kv) *
+                            pub(super) #___________graph_traversal_string: ::std::string::String,
+                            pub(super) #___________bindings: #crate_name::BindingsList,
+                            pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                        }
+                    }
+                    pub type #struct_name_ident = _____schema_def::Schema;
 
                     impl #crate_name::Buildable for #struct_name_ident {
                         fn build(&self) -> ::std::string::String {
