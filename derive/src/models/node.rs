@@ -114,7 +114,7 @@ impl ToTokens for NodeToken {
 
         // imports_referenced_node_schema.dedup_by(|a, b| a.to_string().trim() == b.to_string().trim());
 
-        let module_name = format_ident!(
+        let module_name_internal = format_ident!(
             "________internal_{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
@@ -122,7 +122,8 @@ impl ToTokens for NodeToken {
             format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
 
         let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
-        let test_function_name = format_ident!("_________test_{module_name}_edge_name__________");
+        let test_function_name =
+            format_ident!("_________test_{module_name_internal}_edge_name__________");
         let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");
@@ -171,16 +172,16 @@ impl ToTokens for NodeToken {
             }
 
             impl #crate_name::Node for #struct_name_ident {
-                type TableNameChecker = #module_name::TableNameStaticChecker;
+                type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                 // type Schema = #module_name::#struct_name_ident;
-                type Aliases = #module_name::#aliases_struct_name;
+                type Aliases = #module_name_internal::#aliases_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
 
                 fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
 
-                    #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
-                                #module_name::#struct_name_ident::empty(),
+                    #module_name_internal::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
+                                #module_name_internal::#struct_name_ident::empty(),
                                 clause.with_table(#table_name_str),
                     )
                 }
@@ -194,7 +195,7 @@ impl ToTokens for NodeToken {
                 // }
 
                 fn aliases() -> Self::Aliases {
-                    #module_name::#aliases_struct_name::new()
+                    #module_name_internal::#aliases_struct_name::new()
                 }
 
 
@@ -289,11 +290,11 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub use super::#module_name::#_____schema_def::Schema;
+                pub use super::#module_name_internal::#_____schema_def::Schema;
             }
 
             #[allow(non_snake_case)]
-            mod #module_name {
+            mod #module_name_internal {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;

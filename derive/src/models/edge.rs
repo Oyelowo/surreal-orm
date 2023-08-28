@@ -140,7 +140,7 @@ impl ToTokens for EdgeToken {
         let test_name = format_ident!("test_{schema_mod_name}_edge_name");
 
         // let field_names_ident = format_ident!("{struct_name_ident}Fields");
-        let module_name = format_ident!(
+        let module_name_internal = format_ident!(
             "________internal_{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
@@ -167,7 +167,7 @@ impl ToTokens for EdgeToken {
                 }
 
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::SchemaGetter for #struct_name_ident<In, Out> {
-                    type Schema = #module_name::#struct_name_ident;
+                    type Schema = #module_name_internal::#struct_name_ident;
 
                     fn schema() -> #module_name_rexported::Schema {
                         #module_name_rexported::Schema::new()
@@ -182,7 +182,7 @@ impl ToTokens for EdgeToken {
                 impl<In: #crate_name::Node, Out: #crate_name::Node> #crate_name::Edge for #struct_name_ident<In, Out> {
                     type In = In;
                     type Out = Out;
-                    type TableNameChecker = #module_name::TableNameStaticChecker;
+                    type TableNameChecker = #module_name_internal::TableNameStaticChecker;
                     // type Schema = #module_name::#struct_name_ident;
 
                     // fn schema() -> Self::Schema {
@@ -267,12 +267,12 @@ impl ToTokens for EdgeToken {
 
                 #[allow(non_snake_case)]
                 pub mod #module_name_rexported {
-                    pub use super::#module_name::#_____schema_def::Schema;
+                    pub use super::#module_name_internal::#_____schema_def::Schema;
                 }
 
 
                 #[allow(non_snake_case)]
-                mod #module_name {
+                mod #module_name_internal {
                     use #crate_name::Node;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;

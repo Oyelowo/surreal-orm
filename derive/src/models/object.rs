@@ -88,13 +88,13 @@ impl ToTokens for ObjectToken {
             .into_iter()
             .collect::<Vec<_>>();
 
-        let module_name = format_ident!(
+        let module_name_internal = format_ident!(
             "________internal_{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
         let module_name_rexported =
             format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
-        let test_function_name = format_ident!("test_{module_name}_edge_name");
+        let test_function_name = format_ident!("test_{module_name_internal}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
         let _____schema_def = format_ident!("_____schema_def");
 
@@ -109,7 +109,7 @@ impl ToTokens for ObjectToken {
             use #crate_name::{ToRaw as _};
 
             impl #crate_name::SchemaGetter for #struct_name_ident {
-                type Schema = #module_name::#struct_name_ident;
+                type Schema = #module_name_internal::#struct_name_ident;
 
                 fn schema() -> #module_name_rexported::Schema {
                     #module_name_rexported::Schema::new()
@@ -141,12 +141,12 @@ impl ToTokens for ObjectToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                pub use super::#module_name::#_____schema_def::Schema;
+                pub use super::#module_name_internal::#_____schema_def::Schema;
             }
 
 
             #[allow(non_snake_case)]
-            mod #module_name {
+            mod #module_name_internal {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
