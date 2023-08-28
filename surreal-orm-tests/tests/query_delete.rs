@@ -36,7 +36,7 @@ async fn test_delete_by_id_helper_function() -> SurrealOrmResult<()> {
     let weapon1 = weapons.first().unwrap();
     let weapon1_id = &weapon1.id.clone();
 
-    let weapon_schema::Weapon { id, .. } = &Weapon::schema();
+    let weapon::Schema { id, .. } = &Weapon::schema();
 
     let deleted_weapon_count = || async {
         Weapon::count_where(id.eq(weapon1_id))
@@ -62,7 +62,7 @@ async fn test_delete_one_by_id() -> SurrealOrmResult<()> {
     let weapon1 = weapons.first().unwrap();
     let weapon1_id = &weapon1.id.clone();
 
-    let weapon_schema::Weapon { id, .. } = &Weapon::schema();
+    let weapon::Schema { id, .. } = &Weapon::schema();
 
     let deleted_weapon_count = || async {
         Weapon::count_where(id.eq(weapon1_id))
@@ -88,7 +88,7 @@ async fn test_delete_one_by_model_instance() -> SurrealOrmResult<()> {
     let weapon1 = weapons.first().unwrap();
     let weapon1_id = &weapon1.id.clone();
 
-    let weapon_schema::Weapon { id, .. } = &Weapon::schema();
+    let weapon::Schema { id, .. } = &Weapon::schema();
 
     let deleted_weapon_count = || async {
         Weapon::count_where(id.eq(weapon1_id))
@@ -121,7 +121,7 @@ async fn test_delete_where_model_helper_function() -> SurrealOrmResult<()> {
 
     create_test_data(db.clone()).await;
 
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_count = || async { Weapon::count_all().get(db.clone()).await.unwrap() };
     assert_eq!(weapons_count().await, 1000);
@@ -142,7 +142,7 @@ async fn test_delete_many_query_by_condition() -> SurrealOrmResult<()> {
 
     create_test_data(db.clone()).await;
 
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_count = || async { Weapon::count_all().get(db.clone()).await.unwrap() };
     assert_eq!(weapons_count().await, 1000);

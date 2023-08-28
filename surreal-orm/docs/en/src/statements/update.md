@@ -125,7 +125,7 @@ assert_eq!(created_weapon.name, "Laser");
 assert_eq!(created_weapon.strength, 0);
 
 let ref id = created_weapon.clone().id;
-let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+let weapon::Schema { strength, .. } = Weapon::schema();
 
 update::<Weapon>(id)
     .set(object_partial!(Weapon { strength: 923u64 }))
@@ -149,7 +149,7 @@ method:
 ```rust
 let created_weapon = create().content(weapon).get_one(db.clone()).await.unwrap();
 
-let weapon_schema::Weapon { strength, name, .. } = Weapon::schema();
+let weapon::Schema { strength, name, .. } = Weapon::schema();
 
 update::<Weapon>(created_weapon.clone().id)
     .set(object!(Weapon {

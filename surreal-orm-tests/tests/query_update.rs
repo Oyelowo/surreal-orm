@@ -62,7 +62,7 @@ async fn test_increment_and_decrement_update_set_with_object_partial() -> Surrea
     //
     // // Increment by 5;
     let id = &created_weapon.clone().id;
-    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let weapon::Schema { strength, .. } = Weapon::schema();
 
     update::<Weapon>(created_weapon)
         .set(strength.increment_by(5u64))
@@ -118,7 +118,7 @@ async fn test_increment_and_decrement_update() -> SurrealOrmResult<()> {
     //
     // // Increment by 5;
     let id = &created_weapon.clone().id;
-    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let weapon::Schema { strength, .. } = Weapon::schema();
 
     update::<Weapon>(created_weapon)
         .set(strength.increment_by(5u64))
@@ -527,7 +527,7 @@ async fn test_update_content_with_filter() -> SurrealOrmResult<()> {
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
 
-    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let weapon::Schema { strength, .. } = Weapon::schema();
     let filter = &cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
 
     let get_selected_weapons = || async {
@@ -614,7 +614,7 @@ async fn test_update_merge_with_filter() -> SurrealOrmResult<()> {
         .collect::<Vec<Weapon>>();
     insert(generated_weapons.clone()).run(db.clone()).await?;
 
-    let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+    let weapon::Schema { strength, .. } = Weapon::schema();
     let filter = &cond(strength.greater_than(5)).and(strength.less_than_or_equal(15));
 
     let get_selected_weapons = || async {
@@ -918,7 +918,7 @@ async fn test_update_single_id_patch_replace_change() -> SurrealOrmResult<()> {
     };
     assert_eq!(get_selected_weapon().await.unwrap().name, "test");
 
-    let weapon_schema::Weapon {
+    let weapon::Schema {
         ref name,
         ref strength,
         ..

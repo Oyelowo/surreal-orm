@@ -132,7 +132,7 @@ let weapons = (
 let created_weapons = insert(weapons).return_many(db.clone()).await.unwrap();
 
 // Define a SELECT statement for weapons with strength values between 800 and 950
-let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+let weapon::Schema { strength, .. } = Weapon::schema();
 let select_statement = select(All)
     .from(Weapon::table_name())
     .where_(cond(strength.greater_than_or_equal(800)).and(strength.less_than(950)));

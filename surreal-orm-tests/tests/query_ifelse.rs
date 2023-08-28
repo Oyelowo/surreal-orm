@@ -41,7 +41,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
 
     let space_ship = &SpaceShip::table_name();
     let weapon = &Weapon::table_name();
-    let weapon_schema::Weapon {
+    let weapon::Schema {
         ref name,
         ref strength,
         ..
@@ -409,7 +409,7 @@ END"
 async fn test_if_else_in_update_statement_setter() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
-    let weapon_schema::Weapon {
+    let weapon::Schema {
         ref strength, name, ..
     } = Weapon::schema();
     let weapon = &Weapon::table_name();

@@ -11,7 +11,7 @@ async fn test_count_where() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(strength.gte(500));
     let weapons_count = weapons_query.get(db.clone()).await?;

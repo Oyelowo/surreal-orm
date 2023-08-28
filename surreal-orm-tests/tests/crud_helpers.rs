@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use surreal_models::{space_ship_schema, weapon_schema, SpaceShip, Weapon};
+use surreal_models::{space_ship, weapon, SpaceShip, Weapon};
 use surreal_orm::{
     statements::{insert, select, select_value},
     *,
@@ -119,7 +119,7 @@ async fn test_find_where() -> SurrealOrmResult<()> {
     .await?;
 
     let _spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
-    let space_ship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
+    let space_ship::Schema { name, id, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
         .return_many(db.clone())
@@ -148,7 +148,7 @@ async fn test_find_where_complex() -> SurrealOrmResult<()> {
 
     create_test_data(db.clone()).await;
 
-    let weapon_schema::Weapon { id, strength, .. } = &Weapon::schema();
+    let weapon::Schema { id, strength, .. } = &Weapon::schema();
     let count = &Field::new("count");
 
     let total_spaceships = Weapon::find_where(id.is_not(NONE))
@@ -183,7 +183,7 @@ async fn test_count_where() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(strength.gte(500));
     let weapons_count = weapons_query.get(db.clone()).await?;
@@ -204,7 +204,7 @@ async fn test_count_where_complex() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(cond(strength.gte(500)).and(strength.lt(734)));
     let weapons_count = weapons_query.get(db.clone()).await?;
@@ -296,8 +296,20 @@ async fn test_delete_by_id() -> SurrealOrmResult<()> {
     Ok(())
 }
 
+struct Name;
+type Olo = Name;
+impl Olo {
+    fn name(&self) -> String {
+        "name".into()
+    }
+}
+// use self::Name as Olo;
+
 #[tokio::test]
 async fn test_delete_where() -> SurrealOrmResult<()> {
+    let x = Name;
+    let y: Olo = Name;
+    let z = y;
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
@@ -308,7 +320,8 @@ async fn test_delete_where() -> SurrealOrmResult<()> {
     };
 
     spaceship.save().run(db.clone()).await.unwrap();
-    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let m = SpaceShip::schema();
+    let space_ship::Schema { name, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(name.like("spaceship-1"))
         .return_many(db.clone())

@@ -6,12 +6,12 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{rocket_schema, Rocket};
+use surreal_models::{rocket, Rocket};
 use surreal_orm::*;
 
 #[test]
 fn test_rocket_add_field_to_real_number_complex() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         ref bunchOfOtherFields,
         ..
@@ -30,7 +30,7 @@ fn test_rocket_add_field_to_real_number_complex() {
 
 #[test]
 fn test_rocket_add_field_to_real_number() {
-    let rocket_schema::Rocket { strength, .. } = Rocket::schema();
+    let rocket::Schema { strength, .. } = Rocket::schema();
     let operation = strength + 5;
 
     assert_eq!(operation.to_raw().build(), "strength + 5");
@@ -39,7 +39,7 @@ fn test_rocket_add_field_to_real_number() {
 
 #[test]
 fn test_rocket_add_field_to_field_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         bunchOfOtherFields,
         ..
@@ -55,7 +55,7 @@ fn test_rocket_add_field_to_field_owned() {
 
 #[test]
 fn test_rocket_add_field_to_field_borrowed_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         ref bunchOfOtherFields,
         ..
@@ -71,7 +71,7 @@ fn test_rocket_add_field_to_field_borrowed_plus_borrowed() {
 
 #[test]
 fn test_rocket_add_field_to_field_borrowed_plus_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         bunchOfOtherFields,
         ..
@@ -87,7 +87,7 @@ fn test_rocket_add_field_to_field_borrowed_plus_owned() {
 
 #[test]
 fn test_rocket_add_field_to_field_owned_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         ref bunchOfOtherFields,
         ..
@@ -103,7 +103,7 @@ fn test_rocket_add_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_sub_with_real_number() {
-    let rocket_schema::Rocket { ref strength, .. } = Rocket::schema();
+    let rocket::Schema { ref strength, .. } = Rocket::schema();
     let operation = strength - 5;
 
     assert_eq!(operation.to_raw().build(), "strength - 5");
@@ -112,7 +112,7 @@ fn test_rocket_sub_with_real_number() {
 
 #[test]
 fn test_rocket_sub_field_to_field_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         bunchOfOtherFields,
         ..
@@ -128,7 +128,7 @@ fn test_rocket_sub_field_to_field_owned() {
 
 #[test]
 fn test_rocket_sub_field_to_field_borrowed_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         ref bunchOfOtherFields,
         ..
@@ -144,7 +144,7 @@ fn test_rocket_sub_field_to_field_borrowed_plus_borrowed() {
 
 #[test]
 fn test_rocket_sub_field_to_field_borrowed_plus_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         bunchOfOtherFields,
         ..
@@ -160,7 +160,7 @@ fn test_rocket_sub_field_to_field_borrowed_plus_owned() {
 
 #[test]
 fn test_rocket_sub_field_to_field_owned_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         ref bunchOfOtherFields,
         ..
@@ -176,7 +176,7 @@ fn test_rocket_sub_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_mul_field_to_real_number() {
-    let rocket_schema::Rocket { strength, .. } = Rocket::schema();
+    let rocket::Schema { strength, .. } = Rocket::schema();
     let operation = strength * 5;
 
     assert_eq!(operation.to_raw().build(), "strength * 5");
@@ -185,7 +185,7 @@ fn test_rocket_mul_field_to_real_number() {
 
 #[test]
 fn test_rocket_mul_field_to_field_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         bunchOfOtherFields,
         ..
@@ -201,7 +201,7 @@ fn test_rocket_mul_field_to_field_owned() {
 
 #[test]
 fn test_rocket_mul_field_to_field_borrowed_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         ref bunchOfOtherFields,
         ..
@@ -217,7 +217,7 @@ fn test_rocket_mul_field_to_field_borrowed_plus_borrowed() {
 
 #[test]
 fn test_rocket_mul_field_to_field_borrowed_plus_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         bunchOfOtherFields,
         ..
@@ -233,7 +233,7 @@ fn test_rocket_mul_field_to_field_borrowed_plus_owned() {
 
 #[test]
 fn test_rocket_mul_field_to_field_owned_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         ref bunchOfOtherFields,
         ..
@@ -249,7 +249,7 @@ fn test_rocket_mul_field_to_field_owned_plus_borrowed() {
 
 #[test]
 fn test_rocket_div() {
-    let rocket_schema::Rocket { ref strength, .. } = Rocket::schema();
+    let rocket::Schema { ref strength, .. } = Rocket::schema();
     let operation = strength / 5;
 
     assert_eq!(operation.to_raw().build(), "strength / 5");
@@ -258,7 +258,7 @@ fn test_rocket_div() {
 
 #[test]
 fn test_rocket_div_field_to_field_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         bunchOfOtherFields,
         ..
@@ -274,7 +274,7 @@ fn test_rocket_div_field_to_field_owned() {
 
 #[test]
 fn test_rocket_div_field_to_field_borrowed_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         ref bunchOfOtherFields,
         ..
@@ -290,7 +290,7 @@ fn test_rocket_div_field_to_field_borrowed_plus_borrowed() {
 
 #[test]
 fn test_rocket_div_field_to_field_borrowed_plus_owned() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         ref strength,
         bunchOfOtherFields,
         ..
@@ -306,7 +306,7 @@ fn test_rocket_div_field_to_field_borrowed_plus_owned() {
 
 #[test]
 fn test_rocket_div_field_to_field_owned_plus_borrowed() {
-    let rocket_schema::Rocket {
+    let rocket::Schema {
         strength,
         ref bunchOfOtherFields,
         ..

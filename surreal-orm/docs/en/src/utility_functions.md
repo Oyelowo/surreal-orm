@@ -119,7 +119,7 @@ async fn test_find_where() -> SurrealOrmResult<()> {
     .await?;
 
     let _spaceschip = spaceship.clone().save().get_one(db.clone()).await?;
-    let space_ship_schema::SpaceShip { name, id, .. } = SpaceShip::schema();
+    let space_ship::Schema { name, id, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(id.is_not(NULL))
         .return_many(db.clone())
@@ -155,7 +155,7 @@ async fn test_count_where() -> SurrealOrmResult<()> {
     db.use_ns("test").use_db("test").await.unwrap();
 
     create_test_data(db.clone()).await;
-    let weapon_schema::Weapon { strength, .. } = &Weapon::schema();
+    let weapon::Schema { strength, .. } = &Weapon::schema();
 
     let weapons_query = Weapon::count_where(strength.gte(500));
     let weapons_count = weapons_query.get(db.clone()).await?;
@@ -289,7 +289,7 @@ async fn test_delete_where() -> SurrealOrmResult<()> {
     };
 
     spaceship.save().run(db.clone()).await.unwrap();
-    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship::Schema { name, .. } = SpaceShip::schema();
 
     let found_spaceships = SpaceShip::find_where(name.like("spaceship-1"))
         .return_many(db.clone())

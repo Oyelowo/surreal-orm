@@ -20,8 +20,8 @@ calculate the average strength of weapons, for instance:
 # db.use_ns("test").use_db("test").await.unwrap();
 #
 # let ref weapon = Weapon::table_name();
-# let weapon_schema::Weapon { ref strength, .. } = Weapon::schema();
-# let weapon_stats_schema::WeaponStats {
+# let weapon::Schema { ref strength, .. } = Weapon::schema();
+# let weapon_stats::Schema {
 #     averageStrength, ..
 # } = WeaponStats::schema();
 #

@@ -6,7 +6,7 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{student_schema, Student};
+use surreal_models::{student, Student};
 use surreal_orm::{index, this, value, where_, All, Buildable, Operatable, SchemaGetter, ToRaw, E};
 
 #[test]
@@ -57,7 +57,7 @@ fn test_param_with_path_no_clause() {
 
 #[test]
 fn test_param_with_path_with_clause() {
-    let student_schema::Student { age, .. } = Student::schema();
+    let student::Schema { age, .. } = Student::schema();
 
     let param_with_path = this()
         .with_path::<Student>(where_(age.greater_than(18)))

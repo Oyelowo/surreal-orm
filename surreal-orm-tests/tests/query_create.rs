@@ -14,7 +14,7 @@ use geo::polygon;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use surreal_models::{alien_schema, space_ship_schema, Alien, SpaceShip, Weapon};
+use surreal_models::{alien, space_ship, Alien, SpaceShip, Weapon};
 use surreal_orm::statements::order;
 use surreal_orm::{
     statements::{create, select},
@@ -133,7 +133,7 @@ async fn test_creation_with_returning_selected_fields_with_helper_method() -> Su
     };
 
     assert_eq!(space_ship.id.to_thing().tb, "space_ship");
-    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship::Schema { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -161,7 +161,7 @@ async fn test_creation_with_returning_selected_fields_with_run_take_surreal_help
     };
 
     assert_eq!(space_ship.id.to_thing().tb, "space_ship");
-    let space_ship_schema::SpaceShip { name, .. } = SpaceShip::schema();
+    let space_ship::Schema { name, .. } = SpaceShip::schema();
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default)]
     struct ReturnedSpaceShip {
@@ -284,7 +284,7 @@ async fn test_create_alien_with_links() -> SurrealOrmResult<()> {
     assert!(unsaved_alien.weapon.value().is_none());
 
     // Check fields value fetching
-    let alien_schema::Alien { weapon, .. } = Alien::schema();
+    let alien::Schema { weapon, .. } = Alien::schema();
     let created_alien = create()
         .content(unsaved_alien.clone())
         .load_links(vec![weapon])?
@@ -863,7 +863,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
+    let alien::Schema { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create()
         .content(unsaved_alien.clone())
@@ -1073,7 +1073,7 @@ async fn test_create_set_object_and_array_statement() -> SurrealOrmResult<()> {
         .await?;
     assert_eq!(space_ship1.name, "SpaceShip1");
 
-    let space_ship_schema::SpaceShip {
+    let space_ship::Schema {
         id, name, created, ..
     } = SpaceShip::schema();
     let space_ship2 = create::<SpaceShip>()

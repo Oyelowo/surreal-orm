@@ -79,7 +79,7 @@ chain various methods to build the query. Here's an example:
 ```rust
 use surreal_orm::statements::{select, All};
 
-let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+let space_ship::Schema { name, age, .. } = SpaceShip::schema();
 
 let statement = select(All)
     .from(space_ship)
@@ -151,7 +151,7 @@ the condition for deletion. Here's an example:
 ```rust
 use surreal_orm::statements::{delete, Field};
 
-let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+let space_ship::Schema { name, age, .. } = SpaceShip::schema();
 let condition = name.eq("Millennium Falcon");
 
 delete(space_ship)

@@ -300,7 +300,7 @@ let generated_weapons = (1..=10)
 insert(generated_weapons.clone()).run(db.clone()).await?;
 
 let ref weapon = Weapon::table_name();
-let weapon_schema::Weapon { ref strength, .. } = &Weapon::schema();
+let weapon::Schema { ref strength, .. } = &Weapon::schema();
 
 let statement = select(All)
     .from(weapon)

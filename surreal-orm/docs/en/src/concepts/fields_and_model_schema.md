@@ -65,7 +65,7 @@ The following example illustrates how to modify and update entities:
 
 ```rust
 let ref id = created_weapon.clone().id;
-let weapon_schema::Weapon { strength, .. } = Weapon::schema();
+let weapon::Schema { strength, .. } = Weapon::schema();
 
 update::<Weapon>(id)
     .set(strength.increment_by(5u64))
