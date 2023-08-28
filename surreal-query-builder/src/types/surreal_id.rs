@@ -39,7 +39,7 @@ where
     }
 }
 
-// impl<T, Id> From<SurrealId<T, Id>> for Valuex
+// impl<T, Id> From<SurrealId<T, Id>> for ValueLike
 // where
 //     T: Model,
 //     Id: Into<sql::Id>,

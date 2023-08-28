@@ -7,7 +7,7 @@
 
 use crate::{
     Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
-    GeometryLike, NumberLike, Ordinal, Parametric, Setter, Valuex,
+    GeometryLike, NumberLike, Ordinal, Parametric, Setter, ValueLike,
 };
 use std::fmt::Display;
 use surrealdb::sql;
@@ -112,7 +112,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Equal, value)
     }
@@ -144,7 +144,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn eq<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Equal, value)
     }
@@ -176,7 +176,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn not_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotEqual, value)
     }
@@ -208,7 +208,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn neq<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotEqual, value)
     }
@@ -240,7 +240,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn exactly_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
         Self: Sized,
     {
         self.generate_query(sql::Operator::Exact, value)
@@ -273,7 +273,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn any_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AnyEqual, value)
     }
@@ -294,7 +294,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn all_equal<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AllEqual, value)
     }
@@ -316,7 +316,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn like<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Like, value.into())
     }
@@ -338,7 +338,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn not_like<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotLike, value)
     }
@@ -359,7 +359,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn any_like<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AnyLike, value)
     }
@@ -380,7 +380,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn all_like<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::AllLike, value)
     }
@@ -577,7 +577,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn add<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Add, value)
     }
@@ -597,7 +597,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn plus<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Add, value)
     }
@@ -618,7 +618,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn subtract<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Sub, value)
     }
@@ -639,7 +639,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn minus<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Sub, value)
     }
@@ -660,7 +660,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn multiply<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Mul, value)
     }
@@ -680,7 +680,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn mul<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Mul, value)
     }
@@ -701,7 +701,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn divide<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Div, value)
     }
@@ -721,7 +721,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn div<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Div, value)
     }
@@ -784,7 +784,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn truthy_and<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query("&&", value)
     }
@@ -805,7 +805,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn truthy_or<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query("||", value)
     }
@@ -826,7 +826,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn and<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query("AND", value)
     }
@@ -847,9 +847,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn or<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("OR", value)
     }
 
@@ -869,9 +869,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn is<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("IS", value)
     }
 
@@ -891,9 +891,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn is_not<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         self.generate_query("IS NOT", value)
     }
 
@@ -916,9 +916,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn contains<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         self.generate_query(sql::Operator::Contain, value)
     }
 
@@ -938,7 +938,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn contains_not<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotContain, value)
     }
@@ -1025,7 +1025,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn inside<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Inside, value)
     }
@@ -1046,7 +1046,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn in_<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::Inside, value)
     }
@@ -1085,7 +1085,7 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// ```
     fn not_inside<T>(&self, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
         self.generate_query(sql::Operator::NotInside, value)
     }
@@ -1246,8 +1246,8 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        let lower_bound: Valuex = lower_bound.into().into();
-        let upper_bound: Valuex = upper_bound.into().into();
+        let lower_bound: ValueLike = lower_bound.into().into();
+        let upper_bound: ValueLike = upper_bound.into().into();
         let condition = format!(
             "{} < {} < {}",
             lower_bound.build(),
@@ -1287,8 +1287,8 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     where
         T: Into<Ordinal>,
     {
-        let lower_bound: Valuex = lower_bound.into().into();
-        let upper_bound: Valuex = upper_bound.into().into();
+        let lower_bound: ValueLike = lower_bound.into().into();
+        let upper_bound: ValueLike = upper_bound.into().into();
         let condition = format!(
             "{} <= {} <= {}",
             lower_bound.build(),
@@ -1330,9 +1330,9 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     /// generates operation query string
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         let condition = format!("{} {} {}", self.build(), operator, &value.build());
         let updated_bindings = [
             self.get_bindings().as_slice(),

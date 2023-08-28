@@ -11,7 +11,7 @@ This trait is defined as follows:
 pub trait SchemaGetter {
     type Schema;
     fn schema() -> Self::Schema;
-    fn schema_prefixed(prefix: impl Into<Valuex>) -> Self::Schema;
+    fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
 }
 ```
 
@@ -20,10 +20,10 @@ It contains two associated functions:
 
 1. `schema()`: Returns a schema for an entity. This is used for defining the
    structure and constraints of the entity.
-2. `schema_prefixed(prefix: impl Into<Valuex>)`: This is similar to `schema()`,
-   but it allows the schema to be prefixed with a custom value. This can be
-   useful when working with entities that may share similar fields but have
-   different schemas.
+2. `schema_prefixed(prefix: impl Into<ValueLike>)`: This is similar to
+   `schema()`, but it allows the schema to be prefixed with a custom value. This
+   can be useful when working with entities that may share similar fields but
+   have different schemas.
 
 The `SchemaGetter` trait's primary use is to allow types to be used as a
 'Schema' - a representation of the structure of the data you're storing or

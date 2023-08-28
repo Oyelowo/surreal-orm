@@ -165,7 +165,7 @@ impl ToTokens for NodeToken {
                     #module_name_rexported::Schema::new()
                 }
 
-                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> #module_name_rexported::Schema {
+                fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> #module_name_rexported::Schema {
                     #module_name_rexported::Schema::new_prefixed(prefix)
                 }
             }
@@ -343,7 +343,7 @@ impl ToTokens for NodeToken {
 
                 impl #crate_name::Aliasable for #struct_name_ident {}
 
-                impl From<#struct_name_ident> for #crate_name::Valuex {
+                impl From<#struct_name_ident> for #crate_name::ValueLike {
                     fn from(node: #struct_name_ident) -> Self {
                        Self::new(node)
                     }
@@ -403,8 +403,8 @@ impl ToTokens for NodeToken {
                         }
                     }
 
-                    pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self {
-                        let prefix: #crate_name::Valuex = prefix.into();
+                    pub fn new_prefixed(prefix: impl ::std::convert::Into<#crate_name::ValueLike>) -> Self {
+                        let prefix: #crate_name::ValueLike = prefix.into();
 
                         Self {
                            #( #schema_struct_fields_names_kv_prefixed) *

@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Buildable, Erroneous, Function, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, Parametric, ValueLike};
 // Count functions
 // These functions can be used when counting field values and expressions.
 
@@ -21,8 +21,8 @@ use crate::{Buildable, Erroneous, Function, Parametric, Valuex};
 ///
 /// count(array) -> number
 /// The following examples show this function, and its output, when used in a select statement:
-pub fn count_fn(countable: impl Into<Valuex>) -> Function {
-    let countable: Valuex = countable.into();
+pub fn count_fn(countable: impl Into<ValueLike>) -> Function {
+    let countable: ValueLike = countable.into();
 
     Function {
         query_string: format!("count({})", countable.build()),

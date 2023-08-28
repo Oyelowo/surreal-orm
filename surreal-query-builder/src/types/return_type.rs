@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Buildable, Projections, Valuex};
+use crate::{Buildable, Projections, ValueLike};
 use std::fmt::{self, Display};
 
 /// Return type
@@ -23,9 +23,9 @@ pub enum ReturnType {
     Projections(Projections),
 }
 
-impl From<Vec<Valuex>> for ReturnType {
-    fn from(valuex: Vec<Valuex>) -> Self {
-        ReturnType::Projections(Projections(valuex))
+impl From<Vec<ValueLike>> for ReturnType {
+    fn from(value_like: Vec<ValueLike>) -> Self {
+        ReturnType::Projections(Projections(value_like))
     }
 }
 

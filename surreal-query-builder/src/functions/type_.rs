@@ -24,7 +24,7 @@
 
 use crate::{
     Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric, StrandLike,
-    TableLike, Valuex,
+    TableLike, ValueLike,
 };
 
 macro_rules! create_type {
@@ -101,7 +101,7 @@ create_type!(
     /// assert_eq!(result.to_raw().build(), "type::bool($bool_param)");
     /// ```
     => 
-    "bool", Valuex, "toronto", "'toronto'");
+    "bool", ValueLike, "toronto", "'toronto'");
 
 create_type!(
     /// The type::datetime function converts a value into a datetime.
@@ -278,7 +278,7 @@ create_type!(
     /// assert_eq!(result.to_raw().build(), "type::string($string_param)");
     /// ```
     =>
-    "string", Valuex, 5454, "5454"
+    "string", ValueLike, 5454, "5454"
 );
 
 create_type!(
@@ -390,9 +390,9 @@ macro_rules! type_point {
 pub use type_point as point;
 
 /// The type::thing function converts a value into a record pointer definition.
-pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<Valuex>) -> Function {
+pub fn thing_fn(table: impl Into<TableLike>, value: impl Into<ValueLike>) -> Function {
     let table: TableLike = table.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
     let mut bindings = table.get_bindings();
     let mut errors = table.get_errors();
 

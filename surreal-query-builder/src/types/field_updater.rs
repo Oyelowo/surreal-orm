@@ -7,7 +7,7 @@
 
 use surrealdb::sql::{self, Operator};
 
-use crate::{BindingsList, Buildable, Parametric, Setter, Valuex};
+use crate::{BindingsList, Buildable, Parametric, Setter, ValueLike};
 
 use super::Field;
 
@@ -229,8 +229,8 @@ impl Updater {
         self.update_field(Operator::Dec, value)
     }
 
-    fn update_field(&self, operator: sql::Operator, value: impl Into<Valuex>) -> Updater {
-        let value: Valuex = value.into();
+    fn update_field(&self, operator: sql::Operator, value: impl Into<ValueLike>) -> Updater {
+        let value: ValueLike = value.into();
         let column_updater_string = format!("{self} {operator} {}", value.build());
         Self {
             query_string: column_updater_string,

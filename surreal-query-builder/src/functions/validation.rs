@@ -24,10 +24,10 @@
 // is::uuid()	Checks whether a value is a UUID
 //
 
-use crate::{Buildable, Erroneous, Function, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, Parametric, ValueLike};
 
-fn create_validation_function(value: impl Into<Valuex>, function_name: &str) -> Function {
-    let value: Valuex = value.into();
+fn create_validation_function(value: impl Into<ValueLike>, function_name: &str) -> Function {
+    let value: ValueLike = value.into();
 
     Function {
         query_string: format!("is::{function_name}({})", value.build()),
@@ -40,7 +40,7 @@ macro_rules! create_validation_with_tests {
     ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
             $(#[$attr])*
-            pub fn [<$function_name _fn>](value: impl Into<$crate::Valuex>) -> $crate::Function {
+            pub fn [<$function_name _fn>](value: impl Into<$crate::ValueLike>) -> $crate::Function {
                 super::create_validation_function(value, $function_name)
             }
 

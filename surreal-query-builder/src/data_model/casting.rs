@@ -7,13 +7,13 @@
 
 use std::fmt::Display;
 
-use crate::{BindingsList, Buildable, Erroneous, Parametric, Valuex};
+use crate::{BindingsList, Buildable, Erroneous, Parametric, ValueLike};
 
 /// Represents a cast function.
-pub struct Cast(Valuex);
+pub struct Cast(ValueLike);
 
 impl std::ops::Deref for Cast {
-    type Target = Valuex;
+    type Target = ValueLike;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -44,11 +44,11 @@ macro_rules! create_cast_function {
     ($(#[$attr:meta])* => $function_name: expr) => {
         paste::paste! {
             $(#[$attr])*
-            pub fn [<$function_name>](value: impl Into<Valuex>) -> Cast {
-                let value: Valuex = value.into();
+            pub fn [<$function_name>](value: impl Into<ValueLike>) -> Cast {
+                let value: ValueLike = value.into();
                 let string = format!("<{}> {}", $function_name, value.build());
 
-                Cast(Valuex {
+                Cast(ValueLike {
                     string,
                     bindings: value.get_bindings(),
                     errors: value.get_errors(),

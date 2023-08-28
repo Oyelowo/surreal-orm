@@ -9,7 +9,7 @@ use std::ops::Bound;
 
 use crate::{
     statements::select::TargettablesForSelect, Binding, Model, SurrealId, SurrealSimpleId,
-    SurrealUlid, SurrealUuid, Valuex,
+    SurrealUlid, SurrealUuid, ValueLike,
 };
 use surrealdb::sql;
 
@@ -26,7 +26,7 @@ where
             end: Bound::Included(range.end().to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -47,7 +47,7 @@ where
             end: Bound::Unbounded,
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -68,7 +68,7 @@ where
             end: Bound::Excluded(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -89,7 +89,7 @@ where
             end: Bound::Included(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -110,7 +110,7 @@ where
             end: Bound::Excluded(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -131,7 +131,7 @@ where
         };
         let binding = Binding::new(range);
 
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -152,7 +152,7 @@ where
             end: Bound::Unbounded,
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -173,7 +173,7 @@ where
             end: Bound::Excluded(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -194,7 +194,7 @@ where
             end: Bound::Included(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -215,7 +215,7 @@ where
             end: Bound::Excluded(range.end.to_thing().id),
         };
         let binding = Binding::new(range);
-        TargettablesForSelect::RecordRange(Valuex {
+        TargettablesForSelect::RecordRange(ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -238,7 +238,7 @@ macro_rules! create_range {
                     end: Bound::Included(range.end().to_thing().id),
                 };
                 let binding = Binding::new(range);
-                TargettablesForSelect::RecordRange(Valuex {
+                TargettablesForSelect::RecordRange(ValueLike {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
                     errors: vec![],
@@ -258,7 +258,7 @@ macro_rules! create_range {
                     end: Bound::Unbounded,
                 };
                 let binding = Binding::new(range);
-                TargettablesForSelect::RecordRange(Valuex {
+                TargettablesForSelect::RecordRange(ValueLike {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
                     errors: vec![],
@@ -278,7 +278,7 @@ macro_rules! create_range {
                     end: Bound::Excluded(range.end.to_thing().id),
                 };
                 let binding = Binding::new(range);
-                TargettablesForSelect::RecordRange(Valuex {
+                TargettablesForSelect::RecordRange(ValueLike {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
                     errors: vec![],
@@ -298,7 +298,7 @@ macro_rules! create_range {
                     end: Bound::Included(range.end.to_thing().id),
                 };
                 let binding = Binding::new(range);
-                TargettablesForSelect::RecordRange(Valuex {
+                TargettablesForSelect::RecordRange(ValueLike {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
                     errors: vec![],
@@ -318,7 +318,7 @@ macro_rules! create_range {
                     end: Bound::Excluded(range.end.to_thing().id),
                 };
                 let binding = Binding::new(range);
-                TargettablesForSelect::RecordRange(Valuex {
+                TargettablesForSelect::RecordRange(ValueLike {
                     string: binding.get_param_dollarised(),
                     bindings: vec![binding],
                     errors: vec![],

@@ -10,7 +10,7 @@ use std::fmt::Display;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::expression::Expression,
-    Clause, Operatable, Operation, Param, SchemaGetter, Valuex,
+    Clause, Operatable, Operation, Param, SchemaGetter, ValueLike,
 };
 
 /// Builds LET statement.
@@ -75,9 +75,9 @@ pub struct LetStatement {
 impl Operatable for LetStatement {
     fn generate_query<T>(&self, operator: impl std::fmt::Display, value: T) -> Operation
     where
-        T: Into<Valuex>,
+        T: Into<ValueLike>,
     {
-        let value: Valuex = value.into();
+        let value: ValueLike = value.into();
         let condition = format!(
             "{} {} {}",
             self.get_param().build(),
@@ -126,7 +126,7 @@ impl LetStatement {
     /// For traversing from the param
     pub fn with_path<T: SchemaGetter>(&self, clause: impl Into<Clause>) -> T::Schema {
         let clause: Clause = clause.into();
-        let value = Valuex {
+        let value = ValueLike {
             string: format!("{}{}", self.get_param().build(), clause.build()),
             bindings: self
                 .get_bindings()

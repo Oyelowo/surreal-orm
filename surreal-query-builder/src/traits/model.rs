@@ -16,7 +16,7 @@ use crate::{
         SelectStatementMini,
     },
     Alias, All, Conditional, Field, Filter, NodeClause, Raw, SurrealId, SurrealOrmResult,
-    SurrealSimpleId, SurrealUlid, SurrealUuid, Table, Valuex,
+    SurrealSimpleId, SurrealUlid, SurrealUuid, Table, ValueLike,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
@@ -298,7 +298,7 @@ pub trait SchemaGetter {
     ///
     fn schema() -> Self::Schema;
     ///
-    fn schema_prefixed(prefix: impl Into<Valuex>) -> Self::Schema;
+    fn schema_prefixed(prefix: impl Into<ValueLike>) -> Self::Schema;
 }
 
 /// List of error

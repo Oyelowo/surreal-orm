@@ -10,7 +10,8 @@ use std::fmt::Display;
 use surrealdb::sql;
 
 use crate::{
-    BindingsList, Buildable, Clause, Erroneous, Index, Operatable, Parametric, SchemaGetter, Valuex,
+    BindingsList, Buildable, Clause, Erroneous, Index, Operatable, Parametric, SchemaGetter,
+    ValueLike,
 };
 
 /// Represents a surrogate parameter
@@ -71,7 +72,7 @@ impl Param {
     /// For traversing from the param
     pub fn with_path<T: SchemaGetter>(&self, clause: impl Into<Clause>) -> T::Schema {
         let clause: Clause = clause.into();
-        let value = Valuex {
+        let value = ValueLike {
             string: format!("{}{}", self.build(), clause.build()),
             bindings: self
                 .get_bindings()
@@ -87,7 +88,7 @@ impl Param {
     /// For accessing an object in a list.
     pub fn index(self, index: impl Into<Index>) -> Self {
         let index: Index = index.into();
-        let value = Valuex {
+        let value = ValueLike {
             string: format!("{}{}", self.build(), index.build()),
             bindings: self
                 .get_bindings()

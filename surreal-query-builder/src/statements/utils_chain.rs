@@ -7,7 +7,9 @@
 
 use std::fmt;
 
-use crate::{BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable, Valuex};
+use crate::{
+    BindingsList, Block, Buildable, Erroneous, ErrorList, Parametric, Queryable, ValueLike,
+};
 
 /// Chains together multiple queries into a single `QueryChain`.
 ///
@@ -56,11 +58,11 @@ pub struct QueryChain {
 
 /// A chainable query.
 #[derive(Debug, Clone)]
-pub struct Chainable(Valuex);
+pub struct Chainable(ValueLike);
 
 impl<T: Erroneous + Parametric + Buildable> From<T> for Chainable {
     fn from(query: T) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: query.build(),
             bindings: query.get_bindings(),
             errors: query.get_errors(),
@@ -141,8 +143,8 @@ impl fmt::Display for QueryChain {
     }
 }
 
-impl From<Vec<Valuex>> for QueryChain {
-    fn from(values: Vec<Valuex>) -> Self {
+impl From<Vec<ValueLike>> for QueryChain {
+    fn from(values: Vec<ValueLike>) -> Self {
         let mut bindings = BindingsList::new();
         let mut errors = ErrorList::new();
         let mut queries = Vec::new();

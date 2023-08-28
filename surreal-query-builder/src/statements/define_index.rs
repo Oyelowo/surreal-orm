@@ -15,7 +15,7 @@ use std::fmt::{self, Display};
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::{Field, Table, TableIndex},
-    Valuex,
+    ValueLike,
 };
 
 /// Define a new database index.
@@ -94,8 +94,8 @@ impl<const N: usize> From<[Field; N]> for Columns {
     }
 }
 
-impl<const N: usize> From<[Valuex; N]> for Columns {
-    fn from(value: [Valuex; N]) -> Self {
+impl<const N: usize> From<[ValueLike; N]> for Columns {
+    fn from(value: [ValueLike; N]) -> Self {
         Self::Fields(
             value
                 .into_iter()
@@ -109,8 +109,8 @@ impl<const N: usize> From<[Valuex; N]> for Columns {
     }
 }
 
-impl From<Vec<Valuex>> for Columns {
-    fn from(value: Vec<Valuex>) -> Self {
+impl From<Vec<ValueLike>> for Columns {
+    fn from(value: Vec<ValueLike>) -> Self {
         Self::Fields(
             value
                 .into_iter()

@@ -141,7 +141,7 @@ macro_rules! define_function_ {
     ($function_name:ident ($($param:ident : $type:ident),* ) {$(let $var:ident = $value:expr;)* return $expr:expr;}) => {
         macro_rules! check_field_type {
             (any) => {
-                $crate::Valuex
+                $crate::ValueLike
             };
             (array) => {
                 $crate::ArrayLike

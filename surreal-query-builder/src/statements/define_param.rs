@@ -7,7 +7,9 @@
 
 use std::{fmt::Display, ops::Deref};
 
-use crate::{BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable, Valuex};
+use crate::{
+    BindingsList, Buildable, Erroneous, ErrorList, Param, Parametric, Queryable, ValueLike,
+};
 
 // DEFINE PARAM statement
 // The DEFINE PARAM statement allows you to define global (database-wide) parameters that are available to every client.
@@ -71,8 +73,8 @@ pub struct DefineParamStatement {
 
 impl DefineParamStatement {
     /// Set the value of the parameter.
-    pub fn value(mut self, value: impl Into<Valuex>) -> Self {
-        let value: Valuex = value.into();
+    pub fn value(mut self, value: impl Into<ValueLike>) -> Self {
+        let value: ValueLike = value.into();
         self.bindings.extend(value.get_bindings());
         self.errors.extend(value.get_errors());
         self.value = Some(value.build());

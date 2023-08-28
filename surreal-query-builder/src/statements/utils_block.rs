@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, Valuex};
+use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 
 #[macro_export]
 /// Macro for creating a surrealdb code block
@@ -395,9 +395,9 @@ impl From<QueryChain> for Block {
     }
 }
 
-impl From<Block> for Valuex {
+impl From<Block> for ValueLike {
     fn from(block: Block) -> Self {
-        Valuex {
+        ValueLike {
             string: block.build(),
             bindings: block.get_bindings(),
             errors: block.get_errors(),

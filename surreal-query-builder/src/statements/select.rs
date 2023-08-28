@@ -38,7 +38,7 @@ use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
     ErrorList, Field, Filter, Function, Model, NumberLike, Parametric, Queryable, ReturnableSelect,
     ReturnableStandard, SurrealId, SurrealOrmResult, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    Table, ToRaw, Valuex,
+    Table, ToRaw, ValueLike,
 };
 
 use super::Subquery;
@@ -294,7 +294,7 @@ pub enum TargettablesForSelect {
     // Should already be bound
     Subquery(Subquery),
     Function(Function),
-    RecordRange(Valuex),
+    RecordRange(ValueLike),
 }
 
 impl From<Vec<sql::Thing>> for TargettablesForSelect {
@@ -598,8 +598,8 @@ impl From<Vec<&Field>> for Splittables {
     }
 }
 
-impl From<Vec<Valuex>> for Splittables {
-    fn from(value: Vec<Valuex>) -> Self {
+impl From<Vec<ValueLike>> for Splittables {
+    fn from(value: Vec<ValueLike>) -> Self {
         Self::Fields(
             value
                 .into_iter()
@@ -620,12 +620,12 @@ impl<T: Into<Field>> From<T> for Splittables {
 }
 /// Items that can be selected
 
-pub struct Selectables(Valuex);
+pub struct Selectables(ValueLike);
 
 impl<T: Into<Field>> From<T> for Selectables {
     fn from(value: T) -> Self {
         let value: Field = value.into();
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -633,9 +633,9 @@ impl<T: Into<Field>> From<T> for Selectables {
     }
 }
 
-impl From<Vec<Valuex>> for Selectables {
-    fn from(value: Vec<Valuex>) -> Self {
-        Self(Valuex {
+impl From<Vec<ValueLike>> for Selectables {
+    fn from(value: Vec<ValueLike>) -> Self {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -645,7 +645,7 @@ impl From<Vec<Valuex>> for Selectables {
 
 impl From<&All> for Selectables {
     fn from(_value: &All) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: "*".into(),
             bindings: vec![],
             errors: vec![],
@@ -655,7 +655,7 @@ impl From<&All> for Selectables {
 
 impl From<All> for Selectables {
     fn from(_value: All) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: "*".into(),
             bindings: vec![],
             errors: vec![],
@@ -665,7 +665,7 @@ impl From<All> for Selectables {
 
 impl<const N: usize> From<&[Field; N]> for Selectables {
     fn from(value: &[Field; N]) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -675,7 +675,7 @@ impl<const N: usize> From<&[Field; N]> for Selectables {
 
 impl<const N: usize> From<&[&Field; N]> for Selectables {
     fn from(value: &[&Field; N]) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -685,7 +685,7 @@ impl<const N: usize> From<&[&Field; N]> for Selectables {
 
 impl From<Vec<&Field>> for Selectables {
     fn from(value: Vec<&Field>) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -695,7 +695,7 @@ impl From<Vec<&Field>> for Selectables {
 
 impl From<Vec<Field>> for Selectables {
     fn from(value: Vec<Field>) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -705,7 +705,7 @@ impl From<Vec<Field>> for Selectables {
 
 // impl From<Field> for Selectables {
 //     fn from(value: Field) -> Self {
-//         Self(Valuex {
+//         Self(ValueLike {
 //             string: value.build(),
 //             bindings: value.get_bindings(),
 //         })
@@ -714,7 +714,7 @@ impl From<Vec<Field>> for Selectables {
 //
 // impl From<&Field> for Selectables {
 //     fn from(value: &Field) -> Self {
-//         Self(Valuex {
+//         Self(ValueLike {
 //             string: value.build(),
 //             bindings: value.get_bindings(),
 //         })
@@ -723,7 +723,7 @@ impl From<Vec<Field>> for Selectables {
 
 impl From<Function> for Selectables {
     fn from(value: Function) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -733,7 +733,7 @@ impl From<Function> for Selectables {
 
 impl From<&Function> for Selectables {
     fn from(value: &Function) -> Self {
-        Self(Valuex {
+        Self(ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -742,7 +742,7 @@ impl From<&Function> for Selectables {
 }
 
 impl Deref for Selectables {
-    type Target = Valuex;
+    type Target = ValueLike;
 
     fn deref(&self) -> &Self::Target {
         &self.0

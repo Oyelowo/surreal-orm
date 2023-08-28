@@ -11,7 +11,7 @@ use crate::{
         RelateStatement, SelectStatement, UpdateStatement,
     },
     Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Field, Model, Node, Operation,
-    Param, Parametric, Valuex,
+    Param, Parametric, ValueLike,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
@@ -39,7 +39,7 @@ macro_rules! create_value_like_struct {
             /// Represents the value, or field, param which can all be used
             /// to represent the value itself within a query.
             #[derive(Debug, Clone)]
-            pub struct [<$sql_type_name Like>]($crate::Valuex, ValueType);
+            pub struct [<$sql_type_name Like>]($crate::ValueLike, ValueType);
 
             impl [<$sql_type_name Like>] {
                 #[allow(dead_code)]
@@ -51,7 +51,7 @@ macro_rules! create_value_like_struct {
                 }
             }
 
-            impl From<[<$sql_type_name Like>]> for $crate::Valuex {
+            impl From<[<$sql_type_name Like>]> for $crate::ValueLike {
                 fn from(val: [<$sql_type_name Like>]) -> Self {
                     val.0
                 }
@@ -202,9 +202,9 @@ pub struct NONE;
 
 /// Represents the surrealdb boolean value
 #[derive(Debug, Clone)]
-pub struct BoolLike(Valuex);
+pub struct BoolLike(ValueLike);
 
-impl From<BoolLike> for Valuex {
+impl From<BoolLike> for ValueLike {
     fn from(val: BoolLike) -> Self {
         val.0
     }
@@ -307,8 +307,8 @@ impl From<IfElseStatement> for BoolLike {
 /// Represents the surrealdb Array value, or field, param which can all be used
 /// to represent the value itself within a query.
 #[derive(Debug, Clone)]
-pub struct ArrayLike(Valuex);
-impl From<ArrayLike> for Valuex {
+pub struct ArrayLike(ValueLike);
+impl From<ArrayLike> for ValueLike {
     fn from(val: ArrayLike) -> Self {
         val.0
     }
@@ -457,9 +457,9 @@ impl From<sql::Array> for Array {
     }
 }
 
-impl From<Vec<Valuex>> for ArrayLike {
-    fn from(value: Vec<Valuex>) -> Self {
-        Self(Valuex {
+impl From<Vec<ValueLike>> for ArrayLike {
+    fn from(value: Vec<ValueLike>) -> Self {
+        Self(ValueLike {
             string: format!("[{}]", value.build()),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -468,13 +468,13 @@ impl From<Vec<Valuex>> for ArrayLike {
 }
 
 /// Used to represent a list of arguments to a function
-pub struct ArgsList(Valuex);
+pub struct ArgsList(ValueLike);
 impl ArgsList {
     pub(crate) fn get_errors(&self) -> Vec<String> {
         self.0.get_errors()
     }
 }
-impl From<ArgsList> for Valuex {
+impl From<ArgsList> for ValueLike {
     fn from(val: ArgsList) -> Self {
         val.0
     }
@@ -507,7 +507,7 @@ impl<T: Into<sql::Value>> From<Vec<T>> for ArgsList {
             })
             .unzip();
 
-        Self(Valuex {
+        Self(ValueLike {
             string: params.join(", "),
             bindings,
             errors: vec![],
@@ -542,9 +542,9 @@ impl From<&Field> for ArgsList {
     }
 }
 
-impl From<Vec<Valuex>> for ArgsList {
-    fn from(value: Vec<Valuex>) -> Self {
-        Self(Valuex {
+impl From<Vec<ValueLike>> for ArgsList {
+    fn from(value: Vec<ValueLike>) -> Self {
+        Self(ValueLike {
             string: value.build().to_string(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),

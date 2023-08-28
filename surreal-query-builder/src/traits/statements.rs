@@ -1,7 +1,7 @@
 use super::{Buildable, Parametric};
 use crate::{
     AllGetter, Field, Model, Projections, Queryable, ReturnType, SurrealOrmError, SurrealOrmResult,
-    Valuex,
+    ValueLike,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::{engine::local::Db, Surreal};
@@ -124,12 +124,12 @@ where
         let result = linked_fields_to_fetch
             .iter()
             .map(|n| {
-                let n: Valuex = n.into();
+                let n: ValueLike = n.into();
                 n.build()
             })
             .filter(|n| !T::get_linked_fields().iter().any(|m| m.build() == *n))
             // .map(|&n| {
-            //     let n: Valuex = n.into();
+            //     let n: ValueLike = n.into();
             //     n.build()
             // })
             .collect::<Vec<_>>();
@@ -144,12 +144,15 @@ where
 
     /// Sets the return type to projections and fetches all records links.
     /// Defaults values to null for referenced records that do not exist.
-    fn load_links(self, linked_fields_to_fetch: Vec<impl Into<Valuex>>) -> SurrealOrmResult<Self> {
+    fn load_links(
+        self,
+        linked_fields_to_fetch: Vec<impl Into<ValueLike>>,
+    ) -> SurrealOrmResult<Self> {
         let linked_fields_to_fetch = linked_fields_to_fetch
             .into_iter()
             .map(|field| {
-                let valuex: Valuex = field.into();
-                Field::new(valuex.build()).with_bindings(valuex.get_bindings())
+                let value_like: ValueLike = field.into();
+                Field::new(value_like.build()).with_bindings(value_like.get_bindings())
             })
             .collect::<Vec<_>>();
         Self::validate_fields_to_fetch(&linked_fields_to_fetch)?;
@@ -255,7 +258,7 @@ where
     async fn get_one(self, db: Surreal<Db>) -> SurrealOrmResult<T> {
         let response = self.run(db).await?;
         let returned_type = self.get_return_type();
-        let all = vec![Valuex::from(Field::new("*"))];
+        let all = vec![ValueLike::from(Field::new("*"))];
         let selected_fields = match returned_type {
             ReturnType::Projections(projections) => {
                 all.into_iter()

@@ -1,10 +1,10 @@
-use crate::{Buildable, Erroneous, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Parametric, ValueLike};
 
 /// A code block. Surrounds the code with brackets.
-pub struct Bracket(Valuex);
+pub struct Bracket(ValueLike);
 
 /// Wraps the code in brackets.
-pub fn bracket(code: impl Into<Valuex>) -> Bracket {
+pub fn bracket(code: impl Into<ValueLike>) -> Bracket {
     Bracket(code.into())
 }
 
@@ -14,15 +14,15 @@ impl Buildable for Bracket {
     }
 }
 
-impl From<Valuex> for Bracket {
-    fn from(code: Valuex) -> Self {
+impl From<ValueLike> for Bracket {
+    fn from(code: ValueLike) -> Self {
         Self(code)
     }
 }
 
-impl From<Bracket> for Valuex {
+impl From<Bracket> for ValueLike {
     fn from(bracket: Bracket) -> Self {
-        Valuex {
+        ValueLike {
             string: bracket.build(),
             bindings: bracket.get_bindings(),
             errors: bracket.get_errors(),

@@ -25,7 +25,9 @@
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
 
-use crate::{ArgsList, Buildable, Erroneous, Function, NumberLike, Parametric, StrandLike, Valuex};
+use crate::{
+    ArgsList, Buildable, Erroneous, Function, NumberLike, Parametric, StrandLike, ValueLike,
+};
 
 fn create_fn_with_single_string_arg(value: impl Into<StrandLike>, function_name: &str) -> Function {
     let value: StrandLike = value.into();
@@ -279,14 +281,14 @@ macro_rules! string_slug {
 pub use string_slug as slug;
 
 /// The string::concat function concatenates strings together.
-pub fn concat_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
+pub fn concat_fn<T: Into<ValueLike>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
     let mut errors = vec![];
 
     let values = values
         .into_iter()
         .map(|v| {
-            let v: Valuex = v.into();
+            let v: ValueLike = v.into();
             bindings.extend(v.get_bindings());
             errors.extend(v.get_errors());
             v.build()

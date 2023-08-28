@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, Valuex};
+use crate::{BindingsList, Buildable, Erroneous, ErrorList, Parametric, Queryable, ValueLike};
 
 use super::select::Fetchables;
 
@@ -29,8 +29,8 @@ use super::select::Fetchables;
 ///     "RETURN user:oyelowo FETCH account, connection;"
 /// );
 /// ```
-pub fn return_(return_value: impl Into<Valuex>) -> ReturnStatement {
-    let return_value: Valuex = return_value.into();
+pub fn return_(return_value: impl Into<ValueLike>) -> ReturnStatement {
+    let return_value: ValueLike = return_value.into();
     let return_string = return_value.build();
     let bindings = return_value.get_bindings();
     let errors = return_value.get_errors();

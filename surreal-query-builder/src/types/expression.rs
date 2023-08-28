@@ -5,12 +5,12 @@
  * Licensed under the MIT license
  */
 
-use crate::{statements::Subquery, Buildable, Erroneous, ErrorList, Parametric, Valuex};
+use crate::{statements::Subquery, Buildable, Erroneous, ErrorList, Parametric, ValueLike};
 
 /// An expression is a value or statement that can be used within another query.
 #[derive(Clone, Debug)]
 pub enum Expression {
-    Value(Valuex),
+    Value(ValueLike),
     Subquery(Subquery),
 }
 
@@ -43,7 +43,7 @@ impl Erroneous for Expression {
 
 impl<T> From<T> for Expression
 where
-    T: Into<Valuex>,
+    T: Into<ValueLike>,
 {
     fn from(value: T) -> Self {
         Expression::Value(value.into())

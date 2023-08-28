@@ -5,15 +5,15 @@
  * Licensed under the MIT license
  */
 
-use crate::{Alias, BindingsList, Buildable, Field, Function, Param, Parametric, Valuex};
+use crate::{Alias, BindingsList, Buildable, Field, Function, Param, Parametric, ValueLike};
 
 /// Used to represent a list of projections to access fields of a table or
 /// those of foreign tables and can even include filters.
 #[derive(Debug, Clone)]
-pub struct Projections(pub Vec<Valuex>);
+pub struct Projections(pub Vec<ValueLike>);
 
 impl std::ops::Deref for Projections {
-    type Target = Vec<Valuex>;
+    type Target = Vec<ValueLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -39,20 +39,20 @@ impl Buildable for Projections {
     }
 }
 
-impl From<Vec<Valuex>> for Projections {
-    fn from(value: Vec<Valuex>) -> Self {
+impl From<Vec<ValueLike>> for Projections {
+    fn from(value: Vec<ValueLike>) -> Self {
         Self(value)
     }
 }
 
-impl From<Vec<&Valuex>> for Projections {
-    fn from(value: Vec<&Valuex>) -> Self {
+impl From<Vec<&ValueLike>> for Projections {
+    fn from(value: Vec<&ValueLike>) -> Self {
         Self(value.into_iter().map(ToOwned::to_owned).collect::<Vec<_>>())
     }
 }
 
-impl From<&[Valuex]> for Projections {
-    fn from(value: &[Valuex]) -> Self {
+impl From<&[ValueLike]> for Projections {
+    fn from(value: &[ValueLike]) -> Self {
         Self(value.to_vec())
     }
 }

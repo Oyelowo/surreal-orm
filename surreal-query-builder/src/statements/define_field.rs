@@ -9,7 +9,7 @@ use std::fmt::{self, Display};
 
 use crate::{
     BindingsList, Buildable, Conditional, Erroneous, Field, FieldType, Filter, Parametric,
-    Queryable, Table, Valuex,
+    Queryable, Table, ValueLike,
 };
 
 use super::for_::Permissions;
@@ -108,8 +108,8 @@ impl DefineFieldStatement {
     }
 
     /// Set the default value for the field.
-    pub fn value(mut self, default_value: impl Into<Valuex>) -> Self {
-        let value: Valuex = default_value.into();
+    pub fn value(mut self, default_value: impl Into<ValueLike>) -> Self {
+        let value: ValueLike = default_value.into();
         self.value = Some(value.build());
         self.bindings.extend(value.get_bindings());
         self

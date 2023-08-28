@@ -19,14 +19,14 @@ use surrealdb::sql;
 /// A value that can be used in a SQL statement. Serves as the bind and arbiter between
 /// `sql::Value` and the query building world.
 #[derive(Debug, Clone)]
-pub struct Valuex {
+pub struct ValueLike {
     pub(crate) string: String,
     pub(crate) bindings: BindingsList,
     pub(crate) errors: ErrorList,
 }
 
-impl Valuex {
-    /// Create a new `Valuex` from other values.
+impl ValueLike {
+    /// Create a new `ValueLike` from other values.
     pub fn new(value: impl Buildable + Parametric + Erroneous) -> Self {
         Self {
             string: value.build(),
@@ -36,13 +36,13 @@ impl Valuex {
     }
 }
 
-impl Parametric for Valuex {
+impl Parametric for ValueLike {
     fn get_bindings(&self) -> BindingsList {
         self.bindings.to_vec()
     }
 }
 
-impl Parametric for Vec<Valuex> {
+impl Parametric for Vec<ValueLike> {
     fn get_bindings(&self) -> BindingsList {
         self.iter()
             .flat_map(|m| m.get_bindings())
@@ -50,25 +50,25 @@ impl Parametric for Vec<Valuex> {
     }
 }
 
-impl Erroneous for Valuex {
+impl Erroneous for ValueLike {
     fn get_errors(&self) -> ErrorList {
         self.errors.to_vec()
     }
 }
 
-impl Erroneous for Vec<Valuex> {
+impl Erroneous for Vec<ValueLike> {
     fn get_errors(&self) -> ErrorList {
         self.iter().flat_map(|m| m.get_errors()).collect::<Vec<_>>()
     }
 }
 
-impl Buildable for Valuex {
+impl Buildable for ValueLike {
     fn build(&self) -> String {
         self.string.to_string()
     }
 }
 
-impl Buildable for Vec<Valuex> {
+impl Buildable for Vec<ValueLike> {
     fn build(&self) -> String {
         self.iter()
             .map(|m| m.build())
@@ -77,7 +77,7 @@ impl Buildable for Vec<Valuex> {
     }
 }
 
-impl From<&Field> for Valuex {
+impl From<&Field> for ValueLike {
     fn from(value: &Field) -> Self {
         Self {
             string: value.build(),
@@ -87,7 +87,7 @@ impl From<&Field> for Valuex {
     }
 }
 
-impl From<Field> for Valuex {
+impl From<Field> for ValueLike {
     fn from(value: Field) -> Self {
         Self {
             string: value.build(),
@@ -97,7 +97,7 @@ impl From<Field> for Valuex {
     }
 }
 
-impl From<Param> for Valuex {
+impl From<Param> for ValueLike {
     fn from(value: Param) -> Self {
         Self {
             string: value.build(),
@@ -107,7 +107,7 @@ impl From<Param> for Valuex {
     }
 }
 
-impl From<&Param> for Valuex {
+impl From<&Param> for ValueLike {
     fn from(value: &Param) -> Self {
         Self {
             string: value.build(),
@@ -117,7 +117,7 @@ impl From<&Param> for Valuex {
     }
 }
 
-impl From<LetStatement> for Valuex {
+impl From<LetStatement> for ValueLike {
     fn from(value: LetStatement) -> Self {
         Self {
             string: value.get_param().build(),
@@ -127,7 +127,7 @@ impl From<LetStatement> for Valuex {
     }
 }
 
-impl From<&LetStatement> for Valuex {
+impl From<&LetStatement> for ValueLike {
     fn from(value: &LetStatement) -> Self {
         Self {
             string: value.get_param().build(),
@@ -137,9 +137,9 @@ impl From<&LetStatement> for Valuex {
     }
 }
 
-impl From<Alias> for Valuex {
+impl From<Alias> for ValueLike {
     fn from(value: Alias) -> Self {
-        Valuex {
+        ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -147,9 +147,9 @@ impl From<Alias> for Valuex {
     }
 }
 
-impl From<All> for Valuex {
+impl From<All> for ValueLike {
     fn from(_value: All) -> Self {
-        Valuex {
+        ValueLike {
             string: "*".to_string(),
             bindings: vec![],
             errors: vec![],
@@ -157,9 +157,9 @@ impl From<All> for Valuex {
     }
 }
 
-impl From<NULL> for Valuex {
+impl From<NULL> for ValueLike {
     fn from(_value: NULL) -> Self {
-        Valuex {
+        ValueLike {
             string: "NULL".to_string(),
             bindings: vec![],
             errors: vec![],
@@ -167,9 +167,9 @@ impl From<NULL> for Valuex {
     }
 }
 
-impl From<E> for Valuex {
+impl From<E> for ValueLike {
     fn from(_value: E) -> Self {
-        Valuex {
+        ValueLike {
             string: "".to_string(),
             bindings: vec![],
             errors: vec![],
@@ -177,9 +177,9 @@ impl From<E> for Valuex {
     }
 }
 
-impl From<NONE> for Valuex {
+impl From<NONE> for ValueLike {
     fn from(_value: NONE) -> Self {
-        Valuex {
+        ValueLike {
             string: "NONE".to_string(),
             bindings: vec![],
             errors: vec![],
@@ -187,9 +187,9 @@ impl From<NONE> for Valuex {
     }
 }
 
-impl From<Filter> for Valuex {
+impl From<Filter> for ValueLike {
     fn from(value: Filter) -> Self {
-        Valuex {
+        ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -197,9 +197,9 @@ impl From<Filter> for Valuex {
     }
 }
 
-impl From<Operation> for Valuex {
+impl From<Operation> for ValueLike {
     fn from(value: Operation) -> Self {
-        Valuex {
+        ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -207,9 +207,9 @@ impl From<Operation> for Valuex {
     }
 }
 
-impl From<Function> for Valuex {
+impl From<Function> for ValueLike {
     fn from(value: Function) -> Self {
-        Valuex {
+        ValueLike {
             string: value.build(),
             bindings: value.get_bindings(),
             errors: value.get_errors(),
@@ -217,12 +217,12 @@ impl From<Function> for Valuex {
     }
 }
 
-impl<T: Into<sql::Value>> From<T> for Valuex {
+impl<T: Into<sql::Value>> From<T> for ValueLike {
     fn from(value: T) -> Self {
         let value: sql::Value = value.into();
         let binding = Binding::new(value);
 
-        Valuex {
+        ValueLike {
             string: binding.get_param_dollarised(),
             bindings: vec![binding],
             errors: vec![],
@@ -230,84 +230,84 @@ impl<T: Into<sql::Value>> From<T> for Valuex {
     }
 }
 
-fn statement_to_valuex<T>(statement: T) -> Valuex
+fn statement_to_value_like<T>(statement: T) -> ValueLike
 where
     T: Into<Subquery>,
 {
     let subquery: Subquery = statement.into();
 
-    Valuex {
+    ValueLike {
         string: subquery.build(),
         bindings: subquery.get_bindings(),
         errors: subquery.get_errors(),
     }
 }
 
-impl From<SelectStatement> for Valuex {
+impl From<SelectStatement> for ValueLike {
     fn from(statement: SelectStatement) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl<T> From<CreateStatement<T>> for Valuex
+impl<T> From<CreateStatement<T>> for ValueLike
 where
     T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: CreateStatement<T>) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl<T> From<UpdateStatement<T>> for Valuex
+impl<T> From<UpdateStatement<T>> for ValueLike
 where
     T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: UpdateStatement<T>) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl<T> From<DeleteStatement<T>> for Valuex
+impl<T> From<DeleteStatement<T>> for ValueLike
 where
     T: Model + Serialize + DeserializeOwned,
 {
     fn from(statement: DeleteStatement<T>) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl<T> From<RelateStatement<T>> for Valuex
+impl<T> From<RelateStatement<T>> for ValueLike
 where
     T: Edge + Serialize + DeserializeOwned,
 {
     fn from(statement: RelateStatement<T>) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl<T> From<InsertStatement<T>> for Valuex
+impl<T> From<InsertStatement<T>> for ValueLike
 where
     T: Node + Serialize + DeserializeOwned,
 {
     fn from(statement: InsertStatement<T>) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
-impl From<IfElseStatement> for Valuex {
+impl From<IfElseStatement> for ValueLike {
     fn from(statement: IfElseStatement) -> Self {
-        statement_to_valuex(statement)
+        statement_to_value_like(statement)
     }
 }
 
 /// A macro to create a heterogenous list of anything
-/// that can be converted into `Valuex` including all
+/// that can be converted into `ValueLike` including all
 /// supported surrealdb types like numbers,
 /// dates, field, param, geometry etc, and statements.
-/// It creates Vec<Valuex>` from a list of values.
+/// It creates Vec<ValueLike>` from a list of values.
 ///
 /// # Arguments
-/// * `$( $val:expr ),*` - A list of values that can be converted into `Valuex`
+/// * `$( $val:expr ),*` - A list of values that can be converted into `ValueLike`
 /// # Example
 /// ```rust
 /// use surrealdb::sql;
@@ -340,17 +340,17 @@ impl From<IfElseStatement> for Valuex {
 macro_rules! arr {
     ($( $val:expr ),*) => {{
         vec![
-            $( $crate::Valuex::from($val) ),*
+            $( $crate::ValueLike::from($val) ),*
         ]
     }};
 }
 
-// impl<T: Into<Field>> From<T> for Valuex {
+// impl<T: Into<Field>> From<T> for ValueLike {
 //     fn from(value: T) -> Self {
 //         let value: Field = value.into();
 //         let binding = Binding::new(value);
 //
-//         Valuex {
+//         ValueLike {
 //             string: binding.get_param_dollarised(),
 //             bindings: vec![binding],
 //         }

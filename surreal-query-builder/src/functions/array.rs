@@ -33,7 +33,7 @@
 
 use std::fmt::Display;
 
-use crate::{ArrayLike, Buildable, Erroneous, Function, NumberLike, Parametric, Valuex};
+use crate::{ArrayLike, Buildable, Erroneous, Function, NumberLike, Parametric, ValueLike};
 
 /// The array::add function adds an item to an array only if it doesn't exist.
 /// array::add(array, value) -> array
@@ -41,9 +41,9 @@ use crate::{ArrayLike, Buildable, Erroneous, Function, NumberLike, Parametric, V
 ///
 /// SELECT * FROM array::add(["one", "two"], "three");
 /// ["one", "two", "three"]
-pub fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+pub fn add_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
     let mut bindings = vec![];
     let mut errors = vec![];
     bindings.extend(arr.get_bindings());
@@ -267,9 +267,9 @@ mod any_tests {
 ///
 /// SELECT * FROM array::append([1,2,3,4], 5);
 /// [1,2,3,4,5]
-pub fn append_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+pub fn append_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
     let mut bindings = vec![];
     let mut errors = vec![];
     bindings.extend(arr.get_bindings());
@@ -915,11 +915,11 @@ mod array_group_tests {
 /// [1,2,5,3,4]
 pub fn insert_fn(
     arr: impl Into<ArrayLike>,
-    value: impl Into<Valuex>,
+    value: impl Into<ValueLike>,
     index: impl Into<NumberLike>,
 ) -> Function {
     let arr: ArrayLike = arr.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
     let index: NumberLike = index.into();
 
     Function {
@@ -1183,9 +1183,9 @@ mod array_pop_tests {
 ///
 /// SELECT * FROM array::prepend([1,2,3,4], 5);
 /// [5,1,2,3,4]
-pub fn prepend_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+pub fn prepend_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
 
     Function {
         query_string: format!("array::prepend({}, {})", arr.build(), value.build()),
@@ -1283,9 +1283,9 @@ mod array_prepend_tests {
 /// SELECT * FROM array::push([1,2,3,4], 5);
 /// [1,2,3,4,5]
 /// The ordering of the array.
-pub fn push_fn(arr: impl Into<ArrayLike>, value: impl Into<Valuex>) -> Function {
+pub fn push_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
-    let value: Valuex = value.into();
+    let value: ValueLike = value.into();
 
     Function {
         query_string: format!("array::push({}, {})", arr.build(), value.build()),
@@ -1382,9 +1382,9 @@ mod array_push_tests {
 ///
 /// SELECT * FROM array::remove([1,2,3,4,5], 2);
 /// [1,2,4,5]
-pub fn remove_fn(arr: impl Into<ArrayLike>, number: impl Into<Valuex>) -> Function {
+pub fn remove_fn(arr: impl Into<ArrayLike>, number: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
-    let number: Valuex = number.into();
+    let number: ValueLike = number.into();
 
     Function {
         query_string: format!("array::remove({}, {})", arr.build(), number.build()),

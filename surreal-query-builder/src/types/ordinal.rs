@@ -6,7 +6,7 @@
  */
 
 use super::Field;
-use crate::{Binding, Buildable, Parametric, Valuex};
+use crate::{Binding, Buildable, Parametric, ValueLike};
 // use bigdecimal::BigDecimal;
 use surrealdb::sql;
 
@@ -23,7 +23,7 @@ pub enum Ordinal {
     Geometry(sql::Geometry),
 }
 
-impl From<Ordinal> for Valuex {
+impl From<Ordinal> for ValueLike {
     fn from(value: Ordinal) -> Self {
         let (string, bindings) = match value {
             Ordinal::Datetime(d) => {
@@ -43,7 +43,7 @@ impl From<Ordinal> for Valuex {
                 (param, vec![binding])
             }
         };
-        Valuex {
+        ValueLike {
             string,
             bindings,
             errors: vec![],

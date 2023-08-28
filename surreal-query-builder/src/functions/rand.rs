@@ -20,7 +20,7 @@
 // rand::uuid::v4() Generates and returns a random Version 4 UUID
 // rand::uuid::v7() Generates and returns a random Version 7 UUID
 
-use crate::{Buildable, Erroneous, Function, NumberLike, Parametric, Valuex};
+use crate::{Buildable, Erroneous, Function, NumberLike, Parametric, ValueLike};
 
 /// The rand function generates a random float, between 0 and 1.
 ///
@@ -130,13 +130,13 @@ macro_rules! rand_uuid {
 pub use rand_uuid as uuid;
 
 /// The rand::enum function generates a random value, from a multitude of values.
-pub fn enum_fn<T: Into<Valuex>>(values: Vec<T>) -> Function {
+pub fn enum_fn<T: Into<ValueLike>>(values: Vec<T>) -> Function {
     let mut bindings = vec![];
 
     let values = values
         .into_iter()
         .map(|v| {
-            let v: Valuex = v.into();
+            let v: ValueLike = v.into();
             bindings.extend(v.get_bindings());
             v.build()
         })

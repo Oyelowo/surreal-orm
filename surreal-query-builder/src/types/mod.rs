@@ -29,7 +29,7 @@ pub(crate) mod projection;
 pub(crate) mod return_type;
 pub(crate) mod surreal_id;
 pub(crate) mod token_target;
-pub(crate) mod valuex;
+pub(crate) mod value_like;
 
 pub use alias::*;
 pub use arithmetic::*;
@@ -55,4 +55,4 @@ pub use projection::*;
 pub use return_type::*;
 pub use surreal_id::*;
 pub use token_target::*;
-pub use valuex::*;
+pub use value_like::*;
