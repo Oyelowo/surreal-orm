@@ -144,6 +144,8 @@ impl ToTokens for EdgeToken {
             "{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
+        let module_name_rexported =
+            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
         let struct_with_renamed_serialized_fields =
             format_ident!("{struct_name_ident}RenamedCreator");
@@ -263,7 +265,13 @@ impl ToTokens for EdgeToken {
                 }
 
                 #[allow(non_snake_case)]
-                pub mod #module_name {
+                pub mod #module_name_rexported {
+                    pub type Schema = super::#module_name::#struct_name_ident;
+                }
+
+        
+                #[allow(non_snake_case)]
+                mod #module_name {
                     use #crate_name::Node;
                     use #crate_name::Parametric as _;
                     use #crate_name::Buildable as _;

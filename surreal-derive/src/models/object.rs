@@ -92,6 +92,8 @@ impl ToTokens for ObjectToken {
             "{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
+        let module_name_rexported =
+            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
         let test_function_name = format_ident!("test_{module_name}_edge_name");
         let non_null_updater_struct_name = format_ident!("{}NonNullUpdater", struct_name_ident);
 
@@ -136,9 +138,14 @@ impl ToTokens for ObjectToken {
                 ) *
             }
 
+            #[allow(non_snake_case)]
+            pub mod #module_name_rexported {
+                pub type Schema = super::#module_name::#struct_name_ident;
+            }
+        
 
             #[allow(non_snake_case)]
-            pub mod #module_name {
+            mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;

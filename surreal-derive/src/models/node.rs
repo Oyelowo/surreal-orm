@@ -118,6 +118,9 @@ impl ToTokens for NodeToken {
             "{}_schema",
             struct_name_ident.to_string().to_case(Case::Snake)
         );
+        let module_name_rexported =
+            format_ident!("{}", struct_name_ident.to_string().to_case(Case::Snake));
+
         let aliases_struct_name = format_ident!("{struct_name_ident}Aliases");
         let test_function_name = format_ident!("_________test_{module_name}_edge_name__________");
         let non_null_updater_struct_name = format_ident!("{struct_name_ident}NonNullUpdater");
@@ -131,7 +134,7 @@ impl ToTokens for NodeToken {
 
         let table_definitions = self.get_table_definition_token();
 
-        // #[derive(Model, TypedBuilder, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
+        // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]
         // #[surreal_orm(table_name = "student", drop, schemafull, permission, define="any_fnc")]
         // pub struct Student {
@@ -283,9 +286,13 @@ impl ToTokens for NodeToken {
                 }
             }
 
+            #[allow(non_snake_case)]
+            pub mod #module_name_rexported {
+                pub type Schema = super::#module_name::#struct_name_ident;
+            }
 
             #[allow(non_snake_case)]
-            pub mod #module_name {
+            mod #module_name {
                 use #crate_name::Parametric as _;
                 use #crate_name::Buildable as _;
                 use #crate_name::Erroneous as _;
