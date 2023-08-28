@@ -269,11 +269,11 @@ impl ToTokens for EdgeToken {
                     use super::#module_name::#_____field_names;
 
                     #[derive(Debug, Clone)]
-                    pub struct #struct_name_ident {
+                    pub struct Schema {
                        #( #schema_struct_fields_types_kv) *
-                        #___________graph_traversal_string: ::std::string::String,
-                        #___________bindings: #crate_name::BindingsList,
-                        #___________errors: ::std::vec::Vec<::std::string::String>,
+                        pub(super) #___________graph_traversal_string: ::std::string::String,
+                        pub(super) #___________bindings: #crate_name::BindingsList,
+                        pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
                     }
                 }
 
