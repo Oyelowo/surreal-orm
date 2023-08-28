@@ -253,7 +253,7 @@ impl ToTokens for ObjectToken {
                     pub fn #__________connect_object_to_graph_traversal_string(
                         // store: ::std::string::String,
                         connection: impl #crate_name::Buildable + #crate_name::Parametric + #crate_name::Erroneous,
-                        clause: impl Into<#crate_name::ObjectClause>,
+                        clause: impl ::std::convert::Into<#crate_name::ObjectClause>,
                         // use_table_name: bool,
                         // existing_bindings: #crate_name::BindingsList,
                         // existing_errors: ::std::vec::Vec<String>,
