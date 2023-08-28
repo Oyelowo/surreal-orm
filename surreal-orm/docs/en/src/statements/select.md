@@ -86,7 +86,7 @@ pub struct Book {
 ```rust
 use surreal_orm::{*, statements::{order, select}};
 
-let student_schema::Student {
+let student::Schema {
     id,
     first_name,
     last_name,
@@ -98,7 +98,7 @@ let student_schema::Student {
     ..
 } = &Student::schema();
 
-let book_schema::Book { ref content, .. } = Book::schema();
+let book::Schema { ref content, .. } = Book::schema();
 
 let mut statement = select(arr![age, last_name, content])
     .from(Book::table_name())
@@ -160,7 +160,7 @@ conditional query generation. Here is an example:
 ```rust
 use surreal_orm::{*, statements::{order, select}};
 
-let student_schema::Student {
+let student::Schema {
     id,
     firstName,
     lastName,
@@ -172,7 +172,7 @@ let student_schema::Student {
     ..
 } = &Student::schema();
 
-let book_schema::Book { ref content, .. } = Book::schema();
+let book::Schema { ref content, .. } = Book::schema();
 let ref student_table = Student::get_table_name();
 let ref book_table = Book::get_table_name();
 let ref book_id = thing("book:1").unwrap();

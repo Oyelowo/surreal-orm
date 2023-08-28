@@ -7,7 +7,7 @@
 
 use pretty_assertions::assert_eq;
 use surreal_models::{
-    alien, Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
+    Alien, AlienWithExplicitAttributes, StudentWithDefineAttr, StudentWithDefineFnAttr,
     StudentWithGranularAttributes,
 };
 use surreal_orm::*;

@@ -9,7 +9,7 @@ abstraction over raw database statements, simplifying CRUD operations.
 Before we dive into the helper methods, let's set up our environment:
 
 ```rust
-use surreal_models::{space_ship_schema, weapon_schema, SpaceShip, Weapon};
+use surreal_models::{space_ship, weapon, SpaceShip, Weapon};
 use surreal_orm::{
     statements::{insert, select, select_value},
     *,

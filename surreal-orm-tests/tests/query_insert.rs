@@ -12,8 +12,8 @@ use geo::polygon;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use surreal_models::weapon_schema;
-use surreal_models::{alien_schema, space_ship_schema, Alien, SpaceShip, Weapon};
+use surreal_models::weapon;
+use surreal_models::{alien, space_ship, Alien, SpaceShip, Weapon};
 use surreal_orm::statements::insert;
 use surreal_orm::statements::order;
 use surreal_orm::{statements::select, *};
@@ -434,7 +434,7 @@ async fn test_create_fetch_values_of_one_to_many_record_links() -> SurrealOrmRes
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
+    let alien::Schema { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = insert(unsaved_alien.clone())
         .load_links(vec![spaceShips])?
@@ -1036,7 +1036,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealOrmResult<
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien {
+    let alien::Schema {
         spaceShips,
         age,
         created,
@@ -1075,7 +1075,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealOrmResult<
     // no valid keys
     assert_eq!(alien_spaceships.keys_truthy().len(), 2);
 
-    let alien_schema::Alien { created, .. } = Alien::schema();
+    let alien::Schema { created, .. } = Alien::schema();
     let selected_aliens: Option<Alien> = select(All)
         .from(Alien::table_name())
         .fetch(Alien::schema().spaceShips)

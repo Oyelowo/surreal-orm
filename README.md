@@ -1,10 +1,5 @@
 [![surreal-orm](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml/badge.svg)](https://github.com/Oyelowo/surreal-orm/actions/workflows/rust.yaml)
-
 [![cleanup old images](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml/badge.svg)](https://github.com/Oyelowo/modern-distributed-app-template/actions/workflows/delete-old-images.yaml)
-
-# Quick Start
-
-# Surreal ORM Documentation
 
 ## Introduction
 
@@ -51,9 +46,9 @@ function with the `local::Mem` engine. The `local::Mem` engine represents a
 local in-memory database. You can replace it with other engine types according
 to your setup.
 
-## Defining a Model
+## Defining a Node
 
-A model in Surreal ORM represents a database table. You can define a model by
+A model in Surreal ORM represents a database table. You can define a node by
 creating a Rust struct and implementing the `Node` or `Edge` trait. Here's an
 example of defining a `SpaceShip` model:
 
@@ -83,7 +78,7 @@ chain various methods to build the query. Here's an example:
 ```rust
 use surreal_orm::statements::{select, All};
 
-let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
+let space_ship::Schema { name, age, .. } = SpaceShip::schema();
 
 let statement = select(All)
     .from(space_ship)
@@ -135,7 +130,6 @@ the updated data as a struct. Here's an example:
 use surreal_orm::statements::update;
 
 let spaceship = SpaceShip {
-    id: SpaceShip::create_simple_id(),
     name: "Millennium Falcon".to_string(),
     age: 60
 };
@@ -155,8 +149,7 @@ the condition for deletion. Here's an example:
 ```rust
 use surreal_orm::{*, statements::{delete}};
 
-let space_ship_schema::SpaceShip { name, age, .. } = SpaceShip::schema();
-let condition = name.eq("Millennium Falcon");
+let space_ship::Schema { name, age, .. } = SpaceShip::schema();
 
 delete(space_ship)
     .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
@@ -212,7 +205,7 @@ block! {
     // You can reference the balance object by using the $balance variable and pass the amount
     // as a parameter to the decrement_by function. i.e $balance.amount
     LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
-            
+
     // You can also pass the amount directly to the decrement_by function. i.e 300.00
     LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 

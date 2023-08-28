@@ -296,20 +296,8 @@ async fn test_delete_by_id() -> SurrealOrmResult<()> {
     Ok(())
 }
 
-struct Name;
-type Olo = Name;
-impl Olo {
-    fn name(&self) -> String {
-        "name".into()
-    }
-}
-// use self::Name as Olo;
-
 #[tokio::test]
 async fn test_delete_where() -> SurrealOrmResult<()> {
-    let x = Name;
-    let y: Olo = Name;
-    let z = y;
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 

@@ -7,7 +7,7 @@
 
 use pretty_assertions::assert_eq;
 use std::time::Duration;
-use surreal_models::{book_schema, student_schema, Book, Student, StudentWritesBook};
+use surreal_models::{book, student, Book, Student, StudentWritesBook};
 use surreal_orm::{
     cond,
     statements::{order, relate, select},
@@ -17,7 +17,7 @@ use surrealdb::sql::{thing, Thing};
 
 #[test]
 fn multiplication_tests1() {
-    let student_schema::Student {
+    let student::Schema {
         id,
         firstName,
         lastName,
@@ -28,7 +28,7 @@ fn multiplication_tests1() {
         ref age,
         ..
     } = &Student::schema();
-    let book_schema::Book { ref content, .. } = Book::schema();
+    let book::Schema { ref content, .. } = Book::schema();
 
     let mut query1 = select(arr![age, lastName, content])
         .from(Book::get_table_name())

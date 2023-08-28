@@ -7,7 +7,7 @@
 
 use chrono::Utc;
 use pretty_assertions::assert_eq;
-use surreal_models::{weapon_schema, SpaceShip, Weapon};
+use surreal_models::{weapon, SpaceShip, Weapon};
 use surreal_orm::{
     statements::{insert, order, select, select_value},
     *,

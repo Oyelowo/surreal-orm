@@ -142,7 +142,7 @@ impl ToTokens for ObjectToken {
             pub mod #module_name_rexported {
                 pub type Schema = super::#module_name::#struct_name_ident;
             }
-        
+
 
             #[allow(non_snake_case)]
             mod #module_name {

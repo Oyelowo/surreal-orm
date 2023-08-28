@@ -13,7 +13,7 @@ use geo::polygon;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use surreal_models::{alien_schema, space_ship_schema, Alien, SpaceShip, Weapon};
+use surreal_models::{alien, space_ship, Alien, SpaceShip, Weapon};
 use surreal_orm::statements::order;
 use surreal_orm::{
     statements::{create_v2, select},
@@ -779,7 +779,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         planets_to_visit: Relate::null(),
     };
 
-    let alien_schema::Alien { spaceShips, .. } = Alien::schema();
+    let alien::Schema { spaceShips, .. } = Alien::schema();
 
     let created_alien_with_fetched_links = create_v2(unsaved_alien.clone())
         .load_links(arr![spaceShips])?

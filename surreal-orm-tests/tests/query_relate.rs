@@ -11,8 +11,8 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{
-    company_schema, like_schema, user_schema, writes_schema, AlienVisitsPlanet, Blog, Book,
-    Company, CompanyLikeUser, Student, StudentLiksBook, StudentWritesBlog, StudentWritesBook, User,
+    company, like, user, writes, AlienVisitsPlanet, Blog, Book, Company, CompanyLikeUser, Student,
+    StudentLiksBook, StudentWritesBlog, StudentWritesBook, User,
 };
 use surreal_orm::statements::{create, insert, order, relate, select, select_value};
 use surreal_orm::*;
@@ -108,13 +108,13 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
     );
 
     // Student 2 writes blog1
-    let writes_schema::Writes { timeWritten, .. } = StudentWritesBlog::schema();
+    let writes::Schema { timeWritten, .. } = StudentWritesBlog::schema();
     // Using the set method
     relate(Student::with(&student_id2).writes__(Empty).blog(&blog_id))
         .set(timeWritten.equal_to(sql::Duration::from(Duration::from_secs(47))))
         .content(write_blog)
         .parallel();
-    let writes_schema::Writes { count, .. } = StudentWritesBlog::schema();
+    let writes::Schema { count, .. } = StudentWritesBlog::schema();
     let relation =
         relate::<StudentWritesBlog>(Student::with(&student_id2).writes__(Empty).blog(&blog_id))
             .set([
@@ -150,7 +150,7 @@ async fn should_not_contain_error_when_valid_id_use_in_connection() -> SurrealOr
         format!("{{ count: 545, id: {id}, timeWritten: {{ nanos: 0, secs: 47 }} }}")
     );
 
-    let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
+    let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let result: Vec<StudentWritesBook> = select(All)
         .from(StudentWritesBook::table_name())
@@ -227,9 +227,9 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
         .get_one(db.clone())
         .await?;
 
-    let user_schema::User { tags, id, .. } = User::schema();
-    let company_schema::Company { users, .. } = Company::schema();
-    let like_schema::Like { in_, .. } = CompanyLikeUser::schema();
+    let user::Schema { tags, id, .. } = User::schema();
+    let company::Schema { users, .. } = Company::schema();
+    let like::Schema { in_, .. } = CompanyLikeUser::schema();
 
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
@@ -312,7 +312,7 @@ fn test_recursive_edge_to_edge_connection_as_supported_in_surrealql() {
     let book_id = Book::create_id("2");
     let likes = StudentLiksBook::table_name();
     let writes = StudentWritesBook::table_name();
-    let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
+    let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let aliased_connection = Student::with(student_id)
         .writes__(Empty)
@@ -342,7 +342,7 @@ fn test_any_edge_filter() {
     let book_id = Book::create_id("mars");
     let likes = StudentLiksBook::table_name();
     let visits = AlienVisitsPlanet::table_name();
-    let writes_schema::Writes { timeWritten, .. } = StudentWritesBook::schema();
+    let writes::Schema { timeWritten, .. } = StudentWritesBook::schema();
 
     let aliased_connection = Student::with(student_id)
         .writes__(any_other_edges([visits, likes]).where_(timeWritten.less_than_or_equal(50)))

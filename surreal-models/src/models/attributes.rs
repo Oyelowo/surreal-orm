@@ -317,7 +317,7 @@ fn define_last_name_external_fn_attr() -> DefineFieldStatement {
         ])
 }
 fn define_student_with_define_attr() -> DefineTableStatement {
-    let student_schema::Student {
+    let student::Schema {
         ref age,
         ref firstName,
         ref lastName,
@@ -346,7 +346,7 @@ fn define_student_with_define_attr() -> DefineTableStatement {
 
 fn define_age(field: impl Into<Field>) -> DefineFieldStatement {
     use CrudType::*;
-    let student_schema::Student { age, firstName, .. } = Student::schema();
+    let student::Schema { age, firstName, .. } = Student::schema();
 
     use FieldType::*;
 

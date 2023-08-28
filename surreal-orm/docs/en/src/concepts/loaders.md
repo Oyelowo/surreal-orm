@@ -163,7 +163,7 @@ let user = User::find(1).load_links(vec!["posts"]).unwrap();
     assert!(unsaved_alien.weapon.value().is_none());
 
     // Check fields value fetching
-    let alien_schema::Alien { weapon, .. } = Alien::schema();
+    let alien::Schema { weapon, .. } = Alien::schema();
     let created_alien = create()
         .content(unsaved_alien.clone())
         .load_links(vec![weapon])?

@@ -10,7 +10,7 @@ use geo::{line_string, point, polygon};
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use surreal_models::{
-    alien_schema, weapon_old_schema, weapon_schema, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
+    alien, weapon, weapon_old, Alien, RocketNonNullUpdater, SpaceShip, Weapon,
     WeaponNonNullUpdater, WeaponOld,
 };
 use surreal_orm::{
@@ -227,7 +227,7 @@ async fn test_increment_and_decrement_update_conditionally() -> SurrealOrmResult
     assert_eq!(created_aliens[0].weapon.value().unwrap().strength, 5);
     assert_eq!(created_aliens[1].weapon.value().unwrap().strength, 20);
 
-    let alien_schema::Alien {
+    let alien::Schema {
         ref age,
         ref name,
         ref tags,
@@ -326,7 +326,7 @@ async fn test_add_and_remove_to_array() -> SurrealOrmResult<()> {
 
     // Try append
     let alien_id = &created_alien.clone().id;
-    let alien_schema::Alien {
+    let alien::Schema {
         ref tags,
         ref weapon,
         ref spaceShips,
@@ -1017,7 +1017,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
     );
 
     // Remove some fields from WeaponOld struct.
-    let weapon_old_schema::WeaponOld {
+    let weapon_old::Schema {
         ref bunchOfOtherFields,
         ref nice,
         ..
@@ -1127,7 +1127,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
         vec!["created", "id", "name", "rocket", "strength"]
     );
 
-    let weapon_old_schema::WeaponOld {
+    let weapon_old::Schema {
         ref bunchOfOtherFields,
         ref nice,
         ..

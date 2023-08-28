@@ -7,7 +7,7 @@
 
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
-use surreal_models::{weapon_schema, SpaceShip, Weapon};
+use surreal_models::{weapon, SpaceShip, Weapon};
 use surreal_orm::{
     block, chain,
     statements::{if_, insert, let_, order, select, update, LetStatement},

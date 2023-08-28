@@ -19,7 +19,7 @@ and generate some test data.
 
 ```rust
 # use pretty_assertions::assert_eq;
-# use surreal_models::{weapon_schema, Weapon};
+# use surreal_models::{weapon, Weapon};
 # use surreal_orm::{
 #     statements::{delete, insert},
 #     *,

@@ -269,7 +269,7 @@ impl ToTokens for EdgeToken {
                     pub type Schema = super::#module_name::#struct_name_ident;
                 }
 
-        
+
                 #[allow(non_snake_case)]
                 mod #module_name {
                     use #crate_name::Node;

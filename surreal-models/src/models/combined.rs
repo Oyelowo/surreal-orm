@@ -91,7 +91,7 @@ fn erer() -> Filter {
 fn define_age() -> DefineFieldStatement {
     use surreal_orm::{Model, Node};
     use CrudType::*;
-    let student_schema::Student { age, firstName, .. } = Student::schema();
+    let student::Schema { age, firstName, .. } = Student::schema();
 
     use FieldType::*;
 
