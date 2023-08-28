@@ -54,7 +54,8 @@ macro_rules! object_partial {
     ($struct_name:ident { $($key:ident: $value:expr),* $(,)? }) => {
         {
             $crate::check_unique_idents!($($key), *);
-            type __StructNameRenamedFields = <$struct_name as $crate::Model>::NonNullUpdater;
+            // type __StructNameRenamedFields = <$struct_name as $crate::Model>::NonNullUpdater;
+            type __StructNameRenamedFields = <$struct_name as $crate::Model>::StructRenamedCreator;
             $crate::validators::assert_fields!(__StructNameRenamedFields : $( $key ),*);
 
             let schema = &$struct_name::schema();

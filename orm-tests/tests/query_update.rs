@@ -469,7 +469,7 @@ async fn test_update_single_id_content() -> SurrealOrmResult<()> {
         ..Default::default()
     };
     let weapon_to_update = Weapon {
-        id: Weapon::create_simple_id(),
+        id: weapon.id.clone(),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 1000,
@@ -483,10 +483,12 @@ async fn test_update_single_id_content() -> SurrealOrmResult<()> {
     assert_eq!(created_weapon.strength, 20);
     assert_eq!(created_weapon.id.to_string(), weapon.id.to_string());
 
+    let weapon::Schema { id, .. } = Weapon::schema();
+
     let get_selected_weapon = || async {
         let selected_weapon: Option<Weapon> = select(All)
             .from(Weapon::table_name())
-            .where_(Weapon::schema().id.equal(created_weapon.id.to_owned()))
+            .where_(id.equal(created_weapon.id.to_owned()))
             .return_one(db.clone())
             .await
             .unwrap();
@@ -676,6 +678,7 @@ async fn test_update_single_id_merge_no_fields_skip() -> SurrealOrmResult<()> {
         ..Default::default()
     };
     let weapon_to_update = Weapon {
+        id: weapon.id.clone(),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 1000,
@@ -778,68 +781,21 @@ async fn test_update_single_id_merge_skips_fields() -> SurrealOrmResult<()> {
 async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
-    let weapon_old = WeaponOld {
-        name: "Laser".to_string(),
-        created: Utc::now(),
-        strength: 20,
-        bunch_of_other_fields: 34,
-        nice: false,
-        ..Default::default()
-    };
-    // Create old weapon
-    let old_weapon = create()
-        .content(weapon_old.clone())
-        .get_one(db.clone())
-        .await?;
-    assert_eq!(old_weapon.name, "Laser");
-    assert_eq!(old_weapon.strength, 20);
-    assert_eq!(old_weapon.id.to_thing().tb, "weapon");
-    assert_eq!(old_weapon.id.to_thing(), weapon_old.id.to_thing());
-    assert_eq!(
-        serde_json::to_value(&old_weapon)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .keys()
-            .collect::<Vec<&String>>(),
-        vec![
-            "bunchOfOtherFields",
-            "created",
-            "id",
-            "name",
-            "nice",
-            "rocket",
-            "strength",
-        ]
-    );
 
-    let selected_weapon: Option<WeaponOld> = select(All)
-        .from(WeaponOld::table_name())
-        .where_(WeaponOld::schema().id.equal(old_weapon.id.to_owned()))
-        .return_one(db.clone())
-        .await
-        .unwrap();
-    assert_eq!(selected_weapon.as_ref().unwrap().name, "Laser");
-    assert_eq!(
-        serde_json::to_value(selected_weapon.as_ref().unwrap())
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .keys()
-            .collect::<Vec<&String>>(),
-        vec![
-            "bunchOfOtherFields",
-            "created",
-            "id",
-            "name",
-            "nice",
-            "rocket",
-            "strength"
-        ]
-    );
+    // Create old weapon
+    let weapon_id = Weapon::create_simple_id();
+    create::<Weapon>()
+        .set(object_partial!(Weapon {
+            id: weapon_id.clone(),
+            name: "Laser".to_string()
+        }))
+        .run(db.clone())
+        .await?;
+    assert_eq!(Weapon::count_all().get(db.clone()).await.unwrap(), 1);
 
     // Will replace the whole weapon.
     let weapon_to_update_with_new_fields = Weapon {
+        id: weapon_id.clone(),
         name: "Oyelowo".to_string(),
         created: Utc::now(),
         strength: 823,
@@ -848,14 +804,14 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
 
     // Fully replace weapon table with completely new object and data. This will remove all fields
     // that are not present in the new object. This is a destructive operation.
-    let updated_weapon = &(update::<Weapon>(old_weapon.clone().id)
+    let updated_weapon = &(update::<Weapon>(weapon_id.clone())
         .replace(weapon_to_update_with_new_fields)
         .get_one(db.clone())
         .await?);
 
     let selected_weapon: Option<Weapon> = select(All)
         .from(Weapon::table_name())
-        .where_(Weapon::schema().id.equal(old_weapon.id.to_owned()))
+        .where_(Weapon::schema().id.equal(weapon_id.clone()))
         .return_one(db.clone())
         .await
         .unwrap();
@@ -864,7 +820,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
     // Only name should be updated
     assert_eq!(updated_weapon.strength, 823);
     assert_eq!(updated_weapon.name, "Oyelowo");
-    assert_eq!(updated_weapon.id.to_string(), old_weapon.id.to_string());
+    assert_eq!(updated_weapon.id.to_string(), weapon_id.clone().to_string());
 
     assert_eq!(selected_weapon.as_ref().unwrap().name, "Oyelowo");
     assert_eq!(
@@ -874,7 +830,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -883,7 +839,7 @@ async fn test_update_single_id_replace() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     Ok(())
@@ -981,13 +937,13 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "bunchOfOtherFields",
-            "created",
             "id",
             "name",
+            "strength",
             "nice",
+            "bunchOfOtherFields",
+            "created",
             "rocket",
-            "strength"
         ]
     );
 
@@ -1006,13 +962,13 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "bunchOfOtherFields",
-            "created",
             "id",
             "name",
+            "strength",
             "nice",
+            "bunchOfOtherFields",
+            "created",
             "rocket",
-            "strength"
         ]
     );
 
@@ -1065,7 +1021,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_eq!(
         serde_json::to_value(&selected_weapon)
@@ -1074,7 +1030,7 @@ async fn test_update_single_id_patch_remove() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
     //
@@ -1107,7 +1063,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
 
     let selected_weapon: Option<Weapon> = select(All)
@@ -1124,7 +1080,7 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .unwrap()
             .keys()
             .collect::<Vec<&String>>(),
-        vec!["created", "id", "name", "rocket", "strength"]
+        vec!["id", "name", "strength", "created", "rocket"]
     );
 
     let weapon_old::Schema {
@@ -1180,13 +1136,13 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "bunchOfOtherFields",
-            "created",
             "id",
             "name",
-            "nice",
-            "rocket",
             "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created",
+            "rocket",
         ]
     );
     assert_eq!(
@@ -1197,13 +1153,13 @@ async fn test_update_single_id_patch_add() -> SurrealOrmResult<()> {
             .keys()
             .collect::<Vec<&String>>(),
         vec![
-            "bunchOfOtherFields",
-            "created",
             "id",
             "name",
-            "nice",
-            "rocket",
             "strength",
+            "nice",
+            "bunchOfOtherFields",
+            "created",
+            "rocket",
         ]
     );
     assert_ne!(selected_weapon.unwrap().id.to_string(), "weapon:lowo");
