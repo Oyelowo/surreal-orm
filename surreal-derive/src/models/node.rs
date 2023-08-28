@@ -158,14 +158,14 @@ impl ToTokens for NodeToken {
             use #crate_name::Aliasable as _;
 
             impl #crate_name::SchemaGetter for #struct_name_ident {
-                type Schema = #module_name::#struct_name_ident;
+                type Schema = #module_name_rexported::Schema;
 
-                fn schema() -> Self::Schema {
-                    #module_name::#struct_name_ident::new()
+                fn schema() -> #module_name_rexported::Schema {
+                    Self::Schema::new()
                 }
 
                 fn schema_prefixed(prefix: impl ::std::convert::Into<#crate_name::Valuex>) -> Self::Schema {
-                    #module_name::#struct_name_ident::new_prefixed(prefix)
+                    Self::Schema::new_prefixed(prefix)
                 }
             }
 
@@ -175,7 +175,7 @@ impl ToTokens for NodeToken {
                 type Aliases = #module_name::#aliases_struct_name;
                 type NonNullUpdater = #non_null_updater_struct_name;
 
-                fn with(clause: impl Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
+                fn with(clause: impl ::std::convert::Into<#crate_name::NodeClause>) -> <Self as #crate_name::SchemaGetter>::Schema {
                     let clause: #crate_name::NodeClause = clause.into();
 
                     #module_name::#struct_name_ident::#__________connect_node_to_graph_traversal_string(
@@ -288,16 +288,7 @@ impl ToTokens for NodeToken {
 
             #[allow(non_snake_case)]
             pub mod #module_name_rexported {
-                use super::#module_name::#_____field_names;
-
-                #[allow(non_snake_case)]
-                #[derive(Debug, Clone)]
-                pub struct Schema {
-                   #( #schema_struct_fields_types_kv) *
-                    pub(super) #___________graph_traversal_string: ::std::string::String,
-                    pub(super) #___________bindings: #crate_name::BindingsList,
-                    pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
-                }
+                pub use super::#module_name::_____schema_def::Schema;
             }
 
             #[allow(non_snake_case)]
@@ -320,8 +311,20 @@ impl ToTokens for NodeToken {
 
                     #( #field_wrapper_type_custom_implementations) *
                 }
-
-                pub type #struct_name_ident = super::#module_name_rexported::Schema;
+        
+                pub mod _____schema_def {
+                    use super::#_____field_names;
+        
+                    #[allow(non_snake_case)]
+                    #[derive(Debug, Clone)]
+                    pub struct Schema {
+                       #( #schema_struct_fields_types_kv) *
+                        pub(super) #___________graph_traversal_string: ::std::string::String,
+                        pub(super) #___________bindings: #crate_name::BindingsList,
+                        pub(super) #___________errors: ::std::vec::Vec<::std::string::String>,
+                    }
+                }
+                pub type #struct_name_ident = _____schema_def::Schema;
 
 
                 #[derive(Debug, Clone)]
