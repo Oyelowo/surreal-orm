@@ -2,12 +2,12 @@
 workspace.resolver = "2"
 
 members = [
-  "surreal-orm",
-  "surreal-query-builder",
-  "surreal-derive",
-  "surreal-models",
-  "surreal-orm-tests",
-  "surreal-compile-tests",
+  "orm",
+  "query-builder",
+  "derive",
+  "models",
+  "orm-tests",
+  "orm-compile-tests",
 ]
 
 [workspace.package]
@@ -19,14 +19,12 @@ documentation = "https://codebreather.com/oyelowo"
 
 
 [workspace.dependencies]
-surreal-derive = { path = "./surreal-derive" }
-surreal-orm = { path = "./surreal-orm" }
-surreal-query-builder = { path = "./surreal-query-builder" }
-surreal-models = { path = "./surreal-models" }
-surreal-orm-tests = { path = "./surreal-orm-tests" }
-surreal-compile-tests = { path = "./surreal-compile-tests" }
+surreal-derive = { path = "derive" }
+surreal-orm = { path = "orm" }
+surreal-query-builder = { path = "query-builder" }
+surreal-models = { path = "models" }
 
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "a12348db8e099f25ec6f32ec3127b405825f1289", features = [
+surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
   "protocol-ws",
   "protocol-http",
   "kv-mem",
