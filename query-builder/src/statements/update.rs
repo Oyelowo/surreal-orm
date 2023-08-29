@@ -332,6 +332,33 @@ where
     /// To increment a numeric value, or to add an item to an array,
     /// use the `append` or incremenet (i.e +=) operator. To decrement a numeric value,
     /// or to remove an value from an array, use the `decrement` or `remove` (i.e -=) operator.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, ignore
+    /// // Set fields using a helper macro function:
+    /// .set(object_partial!(Weapon {
+    ///     id: weapon_id.clone(),
+    ///     name: "Laser".to_string()
+    /// }))
+    ///
+    /// // Set multiple fields as an array or vector:
+    /// .set([name.equal_to("Laser"), damage.increment_by(100)]);
+    ///
+    /// // set a single field number. Generates  =
+    /// .set(score.equal_to(5))
+    ///
+    /// // increment a field number. Generates  +=
+    /// .set(score.increment_by(5))
+    ///
+    /// // decrement a field number. Generates  -=
+    /// .set(score.decrement_by(5))
+    ///
+    /// // add to an array. Generates  +=
+    /// .set(friends_names.append("Oyelowo"))
+    ///
+    /// // remove value from an array. Generates  -=
+    /// .set(friends_names.remove("Oyedayo"))
     pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> UpdateStatement<T> {
         let settable: Vec<Setter> = settables.into();
 

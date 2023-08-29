@@ -130,6 +130,17 @@ where
     ///
     /// # Examples
     ///
+    /// Setting multiple fields by using the `object!` macro. Forces you to set all fields
+    /// and makes sure they are all typed correctly. This is the recommended approach.
+    /// ```rust, ignore
+    /// assert_eq!(create::<User>()
+    ///             .set(object!(User {
+    ///                 name: "Oyelowo",
+    ///                 age: 192
+    ///             })
+    ///         ).to_raw().build(), "Create user SET name='Oyelowo', age=192")
+    /// ```
+    ///
     /// Setting single field
     /// ```rust, ignore
     /// assert_eq!(create::<User>().set(name.equal("Oyelowo")).to_raw().build(), "CREATE user SET name='Oyelowo'")
@@ -138,8 +149,10 @@ where
     /// Setting multiple fields by chaining `set` method
     /// ```rust, ignore
     /// assert_eq!(create::<User>()
-    ///             .set(name.equal_to("Oyelowo"))
-    ///             .set(age.equal_to(192))
+    ///             .set([
+    ///                 name.equal_to("Oyelowo"),
+    ///                 age.equal_to(192)
+    ///             ])
     ///         ).to_raw().build(), "Create user SET name='Oyelowo', age=192")
     /// ```
     ///
