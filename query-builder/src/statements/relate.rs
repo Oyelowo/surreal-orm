@@ -17,10 +17,10 @@
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
 
 use crate::{
-    traits::{Binding, BindingsList, Buildable, Edge, Erroneous, ErrorList, Parametric, Queryable},
+    derive_binding_and_errors_from_value,
+    traits::{BindingsList, Buildable, Edge, Erroneous, ErrorList, Parametric, Queryable},
     types::{DurationLike, ReturnType},
     ReturnableDefault, ReturnableStandard, Setter, ToRaw,
 };
@@ -92,10 +92,10 @@ where
 {
     /// Set a serailizable surrealdb edge model. It must implement the Edge trait.
     pub fn content(mut self, content: T) -> Self {
-        let sql_value = sql::to_value(&content).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&content);
         self.content_param = Some(binding.get_param_dollarised().to_owned());
         self.bindings.push(binding);
+        self.errors.extend(errors);
         self
     }
 

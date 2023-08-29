@@ -8,12 +8,12 @@
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
 
 use crate::{
+    derive_binding_and_errors_from_value,
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Node, Parametric, Queryable,
-        ReturnableDefault, ReturnableStandard,
+        BindingsList, Buildable, Erroneous, Node, Parametric, Queryable, ReturnableDefault,
+        ReturnableStandard,
     },
     types::{DurationLike, ReturnType},
     ErrorList, Setter, ToRaw,
@@ -113,10 +113,10 @@ where
     ///     });
     /// ```
     pub fn content(mut self, content: T) -> CreateStatement<T> {
-        let sql_value = sql::to_value(&content).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&content);
         self.content = binding.get_param_dollarised();
         self.bindings.push(binding);
+        self.errors.extend(errors);
 
         CreateStatement(self)
     }
