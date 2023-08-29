@@ -2,8 +2,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{Node, Object, SurrealId, SurrealSimpleId};
 
-use serde_aux::prelude::deserialize_number_from_string;
-
 // Weapon
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -50,8 +48,6 @@ pub struct Rocket {
 #[surreal_orm(table_name = "weapon_stats")]
 pub struct WeaponStats {
     pub id: SurrealSimpleId<Self>,
-
-    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub average_strength: f64,
 }
 
@@ -60,7 +56,6 @@ pub struct WeaponStats {
 #[surreal_orm(table_name = "account")]
 pub struct Account {
     pub id: SurrealId<Self, String>,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub balance: f64,
 }
 
@@ -69,6 +64,5 @@ pub struct Account {
 #[surreal_orm(table_name = "balance")]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub amount: f64,
 }

@@ -16,7 +16,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 geo = { workspace = true }
 chrono = { workspace = true }
-serde-aux = { workspace = true }
 typed-builder = { workspace = true }
 
 [lib]

@@ -79,6 +79,7 @@ chain various methods to build the query. Here's an example:
 use surreal_orm::statements::{select, All};
 
 let space_ship::Schema { name, age, .. } = SpaceShip::schema();
+let space_ship = SpaceShip::table_name();
 
 let statement = select(All)
     .from(space_ship)
@@ -108,9 +109,9 @@ let spaceships = vec![
         age: 79,
     },
     SpaceShip {
-        id: SpaceShip::create_simple_id(),
         name: "Starship Enterprise".to_string(),
         age: 15,
+        ..Default::default()
     },
 ];
 
@@ -129,16 +130,22 @@ the updated data as a struct. Here's an example:
 ```rust
 use surreal_orm::statements::update;
 
-let spaceship = SpaceShip {
-    name: "Millennium Falcon".to_string(),
-    age: 60
-};
+let space_ship = SpaceShip::table_name();
 
-update(spaceship).run(db.clone()).await?;
+update::<SpaceShip>(space_ship)
+    .content(SpaceShip {
+        name: "Oyelowo".to_string(),
+        age: 90,
+        ..Default::default()
+    })
+    .where_(cond(strength.greater_than(5)).and(strength.less_than_or_equal(15)))
+    .return_many(db.clone())
+    .await?;
 ```
 
 In this example, we define a `SpaceShip` struct with the updated data and pass
-it to the `update` function. We then call the `run` method to execute the update
+it to the `update` function to update records within the table based on the
+condition. We then call the `return_many` method to execute the update
 operation.
 
 ## Deleting Data
@@ -150,6 +157,7 @@ the condition for deletion. Here's an example:
 use surreal_orm::{*, statements::{delete}};
 
 let space_ship::Schema { name, age, .. } = SpaceShip::schema();
+let space_ship = SpaceShip::table_name();
 
 delete(space_ship)
     .where_(cond(name.equal("Millennium Falcon")).and(age.less_then(50)))
@@ -173,11 +181,27 @@ use surreal_orm::{
     statements::{begin_transaction, create, update},
     *,
 };
-use surreal_models::Account;
 use surrealdb::{engine::local::Mem, Surreal};
 
 let db = Surreal::new::<Mem>(()).await.unwrap();
 db.use_ns("test").use_db("test").await.unwrap();
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "account")]
+pub struct Account {
+    pub id: SurrealId<Self, String>,
+    pub balance: f64,
+}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "balance")]
+pub struct Balance {
+    pub id: SurrealId<Self, String>,
+    pub amount: f64,
+}
+
 
 let id1 = &Account::create_id("one".into());
 let id2 = &Account::create_id("two".into());
@@ -231,7 +255,7 @@ This concludes the basic usage and features of the Surreal ORM library. You can
 explore more advanced features and methods in the API documentation. If you have
 any further questions or need assistance, feel free to reach out.
 
-## Convention
+## Development: Convention
 
 To carry out certain tasks in any directory, these are the standard commands:
 

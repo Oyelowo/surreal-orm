@@ -23,9 +23,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql;
 
 use crate::{
-    Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous, ErrorList, Filter,
-    Model, Parametric, PatchOp, Queryable, ReturnType, ReturnableDefault, ReturnableStandard,
-    Setter, SurrealId, SurrealSimpleId, SurrealUlid, SurrealUuid, ToRaw,
+    derive_binding_and_errors_from_value, Binding, BindingsList, Buildable, Conditional,
+    DurationLike, Erroneous, ErrorList, Filter, Model, Parametric, PatchOp, Queryable, ReturnType,
+    ReturnableDefault, ReturnableStandard, Setter, SurrealId, SurrealSimpleId, SurrealUlid,
+    SurrealUuid, ToRaw,
 };
 
 /// Creates a new UPDATE statement.
@@ -298,25 +299,19 @@ where
     /// Specify the full record data using the CONTENT keyword. The content must be serializable
     /// and implement Model trait.
     pub fn content(mut self, content: T) -> UpdateStatement<T> {
-        // let sql_value = sql::json(
-        //     &sql::to_value(&content)
-        //         .expect("Problem converting to value")
-        //         .to_string(),
-        // )
-        // .expect("Problem converting to JSON");
-        let sql_value = sql::to_value(&content).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&content);
         self.content = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
+        self.errors.extend(errors);
         self.into()
     }
 
     /// merge-update only specific fields by using the MERGE keyword and specifying only the fields which are to be updated.
     pub fn merge(mut self, merge: impl Serialize) -> UpdateStatement<T> {
-        let sql_value = sql::to_value(&merge).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&merge);
         self.merge = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
+        self.errors.extend(errors);
         self.into()
     }
 
@@ -324,10 +319,10 @@ where
     /// Fully replaces weapon table with completely new object and data. This will remove all fields
     /// that are not present in the new object. This is a destructive operation.
     pub fn replace(mut self, replacement: impl Serialize) -> UpdateStatement<T> {
-        let sql_value = sql::to_value(&replacement).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&replacement);
         self.replace = Some(binding.get_param_dollarised());
         self.bindings.push(binding);
+        self.errors.extend(errors);
         self.into()
     }
 
@@ -337,6 +332,33 @@ where
     /// To increment a numeric value, or to add an item to an array,
     /// use the `append` or incremenet (i.e +=) operator. To decrement a numeric value,
     /// or to remove an value from an array, use the `decrement` or `remove` (i.e -=) operator.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, ignore
+    /// // Set fields using a helper macro function:
+    /// .set(object_partial!(Weapon {
+    ///     id: weapon_id.clone(),
+    ///     name: "Laser".to_string()
+    /// }))
+    ///
+    /// // Set multiple fields as an array or vector:
+    /// .set([name.equal_to("Laser"), damage.increment_by(100)]);
+    ///
+    /// // set a single field number. Generates  =
+    /// .set(score.equal_to(5))
+    ///
+    /// // increment a field number. Generates  +=
+    /// .set(score.increment_by(5))
+    ///
+    /// // decrement a field number. Generates  -=
+    /// .set(score.decrement_by(5))
+    ///
+    /// // add to an array. Generates  +=
+    /// .set(friends_names.append("Oyelowo"))
+    ///
+    /// // remove value from an array. Generates  -=
+    /// .set(friends_names.remove("Oyedayo"))
     pub fn set(mut self, settables: impl Into<Vec<Setter>>) -> UpdateStatement<T> {
         let settable: Vec<Setter> = settables.into();
 

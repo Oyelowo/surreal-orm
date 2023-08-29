@@ -8,12 +8,12 @@
 use std::marker::PhantomData;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::sql;
 
 use crate::{
+    derive_binding_and_errors_from_value,
     traits::{
-        Binding, BindingsList, Buildable, Erroneous, Node, Parametric, Queryable,
-        ReturnableDefault, ReturnableStandard,
+        BindingsList, Buildable, Erroneous, Node, Parametric, Queryable, ReturnableDefault,
+        ReturnableStandard,
     },
     types::{DurationLike, ReturnType},
     ErrorList, Setter, ToRaw,
@@ -113,10 +113,10 @@ where
     ///     });
     /// ```
     pub fn content(mut self, content: T) -> CreateStatement<T> {
-        let sql_value = sql::to_value(&content).unwrap();
-        let binding = Binding::new(sql_value);
+        let (binding, errors) = derive_binding_and_errors_from_value(&content);
         self.content = binding.get_param_dollarised();
         self.bindings.push(binding);
+        self.errors.extend(errors);
 
         CreateStatement(self)
     }
@@ -130,6 +130,17 @@ where
     ///
     /// # Examples
     ///
+    /// Setting multiple fields by using the `object!` macro. Forces you to set all fields
+    /// and makes sure they are all typed correctly. This is the recommended approach.
+    /// ```rust, ignore
+    /// assert_eq!(create::<User>()
+    ///             .set(object!(User {
+    ///                 name: "Oyelowo",
+    ///                 age: 192
+    ///             })
+    ///         ).to_raw().build(), "Create user SET name='Oyelowo', age=192")
+    /// ```
+    ///
     /// Setting single field
     /// ```rust, ignore
     /// assert_eq!(create::<User>().set(name.equal("Oyelowo")).to_raw().build(), "CREATE user SET name='Oyelowo'")
@@ -138,8 +149,10 @@ where
     /// Setting multiple fields by chaining `set` method
     /// ```rust, ignore
     /// assert_eq!(create::<User>()
-    ///             .set(name.equal_to("Oyelowo"))
-    ///             .set(age.equal_to(192))
+    ///             .set([
+    ///                 name.equal_to("Oyelowo"),
+    ///                 age.equal_to(192)
+    ///             ])
     ///         ).to_raw().build(), "Create user SET name='Oyelowo', age=192")
     /// ```
     ///

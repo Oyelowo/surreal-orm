@@ -169,17 +169,33 @@ where
 }
 
 fn patch_path<T: Serialize>(field: &Field, operation_type: OpType, value: impl Into<T>) -> PatchOp {
-    let sql_value = sql::json(&serde_json::to_string(&value.into()).unwrap()).unwrap();
-    let binding = Binding::new(sql_value);
-    // let field = field.deref();
+    let (binding, errors) = derive_binding_and_errors_from_value(&value.into());
     let patch = patch(field);
 
     PatchOp(PatchOpInit {
         op: operation_type,
         value: Some(binding.get_param_dollarised()),
         bindings: patch.bindings.into_iter().chain(vec![binding]).collect(),
+        errors,
         ..patch
     })
+}
+
+pub(crate) fn derive_binding_and_errors_from_value<T: Serialize>(
+    value: &T,
+) -> (Binding, Vec<String>) {
+    let sql_value = sql::to_value(value);
+
+    let (value, errors) = match sql_value {
+        Ok(sql_value) => (sql_value, vec![]),
+        Err(e) => (
+            sql::Value::Null,
+            vec![format!("Error: Unable to serialise value. \n{}", e)],
+        ),
+    };
+
+    let binding = Binding::new(value);
+    (binding, errors)
 }
 
 // Patch helper

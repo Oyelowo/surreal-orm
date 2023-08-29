@@ -38,22 +38,3 @@ pub struct TestRawId {
     pub id: SurrealId<Self, i32>,
     pub name: String,
 }
-
-// // Rust doc test compile fail
-// /// ```rust, compile_fail
-// /// use surreal_models::models::spaceship::SpaceShip;
-// /// let result: SurrealId<SpaceShip, i32> = TestRawId::create_id("dff");
-// /// ```
-// /// ```rust
-// /// use surreal_models::models::spaceship::SpaceShip;
-// /// let result: SurrealId<SpaceShip, i32> = TestRawId::create_id(112);
-// /// ```
-// fn ere() {
-//     let x = SpaceShip::default().get_id();
-//     // let xx: SurrealId<SpaceShip, &str> = SpaceShip::create_id("dff");
-//
-//     let c = TestRawId {
-//         id: TestRawId::create_id(34),
-//         name: "dff".to_string(),
-//     };
-// }
