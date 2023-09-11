@@ -1,0 +1,6 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling functions v0.1.0 (file:///projects/functions)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/aarch64-apple-darwin/debug/functions`
+The measurement is: 5h

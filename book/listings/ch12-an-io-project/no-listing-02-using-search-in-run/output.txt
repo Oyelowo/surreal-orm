@@ -1,0 +1,6 @@
+$ cargo run -- frog poem.txt
+warning: unused manifest key: workspace.workspace
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.38s
+     Running `target/aarch64-apple-darwin/debug/minigrep frog poem.txt`
+How public, like a frog

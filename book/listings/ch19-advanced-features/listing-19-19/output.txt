@@ -1,0 +1,6 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling traits-example v0.1.0 (file:///projects/traits-example)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.54s
+     Running `target/aarch64-apple-darwin/debug/traits-example`
+A baby dog is called a Spot

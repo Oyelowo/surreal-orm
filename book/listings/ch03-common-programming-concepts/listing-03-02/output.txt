@@ -1,0 +1,6 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling branches v0.1.0 (file:///projects/branches)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.30s
+     Running `target/aarch64-apple-darwin/debug/branches`
+The value of number is: 5

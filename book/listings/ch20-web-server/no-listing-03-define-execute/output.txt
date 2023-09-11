@@ -1,0 +1,4 @@
+$ cargo check
+warning: unused manifest key: workspace.workspace
+    Checking hello v0.1.0 (file:///projects/hello)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.24s

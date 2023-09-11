@@ -1,0 +1,6 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/aarch64-apple-darwin/debug/rectangles`
+rect1 is Rectangle { width: 30, height: 50 }

@@ -1,5 +1,5 @@
 [workspace]
-workspace.resolver = "2"
+workspace.resolver = "1"
 
 members = [
   "orm",
@@ -8,7 +8,12 @@ members = [
   "models",
   "orm-tests",
   "orm-compile-tests",
+  # "book",
+  # "tools",
 ]
+
+exclude = ["book"]
+
 
 [workspace.package]
 version = "1.0.0"

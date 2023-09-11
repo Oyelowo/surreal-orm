@@ -1,0 +1,7 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling variables v0.1.0 (file:///projects/variables)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.31s
+     Running `target/aarch64-apple-darwin/debug/variables`
+The value of x in the inner scope is: 12
+The value of x is: 6

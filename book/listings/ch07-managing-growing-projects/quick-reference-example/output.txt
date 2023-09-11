@@ -1,0 +1,6 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling backyard v0.1.0 (file:///projects/backyard)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.36s
+     Running `target/aarch64-apple-darwin/debug/backyard`
+I'm growing Asparagus!

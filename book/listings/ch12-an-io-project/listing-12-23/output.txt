@@ -1,0 +1,7 @@
+$ cargo run -- to poem.txt
+warning: unused manifest key: workspace.workspace
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/aarch64-apple-darwin/debug/minigrep to poem.txt`
+Are you nobody, too?
+How dreary to be somebody!

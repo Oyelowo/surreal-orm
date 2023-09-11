@@ -1,0 +1,7 @@
+$ cargo run
+warning: unused manifest key: workspace.workspace
+   Compiling closure-example v0.1.0 (file:///projects/closure-example)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.43s
+     Running `target/aarch64-apple-darwin/debug/closure-example`
+Before defining closure: [1, 2, 3]
+After calling closure: [1, 2, 3, 7]
