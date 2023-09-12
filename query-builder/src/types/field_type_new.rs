@@ -68,7 +68,7 @@ use surrealdb::sql;
 use crate::Table;
 
 /// Geometry types supported by surrealdb
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize, Hash)]
 pub enum GeometryTypee {
     /// Define a field with any geometric type
     Feature,
@@ -140,7 +140,7 @@ pub enum FieldTypee {
     String,
     Uuid,
     Record(Vec<sql::Table>), // record<user | admin> or record<user> or record
-    Geometry(Vec<String>),   // geometry<point | line | polygon>
+    Geometry(Vec<GeometryTypee>), // geometry<point | line | polygon>
     Option(Box<FieldTypee>), // option<string>
     Union(Vec<FieldTypee>),  // string | int | object
     Set(Box<FieldTypee>, Option<u64>), // set<string, 10>, set<string>, set
@@ -162,6 +162,8 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         tag("object").map(|_| FieldTypee::Object),
         tag("string").map(|_| FieldTypee::String),
         tag("uuid").map(|_| FieldTypee::Uuid),
+        parse_record_type,
+        parse_geometry_type,
         // tag("record").map(|_| FieldTypee::Record(vec![])),
         // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
         // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
@@ -212,16 +214,48 @@ fn parse_record_type2(input: &str) -> IResult<&str, FieldTypee> {
     ))
 }
 
+fn parse_simple_geom(input: &str) -> IResult<&str, GeometryTypee> {
+    alt((
+        tag("feature").map(|_| GeometryTypee::Feature),
+        tag("point").map(|_| GeometryTypee::Point),
+        tag("line").map(|_| GeometryTypee::Line),
+        tag("polygon").map(|_| GeometryTypee::Polygon),
+        tag("multipoint").map(|_| GeometryTypee::Multipoint),
+        tag("multiline").map(|_| GeometryTypee::Multiline),
+        tag("multipolygon").map(|_| GeometryTypee::Multipolygon),
+        tag("collection").map(|_| GeometryTypee::Collection),
+    ))(input)
+}
+
+fn parse_geometry_inner(input: &str) -> IResult<&str, Vec<GeometryTypee>> {
+    let (input, _) = space0(input)?;
+    let (input, _) = tag("<")(input)?;
+    let (input, _) = space0(input)?;
+    let (input, ref_tables) =
+        separated_list0(tag("|"), tuple((space0, parse_simple_geom, space0)))(input)?;
+    let (input, _) = space0(input)?;
+    let (input, _) = tag(">")(input)?;
+    let (input, _) = space0(input)?;
+    Ok((input, ref_tables.iter().map(|t| t.1.clone()).collect()))
+}
+
+fn parse_geometry_type(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, _) = tag("geometry")(input)?;
+    let (input, rt) = opt(parse_geometry_inner)(input)?;
+    // let (input, rt) = cut(opt(parse_record_inner))(input)?;
+    Ok((input, FieldTypee::Geometry(rt.unwrap_or(vec![]))))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
     macro_rules! test_parse_db_field_type {
-        ($input:expr, $output:expr) => {
+        ($name:ident, $input:expr, $output:expr) => {
             paste::paste! {
                 #[test]
-                fn [< test_field_type_$input >]() {
+                fn [< test_field_type_$name >]() {
                     let result = parse_db_field_type($input);
                     let (input, ouput) = result.unwrap();
                     assert_eq!(input, "");
@@ -231,25 +265,70 @@ mod tests {
         };
     }
 
-    // test_parse_db_field_type!("any", FieldTypee::Any);
-    // test_parse_db_field_type!("null", FieldTypee::Null);
-    // test_parse_db_field_type!("bool", FieldTypee::Bool);
-    // test_parse_db_field_type!("bytes", FieldTypee::Bytes);
-    // test_parse_db_field_type!("datetime", FieldTypee::Datetime);
-    // test_parse_db_field_type!("decimal", FieldTypee::Decimal);
-    // test_parse_db_field_type!("duration", FieldTypee::Duration);
-    // test_parse_db_field_type!("float", FieldTypee::Float);
-    // test_parse_db_field_type!("int", FieldTypee::Int);
-    // test_parse_db_field_type!("number", FieldTypee::Number);
-    // test_parse_db_field_type!("object", FieldTypee::Object);
-    // test_parse_db_field_type!("string", FieldTypee::String);
-    // test_parse_db_field_type!("uuid", FieldTypee::Uuid);
-    //
-    // test_parse_db_field_type!("record", FieldTypee::Record(vec![]));
-    // test_parse_db_field_type!("geometry", FieldTypee::Geometry(vec![]));
-    // test_parse_db_field_type!("option", FieldTypee::Option(Box::new(FieldTypee::Any)));
-    // test_parse_db_field_type!("set", FieldTypee::Set(Box::new(FieldTypee::Any), None));
-    // test_parse_db_field_type!("array", FieldTypee::Array(Box::new(FieldTypee::Any), None));
+    test_parse_db_field_type!(any, "any", FieldTypee::Any);
+    test_parse_db_field_type!(null, "null", FieldTypee::Null);
+    test_parse_db_field_type!(bool, "bool", FieldTypee::Bool);
+    test_parse_db_field_type!(bytes, "bytes", FieldTypee::Bytes);
+    test_parse_db_field_type!(datetime, "datetime", FieldTypee::Datetime);
+    test_parse_db_field_type!(decimal, "decimal", FieldTypee::Decimal);
+    test_parse_db_field_type!(duration, "duration", FieldTypee::Duration);
+    test_parse_db_field_type!(flaot, "float", FieldTypee::Float);
+    test_parse_db_field_type!(int, "int", FieldTypee::Int);
+    test_parse_db_field_type!(number, "number", FieldTypee::Number);
+    test_parse_db_field_type!(object, "object", FieldTypee::Object);
+    test_parse_db_field_type!(string, "string", FieldTypee::String);
+    test_parse_db_field_type!(uuild, "uuid", FieldTypee::Uuid);
+    test_parse_db_field_type!(record_any, "record", FieldTypee::Record(vec![]));
+    test_parse_db_field_type!(
+        record_single_alien,
+        "record<alien>",
+        FieldTypee::Record(vec!["alien".into()])
+    );
+    test_parse_db_field_type!(
+        record_spaced,
+        "record      < lowo | dayo  |     oye>",
+        FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+    );
+    test_parse_db_field_type!(
+        record_no_space,
+        "record<lowo|dayo|oye>",
+        FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+    );
+
+    test_parse_db_field_type!(
+        geometry_empty_optional,
+        "geometry",
+        FieldTypee::Geometry(vec![])
+    );
+
+    test_parse_db_field_type!(
+        geometry_single,
+        "geometry<point>",
+        FieldTypee::Geometry(vec![GeometryTypee::Point])
+    );
+
+    test_parse_db_field_type!(
+        geometry_spaced,
+        "geometry    < point | line  |     polygon>",
+        FieldTypee::Geometry(vec![
+            GeometryTypee::Point,
+            GeometryTypee::Line,
+            GeometryTypee::Polygon
+        ])
+    );
+
+    test_parse_db_field_type!(
+        geometry_no_space,
+        "geometry<collection| point|multipolygon|line|polygon>",
+        FieldTypee::Geometry(vec![
+            GeometryTypee::Collection,
+            GeometryTypee::Point,
+            GeometryTypee::Multipolygon,
+            GeometryTypee::Line,
+            GeometryTypee::Polygon
+        ])
+    );
+    ///////
 
     #[test]
     fn test_parse_record_type_empty_optional() {
@@ -297,6 +376,105 @@ mod tests {
         assert_eq!(
             ouput,
             FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        );
+    }
+
+    /////// parse record upper level
+    #[test]
+    fn test_parse_record_type_empty_optional_field_type() {
+        let result = parse_db_field_type("record");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(ouput, FieldTypee::Record(vec![]));
+    }
+
+    #[test]
+    fn test_parse_record_type_single_field_type() {
+        let result = parse_db_field_type("record<alien>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(ouput, FieldTypee::Record(vec!["alien".into()]));
+    }
+
+    #[test]
+    fn test_parse_record_type_spaced_field_type() {
+        let result = parse_db_field_type("record    < lowo | dayo  |     oye>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(
+            ouput,
+            FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        );
+    }
+
+    #[test]
+    fn test_parse_record_type_no_space_field_type() {
+        let result = parse_db_field_type("record<lowo|dayo|oye>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(
+            ouput,
+            FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        );
+    }
+
+    #[test]
+    fn test_parse_record_type_no_space2_field_type() {
+        let result = parse_db_field_type("record<lowo|dayo|oye>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(
+            ouput,
+            FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        );
+    }
+
+    /// Parse geometry type
+    #[test]
+    fn test_parse_geometry_type_empty_optional() {
+        let result = parse_db_field_type("geometry");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(ouput, FieldTypee::Geometry(vec![]));
+    }
+
+    #[test]
+    fn test_parse_geometry_type_single() {
+        let result = parse_db_field_type("geometry<point>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(ouput, FieldTypee::Geometry(vec![GeometryTypee::Point]));
+    }
+
+    #[test]
+    fn test_parse_geometry_type_spaced() {
+        let result = parse_db_field_type("geometry    < point | line  |     polygon>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(
+            ouput,
+            FieldTypee::Geometry(vec![
+                GeometryTypee::Point,
+                GeometryTypee::Line,
+                GeometryTypee::Polygon
+            ])
+        );
+    }
+
+    #[test]
+    fn test_parse_geometry_type_no_space() {
+        let result = parse_db_field_type("geometry<collection| point|multipolygon|line|polygon>");
+        let (input, ouput) = result.unwrap();
+        assert_eq!(input, "");
+        assert_eq!(
+            ouput,
+            FieldTypee::Geometry(vec![
+                GeometryTypee::Collection,
+                GeometryTypee::Point,
+                GeometryTypee::Multipolygon,
+                GeometryTypee::Line,
+                GeometryTypee::Polygon
+            ])
         );
     }
 
