@@ -147,6 +147,18 @@ pub enum FieldTypee {
     Array(Box<FieldTypee>, Option<u64>), // array<string, 10>, array<string>, array
 }
 
+fn parse_option_field_type(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, _) = tag("option")(input)?;
+    let (input, _) = space0(input)?;
+    let (input, _) = tag("<")(input)?;
+    let (input, _) = space0(input)?;
+    let (input, ft) = parse_db_field_type(input)?;
+    let (input, _) = space0(input)?;
+    let (input, _) = tag(">")(input)?;
+    let (input, _) = space0(input)?;
+    Ok((input, FieldTypee::Option(Box::new(ft))))
+}
+
 fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
     alt((
         tag("any").map(|_| FieldTypee::Any),
@@ -163,7 +175,9 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         tag("string").map(|_| FieldTypee::String),
         tag("uuid").map(|_| FieldTypee::Uuid),
         parse_record_type,
+        // parse_record_type2,
         parse_geometry_type,
+        parse_option_field_type,
         // tag("record").map(|_| FieldTypee::Record(vec![])),
         // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
         // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
@@ -281,7 +295,7 @@ mod tests {
     test_parse_db_field_type!(record_any, "record", FieldTypee::Record(vec![]));
     test_parse_db_field_type!(
         record_single_alien,
-        "record<alien>",
+        "record<alien> ",
         FieldTypee::Record(vec!["alien".into()])
     );
     test_parse_db_field_type!(
@@ -328,6 +342,130 @@ mod tests {
             GeometryTypee::Polygon
         ])
     );
+    test_parse_db_field_type!(
+        option_string,
+        "option<string>",
+        FieldTypee::Option(Box::new(FieldTypee::String))
+    );
+    test_parse_db_field_type!(
+        option_float,
+        "option<float>",
+        FieldTypee::Option(Box::new(FieldTypee::Float))
+    );
+    test_parse_db_field_type!(
+        option_bool,
+        "option<bool>",
+        FieldTypee::Option(Box::new(FieldTypee::Bool))
+    );
+    test_parse_db_field_type!(
+        option_decimal,
+        "option<decimal>",
+        FieldTypee::Option(Box::new(FieldTypee::Decimal))
+    );
+    test_parse_db_field_type!(
+        option_duration,
+        "option<duration>",
+        FieldTypee::Option(Box::new(FieldTypee::Duration))
+    );
+    test_parse_db_field_type!(
+        option_datetime,
+        "option<datetime>",
+        FieldTypee::Option(Box::new(FieldTypee::Datetime))
+    );
+    test_parse_db_field_type!(
+        option_uuid,
+        "option<uuid>",
+        FieldTypee::Option(Box::new(FieldTypee::Uuid))
+    );
+    test_parse_db_field_type!(
+        option_number,
+        "option<number>",
+        FieldTypee::Option(Box::new(FieldTypee::Number))
+    );
+    test_parse_db_field_type!(
+        option_object,
+        "option<object>",
+        FieldTypee::Option(Box::new(FieldTypee::Object))
+    );
+    test_parse_db_field_type!(
+        option_bytes,
+        "option<bytes>",
+        FieldTypee::Option(Box::new(FieldTypee::Bytes))
+    );
+    test_parse_db_field_type!(
+        option_any,
+        "option<any>",
+        FieldTypee::Option(Box::new(FieldTypee::Any))
+    );
+    test_parse_db_field_type!(
+        option_null,
+        "option<null>",
+        FieldTypee::Option(Box::new(FieldTypee::Null))
+    );
+    test_parse_db_field_type!(
+        option_geometry,
+        "option<geometry>",
+        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![])))
+    );
+    test_parse_db_field_type!(
+        option_geometry_single,
+        "option<geometry<point>>",
+        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![GeometryTypee::Point])))
+    );
+    test_parse_db_field_type!(
+        option_geometry_spaced,
+        "option<geometry    < point | line  |     polygon>>",
+        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![
+            GeometryTypee::Point,
+            GeometryTypee::Line,
+            GeometryTypee::Polygon
+        ])))
+    );
+    test_parse_db_field_type!(
+        option_geometry_no_space,
+        "option<geometry<collection| point|multipolygon|line|polygon>>",
+        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![
+            GeometryTypee::Collection,
+            GeometryTypee::Point,
+            GeometryTypee::Multipolygon,
+            GeometryTypee::Line,
+            GeometryTypee::Polygon
+        ])))
+    );
+    test_parse_db_field_type!(
+        option_int,
+        "option<int>",
+        FieldTypee::Option(Box::new(FieldTypee::Int))
+    );
+    test_parse_db_field_type!(
+        option_simple_record,
+        "option<record>",
+        FieldTypee::Option(Box::new(FieldTypee::Record(vec![])))
+    );
+    test_parse_db_field_type!(
+        option_record,
+        "option<record<alien>>",
+        FieldTypee::Option(Box::new(FieldTypee::Record(vec!["alien".into()])))
+    );
+    test_parse_db_field_type!(
+        option_record_spaced,
+        "option<record    < lowo | dayo  |     oye>>",
+        FieldTypee::Option(Box::new(FieldTypee::Record(vec![
+            "lowo".into(),
+            "dayo".into(),
+            "oye".into()
+        ])))
+    );
+    test_parse_db_field_type!(
+        option_record_no_space,
+        "option<record<lowo|dayo|oye>>",
+        FieldTypee::Option(Box::new(FieldTypee::Record(vec![
+            "lowo".into(),
+            "dayo".into(),
+            "oye".into()
+        ])))
+    );
+
     ///////
 
     #[test]
