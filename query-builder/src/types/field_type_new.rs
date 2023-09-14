@@ -6,10 +6,13 @@ use std::{
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{alphanumeric0, alphanumeric1, space0},
+    character::{
+        complete::{alphanumeric0, alphanumeric1, digit1, space0},
+        is_digit,
+    },
     combinator::{cut, opt, value},
     multi::separated_list0,
-    sequence::tuple,
+    sequence::{preceded, tuple},
     IResult, Parser,
 };
 /*
@@ -178,6 +181,7 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         // parse_record_type2,
         parse_geometry_type,
         parse_option_field_type,
+        parse_array_type,
         // tag("record").map(|_| FieldTypee::Record(vec![])),
         // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
         // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
@@ -258,6 +262,33 @@ fn parse_geometry_type(input: &str) -> IResult<&str, FieldTypee> {
     let (input, rt) = opt(parse_geometry_inner)(input)?;
     // let (input, rt) = cut(opt(parse_record_inner))(input)?;
     Ok((input, FieldTypee::Geometry(rt.unwrap_or(vec![]))))
+}
+
+fn parse_array_inner(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, _) = space0(input)?;
+    let (input, _) = tag("<")(input)?;
+    let (input, _) = space0(input)?;
+    let (input, field_type) = parse_db_field_type(input)?;
+    let (input, _) = space0(input)?;
+    let (input, size) = opt(preceded(
+        tuple((tag(","), space0)),
+        nom::character::complete::u64,
+    ))(input)?;
+    let (input, _) = space0(input)?;
+    let (input, _) = tag(">")(input)?;
+    let (input, _) = space0(input)?;
+    Ok((input, FieldTypee::Array(Box::new(field_type), size)))
+}
+
+fn parse_array_type(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, _) = tag("array")(input)?;
+    let (input, item_type) = opt(parse_array_inner)(input)?;
+
+    if let Some(FieldTypee::Array(item, size)) = item_type {
+        Ok((input, FieldTypee::Array(item, size)))
+    } else {
+        Ok((input, FieldTypee::Array(Box::new(FieldTypee::Any), None)))
+    }
 }
 
 #[cfg(test)]
@@ -464,6 +495,78 @@ mod tests {
             "dayo".into(),
             "oye".into()
         ])))
+    );
+    test_parse_db_field_type!(
+        option_array,
+        "option<array>",
+        FieldTypee::Option(Box::new(FieldTypee::Array(Box::new(FieldTypee::Any), None)))
+    );
+    test_parse_db_field_type!(
+        option_array_string,
+        "option<array<string>>",
+        FieldTypee::Option(Box::new(FieldTypee::Array(
+            Box::new(FieldTypee::String),
+            None
+        )))
+    );
+    test_parse_db_field_type!(
+        option_array_string_10_nospace,
+        "option<array<string,10>>",
+        FieldTypee::Option(Box::new(FieldTypee::Array(
+            Box::new(FieldTypee::String),
+            Some(10)
+        )))
+    );
+
+    test_parse_db_field_type!(
+        option_array_string_10,
+        "option<array<string, 10>>",
+        FieldTypee::Option(Box::new(FieldTypee::Array(
+            Box::new(FieldTypee::String),
+            Some(10)
+        )))
+    );
+    test_parse_db_field_type!(
+        option_array_string_10_spaced,
+        "option<array    < string , 10> >",
+        FieldTypee::Option(Box::new(FieldTypee::Array(
+            Box::new(FieldTypee::String),
+            Some(10)
+        )))
+    );
+    test_parse_db_field_type!(
+        option_array_string_10_spaced2,
+        "option   <  array    < string ,   10> >",
+        FieldTypee::Option(Box::new(FieldTypee::Array(
+            Box::new(FieldTypee::String),
+            Some(10)
+        )))
+    );
+    // parse for array
+    test_parse_db_field_type!(
+        array,
+        "array",
+        FieldTypee::Array(Box::new(FieldTypee::Any), None)
+    );
+    test_parse_db_field_type!(
+        array_string,
+        "array<string>",
+        FieldTypee::Array(Box::new(FieldTypee::String), None)
+    );
+    test_parse_db_field_type!(
+        array_string_10_nospace,
+        "array<string,69>",
+        FieldTypee::Array(Box::new(FieldTypee::String), Some(69))
+    );
+    test_parse_db_field_type!(
+        array_string_10,
+        "array<string, 10>",
+        FieldTypee::Array(Box::new(FieldTypee::String), Some(10))
+    );
+    test_parse_db_field_type!(
+        array_string_10_spaced,
+        "array    < string , 10> ",
+        FieldTypee::Array(Box::new(FieldTypee::String), Some(10))
     );
 
     ///////
