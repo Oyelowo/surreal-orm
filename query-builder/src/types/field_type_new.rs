@@ -544,7 +544,7 @@ mod tests {
     );
     // parse for array
     test_parse_db_field_type!(
-        array,
+        array_any,
         "array",
         FieldTypee::Array(Box::new(FieldTypee::Any), None)
     );
@@ -554,19 +554,34 @@ mod tests {
         FieldTypee::Array(Box::new(FieldTypee::String), None)
     );
     test_parse_db_field_type!(
-        array_string_10_nospace,
-        "array<string,69>",
-        FieldTypee::Array(Box::new(FieldTypee::String), Some(69))
+        array_object_10_nospace,
+        "array<object,69>",
+        FieldTypee::Array(Box::new(FieldTypee::Object), Some(69))
     );
     test_parse_db_field_type!(
-        array_string_10,
-        "array<string, 10>",
-        FieldTypee::Array(Box::new(FieldTypee::String), Some(10))
+        array_geometry_10,
+        "array<geometry<point | polygon | multipolygon>, 10>",
+        FieldTypee::Array(
+            Box::new(FieldTypee::Geometry(vec![
+                GeometryTypee::Point,
+                GeometryTypee::Polygon,
+                GeometryTypee::Multipolygon
+            ])),
+            Some(10)
+        )
     );
     test_parse_db_field_type!(
-        array_string_10_spaced,
-        "array    < string , 10> ",
-        FieldTypee::Array(Box::new(FieldTypee::String), Some(10))
+        array_null_10_spaced,
+        "array    < null , 10> ",
+        FieldTypee::Array(Box::new(FieldTypee::Null), Some(10))
+    );
+    test_parse_db_field_type!(
+        array_nested_array,
+        "array<array<float, 42> , 10> ",
+        FieldTypee::Array(
+            Box::new(FieldTypee::Array(Box::new(FieldTypee::Float), Some(42))),
+            Some(10)
+        )
     );
 
     ///////
