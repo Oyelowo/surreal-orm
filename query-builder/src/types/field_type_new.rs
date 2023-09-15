@@ -182,6 +182,7 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         parse_geometry_type,
         parse_option_field_type,
         parse_array_type,
+        parse_set_type,
         // tag("record").map(|_| FieldTypee::Record(vec![])),
         // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
         // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
@@ -264,7 +265,11 @@ fn parse_geometry_type(input: &str) -> IResult<&str, FieldTypee> {
     Ok((input, FieldTypee::Geometry(rt.unwrap_or(vec![]))))
 }
 
-fn parse_array_inner(input: &str) -> IResult<&str, FieldTypee> {
+struct ListItem {
+    item_type: FieldTypee,
+    size: Option<u64>,
+}
+fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
     let (input, _) = space0(input)?;
@@ -277,17 +282,34 @@ fn parse_array_inner(input: &str) -> IResult<&str, FieldTypee> {
     let (input, _) = space0(input)?;
     let (input, _) = tag(">")(input)?;
     let (input, _) = space0(input)?;
-    Ok((input, FieldTypee::Array(Box::new(field_type), size)))
+    Ok((
+        input,
+        ListItem {
+            item_type: field_type,
+            size,
+        },
+    ))
 }
 
 fn parse_array_type(input: &str) -> IResult<&str, FieldTypee> {
     let (input, _) = tag("array")(input)?;
-    let (input, item_type) = opt(parse_array_inner)(input)?;
+    let (input, item_type) = opt(parse_list_inner)(input)?;
 
-    if let Some(FieldTypee::Array(item, size)) = item_type {
-        Ok((input, FieldTypee::Array(item, size)))
+    if let Some(ListItem { item_type, size }) = item_type {
+        Ok((input, FieldTypee::Array(Box::new(item_type), size)))
     } else {
         Ok((input, FieldTypee::Array(Box::new(FieldTypee::Any), None)))
+    }
+}
+
+fn parse_set_type(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, _) = tag("set")(input)?;
+    let (input, item_type) = opt(parse_list_inner)(input)?;
+
+    if let Some(ListItem { item_type, size }) = item_type {
+        Ok((input, FieldTypee::Set(Box::new(item_type), size)))
+    } else {
+        Ok((input, FieldTypee::Set(Box::new(FieldTypee::Any), None)))
     }
 }
 
@@ -580,6 +602,48 @@ mod tests {
         "array<array<float, 42> , 10> ",
         FieldTypee::Array(
             Box::new(FieldTypee::Array(Box::new(FieldTypee::Float), Some(42))),
+            Some(10)
+        )
+    );
+
+    // SET TESTS
+    test_parse_db_field_type!(
+        set_any,
+        "set",
+        FieldTypee::Set(Box::new(FieldTypee::Any), None)
+    );
+    test_parse_db_field_type!(
+        set_string,
+        "set<string>",
+        FieldTypee::Set(Box::new(FieldTypee::String), None)
+    );
+    test_parse_db_field_type!(
+        set_object_10_nospace,
+        "set<object,69>",
+        FieldTypee::Set(Box::new(FieldTypee::Object), Some(69))
+    );
+    test_parse_db_field_type!(
+        set_geometry_10,
+        "set<geometry<point | polygon | multipolygon>, 10>",
+        FieldTypee::Set(
+            Box::new(FieldTypee::Geometry(vec![
+                GeometryTypee::Point,
+                GeometryTypee::Polygon,
+                GeometryTypee::Multipolygon
+            ])),
+            Some(10)
+        )
+    );
+    test_parse_db_field_type!(
+        set_null_10_spaced,
+        "set    < null , 10> ",
+        FieldTypee::Set(Box::new(FieldTypee::Null), Some(10))
+    );
+    test_parse_db_field_type!(
+        set_nested_array,
+        "set<set<float, 42> , 10> ",
+        FieldTypee::Set(
+            Box::new(FieldTypee::Set(Box::new(FieldTypee::Float), Some(42))),
             Some(10)
         )
     );
