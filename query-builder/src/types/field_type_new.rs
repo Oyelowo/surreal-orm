@@ -11,8 +11,8 @@ use nom::{
         is_digit,
     },
     combinator::{cut, opt, value},
-    multi::separated_list0,
-    sequence::{preceded, tuple},
+    multi::{separated_list0, separated_list1},
+    sequence::{delimited, preceded, tuple},
     IResult, Parser,
 };
 /*
@@ -162,7 +162,103 @@ fn parse_option_field_type(input: &str) -> IResult<&str, FieldTypee> {
     Ok((input, FieldTypee::Option(Box::new(ft))))
 }
 
+use nom::character::complete::multispace0;
+
+fn surrounded_by_spaces<'a, O, F>(parser: F) -> impl Fn(&'a str) -> IResult<&'a str, O>
+where
+    F: Fn(&'a str) -> IResult<&'a str, O>,
+{
+    move |input: &'a str| {
+        let (input, _) = multispace0(input)?;
+        let (input, value) = parser(input)?;
+        let (input, _) = multispace0(input)?;
+        Ok((input, value))
+    }
+}
+
+fn parse_primitive_type(input: &str) -> IResult<&str, FieldTypee> {
+    // (
+    //     tag("any").map(|_| FieldTypee::Any),
+    //     tag("null").map(|_| FieldTypee::Null),
+    //     tag("bool").map(|_| FieldTypee::Bool),
+    //     tag("bytes").map(|_| FieldTypee::Bytes),
+    //     tag("datetime").map(|_| FieldTypee::Datetime),
+    //     tag("decimal").map(|_| FieldTypee::Decimal),
+    //     tag("duration").map(|_| FieldTypee::Duration),
+    //     tag("float").map(|_| FieldTypee::Float),
+    //     tag("int").map(|_| FieldTypee::Int),
+    //     tag("number").map(|_| FieldTypee::Number),
+    //     tag("object").map(|_| FieldTypee::Object),
+    //     tag("string").map(|_| FieldTypee::String),
+    //     tag("uuid").map(|_| FieldTypee::Uuid),
+    // )
+    alt((
+        value(FieldTypee::Any, tag("any")),
+        value(FieldTypee::Null, tag("null")),
+        value(FieldTypee::Bool, tag("bool")),
+        value(FieldTypee::Bytes, tag("bytes")),
+        value(FieldTypee::Datetime, tag("datetime")),
+        value(FieldTypee::Decimal, tag("decimal")),
+        value(FieldTypee::Duration, tag("duration")),
+        value(FieldTypee::Float, tag("float")),
+        value(FieldTypee::Int, tag("int")),
+        value(FieldTypee::Number, tag("number")),
+        value(FieldTypee::Object, tag("object")),
+        value(FieldTypee::String, tag("string")),
+        value(FieldTypee::Uuid, tag("uuid")),
+        // tag("null").map(|_| FieldTypee::Null),
+        // tag("bool").map(|_| FieldTypee::Bool),
+        // tag("bytes").map(|_| FieldTypee::Bytes),
+        // tag("datetime").map(|_| FieldTypee::Datetime),
+        // tag("decimal").map(|_| FieldTypee::Decimal),
+        // tag("duration").map(|_| FieldTypee::Duration),
+        // tag("float").map(|_| FieldTypee::Float),
+        // tag("int").map(|_| FieldTypee::Int),
+        // tag("number").map(|_| FieldTypee::Number),
+        // tag("object").map(|_| FieldTypee::Object),
+        // tag("string").map(|_| FieldTypee::String),
+        // tag("uuid").map(|_| FieldTypee::Uuid),
+    ))(input)
+}
+fn parse_single_field_type(input: &str) -> IResult<&str, FieldTypee> {
+    alt((
+        parse_primitive_type,
+        parse_record_type,
+        // parse_record_type2,
+        parse_geometry_type,
+        parse_option_field_type,
+        parse_array_type,
+        parse_set_type,
+        // parse_union_type,
+    ))(input)
+}
 fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
+    // delimited
+    // nom::character::complete::
+    // string|number
+    alt((
+        parse_single_field_type,
+        parse_union_type,
+        // parse_union_type,
+        // parse_record_type,
+        // // parse_record_type2,
+        // parse_geometry_type,
+        // parse_option_field_type,
+        // parse_array_type,
+        // parse_set_type,
+        // parse_union_type,
+        // parse_union_type,
+        // tag("record").map(|_| FieldTypee::Record(vec![])),
+        // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
+        // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
+        // tag("set").map(|_| FieldTypee::Set(Box::new(FieldTypee::Any), None)),
+        // tag("array").map(|_| FieldTypee::Array(Box::new(FieldTypee::Any), None)),
+    ))(input)
+}
+
+fn parse_db_field_type_without_union(input: &str) -> IResult<&str, FieldTypee> {
+    // nom::character::complete::
+    // string|number
     alt((
         tag("any").map(|_| FieldTypee::Any),
         tag("null").map(|_| FieldTypee::Null),
@@ -183,6 +279,7 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         parse_option_field_type,
         parse_array_type,
         parse_set_type,
+        // parse_union_type,
         // tag("record").map(|_| FieldTypee::Record(vec![])),
         // tag("geometry").map(|_| FieldTypee::Geometry(vec![])),
         // tag("option").map(|_| FieldTypee::Option(Box::new(FieldTypee::Any))),
@@ -190,7 +287,6 @@ fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
         // tag("array").map(|_| FieldTypee::Array(Box::new(FieldTypee::Any), None)),
     ))(input)
 }
-
 fn parse_record_inner(input: &str) -> IResult<&str, Vec<&str>> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
@@ -289,6 +385,11 @@ fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
             size,
         },
     ))
+}
+
+fn parse_union_type(input: &str) -> IResult<&str, FieldTypee> {
+    let (input, ft) = separated_list1(tag("|"), parse_single_field_type)(input)?;
+    Ok((input, FieldTypee::Union(ft)))
 }
 
 fn parse_array_type(input: &str) -> IResult<&str, FieldTypee> {
@@ -518,6 +619,15 @@ mod tests {
             "oye".into()
         ])))
     );
+
+    // Union/Either
+    test_parse_db_field_type!(
+        union_string_int,
+        "string|int",
+        FieldTypee::Union(vec![FieldTypee::String, FieldTypee::Int])
+    );
+
+    // Array
     test_parse_db_field_type!(
         option_array,
         "option<array>",
