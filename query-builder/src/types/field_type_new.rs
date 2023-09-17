@@ -177,21 +177,6 @@ where
 }
 
 fn parse_primitive_type(input: &str) -> IResult<&str, FieldTypee> {
-    // (
-    //     tag("any").map(|_| FieldTypee::Any),
-    //     tag("null").map(|_| FieldTypee::Null),
-    //     tag("bool").map(|_| FieldTypee::Bool),
-    //     tag("bytes").map(|_| FieldTypee::Bytes),
-    //     tag("datetime").map(|_| FieldTypee::Datetime),
-    //     tag("decimal").map(|_| FieldTypee::Decimal),
-    //     tag("duration").map(|_| FieldTypee::Duration),
-    //     tag("float").map(|_| FieldTypee::Float),
-    //     tag("int").map(|_| FieldTypee::Int),
-    //     tag("number").map(|_| FieldTypee::Number),
-    //     tag("object").map(|_| FieldTypee::Object),
-    //     tag("string").map(|_| FieldTypee::String),
-    //     tag("uuid").map(|_| FieldTypee::Uuid),
-    // )
     alt((
         value(FieldTypee::Any, tag("any")),
         value(FieldTypee::Null, tag("null")),
