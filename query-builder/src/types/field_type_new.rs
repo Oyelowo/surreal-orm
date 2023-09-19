@@ -373,7 +373,7 @@ fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
 }
 
 fn parse_union_type(input: &str) -> IResult<&str, FieldTypee> {
-    let (input, ft) = separated_list1(tag("|"), parse_single_field_type)(input)?;
+    let (input, ft) = separated_list1(tag("|"), parse_db_field_type)(input)?;
     Ok((input, FieldTypee::Union(ft)))
 }
 
