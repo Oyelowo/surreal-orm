@@ -101,10 +101,10 @@ macro_rules! create_time_fn_with_single_datetime_arg {
 
                 #[test]
                 fn [<test_ $function_name _fn_with_plain_datetime>]() {
-                    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
-                        chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
-                        chrono::Utc,
-                    );
+                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+                                chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+                                chrono::Utc,
+                            );
                     let result = time::[<$function_name>]!(dt);
                     assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_name));
                     assert_eq!(
@@ -131,7 +131,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -168,7 +168,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -205,7 +205,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -242,7 +242,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -280,7 +280,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -316,7 +316,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -352,7 +352,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -388,7 +388,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -424,7 +424,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -460,7 +460,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -496,7 +496,7 @@ create_time_fn_with_single_datetime_arg!(
     /// # use surreal_query_builder as  surreal_orm;
     /// use surreal_orm::{*, functions::time};
     ///
-    /// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///     chrono::Utc,
     /// );
@@ -548,7 +548,7 @@ pub fn floor_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
 ///    chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///    chrono::Utc,
 /// );
@@ -619,7 +619,7 @@ pub fn format_fn(datetime: impl Into<DatetimeLike>, format: impl Into<StrandLike
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
 ///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///   chrono::Utc,
 /// );
@@ -717,7 +717,7 @@ pub fn round_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationL
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
 ///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///   chrono::Utc,
 /// );
@@ -784,7 +784,7 @@ pub fn group_fn(datetime: impl Into<DatetimeLike>, interval: impl Into<StrandLik
 /// ```rust
 /// # use surreal_query_builder as  surreal_orm;
 /// use surreal_orm::{*, functions::time};
-/// let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
 ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
 ///     chrono::Utc,
 /// );
@@ -860,7 +860,7 @@ mod tests {
 
     #[test]
     fn test_floor_macro_with_plain_datetime_and_duration() {
-        let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+        let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
             chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
             chrono::Utc,
         );
@@ -894,7 +894,7 @@ mod tests {
 
     #[test]
     fn test_round_macro_with_plain_datetime_and_duration() {
-        let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+        let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
             chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
             chrono::Utc,
         );
@@ -947,7 +947,7 @@ mod tests {
             paste::paste! {
                 #[test]
                 fn [<test_group_macro_with_plain_datetime_and_ $interval_name>]() {
-                    let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
                         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
                         chrono::Utc,
                     );

@@ -331,7 +331,7 @@ async fn insert_many() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(32),
             name: "Acme Inc.".to_string(),
-            founded: chrono::DateTime::from_utc(
+            founded: chrono::DateTime::from_naive_utc_and_offset(
                 chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
@@ -352,7 +352,7 @@ async fn insert_many() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
-            founded: chrono::DateTime::from_utc(
+            founded: chrono::DateTime::from_naive_utc_and_offset(
                 chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
@@ -387,7 +387,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(1),
             name: "Acme Inc.".to_string(),
-            founded: chrono::DateTime::from_utc(
+            founded: chrono::DateTime::from_naive_utc_and_offset(
                 chrono::NaiveDate::from_ymd_opt(1967, 5, 3)
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
@@ -408,7 +408,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
         Company {
             id: Company::create_id(2),
             name: "Apple Inc.".to_string(),
-            founded: chrono::DateTime::from_utc(
+            founded: chrono::DateTime::from_naive_utc_and_offset(
                 chrono::NaiveDate::from_ymd_opt(1974, 5, 3)
                     .unwrap()
                     .and_hms_opt(0, 0, 0)

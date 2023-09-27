@@ -51,7 +51,7 @@ use surreal_orm::macros::type_;
 use chrono::DateTime;
 use chrono::Utc;
 
-let value = DateTime::<Utc>::from_utc(chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(), Utc);
+let value = DateTime::<Utc>::from_naive_utc_and_offset(chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(), Utc);
 let result = type_::datetime!(value);
 assert_eq!(result.to_raw().build(), "type::datetime('1970-01-01T00:01:01Z')");
 

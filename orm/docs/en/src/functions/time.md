@@ -27,7 +27,7 @@ The `time::day()` function extracts the day as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -52,7 +52,7 @@ assert_eq!(result.to_raw().build(), "time::day($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -117,7 +117,7 @@ The `time::format()` function outputs a datetime according to a specific format.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -135,7 +135,7 @@ assert_eq!(
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -157,7 +157,7 @@ The `time::group()` function groups a datetime by a particular time interval.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -190,7 +190,7 @@ assert_eq!(
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -229,7 +229,7 @@ from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -254,7 +254,7 @@ assert_eq!(result.to_raw().build(), "time::hour($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -283,7 +283,7 @@ The `time::minute()` function extracts the minutes as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -308,7 +308,7 @@ assert_eq!(result.to_raw().build(), "time::minute($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -337,7 +337,7 @@ The `time::month()` function extracts the month as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -362,7 +362,7 @@ assert_eq!(result.to_raw().build(), "time::month($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -471,7 +471,7 @@ The `time::second()` function extracts the second as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -496,7 +496,7 @@ assert_eq!(result.to_raw().build(), "time::second($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -569,7 +569,7 @@ The `time::wday()` function extracts the week day as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -596,7 +596,7 @@ assert_eq!(result.to_raw().build(), "time::wday($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -625,7 +625,7 @@ The `time::week()` function extracts the week as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -650,7 +650,7 @@ assert_eq!(result.to_raw().build(), "time::week($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -679,7 +679,7 @@ The `time::yday()` function extracts the yday as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -706,7 +706,7 @@ assert_eq!(result.to_raw().build(), "time::yday($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -735,7 +735,7 @@ The `time::year()` function extracts the year as a number from a datetime.
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );
@@ -760,7 +760,7 @@ assert_eq!(result.to_raw().build(), "time::year($rebirth_date)");
 ```rust
 use surreal_orm::{*, functions::time};
 
-let dt = chrono::DateTime::<chrono::Utc>::from_utc(
+let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     chrono::Utc,
 );

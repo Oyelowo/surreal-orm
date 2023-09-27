@@ -115,7 +115,7 @@ create_type!(
     /// ```rust
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::type_};
-    /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_utc(
+    /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
     ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
     ///    chrono::Utc,
     /// );
@@ -133,7 +133,7 @@ create_type!(
     =>
     "datetime",
     DatetimeLike,
-    chrono::DateTime::<chrono::Utc>::from_utc(
+    chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
         chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
         chrono::Utc,
     ),
@@ -471,7 +471,7 @@ mod tests {
 
     #[test]
     fn test_datetime_macro_with_plain_datetime() {
-        let value = chrono::DateTime::<chrono::Utc>::from_utc(
+        let value = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
             chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
             chrono::Utc,
         );
