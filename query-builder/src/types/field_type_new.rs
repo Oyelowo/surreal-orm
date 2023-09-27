@@ -375,7 +375,8 @@ impl FieldTypee {
 
 /// Parses a field type
 /// ```
-/// use surrealdb::{FieldTypee, parse_db_field_type};
+/// # use surreal_query_builder as surreal_orm;
+/// # use surreal_orm::{FieldTypee, parse_db_field_type};
 /// assert_eq!(parse_db_field_type("any"), Ok(("", FieldTypee::Any)));
 /// assert_eq!(parse_db_field_type("null"), Ok(("", FieldTypee::Null)));
 /// assert_eq!(parse_db_field_type("bool"), Ok(("", FieldTypee::Bool)));
@@ -489,7 +490,7 @@ fn parse_record_type(input: &str) -> IResult<&str, FieldTypee> {
         input,
         FieldTypee::Record(
             rt.unwrap_or(vec![])
-                .iter()
+                .into_iter()
                 .map(|t| t.to_string().into())
                 .collect(),
         ),

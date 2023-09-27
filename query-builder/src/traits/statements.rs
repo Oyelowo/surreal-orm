@@ -260,19 +260,16 @@ where
         let returned_type = self.get_return_type();
         let all = vec![ValueLike::from(Field::new("*"))];
         let selected_fields = match returned_type {
-            ReturnType::Projections(projections) => {
-                all.into_iter()
-                    .chain(
-                        projections
-                            .iter()
-                            .cloned()
-                            .filter(|p| p.build() != "*")
-                            // .map(|v| v.build())
-                            // .map(|v| v.build())
-                            .collect::<Vec<_>>(),
-                    )
-                    .collect::<Vec<_>>()
-            }
+            ReturnType::Projections(projections) => all
+                .into_iter()
+                .chain(
+                    projections
+                        .iter()
+                        .filter(|p| p.build() != "*")
+                        .cloned()
+                        .collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>(),
             _ => all,
         };
 
