@@ -541,7 +541,7 @@ impl SchemaFieldsProperties {
                         .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         })
-                        .unwrap_or(quote!())} else {
+                        .unwrap_or_default()} else {
                             quote!()
                     };
 
