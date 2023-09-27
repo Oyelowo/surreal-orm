@@ -175,7 +175,7 @@ where
     Id: Into<sql::Id>,
 {
     fn from(value: &SurrealId<T, Id>) -> Self {
-        Self(Clause::new(ClauseType::Id(value.clone().to_thing())))
+        Self(Clause::new(ClauseType::Id(value.to_thing())))
     }
 }
 
