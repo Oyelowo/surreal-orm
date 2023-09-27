@@ -24,7 +24,7 @@ surreal-orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
 surreal-models = { path = "models" }
 
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", branch = "main", features = [
+surrealdb = { version = "1.0.0", features = [
   "protocol-ws",
   "protocol-http",
   "kv-mem",
