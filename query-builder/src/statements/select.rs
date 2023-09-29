@@ -968,13 +968,14 @@ impl SelectStatementInit {
     ///  select(All).from(![user, user_id, select(All).from(alien)]);
     /// ```
     pub fn from(self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
-        self.__internal_from(targettables).into()
+        self.__internal_from(targettables)
     }
 
     /// Same as normal from but only selects from a single table
+    #[allow(clippy::wrong_self_convention)]
     pub fn from_only(mut self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
         self.only = true;
-        self.__internal_from(targettables).into()
+        self.__internal_from(targettables)
     }
 
     fn __internal_from(
