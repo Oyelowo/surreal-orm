@@ -14,7 +14,6 @@ pub(crate) mod data_types;
 pub(crate) mod expression;
 pub(crate) mod field;
 pub(crate) mod field_type;
-pub(crate) mod field_type_new;
 pub(crate) mod field_updater;
 pub(crate) mod filter;
 pub(crate) mod function;
