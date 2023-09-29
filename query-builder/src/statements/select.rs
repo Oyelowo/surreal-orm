@@ -761,6 +761,7 @@ pub struct SelectStatementInit {
     selection_type: SelectionType,
     projections: String,
     targets: Vec<String>,
+    only: bool,
     where_: Option<String>,
     split: Vec<String>,
     group_by: Vec<String>,
@@ -897,6 +898,7 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
         selection_type: SelectionType::Select,
         projections: selectables.build(),
         targets: vec![],
+        only: false,
         where_: None,
         split: vec![],
         group_by: vec![],
@@ -920,6 +922,7 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
         selection_type: SelectionType::SelectValue,
         projections: selectables.build(),
         targets: vec![],
+        only: false,
         where_: None,
         split: vec![],
         group_by: vec![],
@@ -964,7 +967,20 @@ impl SelectStatementInit {
     ///  // or a list of tables, ids or subqueries
     ///  select(All).from(![user, user_id, select(All).from(alien)]);
     /// ```
-    pub fn from(mut self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
+    pub fn from(self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
+        self.__internal_from(targettables).into()
+    }
+
+    /// Same as normal from but only selects from a single table
+    pub fn from_only(mut self, targettables: impl Into<TargettablesForSelect>) -> SelectStatement {
+        self.only = true;
+        self.__internal_from(targettables).into()
+    }
+
+    fn __internal_from(
+        mut self,
+        targettables: impl Into<TargettablesForSelect>,
+    ) -> SelectStatement {
         let targets: TargettablesForSelect = targettables.into();
         let mut targets_bindings = vec![];
 
@@ -1431,9 +1447,11 @@ impl Buildable for SelectStatement {
             SelectionType::SelectValue => "SELECT VALUE",
         };
 
+        let only = if statement.only { "ONLY " } else { "" };
         let mut query = format!(
-            "{select} {} FROM {}",
+            "{select} {} FROM {}{}",
             statement.projections,
+            only,
             statement.targets.join(", ")
         );
 
