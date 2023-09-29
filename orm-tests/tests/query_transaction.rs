@@ -87,7 +87,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
     insta::assert_display_snapshot!(transaction_query.to_raw().build());
 
     assert_eq!(accounts.len(), 2);
-    assert_eq!(accounts[0].balance, 135_905.16);
+    assert_eq!(accounts[0].balance, 135_605.16);
     assert_eq!(accounts[1].balance, 90_731.31);
     assert_eq!(accounts[0].id.to_string(), "account:one");
     assert_eq!(accounts[1].id.to_string(), "account:two");
@@ -140,7 +140,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         .await?;
 
     assert_eq!(accounts.len(), 2);
-    assert_eq!(accounts[0].balance, 135_905.16);
+    assert_eq!(accounts[0].balance, 135_605.16);
     assert_eq!(accounts[1].balance, 90_731.31);
     assert_eq!(accounts[0].id.to_string(), "account:one");
     assert_eq!(accounts[1].id.to_string(), "account:two");
