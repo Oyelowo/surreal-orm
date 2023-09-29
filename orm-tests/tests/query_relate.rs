@@ -234,8 +234,8 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
     // We use select value to pull out the nested users field to only give the list of userids
-    // to make this work
-    let from_statement = select_value(&users).from(codebreather.id);
+    // us make this work
+    let from_statement = select_value(&users).from_only(codebreather.id);
     // select devs
     let devs_statement = select(All)
         .from(User::table_name())
@@ -259,7 +259,7 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
         relation.fine_tune_params(),
         "RELATE $_param_00000001->like->$_param_00000002 SET time.connected = $_param_00000003 ;"
     );
-    assert_eq!(relation.to_raw().build().len(), 184);
+    assert_eq!(relation.to_raw().build().len(), 189);
     assert_eq!(result.len(), 12);
     assert_eq!(result[0].time.connected, dt);
 
