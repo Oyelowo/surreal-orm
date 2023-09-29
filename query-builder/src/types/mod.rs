@@ -40,7 +40,6 @@ pub use crud_type::*;
 pub use data_types::*;
 pub use field::*;
 pub use field_type::*;
-pub use field_type_new::*;
 pub use field_updater::*;
 pub use filter::*;
 pub use function::*;

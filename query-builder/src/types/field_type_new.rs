@@ -67,7 +67,7 @@ use surrealdb::sql;
 
 /// Geometry types supported by surrealdb
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize, Hash)]
-pub enum GeometryTypee {
+pub enum GeometryType {
     /// Define a field with any geometric type
     Feature,
     /// Define a field with point geometric type
@@ -86,7 +86,7 @@ pub enum GeometryTypee {
     Collection,
 }
 
-impl FromStr for GeometryTypee {
+impl FromStr for GeometryType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -104,17 +104,17 @@ impl FromStr for GeometryTypee {
     }
 }
 
-impl Display for GeometryTypee {
+impl Display for GeometryType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let geom = match self {
-            GeometryTypee::Feature => "feature",
-            GeometryTypee::Point => "point",
-            GeometryTypee::Line => "line",
-            GeometryTypee::Polygon => "polygon",
-            GeometryTypee::Multipoint => "multipoint",
-            GeometryTypee::Multiline => "multiline",
-            GeometryTypee::Multipolygon => "multipolygon",
-            GeometryTypee::Collection => "collection",
+            GeometryType::Feature => "feature",
+            GeometryType::Point => "point",
+            GeometryType::Line => "line",
+            GeometryType::Polygon => "polygon",
+            GeometryType::Multipoint => "multipoint",
+            GeometryType::Multiline => "multiline",
+            GeometryType::Multipolygon => "multipolygon",
+            GeometryType::Collection => "collection",
         };
         write!(f, "{}", geom)
     }
@@ -122,29 +122,46 @@ impl Display for GeometryTypee {
 
 #[allow(missing_docs)]
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize, Hash)]
-pub enum FieldTypee {
+pub enum FieldType {
+    /// Use this when you explicitly don't want to specify the field's data type. The field will
+    /// allow any data type supported by SurrealDB.
     Any,
     Null,
+    /// true of false
     Bool,
     Bytes,
+    /// An ISO 8601 compliant data type that stores a date with time and time zone.
     Datetime,
+    /// Uses BigDecimal for storing any real number with arbitrary precision.
     Decimal,
+    /// Store a value representing a length of time. Can be added or subtracted from datetimes or
+    /// other durations.
     Duration,
+    /// Store a value in a 64 bit float.
     Float,
+    /// Store a value in a 64 bit integer.
     Int,
+    /// Store numbers without specifying the type. SurrealDB will detect the type of number and
+    /// store it using the minimal number of bytes. For numbers passed in as a string, this field
+    /// will store the number in a BigDecimal.
     Number,
+    /// Store formatted objects containing values of any supported type with no limit to object
+    /// depth or nesting.
     Object,
     String,
     Uuid,
+    /// Store a reference to another record. The value must be a Record ID.
     Record(Vec<sql::Table>), // record<user | admin> or record<user> or record
-    Geometry(Vec<GeometryTypee>), // geometry<point | line | polygon>
-    Option(Box<FieldTypee>), // option<string>
-    Union(Vec<FieldTypee>),  // string | int | object
-    Set(Box<FieldTypee>, Option<u64>), // set<string, 10>, set<string>, set
-    Array(Box<FieldTypee>, Option<u64>), // array<string, 10>, array<string>, array
+    /// RFC 7946 compliant data type for storing geometry in the GeoJson format.
+    Geometry(Vec<GeometryType>), // geometry<point | line | polygon>
+    Option(Box<FieldType>),           // option<string>
+    Union(Vec<FieldType>),            // string | int | object
+    Set(Box<FieldType>, Option<u64>), // set<string, 10>, set<string>, set
+    /// a list
+    Array(Box<FieldType>, Option<u64>), // array<string, 10>, array<string>, array
 }
 
-impl FromStr for FieldTypee {
+impl FromStr for FieldType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -154,23 +171,23 @@ impl FromStr for FieldTypee {
     }
 }
 
-impl Display for FieldTypee {
+impl Display for FieldType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FieldTypee::Any => write!(f, "any"),
-            FieldTypee::Null => write!(f, "null"),
-            FieldTypee::Bool => write!(f, "bool"),
-            FieldTypee::Bytes => write!(f, "bytes"),
-            FieldTypee::Datetime => write!(f, "datetime"),
-            FieldTypee::Decimal => write!(f, "decimal"),
-            FieldTypee::Duration => write!(f, "duration"),
-            FieldTypee::Float => write!(f, "float"),
-            FieldTypee::Int => write!(f, "int"),
-            FieldTypee::Number => write!(f, "number"),
-            FieldTypee::Object => write!(f, "object"),
-            FieldTypee::String => write!(f, "string"),
-            FieldTypee::Uuid => write!(f, "uuid"),
-            FieldTypee::Record(ref_tables) => {
+            FieldType::Any => write!(f, "any"),
+            FieldType::Null => write!(f, "null"),
+            FieldType::Bool => write!(f, "bool"),
+            FieldType::Bytes => write!(f, "bytes"),
+            FieldType::Datetime => write!(f, "datetime"),
+            FieldType::Decimal => write!(f, "decimal"),
+            FieldType::Duration => write!(f, "duration"),
+            FieldType::Float => write!(f, "float"),
+            FieldType::Int => write!(f, "int"),
+            FieldType::Number => write!(f, "number"),
+            FieldType::Object => write!(f, "object"),
+            FieldType::String => write!(f, "string"),
+            FieldType::Uuid => write!(f, "uuid"),
+            FieldType::Record(ref_tables) => {
                 if ref_tables.is_empty() {
                     write!(f, "record")
                 } else {
@@ -185,7 +202,7 @@ impl Display for FieldTypee {
                     )
                 }
             }
-            FieldTypee::Geometry(ref_tables) => {
+            FieldType::Geometry(ref_tables) => {
                 if ref_tables.is_empty() {
                     write!(f, "geometry")
                 } else {
@@ -200,8 +217,8 @@ impl Display for FieldTypee {
                     )
                 }
             }
-            FieldTypee::Option(ft) => write!(f, "option<{}>", ft),
-            FieldTypee::Union(ref_tables) => write!(
+            FieldType::Option(ft) => write!(f, "option<{}>", ft),
+            FieldType::Union(ref_tables) => write!(
                 f,
                 "{}",
                 ref_tables
@@ -210,14 +227,14 @@ impl Display for FieldTypee {
                     .collect::<Vec<_>>()
                     .join(" | ")
             ),
-            FieldTypee::Set(ft, size) => {
+            FieldType::Set(ft, size) => {
                 if let Some(size) = size {
                     write!(f, "set<{}, {}>", ft, size)
                 } else {
                     write!(f, "set<{}>", ft)
                 }
             }
-            FieldTypee::Array(ft, size) => {
+            FieldType::Array(ft, size) => {
                 if let Some(size) = size {
                     write!(f, "array<{}, {}>", ft, size)
                 } else {
@@ -228,148 +245,169 @@ impl Display for FieldTypee {
     }
 }
 
-impl FieldTypee {
+impl FieldType {
+    /// Returns a list of all the variants of the enum
+    pub fn variants() -> Vec<&'static str> {
+        vec![
+            "any", "null", "array", "set", "bool", "datetime", "decimal", "duration", "float",
+            "int", "number", "object", "string", "record", "geometry", "option", "union",
+        ]
+    }
+
+    /// Returns true if the field_type is a record
+    pub fn is_record_any(&self) -> bool {
+        matches!(self, Self::Record(_))
+    }
+
+    /// Returns true if the field_type is a record
+    pub fn is_record_of_the_table(&self, table_name: &String) -> bool {
+        if table_name.is_empty() {
+            return false;
+        }
+        matches!(self, Self::Record(t) if &t.first().map(ToString::to_string).unwrap_or_default() == table_name)
+    }
+
     /// Returns true if the field type is a primitive type
     pub fn is_primitive(&self) -> bool {
         matches!(
             self,
-            FieldTypee::Any
-                | FieldTypee::Null
-                | FieldTypee::Bool
-                | FieldTypee::Bytes
-                | FieldTypee::Datetime
-                | FieldTypee::Decimal
-                | FieldTypee::Duration
-                | FieldTypee::Float
-                | FieldTypee::Int
-                | FieldTypee::Number
-                | FieldTypee::Object
-                | FieldTypee::String
-                | FieldTypee::Uuid
+            FieldType::Any
+                | FieldType::Null
+                | FieldType::Bool
+                | FieldType::Bytes
+                | FieldType::Datetime
+                | FieldType::Decimal
+                | FieldType::Duration
+                | FieldType::Float
+                | FieldType::Int
+                | FieldType::Number
+                | FieldType::Object
+                | FieldType::String
+                | FieldType::Uuid
         )
     }
 
     /// Returns true if the field type is a record type
     pub fn is_record(&self) -> bool {
-        matches!(self, FieldTypee::Record(_))
+        matches!(self, FieldType::Record(_))
     }
 
     /// Returns true if the field type is a geometry type
     pub fn is_geometry(&self) -> bool {
-        matches!(self, FieldTypee::Geometry(_))
+        matches!(self, FieldType::Geometry(_))
     }
 
     /// Returns true if the field type is an option type
     pub fn is_option(&self) -> bool {
-        matches!(self, FieldTypee::Option(_))
+        matches!(self, FieldType::Option(_))
     }
 
     /// Returns true if the field type is a union type
     pub fn is_union(&self) -> bool {
-        matches!(self, FieldTypee::Union(_))
+        matches!(self, FieldType::Union(_))
     }
 
     /// Returns true if the field type is a set type
     pub fn is_set(&self) -> bool {
-        matches!(self, FieldTypee::Set(_, _))
+        matches!(self, FieldType::Set(_, _))
     }
 
     /// Returns true if the field type is an array type
     pub fn is_array(&self) -> bool {
-        matches!(self, FieldTypee::Array(_, _))
+        matches!(self, FieldType::Array(_, _))
     }
 
     /// Returns true if the field type is a collection type
     pub fn is_collection(&self) -> bool {
-        matches!(self, FieldTypee::Array(_, _) | FieldTypee::Set(_, _))
+        matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))
     }
 
     /// Returns true if the field type is a list type
     pub fn is_list(&self) -> bool {
-        matches!(self, FieldTypee::Array(_, _) | FieldTypee::Set(_, _))
+        matches!(self, FieldType::Array(_, _) | FieldType::Set(_, _))
     }
 
     /// Returns true if the field type is a numeric type
     pub fn is_numeric(&self) -> bool {
         matches!(
             self,
-            FieldTypee::Decimal | FieldTypee::Float | FieldTypee::Int | FieldTypee::Number
+            FieldType::Decimal | FieldType::Float | FieldType::Int | FieldType::Number
         )
     }
 
     /// Returns true if the field type is a string type
     pub fn is_string(&self) -> bool {
-        matches!(self, FieldTypee::String)
+        matches!(self, FieldType::String)
     }
 
     /// Returns true if the field type is a boolean type
     pub fn is_bool(&self) -> bool {
-        matches!(self, FieldTypee::Bool)
+        matches!(self, FieldType::Bool)
     }
 
     /// Returns true if the field type is a bytes type
     pub fn is_bytes(&self) -> bool {
-        matches!(self, FieldTypee::Bytes)
+        matches!(self, FieldType::Bytes)
     }
 
     /// Returns true if the field type is a datetime type
     pub fn is_datetime(&self) -> bool {
-        matches!(self, FieldTypee::Datetime)
+        matches!(self, FieldType::Datetime)
     }
 
     /// Returns true if the field type is a duration type
     pub fn is_duration(&self) -> bool {
-        matches!(self, FieldTypee::Duration)
+        matches!(self, FieldType::Duration)
     }
 
     /// Returns true if the field type is a uuid type
     pub fn is_uuid(&self) -> bool {
-        matches!(self, FieldTypee::Uuid)
+        matches!(self, FieldType::Uuid)
     }
 
     /// Returns true if the field type is an object type
     pub fn is_object(&self) -> bool {
-        matches!(self, FieldTypee::Object)
+        matches!(self, FieldType::Object)
     }
 
     /// Returns true if the field type is a null type
     pub fn is_null(&self) -> bool {
-        matches!(self, FieldTypee::Null)
+        matches!(self, FieldType::Null)
     }
 
     /// Returns true if the field type is an any type
     pub fn is_any(&self) -> bool {
-        matches!(self, FieldTypee::Any)
+        matches!(self, FieldType::Any)
     }
 
     /// Returns true if the field type is a number type
     pub fn is_number(&self) -> bool {
-        matches!(self, FieldTypee::Number)
+        matches!(self, FieldType::Number)
     }
 
     /// Returns true if the field type is a float type
     pub fn is_float(&self) -> bool {
-        matches!(self, FieldTypee::Float)
+        matches!(self, FieldType::Float)
     }
 
     /// Returns true if the field type is an int type
     pub fn is_int(&self) -> bool {
-        matches!(self, FieldTypee::Int)
+        matches!(self, FieldType::Int)
     }
 
     /// Returns true if the field type is a decimal type
     pub fn is_decimal(&self) -> bool {
-        matches!(self, FieldTypee::Decimal)
+        matches!(self, FieldType::Decimal)
     }
 
     /// Returns true if the field type is a record type with no reference tables
     pub fn is_empty_record(&self) -> bool {
-        matches!(self, FieldTypee::Record(ref_tables) if ref_tables.is_empty())
+        matches!(self, FieldType::Record(ref_tables) if ref_tables.is_empty())
     }
 
     /// Returns true if the field type is a geometry type with no reference tables
     pub fn is_empty_geometry(&self) -> bool {
-        matches!(self, FieldTypee::Geometry(ref_tables) if ref_tables.is_empty())
+        matches!(self, FieldType::Geometry(ref_tables) if ref_tables.is_empty())
     }
 }
 
@@ -382,7 +420,7 @@ impl FieldTypee {
 /// assert_eq!(parse_db_field_type("bool"), Ok(("", FieldTypee::Bool)));
 /// assert_eq!(parse_db_field_type("option<string>"), Ok(("", FieldTypee::Option(Box::new(FieldTypee::String)))));
 /// ```
-pub fn parse_db_field_type(input: &str) -> IResult<&str, FieldTypee> {
+pub fn parse_db_field_type(input: &str) -> IResult<&str, FieldType> {
     alt((parse_union_type, parse_option_field_type))(input)
 }
 
@@ -393,7 +431,7 @@ fn parse_pipe(input: &str) -> IResult<&str, ()> {
     Ok((input, ()))
 }
 
-fn parse_single_field_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_single_field_type(input: &str) -> IResult<&str, FieldType> {
     alt((
         parse_primitive_type,
         parse_record_type,
@@ -406,17 +444,17 @@ fn parse_single_field_type(input: &str) -> IResult<&str, FieldTypee> {
     ))(input)
 }
 
-fn parse_union_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_union_type(input: &str) -> IResult<&str, FieldType> {
     // let (input, ft) = separated_list1(parse_pipe, parse_db_field_type)(input)?;
     let (input, mut ft) = separated_list1(parse_pipe, alt((parse_single_field_type,)))(input)?;
     let ft = match ft.len() {
         1 => ft.remove(0),
-        _ => FieldTypee::Union(ft),
+        _ => FieldType::Union(ft),
     };
     Ok((input, ft))
 }
 
-fn parse_option_field_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_option_field_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = tag("option")(input)?;
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
@@ -425,7 +463,7 @@ fn parse_option_field_type(input: &str) -> IResult<&str, FieldTypee> {
     let (input, _) = space0(input)?;
     let (input, _) = tag(">")(input)?;
     let (input, _) = space0(input)?;
-    Ok((input, FieldTypee::Option(Box::new(ft))))
+    Ok((input, FieldType::Option(Box::new(ft))))
 }
 
 // fn surrounded_by_spaces<'a, O, F>(parser: F) -> impl Fn(&'a str) -> IResult<&'a str, O>
@@ -440,21 +478,21 @@ fn parse_option_field_type(input: &str) -> IResult<&str, FieldTypee> {
 //     }
 // }
 
-fn parse_primitive_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_primitive_type(input: &str) -> IResult<&str, FieldType> {
     alt((
-        value(FieldTypee::Any, tag("any")),
-        value(FieldTypee::Null, tag("null")),
-        value(FieldTypee::Bool, tag("bool")),
-        value(FieldTypee::Bytes, tag("bytes")),
-        value(FieldTypee::Datetime, tag("datetime")),
-        value(FieldTypee::Decimal, tag("decimal")),
-        value(FieldTypee::Duration, tag("duration")),
-        value(FieldTypee::Float, tag("float")),
-        value(FieldTypee::Int, tag("int")),
-        value(FieldTypee::Number, tag("number")),
-        value(FieldTypee::Object, tag("object")),
-        value(FieldTypee::String, tag("string")),
-        value(FieldTypee::Uuid, tag("uuid")),
+        value(FieldType::Any, tag("any")),
+        value(FieldType::Null, tag("null")),
+        value(FieldType::Bool, tag("bool")),
+        value(FieldType::Bytes, tag("bytes")),
+        value(FieldType::Datetime, tag("datetime")),
+        value(FieldType::Decimal, tag("decimal")),
+        value(FieldType::Duration, tag("duration")),
+        value(FieldType::Float, tag("float")),
+        value(FieldType::Int, tag("int")),
+        value(FieldType::Number, tag("number")),
+        value(FieldType::Object, tag("object")),
+        value(FieldType::String, tag("string")),
+        value(FieldType::Uuid, tag("uuid")),
         // tag("null").map(|_| FieldTypee::Null),
         // tag("bool").map(|_| FieldTypee::Bool),
         // tag("bytes").map(|_| FieldTypee::Bytes),
@@ -482,13 +520,13 @@ fn parse_record_inner(input: &str) -> IResult<&str, Vec<&str>> {
     Ok((input, ref_tables.iter().map(|t| t.1).collect()))
 }
 
-fn parse_record_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_record_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = tag("record")(input)?;
     let (input, rt) = opt(parse_record_inner)(input)?;
     // let (input, rt) = cut(opt(parse_record_inner))(input)?;
     Ok((
         input,
-        FieldTypee::Record(
+        FieldType::Record(
             rt.unwrap_or(vec![])
                 .into_iter()
                 .map(|t| t.to_string().into())
@@ -512,20 +550,20 @@ fn parse_record_type(input: &str) -> IResult<&str, FieldTypee> {
 //     ))
 // }
 
-fn parse_simple_geom(input: &str) -> IResult<&str, GeometryTypee> {
+fn parse_simple_geom(input: &str) -> IResult<&str, GeometryType> {
     alt((
-        tag("feature").map(|_| GeometryTypee::Feature),
-        tag("point").map(|_| GeometryTypee::Point),
-        tag("line").map(|_| GeometryTypee::Line),
-        tag("polygon").map(|_| GeometryTypee::Polygon),
-        tag("multipoint").map(|_| GeometryTypee::Multipoint),
-        tag("multiline").map(|_| GeometryTypee::Multiline),
-        tag("multipolygon").map(|_| GeometryTypee::Multipolygon),
-        tag("collection").map(|_| GeometryTypee::Collection),
+        tag("feature").map(|_| GeometryType::Feature),
+        tag("point").map(|_| GeometryType::Point),
+        tag("line").map(|_| GeometryType::Line),
+        tag("polygon").map(|_| GeometryType::Polygon),
+        tag("multipoint").map(|_| GeometryType::Multipoint),
+        tag("multiline").map(|_| GeometryType::Multiline),
+        tag("multipolygon").map(|_| GeometryType::Multipolygon),
+        tag("collection").map(|_| GeometryType::Collection),
     ))(input)
 }
 
-fn parse_geometry_inner(input: &str) -> IResult<&str, Vec<GeometryTypee>> {
+fn parse_geometry_inner(input: &str) -> IResult<&str, Vec<GeometryType>> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
     let (input, _) = space0(input)?;
@@ -537,15 +575,15 @@ fn parse_geometry_inner(input: &str) -> IResult<&str, Vec<GeometryTypee>> {
     Ok((input, ref_tables.iter().map(|t| t.1.clone()).collect()))
 }
 
-fn parse_geometry_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_geometry_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = tag("geometry")(input)?;
     let (input, rt) = opt(parse_geometry_inner)(input)?;
     // let (input, rt) = cut(opt(parse_record_inner))(input)?;
-    Ok((input, FieldTypee::Geometry(rt.unwrap_or(vec![]))))
+    Ok((input, FieldType::Geometry(rt.unwrap_or(vec![]))))
 }
 
 struct ListItem {
-    item_type: FieldTypee,
+    item_type: FieldType,
     size: Option<u64>,
 }
 fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
@@ -570,25 +608,25 @@ fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
     ))
 }
 
-fn parse_array_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_array_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = tag("array")(input)?;
     let (input, item_type) = opt(parse_list_inner)(input)?;
 
     if let Some(ListItem { item_type, size }) = item_type {
-        Ok((input, FieldTypee::Array(Box::new(item_type), size)))
+        Ok((input, FieldType::Array(Box::new(item_type), size)))
     } else {
-        Ok((input, FieldTypee::Array(Box::new(FieldTypee::Any), None)))
+        Ok((input, FieldType::Array(Box::new(FieldType::Any), None)))
     }
 }
 
-fn parse_set_type(input: &str) -> IResult<&str, FieldTypee> {
+fn parse_set_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = tag("set")(input)?;
     let (input, item_type) = opt(parse_list_inner)(input)?;
 
     if let Some(ListItem { item_type, size }) = item_type {
-        Ok((input, FieldTypee::Set(Box::new(item_type), size)))
+        Ok((input, FieldType::Set(Box::new(item_type), size)))
     } else {
-        Ok((input, FieldTypee::Set(Box::new(FieldTypee::Any), None)))
+        Ok((input, FieldType::Set(Box::new(FieldType::Any), None)))
     }
 }
 
@@ -611,178 +649,178 @@ mod tests {
         };
     }
 
-    test_parse_db_field_type!(any, "any", FieldTypee::Any);
-    test_parse_db_field_type!(null, "null", FieldTypee::Null);
-    test_parse_db_field_type!(bool, "bool", FieldTypee::Bool);
-    test_parse_db_field_type!(bytes, "bytes", FieldTypee::Bytes);
-    test_parse_db_field_type!(datetime, "datetime", FieldTypee::Datetime);
-    test_parse_db_field_type!(decimal, "decimal", FieldTypee::Decimal);
-    test_parse_db_field_type!(duration, "duration", FieldTypee::Duration);
-    test_parse_db_field_type!(flaot, "float", FieldTypee::Float);
-    test_parse_db_field_type!(int, "int", FieldTypee::Int);
-    test_parse_db_field_type!(number, "number", FieldTypee::Number);
-    test_parse_db_field_type!(object, "object", FieldTypee::Object);
-    test_parse_db_field_type!(string, "string", FieldTypee::String);
-    test_parse_db_field_type!(uuild, "uuid", FieldTypee::Uuid);
-    test_parse_db_field_type!(record_any, "record", FieldTypee::Record(vec![]));
+    test_parse_db_field_type!(any, "any", FieldType::Any);
+    test_parse_db_field_type!(null, "null", FieldType::Null);
+    test_parse_db_field_type!(bool, "bool", FieldType::Bool);
+    test_parse_db_field_type!(bytes, "bytes", FieldType::Bytes);
+    test_parse_db_field_type!(datetime, "datetime", FieldType::Datetime);
+    test_parse_db_field_type!(decimal, "decimal", FieldType::Decimal);
+    test_parse_db_field_type!(duration, "duration", FieldType::Duration);
+    test_parse_db_field_type!(flaot, "float", FieldType::Float);
+    test_parse_db_field_type!(int, "int", FieldType::Int);
+    test_parse_db_field_type!(number, "number", FieldType::Number);
+    test_parse_db_field_type!(object, "object", FieldType::Object);
+    test_parse_db_field_type!(string, "string", FieldType::String);
+    test_parse_db_field_type!(uuild, "uuid", FieldType::Uuid);
+    test_parse_db_field_type!(record_any, "record", FieldType::Record(vec![]));
     test_parse_db_field_type!(
         record_single_alien,
         "record<alien> ",
-        FieldTypee::Record(vec!["alien".into()])
+        FieldType::Record(vec!["alien".into()])
     );
     test_parse_db_field_type!(
         record_spaced,
         "record      < lowo | dayo  |     oye>",
-        FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        FieldType::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
     );
     test_parse_db_field_type!(
         record_no_space,
         "record<lowo|dayo|oye>",
-        FieldTypee::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
+        FieldType::Record(vec!["lowo".into(), "dayo".into(), "oye".into()])
     );
 
     test_parse_db_field_type!(
         geometry_empty_optional,
         "geometry",
-        FieldTypee::Geometry(vec![])
+        FieldType::Geometry(vec![])
     );
 
     test_parse_db_field_type!(
         geometry_single,
         "geometry<point>",
-        FieldTypee::Geometry(vec![GeometryTypee::Point])
+        FieldType::Geometry(vec![GeometryType::Point])
     );
 
     test_parse_db_field_type!(
         geometry_spaced,
         "geometry    < point | line  |     polygon>",
-        FieldTypee::Geometry(vec![
-            GeometryTypee::Point,
-            GeometryTypee::Line,
-            GeometryTypee::Polygon
+        FieldType::Geometry(vec![
+            GeometryType::Point,
+            GeometryType::Line,
+            GeometryType::Polygon
         ])
     );
 
     test_parse_db_field_type!(
         geometry_no_space,
         "geometry<collection| point|multipolygon|line|polygon>",
-        FieldTypee::Geometry(vec![
-            GeometryTypee::Collection,
-            GeometryTypee::Point,
-            GeometryTypee::Multipolygon,
-            GeometryTypee::Line,
-            GeometryTypee::Polygon
+        FieldType::Geometry(vec![
+            GeometryType::Collection,
+            GeometryType::Point,
+            GeometryType::Multipolygon,
+            GeometryType::Line,
+            GeometryType::Polygon
         ])
     );
     test_parse_db_field_type!(
         option_string,
         "option<string>",
-        FieldTypee::Option(Box::new(FieldTypee::String))
+        FieldType::Option(Box::new(FieldType::String))
     );
     test_parse_db_field_type!(
         option_float,
         "option<float>",
-        FieldTypee::Option(Box::new(FieldTypee::Float))
+        FieldType::Option(Box::new(FieldType::Float))
     );
     test_parse_db_field_type!(
         option_bool,
         "option<bool>",
-        FieldTypee::Option(Box::new(FieldTypee::Bool))
+        FieldType::Option(Box::new(FieldType::Bool))
     );
     test_parse_db_field_type!(
         option_decimal,
         "option<decimal>",
-        FieldTypee::Option(Box::new(FieldTypee::Decimal))
+        FieldType::Option(Box::new(FieldType::Decimal))
     );
     test_parse_db_field_type!(
         option_duration,
         "option<duration>",
-        FieldTypee::Option(Box::new(FieldTypee::Duration))
+        FieldType::Option(Box::new(FieldType::Duration))
     );
     test_parse_db_field_type!(
         option_datetime,
         "option<datetime>",
-        FieldTypee::Option(Box::new(FieldTypee::Datetime))
+        FieldType::Option(Box::new(FieldType::Datetime))
     );
     test_parse_db_field_type!(
         option_uuid,
         "option<uuid>",
-        FieldTypee::Option(Box::new(FieldTypee::Uuid))
+        FieldType::Option(Box::new(FieldType::Uuid))
     );
     test_parse_db_field_type!(
         option_number,
         "option<number>",
-        FieldTypee::Option(Box::new(FieldTypee::Number))
+        FieldType::Option(Box::new(FieldType::Number))
     );
     test_parse_db_field_type!(
         option_object,
         "option<object>",
-        FieldTypee::Option(Box::new(FieldTypee::Object))
+        FieldType::Option(Box::new(FieldType::Object))
     );
     test_parse_db_field_type!(
         option_bytes,
         "option<bytes>",
-        FieldTypee::Option(Box::new(FieldTypee::Bytes))
+        FieldType::Option(Box::new(FieldType::Bytes))
     );
     test_parse_db_field_type!(
         option_any,
         "option<any>",
-        FieldTypee::Option(Box::new(FieldTypee::Any))
+        FieldType::Option(Box::new(FieldType::Any))
     );
     test_parse_db_field_type!(
         option_null,
         "option<null>",
-        FieldTypee::Option(Box::new(FieldTypee::Null))
+        FieldType::Option(Box::new(FieldType::Null))
     );
     test_parse_db_field_type!(
         option_geometry,
         "option<geometry>",
-        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![])))
+        FieldType::Option(Box::new(FieldType::Geometry(vec![])))
     );
     test_parse_db_field_type!(
         option_geometry_single,
         "option<geometry<point>>",
-        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![GeometryTypee::Point])))
+        FieldType::Option(Box::new(FieldType::Geometry(vec![GeometryType::Point])))
     );
     test_parse_db_field_type!(
         option_geometry_spaced,
         "option<geometry    < point | line  |     polygon>>",
-        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![
-            GeometryTypee::Point,
-            GeometryTypee::Line,
-            GeometryTypee::Polygon
+        FieldType::Option(Box::new(FieldType::Geometry(vec![
+            GeometryType::Point,
+            GeometryType::Line,
+            GeometryType::Polygon
         ])))
     );
     test_parse_db_field_type!(
         option_geometry_no_space,
         "option<geometry<collection| point|multipolygon|line|polygon>>",
-        FieldTypee::Option(Box::new(FieldTypee::Geometry(vec![
-            GeometryTypee::Collection,
-            GeometryTypee::Point,
-            GeometryTypee::Multipolygon,
-            GeometryTypee::Line,
-            GeometryTypee::Polygon
+        FieldType::Option(Box::new(FieldType::Geometry(vec![
+            GeometryType::Collection,
+            GeometryType::Point,
+            GeometryType::Multipolygon,
+            GeometryType::Line,
+            GeometryType::Polygon
         ])))
     );
     test_parse_db_field_type!(
         option_int,
         "option<int>",
-        FieldTypee::Option(Box::new(FieldTypee::Int))
+        FieldType::Option(Box::new(FieldType::Int))
     );
     test_parse_db_field_type!(
         option_simple_record,
         "option<record>",
-        FieldTypee::Option(Box::new(FieldTypee::Record(vec![])))
+        FieldType::Option(Box::new(FieldType::Record(vec![])))
     );
     test_parse_db_field_type!(
         option_record,
         "option<record<alien>>",
-        FieldTypee::Option(Box::new(FieldTypee::Record(vec!["alien".into()])))
+        FieldType::Option(Box::new(FieldType::Record(vec!["alien".into()])))
     );
     test_parse_db_field_type!(
         option_record_spaced,
         "option<record    < lowo | dayo  |     oye>>",
-        FieldTypee::Option(Box::new(FieldTypee::Record(vec![
+        FieldType::Option(Box::new(FieldType::Record(vec![
             "lowo".into(),
             "dayo".into(),
             "oye".into()
@@ -791,7 +829,7 @@ mod tests {
     test_parse_db_field_type!(
         option_record_no_space,
         "option<record<lowo|dayo|oye>>",
-        FieldTypee::Option(Box::new(FieldTypee::Record(vec![
+        FieldType::Option(Box::new(FieldType::Record(vec![
             "lowo".into(),
             "dayo".into(),
             "oye".into()
@@ -802,28 +840,28 @@ mod tests {
     test_parse_db_field_type!(
         union_string_int,
         "string|int",
-        FieldTypee::Union(vec![FieldTypee::String, FieldTypee::Int])
+        FieldType::Union(vec![FieldType::String, FieldType::Int])
     );
 
     // Array
     test_parse_db_field_type!(
         option_array,
         "option<array>",
-        FieldTypee::Option(Box::new(FieldTypee::Array(Box::new(FieldTypee::Any), None)))
+        FieldType::Option(Box::new(FieldType::Array(Box::new(FieldType::Any), None)))
     );
     test_parse_db_field_type!(
         option_array_string,
         "option<array<string>>",
-        FieldTypee::Option(Box::new(FieldTypee::Array(
-            Box::new(FieldTypee::String),
+        FieldType::Option(Box::new(FieldType::Array(
+            Box::new(FieldType::String),
             None
         )))
     );
     test_parse_db_field_type!(
         option_array_string_10_nospace,
         "option<array<string,10>>",
-        FieldTypee::Option(Box::new(FieldTypee::Array(
-            Box::new(FieldTypee::String),
+        FieldType::Option(Box::new(FieldType::Array(
+            Box::new(FieldType::String),
             Some(10)
         )))
     );
@@ -831,24 +869,24 @@ mod tests {
     test_parse_db_field_type!(
         option_array_string_10,
         "option<array<string, 10>>",
-        FieldTypee::Option(Box::new(FieldTypee::Array(
-            Box::new(FieldTypee::String),
+        FieldType::Option(Box::new(FieldType::Array(
+            Box::new(FieldType::String),
             Some(10)
         )))
     );
     test_parse_db_field_type!(
         option_array_string_10_spaced,
         "option<array    < string , 10> >",
-        FieldTypee::Option(Box::new(FieldTypee::Array(
-            Box::new(FieldTypee::String),
+        FieldType::Option(Box::new(FieldType::Array(
+            Box::new(FieldType::String),
             Some(10)
         )))
     );
     test_parse_db_field_type!(
         option_array_string_10_spaced2,
         "option   <  array    < string ,   10> >",
-        FieldTypee::Option(Box::new(FieldTypee::Array(
-            Box::new(FieldTypee::String),
+        FieldType::Option(Box::new(FieldType::Array(
+            Box::new(FieldType::String),
             Some(10)
         )))
     );
@@ -856,26 +894,26 @@ mod tests {
     test_parse_db_field_type!(
         array_any,
         "array",
-        FieldTypee::Array(Box::new(FieldTypee::Any), None)
+        FieldType::Array(Box::new(FieldType::Any), None)
     );
     test_parse_db_field_type!(
         array_string,
         "array<string>",
-        FieldTypee::Array(Box::new(FieldTypee::String), None)
+        FieldType::Array(Box::new(FieldType::String), None)
     );
     test_parse_db_field_type!(
         array_object_10_nospace,
         "array<object,69>",
-        FieldTypee::Array(Box::new(FieldTypee::Object), Some(69))
+        FieldType::Array(Box::new(FieldType::Object), Some(69))
     );
     test_parse_db_field_type!(
         array_geometry_10,
         "array<geometry<point | polygon | multipolygon>, 10>",
-        FieldTypee::Array(
-            Box::new(FieldTypee::Geometry(vec![
-                GeometryTypee::Point,
-                GeometryTypee::Polygon,
-                GeometryTypee::Multipolygon
+        FieldType::Array(
+            Box::new(FieldType::Geometry(vec![
+                GeometryType::Point,
+                GeometryType::Polygon,
+                GeometryType::Multipolygon
             ])),
             Some(10)
         )
@@ -883,13 +921,13 @@ mod tests {
     test_parse_db_field_type!(
         array_null_10_spaced,
         "array    < null , 10> ",
-        FieldTypee::Array(Box::new(FieldTypee::Null), Some(10))
+        FieldType::Array(Box::new(FieldType::Null), Some(10))
     );
     test_parse_db_field_type!(
         array_nested_array,
         "array<array<float, 42> , 10> ",
-        FieldTypee::Array(
-            Box::new(FieldTypee::Array(Box::new(FieldTypee::Float), Some(42))),
+        FieldType::Array(
+            Box::new(FieldType::Array(Box::new(FieldType::Float), Some(42))),
             Some(10)
         )
     );
@@ -898,26 +936,26 @@ mod tests {
     test_parse_db_field_type!(
         set_any,
         "set",
-        FieldTypee::Set(Box::new(FieldTypee::Any), None)
+        FieldType::Set(Box::new(FieldType::Any), None)
     );
     test_parse_db_field_type!(
         set_string,
         "set<string>",
-        FieldTypee::Set(Box::new(FieldTypee::String), None)
+        FieldType::Set(Box::new(FieldType::String), None)
     );
     test_parse_db_field_type!(
         set_object_10_nospace,
         "set<object,69>",
-        FieldTypee::Set(Box::new(FieldTypee::Object), Some(69))
+        FieldType::Set(Box::new(FieldType::Object), Some(69))
     );
     test_parse_db_field_type!(
         set_geometry_10,
         "set<geometry<point | polygon | multipolygon>, 10>",
-        FieldTypee::Set(
-            Box::new(FieldTypee::Geometry(vec![
-                GeometryTypee::Point,
-                GeometryTypee::Polygon,
-                GeometryTypee::Multipolygon
+        FieldType::Set(
+            Box::new(FieldType::Geometry(vec![
+                GeometryType::Point,
+                GeometryType::Polygon,
+                GeometryType::Multipolygon
             ])),
             Some(10)
         )
@@ -925,13 +963,13 @@ mod tests {
     test_parse_db_field_type!(
         set_null_10_spaced,
         "set    < null , 10> ",
-        FieldTypee::Set(Box::new(FieldTypee::Null), Some(10))
+        FieldType::Set(Box::new(FieldType::Null), Some(10))
     );
     test_parse_db_field_type!(
         set_nested_array,
         "set<set<float, 42> , 10> ",
-        FieldTypee::Set(
-            Box::new(FieldTypee::Set(Box::new(FieldTypee::Float), Some(42))),
+        FieldType::Set(
+            Box::new(FieldType::Set(Box::new(FieldType::Float), Some(42))),
             Some(10)
         )
     );
@@ -942,293 +980,293 @@ mod tests {
     test_parse_db_field_type!(
         union_any_null,
         "any | null",
-        FieldTypee::Union(vec![FieldTypee::Any, FieldTypee::Null])
+        FieldType::Union(vec![FieldType::Any, FieldType::Null])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool,
         "any | null | bool",
-        FieldTypee::Union(vec![FieldTypee::Any, FieldTypee::Null, FieldTypee::Bool])
+        FieldType::Union(vec![FieldType::Any, FieldType::Null, FieldType::Bool])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes,
         "any | null | bool | bytes",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime,
         "any | null | bool | bytes | datetime",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal,
         "any | null | bool | bytes | datetime | decimal",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration,
         "any | null | bool | bytes | datetime | decimal | duration",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float,
         "any | null | bool | bytes | datetime | decimal | duration | float",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int,
         "any | null | bool | bytes | datetime | decimal | duration | float | int",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid_record,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid | record",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid,
-            FieldTypee::Record(vec![])
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid,
+            FieldType::Record(vec![])
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid_record_geometry,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid | record | geometry",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid,
-            FieldTypee::Record(vec![]),
-            FieldTypee::Geometry(vec![])
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid,
+            FieldType::Record(vec![]),
+            FieldType::Geometry(vec![])
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid_record_geometry_array,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid | record | geometry | array",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid,
-            FieldTypee::Record(vec![]),
-            FieldTypee::Geometry(vec![]),
-            FieldTypee::Array(Box::new(FieldTypee::Any), None)
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid,
+            FieldType::Record(vec![]),
+            FieldType::Geometry(vec![]),
+            FieldType::Array(Box::new(FieldType::Any), None)
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid_record_geometry_array_set,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid | record | geometry | array | set",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid,
-            FieldTypee::Record(vec![]),
-            FieldTypee::Geometry(vec![]),
-            FieldTypee::Array(Box::new(FieldTypee::Any), None),
-            FieldTypee::Set(Box::new(FieldTypee::Any), None)
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid,
+            FieldType::Record(vec![]),
+            FieldType::Geometry(vec![]),
+            FieldType::Array(Box::new(FieldType::Any), None),
+            FieldType::Set(Box::new(FieldType::Any), None)
         ])
     );
 
     test_parse_db_field_type!(
         union_any_null_bool_bytes_datetime_decimal_duration_float_int_number_object_string_uuid_record_geometry_array_set_option,
         "any | null | bool | bytes | datetime | decimal | duration | float | int | number | object | string | uuid | record | geometry | array | set | option<int>",
-        FieldTypee::Union(vec![
-            FieldTypee::Any,
-            FieldTypee::Null,
-            FieldTypee::Bool,
-            FieldTypee::Bytes,
-            FieldTypee::Datetime,
-            FieldTypee::Decimal,
-            FieldTypee::Duration,
-            FieldTypee::Float,
-            FieldTypee::Int,
-            FieldTypee::Number,
-            FieldTypee::Object,
-            FieldTypee::String,
-            FieldTypee::Uuid,
-            FieldTypee::Record(vec![]),
-            FieldTypee::Geometry(vec![]),
-            FieldTypee::Array(Box::new(FieldTypee::Any), None),
-            FieldTypee::Set(Box::new(FieldTypee::Any), None),
-            FieldTypee::Option(Box::new(FieldTypee::Int))
+        FieldType::Union(vec![
+            FieldType::Any,
+            FieldType::Null,
+            FieldType::Bool,
+            FieldType::Bytes,
+            FieldType::Datetime,
+            FieldType::Decimal,
+            FieldType::Duration,
+            FieldType::Float,
+            FieldType::Int,
+            FieldType::Number,
+            FieldType::Object,
+            FieldType::String,
+            FieldType::Uuid,
+            FieldType::Record(vec![]),
+            FieldType::Geometry(vec![]),
+            FieldType::Array(Box::new(FieldType::Any), None),
+            FieldType::Set(Box::new(FieldType::Any), None),
+            FieldType::Option(Box::new(FieldType::Int))
         ])
     );
 
     test_parse_db_field_type!(
         union_array_of_string_and_int_or_null,
         "array<string|int|null>",
-        FieldTypee::Array(
-            Box::new(FieldTypee::Union(vec![
-                FieldTypee::String,
-                FieldTypee::Int,
-                FieldTypee::Null
+        FieldType::Array(
+            Box::new(FieldType::Union(vec![
+                FieldType::String,
+                FieldType::Int,
+                FieldType::Null
             ])),
             None
         )
@@ -1237,31 +1275,31 @@ mod tests {
     test_parse_db_field_type!(
         union_array_of_string_and_int_or_null_10,
         "int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>",
-        FieldTypee::Union(vec![
-            FieldTypee::Int,
-            FieldTypee::Option(Box::new(FieldTypee::Float)),
-            FieldTypee::Array(
-                Box::new(FieldTypee::Union(vec![
-                    FieldTypee::Option(Box::new(FieldTypee::String)),
-                    FieldTypee::Int,
-                    FieldTypee::Null
+        FieldType::Union(vec![
+            FieldType::Int,
+            FieldType::Option(Box::new(FieldType::Float)),
+            FieldType::Array(
+                Box::new(FieldType::Union(vec![
+                    FieldType::Option(Box::new(FieldType::String)),
+                    FieldType::Int,
+                    FieldType::Null
                 ])),
                 Some(10)
             ),
-            FieldTypee::Set(
-                Box::new(FieldTypee::Union(vec![
-                    FieldTypee::Option(Box::new(FieldTypee::Number)),
-                    FieldTypee::Float,
-                    FieldTypee::Null
+            FieldType::Set(
+                Box::new(FieldType::Union(vec![
+                    FieldType::Option(Box::new(FieldType::Number)),
+                    FieldType::Float,
+                    FieldType::Null
                 ])),
                 Some(10)
             ),
-            FieldTypee::Option(Box::new(FieldTypee::Array(
-                Box::new(FieldTypee::Any),
+            FieldType::Option(Box::new(FieldType::Array(
+                Box::new(FieldType::Any),
                 None
             ))),
-            FieldTypee::Option(Box::new(FieldTypee::Set(
-                Box::new(FieldTypee::Option(Box::new(FieldTypee::Int))),
+            FieldType::Option(Box::new(FieldType::Set(
+                Box::new(FieldType::Option(Box::new(FieldType::Int))),
                 None
             )))
         ])
