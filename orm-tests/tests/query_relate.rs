@@ -234,7 +234,8 @@ async fn can_relate_subquery_to_subquery_relate_with_queries() -> SurrealOrmResu
     // select users from company
     // let from_statement = select(All).from(codebreather.id);
     // We use select value to pull out the nested users field to only give the list of userids
-    // us make this work
+    // from_only ensures that we do not get a nested vector of users, rather we get a flat
+    // vector.
     let from_statement = select_value(&users).from_only(codebreather.id);
     // select devs
     let devs_statement = select(All)
