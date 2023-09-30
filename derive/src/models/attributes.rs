@@ -314,7 +314,7 @@ impl MyFieldReceiver {
                                         }
                                     }
                                     _ => {
-                                        panic!("when link_many attribute is provided, item_type must be of type record or record(<ref_node_table_name>)");
+                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>");
                                     }
                                 }
                             }
