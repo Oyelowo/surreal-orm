@@ -63,10 +63,10 @@ pub struct AlienWithExplicitAttributes {
     #[surreal_orm(type_ = "duration")]
     life_expectancy: Duration,
 
-    #[surreal_orm(type_ = "geometry(feature)")]
+    #[surreal_orm(type_ = "geometry<polygon>")]
     territory_area: geo::Polygon,
 
-    #[surreal_orm(type_ = "geometry(feature)")]
+    #[surreal_orm(type_ = "geometry<point>")]
     home: geo::Point,
 
     // #[surreal_orm(item_type = "string")]

@@ -587,7 +587,8 @@ impl MyFieldReceiver {
                 let ref_struct_name = format_ident!("{ref_node_type}");
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Array(
-                        Box::new(#crate_name::FieldType::Record(#ref_struct_name::table_name()))
+                        Box::new(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
+                        ::std::option::Option::None
                     )),
                     // field_item_type: Some(
                     //     quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
