@@ -535,7 +535,8 @@ impl SchemaFieldsProperties {
                     };
 
                     // Only works for vectors
-                    let array_trait = if field_receiver.is_list() { array_element
+                    let array_trait = if field_receiver.is_list() { 
+                        array_element
                         .or_else(||field_receiver.get_array_item_type())
                         .or_else(|| Some(field_receiver.get_fallback_array_item_concrete_type()))
                         .map(|items|{
