@@ -180,8 +180,8 @@ pub struct Student {
 
     #[surreal_orm(
         link_many = "Book",
-        type_ = "array",
-        item_type = "record(book)",
+        type_ = "array<record<book>>",
+        // item_type = "record(book)",
         item_assert_fn = "erer"
     )]
     #[serde(rename = "semesterCourses")]

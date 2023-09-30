@@ -90,7 +90,8 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     #[surreal_orm(type_ = "geometry(feature)")]
     home: geo::Point,
 
-    #[surreal_orm(item_type = "string")]
+    #[surreal_orm(type_ = "array<string>")]
+    // #[surreal_orm(item_type = "string")]
     tags: Vec<String>,
 
     #[surreal_orm(link_one = "Weapon", type_ = "record(weapon)")]
@@ -99,8 +100,8 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     // Again, we dont have to provide the type attribute, it can auto detect
     #[surreal_orm(
         link_many = "SpaceShip",
-        type_ = "array",
-        item_type = "record(space_ship)"
+        type_ = "array<record<space_ship>>"
+        // item_type = "record(space_ship)"
     )]
     space_ships: LinkMany<SpaceShip>,
 }
