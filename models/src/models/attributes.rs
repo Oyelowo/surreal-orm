@@ -227,7 +227,7 @@ pub struct StudentWithGranularAttributes {
     // becuase I have enough info from the annotation to derive it
     #[surreal_orm(
         link_self = "StudentWithGranularAttributes",
-        type_ = "record(student_with_granular_attributes)"
+        type_ = "record<student_with_granular_attributes>"
     )]
     best_friend: LinkSelf<StudentWithGranularAttributes>,
 
@@ -401,7 +401,7 @@ pub struct StudentWithDefineAttr {
     // becuase I have enough info from the annotation to derive it
     #[surreal_orm(
         link_self = "StudentWithDefineAttr",
-        type_ = "record(student_with_define_attr)"
+        type_ = "record<student_with_define_attr>"
     )]
     best_friend: LinkSelf<StudentWithDefineAttr>,
 
