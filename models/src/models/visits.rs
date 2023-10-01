@@ -50,7 +50,7 @@ pub struct VisitsExplicit<In: Node, Out: Node> {
     #[serde(rename = "in")]
     #[surreal_orm(type_ = "record")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(type_ = "record<any>")]
+    #[surreal_orm(type_ = "record")]
     // #[surreal_orm(type_ = "record<planet>")]
     pub out: LinkOne<Out>,
     #[surreal_orm(type_ = "duration")]
@@ -68,7 +68,7 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in")]
-    #[surreal_orm(type_ = "record<any>")]
+    #[surreal_orm(type_ = "record")]
     pub in_: LinkOne<In>,
     #[surreal_orm(type_ = "record")]
     pub out: LinkOne<Out>,

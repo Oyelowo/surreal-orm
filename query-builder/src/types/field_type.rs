@@ -56,7 +56,7 @@ use std::{
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_while1},
-    character::complete::{alphanumeric1, space0},
+    character::complete::space0,
     combinator::{all_consuming, cut, opt, value},
     error::context,
     multi::{separated_list0, separated_list1},
@@ -64,7 +64,6 @@ use nom::{
     IResult, Parser,
 };
 use serde::{Deserialize, Serialize};
-use surrealdb::sql;
 
 /// Geometry types supported by surrealdb
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize, Hash)]
@@ -166,6 +165,11 @@ impl FromStr for FieldType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        //         let error = format!(
+        //     "Invalid type. Expected one of - `{:?}`",
+        //     FieldType::variants()
+        // );
+
         parse_field_type(s)
             .map(|(_, ft)| ft)
             .map_err(|e| format!("{:?}", e))
@@ -415,11 +419,11 @@ impl FieldType {
 /// Parses a field type
 /// ```
 /// # use surreal_query_builder as surreal_orm;
-/// # use surreal_orm::{FieldTypee, parse_db_field_type};
-/// assert_eq!(parse_db_field_type("any"), Ok(("", FieldTypee::Any)));
-/// assert_eq!(parse_db_field_type("null"), Ok(("", FieldTypee::Null)));
-/// assert_eq!(parse_db_field_type("bool"), Ok(("", FieldTypee::Bool)));
-/// assert_eq!(parse_db_field_type("option<string>"), Ok(("", FieldTypee::Option(Box::new(FieldTypee::String)))));
+/// # use surreal_orm::{FieldType, parse_field_type};
+/// assert_eq!(parse_field_type("any"), Ok(("", FieldType::Any)));
+/// assert_eq!(parse_field_type("null"), Ok(("", FieldType::Null)));
+/// assert_eq!(parse_field_type("bool"), Ok(("", FieldType::Bool)));
+/// assert_eq!(parse_field_type("option<string>"), Ok(("", FieldType::Option(Box::new(FieldType::String)))));
 /// ```
 pub fn parse_field_type(input: &str) -> IResult<&str, FieldType> {
     // all_consuming(parse_top_level_field_type)(input)
