@@ -518,7 +518,7 @@ impl MyFieldReceiver {
             //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
             // });
             FieldTypeDerived {
-                field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Array)),
+                field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None))),
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
@@ -1217,7 +1217,7 @@ impl ReferencedNodeMeta {
                     FieldType::Array(_, _) => quote!(),
                     FieldType::Set(_, _) => quote!(),
                     // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Datetime => quote!(#crate_name::sql::DateTime::from(#value)),
+                    FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value)),
                     FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value)),
                     FieldType::Number => quote!(#crate_name::sql::Number::from(#value)),
                     FieldType::Object => quote!(),
@@ -1255,7 +1255,7 @@ impl ReferencedNodeMeta {
                     FieldType::Array(_, _) => quote!(),
                     FieldType::Set(_, _) => quote!(),
                     // FieldType::Array => quote!(#crate_name::sql::Value::from(#value)),
-                    FieldType::Datetime => quote!(#crate_name::sql::DateTime::from(#value_fn())),
+                    FieldType::Datetime => quote!(#crate_name::sql::Datetime::from(#value_fn())),
                     FieldType::Decimal => quote!(#crate_name::sql::Number::from(#value_fn())),
                     FieldType::Number => quote!(#crate_name::sql::Number::from(#value_fn())),
                     FieldType::Object => quote!(),
