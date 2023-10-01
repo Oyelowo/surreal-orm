@@ -204,7 +204,7 @@ impl MyFieldReceiver {
         let crate_name = get_crate_name(false);
 
         if let Some(type_) = &self.type_ {
-            let type_ = type_.0.to_string();
+            let field_type = type_.into_inner();
             // id: record<student>
             // in: record
             // out: record
@@ -216,25 +216,17 @@ impl MyFieldReceiver {
             match self {
                 MyFieldReceiver {
                     type_: Some(type_),
-                    // item_type,
                     item_assert,
                     item_assert_fn,
                     ..
-                } if !type_.0.trim().to_string().starts_with("array")
-                    // & (item_type.is_some()
-                    & (
-                        item_assert.is_some()
-                        || item_assert_fn.is_some()) =>
-                {
+                } if !type_.is_array() & (item_assert.is_some() || item_assert_fn.is_some()) => {
                     panic!("attributes  `item_assert`, or `item_assert_fn` can only be used when type is array.")
-                    // panic!("attributes `item_type`, `item_assert`, or `item_assert_fn` can only be used when type is array.")
                 }
                 MyFieldReceiver {
                     type_: Some(type_),
                     link_one,
                     link_self,
                     link_many,
-                    // item_type,
                     ..
                 } => {
                     let linked_node = link_one.clone().or(link_self.clone());
@@ -244,7 +236,8 @@ impl MyFieldReceiver {
                         FieldType::variants()
                     );
                     let error = error.as_str();
-                    let field_type = FieldType::from_str(type_.to_string()).expect(error);
+                    // let field_type = type_.0.expect(error);
+                    let field_type = type_.into_inner();
                     // .expect("Field type should have been validated here. If not, report bug");
                     let ref_node_table_name_checker_ident =
                         format_ident!("I{field_name_normalized}RefChecker");
@@ -280,7 +273,7 @@ impl MyFieldReceiver {
                             }
                         }
                     } else if let Some(link_many_ref_node) = link_many {
-                        match field_type {
+                        match field_type.clone() {
                             FieldType::Array(item_type, _) => {
                                 // Check content type if of array type. link_many is used for
                                 // // array types. e.g link_many = "Blog"
@@ -313,7 +306,7 @@ impl MyFieldReceiver {
                                         }
                                     }
                                     _ => {
-                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>");
+                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>. Got - {}", item_type.deref().to_string());
                                     }
                                 }
                             }
@@ -339,7 +332,6 @@ impl MyFieldReceiver {
 
             // Gather assertions for all field types
             let raw_type = &self.ty;
-            let field_type = FieldType::from_str(&type_.to_string()).unwrap();
 
             if let DataType::Edge = model_type {
                 match field_name_normalized.as_str() {
@@ -454,9 +446,15 @@ impl MyFieldReceiver {
             //                           );
             // define_field_methods.push(quote!(.type_(#crate_name::FieldType::String)));
             // let content
+            let ft_string = field_type.to_string();
             Some(FieldTypeDerived {
-                field_type: quote!(#type_.parse::<#crate_name::FieldType>()
+                // TODO: Remove commented out codde
+                // field_type: quote!(#type_.parse::<#crate_name::FieldType>()
+                //                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
+                field_type: quote!(#ft_string.parse::<#crate_name::FieldType>()
                                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
+                // TODO: Fix me
+                // field_type: quote!(#type_.into_inner()),
 
                 // field_item_type: self.item_type.as_ref().map(|item_type| {
                 //     let item_type = &item_type.0;
@@ -521,32 +519,28 @@ impl MyFieldReceiver {
             // });
             FieldTypeDerived {
                 field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Array)),
-                // field_item_type: item_type,
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
         } else if self.raw_type_is_object() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Object),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
             }
         } else if self.raw_type_is_duration() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Duration),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
             }
         } else if self.raw_type_is_datetime() {
             FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::DateTime),
-                // field_item_type: None,
+                field_type: quote!(#crate_name::FieldType::Datetime),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
             }
         } else if self.raw_type_is_geometry() {
             FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![#crate_name::GeometryType::Feature])),
-                // field_item_type: None,
+                // TODO: check if to auto-infer more speicific geometry type?
+                field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
         } else if let MyFieldReceiver {
@@ -561,8 +555,7 @@ impl MyFieldReceiver {
         {
             if field_name_normalized == "id" {
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(Self::table_name())),
-                    // field_item_type: None,
+                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
                 // TODO: Only do this for Edge
@@ -570,23 +563,21 @@ impl MyFieldReceiver {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::RecordAny),
-                    // field_item_type: None,
+                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
                 let ref_node_type = format_ident!("{ref_node_type}");
 
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(#ref_node_type::table_name())),
-                    // field_item_type: None,
+                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if let Some(ref_node_type) = link_many {
                 let ref_struct_name = format_ident!("{ref_node_type}");
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Array(
-                        Box::new(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
+                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_struct_name::table_name()])),
                         ::std::option::Option::None
                     )),
                     // field_item_type: Some(
@@ -601,18 +592,21 @@ impl MyFieldReceiver {
                 }
             } else if let Some(_ref_node_type) = nest_array {
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Array),
+                    field_type: quote!(#crate_name::FieldType::Array(
+                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
+                        ::std::option::Option::None
+                    )),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_one {
                 FieldTypeDerived {
                     // #crate_name::SurrealId<#foreign_node>
-                    field_type: quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
+                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_self {
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(_ref_node_type::table_name())),
+                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
                     static_assertion: quote!(),
                 }
             } else {
@@ -643,7 +637,6 @@ impl MyFieldReceiver {
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
             || self.raw_type_is_list()
-            // || self.item_type.is_some()
             || self.raw_type_is_object()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
@@ -652,8 +645,8 @@ impl MyFieldReceiver {
     pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
         let surreal_field_type = match &self.type_ {
-            Some(x) => FieldType::from_str(x.0.as_str()).unwrap_or(FieldType::Any),
-            None => FieldType::Any,
+            Some(ft) => ft.deref(),
+            None => &FieldType::Any,
         };
 
         let type_is_numeric = match ty {
@@ -738,9 +731,7 @@ impl MyFieldReceiver {
 
     pub fn is_list(&self) -> bool {
         self.raw_type_is_list()
-            || self.type_.as_ref().map_or(false, |t| {
-                t.parse::<FieldType>().unwrap_or(FieldType::Any).is_array()
-            })
+            || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
             || self.link_many.is_some()
     }
 
@@ -832,12 +823,13 @@ impl MyFieldReceiver {
     }
 
     pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
-        let field_type =
-            FieldType::from_str(self.type_.clone().unwrap_or("any".into()).to_string()).unwrap();
+        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+
         let item_type = match field_type {
             FieldType::Array(item_type, _) => item_type,
-            // _ => panic!("Must be array type"),
-            _ => Box::new(FieldType::Any),
+            // TODO: Check if to error out here or just use Any
+            _ => panic!("Must be array type"),
+            // _ => Box::new(FieldType::Any),
         };
 
         let crate_name = get_crate_name(false);
@@ -897,7 +889,6 @@ impl MyFieldReceiver {
             }
             FieldType::Object => {
                 quote!(#crate_name::sql::Object)
-                // quote!(#crate_name::Object)
             }
             FieldType::Record(_) => {
                 quote!(::std::convert::Option<#crate_name::sql::Thing>)
@@ -975,18 +966,33 @@ impl FromMeta for Permissions {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct FieldTypeWrapper(pub String);
+#[derive(Debug, Clone)]
+pub struct FieldTypeWrapper(FieldType);
 
-impl From<&str> for FieldTypeWrapper {
-    fn from(value: &str) -> Self {
-        Self(value.to_string())
+impl Deref for FieldTypeWrapper {
+    type Target = FieldType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl FromMeta for FieldTypeWrapper {
+    fn from_string(value: &str) -> darling::Result<Self> {
+        match value.parse::<FieldType>() {
+            Ok(f) => Ok(Self(f)),
+            Err(e) => Err(darling::Error::unknown_value(&e)),
+        }
     }
 }
 
 impl FieldTypeWrapper {
-    fn to_string(&self) -> &String {
-        &self.0
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+
+    fn into_inner(&self) -> FieldType {
+        self.clone().0
     }
 }
 
@@ -1020,7 +1026,6 @@ impl ReferencedNodeMeta {
         {
             let FieldTypeDerived {
                 field_type,
-                // field_item_type,
                 static_assertion,
             } = type_data;
 
@@ -1067,7 +1072,6 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        // || item_type.is_some()
                         || item_assert.is_some()
                         || item_assert_fn.is_some()
                 ) =>
@@ -1092,7 +1096,6 @@ impl ReferencedNodeMeta {
                 value_fn,
                 permissions,
                 permissions_fn,
-                // item_type,
                 item_assert,
                 item_assert_fn,
                 relate,
@@ -1108,7 +1111,6 @@ impl ReferencedNodeMeta {
                         || value_fn.is_some()
                         || permissions.is_some()
                         || permissions_fn.is_some()
-                        // || item_type.is_some()
                         || item_assert.is_some()
                         || item_assert_fn.is_some()
                 ) =>
@@ -1198,7 +1200,7 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                let field_type = FieldType::from_str(type_.to_string()).unwrap();
+                let field_type = type_.into_inner();
                 let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
                     FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value)),
@@ -1236,7 +1238,7 @@ impl ReferencedNodeMeta {
                 type_: Some(type_),
                 ..
             } => {
-                let field_type = FieldType::from_str(type_.to_string()).unwrap();
+                let field_type = type_.into_inner();
                 let static_assertion = match field_type {
                     FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_fn())),
                     FieldType::Null => quote!(#crate_name::sql::Value::Null),
@@ -1586,23 +1588,6 @@ impl NormalisedField {
         Self {
             field_ident_normalised,
             field_ident_normalised_as_str,
-        }
-    }
-}
-
-impl Deref for FieldTypeWrapper {
-    type Target = String;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl FromMeta for FieldTypeWrapper {
-    fn from_string(value: &str) -> darling::Result<Self> {
-        match value.parse::<FieldType>() {
-            Ok(f) => Ok(Self(f.to_string())),
-            Err(e) => Err(darling::Error::unknown_value(&e)),
         }
     }
 }
