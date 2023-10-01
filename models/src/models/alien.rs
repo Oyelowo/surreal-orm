@@ -31,7 +31,6 @@ pub struct Alien {
     #[surreal_orm(
         link_many = "SpaceShip",
         // type_ = "array",
-        // item_type = "record(space_ship)"
     )]
     pub space_ships: LinkMany<SpaceShip>,
 
@@ -81,6 +80,7 @@ pub struct AlienWithExplicitAttributes {
 
     #[surreal_orm(link_one = "Weapon", type_ = "record<weapon>")]
     weapon: LinkOne<Weapon>,
+
     // Again, we dont have to provide the type attribute, it can auto detect
     #[surreal_orm(link_many = "SpaceShip", type_ = "array<record<space_ship>>")]
     space_ships: LinkMany<SpaceShip>,
@@ -104,10 +104,6 @@ pub struct Alien2 {
     pub weapon: Rocket,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    #[surreal_orm(
-        link_many = "SpaceShip",
-        type_ = "array<record<space_ship>>"
-        // item_type = "record(space_ship)"
-    )]
+    #[surreal_orm(link_many = "SpaceShip", type_ = "array<record<space_ship>>")]
     pub space_ships: LinkMany<SpaceShip>,
 }
