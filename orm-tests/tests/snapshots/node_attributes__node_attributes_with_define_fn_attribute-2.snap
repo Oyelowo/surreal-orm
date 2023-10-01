@@ -1,8 +1,8 @@
 ---
-source: surreal-orm-tests/tests/node_attributes.rs
+source: orm-tests/tests/node_attributes.rs
 expression: "StudentWithDefineFnAttr::define_fields().iter().map(|x|\n                x.to_raw().build()).collect::<Vec<_>>().join(\"\\n\")"
 ---
-DEFINE FIELD id ON TABLE student_with_define_fn_attr TYPE record (student_with_define_fn_attr);
+DEFINE FIELD id ON TABLE student_with_define_fn_attr TYPE record<student_with_define_fn_attr>;
 DEFINE FIELD lastName ON TABLE student_with_define_fn_attr TYPE string VALUE $value OR 'Oyedayo' ASSERT ($value IS NOT NONE) AND ($value ~ 'is_email')
 PERMISSIONS
 FOR select
@@ -42,8 +42,7 @@ FOR create, delete
 	WHERE firstName IS 'Oyelowo'
 FOR update
 	WHERE ageDefineInline <= 130;
-DEFINE FIELD bestFriend ON TABLE student_with_define_fn_attr TYPE record (student_with_define_fn_attr);
-DEFINE FIELD unoBook ON TABLE student_with_define_fn_attr TYPE record (book);
-DEFINE FIELD course ON TABLE student_with_define_fn_attr TYPE record (book);
-DEFINE FIELD semesterCourses ON TABLE student_with_define_fn_attr TYPE array;
-DEFINE FIELD semesterCourses.* ON TABLE student_with_define_fn_attr TYPE record (book);
+DEFINE FIELD bestFriend ON TABLE student_with_define_fn_attr TYPE record<student_with_define_fn_attr>;
+DEFINE FIELD unoBook ON TABLE student_with_define_fn_attr TYPE record<book>;
+DEFINE FIELD course ON TABLE student_with_define_fn_attr TYPE record<book>;
+DEFINE FIELD semesterCourses ON TABLE student_with_define_fn_attr TYPE array<record<book>>;

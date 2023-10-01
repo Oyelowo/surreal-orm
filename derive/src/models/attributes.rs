@@ -7,7 +7,7 @@
  * Licensed under the MIT license
  */
 
-use std::{ops::Deref, str::FromStr};
+use std::ops::Deref;
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -230,15 +230,7 @@ impl MyFieldReceiver {
                     ..
                 } => {
                     let linked_node = link_one.clone().or(link_self.clone());
-
-                    let error = format!(
-                        "Invalid type. Expected one of - `{:?}`",
-                        FieldType::variants()
-                    );
-                    let error = error.as_str();
-                    // let field_type = type_.0.expect(error);
                     let field_type = type_.into_inner();
-                    // .expect("Field type should have been validated here. If not, report bug");
                     let ref_node_table_name_checker_ident =
                         format_ident!("I{field_name_normalized}RefChecker");
 

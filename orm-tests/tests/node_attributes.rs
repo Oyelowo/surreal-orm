@@ -29,19 +29,18 @@ async fn test_node_type_atttribute_auto_inferred() -> SurrealOrmResult<()> {
             .map(|x| x.to_raw().build())
             .collect::<Vec<_>>()
             .join("\n"),
-        "DEFINE FIELD id ON TABLE alien TYPE record (alien);
+        "DEFINE FIELD id ON TABLE alien TYPE record<alien>;
 DEFINE FIELD name ON TABLE alien TYPE string;
 DEFINE FIELD age ON TABLE alien TYPE int;
 DEFINE FIELD created ON TABLE alien TYPE datetime;
 DEFINE FIELD lifeExpectancy ON TABLE alien TYPE duration;
-DEFINE FIELD linePolygon ON TABLE alien TYPE geometry (feature);
-DEFINE FIELD territoryArea ON TABLE alien TYPE geometry (feature);
-DEFINE FIELD home ON TABLE alien TYPE geometry (feature);
-DEFINE FIELD tags ON TABLE alien TYPE array;
-DEFINE FIELD ally ON TABLE alien TYPE record (alien);
-DEFINE FIELD weapon ON TABLE alien TYPE record (weapon);
-DEFINE FIELD spaceShips ON TABLE alien TYPE array;
-DEFINE FIELD spaceShips.* ON TABLE alien TYPE record (space_ship);"
+DEFINE FIELD linePolygon ON TABLE alien TYPE geometry;
+DEFINE FIELD territoryArea ON TABLE alien TYPE geometry;
+DEFINE FIELD home ON TABLE alien TYPE geometry;
+DEFINE FIELD tags ON TABLE alien TYPE array<any>;
+DEFINE FIELD ally ON TABLE alien TYPE record<alien>;
+DEFINE FIELD weapon ON TABLE alien TYPE record<weapon>;
+DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;"
     );
 
     Ok(())
@@ -62,19 +61,17 @@ async fn test_node_type_atttribute_explicit() -> SurrealOrmResult<()> {
             .map(|x| x.to_raw().build())
             .collect::<Vec<_>>()
             .join("\n"),
-        "DEFINE FIELD id ON TABLE alien_with_explicit_attributes TYPE record (alien_with_explicit_attributes);
+        "DEFINE FIELD id ON TABLE alien_with_explicit_attributes TYPE record<alien_with_explicit_attributes>;
 DEFINE FIELD name ON TABLE alien_with_explicit_attributes TYPE string;
 DEFINE FIELD age ON TABLE alien_with_explicit_attributes TYPE int;
 DEFINE FIELD created ON TABLE alien_with_explicit_attributes TYPE datetime;
 DEFINE FIELD lifeExpectancy ON TABLE alien_with_explicit_attributes TYPE duration;
-DEFINE FIELD territoryArea ON TABLE alien_with_explicit_attributes TYPE geometry (feature);
-DEFINE FIELD home ON TABLE alien_with_explicit_attributes TYPE geometry (feature);
-DEFINE FIELD tags ON TABLE alien_with_explicit_attributes TYPE array;
-DEFINE FIELD tags.* ON TABLE alien_with_explicit_attributes TYPE string;
-DEFINE FIELD ally ON TABLE alien_with_explicit_attributes TYPE record (alien_with_explicit_attributes);
-DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes TYPE record (weapon);
-DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes TYPE array;
-DEFINE FIELD spaceShips.* ON TABLE alien_with_explicit_attributes TYPE record (space_ship);"
+DEFINE FIELD territoryArea ON TABLE alien_with_explicit_attributes TYPE geometry<polygon>;
+DEFINE FIELD home ON TABLE alien_with_explicit_attributes TYPE geometry<point>;
+DEFINE FIELD tags ON TABLE alien_with_explicit_attributes TYPE array<string>;
+DEFINE FIELD ally ON TABLE alien_with_explicit_attributes TYPE record<alien_with_explicit_attributes>;
+DEFINE FIELD weapon ON TABLE alien_with_explicit_attributes TYPE record<weapon>;
+DEFINE FIELD spaceShips ON TABLE alien_with_explicit_attributes TYPE array<record<space_ship>>;"
     );
 
     Ok(())
