@@ -122,7 +122,7 @@ impl Display for GeometryType {
 }
 
 #[allow(missing_docs)]
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum FieldType {
     /// Use this when you explicitly don't want to specify the field's data type. The field will
     /// allow any data type supported by SurrealDB.
@@ -152,7 +152,7 @@ pub enum FieldType {
     String,
     Uuid,
     /// Store a reference to another record. The value must be a Record ID.
-    Record(Vec<sql::Table>), // record<user | admin> or record<user> or record
+    Record(Vec<crate::Table>), // record<user | admin> or record<user> or record
     /// RFC 7946 compliant data type for storing geometry in the GeoJson format.
     Geometry(Vec<GeometryType>), // geometry<point | line | polygon>
     Option(Box<FieldType>),           // option<string>
