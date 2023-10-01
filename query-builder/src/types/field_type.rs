@@ -55,9 +55,10 @@ use std::{
 
 use nom::{
     branch::alt,
-    bytes::complete::tag,
+    bytes::complete::{tag, take_while1},
     character::complete::{alphanumeric1, space0},
-    combinator::{opt, value},
+    combinator::{all_consuming, cut, opt, value},
+    error::context,
     multi::{separated_list0, separated_list1},
     sequence::{preceded, tuple},
     IResult, Parser,
@@ -165,7 +166,7 @@ impl FromStr for FieldType {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_db_field_type(s)
+        parse_field_type(s)
             .map(|(_, ft)| ft)
             .map_err(|e| format!("{:?}", e))
     }
@@ -420,7 +421,15 @@ impl FieldType {
 /// assert_eq!(parse_db_field_type("bool"), Ok(("", FieldTypee::Bool)));
 /// assert_eq!(parse_db_field_type("option<string>"), Ok(("", FieldTypee::Option(Box::new(FieldTypee::String)))));
 /// ```
-pub fn parse_db_field_type(input: &str) -> IResult<&str, FieldType> {
+pub fn parse_field_type(input: &str) -> IResult<&str, FieldType> {
+    // all_consuming(parse_top_level_field_type)(input)
+    all_consuming(cut(context(
+        "Unexpected characters found after parsing",
+        parse_top_level_field_type,
+    )))(input)
+}
+
+fn parse_top_level_field_type(input: &str) -> IResult<&str, FieldType> {
     alt((parse_union_type, parse_option_field_type))(input)
 }
 
@@ -459,7 +468,7 @@ fn parse_option_field_type(input: &str) -> IResult<&str, FieldType> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
     let (input, _) = space0(input)?;
-    let (input, ft) = parse_db_field_type(input)?;
+    let (input, ft) = parse_top_level_field_type(input)?;
     let (input, _) = space0(input)?;
     let (input, _) = tag(">")(input)?;
     let (input, _) = space0(input)?;
@@ -508,12 +517,20 @@ fn parse_primitive_type(input: &str) -> IResult<&str, FieldType> {
     ))(input)
 }
 
+fn is_valid_id_char(c: char) -> bool {
+    c.is_alphanumeric() || c == '_' || c == '-'
+}
+
+fn parse_identifier(input: &str) -> IResult<&str, &str> {
+    take_while1(is_valid_id_char)(input)
+}
+
 fn parse_record_inner(input: &str) -> IResult<&str, Vec<&str>> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
     let (input, _) = space0(input)?;
     let (input, ref_tables) =
-        separated_list0(tag("|"), tuple((space0, alphanumeric1, space0)))(input)?;
+        separated_list0(tag("|"), tuple((space0, parse_identifier, space0)))(input)?;
     let (input, _) = space0(input)?;
     let (input, _) = tag(">")(input)?;
     let (input, _) = space0(input)?;
@@ -590,7 +607,7 @@ fn parse_list_inner(input: &str) -> IResult<&str, ListItem> {
     let (input, _) = space0(input)?;
     let (input, _) = tag("<")(input)?;
     let (input, _) = space0(input)?;
-    let (input, field_type) = parse_db_field_type(input)?;
+    let (input, field_type) = parse_top_level_field_type(input)?;
     let (input, _) = space0(input)?;
     let (input, size) = opt(preceded(
         tuple((tag(","), space0)),
@@ -640,7 +657,7 @@ mod tests {
             paste::paste! {
                 #[test]
                 fn [< test_field_type_$name >]() {
-                    let result = parse_db_field_type($input);
+                    let result = parse_field_type($input);
                     let (input, ouput) = result.unwrap();
                     assert_eq!(input, "");
                     assert_eq!(ouput, $output);
