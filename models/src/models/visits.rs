@@ -45,12 +45,13 @@ pub type AlienVisitsPlanet = Visits<Alien, Planet>;
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "visits_explicit")]
 pub struct VisitsExplicit<In: Node, Out: Node> {
-    #[surreal_orm(type_ = "record(visits_explicit)")]
+    #[surreal_orm(type_ = "record<visits_explicit>")]
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
-    #[surreal_orm(type_ = "record()")]
+    #[surreal_orm(type_ = "record")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(type_ = "record()")]
+    #[surreal_orm(type_ = "record<any>")]
+    // #[surreal_orm(type_ = "record<planet>")]
     pub out: LinkOne<Out>,
     #[surreal_orm(type_ = "duration")]
     pub time_visited: Duration,
@@ -63,13 +64,13 @@ pub type AlienVisitsPlanetExplicit = VisitsExplicit<Alien, Planet>;
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "visits_with_explicit_attributes")]
 pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
-    #[surreal_orm(type_ = "record(visits_with_explicit_attributes)")]
+    #[surreal_orm(type_ = "record<visits_with_explicit_attributes>")]
     pub id: SurrealSimpleId<Self>,
 
     #[serde(rename = "in")]
-    #[surreal_orm(type_ = "record()")]
+    #[surreal_orm(type_ = "record<any>")]
     pub in_: LinkOne<In>,
-    #[surreal_orm(type_ = "record()")]
+    #[surreal_orm(type_ = "record")]
     pub out: LinkOne<Out>,
 
     #[surreal_orm(type_ = "string")]
@@ -84,25 +85,20 @@ pub struct VisitsWithExplicitAttributes<In: Node, Out: Node> {
     #[surreal_orm(type_ = "duration")]
     life_expectancy: Duration,
 
-    #[surreal_orm(type_ = "geometry(feature)")]
+    #[surreal_orm(type_ = "geometry<polygon>")]
     territory_area: geo::Polygon,
 
-    #[surreal_orm(type_ = "geometry(feature)")]
+    #[surreal_orm(type_ = "geometry<point>")]
     home: geo::Point,
 
     #[surreal_orm(type_ = "array<string>")]
-    // #[surreal_orm(item_type = "string")]
     tags: Vec<String>,
 
-    #[surreal_orm(link_one = "Weapon", type_ = "record(weapon)")]
+    #[surreal_orm(link_one = "Weapon", type_ = "record<weapon>")]
     weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    #[surreal_orm(
-        link_many = "SpaceShip",
-        type_ = "array<record<space_ship>>"
-        // item_type = "record(space_ship)"
-    )]
+    #[surreal_orm(link_many = "SpaceShip", type_ = "array<record<space_ship>>")]
     space_ships: LinkMany<SpaceShip>,
 }
 
