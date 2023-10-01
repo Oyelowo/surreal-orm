@@ -190,7 +190,6 @@ pub struct MyFieldReceiver {
 
 pub struct FieldTypeDerived {
     field_type: TokenStream,
-    // field_item_type: Option<TokenStream>,
     static_assertion: TokenStream,
 }
 
@@ -206,13 +205,13 @@ impl MyFieldReceiver {
 
         if let Some(type_) = &self.type_ {
             let type_ = type_.0.to_string();
-            // id: record(student)
+            // id: record<student>
             // in: record
             // out: record
-            // link_one => record(book) = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
-            // link_self => record(student) = #crate_name::validators::assert_has_field(<Student as Node>::TableNameChecker, student);
-            // link_many => Vec<Book> => array(record(book)) = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
-            // e.g names: Vec<T> => array || array(string) => names: array && names.* : string
+            // link_one => record<book> = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
+            // link_self => record<student> = #crate_name::validators::assert_has_field(<Student as Node>::TableNameChecker, student);
+            // link_many => Vec<Book> => array<record<book>> = #crate_name::validators::assert_has_field(<Book as Node>::TableNameChecker, book);
+            // e.g names: Vec<T> => array || array<string> => names: array && names.* : string
 
             match self {
                 MyFieldReceiver {

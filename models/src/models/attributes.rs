@@ -475,7 +475,7 @@ pub struct StudentWithDefineFnAttr {
     // becuase I have enough info from the annotation to derive it
     #[surreal_orm(
         link_self = "StudentWithDefineFnAttr",
-        type_ = "record(student_with_define_fn_attr)"
+        type_ = "record<student_with_define_fn_attr>"
     )]
     best_friend: LinkSelf<StudentWithDefineFnAttr>,
 
