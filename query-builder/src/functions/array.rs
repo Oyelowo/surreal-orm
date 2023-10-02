@@ -27,6 +27,7 @@
 // array::remove() Removes an item at a specific position from an array
 // array::reverse() Reverses the sorting order of an array
 // array::sort()	Sorts the values in an array in ascending or descending order
+// array::slice()	Returns a slice of an array
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
 // array::union()
@@ -1719,6 +1720,90 @@ pub mod sort {
     pub use array_sort_desc as desc;
 }
 
+/// The array::slice function returns a portion of an array.
+/// array::slice(array, start, len) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::slice([1,2,3,4,5], 2, 4);
+/// [3,4]
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `start` -  The start of the slice.
+/// * `len` -  length of the slice.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::slice!(vec![1, 2, 3, 4, 5], 2, 4);
+/// array::slice!(&[1, 2, 3, 4, 5], 2, 4);
+/// array::slice!(own_goals, 2, 4);
+/// array::slice!(goals, 2, 4);
+/// // It is also aliased as array_slice;
+/// array_slice!(vec![1, 2, 3, 4, 5], 2, 4);
+/// ```
+pub fn slice_fn(
+    arr: impl Into<ArrayLike>,
+    start: impl Into<NumberLike>,
+    len: impl Into<NumberLike>,
+) -> Function {
+    let arr: ArrayLike = arr.into();
+    let start: NumberLike = start.into();
+    let len: NumberLike = len.into();
+
+    Function {
+        query_string: format!(
+            "array::slice({}, {}, {})",
+            arr.build(),
+            start.build(),
+            len.build()
+        ),
+        bindings: arr
+            .get_bindings()
+            .into_iter()
+            .chain(start.get_bindings())
+            .chain(len.get_bindings())
+            .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(start.get_errors())
+            .chain(len.get_errors())
+            .collect(),
+    }
+}
+
+/// Slice function returns a portion of an array.
+/// array::slice(array, start, len) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::slice([1,2,3,4,5], 2, 4);
+/// [3,4]
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `start` -  The start of the slice.
+/// * `len` -  length of the slice.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::slice!(vec![1, 2, 3, 4, 5], 2, 4);
+/// array::slice!(&[1, 2, 3, 4, 5], 2, 4);
+/// array::slice!(own_goals, 2, 4);
+/// array::slice!(goals, 2, 4);
+/// // It is also aliased as array_slice;
+/// array_slice!(vec![1, 2, 3, 4, 5], 2, 4);
+/// ```
+#[macro_export]
+macro_rules! array_slice {
+    ( $arr:expr, $start:expr, $end:expr ) => {
+        $crate::functions::array::slice_fn($arr, $start, $end)
+    };
+}
+
+pub use array_slice as slice;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1924,5 +2009,33 @@ mod tests {
             "array::sort::desc([$_param_00000001, $_param_00000002, $_param_00000003])"
         );
         assert_eq!(result.to_raw().build(), "array::sort::desc([3, 2, 1])");
+    }
+
+    #[test]
+    fn test_slice() {
+        let arr = vec![1, 2, 3, 4, 5];
+        let result = slice_fn(arr, 2, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::slice($_param_00000001, $_param_00000002, $_param_00000003)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::slice([1, 2, 3, 4, 5], 2, 4)"
+        );
+    }
+
+    #[test]
+    fn test_slice_macro() {
+        let arr = arr![1, 2, 3, 4, 5];
+        let result = slice!(arr, 2, 4);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::slice([$_param_00000001, $_param_00000002, $_param_00000003, $_param_00000004, $_param_00000005], $_param_00000006, $_param_00000007)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::slice([1, 2, 3, 4, 5], 2, 4)"
+        );
     }
 }
