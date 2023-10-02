@@ -4,6 +4,8 @@ pub use static_assertions::assert_impl_all;
 pub use static_assertions::assert_impl_any;
 pub use static_assertions::assert_impl_one;
 pub use static_assertions::assert_type_eq_all;
+use std::any::TypeId;
+use std::collections::HashSet;
 
 /// Validate that type is a number at compile time
 ///
@@ -74,6 +76,12 @@ pub fn is_float<T: Float>() {}
 /// ```
 pub fn assert_is_vec<T: IntoIterator>() {
     let _ = <T as IntoIterator>::into_iter;
+}
+
+/// Validate that type is a hashset at compile time
+fn assert_is_hashset<T: 'static>(_: &T) -> bool {
+    // Here, you can change i32 to any other type based on what you are comparing with
+    TypeId::of::<T>() == TypeId::of::<HashSet<i32>>()
 }
 
 /// This function can only be called with two arrays of the same length.

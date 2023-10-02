@@ -82,6 +82,7 @@ pub struct AlienWithExplicitAttributes {
     weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
+    // #[surreal_orm(link_many = "SpaceShip", type_ = "set<record<space_ship>>")]
     #[surreal_orm(link_many = "SpaceShip", type_ = "array<record<space_ship>>")]
     space_ships: LinkMany<SpaceShip>,
 }
