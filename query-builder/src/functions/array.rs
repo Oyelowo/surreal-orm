@@ -28,6 +28,7 @@
 // array::reverse() Reverses the sorting order of an array
 // array::sort()	Sorts the values in an array in ascending or descending order
 // array::slice()	Returns a slice of an array
+// array::join
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
 // array::union()
@@ -1803,6 +1804,118 @@ macro_rules! array_slice {
 }
 
 pub use array_slice as slice;
+
+// The array::join function joins the elements of an array into a string, and returns the string.
+// array::join(array, separator) -> string
+// The following example shows this function, and its output, when used in a select statement:
+// SELECT * FROM array::join([1,2,3,4,5], ',');
+// 1,2,3,4,5
+// # Arguments
+// * `arr` -  A vector, field or param.
+// * `separator` -  The separator of the array.
+// # Examples
+//
+// ```rust
+// # use surreal_query_builder as  surreal_orm;
+// use surreal_orm::{*, functions::array};
+// let own_goals = Field::new("own_goals");
+// let goals = Param::new("goals");
+// array::join!(vec![1, 2, 3, 4, 5], ",");
+// array::join!(&[1, 2, 3, 4, 5], ",");
+// array::join!(own_goals, ",");
+// array::join!(goals, ",");
+// // It is also aliased as array_join;
+// array_join!(vec![1, 2, 3, 4, 5], ",");
+// ```
+pub fn join_fn(arr: impl Into<ArrayLike>, separator: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let separator: ValueLike = separator.into();
+
+    Function {
+        query_string: format!("array::join({}, {})", arr.build(), separator.build()),
+        bindings: arr
+            .get_bindings()
+            .into_iter()
+            .chain(separator.get_bindings())
+            .collect(),
+        errors: arr
+            .get_errors()
+            .into_iter()
+            .chain(separator.get_errors())
+            .collect(),
+    }
+}
+
+/// The array::join function joins the elements of an array into a string, and returns the string.
+/// array::join(array, separator) -> string
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::join([1,2,3,4,5], ',');
+/// 1,2,3,4,5
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `separator` -  The separator of the array.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::join!(vec![1, 2, 3, 4, 5], ",");
+/// array::join!(&[1, 2, 3, 4, 5], ",");
+/// array::join!(own_goals, ",");
+/// array::join!(goals, ",");
+/// // It is also aliased as array_join;
+/// array_join!(vec![1, 2, 3, 4, 5], ",");
+/// ```
+#[macro_export]
+macro_rules! array_join {
+    ( $arr:expr, $separator:expr ) => {
+        $crate::functions::array::join_fn($arr, $separator)
+    };
+}
+pub use array_join as join;
+
+#[cfg(test)]
+mod array_join_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_join() {
+        let result = array::join!(vec![1, 2, 3, 4, 5], ",");
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::join($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::join([1, 2, 3, 4, 5], ',')");
+    }
+
+    #[test]
+    fn test_array_join_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::join!(own_goals, ",");
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::join(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::join(own_goals, ',')");
+    }
+
+    #[test]
+    fn test_array_join_param() {
+        let goals = Param::new("goals");
+
+        let result = array::join!(goals, ",");
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::join($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::join($goals, ',')");
+    }
+}
 
 #[cfg(test)]
 mod tests {
