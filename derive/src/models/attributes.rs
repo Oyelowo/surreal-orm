@@ -7,7 +7,10 @@
  * Licensed under the MIT license
  */
 
-use std::ops::Deref;
+use std::{
+    fmt::{Display, Formatter},
+    ops::Deref,
+};
 
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
@@ -204,7 +207,7 @@ impl MyFieldReceiver {
         let crate_name = get_crate_name(false);
 
         if let Some(type_) = &self.type_ {
-            let field_type = type_.into_inner();
+            let field_type = type_.deref();
             // id: record<student>
             // in: record
             // out: record
@@ -230,7 +233,7 @@ impl MyFieldReceiver {
                     ..
                 } => {
                     let linked_node = link_one.clone().or(link_self.clone());
-                    let field_type = type_.into_inner();
+                    let field_type = type_.deref();
                     let ref_node_table_name_checker_ident =
                         format_ident!("I{field_name_normalized}RefChecker");
 
@@ -296,7 +299,7 @@ impl MyFieldReceiver {
                                         }
                                     }
                                     _ => {
-                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>. Got - {}", item_type.deref().to_string());
+                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>. Got - {}", item_type.deref());
                                     }
                                 }
                             }
@@ -990,6 +993,12 @@ impl FromMeta for Permissions {
 #[derive(Debug, Clone)]
 pub struct FieldTypeWrapper(FieldType);
 
+impl Display for FieldTypeWrapper {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl Deref for FieldTypeWrapper {
     type Target = FieldType;
 
@@ -1004,16 +1013,6 @@ impl FromMeta for FieldTypeWrapper {
             Ok(f) => Ok(Self(f)),
             Err(e) => Err(darling::Error::unknown_value(&e)),
         }
-    }
-}
-
-impl FieldTypeWrapper {
-    fn to_string(&self) -> String {
-        self.0.to_string()
-    }
-
-    fn into_inner(&self) -> FieldType {
-        self.clone().0
     }
 }
 
@@ -1221,7 +1220,7 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 let value = parse_lit_to_tokenstream(value).unwrap();
-                let field_type = type_.into_inner();
+                let field_type = type_.deref();
                 let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
                     FieldType::Uuid => quote!(#crate_name::sql::Uuid::from(#value)),
@@ -1259,7 +1258,7 @@ impl ReferencedNodeMeta {
                 type_: Some(type_),
                 ..
             } => {
-                let field_type = type_.into_inner();
+                let field_type = type_.deref();
                 let static_assertion = match field_type {
                     FieldType::Bytes => quote!(#crate_name::sql::Bytes::from(#value_fn())),
                     FieldType::Null => quote!(#crate_name::sql::Value::Null),

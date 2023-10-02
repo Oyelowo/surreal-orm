@@ -79,7 +79,7 @@ pub fn assert_is_vec<T: IntoIterator>() {
 }
 
 /// Validate that type is a hashset at compile time
-fn assert_is_hashset<T: 'static>(_: &T) -> bool {
+pub fn assert_is_hashset<T: 'static>(_: &T) -> bool {
     // Here, you can change i32 to any other type based on what you are comparing with
     TypeId::of::<T>() == TypeId::of::<HashSet<i32>>()
 }
