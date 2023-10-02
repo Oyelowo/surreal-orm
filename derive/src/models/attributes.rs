@@ -238,7 +238,7 @@ impl MyFieldReceiver {
                         // Validate that it is a type - record, when link_one or link_self used,
                         // since those attributes are used for record links. When record type
                         // provided, do static assertions validation to check the inner type e.g
-                        // record(book)
+                        // record<book>
                         match field_type {
                             FieldType::Record(link_table_names) => {
                                 let link_table_name = format_ident!(
@@ -266,11 +266,9 @@ impl MyFieldReceiver {
                         }
                     } else if let Some(link_many_ref_node) = link_many {
                         match field_type.clone() {
-                            FieldType::Array(item_type, _) => {
+                            FieldType::Array(item_type, _) | FieldType::Set(item_type, _) => {
                                 // Check content type if of array type. link_many is used for
                                 // // array types. e.g link_many = "Blog"
-                                // // let item_type =
-                                // FieldType::from_str(&item_type.0.to_string()).unwrap();
 
                                 match item_type.deref() {
                                     FieldType::Record(array_item_table_name) => {
@@ -514,6 +512,16 @@ impl MyFieldReceiver {
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
+        } else if self.raw_type_is_hash_set() || self.type_.is_some() {
+            let array_type = self.type_.as_ref().map(|ct| {
+                let ct = ct.to_string();
+                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
+            });
+
+            FieldTypeDerived {
+                field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None))),
+                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
+            }
         } else if self.raw_type_is_object() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Object),
@@ -629,6 +637,7 @@ impl MyFieldReceiver {
             || self.raw_type_is_string()
             || self.raw_type_is_bool()
             || self.raw_type_is_list()
+            || self.raw_type_is_hash_set()
             || self.raw_type_is_object()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
@@ -738,6 +747,26 @@ impl MyFieldReceiver {
                         return false;
                     }
                     last_seg.ident == "Vec"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn raw_type_is_hash_set(&self) -> bool {
+        let ty = &self.ty;
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path.path.segments.last().unwrap();
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        return false;
+                    }
+                    last_seg.ident == "HashSet"
                 } else {
                     false
                 }
