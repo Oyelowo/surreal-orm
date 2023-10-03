@@ -946,7 +946,6 @@ pub mod is {
         "string", StrandLike, "Oyelowo", "Oyelowo"
     );
 
-    // is geometry GeometryLike
     create_is_function!(
         /// The type::is::geometry function checks if given value is of type geometry.
         /// Also aliased as `type_is_geometry!`
@@ -975,7 +974,6 @@ pub mod is {
         "geometry", crate::GeometryLike, geo::point!(x: 51.509865, y: -0.118092), "(51.509865, -0.118092)"
     );
 
-    // is line
     create_is_function!(
         /// The type::is::line function checks if given value is of type line.
         /// Also aliased as `type_is_line!`
@@ -1033,5 +1031,76 @@ pub mod is {
             y: 47.60621,
         },
     ]), "LINESTRING (-122.33583 47.60621, -122.33583 47.60622, -122.33584 47.60622, -122.33584 47.60621, -122.33583 47.60621)"
+    );
+
+    create_is_function!(
+        /// The type::is::multiline function checks if given value is of type multiline.
+        /// Also aliased as `type_is_multiline!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type multiline. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::multiline!(geo::MultiLineString(vec![
+        ///    geo::LineString(vec![
+        ///        geo::Coord {
+        ///        x: -122.33583,
+        ///        y: 47.60621,
+        ///        },
+        ///        geo::Coord {
+        ///        x: -122.33583,
+        ///        y: 47.60622,
+        ///        },
+        ///    ]),
+        ///    geo::LineString(vec![
+        ///        geo::Coord {
+        ///        x: -122.33583,
+        ///        y: 47.60621,
+        ///        },
+        ///        geo::Coord {
+        ///        x: -122.33583,
+        ///        y: 47.60622,
+        ///        },
+        ///    ]),
+        /// ]));
+        /// assert_eq!(result.to_raw().build(),
+        /// "type::is::multiline({ type: 'MultiLineString', coordinates: [[[-122.33583, 47.60621], [-122.33583, 47.60622]], [[-122.33583, 47.60621], [-122.33583, 47.60622]]] })");
+        ///
+        /// let multiline_field = Field::new("multiline_field");
+        /// let result = type_::is::multiline!(multiline_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::multiline(multiline_field)");
+        ///
+        /// let multiline_param = Param::new("multiline_param");
+        /// let result = type_::is::multiline!(multiline_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::multiline($multiline_param)");
+        /// ```
+        =>
+        "multiline", crate::GeometryLike, geo::MultiLineString(vec![
+        geo::LineString(vec![
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60622,
+            },
+        ]),
+        geo::LineString(vec![
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60622,
+            },
+        ]),
+    ]), "MULTILINESTRING ((-122.33583 47.60621, -122.33583 47.60622), (-122.33583 47.60621, -122.33583 47.60622))"
     );
 }
