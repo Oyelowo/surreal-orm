@@ -15,6 +15,8 @@
 // array::concat()	Returns the merged values from two arrays
 // array::difference()	Returns the difference between two arrays
 // array::distinct()	Returns the unique items in an array
+// array::find_index()	Returns the index of the first occurrence of X value
+// array::find() Finds the first item in an array that matches a condition
 // array::flatten() Flattens multiple arrays into a single array
 // array::group() Flattens and returns the unique items in an array
 // array::insert() Inserts an item at the end of an array, or in a specific position
@@ -762,6 +764,175 @@ mod array_distinct_tests {
         assert_eq!(result.get_bindings().len(), 0);
         assert_eq!(result.fine_tune_params(), "array::distinct($goals)");
         assert_eq!(result.to_raw().build(), "array::distinct($goals)");
+    }
+}
+
+/// The array::find function returns the first value in an array which matches the given value.
+pub fn find_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: ValueLike = value.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+    Function {
+        query_string: format!("array::find({}, {})", arr.build(), value.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array::find function returns the first value in an array which matches the given value.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `value` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::find!(vec![1, 2, 3, 4], 2);
+/// array::find!(own_goals, goals);
+/// array::find!(&[1, 2, 3, 4], 2);
+/// // It is also aliased as array_find;
+/// array_find!(&[1, 2, 3, 4], 2);
+/// ```
+#[macro_export]
+macro_rules! array_find {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::find_fn($arr, $value)
+    };
+}
+pub use array_find as find;
+
+#[cfg(test)]
+mod array_find_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_find() {
+        let result = array::find!(vec![1, 2, 3, 4], 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::find([1, 2, 3, 4], 2)");
+    }
+
+    #[test]
+    fn test_array_find_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::find!(own_goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::find(own_goals, 2)");
+    }
+
+    #[test]
+    fn test_array_find_param() {
+        let goals = Param::new("goals");
+
+        let result = array::find!(goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::find($goals, 2)");
+    }
+}
+
+/// The array::find_index function returns the index of the first value in an array which matches the given value.
+pub fn find_index_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: ValueLike = value.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+    Function {
+        query_string: format!("array::find_index({}, {})", arr.build(), value.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array::find_index function returns the index of the first value in an array which matches the given value.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `value` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::find_index!(vec![1, 2, 3, 4], 2);
+/// array::find_index!(own_goals, goals);
+/// array::find_index!(&[1, 2, 3, 4], 2);
+/// // It is also aliased as array_find_index;
+/// array_find_index!(&[1, 2, 3, 4], 2);
+/// ```
+#[macro_export]
+macro_rules! array_find_index {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::find_index_fn($arr, $value)
+    };
+}
+pub use array_find_index as find_index;
+
+#[cfg(test)]
+mod array_find_index_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_find_index() {
+        let result = array::find_index!(vec![1, 2, 3, 4], 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find_index($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::find_index([1, 2, 3, 4], 2)"
+        );
+    }
+
+    #[test]
+    fn test_array_find_index_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::find_index!(own_goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find_index(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::find_index(own_goals, 2)");
+    }
+
+    #[test]
+    fn test_array_find_index_param() {
+        let goals = Param::new("goals");
+
+        let result = array::find_index!(goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::find_index($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::find_index($goals, 2)");
     }
 }
 
