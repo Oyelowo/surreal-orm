@@ -45,6 +45,7 @@
 // array::join
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
+// array::transpose()	Performs 2d array transposition on two arrays
 // array::union()
 
 use std::fmt::Display;
@@ -1026,6 +1027,117 @@ create_fn_with_two_array_args!(
     =>
     "logical_xor"
 );
+
+/// The array::transpose function transposes an array of arrays, returning a single array containing the transposed values.
+/// array::transpose(array) -> array
+/// The following example shows this function, and its output, when used in a select statement:
+/// SELECT * FROM array::transpose([[1,2,3],[4,5,6],[7,8,9]]);
+pub fn transpose_fn(arr: impl Into<ArrayLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    errors.extend(arr.get_errors());
+    Function {
+        query_string: format!("array::transpose({})", arr.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array::transpose function transposes an array of arrays, returning a single array containing the transposed values.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::transpose!(vec![1, 2, 3, 4, 5]);
+/// array::transpose!(own_goals);
+/// array::transpose!(&[1, 2, 3, 4, 5]);
+/// array::transpose!(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
+/// ```
+#[macro_export]
+macro_rules! array_transpose {
+    ( $arr:expr ) => {
+        $crate::functions::array::transpose_fn($arr)
+    };
+}
+pub use array_transpose as transpose;
+
+#[cfg(test)]
+mod array_transpose_test {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_transpose() {
+        let result = array::transpose!(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::transpose($_param_00000001)"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::transpose([[1, 2, 3], [4, 5, 6], [7, 8, 9]])"
+        );
+    }
+
+    #[test]
+    fn test_array_transpose_array() {
+        let arr = arr![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+
+        let result = array::transpose!(arr);
+        assert_eq!(result.get_bindings().len(), 3);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::transpose([$_param_00000001, $_param_00000002, $_param_00000003])"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::transpose([[1, 2, 3], [4, 5, 6], [7, 8, 9]])"
+        );
+    }
+
+    #[test]
+    fn test_array_transpose_multiple_fields_and_params() {
+        let own_goals = Field::new("own_goals");
+        let goals = Param::new("goals");
+
+        let result = array::transpose!(arr![own_goals, goals]);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::transpose([own_goals, $goals])"
+        );
+        assert_eq!(
+            result.to_raw().build(),
+            "array::transpose([own_goals, $goals])"
+        );
+    }
+
+    #[test]
+    fn test_array_transpose_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::transpose!(own_goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::transpose(own_goals)");
+        assert_eq!(result.to_raw().build(), "array::transpose(own_goals)");
+    }
+
+    #[test]
+    fn test_array_transpose_param() {
+        let goals = Param::new("goals");
+
+        let result = array::transpose!(goals);
+        assert_eq!(result.get_bindings().len(), 0);
+        assert_eq!(result.fine_tune_params(), "array::transpose($goals)");
+        assert_eq!(result.to_raw().build(), "array::transpose($goals)");
+    }
+}
 
 /// The array:at function returns the value at the specified index in an array.
 pub fn at_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
