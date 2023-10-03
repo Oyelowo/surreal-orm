@@ -26,6 +26,9 @@
 // array::insert() Inserts an item at the end of an array, or in a specific position
 // array::intersect()	Returns the values which intersect two arrays
 // array::len()	Returns the length of an array
+// rray::logical_and()	Performs the AND logical operations on two arrays
+// array::logical_or()	Performs the OR logical operations on two arrays
+// array::logical_xor()	Performs the XOR logical operations on two arrays
 // array::max() Returns the maximum item in an array
 // array::min() Returns the minimum item in an array
 // array::pop() Returns the last item from an array
@@ -746,6 +749,90 @@ create_fn_with_two_array_args!(
     /// ```
     =>
     "boolean_xor"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::logical_and function performs the AND logical operations on two arrays.
+    /// array::logical_and(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::logical_and([1,2,3,4], [3,4,5,6]);
+    /// [3,4]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    ///
+    /// array::logical_and!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::logical_and!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_logical_and;
+    /// array_logical_and!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "logical_and"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::logical_or function performs the OR logical operations on two arrays.
+    /// array::logical_or(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::logical_or([1,2,3,4], [3,4,5,6]);
+    /// [1,2,3,4,5,6]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    ///
+    /// array::logical_or!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::logical_or!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_logical_or;
+    /// array_logical_or!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "logical_or"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::logical_xor function performs the XOR logical operations on two arrays.
+    /// array::logical_xor(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::logical_xor([1,2,3,4], [3,4,5,6]);
+    /// [1,2,5,6]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    ///
+    /// array::logical_xor!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::logical_xor!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_logical_xor;
+    /// array_logical_xor!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "logical_xor"
 );
 
 /// The array::clump function returns the original array split into sub-arrays of size. Similar to slice::chunks
