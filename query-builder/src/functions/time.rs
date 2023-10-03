@@ -591,7 +591,6 @@ macro_rules! time_floor {
 
 pub use time_floor as floor;
 
-// time ceil
 /// The time::ceil function rounds a datetime up by a specific duration.
 pub fn ceil_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
     let datetime: DatetimeLike = datetime.into();
@@ -1063,3 +1062,151 @@ mod tests {
         assert_eq!(result.to_raw().build(), "now()");
     }
 }
+
+macro_rules! create_time_fn_with_single_array_of_datetime_arg {
+    ($(#[$attr:meta])* => $function_name: expr) => {
+        paste::paste! {
+            $(#[$attr])*
+            pub fn [<$function_name _fn>](datetime: impl ::std::convert::Into<$crate::ArrayLike>) -> $crate::Function {
+                let datetime: $crate::ArrayLike = datetime.into();
+                let query_string = format!("time::{}({})", $function_name, datetime.build());
+
+                $crate::Function {
+                    query_string,
+                    bindings: datetime.get_bindings(),
+                    errors: datetime.get_errors(),
+                }
+            }
+
+            $(#[$attr])*
+            #[macro_export]
+            macro_rules! [<time_ $function_name>] {
+                ( $datetime:expr ) => {
+                    $crate::functions::time::[<$function_name _fn>]($datetime)
+                };
+            }
+
+            pub use [<time_ $function_name>] as [<$function_name>];
+
+            #[cfg(test)]
+            mod [<test_ $function_name _fn>] {
+                use $crate::*;
+                use crate::functions::time;
+
+
+                #[test]
+                fn [<test_ $function_name _fn_with_datetime_field>]() {
+                    let rebirth_date = $crate::Field::new("rebirth_date");
+                    let result = time::[<$function_name>]!(rebirth_date);
+
+                    assert_eq!(result.fine_tune_params(), format!("time::{}(rebirth_date)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("time::{}(rebirth_date)", $function_name));
+                }
+
+                #[test]
+                fn [<test_ $function_name _fn_with_plain_datetime>]() {
+                    let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+                                chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+                                chrono::Utc,
+                            );
+                    let dt2 = $crate::Param::new("dt2");
+                    let result = time::[<$function_name>]!(arr![dt, dt2]);
+                    assert_eq!(result.fine_tune_params(), format!("time::{}([$_param_00000001, $dt2])", $function_name));
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("time::{}(['1970-01-01T00:01:01Z', $dt2])", $function_name)
+
+                    );
+                }
+            }
+        }
+    }
+
+}
+create_time_fn_with_single_array_of_datetime_arg!(
+    /// The time::max function returns the maximum datetime from an array of datetimes.
+    /// The function is also aliased as `time_max!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The array of datetimes to extract the maximum datetime from. Could also be a field or a parameter representing an array of datetimes.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::time};
+    ///
+    /// let dt1 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    /// let dt2 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(62, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    /// let dt3 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(63, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::max!([dt1, dt2, dt3]);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::max(['1970-01-01T00:01:01Z', '1970-01-01T00:01:02Z', '1970-01-01T00:01:03Z'])"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::max!([rebirth_date]);
+    /// assert_eq!(result.to_raw().build(), "time::max([rebirth_date])");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::max!([param]);
+    /// assert_eq!(result.to_raw().build(), "time::max([$rebirth_date])");
+    /// ```
+    =>
+    "max"
+);
+
+create_time_fn_with_single_array_of_datetime_arg!(
+    /// The time::min function returns the minimum datetime from an array of datetimes.
+    /// The function is also aliased as `time_min!`.
+    ///
+    /// # Arguments
+    ///
+    /// * `datetime` - The array of datetimes to extract the minimum datetime from. Could also be a field or a parameter representing an array of datetimes.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::time};
+    ///
+    /// let dt1 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    /// let dt2 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(62, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    /// let dt3 = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+    ///     chrono::NaiveDateTime::from_timestamp_opt(63, 0).unwrap(),
+    ///     chrono::Utc,
+    /// );
+    ///
+    /// let result = time::min!([dt1, dt2, dt3]);
+    /// assert_eq!(
+    ///    result.to_raw().build(),
+    ///    "time::min(['1970-01-01T00:01:01Z', '1970-01-01T00:01:02Z', '1970-01-01T00:01:03Z'])"
+    /// );
+    ///
+    /// let rebirth_date = Field::new("rebirth_date");
+    /// let result = time::min!([rebirth_date]);
+    /// assert_eq!(result.to_raw().build(), "time::min([rebirth_date])");
+    ///
+    /// let param = Param::new("rebirth_date");
+    /// let result = time::min!([param]);
+    /// assert_eq!(result.to_raw().build(), "time::min([$rebirth_date])");
+    /// ```
+    =>
+    "min"
+);
