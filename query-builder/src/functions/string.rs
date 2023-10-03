@@ -1562,3 +1562,244 @@ mod tests {
         );
     }
 }
+
+fn create_two_strings_args_helper(
+    str1: impl Into<StrandLike>,
+    str2: impl Into<StrandLike>,
+    func_name: &str,
+) -> Function {
+    let str1: StrandLike = str1.into();
+    let str2: StrandLike = str2.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(str1.get_bindings());
+    bindings.extend(str2.get_bindings());
+    errors.extend(str1.get_errors());
+    errors.extend(str2.get_errors());
+    Function {
+        query_string: format!("string::{func_name}({}, {})", str1.build(), str2.build()),
+        bindings,
+        errors,
+    }
+}
+
+macro_rules! create_fn_with_two_strings_args {
+    ($(#[$attr:meta])* => $function_name:expr, $function_path:expr) => {
+        paste::paste! {
+            $(#[$attr])*
+            pub fn [<$function_name _fn>](str1: impl Into<$crate::StrandLike>, str2: impl Into<$crate::StrandLike>) -> $crate::Function {
+                create_two_strings_args_helper(str1, str2, $function_path)
+            }
+
+            $(#[$attr])*
+            #[macro_export]
+            macro_rules! [<string_ $function_name>] {
+                ( $str1:expr, $str2:expr ) => {
+                    $crate::functions::string::[<$function_name _fn>]($str1, $str2)
+                };
+            }
+            pub use [<string_ $function_name>] as [<$function_name>];
+
+            #[cfg(test)]
+            mod [<test_ $function_name>] {
+                use $crate::{functions::string, *};
+
+                #[test]
+                fn [<test $function_name fn_on_strand_macro_on_diverse_strands>]() {
+                    let name = Field::new("name");
+                    let result = functions::string::[<$function_name _fn>](name, "Oyelowo");
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("string::{}(name, $_param_00000001)", $function_path)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("string::{}(name, 'Oyelowo')", $function_path)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _fn_on_same_element_types>]() {
+                    let result = string::[<$function_name _fn>]("Oyelowo", "Oyedayo");
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("string::{}($_param_00000001, $_param_00000002)", $function_path)
+                    );
+
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("string::{}('Oyelowo', 'Oyedayo')", $function_path)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _macro_on_strand_macro_on_diverse_strands>]() {
+                    let name = Field::new("name");
+                    let result = string::[<$function_name>]!(name, "Oyelowo");
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("string::{}(name, $_param_00000001)", $function_path)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("string::{}(name, 'Oyelowo')", $function_path)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _macro_on_same_element_types>]() {
+                    let result = string::[<$function_name>]!("Oyelowo", "Oyedayo");
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("string::{}($_param_00000001, $_param_00000002)", $function_path)
+                    );
+
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("string::{}('Oyelowo', 'Oyedayo')", $function_path)
+                    );
+                }
+            }
+        }
+    };
+}
+
+create_fn_with_two_strings_args!(
+    /// The string::distance::hamming function calculates the hamming distance between two strings.
+    /// Also aliased as `string_distance_hamming!`
+    ///
+    /// # Arguments
+    ///
+    /// * `str1` - The first string to compare. Could be a field or a parameter that represents the
+    /// value.
+    /// * `str2` - The second string to compare. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::string, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::distance::hamming!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::distance::hamming(name, 'Oyelowo')");
+    ///
+    /// let result = string::distance::hamming!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::distance::hamming('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "distance_hamming",
+    "distance::hamming"
+);
+
+create_fn_with_two_strings_args!(
+    /// The string::distance::levenshtein function calculates the levenshtein distance between two strings.
+    /// Also aliased as `string_distance_levenshtein!`
+    ///
+    /// # Arguments
+    ///
+    /// * `str1` - The first string to compare. Could be a field or a parameter that represents the
+    /// value.
+    /// * `str2` - The second string to compare. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::string, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::distance::levenshtein!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::distance::levenshtein(name, 'Oyelowo')");
+    ///
+    /// let result = string::distance::levenshtein!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::distance::levenshtein('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "distance_levenshtein",
+    "distance::levenshtein"
+);
+
+create_fn_with_two_strings_args!(
+    /// The string::similarity::fuzzy function calculates the fuzzy similarity between two strings.
+    /// Also aliased as `string_similarity_fuzzy!`
+    ///
+    /// # Arguments
+    ///
+    /// * `str1` - The first string to compare. Could be a field or a parameter that represents the
+    /// value.
+    /// * `str2` - The second string to compare. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::string, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::similarity::fuzzy!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::fuzzy(name, 'Oyelowo')");
+    ///
+    /// let result = string::similarity::fuzzy!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::fuzzy('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "similarity_fuzzy",
+    "similarity::fuzzy"
+);
+
+create_fn_with_two_strings_args!(
+    /// The string::similarity::jaro function calculates the jaro similarity between two strings.
+    /// Also aliased as `string_similarity_jaro!`
+    ///
+    /// # Arguments
+    ///
+    /// * `str1` - The first string to compare. Could be a field or a parameter that represents the
+    /// value.
+    /// * `str2` - The second string to compare. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::string, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::similarity::jaro!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::jaro(name, 'Oyelowo')");
+    ///
+    /// let result = string::similarity::jaro!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::jaro('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "similarity_jaro",
+    "similarity::jaro"
+);
+
+create_fn_with_two_strings_args!(
+    /// The string::similarity::smithwaterman function calculates the smithwaterman similarity between two strings.
+    /// Also aliased as `string_similarity_smithwaterman!`
+    ///
+    /// # Arguments
+    ///
+    /// * `str1` - The first string to compare. Could be a field or a parameter that represents the
+    /// value.
+    /// * `str2` - The second string to compare. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::string, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::similarity::smithwaterman!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::smithwaterman(name, 'Oyelowo')");
+    ///
+    /// let result = string::similarity::smithwaterman!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::similarity::smithwaterman('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "similarity_smithwaterman",
+    "similarity::smithwaterman"
+);
