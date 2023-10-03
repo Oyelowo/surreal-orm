@@ -1225,8 +1225,7 @@ pub mod is {
         /// use surreal_orm::{*, functions::type_};
         ///
         /// let result = type_::is::point!(geo::Point::new(0.0, 0.0));
-        /// assert_eq!(result.to_raw().build(),
-        /// "type::is::point({ type: 'Point', coordinates: [0, 0] })");
+        /// assert_eq!(result.to_raw().build(), "type::is::point((0, 0))");
         ///
         /// let point_field = Field::new("point_field");
         /// let result = type_::is::point!(point_field);
@@ -1238,5 +1237,75 @@ pub mod is {
         /// ```
         =>
         "point", crate::GeometryLike, geo::Point::new(0.0, 0.0), "POINT (0 0)"
+    );
+
+    create_is_function!(
+    /// The type::is::polygon function checks if given value is of type polygon.
+    /// Also aliased as `type_is_polygon!`
+    ///
+    /// # Arguments
+    /// * `value` - The value to be checked if it is of type polygon. Could also be a field or a parameter
+    /// representing the value.
+    ///
+    /// # Example
+    /// ```rust
+    /// use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::type_};
+    ///
+    /// let result = type_::is::polygon!(geo::Polygon::new(
+    ///    geo::LineString(vec![
+    ///         geo::Coord {
+    ///             x: -122.33583,
+    ///             y: 47.60621,
+    ///         },
+    ///         geo::Coord {
+    ///             x: -122.33583,
+    ///             y: 47.60622,
+    ///         },
+    ///    ]),
+    ///    vec![geo::LineString(vec![
+    ///             geo::Coord {
+    ///                 x: -122.33583,
+    ///                 y: 47.60621,
+    ///             },
+    ///             geo::Coord {
+    ///                 x: -122.33583,
+    ///                 y: 47.60622,
+    ///             },
+    ///         ])],
+    ///    ));
+    ///    println!("{}", result.to_raw().build());
+    ///
+    ///    let polygon_field = Field::new("polygon_field");
+    ///    let result = type_::is::polygon!(polygon_field);
+    ///    assert_eq!(result.to_raw().build(), "type::is::polygon(polygon_field)");
+    ///
+    ///    let polygon_param = Param::new("polygon_param");
+    ///    let result = type_::is::polygon!(polygon_param);
+    ///    assert_eq!(result.to_raw().build(), "type::is::polygon($polygon_param)");
+    ///    ```
+    =>
+    "polygon", crate::GeometryLike, geo::Polygon::new(
+        geo::LineString(vec![
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60622,
+            },
+        ]),
+        vec![geo::LineString(vec![
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60621,
+            },
+            geo::Coord {
+                x: -122.33583,
+                y: 47.60622,
+            },
+        ])],
+    ), "POLYGON ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622))"
     );
 }
