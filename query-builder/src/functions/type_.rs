@@ -13,6 +13,8 @@
 // type::datetime()	Converts a value into a datetime
 // type::decimal()	Converts a value into a decimal
 // type::duration()	Converts a value into a duration
+// type::field()	Projects a single field within a SELECT statement
+// type::fields()	Projects a multiple fields within a SELECT statement
 // type::float()	Converts a value into a floating point number
 // type::int()	Converts a value into an integer
 // type::number()	Converts a value into a number
@@ -45,8 +47,8 @@
 // type::is::uuid()	Checks if given value is of type uuid
 
 use crate::{
-    Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric, StrandLike,
-    TableLike, ValueLike,
+    ArrayLike, Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric,
+    StrandLike, TableLike, ValueLike,
 };
 
 macro_rules! create_type {
@@ -193,6 +195,64 @@ create_type!(
     DurationLike,
     std::time::Duration::from_secs(24 * 60 * 60 * 7),
     "1w"
+);
+
+create_type!(
+    /// The type::field function projects a single field within a SELECT statement.
+    /// Also aliased as `type_field!`
+    ///
+    /// # Arguments
+    /// * `value` - The value to be converted to a field. Could also be a field or a parameter
+    /// representing the value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::type_};
+    /// let result = type_::field!("name");
+    /// assert_eq!(result.to_raw().build(), "type::field('name')");
+    ///
+    /// let field_field = Field::new("field_field");
+    /// let result = type_::field!(field_field);
+    /// assert_eq!(result.to_raw().build(), "type::field(field_field)");
+    ///
+    /// let field_param = Param::new("field_param");
+    /// let result = type_::field!(field_param);
+    /// assert_eq!(result.to_raw().build(), "type::field($field_param)");
+    /// ```
+    =>
+    "field", ValueLike, "name", "'name'"
+);
+
+create_type!(
+    /// The type::fields function projects multiple fields within a SELECT statement.
+    /// Also aliased as `type_fields!`
+    ///
+    /// # Arguments
+    /// * `value` - The value to be converted to a field. Could also be a field or a parameter
+    /// representing the value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{
+    ///     *,
+    ///     functions::type_,
+    ///     statements::let_,
+    /// };
+    /// let result = type_::fields!(["name", "age"]);
+    /// assert_eq!(result.to_raw().build(), "type::fields(['name', 'age'])");
+    ///
+    /// let field_field = Field::new("field_field");
+    /// let result = type_::fields!(field_field);
+    /// assert_eq!(result.to_raw().build(), "type::fields(field_field)");
+    ///
+    /// let field_param = Param::new("field_param");
+    /// let result = type_::fields!(field_param);
+    /// assert_eq!(result.to_raw().build(), "type::fields($field_param)");
+    /// ```
+    =>
+    "fields", ArrayLike, ["name"], "['name']"
 );
 
 create_type!(
@@ -748,6 +808,34 @@ pub mod is {
             chrono::Utc,
         ),
         "'1970-01-01T00:01:01Z'"
+    );
+
+    create_is_function!(
+        /// The type::is::collection function checks if given value is of type collection.
+        /// Also aliased as `type_is_collection!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type collection. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::collection!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::collection(1234)");
+        ///
+        /// let collection_field = Field::new("collection_field");
+        /// let result = type_::is::collection!(collection_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::collection(collection_field)");
+        ///
+        /// let collection_param = Param::new("collection_param");
+        /// let result = type_::is::collection!(collection_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::collection($collection_param)");
+        /// ```
+        =>
+        "collection", ValueLike, 5454, "5454"
     );
 
     create_is_function!(
