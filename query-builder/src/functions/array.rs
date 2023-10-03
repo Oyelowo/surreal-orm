@@ -26,7 +26,7 @@
 // array::insert() Inserts an item at the end of an array, or in a specific position
 // array::intersect()	Returns the values which intersect two arrays
 // array::len()	Returns the length of an array
-// rray::logical_and()	Performs the AND logical operations on two arrays
+// array::logical_and()	Performs the AND logical operations on two arrays
 // array::logical_or()	Performs the OR logical operations on two arrays
 // array::logical_xor()	Performs the XOR logical operations on two arrays
 // array::max() Returns the maximum item in an array
@@ -368,7 +368,146 @@ mod append_tests {
     }
 }
 
-fn create_array_helper(
+fn create_single_array_arg_helper(arr: impl Into<ArrayLike>, func_name: &str) -> Function {
+    let arr: ArrayLike = arr.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    errors.extend(arr.get_errors());
+    Function {
+        query_string: format!("array::{func_name}({})", arr.build(), func_name = func_name),
+        bindings,
+        errors,
+    }
+}
+
+macro_rules! create_fn_with_single_array_arg {
+    ($(#[$attr:meta])* => $function_name:expr) => {
+        paste::paste! {
+            $(#[$attr])*
+            pub fn [<$function_name _fn>](arr: impl Into<$crate::ArrayLike>) -> $crate::Function {
+                create_single_array_arg_helper(arr, $function_name)
+            }
+
+            $(#[$attr])*
+            #[macro_export]
+            macro_rules! [<array_ $function_name>] {
+                ( $arr:expr ) => {
+                    $crate::functions::array::[<$function_name _fn>]($arr)
+                };
+            }
+            pub use [<array_ $function_name>] as [<$function_name>];
+
+            #[cfg(test)]
+            mod [<test_ $function_name>] {
+                use $crate::{functions::array, *};
+
+                #[test]
+                fn [<test $function_name _fn_on_array_macro_on_diverse_array>]() {
+                    let age = Field::new("age");
+                    let arr = arr![1, "Oyelowo", age];
+                    let result = functions::array::[<$function_name _fn>](arr);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("array::{}([$_param_00000001, $_param_00000002, age])", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("array::{}([1, 'Oyelowo', age])", $function_name)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _fn_on_same_element_types>]() {
+                    let arr = arr![1, 2, 3];
+                    let result = array::[<$function_name _fn>](arr);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003])", $function_name)
+                    );
+
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("array::{}([1, 2, 3])", $function_name)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _macro_on_array_macro_on_diverse_array>]() {
+                    let age = Field::new("age");
+                    let arr = arr![1, "Oyelowo", age];
+                    let result = array::[<$function_name>]!(arr);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("array::{}([$_param_00000001, $_param_00000002, age])", $function_name)
+                    );
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("array::{}([1, 'Oyelowo', age])", $function_name)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _macro_on_same_element_types>]() {
+                    let arr = $crate::arr![1, 2, 3];
+                    let result = $crate::functions::array::[<$function_name>]!(arr);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("array::{}([$_param_00000001, $_param_00000002, $_param_00000003])", $function_name)
+                    );
+
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("array::{}([1, 2, 3])", $function_name)
+                    );
+                }
+
+                #[test]
+                fn [<test $function_name _macro_on_fields>]() {
+                    let students_ages = Field::new("students_ages");
+                    let result = array::[<$function_name>]!(students_ages);
+                    assert_eq!(
+                        result.fine_tune_params(),
+                        format!("array::{}(students_ages)", $function_name)
+                    );
+
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("array::{}(students_ages)", $function_name)
+                    );
+                }
+        }
+        }
+    };
+}
+
+// array::boolean_not
+create_fn_with_single_array_arg!(
+    /// The array::boolean_not function performs the NOT bitwise operations on an array.
+    ///
+    /// # Arguments
+    /// * `arr` - The array to perform the NOT bitwise operations on. Could be an array, `Field` or `Param`
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// array::boolean_not!(vec![1, 2, 3, 4, 5]);
+    /// array::boolean_not!(&[1, 2, 3, 4, 5]);
+    /// array::boolean_not!(arr![1, 2, 3, 4, 5]);
+    ///
+    /// let numbers = Field::new("numbers");
+    /// let result = array::boolean_not!(numbers);
+    /// assert_eq!(
+    ///  result.to_raw().build(),
+    ///  "array::boolean_not(numbers)"
+    ///  );
+    ///  ```
+    =>
+    "boolean_not"
+);
+
+fn create_two_array_args_helper(
     arr1: impl Into<ArrayLike>,
     arr2: impl Into<ArrayLike>,
     func_name: &str,
@@ -393,7 +532,7 @@ macro_rules! create_fn_with_two_array_args {
         paste::paste! {
             $(#[$attr])*
             pub fn [<$function_name _fn>](arr1: impl Into<$crate::ArrayLike>, arr2: impl Into<$crate::ArrayLike>) -> $crate::Function {
-                create_array_helper(arr1, arr2, $function_name)
+                create_two_array_args_helper(arr1, arr2, $function_name)
             }
 
             $(#[$attr])*
