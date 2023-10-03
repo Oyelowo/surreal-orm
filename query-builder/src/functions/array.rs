@@ -2723,28 +2723,7 @@ macro_rules! array_slice {
 
 pub use array_slice as slice;
 
-// The array::join function joins the elements of an array into a string, and returns the string.
-// array::join(array, separator) -> string
-// The following example shows this function, and its output, when used in a select statement:
-// SELECT * FROM array::join([1,2,3,4,5], ',');
-// 1,2,3,4,5
-// # Arguments
-// * `arr` -  A vector, field or param.
-// * `separator` -  The separator of the array.
-// # Examples
-//
-// ```rust
-// # use surreal_query_builder as  surreal_orm;
-// use surreal_orm::{*, functions::array};
-// let own_goals = Field::new("own_goals");
-// let goals = Param::new("goals");
-// array::join!(vec![1, 2, 3, 4, 5], ",");
-// array::join!(&[1, 2, 3, 4, 5], ",");
-// array::join!(own_goals, ",");
-// array::join!(goals, ",");
-// // It is also aliased as array_join;
-// array_join!(vec![1, 2, 3, 4, 5], ",");
-// ```
+/// The array::join function joins the elements of an array into a string, and returns the string.
 pub fn join_fn(arr: impl Into<ArrayLike>, separator: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
     let separator: ValueLike = separator.into();
