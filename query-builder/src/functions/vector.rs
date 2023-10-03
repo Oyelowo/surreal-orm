@@ -172,10 +172,13 @@ macro_rules! create_fn_with_two_vectors_args {
                     $crate::functions::vector::[<$function_name _fn>]($vector1, $vector2)
                 };
             }
-            pub use [<vector_ $function_name>] as [<$function_name>];
+            // pub use [<vector_ $function_name>] as [<$function_name>];
+            pub use [<vector_ $function_name>];
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
+                use [<vector_ $function_name>] as [<$function_name>];
+
                 use $crate::{functions::vector, *};
 
                 #[test]
@@ -212,7 +215,7 @@ macro_rules! create_fn_with_two_vectors_args {
                 macro_on_strand_macro_on_diverse_vectors>]() {
                     let field = Field::new("field");
                     let param = Param::new("param");
-                    let result = vector::[<$function_name>]!(field, param);
+                    let result = self::[<$function_name>]!(field, param);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("vector::{}(field, $param)", $function_path)
@@ -225,7 +228,7 @@ macro_rules! create_fn_with_two_vectors_args {
 
                 #[test]
                 fn [<test $function_name _macro_on_same_element_types>]() {
-                    let result = vector::[<$function_name>]!(vec![1, 2, 3], vec![1, 2, 3]);
+                    let result = self::[<$function_name>]!(vec![1, 2, 3], vec![1, 2, 3]);
                     assert_eq!(
                         result.fine_tune_params(),
                         format!("vector::{}($_param_00000001, $_param_00000002)", $function_path)
@@ -629,6 +632,15 @@ create_fn_with_two_vectors_args!(
     "distance::manhattan"
 );
 
+/// The vector distance functions compute the distance between two vectors, providing a measure of the difference between them. The distance functions are useful for comparing vectors of different lengths, such as strings or codes.
+pub mod distance {
+    pub use super::vector_distance_chebyshev as chebyshev;
+    pub use super::vector_distance_euclidean as euclidean;
+    pub use super::vector_distance_hamming as hamming;
+    pub use super::vector_distance_manhattan as manhattan;
+    pub use super::vector_distance_minkowski as minkowski;
+}
+
 create_fn_with_two_vectors_args!(
     /// The vector::similarity::cosine function computes the Cosine similarity between two vectors, indicating the cosine of the angle between them, which is a measure of how closely two vectors are oriented to each other.
     ///
@@ -695,8 +707,14 @@ create_fn_with_two_vectors_args!(
     "similarity::jaccard"
 );
 
+/// The vector similarity functions compute the similarity between two vectors, providing a measure of how similar they are to each other. The similarity functions are useful for comparing vectors of different lengths, such as strings or codes.
+pub mod similarity {
+    pub use super::vector_similarity_cosine as cosine;
+    pub use super::vector_similarity_jaccard as jaccard;
+}
+
 /// The vector::distance::minkowski function computes the Minkowski distance between two vectors, a generalization of other distance metrics such as Euclidean and Manhattan when parameterized with different values of p.
-fn distance_minkowski_fn(
+pub fn distance_minkowski_fn(
     vector1: impl Into<ArrayLike>,
     vector2: impl Into<ArrayLike>,
     p: impl Into<NumberLike>,
@@ -739,7 +757,7 @@ macro_rules! vector_distance_minkowski {
         $crate::functions::vector::distance_minkowski_fn($vector1, $vector2, $p)
     };
 }
-pub use vector_distance_minkowski as distance_minkowski;
+pub use vector_distance_minkowski;
 
 #[cfg(test)]
 mod vector_distance_minkowski_tests {
@@ -778,7 +796,7 @@ mod vector_distance_minkowski_tests {
     fn test_vector_distance_minkowski_macro_on_strand_macro_on_diverse_vectors() {
         let field = Field::new("field");
         let param = Param::new("param");
-        let result = vector::distance_minkowski!(field, param, 1);
+        let result = vector::distance::minkowski!(field, param, 1);
         assert_eq!(
             result.fine_tune_params(),
             "vector::distance::minkowski(field, $param, $_param_00000001)"
@@ -791,7 +809,7 @@ mod vector_distance_minkowski_tests {
 
     #[test]
     fn test_vector_distance_minkowski_macro_on_same_element_types() {
-        let result = vector::distance_minkowski!(vec![1, 2, 3], vec![1, 2, 3], 1);
+        let result = vector::distance::minkowski!(vec![1, 2, 3], vec![1, 2, 3], 1);
         assert_eq!(
             result.fine_tune_params(),
             "vector::distance::minkowski($_param_00000001, $_param_00000002, $_param_00000003)"
