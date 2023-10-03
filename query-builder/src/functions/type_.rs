@@ -21,6 +21,28 @@
 // type::string()	Converts a value into a string
 // type::table()	Converts a value into a table
 // type::thing()	Converts a value into a record pointer
+// type::is::array()	Checks if given value is of type array
+// type::is::bool()	Checks if given value is of type bool
+// type::is::bytes()	Checks if given value is of type bytes
+// type::is::collection()	Checks if given value is of type collection
+// type::is::datetime()	Checks if given value is of type datetime
+// type::is::decimal()	Checks if given value is of type decimal
+// type::is::duration()	Checks if given value is of type duration
+// type::is::float()	Checks if given value is of type float
+// type::is::geometry()	Checks if given value is of type geometry
+// type::is::int()	Checks if given value is of type int
+// type::is::line()	Checks if given value is of type line
+// type::is::null()	Checks if given value is of type null
+// type::is::multiline()	Checks if given value is of type multiline
+// type::is::multipoint()	Checks if given value is of type multipoint
+// type::is::multipolygon()	Checks if given value is of type multipolygon
+// type::is::number()	Checks if given value is of type number
+// type::is::object()	Checks if given value is of type object
+// type::is::point()	Checks if given value is of type point
+// type::is::polygon()	Checks if given value is of type polygon
+// type::is::record()	Checks if given value is of type record
+// type::is::string()	Checks if given value is of type string
+// type::is::uuid()	Checks if given value is of type uuid
 
 use crate::{
     Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric, StrandLike,
@@ -550,4 +572,378 @@ mod tests {
         );
         assert_eq!(result.to_raw().build(), "type::thing(table, id)");
     }
+}
+
+// create_is_function macro
+macro_rules! create_is_function {
+    ($(#[$attr:meta])* => $function_name:expr, $value_type: ty, $test_data_input:expr, $test_stringified_data_output: expr) => {
+        paste::paste! {
+
+            $(#[$attr])*
+            pub fn [<$function_name _fn>](value: impl Into<$value_type>) -> $crate::Function {
+                let value: $value_type = value.into();
+                let query_string = format!("type::is::{}({})", $function_name, value.build());
+
+                $crate::Function {
+                    query_string,
+                    bindings: value.get_bindings(),
+                    errors: value.get_errors(),
+                }
+            }
+
+            $(#[$attr])*
+            #[macro_export]
+            macro_rules! [<type_is_ $function_name>] {
+                ( $string:expr ) => {
+                    $crate::functions::type_::is::[<$function_name _fn>]($string)
+                };
+            }
+            pub use [<type_is_ $function_name>] as [<$function_name>];
+
+            #[cfg(test)]
+            mod [<test_is_ $function_name>] {
+                use super::*;
+                use crate::*;
+                use crate::functions::type_;
+
+                #[test]
+                fn [<test_is_ $function_name _with_field>]() {
+                    let name = Field::new("name");
+                    let result = type_::is::[<$function_name _fn>](name);
+                    assert_eq!(result.fine_tune_params(), format!("type::is::{}(name)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("type::is::{}(name)", $function_name));
+                }
+
+                #[test]
+                fn [<test_is_ $function_name _with_plain_string>]() {
+                    let result = type_::is::[<$function_name _fn>]($test_data_input);
+                    assert_eq!(result.fine_tune_params(), format!("type::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().build(), format!("type::is::{}({})", $function_name, $test_stringified_data_output));
+                }
+            }
+        }
+    };
+}
+
+/// The type_::is functions check if given value is of a specific type.
+pub mod is {
+    use crate::{
+        Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric,
+        StrandLike, ValueLike,
+    };
+
+    create_is_function!(
+        /// The type::is::array function checks if given value is of type array.
+        /// Also aliased as `type_is_array!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type array. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::array!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::array(1234)");
+        ///
+        /// let array_field = Field::new("array_field");
+        /// let result = type_::is::array!(array_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::array(array_field)");
+        ///
+        /// let array_param = Param::new("array_param");
+        /// let result = type_::is::array!(array_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::array($array_param)");
+        /// ```
+        =>
+        "array", ValueLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::bool function checks if given value is of type bool.
+        /// Also aliased as `type_is_bool!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type bool. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::bool!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::bool(1234)");
+        ///
+        /// let bool_field = Field::new("bool_field");
+        /// let result = type_::is::bool!(bool_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::bool(bool_field)");
+        ///
+        /// let bool_param = Param::new("bool_param");
+        /// let result = type_::is::bool!(bool_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::bool($bool_param)");
+        /// ```
+        =>
+        "bool", ValueLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::bytes function checks if given value is of type bytes.
+        /// Also aliased as `type_is_bytes!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type bytes. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::bytes!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::bytes(1234)");
+        ///
+        /// let bytes_field = Field::new("bytes_field");
+        /// let result = type_::is::bytes!(bytes_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::bytes(bytes_field)");
+        ///
+        /// let bytes_param = Param::new("bytes_param");
+        /// let result = type_::is::bytes!(bytes_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::bytes($bytes_param)");
+        /// ```
+        =>
+        "bytes", ValueLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::datetime function checks if given value is of type datetime.
+        /// Also aliased as `type_is_datetime!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type datetime. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let datetime = ::chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+        ///     chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+        ///    chrono::Utc,
+        /// );
+        /// let result = type_::is::datetime!(datetime);
+        /// assert_eq!(result.to_raw().build(), "type::is::datetime('1970-01-01T00:01:01Z')");
+        ///
+        /// let datetime_field = Field::new("datetime_field");
+        /// let result = type_::is::datetime!(datetime_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::datetime(datetime_field)");
+        ///
+        /// let datetime_param = Param::new("datetime_param");
+        /// let result = type_::is::datetime!(datetime_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::datetime($datetime_param)");
+        /// ```
+        =>
+        "datetime",
+        DatetimeLike,
+        chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+            chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+            chrono::Utc,
+        ),
+        "'1970-01-01T00:01:01Z'"
+    );
+
+    create_is_function!(
+        /// The type::is::decimal function checks if given value is of type decimal.
+        /// Also aliased as `type_is_decimal!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type decimal. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::decimal!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::decimal(1234)");
+        ///
+        /// let decimal_field = Field::new("decimal_field");
+        /// let result = type_::is::decimal!(decimal_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::decimal(decimal_field)");
+        ///
+        /// let decimal_param = Param::new("decimal_param");
+        /// let result = type_::is::decimal!(decimal_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::decimal($decimal_param)");
+        /// ```
+        =>
+        "decimal", ValueLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::duration function checks if given value is of type duration.
+        /// Also aliased as `type_is_duration!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type duration. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let duration = std::time::Duration::from_secs(60 * 60);
+        /// let result = type_::is::duration!(duration);
+        /// assert_eq!(result.to_raw().build(), "type::is::duration(1h)");
+        ///
+        /// let duration_field = Field::new("duration_field");
+        /// let result = type_::is::duration!(duration_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::duration(duration_field)");
+        ///
+        /// let duration_param = Param::new("duration_param");
+        /// let result = type_::is::duration!(duration_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::duration($duration_param)");
+        /// ```
+        =>
+        "duration",
+        DurationLike,
+        std::time::Duration::from_secs(24 * 60 * 60 * 7),
+        "1w"
+    );
+
+    create_is_function!(
+        /// The type::is::float function checks if given value is of type float.
+        /// Also aliased as `type_is_float!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type float. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::float!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::float(1234)");
+        ///
+        /// let float_field = Field::new("float_field");
+        /// let result = type_::is::float!(float_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::float(float_field)");
+        ///
+        /// let float_param = Param::new("float_param");
+        /// let result = type_::is::float!(float_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::float($float_param)");
+        /// ```
+        =>
+        "float", NumberLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::int function checks if given value is of type int.
+        /// Also aliased as `type_is_int!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type int. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::int!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::int(1234)");
+        ///
+        /// let int_field = Field::new("int_field");
+        /// let result = type_::is::int!(int_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::int(int_field)");
+        ///
+        /// let int_param = Param::new("int_param");
+        /// let result = type_::is::int!(int_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::int($int_param)");
+        /// ```
+        =>
+        "int", NumberLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::number function checks if given value is of type number.
+        /// Also aliased as `type_is_number!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type number. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::number!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::number(1234)");
+        ///
+        /// let number_field = Field::new("number_field");
+        /// let result = type_::is::number!(number_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::number(number_field)");
+        ///
+        /// let number_param = Param::new("number_param");
+        /// let result = type_::is::number!(number_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::number($number_param)");
+        /// ```
+        =>
+        "number", NumberLike, 5454, "5454"
+    );
+
+    create_is_function!(
+        /// The type::is::string function checks if given value is of type string.
+        /// Also aliased as `type_is_string!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type string. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        ///
+        /// use surreal_orm::{*, functions::type_};
+        /// let result = type_::is::string!("Oyelowo");
+        /// assert_eq!(result.to_raw().build(), "type::is::string('Oyelowo')");
+        ///
+        /// let string_field = Field::new("string_field");
+        /// let result = type_::is::string!(string_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::string(string_field)");
+        ///
+        /// let string_param = Param::new("string_param");
+        /// let result = type_::is::string!(string_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::string($string_param)");
+        /// ```
+        =>
+        "string", StrandLike, "Oyelowo", "Oyelowo"
+    );
+
+    // is geometry GeometryLike
+    create_is_function!(
+        /// The type::is::geometry function checks if given value is of type geometry.
+        /// Also aliased as `type_is_geometry!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type geometry. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::geometry!(geo::point!(x: 51.509865, y: -0.118092));
+        /// assert_eq!(result.to_raw().build(), "type::is::geometry((51.509865, -0.118092))");
+        ///
+        /// let geometry_field = Field::new("geometry_field");
+        /// let result = type_::is::geometry!(geometry_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::geometry(geometry_field)");
+        ///
+        /// let geometry_param = Param::new("geometry_param");
+        /// let result = type_::is::geometry!(geometry_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::geometry($geometry_param)");
+        /// ```
+        =>
+        "geometry", crate::GeometryLike, geo::point!(x: 51.509865, y: -0.118092), "(51.509865, -0.118092)"
+    );
 }
