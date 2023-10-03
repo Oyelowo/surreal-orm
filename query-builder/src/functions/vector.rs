@@ -334,9 +334,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::cross!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::cross(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::cross!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::cross(arr1, arr2)");
     ///
     /// let result = vector::cross!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::cross([1, 2, 3], [1, 2, 3])");
@@ -345,6 +346,7 @@ create_fn_with_two_vectors_args!(
     "cross",
     "cross"
 );
+pub use vector_cross as cross;
 
 create_fn_with_two_vectors_args!(
     /// The vector::dot function computes the dot product of two vectors, which is the sum of the products of the corresponding entries of the two sequences of numbers.
@@ -361,9 +363,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::dot!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::dot(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::dot!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::dot(arr1, arr2)");
     ///
     /// let result = vector::dot!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::dot([1, 2, 3], [1, 2, 3])");
@@ -372,6 +375,7 @@ create_fn_with_two_vectors_args!(
     "dot",
     "dot"
 );
+pub use vector_dot as dot;
 
 create_fn_with_two_vectors_args!(
     /// The vector::add function performs element-wise addition of two vectors, where each element in the first vector is added to the corresponding element in the second vector.
@@ -388,9 +392,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::add!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::add(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::add!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::add(arr1, arr2)");
     ///
     /// let result = vector::add!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::add([1, 2, 3], [1, 2, 3])");
@@ -399,6 +404,7 @@ create_fn_with_two_vectors_args!(
     "add",
     "add"
 );
+pub use vector_add as add;
 
 create_fn_with_two_vectors_args!(
     /// The vector::subtract function performs element-wise subtraction between two vectors, where each element in the second vector is subtracted from the corresponding element in the first vector.
@@ -415,9 +421,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::subtract!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::subtract(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::subtract!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::subtract(arr1, arr2)");
     ///
     /// let result = vector::subtract!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::subtract([1, 2, 3], [1, 2, 3])");
@@ -426,6 +433,7 @@ create_fn_with_two_vectors_args!(
     "subtract",
     "subtract"
 );
+pub use vector_subtract as subtract;
 
 create_fn_with_two_vectors_args!(
     /// The vector::multiply function performs element-wise multiplication of two vectors, where each element in the first vector is multiplied by the corresponding element in the second vector.
@@ -442,9 +450,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::multiply!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::multiply(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::multiply!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::multiply(arr1, arr2)");
     ///
     /// let result = vector::multiply!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::multiply([1, 2, 3], [1, 2, 3])");
@@ -453,6 +462,7 @@ create_fn_with_two_vectors_args!(
     "multiply",
     "multiply"
 );
+pub use vector_multiply as multiply;
 
 create_fn_with_two_vectors_args!(
     /// The vector::divide function performs element-wise division between two vectors, where each element in the first vector is divided by the corresponding element in the second vector.
@@ -469,9 +479,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::vector, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::divide!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::divide(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::divide!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::divide(arr1, arr2)");
     ///
     /// let result = vector::divide!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::divide([1, 2, 3], [1, 2, 3])");
@@ -480,6 +491,7 @@ create_fn_with_two_vectors_args!(
     "divide",
     "divide"
 );
+pub use vector_divide as divide;
 
 create_fn_with_two_vectors_args!(
     /// The vector::angle function computes the angle between two vectors, providing a measure of the orientation difference between them.
@@ -496,9 +508,10 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{*, functions::{vector, math}, statements::let_};
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::angle!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::angle(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::angle!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::angle(arr1, arr2)");
     ///
     /// let result = vector::angle!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::angle([1, 2, 3], [1, 2, 3])");
@@ -507,6 +520,7 @@ create_fn_with_two_vectors_args!(
     "angle",
     "angle"
 );
+pub use vector_angle as angle;
 
 create_fn_with_two_vectors_args!(
     /// The vector::distance::chebyshev function computes the Chebyshev distance (also known as maximum value distance) between two vectors, which is the greatest of their differences along any coordinate dimension.
@@ -527,9 +541,10 @@ create_fn_with_two_vectors_args!(
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::distance::chebyshev!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::distance::chebyshev(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::distance::chebyshev!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::distance::chebyshev(arr1, arr2)");
     ///
     /// let result = vector::distance::chebyshev!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::distance::chebyshev([1, 2, 3], [1, 2, 3])");
@@ -558,9 +573,10 @@ create_fn_with_two_vectors_args!(
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::distance::euclidean!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::distance::euclidean(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::distance::euclidean!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::distance::euclidean(arr1, arr2)");
     ///
     /// let result = vector::distance::euclidean!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::distance::euclidean([1, 2, 3], [1, 2, 3])");
@@ -589,9 +605,10 @@ create_fn_with_two_vectors_args!(
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::distance::hamming!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::distance::hamming(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::distance::hamming!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::distance::hamming(arr1, arr2)");
     ///
     /// let result = vector::distance::hamming!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::distance::hamming([1, 2, 3], [1, 2, 3])");
@@ -620,9 +637,10 @@ create_fn_with_two_vectors_args!(
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::distance::manhattan!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::distance::manhattan(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::distance::manhattan!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::distance::manhattan(arr1, arr2)");
     ///
     /// let result = vector::distance::manhattan!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::distance::manhattan([1, 2, 3], [1, 2, 3])");
@@ -662,9 +680,10 @@ create_fn_with_two_vectors_args!(
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::similarity::cosine!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::similarity::cosine(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::similarity::cosine!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::similarity::cosine(arr1, arr2)");
     ///
     /// let result = vector::similarity::cosine!([1, 2, 3], [1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::similarity::cosine([1, 2, 3], [1, 2, 3])");
@@ -691,15 +710,16 @@ create_fn_with_two_vectors_args!(
     /// # use surreal_query_builder as surreal_orm;
     /// use surreal_orm::{
     ///     *,
-    ///     functions::{vector, math},
+    ///     functions::vector,
     ///     statements::let_,
     /// };
     ///
-    /// let name = Field::new("name");
-    /// let result = vector::similarity::jaccard!(name, name);
-    /// assert_eq!(result.to_raw().build(), "vector::similarity::jaccard(name, name)");
+    /// let arr1 = Field::new("arr1");
+    /// let arr2 = Field::new("arr2");
+    /// let result = vector::similarity::jaccard!(arr1, arr2);
+    /// assert_eq!(result.to_raw().build(), "vector::similarity::jaccard(arr1, arr2)");
     ///
-    /// let result = vector::similarity::jaccard!([1, 2, 3], [1, 2, 3]);
+    /// let result = vector::similarity::jaccard!(vec![1, 2, 3], vec![1, 2, 3]);
     /// assert_eq!(result.to_raw().build(), "vector::similarity::jaccard([1, 2, 3], [1, 2, 3])");
     /// ```
     =>
@@ -747,9 +767,10 @@ pub fn distance_minkowski_fn(
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, functions::vector};
 ///
-/// let name = Field::new("name");
-/// let result = vector::distance::minkowski_fn(name, name, 1);
-/// assert_eq!(result.to_raw().build(), "vector::distance::minkowski(name, name, 1)");
+/// let arr1 = Field::new("arr1");
+/// let arr2 = Field::new("arr2");
+/// let result = vector::distance::minkowski!(arr1, arr2, 1);
+/// assert_eq!(result.to_raw().build(), "vector::distance::minkowski(arr1, arr2, 1)");
 /// ```
 #[macro_export]
 macro_rules! vector_distance_minkowski {
