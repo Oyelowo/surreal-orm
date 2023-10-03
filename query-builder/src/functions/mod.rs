@@ -64,3 +64,6 @@ pub mod type_;
 /// This module contains the different types of functions for deriving metadata from
 /// surrealdb record id.
 pub mod meta;
+
+/// This module contains the different types of functions for working with vectors.
+pub mod vector;
