@@ -26,6 +26,13 @@
 // time::week()	Extracts the week as a number from a datetime
 // time::yday()	Extracts the yday as a number from a datetime
 // time::year()	Extracts the year as a number from a datetime
+// time::ceil()	Rounds a datetime up by a specific duration
+// time::max()	Finds the most recent datetime in an array
+// time::min()	Finds the least recent datetime in an array
+// time::from::micros()	Calculates a datetimes based on an amount of microseconds since January 1, 1970 0:00:00 UTC.
+// time::from::millis()	Calculates a datetimes based on an amount of milliseconds since January 1, 1970 0:00:00 UTC.
+// time::from::secs()	Calculates a datetimes based on an amount of seconds since January 1, 1970 0:00:00 UTC.
+// time::from::unix()	Calculates a datetimes based on an amount of seconds since January 1, 1970 0:00:00 UTC.
 
 use crate::{Buildable, DatetimeLike, DurationLike, Erroneous, Function, Parametric, StrandLike};
 
@@ -583,6 +590,67 @@ macro_rules! time_floor {
 }
 
 pub use time_floor as floor;
+
+// time ceil
+/// The time::ceil function rounds a datetime up by a specific duration.
+pub fn ceil_fn(datetime: impl Into<DatetimeLike>, duration: impl Into<DurationLike>) -> Function {
+    let datetime: DatetimeLike = datetime.into();
+    let duration: DurationLike = duration.into();
+    let mut bindings = datetime.get_bindings();
+    let mut errors = datetime.get_errors();
+    bindings.extend(duration.get_bindings());
+    errors.extend(duration.get_errors());
+
+    let query_string = format!("time::ceil({}, {})", datetime.build(), duration.build(),);
+
+    Function {
+        query_string,
+        bindings,
+        errors,
+    }
+}
+
+/// The time::ceil function rounds a datetime up by a specific duration.
+/// The function is also aliased as `time_ceil!`.
+/// # Example
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::time};
+/// let dt = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+///   chrono::NaiveDateTime::from_timestamp_opt(61, 0).unwrap(),
+///   chrono::Utc,
+///   );
+///   let duration = std::time::Duration::from_secs(10);
+///   let result = time::ceil!(dt, duration);
+///   assert_eq!(
+///   result.to_raw().build(),
+///   "time::ceil('1970-01-01T00:01:01Z', 10s)"
+///   );
+///
+///   let rebirth_date = Field::new("rebirth_date");
+///   let duration = Field::new("duration");
+///   let result = time::ceil!(rebirth_date, duration);
+///   assert_eq!(
+///   result.to_raw().build(),
+///   "time::ceil(rebirth_date, duration)"
+///   );
+///
+///   let param = Param::new("rebirth_date");
+///   let duration = Param::new("duration");
+///   let result = time::ceil!(param, duration);
+///   assert_eq!(
+///   result.to_raw().build(),
+///   "time::ceil($rebirth_date, $duration)"
+///   );
+///   ```
+#[macro_export]
+macro_rules! time_ceil {
+    ( $datetime:expr, $duration:expr ) => {
+        $crate::functions::time::ceil_fn($datetime, $duration)
+    };
+}
+
+pub use time_ceil as ceil;
 
 /// The time::format function outputs a datetime according to a specific format.
 ///
