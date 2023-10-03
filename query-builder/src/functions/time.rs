@@ -1156,12 +1156,12 @@ create_time_fn_with_single_array_of_datetime_arg!(
     /// );
     ///
     /// let rebirth_date = Field::new("rebirth_date");
-    /// let result = time::max!([rebirth_date]);
-    /// assert_eq!(result.to_raw().build(), "time::max([rebirth_date])");
+    /// let result = time::max!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::max(rebirth_date)");
     ///
     /// let param = Param::new("rebirth_date");
-    /// let result = time::max!([param]);
-    /// assert_eq!(result.to_raw().build(), "time::max([$rebirth_date])");
+    /// let result = time::max!(param);
+    /// assert_eq!(result.to_raw().build(), "time::max($rebirth_date)");
     /// ```
     =>
     "max"
@@ -1200,13 +1200,204 @@ create_time_fn_with_single_array_of_datetime_arg!(
     /// );
     ///
     /// let rebirth_date = Field::new("rebirth_date");
-    /// let result = time::min!([rebirth_date]);
-    /// assert_eq!(result.to_raw().build(), "time::min([rebirth_date])");
+    /// let result = time::min!(rebirth_date);
+    /// assert_eq!(result.to_raw().build(), "time::min(rebirth_date)");
     ///
     /// let param = Param::new("rebirth_date");
-    /// let result = time::min!([param]);
-    /// assert_eq!(result.to_raw().build(), "time::min([$rebirth_date])");
+    /// let result = time::min!(param);
+    /// assert_eq!(result.to_raw().build(), "time::min($rebirth_date)");
     /// ```
     =>
     "min"
 );
+
+macro_rules! create_time_fn_with_single_number_arg {
+    ($(#[$attr:meta])* => $function_name: expr, $function_path: expr) => {
+        paste::paste! {
+
+            $(#[$attr])*
+            pub fn [<$function_name _fn>](number: impl ::std::convert::Into<$crate::NumberLike>) -> $crate::Function {
+                let number: $crate::NumberLike = number.into();
+                let query_string = format!("time::{}({})", $function_path, number.build());
+
+                $crate::Function {
+                    query_string,
+                    bindings: number.get_bindings(),
+                    errors: number.get_errors(),
+                }
+            }
+
+            $(#[$attr])*
+            #[macro_export]
+            macro_rules! [<time_from_ $function_name>] {
+                ( $number:expr ) => {
+                    $crate::functions::time::from::[<$function_name _fn>]($number)
+                };
+            }
+
+            pub use [<time_from_ $function_name>] as [<$function_name>];
+
+            #[cfg(test)]
+            mod [<test_ $function_name _fn>] {
+                use $crate::*;
+                use crate::functions::time;
+
+
+                #[test]
+                fn [<test_ $function_name _fn_with_number_field>]() {
+                    let rebirth_date = $crate::Field::new("rebirth_date");
+                    let result = time::from::[<$function_name>]!(rebirth_date);
+
+                    assert_eq!(result.fine_tune_params(), format!("time::{}(rebirth_date)", $function_path));
+                    assert_eq!(result.to_raw().build(), format!("time::{}(rebirth_date)", $function_path));
+                }
+
+                #[test]
+                fn [<test_ $function_name _fn_with_plain_number>]() {
+                    let number = $crate::Param::new("number");
+                    let result = time::from::[<$function_name>]!(number);
+                    assert_eq!(result.fine_tune_params(), format!("time::{}($number)", $function_path));
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("time::{}($number)", $function_path)
+
+                    );
+                }
+
+                #[test]
+                fn [<test_ $function_name _fn_with_plain_number_and_duration>]() {
+                    let result = time::from::[<$function_name>]!(20000);
+                    assert_eq!(result.fine_tune_params(), format!("time::{}($_param_00000001)", $function_path));
+                    assert_eq!(
+                        result.to_raw().build(),
+                        format!("time::{}(20000)", $function_path)
+
+                    );
+                }
+            }
+        }
+    }
+}
+
+/// The time::from module contains functions that convert a number into a datetime.
+pub mod from {
+    use crate::*;
+
+    create_time_fn_with_single_number_arg!(
+        /// The time::from::micros function converts a number of microseconds into a datetime.
+        /// The function is also aliased as `time_from_micros!`.
+        ///
+        /// # Arguments
+        ///
+        /// * `number` - The number of microseconds to convert. Could also be a field or a parameter representing a number of microseconds.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as  surreal_orm;
+        /// use surreal_orm::{*, functions::time};
+        ///
+        /// let result = time::from::micros!(1);
+        /// assert_eq!(result.to_raw().build(), "time::from::micros(1)");
+        ///
+        /// let rebirth_date = Field::new("rebirth_date");
+        /// let result = time::from::micros!(rebirth_date);
+        /// assert_eq!(result.to_raw().build(), "time::from::micros(rebirth_date)");
+        ///
+        /// let param = Param::new("rebirth_date");
+        /// let result = time::from::micros!(param);
+        /// assert_eq!(result.to_raw().build(), "time::from::micros($rebirth_date)");
+        /// ```
+        =>
+        "micros",
+        "from::micros"
+    );
+
+    create_time_fn_with_single_number_arg!(
+        /// The time::from::millis function converts a number of milliseconds into a datetime.
+        /// The function is also aliased as `time_from_millis!`.
+        ///
+        /// # Arguments
+        ///
+        /// * `number` - The number of milliseconds to convert. Could also be a field or a parameter representing a number of milliseconds.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as  surreal_orm;
+        /// use surreal_orm::{*, functions::time};
+        ///
+        /// let result = time::from::millis!(1);
+        /// assert_eq!(result.to_raw().build(), "time::from::millis(1)");
+        ///
+        /// let rebirth_date = Field::new("rebirth_date");
+        /// let result = time::from::millis!(rebirth_date);
+        /// assert_eq!(result.to_raw().build(), "time::from::millis(rebirth_date)");
+        ///
+        /// let param = Param::new("rebirth_date");
+        /// let result = time::from::millis!(param);
+        /// assert_eq!(result.to_raw().build(), "time::from::millis($rebirth_date)");
+        /// ```
+        =>
+        "millis",
+        "from::millis"
+    );
+
+    // from::secs
+    create_time_fn_with_single_number_arg!(
+        /// The time::from::secs function converts a number of seconds into a datetime.
+        /// The function is also aliased as `time_from_secs!`.
+        ///
+        /// # Arguments
+        ///
+        /// * `number` - The number of seconds to convert. Could also be a field or a parameter representing a number of seconds.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as  surreal_orm;
+        /// use surreal_orm::{*, functions::time};
+        ///
+        /// let result = time::from::secs!(1);
+        /// assert_eq!(result.to_raw().build(), "time::from::secs(1)");
+        ///
+        /// let rebirth_date = Field::new("rebirth_date");
+        /// let result = time::from::secs!(rebirth_date);
+        /// assert_eq!(result.to_raw().build(), "time::from::secs(rebirth_date)");
+        ///
+        /// let param = Param::new("rebirth_date");
+        /// let result = time::from::secs!(param);
+        /// assert_eq!(result.to_raw().build(), "time::from::secs($rebirth_date)");
+        /// ```
+        =>
+        "secs",
+        "from::secs"
+    );
+
+    // from::unix
+    create_time_fn_with_single_number_arg!(
+        /// The time::from::unix function converts a number of seconds since the Unix epoch into a datetime.
+        /// The function is also aliased as `time_from_unix!`.
+        ///
+        /// # Arguments
+        ///
+        /// * `number` - The number of seconds since the Unix epoch to convert. Could also be a field or a parameter representing a number of seconds since the Unix epoch.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as  surreal_orm;
+        /// use surreal_orm::{*, functions::time};
+        ///
+        /// let result = time::from::unix!(1);
+        /// assert_eq!(result.to_raw().build(), "time::from::unix(1)");
+        ///
+        /// let rebirth_date = Field::new("rebirth_date");
+        /// let result = time::from::unix!(rebirth_date);
+        /// assert_eq!(result.to_raw().build(), "time::from::unix(rebirth_date)");
+        ///
+        /// let param = Param::new("rebirth_date");
+        /// let result = time::from::unix!(param);
+        /// assert_eq!(result.to_raw().build(), "time::from::unix($rebirth_date)");
+        /// ```
+        =>
+        "unix",
+        "from::unix"
+    );
+}
