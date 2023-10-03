@@ -10,6 +10,7 @@
 //
 // Function	Description
 // string::concat()	Concatenates strings together
+// string::contains()	Check wether a string contains another string
 // string::endsWith()	Checks whether a string ends with another string
 // string::join()	Joins strings together with a delimiter
 // string::len()	Returns the length of a string
@@ -24,6 +25,11 @@
 // string::trim()	Removes whitespace from the start and end of a string
 // string::uppercase()	Converts a string to uppercase
 // string::words()	Splits a string into an array of separate words
+// string::distance::hamming
+// string::distance::levenshtein,
+// string::similarity::fuzzy
+// string::similarity::jaro
+// string::similarity::smithwaterman
 // is::alphanum()	Checks whether a value has only alphanumeric characters
 // is::alpha()	Checks whether a value has only alpha characters
 // is::ascii()	Checks whether a value has only ascii characters
@@ -353,6 +359,56 @@ macro_rules! string_concat {
     }
 
 pub use string_concat as concat;
+
+// contains
+/// The string::contains function checks whether a string contains another string.
+pub fn contains_fn(string: impl Into<StrandLike>, contains: impl Into<StrandLike>) -> Function {
+    let string: StrandLike = string.into();
+    let contains: StrandLike = contains.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(string.get_bindings());
+    bindings.extend(contains.get_bindings());
+    errors.extend(string.get_errors());
+    errors.extend(contains.get_errors());
+
+    let query_string = format!("string::contains({}, {})", string.build(), contains.build());
+
+    Function {
+        query_string,
+        bindings,
+        errors,
+    }
+}
+
+/// The string::contains function checks whether a string contains another string.
+/// The macro function is also aliases as `string_contains!`
+/// # Arguments
+/// * `string` - The string to check. Can be a string literal, field or parameter representing a string.
+/// * `contains` - The string to check for. Can be a string literal, field or parameter representing a string.
+/// # Example
+/// ```rust
+/// # use surreal_query_builder as surreal_orm;
+/// use surreal_orm::{*, functions::string, statements::let_};
+///
+/// let contains = string::contains!("Oyelowo Oyedayo", "Oyedayo");
+/// assert_eq!(contains.to_raw().build(), "string::contains('Oyelowo Oyedayo', 'Oyedayo')");
+///
+/// let string_field = Field::new("string_field");
+/// let contains = string::contains!(string_field, "Oyedayo");
+/// assert_eq!(contains.to_raw().build(), "string::contains(string_field, 'Oyedayo')");
+///
+/// let string_param = let_("string_param").equal_to("Oyelowo Oyedayo").get_param();
+/// let contains = string::contains!(string_param, "Oyedayo");
+/// assert_eq!(contains.to_raw().build(), "string::contains($string_param, 'Oyedayo')");
+/// ```
+#[macro_export]
+macro_rules! string_contains {
+    ( $string:expr, $contains: expr ) => {
+        $crate::functions::string::contains_fn($string, $contains)
+    };
+}
+pub use string_contains as contains;
 
 /// The string::join function joins strings together with a delimiter.
 pub fn join_fn(values: impl Into<ArgsList>) -> Function {
