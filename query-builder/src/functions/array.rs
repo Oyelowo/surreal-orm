@@ -11,6 +11,7 @@
 // array::append() Appends an item to the end of an array
 // array::combine()	Combines all values from two arrays together
 // array::complement() Returns the complement of two arrays
+// array::clump()	Returns the original array split into multiple arrays of X size
 // array::concat()	Returns the merged values from two arrays
 // array::difference()	Returns the difference between two arrays
 // array::distinct()	Returns the unique items in an array
@@ -647,6 +648,47 @@ create_fn_with_two_array_args!(
     =>
     "complement"
 );
+
+/// The array::clump function returns the original array split into sub-arrays of size. Similar to slice::chunks
+pub fn clump_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: ValueLike = value.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+    Function {
+        query_string: format!("array::clump({}, {})", arr.build(), value.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array::clump function returns the original array split into sub-arrays of size. Similar to slice::chunks
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `value` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::clump!(vec![1, 2, 3, 4], 2);
+/// array::clump!(own_goals, goals);
+/// array::clump!(&[1, 2, 3, 4], 2);
+/// // It is also aliased as array_clump;
+/// array_clump!(&[1, 2, 3, 4], 2);
+/// ```
+#[macro_export]
+macro_rules! array_clump {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::clump_fn($arr, $value)
+    };
+}
+pub use array_clump as clump;
 
 /// The array::distinct function calculates the unique values in an array, returning a single array.
 pub fn distinct_fn(arr: impl Into<ArrayLike>) -> Function {
