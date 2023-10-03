@@ -9,6 +9,10 @@
 // array::all() Checks whether all array values are truthy
 // array::any() Checks whether any array value is truthy
 // array::append() Appends an item to the end of an array
+// array::boolean_and()	Perform the AND bitwise operations on two arrays
+// array::boolean_or()	Perform the OR bitwise operations on two arrays
+// array::boolean_xor()	Perform the XOR bitwise operations on two arrays
+// array::boolean_not()	Perform the NOT bitwise operations on an array
 // array::combine()	Combines all values from two arrays together
 // array::complement() Returns the complement of two arrays
 // array::clump()	Returns the original array split into multiple arrays of X size
@@ -649,6 +653,99 @@ create_fn_with_two_array_args!(
     /// ```
     =>
     "complement"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::boolean_and function performs the AND bitwise operations on two arrays.
+    /// array::boolean_and(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::boolean_and([1,2,3,4], [3,4,5,6]);
+    /// [1,2,3,4]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::boolean_and!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::boolean_and!(own_goals, goals);
+    /// array::boolean_and!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_boolean_and;
+    /// array_boolean_and!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "boolean_and"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::boolean_or function performs the OR bitwise operations on two arrays.
+    /// array::boolean_or(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::boolean_or([1,2,3,4], [3,4,5,6]);
+    /// [3,4,5,6]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::boolean_or!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::boolean_or!(own_goals, goals);
+    /// array::boolean_or!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_boolean_or;
+    /// array_boolean_or!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "boolean_or"
+);
+
+create_fn_with_two_array_args!(
+    /// The array::boolean_xor function performs the XOR bitwise operations on two arrays.
+    /// array::boolean_xor(array, array) -> array
+    /// The following example shows this function, and its output, when used in a select statement:
+    ///
+    /// SELECT * FROM array::boolean_xor([1,2,3,4], [3,4,5,6]);
+    /// [2,5,6]
+    ///
+    /// # Arguments
+    /// * `arr1` -  A vector, field or param.
+    /// * `arr2` -  A vector, field or param.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// let own_goals = Field::new("own_goals");
+    /// let goals = Param::new("goals");
+    ///
+    /// array::boolean_xor!(vec![1, 2, 3, 4], vec![3, 4, 5, 6]);
+    /// array::boolean_xor!(own_goals, goals);
+    /// array::boolean_xor!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    ///
+    /// // It is also aliased as array_boolean_xor;
+    /// array_boolean_xor!(&[1, 2, 3, 4], &[3, 4, 5, 6]);
+    /// ```
+    =>
+    "boolean_xor"
 );
 
 /// The array::clump function returns the original array split into sub-arrays of size. Similar to slice::chunks
