@@ -628,8 +628,8 @@ macro_rules! create_is_function {
 /// The type_::is functions check if given value is of a specific type.
 pub mod is {
     use crate::{
-        Buildable, DatetimeLike, DurationLike, Erroneous, NumberLike, Parametric, StrandLike,
-        ValueLike,
+        Buildable, DatetimeLike, DurationLike, Erroneous, NumberLike, ObjectLike, Parametric,
+        StrandLike, ThingLike, ValueLike,
     };
 
     create_is_function!(
@@ -1137,7 +1137,6 @@ pub mod is {
     ]), "MULTIPOINT (-122.33583 47.60621, -122.33583 47.60622)"
     );
 
-    // is multypolygon
     create_is_function!(
         /// The type::is::multipolygon function checks if given value is of type multipolygon.
         /// Also aliased as `type_is_multipolygon!`
@@ -1307,5 +1306,94 @@ pub mod is {
             },
         ])],
     ), "POLYGON ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622))"
+    );
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct ObjectTest {
+        name: i32,
+    }
+
+    create_is_function!(
+        /// The type::is::object function checks if given value is of type object.
+        /// Also aliased as `type_is_object!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type object. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::object!(sql::Object::default());
+        /// println!("{}", result.to_raw().build());
+        ///
+        /// let object_field = Field::new("object_field");
+        /// let result = type_::is::object!(object_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::object(object_field)");
+        ///
+        /// let object_param = Param::new("object_param");
+        /// let result = type_::is::object!(object_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::object($object_param)");
+        /// ```
+        =>
+        "object", ObjectLike, sql::Object::default(), "{}"
+    );
+
+    create_is_function!(
+        /// The type::is::record function checks if given value is of type record.
+        /// Also aliased as `type_is_record!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type record. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::record!(sql::thing("user:oye").unwrap());
+        /// assert_eq!(result.to_raw().build(), "type::is::record(user:oye)");
+        ///
+        /// let record_field = Field::new("record_field");
+        /// let result = type_::is::record!(record_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::record(record_field)");
+        ///
+        /// let record_param = Param::new("record_param");
+        /// let result = type_::is::record!(record_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::record($record_param)");
+        /// ```
+        =>
+        "record", ThingLike, sql::thing("user:1").unwrap(), "user:1"
+    );
+
+    create_is_function!(
+        /// The type::is::uuid function checks if given value is of type uuid.
+        /// Also aliased as `type_is_uuid!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type uuid. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::uuid!(uuid::Uuid::parse_str("936DA01F9ABD4d9d80C702AF85C822A8").unwrap());
+        /// assert_eq!(result.to_raw().build(), "type::is::uuid('936da01f-9abd-4d9d-80c7-02af85c822a8')");
+        ///
+        /// let uuid_field = Field::new("uuid_field");
+        /// let result = type_::is::uuid!(uuid_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::uuid(uuid_field)");
+        ///
+        /// let uuid_param = Param::new("uuid_param");
+        /// let result = type_::is::uuid!(uuid_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::uuid($uuid_param)");
+        /// ```
+        =>
+        "uuid", ValueLike, uuid::Uuid::parse_str("936DA01F9ABD4d9d80C702AF85C822A8").unwrap(), "'936DA01F-9ABD-4d9d-80C7-02AF85C822A8'"
     );
 }
