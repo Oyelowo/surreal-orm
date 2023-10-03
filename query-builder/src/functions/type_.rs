@@ -1210,4 +1210,33 @@ pub mod is {
         ),
     ]), "MULTIPOLYGON (((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)), ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)))"
     );
+
+    create_is_function!(
+        /// The type::is::point function checks if given value is of type point.
+        /// Also aliased as `type_is_point!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type point. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::point!(geo::Point::new(0.0, 0.0));
+        /// assert_eq!(result.to_raw().build(),
+        /// "type::is::point({ type: 'Point', coordinates: [0, 0] })");
+        ///
+        /// let point_field = Field::new("point_field");
+        /// let result = type_::is::point!(point_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::point(point_field)");
+        ///
+        /// let point_param = Param::new("point_param");
+        /// let result = type_::is::point!(point_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::point($point_param)");
+        /// ```
+        =>
+        "point", crate::GeometryLike, geo::Point::new(0.0, 0.0), "POINT (0 0)"
+    );
 }
