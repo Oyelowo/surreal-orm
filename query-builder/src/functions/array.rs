@@ -1190,6 +1190,47 @@ mod array_transpose_test {
     }
 }
 
+/// The array::matches function returns true if the array matches the specified pattern.
+pub fn matches_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: ValueLike = value.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+    Function {
+        query_string: format!("array::matches({}, {})", arr.build(), value.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array::matches function returns true if the array matches the specified pattern.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `value` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::matches!(vec![1, 2, 3, 4, 5], 2);
+/// array::matches!(own_goals, goals);
+/// array::matches!(&[1, 2, 3, 4, 5], 2);
+/// // It is also aliased as array_matches;
+/// array_matches!(&[1, 2, 3, 4, 5], 2);
+/// ```
+#[macro_export]
+macro_rules! array_matches {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::matches_fn($arr, $value)
+    };
+}
+pub use array_matches as matches;
+
 /// The array:at function returns the value at the specified index in an array.
 pub fn at_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
     let arr: ArrayLike = arr.into();
