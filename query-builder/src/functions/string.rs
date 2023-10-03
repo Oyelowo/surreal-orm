@@ -1803,3 +1803,31 @@ create_fn_with_two_strings_args!(
     "similarity_smithwaterman",
     "similarity::smithwaterman"
 );
+
+create_fn_with_two_strings_args!(
+    /// The string::is::format function checks whether a value matches a format.
+    /// Also aliased as `string_is_format!`
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value to check. Could be a field or a parameter that represents the
+    /// value.
+    /// * `format` - The format to check against. Could be a field or a parameter that represents the
+    /// value.
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// use surreal_orm::{*, functions::{string, is}, statements::let_};
+    ///
+    /// let name = Field::new("name");
+    /// let result = string::is::format!(name, "Oyelowo");
+    /// assert_eq!(result.to_raw().build(), "string::is::format(name, 'Oyelowo')");
+    ///
+    /// let result = string::is::format!("Oyelowo", "Oyedayo");
+    /// assert_eq!(result.to_raw().build(), "string::is::format('Oyelowo', 'Oyedayo')");
+    /// ```
+    =>
+    "is_format",
+    "is::format"
+);
