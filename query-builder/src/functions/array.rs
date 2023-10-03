@@ -8,6 +8,7 @@
 // array::add() Adds an item to an array if it doesn't exist
 // array::all() Checks whether all array values are truthy
 // array::any() Checks whether any array value is truthy
+// array::at()	Returns value for X index, or in reverse for a negative index
 // array::append() Appends an item to the end of an array
 // array::boolean_and()	Perform the AND bitwise operations on two arrays
 // array::boolean_or()	Perform the OR bitwise operations on two arrays
@@ -20,6 +21,8 @@
 // array::difference()	Returns the difference between two arrays
 // array::distinct()	Returns the unique items in an array
 // array::find_index()	Returns the index of the first occurrence of X value
+// array::first()	Returns the first item in an array
+// array::last()	Returns the last item in an array
 // array::find() Finds the first item in an array that matches a condition
 // array::flatten() Flattens multiple arrays into a single array
 // array::group() Flattens and returns the unique items in an array
@@ -29,6 +32,7 @@
 // array::logical_and()	Performs the AND logical operations on two arrays
 // array::logical_or()	Performs the OR logical operations on two arrays
 // array::logical_xor()	Performs the XOR logical operations on two arrays
+// array::retain(): TODO: Check: listed in  v10 release note but doesnt seme to be yet implemented
 // array::max() Returns the maximum item in an array
 // array::min() Returns the minimum item in an array
 // array::pop() Returns the last item from an array
@@ -481,7 +485,6 @@ macro_rules! create_fn_with_single_array_arg {
     };
 }
 
-// array::boolean_not
 create_fn_with_single_array_arg!(
     /// The array::boolean_not function performs the NOT bitwise operations on an array.
     ///
@@ -505,6 +508,56 @@ create_fn_with_single_array_arg!(
     ///  ```
     =>
     "boolean_not"
+);
+
+create_fn_with_single_array_arg!(
+    /// The array::first function returns the first item in an array.
+    ///
+    /// # Arguments
+    /// * `arr` - The array to get the first item from. Could be an array, `Field` or `Param`
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// array::first!(vec![1, 2, 3, 4, 5]);
+    /// array::first!(&[1, 2, 3, 4, 5]);
+    /// array::first!(arr![1, 2, 3, 4, 5]);
+    ///
+    /// let numbers = Field::new("numbers");
+    /// let result = array::first!(numbers);
+    /// assert_eq!(
+    ///  result.to_raw().build(),
+    ///  "array::first(numbers)"
+    ///  );
+    ///  ```
+    =>
+    "first"
+);
+
+create_fn_with_single_array_arg!(
+    /// The array::last function returns the last item in an array.
+    ///
+    /// # Arguments
+    /// * `arr` - The array to get the last item from. Could be an array, `Field` or `Param`
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// array::last!(vec![1, 2, 3, 4, 5]);
+    /// array::last!(&[1, 2, 3, 4, 5]);
+    /// array::last!(arr![1, 2, 3, 4, 5]);
+    ///
+    /// let numbers = Field::new("numbers");
+    /// let result = array::last!(numbers);
+    /// assert_eq!(
+    ///  result.to_raw().build(),
+    ///  "array::last(numbers)"
+    ///  );
+    ///  ```
+    =>
+    "last"
 );
 
 fn create_two_array_args_helper(
@@ -973,6 +1026,89 @@ create_fn_with_two_array_args!(
     =>
     "logical_xor"
 );
+
+/// The array:at function returns the value at the specified index in an array.
+pub fn at_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
+    let arr: ArrayLike = arr.into();
+    let value: ValueLike = value.into();
+    let mut bindings = vec![];
+    let mut errors = vec![];
+    bindings.extend(arr.get_bindings());
+    bindings.extend(value.get_bindings());
+    errors.extend(arr.get_errors());
+    errors.extend(value.get_errors());
+    Function {
+        query_string: format!("array::at({}, {})", arr.build(), value.build()),
+        bindings,
+        errors,
+    }
+}
+
+/// The array:at function returns the value at the specified index in an array.
+/// # Arguments
+/// * `arr` -  A vector, field or param.
+/// * `value` -  A vector, field or param.
+/// # Examples
+/// ```rust
+/// # use surreal_query_builder as  surreal_orm;
+/// use surreal_orm::{*, functions::array};
+/// let own_goals = Field::new("own_goals");
+/// let goals = Param::new("goals");
+/// array::at!(vec![1, 2, 3, 4], 2);
+/// array::at!(own_goals, goals);
+/// array::at!(&[1, 2, 3, 4], 2);
+/// // It is also aliased as array_at;
+/// array_at!(&[1, 2, 3, 4], 2);
+/// ```
+#[macro_export]
+macro_rules! array_at {
+    ( $arr:expr, $value:expr ) => {
+        $crate::functions::array::at_fn($arr, $value)
+    };
+}
+pub use array_at as at;
+
+#[cfg(test)]
+mod array_at_tests {
+    use crate::{functions::array, *};
+
+    #[test]
+    fn test_array_at() {
+        let result = array::at!(vec![1, 2, 3, 4, 5], 2);
+        assert_eq!(result.get_bindings().len(), 2);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::at($_param_00000001, $_param_00000002)"
+        );
+        assert_eq!(result.to_raw().build(), "array::at([1, 2, 3, 4, 5], 2)");
+    }
+
+    #[test]
+    fn test_array_at_field() {
+        let own_goals = Field::new("own_goals");
+
+        let result = array::at!(own_goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::at(own_goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::at(own_goals, 2)");
+    }
+
+    #[test]
+    fn test_array_at_param() {
+        let goals = Param::new("goals");
+
+        let result = array::at!(goals, 2);
+        assert_eq!(result.get_bindings().len(), 1);
+        assert_eq!(
+            result.fine_tune_params(),
+            "array::at($goals, $_param_00000001)"
+        );
+        assert_eq!(result.to_raw().build(), "array::at($goals, 2)");
+    }
+}
 
 /// The array::clump function returns the original array split into sub-arrays of size. Similar to slice::chunks
 pub fn clump_fn(arr: impl Into<ArrayLike>, value: impl Into<ValueLike>) -> Function {
