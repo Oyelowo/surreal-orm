@@ -1104,7 +1104,6 @@ pub mod is {
     ]), "MULTILINESTRING ((-122.33583 47.60621, -122.33583 47.60622), (-122.33583 47.60621, -122.33583 47.60622))"
     );
 
-    // is multipoint
     create_is_function!(
         /// The type::is::multipoint function checks if given value is of type multipoint.
         /// Also aliased as `type_is_multipoint!`
@@ -1139,4 +1138,76 @@ pub mod is {
     );
 
     // is multypolygon
+    create_is_function!(
+        /// The type::is::multipolygon function checks if given value is of type multipolygon.
+        /// Also aliased as `type_is_multipolygon!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type multipolygon. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::multipolygon!(geo::MultiPolygon(vec![]));
+        ///
+        /// assert_eq!(result.to_raw().build(),
+        /// "type::is::multipolygon({ type: 'MultiPolygon', coordinates: [] })");
+        /// let multipolygon_field = Field::new("multipolygon_field");
+        /// let result = type_::is::multipolygon!(multipolygon_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::multipolygon(multipolygon_field)");
+        /// let multipolygon_param = Param::new("multipolygon_param");
+        /// let result = type_::is::multipolygon!(multipolygon_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::multipolygon($multipolygon_param)");
+        /// ```
+    =>
+    "multipolygon", crate::GeometryLike, geo::MultiPolygon(vec![
+        geo::Polygon::new(
+            geo::LineString(vec![
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60621,
+                },
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60622,
+                },
+            ]),
+            vec![geo::LineString(vec![
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60621,
+                },
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60622,
+                },
+            ])],
+        ),
+        geo::Polygon::new(
+            geo::LineString(vec![
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60621,
+                },
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60622,
+                },
+            ]),
+        vec![geo::LineString(vec![
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60621,
+                },
+                geo::Coord {
+                    x: -122.33583,
+                    y: 47.60622,
+                },
+        ])],
+        ),
+    ]), "MULTIPOLYGON (((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)), ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)))"
+    );
 }
