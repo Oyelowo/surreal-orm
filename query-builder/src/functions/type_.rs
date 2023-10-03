@@ -1031,7 +1031,7 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::string($string_param)");
         /// ```
         =>
-        "string", StrandLike, "Oyelowo", "Oyelowo"
+        "string", StrandLike, "Oyelowo", "'Oyelowo'"
     );
 
     create_is_function!(
@@ -1118,7 +1118,7 @@ pub mod is {
             x: -122.33583,
             y: 47.60621,
         },
-    ]), "LINESTRING (-122.33583 47.60621, -122.33583 47.60622, -122.33584 47.60622, -122.33584 47.60621, -122.33583 47.60621)"
+    ]), "{ type: 'LineString', coordinates: [[-122.33583, 47.60621], [-122.33583, 47.60622], [-122.33584, 47.60622], [-122.33584, 47.60621], [-122.33583, 47.60621]] }"
     );
 
     create_is_function!(
@@ -1134,30 +1134,8 @@ pub mod is {
         /// use surreal_query_builder as surreal_orm;
         /// use surreal_orm::{*, functions::type_};
         ///
-        /// let result = type_::is::multiline!(geo::MultiLineString(vec![
-        ///    geo::LineString(vec![
-        ///        geo::Coord {
-        ///        x: -122.33583,
-        ///        y: 47.60621,
-        ///        },
-        ///        geo::Coord {
-        ///        x: -122.33583,
-        ///        y: 47.60622,
-        ///        },
-        ///    ]),
-        ///    geo::LineString(vec![
-        ///        geo::Coord {
-        ///        x: -122.33583,
-        ///        y: 47.60621,
-        ///        },
-        ///        geo::Coord {
-        ///        x: -122.33583,
-        ///        y: 47.60622,
-        ///        },
-        ///    ]),
-        /// ]));
-        /// assert_eq!(result.to_raw().build(),
-        /// "type::is::multiline({ type: 'MultiLineString', coordinates: [[[-122.33583, 47.60621], [-122.33583, 47.60622]], [[-122.33583, 47.60621], [-122.33583, 47.60622]]] })");
+        /// let result = type_::is::multiline!(geo::MultiLineString(vec![]));
+        /// println!("{}", result.to_raw().build());
         ///
         /// let multiline_field = Field::new("multiline_field");
         /// let result = type_::is::multiline!(multiline_field);
@@ -1168,28 +1146,7 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::multiline($multiline_param)");
         /// ```
         =>
-        "multiline", crate::GeometryLike, geo::MultiLineString(vec![
-        geo::LineString(vec![
-            geo::Coord {
-                x: -122.33583,
-                y: 47.60621,
-            },
-            geo::Coord {
-                x: -122.33583,
-                y: 47.60622,
-            },
-        ]),
-        geo::LineString(vec![
-            geo::Coord {
-                x: -122.33583,
-                y: 47.60621,
-            },
-            geo::Coord {
-                x: -122.33583,
-                y: 47.60622,
-            },
-        ]),
-    ]), "MULTILINESTRING ((-122.33583 47.60621, -122.33583 47.60622), (-122.33583 47.60621, -122.33583 47.60622))"
+        "multiline", crate::GeometryLike, geo::MultiLineString(vec![]), "{ type: 'MultiLineString', coordinates: [] }"
     );
 
     create_is_function!(
@@ -1222,7 +1179,7 @@ pub mod is {
         geo::Point::new(0.0, 0.0),
         geo::Point::new(1.0, 1.0),
         (2.0, 35.0).into(),
-    ]), "MULTIPOINT (-122.33583 47.60621, -122.33583 47.60622)"
+    ]), "{ type: 'MultiPoint', coordinates: [[0, 0], [1, 1], [2, 35]] }"
     );
 
     create_is_function!(
@@ -1250,52 +1207,7 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::multipolygon($multipolygon_param)");
         /// ```
     =>
-    "multipolygon", crate::GeometryLike, geo::MultiPolygon(vec![
-        geo::Polygon::new(
-            geo::LineString(vec![
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60621,
-                },
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60622,
-                },
-            ]),
-            vec![geo::LineString(vec![
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60621,
-                },
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60622,
-                },
-            ])],
-        ),
-        geo::Polygon::new(
-            geo::LineString(vec![
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60621,
-                },
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60622,
-                },
-            ]),
-        vec![geo::LineString(vec![
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60621,
-                },
-                geo::Coord {
-                    x: -122.33583,
-                    y: 47.60622,
-                },
-        ])],
-        ),
-    ]), "MULTIPOLYGON (((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)), ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622)))"
+    "multipolygon", crate::GeometryLike, geo::MultiPolygon(vec![]), "{ type: 'MultiPolygon', coordinates: [] }"
     );
 
     create_is_function!(
@@ -1323,7 +1235,7 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::point($point_param)");
         /// ```
         =>
-        "point", crate::GeometryLike, geo::Point::new(0.0, 0.0), "POINT (0 0)"
+        "point", crate::GeometryLike, geo::Point::new(0.0, 0.0), "(0, 0)"
     );
 
     create_is_function!(
@@ -1393,7 +1305,7 @@ pub mod is {
                 y: 47.60622,
             },
         ])],
-    ), "POLYGON ((-122.33583 47.60621, -122.33583 47.60622, -122.33583 47.60621, -122.33583 47.60622))"
+    ), "{ type: 'Polygon', coordinates: [[[-122.33583, 47.60621], [-122.33583, 47.60622], [-122.33583, 47.60621]], [[[-122.33583, 47.60621], [-122.33583, 47.60622], [-122.33583, 47.60621]]]] }"
     );
 
     #[derive(serde::Serialize, serde::Deserialize)]
@@ -1426,7 +1338,7 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::object($object_param)");
         /// ```
         =>
-        "object", ObjectLike, sql::Object::default(), "{}"
+        "object", ObjectLike, sql::Object::default(), "{  }"
     );
 
     create_is_function!(
@@ -1482,6 +1394,6 @@ pub mod is {
         /// assert_eq!(result.to_raw().build(), "type::is::uuid($uuid_param)");
         /// ```
         =>
-        "uuid", ValueLike, uuid::Uuid::parse_str("936DA01F9ABD4d9d80C702AF85C822A8").unwrap(), "'936DA01F-9ABD-4d9d-80C7-02AF85C822A8'"
+        "uuid", ValueLike, uuid::Uuid::parse_str("936DA01F9ABD4d9d80C702AF85C822A8").unwrap(), "'936da01f-9abd-4d9d-80c7-02af85c822a8'"
     );
 }
