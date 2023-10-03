@@ -794,7 +794,7 @@ fn create_string_validation_function(value: impl Into<ValueLike>, function_name:
     let value: ValueLike = value.into();
 
     Function {
-        query_string: format!("is::{function_name}({})", value.build()),
+        query_string: format!("string::is::{function_name}({})", value.build()),
         bindings: value.get_bindings(),
         errors: value.get_errors(),
     }
@@ -827,32 +827,32 @@ macro_rules! create_validation_with_tests {
                     let username = Field::new("username");
                     let result = is::[<$function_name _fn>](username);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}(username)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(username)", $function_name));
                     }
 
                 #[test]
                 fn [<test_ $function_name _string_username>] ()  {
                     let result = is::[<$function_name _fn>]("oyelowo1234");
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}('oyelowo1234')", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _with_number>] ()  {
                     let result = is::[<$function_name _fn>](123456423);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(123456423)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _with_fraction>] ()  {
                     let result = is::[<$function_name _fn>](12.3456423);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423f)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(12.3456423f)", $function_name));
                 }
 
                 // Macro versions
@@ -861,32 +861,32 @@ macro_rules! create_validation_with_tests {
                     let username = Field::new("username");
                     let result = is::[<$function_name>]!(username);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}(username)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(username)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}(username)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(username)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _macro_string_username>] ()  {
                     let result = is::[<$function_name>]!("oyelowo1234");
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}('oyelowo1234')", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}('oyelowo1234')", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _macro_with_number>] ()  {
                     let result = is::[<$function_name>]!(123456423);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(123456423)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(123456423)", $function_name));
                 }
 
                 #[test]
                 fn [<test_ $function_name _macro_with_fraction>] ()  {
                     let result = is::[<$function_name>]!(12.3456423);
 
-                    assert_eq!(result.fine_tune_params(), format!("is::{}($_param_00000001)", $function_name));
-                    assert_eq!(result.to_raw().to_string(), format!("is::{}(12.3456423f)", $function_name));
+                    assert_eq!(result.fine_tune_params(), format!("string::is::{}($_param_00000001)", $function_name));
+                    assert_eq!(result.to_raw().to_string(), format!("string::is::{}(12.3456423f)", $function_name));
                 }
             }
 
@@ -1011,7 +1011,7 @@ create_fn_with_two_strings_args!(
     /// # Example
     /// ```rust
     /// # use surreal_query_builder as surreal_orm;
-    /// use surreal_orm::{*, functions::{string, is}, statements::let_};
+    /// use surreal_orm::{*, functions::string, statements::let_};
     ///
     /// let name = Field::new("name");
     /// let result = string::is::format!(name, "Oyelowo");
@@ -1031,8 +1031,8 @@ pub mod is {
 
     // The is::alphanum function checks whether a value has only alphanumeric characters.
     create_validation_with_tests!(
-        /// The is::alphanum function checks whether a value has only alphanumeric characters.
-        /// Also aliased as `is_alphanum!`
+        /// The string::is::alphanum function checks whether a value has only alphanumeric characters.
+        /// Also aliased as `string::is_alphanum!`
         ///
         /// # Arguments
         ///
@@ -1042,26 +1042,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::alphanum!("oyelowo1234");
-        /// assert_eq!(result.to_raw().to_string(), "is::alphanum('oyelowo1234')");
+        /// let result = string::is::alphanum!("oyelowo1234");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::alphanum('oyelowo1234')");
         ///
         /// let alphanum_field = Field::new("alphanum_field");
-        /// let result = is::alphanum!(alphanum_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::alphanum(alphanum_field)");
+        /// let result = string::is::alphanum!(alphanum_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::alphanum(alphanum_field)");
         ///
         /// let alphanum_param = let_("alphanum_param").equal_to("oyelowo1234").get_param();
-        /// let result = is::alphanum!(alphanum_param);
-        /// assert_eq!(result.fine_tune_params(), "is::alphanum($alphanum_param)");
+        /// let result = string::is::alphanum!(alphanum_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::alphanum($alphanum_param)");
         /// ```
         =>
         "alphanum"
     );
 
     create_validation_with_tests!(
-        /// The is::alpha function checks whether a value has only alpha characters.
-        /// Also aliased as `is_alpha!`
+        /// The string::is::alpha function checks whether a value has only alpha characters.
+        /// Also aliased as `string::is_alpha!`
         ///
         /// # Arguments
         ///
@@ -1071,26 +1071,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::alpha!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::alpha('oyelowo')");
+        /// let result = string::is::alpha!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::alpha('oyelowo')");
         ///
         /// let alpha_field = Field::new("alpha_field");
-        /// let result = is::alpha!(alpha_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::alpha(alpha_field)");
+        /// let result = string::is::alpha!(alpha_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::alpha(alpha_field)");
         ///
         /// let alpha_param = let_("alpha_param").equal_to("oyelowo").get_param();
-        /// let result = is::alpha!(alpha_param);
-        /// assert_eq!(result.fine_tune_params(), "is::alpha($alpha_param)");
+        /// let result = string::is::alpha!(alpha_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::alpha($alpha_param)");
         /// ```
         =>
         "alpha"
     );
 
     create_validation_with_tests!(
-        /// The is::ascii function checks whether a value has only ascii characters.
-        /// Also aliased as `is_ascii!`
+        /// The string::is::ascii function checks whether a value has only ascii characters.
+        /// Also aliased as `string_is_ascii!`
         ///
         /// # Arguments
         ///
@@ -1100,26 +1100,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::ascii!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::ascii('oyelowo')");
+        /// let result = string::is::ascii!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::ascii('oyelowo')");
         ///
         /// let ascii_field = Field::new("ascii_field");
-        /// let result = is::ascii!(ascii_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::ascii(ascii_field)");
+        /// let result = string::is::ascii!(ascii_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::ascii(ascii_field)");
         ///
         /// let ascii_param = let_("ascii_param").equal_to("oyelowo").get_param();
-        /// let result = is::ascii!(ascii_param);
-        /// assert_eq!(result.fine_tune_params(), "is::ascii($ascii_param)");
+        /// let result = string::is::ascii!(ascii_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::ascii($ascii_param)");
         /// ```
         =>
         "ascii"
     );
 
     create_validation_with_tests!(
-        /// The is::domain function checks whether a value is a domain.
-        /// Also aliased as `is_domain!`
+        /// The string::is::domain function checks whether a value is a domain.
+        /// Also aliased as `string_is_domain!`
         ///
         /// # Arguments
         ///
@@ -1129,26 +1129,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::domain!("oyelowo.com");
-        /// assert_eq!(result.to_raw().to_string(), "is::domain('oyelowo.com')");
+        /// let result = string::is::domain!("oyelowo.com");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::domain('oyelowo.com')");
         ///
         /// let domain_field = Field::new("domain_field");
-        /// let result = is::domain!(domain_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::domain(domain_field)");
+        /// let result = string::is::domain!(domain_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::domain(domain_field)");
         ///
         /// let domain_param = let_("domain_param").equal_to("oyelowo.com").get_param();
-        /// let result = is::domain!(domain_param);
-        /// assert_eq!(result.fine_tune_params(), "is::domain($domain_param)");
+        /// let result = string::is::domain!(domain_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::domain($domain_param)");
         /// ```
         =>
         "domain"
     );
 
     create_validation_with_tests!(
-        /// The is::email function checks whether a value is an email.
-        /// Also aliased as `is_email!`
+        /// The string::is::email function checks whether a value is an email.
+        /// Also aliased as `string_is_email!`
         ///
         /// # Arguments
         ///
@@ -1158,27 +1158,27 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::email!("oyelowo@codebreather.com");
-        /// assert_eq!(result.to_raw().to_string(), "is::email('oyelowo@codebreather.com')");
+        /// let result = string::is::email!("oyelowo@codebreather.com");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::email('oyelowo@codebreather.com')");
         ///
         /// let email_field = Field::new("email_field");
-        /// let result = is::email!(email_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::email(email_field)");
+        /// let result = string::is::email!(email_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::email(email_field)");
         ///
         /// let email_param = let_("email_param").equal_to("oyelowo@codebreather").get_param();
         ///
-        /// let result = is::email!(email_param);
-        /// assert_eq!(result.fine_tune_params(), "is::email($email_param)");
+        /// let result = string::is::email!(email_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::email($email_param)");
         /// ```
         =>
         "email"
     );
 
     create_validation_with_tests!(
-            /// The is::hexadecimal function checks whether a value is hexadecimal.
-            /// Also aliased as `is_hexadecimal!`
+            /// The string::is::hexadecimal function checks whether a value is hexadecimal.
+            /// Also aliased as `string_is_hexadecimal!`
             ///
             /// # Arguments
             ///
@@ -1188,26 +1188,26 @@ pub mod is {
             /// # Example
             /// ```rust
             /// # use surreal_query_builder as surreal_orm;
-            /// use surreal_orm::{*, functions::is, statements::let_};
+            /// use surreal_orm::{*, functions::string, statements::let_};
             ///
-            /// let result = is::hexadecimal!("oyelowo");
-            /// assert_eq!(result.to_raw().to_string(), "is::hexadecimal('oyelowo')");
+            /// let result = string::is::hexadecimal!("oyelowo");
+            /// assert_eq!(result.to_raw().to_string(), "string::is::hexadecimal('oyelowo')");
             ///
             /// let hexadecimal_field = Field::new("hexadecimal_field");
-            /// let result = is::hexadecimal!(hexadecimal_field);
-            /// assert_eq!(result.to_raw().to_string(), "is::hexadecimal(hexadecimal_field)");
+            /// let result = string::is::hexadecimal!(hexadecimal_field);
+            /// assert_eq!(result.to_raw().to_string(), "string::is::hexadecimal(hexadecimal_field)");
             ///
             /// let hexadecimal_param = let_("hexadecimal_param").equal_to("oyelowo").get_param();
-            /// let result = is::hexadecimal!(hexadecimal_param);
-            /// assert_eq!(result.fine_tune_params(), "is::hexadecimal($hexadecimal_param)");
+            /// let result = string::is::hexadecimal!(hexadecimal_param);
+            /// assert_eq!(result.fine_tune_params(), "string::is::hexadecimal($hexadecimal_param)");
             /// ```
             =>
             "hexadecimal"
     );
 
     create_validation_with_tests!(
-        /// The is::latitude function checks whether a value is a latitude value.
-        /// Also aliased as `is_latitude!`
+        /// The string::is::latitude function checks whether a value is a latitude value.
+        /// Also aliased as `string_is_latitude!`
         ///
         /// # Arguments
         ///
@@ -1217,26 +1217,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::latitude!("-0.118092");
-        /// assert_eq!(result.to_raw().to_string(), "is::latitude('-0.118092')");
+        /// let result = string::is::latitude!("-0.118092");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::latitude('-0.118092')");
         ///
         /// let latitude_field = Field::new("latitude_field");
-        /// let result = is::latitude!(latitude_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::latitude(latitude_field)");
+        /// let result = string::is::latitude!(latitude_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::latitude(latitude_field)");
         ///
         /// let latitude_param = let_("latitude_param").equal_to("oyelowo").get_param();
-        /// let result = is::latitude!(latitude_param);
-        /// assert_eq!(result.fine_tune_params(), "is::latitude($latitude_param)");
+        /// let result = string::is::latitude!(latitude_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::latitude($latitude_param)");
         /// ```
         =>
         "latitude"
     );
 
     create_validation_with_tests!(
-        /// The is::longitude function checks whether a value is a longitude value.
-        /// Also aliased as `is_longitude!`
+        /// The string::is::longitude function checks whether a value is a longitude value.
+        /// Also aliased as `string_is_longitude!`
         ///
         /// # Arguments
         ///
@@ -1246,26 +1246,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::longitude!("51.509865");
-        /// assert_eq!(result.to_raw().to_string(), "is::longitude('51.509865')");
+        /// let result = string::is::longitude!("51.509865");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::longitude('51.509865')");
         ///
         /// let longitude_field = Field::new("longitude_field");
-        /// let result = is::longitude!(longitude_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::longitude(longitude_field)");
+        /// let result = string::is::longitude!(longitude_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::longitude(longitude_field)");
         ///
         /// let longitude_param = let_("longitude_param").equal_to("oyelowo").get_param();
-        /// let result = is::longitude!(longitude_param);
-        /// assert_eq!(result.fine_tune_params(), "is::longitude($longitude_param)");
+        /// let result = string::is::longitude!(longitude_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::longitude($longitude_param)");
         /// ```
         =>
         "longitude"
     );
 
     create_validation_with_tests!(
-        /// The is::numeric function checks whether a value has only numeric characters.
-        /// Also aliased as `is_numeric!`
+        /// The string::is::numeric function checks whether a value has only numeric characters.
+        /// Also aliased as `string_is_numeric!`
         ///
         /// # Arguments
         ///
@@ -1275,26 +1275,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::numeric!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::numeric('oyelowo')");
+        /// let result = string::is::numeric!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::numeric('oyelowo')");
         ///
         /// let numeric_field = Field::new("numeric_field");
-        /// let result = is::numeric!(numeric_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::numeric(numeric_field)");
+        /// let result = string::is::numeric!(numeric_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::numeric(numeric_field)");
         ///
         /// let numeric_param = let_("numeric_param").equal_to("oyelowo").get_param();
-        /// let result = is::numeric!(numeric_param);
-        /// assert_eq!(result.fine_tune_params(), "is::numeric($numeric_param)");
+        /// let result = string::is::numeric!(numeric_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::numeric($numeric_param)");
         /// ```
         =>
         "numeric"
     );
 
     create_validation_with_tests!(
-        /// The is::semver function checks whether a value matches a semver version.
-        /// Also aliased as `is_semver!`
+        /// The string::is::semver function checks whether a value matches a semver version.
+        /// Also aliased as `string_is_semver!`
         ///
         /// # Arguments
         ///
@@ -1304,26 +1304,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::semver!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::semver('oyelowo')");
+        /// let result = string::is::semver!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::semver('oyelowo')");
         ///
         /// let semver_field = Field::new("semver_field");
-        /// let result = is::semver!(semver_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::semver(semver_field)");
+        /// let result = string::is::semver!(semver_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::semver(semver_field)");
         ///
         /// let semver_param = let_("semver_param").equal_to("oyelowo").get_param();
-        /// let result = is::semver!(semver_param);
-        /// assert_eq!(result.fine_tune_params(), "is::semver($semver_param)");
+        /// let result = string::is::semver!(semver_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::semver($semver_param)");
         /// ```
         =>
         "semver"
     );
 
     create_validation_with_tests!(
-        /// The is::uuid function checks whether a value is a UUID.
-        /// Also aliased as `is_uuid!`
+        /// The string::is::uuid function checks whether a value is a UUID.
+        /// Also aliased as `string_is_uuid!`
         ///
         /// # Arguments
         ///
@@ -1333,26 +1333,26 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::uuid!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::uuid('oyelowo')");
+        /// let result = string::is::uuid!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::uuid('oyelowo')");
         ///
         /// let uuid_field = Field::new("uuid_field");
-        /// let result = is::uuid!(uuid_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::uuid(uuid_field)");
+        /// let result = string::is::uuid!(uuid_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::uuid(uuid_field)");
         ///
         /// let uuid_param = let_("uuid_param").equal_to("oyelowo").get_param();
-        /// let result = is::uuid!(uuid_param);
-        /// assert_eq!(result.fine_tune_params(), "is::uuid($uuid_param)");
+        /// let result = string::is::uuid!(uuid_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::uuid($uuid_param)");
         /// ```
         =>
         "uuid"
     );
 
     create_validation_with_tests!(
-        /// The is::datetime function checks whether a value matches a datetime format.
-        /// Also aliased as `is_datetime!`
+        /// The string::is::datetime function checks whether a value matches a datetime format.
+        /// Also aliased as `string_is_datetime!`
         ///
         /// # Arguments
         ///
@@ -1362,18 +1362,18 @@ pub mod is {
         /// # Example
         /// ```rust
         /// # use surreal_query_builder as surreal_orm;
-        /// use surreal_orm::{*, functions::is, statements::let_};
+        /// use surreal_orm::{*, functions::string, statements::let_};
         ///
-        /// let result = is::datetime!("oyelowo");
-        /// assert_eq!(result.to_raw().to_string(), "is::datetime('oyelowo')");
+        /// let result = string::is::datetime!("oyelowo");
+        /// assert_eq!(result.to_raw().to_string(), "string::is::datetime('oyelowo')");
         ///
         /// let datetime_field = Field::new("datetime_field");
-        /// let result = is::datetime!(datetime_field);
-        /// assert_eq!(result.to_raw().to_string(), "is::datetime(datetime_field)");
+        /// let result = string::is::datetime!(datetime_field);
+        /// assert_eq!(result.to_raw().to_string(), "string::is::datetime(datetime_field)");
         ///
         /// let datetime_param = let_("datetime_param").equal_to("oyelowo").get_param();
-        /// let result = is::datetime!(datetime_param);
-        /// assert_eq!(result.fine_tune_params(), "is::datetime($datetime_param)");
+        /// let result = string::is::datetime!(datetime_param);
+        /// assert_eq!(result.fine_tune_params(), "string::is::datetime($datetime_param)");
         /// ```
         =>
         "datetime"
