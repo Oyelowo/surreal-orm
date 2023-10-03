@@ -48,7 +48,7 @@
 // array::sort::asc()	Sorts the values in an array in ascending order
 // array::sort::desc()	Sorts the values in an array in descending order
 // array::transpose()	Performs 2d array transposition on two arrays
-// array::union()
+// array::union()	Returns the unique merged values from two arrays
 
 use std::fmt::Display;
 
