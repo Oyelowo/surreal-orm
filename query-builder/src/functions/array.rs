@@ -35,6 +35,7 @@
 // array::retain(): TODO: Check: listed in  v10 release note but doesnt seme to be yet implemented
 // array::max() Returns the maximum item in an array
 // array::min() Returns the minimum item in an array
+// array::matches()	Returns an array of boolenasjj
 // array::pop() Returns the last item from an array
 // array::prepend() Prepends an item to the beginning of an array
 // array::push() Appends an item to the end of an array
@@ -559,6 +560,56 @@ create_fn_with_single_array_arg!(
     ///  ```
     =>
     "last"
+);
+
+create_fn_with_single_array_arg!(
+    /// The array::max function returns the maximum item in an array.
+    ///
+    /// # Arguments
+    /// * `arr` - The array to get the maximum item from. Could be an array, `Field` or `Param`
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// array::max!(vec![1, 2, 3, 4, 5]);
+    /// array::max!(&[1, 2, 3, 4, 5]);
+    /// array::max!(arr![1, 2, 3, 4, 5]);
+    ///
+    /// let numbers = Field::new("numbers");
+    /// let result = array::max!(numbers);
+    /// assert_eq!(
+    ///  result.to_raw().build(),
+    ///  "array::max(numbers)"
+    ///  );
+    ///  ```
+    =>
+    "max"
+);
+
+create_fn_with_single_array_arg!(
+    /// The array::min function returns the minimum item in an array.
+    ///
+    /// # Arguments
+    /// * `arr` - The array to get the minimum item from. Could be an array, `Field` or `Param`
+    ///
+    /// # Example
+    /// ```rust
+    /// # use surreal_query_builder as  surreal_orm;
+    /// use surreal_orm::{*, functions::array};
+    /// array::min!(vec![1, 2, 3, 4, 5]);
+    /// array::min!(&[1, 2, 3, 4, 5]);
+    /// array::min!(arr![1, 2, 3, 4, 5]);
+    ///
+    /// let numbers = Field::new("numbers");
+    /// let result = array::min!(numbers);
+    /// assert_eq!(
+    ///  result.to_raw().build(),
+    ///  "array::min(numbers)"
+    ///  );
+    ///  ```
+    =>
+    "min"
 );
 
 fn create_two_array_args_helper(
