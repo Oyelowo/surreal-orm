@@ -628,8 +628,8 @@ macro_rules! create_is_function {
 /// The type_::is functions check if given value is of a specific type.
 pub mod is {
     use crate::{
-        Buildable, DatetimeLike, DurationLike, Erroneous, Function, NumberLike, Parametric,
-        StrandLike, ValueLike,
+        Buildable, DatetimeLike, DurationLike, Erroneous, NumberLike, Parametric, StrandLike,
+        ValueLike,
     };
 
     create_is_function!(
@@ -864,6 +864,34 @@ pub mod is {
     );
 
     create_is_function!(
+        /// The type::is::null function checks if given value is of type null.
+        /// Also aliased as `type_is_null!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type null. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// # use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::null!(1234);
+        /// assert_eq!(result.to_raw().build(), "type::is::null(1234)");
+        ///
+        /// let null_field = Field::new("null_field");
+        /// let result = type_::is::null!(null_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::null(null_field)");
+        ///
+        /// let null_param = Param::new("null_param");
+        /// let result = type_::is::null!(null_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::null($null_param)");
+        /// ```
+        =>
+        "null", ValueLike, 5454, "5454"
+    );
+
+    create_is_function!(
         /// The type::is::number function checks if given value is of type number.
         /// Also aliased as `type_is_number!`
         ///
@@ -945,5 +973,65 @@ pub mod is {
         /// ```
         =>
         "geometry", crate::GeometryLike, geo::point!(x: 51.509865, y: -0.118092), "(51.509865, -0.118092)"
+    );
+
+    // is line
+    create_is_function!(
+        /// The type::is::line function checks if given value is of type line.
+        /// Also aliased as `type_is_line!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type line. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::line!(geo::LineString(vec![
+        ///    geo::Coord {
+        ///    x: -122.33583,
+        ///    y: 47.60621,
+        ///    },
+        ///    geo::Coord {
+        ///    x: -122.33583,
+        ///    y: 47.60622,
+        ///    },
+        /// ]));
+        /// assert_eq!(result.to_raw().build(),
+        /// "type::is::line({ type: 'LineString', coordinates: [[-122.33583, 47.60621], [-122.33583, 47.60622]] })");
+        ///
+        /// let line_field = Field::new("line_field");
+        /// let result = type_::is::line!(line_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::line(line_field)");
+        ///
+        /// let line_param = Param::new("line_param");
+        /// let result = type_::is::line!(line_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::line($line_param)");
+        /// ```
+        =>
+        "line", crate::GeometryLike, geo::LineString(vec![
+        geo::Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+        geo::Coord {
+            x: -122.33583,
+            y: 47.60622,
+        },
+        geo::Coord {
+            x: -122.33584,
+            y: 47.60622,
+        },
+        geo::Coord {
+            x: -122.33584,
+            y: 47.60621,
+        },
+        geo::Coord {
+            x: -122.33583,
+            y: 47.60621,
+        },
+    ]), "LINESTRING (-122.33583 47.60621, -122.33583 47.60622, -122.33584 47.60622, -122.33584 47.60621, -122.33583 47.60621)"
     );
 }
