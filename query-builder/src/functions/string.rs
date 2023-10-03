@@ -30,19 +30,19 @@
 // string::similarity::fuzzy
 // string::similarity::jaro
 // string::similarity::smithwaterman
-// is::alphanum()	Checks whether a value has only alphanumeric characters
-// is::alpha()	Checks whether a value has only alpha characters
-// is::ascii()	Checks whether a value has only ascii characters
-// is::datetime() Checks whether a value matches a datetime format
-// is::domain()	Checks whether a value is a domain
-// is::email()	Checks whether a value is an email
-// is::hexadecimal()	Checks whether a value is hexadecimal
-// is::latitude()	Checks whether a value is a latitude value
-// is::longitude()	Checks whether a value is a longitude value
-// is::numeric()	Checks whether a value has only numeric characters
-// is::semver()	Checks whether a value matches a semver version
-// is::url() Checks whether a value is a valid URL
-// is::uuid()	Checks whether a value is a UUID
+// string::is::alphanum()	Checks whether a value has only alphanumeric characters
+// string::is::alpha()	Checks whether a value has only alpha characters
+// string::is::ascii()	Checks whether a value has only ascii characters
+// string::is::datetime() Checks whether a value matches a datetime format
+// string::is::domain()	Checks whether a value is a domain
+// string::is::email()	Checks whether a value is an email
+// string::is::hexadecimal()	Checks whether a value is hexadecimal
+// string::is::latitude()	Checks whether a value is a latitude value
+// string::is::longitude()	Checks whether a value is a longitude value
+// string::is::numeric()	Checks whether a value has only numeric characters
+// string::is::semver()	Checks whether a value matches a semver version
+// string::is::url() Checks whether a value is a valid URL
+// string::is::uuid()	Checks whether a value is a UUID
 
 use crate::{
     ArgsList, Buildable, Erroneous, Function, NumberLike, Parametric, StrandLike, ValueLike,
