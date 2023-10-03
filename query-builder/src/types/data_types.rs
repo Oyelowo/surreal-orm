@@ -340,6 +340,20 @@ impl<T: Into<sql::Value>> From<Vec<T>> for ArrayLike {
     }
 }
 
+impl<const N: usize, T> From<[T; N]> for ArrayLike
+where
+    T: Into<sql::Value> + Clone,
+{
+    fn from(value: [T; N]) -> Self {
+        let value = value
+            .iter()
+            .cloned()
+            .map(Into::into)
+            .collect::<Vec<sql::Value>>();
+        Self(value.into())
+    }
+}
+
 impl<const N: usize, T> From<&[T; N]> for ArrayLike
 where
     T: Into<sql::Value> + Clone,
