@@ -1103,4 +1103,40 @@ pub mod is {
         ]),
     ]), "MULTILINESTRING ((-122.33583 47.60621, -122.33583 47.60622), (-122.33583 47.60621, -122.33583 47.60622))"
     );
+
+    // is multipoint
+    create_is_function!(
+        /// The type::is::multipoint function checks if given value is of type multipoint.
+        /// Also aliased as `type_is_multipoint!`
+        ///
+        /// # Arguments
+        /// * `value` - The value to be checked if it is of type multipoint. Could also be a field or a parameter
+        /// representing the value.
+        ///
+        /// # Example
+        /// ```rust
+        /// use surreal_query_builder as surreal_orm;
+        /// use surreal_orm::{*, functions::type_};
+        ///
+        /// let result = type_::is::multipoint!(geo::MultiPoint(vec![(0.0, 0.0).into(), (1.0, 1.0).into(), (2.0, 35.0).into()]));
+        /// assert_eq!(result.to_raw().build(),
+        /// "type::is::multipoint({ type: 'MultiPoint', coordinates: [[0, 0], [1, 1], [2, 35]] })");
+        ///
+        /// let multipoint_field = Field::new("multipoint_field");
+        /// let result = type_::is::multipoint!(multipoint_field);
+        /// assert_eq!(result.to_raw().build(), "type::is::multipoint(multipoint_field)");
+        ///
+        /// let multipoint_param = Param::new("multipoint_param");
+        /// let result = type_::is::multipoint!(multipoint_param);
+        /// assert_eq!(result.to_raw().build(), "type::is::multipoint($multipoint_param)");
+        /// ```
+        =>
+        "multipoint", crate::GeometryLike, geo::MultiPoint(vec![
+        geo::Point::new(0.0, 0.0),
+        geo::Point::new(1.0, 1.0),
+        (2.0, 35.0).into(),
+    ]), "MULTIPOINT (-122.33583 47.60621, -122.33583 47.60622)"
+    );
+
+    // is multypolygon
 }
