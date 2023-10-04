@@ -12,7 +12,7 @@ use crate::{
     Queryable, Table, ValueLike,
 };
 
-use super::for_::Permissions;
+use super::for_permission::Permissions;
 
 // DEFINE FIELD statement
 // The DEFINE FIELD statement allows you to instantiate a named field on a table, enabling you to set the field's data type, set a default value, apply assertions to protect data consistency, and set permissions specifying what operations can be performed on the field.
@@ -67,12 +67,12 @@ pub struct DefineFieldStatement {
 ///     .value("example@codebreather.com")
 ///     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
 ///     // Additional permission chaining accumulates
-///     .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-///     .permissions(for_([Create, Update]).where_(name.is("Oyedayo"))) // Multiple
+///     .permissions(for_permissionSelect).where_(age.greater_than_or_equal(18))) // Single works
+///     .permissions(for_permission[Create, Update]).where_(name.is("Oyedayo"))) // Multiple
 ///     // Multiples multples
 ///     .permissions([
-///         for_([Create, Delete]).where_(name.is("Oyedayo")),
-///         for_(Update).where_(age.less_than_or_equal(130)),
+///         for_permission[Create, Delete]).where_(name.is("Oyedayo")),
+///         for_permissionUpdate).where_(age.less_than_or_equal(130)),
 ///     ]);
 ///
 /// assert!(!statement.build().is_empty());
@@ -177,15 +177,15 @@ impl DefineFieldStatement {
     ///     #    .assert(cond(value().is_not(NONE)).and(value().like("is_email")));
     ///
     /// // You can create perimssion for a single event
-    /// let statement = statement.permissions(for_(Select).where_(age.greater_than_or_equal(18)));
+    /// let statement = statement.permissions(for_permissionSelect).where_(age.greater_than_or_equal(18)));
     ///
     /// // Even multiple
-    /// let statement = statement.permissions(for_(&[Create, Update]).where_(name.is("Oyedayo")));
+    /// let statement = statement.permissions(for_permission&[Create, Update]).where_(name.is("Oyedayo")));
     ///
     /// // Multiples multples
     /// let statement = statement.permissions(&[
-    ///     for_(&[Create, Delete]).where_(name.is("Oyedayo")),
-    ///     for_(Update).where_(age.less_than_or_equal(130)),
+    ///     for_permission&[Create, Delete]).where_(name.is("Oyedayo")),
+    ///     for_permissionUpdate).where_(age.less_than_or_equal(130)),
     /// ]);
     ///
     /// ```
@@ -273,7 +273,7 @@ impl Display for DefineFieldStatement {
 mod tests {
     use super::*;
     use crate::{cond, value, Operatable, ToRaw, NONE};
-    use crate::{statements::for_, CrudType::*};
+    use crate::{statements::for_permission, CrudType::*};
 
     #[test]
     fn test_define_field_statement_full() {
@@ -288,11 +288,11 @@ mod tests {
             .type_(String)
             .value("example@codebreather.com")
             .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-            .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-            .permissions(for_([Create, Update]).where_(name.is("Oyedayo"))) //Multiple
+            .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
+            .permissions(for_permission([Create, Update]).where_(name.is("Oyedayo"))) //Multiple
             .permissions([
-                for_([Create, Delete]).where_(name.is("Oyedayo")),
-                for_(Update).where_(age.less_than_or_equal(130)),
+                for_permission([Create, Delete]).where_(name.is("Oyedayo")),
+                for_permission(Update).where_(age.less_than_or_equal(130)),
             ]);
 
         assert_eq!(

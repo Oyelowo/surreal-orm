@@ -80,14 +80,14 @@ impl ForStart {
 /// # let name = Field::new("name");
 /// # let country = Field::new("country");
 ///  // You can create for a single crud operation
-/// let statement = for_(Create).where_(name.like("Oyelowo"));
+/// let statement = for_permission(Create).where_(name.like("Oyelowo"));
 ///  
 ///  // You can also create for a  list of crud operations
-/// let statement = for_(&[Create, Delete, Select, Update]).where_(country.like("Canada"));
+/// let statement = for_permission(&[Create, Delete, Select, Update]).where_(country.like("Canada"));
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn for_(for_crud_types: impl Into<ForArgs>) -> ForStart {
+pub fn for_permission(for_crud_types: impl Into<ForArgs>) -> ForStart {
     ForStart(ForData {
         crud_types: for_crud_types.into().into(),
         condition: None,
@@ -238,7 +238,7 @@ mod tests {
     fn test_define_for_statement_state_machine() {
         let name = Field::new("name");
 
-        let for_res = for_(CrudType::Create).where_(name.like("Oyelowo"));
+        let for_res = for_permission(CrudType::Create).where_(name.like("Oyelowo"));
         assert_eq!(
             for_res.fine_tune_params(),
             "FOR create\n\tWHERE name ~ $_param_00000001"
@@ -254,7 +254,7 @@ mod tests {
         use CrudType::*;
         let name = Field::new("name");
 
-        let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+        let for_res = for_permission(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
             for_res.fine_tune_params(),
             "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001"

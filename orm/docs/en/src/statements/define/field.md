@@ -55,11 +55,11 @@ let statement = define_field(email)
     .type_(String)
     .value("example@codebreather.com")
     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-    .permissions(for_(Permission::Select).where_(age.greater_than_or_equal(18))) // Single permission
-    .permissions(for_(&[Permission::Create, Permission::Update]).where_(name.is("Oyedayo"))) // Multiple permissions
+    .permissions(for_permission(Permission::Select).where_(age.greater_than_or_equal(18))) // Single permission
+    .permissions(for_permission(&[Permission::Create, Permission::Update]).where_(name.is("Oyedayo"))) // Multiple permissions
     .permissions(&[
-        for_(&[Permission::Create, Permission::Delete]).where_(name.is("Oyedayo")),
-        for_(Permission::Update).where_(age.less_than_or_equal(130)),
+        for_permission(&[Permission::Create, Permission::Delete]).where_(name.is("Oyedayo")),
+        for_permission(Permission::Update).where_(age.less_than_or_equal(130)),
     ]);
 ```
 

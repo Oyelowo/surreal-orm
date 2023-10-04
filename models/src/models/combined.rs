@@ -18,7 +18,7 @@ use std::fmt::{Debug, Display};
 use surreal_orm::{
     functions::*,
     statements::{
-        define_field, define_table, for_, order, select, DefineFieldStatement,
+        define_field, define_table, for_permission, order, select, DefineFieldStatement,
         DefineTableStatement, For, Permissions, SelectStatement,
     },
     *,
@@ -40,16 +40,16 @@ fn full() -> u32 {
 //     let name = Field::new("name");
 //     let age = Field::new("age");
 //     // vec![
-//     //     for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//     //     for_(Update).where_(age.less_than_or_equal(130)),
+//     //     for_permission&[Create, Delete]).where_(name.is("Oyelowo")),
+//     //     for_permissionUpdate).where_(age.less_than_or_equal(130)),
 //     // ]
 //     // .into_iter()
 //     // .map(|e| e.to_raw())
 //     // .collect::<Vec<_>>()
 //     // .to_vec()
 //     PermissionType::from(vec![
-//         for_(&[Create, Delete]).where_(name.is("Oyelowo")),
-//         for_(Update).where_(age.less_than_or_equal(130)),
+//         for_permission&[Create, Delete]).where_(name.is("Oyelowo")),
+//         for_permissionUpdate).where_(age.less_than_or_equal(130)),
 //     ])
 //     // .to_raw()
 // }
@@ -73,11 +73,11 @@ fn define_student() -> DefineTableStatement {
                 .start(5),
         )
         .schemafull()
-        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions(for_([Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
+        .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_permission([Create, Delete]).where_(name.is("Oyedayo"))) //Multiple
         .permissions(&[
-            for_([Create, Delete]).where_(name.is("Oyedayo")),
-            for_(Update).where_(age.less_than_or_equal(130)),
+            for_permission([Create, Delete]).where_(name.is("Oyedayo")),
+            for_permission(Update).where_(age.less_than_or_equal(130)),
         ])
 }
 // use Duration;
@@ -100,16 +100,16 @@ fn define_age() -> DefineFieldStatement {
     //     .type_(String)
     //     .value("example@codebreather.com")
     //     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-    //     // .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
+    //     // .permissions(for_permissionSelect).where_(age.greater_than_or_equal(18))) // Single works
     //     .permissions(PermissionForables::from(
-    //         for_(&[Create, Update])
+    //         for_permission&[Create, Update])
     //             .where_(firstName.is("Oyedayo"))
     //             .to_raw(),
     //     )) //Multiple
     //     .permissions(
     //         PermissionForables::from(&[
-    //             for_(&[Create, Delete]).where_(firstName.is("Oyelowo")),
-    //             for_(Update).where_(age.less_than_or_equal(130)),
+    //             for_permission&[Create, Delete]).where_(firstName.is("Oyelowo")),
+    //             for_permissionUpdate).where_(age.less_than_or_equal(130)),
     //         ])
     //         .to_raw(),
     //     );
@@ -119,12 +119,12 @@ fn define_age() -> DefineFieldStatement {
         .type_(String)
         .value("example@codebreather.com")
         .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
-        .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-        .permissions(for_([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
+        .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
+        .permissions(for_permission([Create, Update]).where_(firstName.is("Oyedayo"))) //Multiple
         .permissions(
             &[
-                for_([Create, Delete]).where_(firstName.is("Oyelowo")),
-                for_(Update).where_(age.less_than_or_equal(130)),
+                for_permission([Create, Delete]).where_(firstName.is("Oyelowo")),
+                for_permission(Update).where_(age.less_than_or_equal(130)),
             ], // .into_iter()
                // .map(|e| e.to_raw())
                // .collect::<Vec<_>>()
