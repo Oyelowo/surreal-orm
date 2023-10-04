@@ -138,6 +138,80 @@ macro_rules! code_block {
             chain
         }
     };
+  (IF ($condition:expr) THEN { $($then_body:expr;)+ } $(ELSE IF ($elif_condition:expr) THEN { $($elif_body:expr;)+ })* $(ELSE { $($else_body:expr;)+ })?) => {
+        {
+            let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+
+            let if_condition = $crate::statements::if_($condition);
+            let if_block = $crate::block! { $($then_body;)+ };
+            __statements.push(if_condition.then(if_block).into());
+
+            $(
+                let elif_condition = $crate::statements::if_($elif_condition);
+                let elif_block = $crate::block! { $($elif_body;)+ };
+                __statements.push(elif_condition.else_if(elif_block).into());
+            )*
+
+            $(
+                let else_block = $crate::block! { $($else_body;)+ };
+                __statements.push(else_block.into());
+            )?
+
+            $crate::statements::utils::QueryChain::from(__statements)
+        }
+    };
+    (if ($condition:expr) then { $($then_body:expr;)+ } $(else if ($elif_condition:expr) then { $($elif_body:expr;)+ })* $(else { $($else_body:expr;)+ })?) => {
+        {
+            let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+
+            let if_condition = $crate::statements::if_($condition);
+            let if_block = $crate::block! { $($then_body;)+ };
+            __statements.push(if_condition.then(if_block).into());
+
+            $(
+                let elif_condition = $crate::statements::if_($elif_condition);
+                let elif_block = $crate::block! { $($elif_body;)+ };
+                __statements.push(elif_condition.else_if(elif_block).into());
+            )*
+
+            $(
+                let else_block = $crate::block! { $($else_body;)+ };
+                __statements.push(else_block.into());
+            )?
+
+            $crate::statements::utils::QueryChain::from(__statements)
+        }
+    };
+    (FOR ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {
+        {
+            let ref $param = $crate::Param::new(stringify!($param));
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+
+            let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+            __statements.push(for_loop.into());
+
+            {
+                $crate::block_inner!( __statements; $($rest)*);
+            }
+
+            $crate::statements::utils::QueryChain::from(__statements)
+        }
+    };
+    (for ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {
+        {
+            let ref $param = $crate::Param::new(stringify!($param));
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+
+            let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+            __statements.push(for_loop.into());
+
+            {
+                $crate::block_inner!( __statements; $($rest)*);
+            }
+
+            $crate::statements::utils::QueryChain::from(__statements)
+        }
+    };
     ($($query:expr;)*) => {
         {
             use $crate::statements::utils::chain;
@@ -328,6 +402,27 @@ macro_rules! block_inner {
         $statements.push($var.clone().into());
         $crate::block_inner!($statements; $($rest)*);
     }};
+
+    ($statements:expr; FOR ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {{
+            let ref $param = $crate::Param::new(stringify!($param));
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+
+            // let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+            $statements.push(for_loop.into());
+            $crate::block_inner!($statements; $($rest)*);
+    }};
+
+    ($statements:expr; for ($param:ident in $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {{
+            let ref $param = $crate::Param::new(stringify!($param));
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+
+            // let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
+            $statements.push(for_loop.clone().into());
+            $crate::block_inner!($statements; $($rest)*);
+    }};
+
+
+
     ($statements:expr; return $value:expr; $($rest:tt)*) => {{
         let __private_stmt = $crate::statements::return_($value);
         $statements.push(__private_stmt.into());
