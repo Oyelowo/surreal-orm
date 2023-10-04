@@ -127,10 +127,10 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::statements::chain;
+            use $crate::statements::utils::chain;
 
 
-            let chain: $crate::statements::QueryChain = $(
+            let chain: $crate::statements::utils::QueryChain = $(
             chain(&$var).
             )*
             into();
@@ -140,10 +140,10 @@ macro_rules! code_block {
     };
     ($($query:expr;)*) => {
         {
-            use $crate::statements::chain;
+            use $crate::statements::utils::chain;
 
-            let chain: $crate::statements::QueryChain = $(
-            chain(&$query).
+            let chain: $crate::statements::utils::QueryChain = $(
+            chain($query).
             )*
             into();
 
@@ -156,9 +156,9 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::chain;
+            use $crate::statements::utils::chain;
 
-            let chain: $crate::QueryChain = $(
+            let chain: $crate::statements::utils::QueryChain = $(
                 chain(&$var).
                 )*
                 into();
@@ -174,9 +174,9 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::chain;
+            use $crate::statements::utils::chain;
 
-            let chain: $crate::QueryChain = $(
+            let chain: $crate::statements::utils::QueryChain = $(
                 chain(&$var).
                 )*
                 into();
@@ -192,9 +192,9 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::statements::chain;
+            use $crate::statements::utils::chain;
 
-            let chain: $crate::statements::QueryChain = $(
+            let chain: $crate::statements::utils::QueryChain = $(
                 chain(&$var).
                 )*
                 into();
@@ -210,9 +210,9 @@ macro_rules! code_block {
                 let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
             )*
 
-            use $crate::statements::chain;
+            use $crate::statements::utils::chain;
 
-            let chain: $crate::statements::QueryChain = $(
+            let chain: $crate::statements::utils::QueryChain = $(
                 chain(&$var).
                 )*
                 into();
@@ -247,9 +247,9 @@ macro_rules! code_block {
             let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         )*
 
-        use $crate::statements::chain;
+        use $crate::statements::utils::chain;
 
-        let chain: $crate::statements::QueryChain = $(
+        let chain: $crate::statements::utils::QueryChain = $(
             chain(&$var).
             )*
             into();
@@ -266,9 +266,9 @@ macro_rules! code_block {
             let $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         )*
 
-        use $crate::statements::chain;
+        use $crate::statements::utils::chain;
 
-        let chain: $crate::statements::QueryChain = $(
+        let chain: $crate::statements::utils::QueryChain = $(
             chain(&$var).
             )*
             into();
@@ -304,11 +304,11 @@ macro_rules! code_block {
         $statement
     }};
     ($($rest:tt)*) => {{
-        let mut __statements: ::std::vec::Vec<$crate::Chainable> = ::std::vec::Vec::new();
+        let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
         {
             $crate::block_inner!( __statements; $($rest)*);
         }
-        $crate::QueryChain::from(__statements)
+        $crate::statements::utils::QueryChain::from(__statements)
     }};
 
     // () => {};
