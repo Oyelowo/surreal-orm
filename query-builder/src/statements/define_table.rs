@@ -61,7 +61,7 @@ pub struct DefineTableStatement {
 ///
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, functions::crypto, statements::{define_table, for_, order, select}};
+/// use surreal_orm::{*, functions::crypto, statements::{define_table, for_permission, order, select}};
 /// use CrudType::*;
 /// use std::time::Duration;
 ///
@@ -136,9 +136,10 @@ impl DefineTableStatement {
     ///
     /// ```rust
     /// # use surreal_query_builder as surreal_orm;
-    /// # use surreal_orm::{*, functions::crypto, statements::{define_table, for_, order, select}};
+    /// # use surreal_orm::{*, functions::crypto, statements::{define_table, order, select}};
     /// # use CrudType::*;
     /// # use std::time::Duration;
+    ///
     /// # let name = Field::new("name");
     /// # let user = Table::from("user");
     /// # let age = Field::new("age");
@@ -183,12 +184,14 @@ impl DefineTableStatement {
     ///  
     /// ```rust
     ///     # use surreal_query_builder as surreal_orm;
-    /// # use surreal_orm::{*, CrudType::*, statements::{define_table, for_}};
+    /// # use surreal_orm::{*, CrudType::*, statements::{define_table, for_permission}};
     /// # use CrudType::*;
     /// # use std::time::Duration;
+    ///
     /// # let name = Field::new("name");
     /// # let user = Table::from("user");
     /// # let age = Field::new("age");
+    ///
     /// # let statement = define_table(user);
     /// // You can create perimssion for a single event
     /// let statement = statement.permissions(for_permission(Select).where_(age.greater_than_or_equal(18)));

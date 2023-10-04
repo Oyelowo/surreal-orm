@@ -63,7 +63,7 @@ pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
 pub use delete::{delete, DeleteStatement, DeleteStatementMini};
 pub use for_loop::{for_, ForLoopStatement};
-pub use for_permission::{for_permission, For, Permissions};
+pub use for_permission::{for_permission, ForPermission, Permissions};
 pub use ifelse::{if_, IfElseStatement};
 pub use info::{info_for, InfoStatement};
 pub use insert::{insert, InsertStatement, Insertables};
