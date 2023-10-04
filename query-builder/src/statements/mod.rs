@@ -22,6 +22,7 @@ pub(crate) mod define_table;
 pub(crate) mod define_token;
 pub(crate) mod delete;
 pub(crate) mod for_;
+pub(crate) mod for_loop;
 pub(crate) mod ifelse;
 pub(crate) mod info;
 pub(crate) mod insert;
