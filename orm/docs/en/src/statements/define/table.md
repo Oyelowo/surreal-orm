@@ -106,11 +106,11 @@ let statement = define_table(user_table)
             .start(5),
     )
     .schemafull()
-    .permissions(for_(Select).where_(age.greater_than_or_equal(18))) // Single works
-    .permissions(for_([Create, Delete]).where_(name.is("Oyedayo"))) // Multiple
+    .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
+    .permissions(for_permission([Create, Delete]).where_(name.is("Oyedayo"))) // Multiple
     .permissions([
-        for_([Create, Delete]).where_(name.is("Oyedayo")),
-        for_(Update).where_(age.less_than_or_equal(130)),
+        for_permission([Create, Delete]).where_(name.is("Oyedayo")),
+        for_permission(Update).where_(age.less_than_or_equal(130)),
     ]);
 ```
 

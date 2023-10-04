@@ -65,7 +65,7 @@ impl From<&Param> for ForParam {
 /// A helper function to create a for loop
 /// ```
 /// use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::for_};
+/// use surreal_orm::{*, statements::{select, for_}};
 /// 
 /// let ref __name = Param::new("name");
 /// let ref person_table = Table::from("person");
@@ -109,17 +109,18 @@ impl ForIterable {
 
 pub struct ForStatementBlock(ForStatementData);
 
-pub struct ForStatement(ForStatementData);
+/// A helper function to create a for loop
+pub struct ForLoopStatement(ForStatementData);
 
 impl ForStatementBlock {
     #[allow(dead_code)]
-    pub fn block(mut self, block: impl Into<Block>) -> ForStatement {
+    pub fn block(mut self, block: impl Into<Block>) -> ForLoopStatement {
         self.0.block = Some(block.into());
-        ForStatement(self.0)
+        ForLoopStatement(self.0)
     }
 }
 
-impl Buildable for ForStatement {
+impl Buildable for ForLoopStatement {
     fn build(&self) -> String {
         let mut query = String::new();
         query.push_str("FOR ");
@@ -153,7 +154,7 @@ impl Buildable for ForStatement {
     }
 }
 
-impl Parametric for ForStatement {
+impl Parametric for ForLoopStatement {
     fn get_bindings(&self) -> BindingsList {
         let mut bindings = self.0.bindings.to_vec();
         match &self.0.flow_type {
@@ -171,7 +172,7 @@ impl Parametric for ForStatement {
     }
 }
 
-impl Erroneous for ForStatement {
+impl Erroneous for ForLoopStatement {
     fn get_errors(&self) -> ErrorList {
         let mut errors = self.0.errors.to_vec();
         match &self.0.flow_type {
@@ -188,9 +189,9 @@ impl Erroneous for ForStatement {
         errors
     }
 }
-impl Queryable for ForStatement {}
+impl Queryable for ForLoopStatement {}
 
-impl fmt::Display for ForStatement {
+impl fmt::Display for ForLoopStatement {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.build())
     }

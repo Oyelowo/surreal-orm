@@ -23,7 +23,7 @@ usage of the `for` statement.
 The basic syntax of the `for` statement is as follows:
 
 ```rust
-for_(permission_type)
+for_permission(permission_type)
     .where_(condition);
 ```
 
@@ -79,7 +79,7 @@ To define permissions for a single action, you can use the following code:
 use CrudType::*;
 let name = Field::new("name");
 
-let for_res = for_(Create).where_(name.like("Oyelowo"));
+let for_res = for_permission(Create).where_(name.like("Oyelowo"));
 println!("{}", for_res.to_raw().build());
 ```
 
@@ -104,9 +104,9 @@ following code:
 use CrudType::*;
 let name = Field::new("name");
 
-let for_res = for_(Select).where_(age.greater_than_or_equal(18))
-    .permissions(for_(Create).where_(name.is("Oyedayo")))
-    .permissions(for_(Update).where_(age.less_than_or_equal(130)));
+let for_res = for_permission(Select).where_(age.greater_than_or_equal(18))
+    .permissions(for_permission(Create).where_(name.is("Oyedayo")))
+    .permissions(for_permission(Update).where_(age.less_than_or_equal(130)));
 println!("{}", for_res.to_raw().build());
 ```
 
@@ -139,7 +139,7 @@ following code:
 use CrudType::*;
 let name = Field::new("name");
 
-let for_res = for_(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+let for_res = for_permission(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
 println!("{}", for_res.to_raw().build());
 ```
 
@@ -165,8 +165,8 @@ and an array, you can use the following code:
 use CrudType::*;
 let name = Field::new("name");
 
-let for_res = for_(&[Create, Delete]).where_(name.is("Oyedayo"))
-    .permissions(for_(Update).where_(age.less_than_or_equal(130)));
+let for_res = for_permission(&[Create, Delete]).where_(name.is("Oyedayo"))
+    .permissions(for_permission(Update).where_(age.less_than_or_equal(130)));
 println!("{}", for_res.to_raw().build());
 ```
 

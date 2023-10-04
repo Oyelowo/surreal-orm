@@ -271,7 +271,7 @@ age: u8,
 ```rust
 #[surreal_orm(
     type_ = "int",
-    permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
+    permissions = "for_permission([CrudType::Create, CrudType::Delete]).where_(StudentTest3::schema().firstName.is(\"Oyelowo\"))",
     define = "define_age()"
 )]
 age: u8,
@@ -311,7 +311,7 @@ pub struct StudentWithGranularAttributes {
         type_ = "int",
         value = "18",
         assert = "cond(value().is_not(NONE)).and(value().gte(18))",
-        permissions = "for_([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is(\"Oyelowo\"))"
+        permissions = "for_permission([CrudType::Create, CrudType::Delete]).where_(StudentWithGranularAttributes::schema().firstName.is(\"Oyelowo\"))"
     )]
     age_inline_expr: u8,
     // ... other fields ...
