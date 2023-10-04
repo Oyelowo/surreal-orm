@@ -59,11 +59,11 @@ impl<const N: usize> From<[CrudType; N]> for ForArgs {
 pub struct ForStart(ForData);
 
 impl ForStart {
-    pub fn where_(mut self, condition: impl Conditional) -> For {
+    pub fn where_(mut self, condition: impl Conditional) -> ForPermission {
         let condition = Filter::new(condition);
         self.0.condition = Some(condition.clone());
         self.0.bindings.extend(condition.get_bindings());
-        For(self.0)
+        ForPermission(self.0)
     }
 }
 
@@ -74,11 +74,12 @@ impl ForStart {
 ///
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::for_};
+/// use surreal_orm::{*, statements::for_permission};
 /// use CrudType::*;
 ///
 /// # let name = Field::new("name");
 /// # let country = Field::new("country");
+///
 ///  // You can create for a single crud operation
 /// let statement = for_permission(Create).where_(name.like("Oyelowo"));
 ///  
@@ -98,9 +99,9 @@ pub fn for_permission(for_crud_types: impl Into<ForArgs>) -> ForStart {
 /// Builder struct for a `FOR` statement which is typeically used in DEFINE TABLE and DEFINE FIELD
 /// statements for setting more granular permissions
 #[derive(Clone, Debug)]
-pub struct For(ForData);
+pub struct ForPermission(ForData);
 
-impl Buildable for For {
+impl Buildable for ForPermission {
     fn build(&self) -> String {
         let mut query = "FOR".to_string();
         if !&self.0.crud_types.is_empty() {
@@ -123,16 +124,16 @@ impl Buildable for For {
     }
 }
 
-impl Erroneous for For {}
-impl Queryable for For {}
+impl Erroneous for ForPermission {}
+impl Queryable for ForPermission {}
 
-impl Parametric for For {
+impl Parametric for ForPermission {
     fn get_bindings(&self) -> BindingsList {
         self.0.bindings.to_vec()
     }
 }
 
-impl Display for For {
+impl Display for ForPermission {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.build())
     }
@@ -143,9 +144,9 @@ impl Display for For {
 #[derive(Clone, Debug)]
 pub enum Permissions {
     /// Single `for` statement
-    For(For),
+    For(ForPermission),
     /// List of `for` statements
-    Fors(Vec<For>),
+    Fors(Vec<ForPermission>),
     /// Single Raw statement
     RawStatement(Raw),
     /// List of Raw statements
@@ -175,26 +176,26 @@ impl ToRaw for Permissions {
     }
 }
 
-impl From<For> for Permissions {
-    fn from(value: For) -> Self {
+impl From<ForPermission> for Permissions {
+    fn from(value: ForPermission) -> Self {
         Self::For(value)
     }
 }
 
-impl From<Vec<For>> for Permissions {
-    fn from(value: Vec<For>) -> Self {
+impl From<Vec<ForPermission>> for Permissions {
+    fn from(value: Vec<ForPermission>) -> Self {
         Self::Fors(value)
     }
 }
 
-impl<const N: usize> From<&[For; N]> for Permissions {
-    fn from(value: &[For; N]) -> Self {
+impl<const N: usize> From<&[ForPermission; N]> for Permissions {
+    fn from(value: &[ForPermission; N]) -> Self {
         Self::Fors(value.to_vec())
     }
 }
 
-impl<const N: usize> From<[For; N]> for Permissions {
-    fn from(value: [For; N]) -> Self {
+impl<const N: usize> From<[ForPermission; N]> for Permissions {
+    fn from(value: [ForPermission; N]) -> Self {
         Self::Fors(value.to_vec())
     }
 }

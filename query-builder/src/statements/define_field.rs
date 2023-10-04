@@ -55,24 +55,25 @@ pub struct DefineFieldStatement {
 ///
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, CrudType::*, statements::{define_field, for_}};
+/// use surreal_orm::{*, CrudType::*, statements::{define_field, for_permission}};
 ///
 /// # let name = Field::new("name");
 /// # let user_table = Table::from("user");
 /// # let age = Field::new("age");
 /// # let email = Field::new("email");
+///
 /// let statement = define_field(email)
 ///     .on_table(user_table)
 ///     .type_(FieldType::String)
 ///     .value("example@codebreather.com")
 ///     .assert(cond(value().is_not(NONE)).and(value().like("is_email")))
 ///     // Additional permission chaining accumulates
-///     .permissions(for_permissionSelect).where_(age.greater_than_or_equal(18))) // Single works
-///     .permissions(for_permission[Create, Update]).where_(name.is("Oyedayo"))) // Multiple
+///     .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
+///     .permissions(for_permission([Create, Update]).where_(name.is("Oyedayo"))) // Multiple
 ///     // Multiples multples
 ///     .permissions([
-///         for_permission[Create, Delete]).where_(name.is("Oyedayo")),
-///         for_permissionUpdate).where_(age.less_than_or_equal(130)),
+///         for_permission([Create, Delete]).where_(name.is("Oyedayo")),
+///         for_permission(Update).where_(age.less_than_or_equal(130)),
 ///     ]);
 ///
 /// assert!(!statement.build().is_empty());
@@ -121,12 +122,13 @@ impl DefineFieldStatement {
     ///  
     /// ```rust
     ///     # use surreal_query_builder as surreal_orm;
-    ///     use surreal_orm::{*, CrudType::*, statements::{define_field, for_}};
+    ///     use surreal_orm::{*, CrudType::*, statements::{define_field}};
     ///
     ///     # let name = Field::new("name");
     ///     # let user_table = Table::from("user");
     ///     # let age = Field::new("age");
     ///     # let email = Field::new("email");
+    ///     
     ///     # let statement = define_field(email)
     ///     #    .on_table(user_table)
     ///     #    .type_(FieldType::String)
@@ -164,7 +166,7 @@ impl DefineFieldStatement {
     ///  
     /// ```rust
     ///     # use surreal_query_builder as surreal_orm;
-    /// use surreal_orm::{*, CrudType::*, statements::{define_field, for_}};
+    /// use surreal_orm::{*, CrudType::*, statements::{define_field, for_permission}};
     ///
     ///     # let name = Field::new("name");
     ///     # let user_table = Table::from("user");
@@ -177,15 +179,15 @@ impl DefineFieldStatement {
     ///     #    .assert(cond(value().is_not(NONE)).and(value().like("is_email")));
     ///
     /// // You can create perimssion for a single event
-    /// let statement = statement.permissions(for_permissionSelect).where_(age.greater_than_or_equal(18)));
+    /// let statement = statement.permissions(for_permission(Select).where_(age.greater_than_or_equal(18)));
     ///
     /// // Even multiple
-    /// let statement = statement.permissions(for_permission&[Create, Update]).where_(name.is("Oyedayo")));
+    /// let statement = statement.permissions(for_permission([Create, Update]).where_(name.is("Oyedayo")));
     ///
     /// // Multiples multples
-    /// let statement = statement.permissions(&[
-    ///     for_permission&[Create, Delete]).where_(name.is("Oyedayo")),
-    ///     for_permissionUpdate).where_(age.less_than_or_equal(130)),
+    /// let statement = statement.permissions([
+    ///     for_permission([Create, Delete]).where_(name.is("Oyedayo")),
+    ///     for_permission(Update).where_(age.less_than_or_equal(130)),
     /// ]);
     ///
     /// ```

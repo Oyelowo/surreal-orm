@@ -19,7 +19,7 @@ use surreal_orm::{
     functions::*,
     statements::{
         define_field, define_table, for_permission, order, select, DefineFieldStatement,
-        DefineTableStatement, For, Permissions, SelectStatement,
+        DefineTableStatement, ForPermission, Permissions, SelectStatement,
     },
     *,
 };
