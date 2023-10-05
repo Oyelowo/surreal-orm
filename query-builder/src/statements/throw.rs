@@ -32,17 +32,21 @@ pub struct ThrowStatement {
 
 impl Queryable for ThrowStatement {}
 
-impl Erroneous for ThrowStatement {}
+impl Erroneous for ThrowStatement {
+    fn get_errors(&self) -> crate::ErrorList {
+        self.message.get_errors()
+    }
+}
 
 impl Parametric for ThrowStatement {
     fn get_bindings(&self) -> BindingsList {
-        vec![]
+        self.message.get_bindings()
     }
 }
 
 impl Buildable for ThrowStatement {
     fn build(&self) -> String {
-        format!("THROW \"{}\";", self.message.build())
+        format!("THROW {};", self.message.build())
     }
 }
 
@@ -55,11 +59,12 @@ impl fmt::Display for ThrowStatement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::traits::Buildable;
+    use crate::{traits::Buildable, ToRaw};
 
     #[test]
     fn test_throw_stmt_build() {
-        let statement = throw("some error message").build();
-        assert_eq!(statement, "THROW 'some error message';");
+        let statement = throw("some error message");
+        assert_eq!(statement.fine_tune_params(), "THROW $_param_00000001;");
+        assert_eq!(statement.to_raw().build(), "THROW 'some error message';");
     }
 }
