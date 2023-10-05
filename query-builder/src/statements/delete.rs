@@ -78,6 +78,7 @@ where
 
     DeleteStatement::<T> {
         target: param,
+        is_only: false,
         where_: None,
         return_type: None,
         timeout: None,
@@ -88,6 +89,31 @@ where
     }
 }
 
+/// Creates a new DELETE statement.
+/// The DELETE ONLY statement can be used to delete records from the database and returns a single
+/// record.
+///
+/// # Argument: `table or id`
+///
+/// # Examples
+///
+/// ```rust, ignore
+/// delete_only(user)
+/// .where_(age.less_than(18)); // simple filtering on a field
+///
+/// delete_only(user)
+/// .where_(cond(age.greater_than(18)) // Or more complex filtering with `cond` helper
+///         .and(age.less_than(80)));
+/// ```
+pub fn delete_only<T>(targettables: impl Into<TargettablesForUpdate>) -> DeleteStatement<T>
+where
+    T: Serialize + DeserializeOwned + Model,
+{
+    let mut delete_statement = delete(targettables);
+    delete_statement.is_only = true;
+    delete_statement
+}
+
 /// Define the API for delete Statement
 #[derive(Debug, Clone)]
 pub struct DeleteStatement<T>
@@ -95,6 +121,7 @@ where
     T: Serialize + DeserializeOwned + Model,
 {
     target: String,
+    is_only: bool,
     where_: Option<String>,
     return_type: Option<ReturnType>,
     timeout: Option<String>,
