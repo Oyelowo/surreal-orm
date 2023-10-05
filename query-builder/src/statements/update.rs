@@ -31,7 +31,6 @@ use crate::{
 
 /// Creates a new UPDATE statement.
 /// The UPDATE statement can be used to update or modify records in the database.
-
 ///
 /// # Arguments
 ///
@@ -121,6 +120,7 @@ where
 
     UpdateStatementInit {
         target: param,
+        is_only: false,
         content: None,
         merge: None,
         replace: None,
@@ -136,6 +136,73 @@ where
     }
 }
 
+/// Creates a new UPDATE statement and returns a single object.
+/// The UPDATE statement can be used to update or modify records in the database.
+///
+/// # Arguments
+///
+/// * `connection` - built using `with` method on a node. e.g `Student::with(..).writes(..).book(..)`
+/// # Examples
+///
+/// ```rust, ignore
+/// # use surreal_query_builder as surreal_orm;
+/// use std::time::Duration;
+/// use surreal_orm::{*, statements::update};
+///
+/// // Update using set method
+/// update_only::<User>(user)
+///     .set(object_partial!(
+///         User {
+///             score: 5
+///         }))
+///     .where_(age.greater_than(18));
+///
+/// // Update many records that match the filter using content method in user table
+/// update_only::<User>(user)
+///     .content(
+///          User {
+///             team: "Codebreather",
+///             ...
+///          }
+///     ).where_(cond(age.greater_than(18)).and(name.like("codebreather"));
+///     
+/// // Update many records that match the filter using merge method in user table
+/// update_only::<User>(user)
+///     .merge(
+///          UserDocument {
+///             hobbies: vec!["music production", "problem solving", "rust"],
+///             ...
+///          }
+///     ).where_(cond(age.greater_than(18)).and(name.like("codebreather"));
+///
+/// // Update specific record using content method
+/// update_only::<User>(user1)
+///     .content(
+///          User {
+///             name: "Oyelowo".into(),
+///             age: 198,
+///             ...
+///          }
+///     );
+///     
+/// // Update using content method
+/// update_only::<User>(user2)
+///     .merge(
+///          UserDocument {
+///             hobbies: vec!["music production", "problem solving", "rust"],
+///             ...
+///          }
+///     );
+/// ```
+pub fn update_only<T>(targettables: impl Into<TargettablesForUpdate>) -> UpdateStatementInit<T>
+where
+    T: Serialize + DeserializeOwned + Model,
+{
+    let mut statement = update(targettables);
+    statement.is_only = true;
+    statement
+}
+
 /// Update statement initializer
 #[derive(Debug, Clone)]
 pub struct UpdateStatementInit<T>
@@ -143,6 +210,7 @@ where
     T: Serialize + DeserializeOwned + Model,
 {
     target: String,
+    is_only: bool,
     content: Option<String>,
     merge: Option<String>,
     replace: Option<String>,
@@ -531,6 +599,10 @@ where
     fn build(&self) -> String {
         let statement = &self.0;
         let mut query = format!("UPDATE {}", statement.target);
+
+        if statement.is_only {
+            query.push_str(" ONLY");
+        }
 
         if let Some(content) = &statement.content {
             query = format!("{query} CONTENT  {content}",);
