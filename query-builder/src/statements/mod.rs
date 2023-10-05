@@ -1,4 +1,4 @@
-/*
+/*utils_chain
  * Author: Oyelowo Oyedayo
  * Email: oyelowooyedayo@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
@@ -39,6 +39,7 @@ pub(crate) mod remove_function;
 pub(crate) mod remove_index;
 pub(crate) mod remove_login;
 pub(crate) mod remove_namespace;
+pub(crate) mod remove_param;
 pub(crate) mod remove_scope;
 pub(crate) mod remove_table;
 pub(crate) mod remove_token;
@@ -89,6 +90,7 @@ pub use remove_function::{remove_function, RemoveFunctionStatement};
 pub use remove_index::{remove_index, RemoveIndexStatement};
 pub use remove_login::{remove_login, RemoveLoginStatement};
 pub use remove_namespace::{remove_namespace, RemoveNamespaceStatement};
+pub use remove_param::{remove_param, RemoveParamStatement};
 pub use remove_scope::{remove_scope, RemoveScopeStatement};
 pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
