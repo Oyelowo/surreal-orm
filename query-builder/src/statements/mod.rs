@@ -7,6 +7,7 @@
 
 use std::fmt::Display;
 
+pub(crate) mod continue_;
 pub(crate) mod create;
 pub(crate) mod create_v2;
 pub(crate) mod define_analyzer;
@@ -49,6 +50,7 @@ pub(crate) mod use_;
 pub(crate) mod utils_block;
 pub(crate) mod utils_chain;
 
+pub use continue_::{continue_, ContinueStatement};
 pub use create::{create, CreateStatement};
 pub use create_v2::{create_v2, CreateStatementV2};
 pub use define_analyzer::{
