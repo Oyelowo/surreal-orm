@@ -98,8 +98,8 @@ pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
 pub use return_::{return_, ReturnStatement};
 pub use select::{
-    order, select, select_value, Order, Orderables, SelectStatement, SelectStatementMini,
-    Selectables, Splittables,
+    order, select, select_diff, select_value, Order, Orderables, SelectStatement,
+    SelectStatementMini, Selectables, Splittables,
 };
 pub use show::{show_changes_for_table, ShowChangesStatement};
 pub use sleep::{sleep, SleepStatement};
