@@ -58,6 +58,7 @@ where
     let errors = connection.get_errors();
     RelateStatement {
         relation: connection.build(),
+        is_only: false,
         content_param: None,
         set: vec![],
         return_type: None,
@@ -69,6 +70,41 @@ where
     }
 }
 
+/// Creates a new RELATE ONLY statement.
+///
+/// # Arguments
+///
+/// * `connection` - built using `with` method on a node. e.g `Student::with(..).writes(..).book(..)`
+/// # Examples
+///
+/// ```rust, ignore
+/// // Add a graph edge between two specific records setting a field on the edge
+/// relate_only(Student::with(student_id).writes__(Empty).book(book_id))
+///     .set(updater(score).equals(5));
+///     
+/// // Instead of specifying record data using the SET clause,
+/// // it is also possible to use the CONTENT keyword to specify the record data using a SurrealQL object.
+/// relate_only(Student::with(student_id).writes__(Empty).book(book_id))
+///     .content(write);
+/// // Generates e.g RELATE student:1->writes->book:2 CONTENT {...}
+///
+/// // Add a graph edge between multiple specific students and books
+/// relate_only(
+///     Student::with(select(All).from(Student::table_name()))
+///         .writes__(Empty)
+///         .book(select(All).from(Book::table_name()))
+/// ).content(write)
+/// // Generates e.g RELATE (select * from student)->writes->(select * from book) CONTENT {...}
+/// ```
+pub fn relate_only<T>(connection: impl Buildable + Parametric + Erroneous) -> RelateStatement<T>
+where
+    T: Serialize + DeserializeOwned + Edge,
+{
+    let mut relate_statement = relate(connection);
+    relate_statement.is_only = true;
+    relate_statement
+}
+
 /// Relate statement initialization builder
 #[derive(Debug, Clone)]
 pub struct RelateStatement<T>
@@ -76,6 +112,7 @@ where
     T: Serialize + DeserializeOwned + Edge,
 {
     relation: String,
+    is_only: bool,
     content_param: Option<String>,
     set: Vec<String>,
     return_type: Option<ReturnType>,
@@ -256,6 +293,10 @@ where
 {
     fn build(&self) -> String {
         let mut query = format!("RELATE {}", self.relation);
+
+        if self.is_only {
+            query = format!("{query} ONLY");
+        }
 
         if let Some(param) = &self.content_param {
             query = format!("{query} CONTENT {param} ");
