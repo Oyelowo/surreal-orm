@@ -66,6 +66,7 @@ where
 {
     CreateStatementInit::<T> {
         target: T::table_name().to_string(),
+        is_only: false,
         content: "".to_string(),
         set: vec![],
         return_type: None,
@@ -77,6 +78,38 @@ where
     }
 }
 
+/// Creates a new CREATE SQL statement for a given type and returns a single object.
+///
+/// Sets the content of the record to be created.
+///
+/// # Arguments
+///
+/// * `content` - a serializable surrealdb node model. Type must implement Model
+/// # Examples
+///
+/// ```rust, ignore
+/// create_only(User{
+///         name: "Oylowo".to_string(),
+///         age: 192
+///     });
+/// ```
+pub fn create_only<T>() -> CreateStatementInit<T>
+where
+    T: Serialize + DeserializeOwned + Node,
+{
+    CreateStatementInit::<T> {
+        target: T::table_name().to_string(),
+        is_only: true,
+        content: "".to_string(),
+        set: vec![],
+        return_type: None,
+        timeout: None,
+        parallel: false,
+        bindings: vec![],
+        errors: vec![],
+        __model_return_type: PhantomData,
+    }
+}
 /// Initializes the create statement
 #[derive(Debug, Clone)]
 pub struct CreateStatementInit<T>
@@ -84,6 +117,7 @@ where
     T: Serialize + DeserializeOwned + Node,
 {
     target: String,
+    is_only: bool,
     content: String,
     set: Vec<String>,
     return_type: Option<ReturnType>,
@@ -279,6 +313,10 @@ where
     fn build(&self) -> String {
         let statement = &self.0;
         let mut query = format!("CREATE {}", statement.target);
+
+        if statement.is_only {
+            query = format!("{query} ONLY");
+        }
 
         if !statement.content.is_empty() {
             query = format!("{query} CONTENT {content}", content = statement.content);
