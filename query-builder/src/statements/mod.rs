@@ -7,6 +7,7 @@
 
 use std::fmt::Display;
 
+pub(crate) mod break_;
 pub(crate) mod continue_;
 pub(crate) mod create;
 pub(crate) mod create_v2;
@@ -44,12 +45,14 @@ pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
 pub(crate) mod sleep;
 pub(crate) mod subquery;
+pub(crate) mod throw;
 pub(crate) mod transaction;
 pub(crate) mod update;
 pub(crate) mod use_;
 pub(crate) mod utils_block;
 pub(crate) mod utils_chain;
 
+pub use break_::{break_, BreakStatement};
 pub use continue_::{continue_, ContinueStatement};
 pub use create::{create, CreateStatement};
 pub use create_v2::{create_v2, CreateStatementV2};
@@ -91,6 +94,7 @@ pub use select::{
 };
 pub use sleep::{sleep, SleepStatement};
 pub use subquery::Subquery;
+pub use throw::{throw, ThrowStatement};
 pub use transaction::{begin_transaction, transaction, BeginTransactionStatement};
 pub use update::{update, UpdateStatement};
 pub use use_::{use_, UseStatement};
