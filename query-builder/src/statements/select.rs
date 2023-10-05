@@ -36,9 +36,9 @@ use surrealdb::{engine::local::Db, sql, Surreal};
 
 use crate::{
     Aliasable, All, Binding, BindingsList, Buildable, Conditional, DurationLike, Erroneous,
-    ErrorList, Field, Filter, Function, Model, NumberLike, Parametric, Queryable, ReturnableSelect,
-    ReturnableStandard, SurrealId, SurrealOrmResult, SurrealSimpleId, SurrealUlid, SurrealUuid,
-    Table, ToRaw, ValueLike,
+    ErrorList, Field, Filter, Function, IndexName, Model, NumberLike, Parametric, Queryable,
+    ReturnableSelect, ReturnableStandard, SurrealId, SurrealOrmResult, SurrealSimpleId,
+    SurrealUlid, SurrealUuid, Table, ToRaw, ValueLike,
 };
 
 use super::Subquery;
@@ -574,6 +574,18 @@ pub enum Splittables {
     Fields(Vec<Field>),
 }
 
+impl<const N: usize> From<[Field; N]> for Splittables {
+    fn from(value: [Field; N]) -> Self {
+        Self::Fields(value.map(Into::into).to_vec())
+    }
+}
+
+impl<const N: usize> From<[&Field; N]> for Splittables {
+    fn from(value: [&Field; N]) -> Self {
+        Self::Fields(value.map(Into::into).to_vec())
+    }
+}
+
 impl<const N: usize> From<&[&Field; N]> for Splittables {
     fn from(value: &[&Field; N]) -> Self {
         Self::Fields(value.map(Into::into).to_vec())
@@ -611,6 +623,8 @@ impl From<Vec<ValueLike>> for Splittables {
 
 type Groupables = Splittables;
 pub(crate) type Fetchables = Groupables;
+pub(crate) type Omittables = Groupables;
+pub(crate) type IndexNames = Groupables;
 
 impl<T: Into<Field>> From<T> for Splittables {
     fn from(value: T) -> Self {
@@ -619,7 +633,6 @@ impl<T: Into<Field>> From<T> for Splittables {
     }
 }
 /// Items that can be selected
-
 pub struct Selectables(ValueLike);
 
 impl<T: Into<Field>> From<T> for Selectables {
@@ -755,6 +768,46 @@ enum SelectionType {
     SelectValue,
 }
 
+#[derive(Debug, Clone)]
+enum WithIndexType {
+    NoIndex,
+    Indexes(Vec<IndexName>),
+}
+
+impl Parametric for WithIndexType {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            WithIndexType::NoIndex => vec![],
+            WithIndexType::Indexes(indexes) => indexes
+                .iter()
+                .flat_map(|i| i.get_bindings())
+                .collect::<Vec<_>>(),
+        }
+    }
+}
+
+impl Buildable for WithIndexType {
+    fn build(&self) -> String {
+        match self {
+            WithIndexType::NoIndex => "WITH NO INDEX".into(),
+            WithIndexType::Indexes(indexes) => format!(
+                "WITH INDEX {}",
+                indexes
+                    .iter()
+                    .map(|i| i.build())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+enum ExplainMode {
+    Simple,
+    Full,
+}
+
 /// Select statement initializer
 #[derive(Debug, Clone)]
 pub struct SelectStatementInit {
@@ -770,8 +823,11 @@ pub struct SelectStatementInit {
     limit: Option<String>,
     start: Option<String>,
     fetch: Vec<String>,
+    omitted_fields: Vec<String>,
+    with_index_type: Option<WithIndexType>,
     timeout: Option<String>,
     parallel: bool,
+    explain_mode: Option<ExplainMode>,
     bindings: BindingsList,
     errors: ErrorList,
 }
@@ -905,8 +961,11 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
         group_all: false,
         order_by: vec![],
         limit: None,
+        with_index_type: None,
+        explain_mode: None,
         start: None,
         fetch: vec![],
+        omitted_fields: vec![],
         timeout: None,
         parallel: false,
         bindings: selectables.get_bindings(),
@@ -929,8 +988,11 @@ pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
         group_all: false,
         order_by: vec![],
         limit: None,
+        with_index_type: None,
+        explain_mode: None,
         start: None,
         fetch: vec![],
+        omitted_fields: vec![],
         timeout: None,
         parallel: false,
         bindings: selectables.get_bindings(),
@@ -1031,6 +1093,23 @@ impl SelectStatementInit {
         self.into()
     }
 
+    /// Omits a field or multiple fields from the query return values.
+    pub fn omit(mut self, fetchables: impl Into<Omittables>) -> Self {
+        let fields: Omittables = fetchables.into();
+
+        let fields = match fields {
+            Omittables::Field(one_field) => vec![one_field],
+            Omittables::Fields(many_fields) => many_fields,
+        };
+
+        fields.iter().for_each(|f| {
+            self.omitted_fields.push(f.build());
+            self.bindings.extend(f.get_bindings());
+            self.errors.extend(f.get_errors());
+        });
+        self
+    }
+
     fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
         // let mut updated_params = vec![];
         // updated_params.extend(self.________params_accumulator.to_vec());
@@ -1039,6 +1118,12 @@ impl SelectStatementInit {
         self
     }
 }
+
+// impl<T: IntoIterator<Item = IndexName>> From<T> for Field {
+//     fn from(value: T) -> Self {
+//         Self::new(value.into_iter().collect())
+//     }
+// }
 
 /// The query builder struct used to construct complex database queries.
 #[derive(Debug, Clone)]
@@ -1087,6 +1172,26 @@ impl SelectStatement {
         self
     }
 
+    /// Makes sure no index is used for the query.
+    pub fn with_no_index(mut self) -> Self {
+        self.0.with_index_type = Some(WithIndexType::NoIndex);
+        self
+    }
+
+    /// Adds an index or multiple indexes to the `WITH INDEX` clause of the query.
+    pub fn with_index(mut self, indexes: impl Into<IndexNames>) -> Self {
+        let index_names: Groupables = indexes.into();
+
+        let indexes = match index_names {
+            Groupables::Field(one_field) => vec![one_field],
+            Groupables::Fields(many_fields) => many_fields,
+        };
+
+        self.update_bindings(indexes.get_bindings());
+        self.0.errors.extend(indexes.get_errors());
+        self.0.with_index_type = Some(WithIndexType::Indexes(indexes));
+        self
+    }
     /// Adds a field or multiple fields to the `SPLIT BY` clause of the query.
     /// As SurrealDB supports s and nested fields within arrays,
     /// it is possible to split the result on a specific field name,
@@ -1425,6 +1530,18 @@ impl SelectStatement {
         self
     }
 
+    /// Indicates that the query should be explained.
+    pub fn explain(mut self) -> Self {
+        self.0.explain_mode = Some(ExplainMode::Simple);
+        self
+    }
+
+    /// Indicates that the query should be explained in full.
+    pub fn explain_full(mut self) -> Self {
+        self.0.explain_mode = Some(ExplainMode::Full);
+        self
+    }
+
     fn update_bindings(&mut self, bindings: BindingsList) -> &mut Self {
         // let mut updated_params = vec![];
         // updated_params.extend(self.________params_accumulator.to_vec());
@@ -1448,13 +1565,36 @@ impl Buildable for SelectStatement {
             SelectionType::SelectValue => "SELECT VALUE",
         };
 
+        let omitted_fields = if !statement.omitted_fields.is_empty() {
+            format!("OMIT {} ", statement.omitted_fields.join(", "))
+        } else {
+            "".to_string()
+        };
+
         let only = if statement.only { "ONLY " } else { "" };
         let mut query = format!(
-            "{select} {} FROM {}{}",
+            "{select} {} {}FROM {}{}",
             statement.projections,
+            omitted_fields,
             only,
             statement.targets.join(", ")
         );
+
+        if let Some(with_index_type) = &statement.with_index_type {
+            match with_index_type {
+                WithIndexType::NoIndex => query = format!("{query} WITH NO INDEX"),
+                WithIndexType::Indexes(indexes) => {
+                    query = format!(
+                        "{query} WITH INDEX {}",
+                        indexes
+                            .iter()
+                            .map(|i| i.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )
+                }
+            }
+        }
 
         if let Some(condition) = &statement.where_ {
             query = format!("{query} WHERE {condition}");
@@ -1500,6 +1640,13 @@ impl Buildable for SelectStatement {
 
         if statement.parallel {
             query = format!("{query} PARALLEL");
+        }
+
+        if let Some(explain_mode) = &statement.explain_mode {
+            match explain_mode {
+                ExplainMode::Simple => query = format!("{query} EXPLAIN"),
+                ExplainMode::Full => query = format!("{query} EXPLAIN FULL"),
+            }
         }
 
         format!("{query};")
@@ -1633,11 +1780,15 @@ mod tests {
     #[test]
     fn test_statement_with_alias() {
         let canadian_cities = AliasName::new("legal_age");
-        let age = Field::new("age");
-        let city = Field::new("city");
+        let ref age = Field::new("age");
+        let ref city = Field::new("city");
         let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
+        let ft_city = IndexName::new("ft_city");
+
         let statement = select(All)
+            .omit([age, city])
             .from(fake_id)
+            .with_index(ft_city)
             .where_(
                 cond(city.is("Prince Edward Island"))
                     .and(city.is("NewFoundland"))
@@ -1646,26 +1797,27 @@ mod tests {
             // You can call directly on field
             .order_by(age.desc().numeric())
             // Or use order function
-            .order_by(order(&city).asc())
+            .order_by(order(city).asc())
             .limit(153)
             .start(10)
+            .explain_full()
             .parallel();
 
         let statement_aliased = statement.__as__(canadian_cities);
 
         assert_eq!(
             statement_aliased.fine_tune_params(),
-            "(SELECT * FROM $_param_00000001 WHERE (city IS $_param_00000002) \
+            "(SELECT * OMIT age, city FROM $_param_00000001 WITH INDEX ft_city WHERE (city IS $_param_00000002) \
                 AND (city IS $_param_00000003) \
                 OR (city ~ $_param_00000004) \
                 ORDER BY age NUMERIC DESC, city ASC LIMIT \
-                $_param_00000005 START AT $_param_00000006 PARALLEL) AS legal_age"
+                $_param_00000005 START AT $_param_00000006 PARALLEL EXPLAIN FULL) AS legal_age"
         );
         assert_eq!(
             statement_aliased.to_raw().to_string(),
-            "(SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') \
+            "(SELECT * OMIT age, city FROM user:oyelowo WITH INDEX ft_city WHERE (city IS 'Prince Edward Island') \
                     AND (city IS 'NewFoundland') OR (city ~ 'Toronto') \
-                    ORDER BY age NUMERIC DESC, city ASC LIMIT 153 START AT 10 PARALLEL) AS legal_age"
+                    ORDER BY age NUMERIC DESC, city ASC LIMIT 153 START AT 10 PARALLEL EXPLAIN FULL) AS legal_age"
         );
     }
 }
