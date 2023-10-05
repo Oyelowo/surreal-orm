@@ -59,7 +59,7 @@ pub(crate) mod utils_chain;
 
 pub use break_::{break_, BreakStatement};
 pub use continue_::{continue_, ContinueStatement};
-pub use create::{create, CreateStatement};
+pub use create::{create, create_only, CreateStatement};
 pub use create_v2::{create_v2, CreateStatementV2};
 pub use define_analyzer::{
     define_analyzer, AnalyzerFilter, DefineAnalyzerStatement, SnowballLanguage, Tokenizer,
@@ -106,7 +106,7 @@ pub use sleep::{sleep, SleepStatement};
 pub use subquery::Subquery;
 pub use throw::{throw, ThrowStatement};
 pub use transaction::{begin_transaction, transaction, BeginTransactionStatement};
-pub use update::{update, UpdateStatement};
+pub use update::{update, update_only, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
 /// helpers for statements

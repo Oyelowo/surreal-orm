@@ -97,19 +97,11 @@ pub fn create_only<T>() -> CreateStatementInit<T>
 where
     T: Serialize + DeserializeOwned + Node,
 {
-    CreateStatementInit::<T> {
-        target: T::table_name().to_string(),
-        is_only: true,
-        content: "".to_string(),
-        set: vec![],
-        return_type: None,
-        timeout: None,
-        parallel: false,
-        bindings: vec![],
-        errors: vec![],
-        __model_return_type: PhantomData,
-    }
+    let mut create_statement = create::<T>();
+    create_statement.is_only = true;
+    create_statement
 }
+
 /// Initializes the create statement
 #[derive(Debug, Clone)]
 pub struct CreateStatementInit<T>
