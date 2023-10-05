@@ -601,7 +601,7 @@ where
         let mut query = format!("UPDATE {}", statement.target);
 
         if statement.is_only {
-            query.push_str(" ONLY");
+            query = format!("{query} ONLY");
         }
 
         if let Some(content) = &statement.content {

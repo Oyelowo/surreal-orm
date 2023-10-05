@@ -83,7 +83,7 @@ pub use info::{info_for, InfoStatement};
 pub use insert::{insert, InsertStatement, Insertables};
 pub use let_::{let_, LetStatement};
 pub use live_select::{live, LiveSelectStatement};
-pub use relate::{relate, RelateStatement};
+pub use relate::{relate, relate_only, RelateStatement};
 pub use remove_analyzer::{remove_analyzer, RemoveAnalyzerStatement};
 pub use remove_database::{remove_database, RemoveDatabaseStatement};
 pub use remove_event::{remove_event, RemoveEventStatement};

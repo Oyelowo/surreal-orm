@@ -258,6 +258,10 @@ where
     fn build(&self) -> String {
         let mut query = format!("DELETE {}", self.target);
 
+        if self.is_only {
+            query = format!("{query} ONLY");
+        }
+
         if let Some(condition) = &self.where_ {
             query = format!("{query} WHERE {}", condition);
         }
