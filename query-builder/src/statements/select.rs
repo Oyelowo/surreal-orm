@@ -766,6 +766,7 @@ impl Deref for Selectables {
 enum SelectionType {
     Select,
     SelectValue,
+    SelectDiff,
 }
 
 #[derive(Debug, Clone)]
@@ -975,29 +976,16 @@ pub fn select(selectables: impl Into<Selectables>) -> SelectStatementInit {
 
 /// Just like normal select statement but useful for selecting a single value out of the returned object.
 pub fn select_value(selectable_value: impl Into<Field>) -> SelectStatementInit {
-    let selectables: Field = selectable_value.into();
+    let mut select_statement = select(selectable_value);
+    select_statement.selection_type = SelectionType::SelectValue;
+    select_statement
+}
 
-    SelectStatementInit {
-        selection_type: SelectionType::SelectValue,
-        projections: selectables.build(),
-        targets: vec![],
-        only: false,
-        where_: None,
-        split: vec![],
-        group_by: vec![],
-        group_all: false,
-        order_by: vec![],
-        limit: None,
-        with_index_type: None,
-        explain_mode: None,
-        start: None,
-        fetch: vec![],
-        omitted_fields: vec![],
-        timeout: None,
-        parallel: false,
-        bindings: selectables.get_bindings(),
-        errors: selectables.get_errors(),
-    }
+/// Selects diff
+pub fn select_diff(selectable_value: impl Into<Field>) -> SelectStatementInit {
+    let mut select_statement = select(selectable_value);
+    select_statement.selection_type = SelectionType::SelectDiff;
+    select_statement
 }
 
 impl SelectStatementInit {
@@ -1563,6 +1551,7 @@ impl Buildable for SelectStatement {
         let select = match statement.selection_type {
             SelectionType::Select => "SELECT",
             SelectionType::SelectValue => "SELECT VALUE",
+            SelectionType::SelectDiff => "SELECT DIFF",
         };
 
         let omitted_fields = if !statement.omitted_fields.is_empty() {
