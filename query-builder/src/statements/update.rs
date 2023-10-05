@@ -44,7 +44,7 @@ use crate::{
 ///
 /// // Update using set method
 /// update::<User>(user)
-///     .set(updater(score).equal(5))
+///     .set(object_partial!(User { score: 5 }))
 ///     .where_(age.greater_than(18));
 ///
 /// // Update many records that match the filter using content method in user table
