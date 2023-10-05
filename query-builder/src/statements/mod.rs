@@ -9,6 +9,7 @@ use std::fmt::Display;
 
 pub(crate) mod create;
 pub(crate) mod create_v2;
+pub(crate) mod define_analyzer;
 pub(crate) mod define_database;
 pub(crate) mod define_event;
 pub(crate) mod define_field;
@@ -50,6 +51,9 @@ pub(crate) mod utils_chain;
 
 pub use create::{create, CreateStatement};
 pub use create_v2::{create_v2, CreateStatementV2};
+pub use define_analyzer::{
+    define_analyzer, AnalyzerFilter, DefineAnalyzerStatement, SnowballLanguage, Tokenizer,
+};
 pub use define_database::{define_database, DefineDatabaseStatement};
 pub use define_event::{define_event, DefineEventStatement};
 pub use define_field::{define_field, DefineFieldStatement};
