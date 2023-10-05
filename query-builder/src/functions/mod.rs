@@ -67,3 +67,6 @@ pub mod meta;
 
 /// This module contains the different types of functions for working with vectors.
 pub mod vector;
+
+/// This module contains the different types of functions for working with search.
+pub mod search;
