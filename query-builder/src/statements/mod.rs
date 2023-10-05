@@ -75,7 +75,7 @@ pub use define_param::{define_param, DefineParamStatement};
 pub use define_scope::{define_scope, DefineScopeStatement};
 pub use define_table::{define_table, DefineTableStatement};
 pub use define_token::{define_token, DefineTokenStatement};
-pub use delete::{delete, DeleteStatement, DeleteStatementMini};
+pub use delete::{delete, delete_only, DeleteStatement, DeleteStatementMini};
 pub use for_loop::{for_, ForLoopStatement};
 pub use for_permission::{for_permission, ForPermission, Permissions};
 pub use ifelse::{if_, IfElseStatement};
