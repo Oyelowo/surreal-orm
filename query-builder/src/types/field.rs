@@ -123,6 +123,12 @@ impl Buildable for Vec<&Field> {
     }
 }
 
+// impl<T: IntoIterator<Item = Field>> From<T> for Field {
+//     fn from(value: T) -> Self {
+//         Self::new(value.into_iter().collect())
+//     }
+// }
+
 impl<const N: usize> Buildable for &[Field; N] {
     fn build(&self) -> String {
         self.to_vec()

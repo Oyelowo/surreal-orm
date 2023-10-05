@@ -192,6 +192,9 @@ create_value_like_struct!("Datetime");
 create_value_like_struct!("Table");
 create_value_like_struct!("Object");
 
+/// Database index name
+pub type IndexName = Field;
+
 /// Represents the surrealdb NULL value
 #[derive(Debug, Clone)]
 pub struct NULL;
