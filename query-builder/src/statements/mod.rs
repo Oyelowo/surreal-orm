@@ -43,6 +43,7 @@ pub(crate) mod remove_token;
 pub(crate) mod return_;
 pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
+pub(crate) mod show;
 pub(crate) mod sleep;
 pub(crate) mod subquery;
 pub(crate) mod throw;
@@ -92,6 +93,7 @@ pub use select::{
     order, select, select_value, Order, Orderables, SelectStatement, SelectStatementMini,
     Selectables, Splittables,
 };
+pub use show::{show_changes_for_table, ShowChangesStatement};
 pub use sleep::{sleep, SleepStatement};
 pub use subquery::Subquery;
 pub use throw::{throw, ThrowStatement};
