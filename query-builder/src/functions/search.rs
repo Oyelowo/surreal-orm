@@ -161,7 +161,7 @@ pub fn highlight_fn(
 #[macro_export]
 macro_rules! search_highlight {
     ( $str1:expr, $str2:expr, $predicate_ref_number:expr ) => {
-        $crate::functions::search::search_highlight_fn($str1, $str2, $predicate_ref_number)
+        $crate::functions::search::highlight_fn($str1, $str2, $predicate_ref_number)
     };
 }
 pub use search_highlight as highlight;
@@ -189,7 +189,7 @@ mod test_search_highlight {
         let str1 = "<b>";
         let str2 = "</b>";
         let predicate_ref_number = 1;
-        let result = search_highlight!(str1, str2, predicate_ref_number);
+        let result = search::highlight!(str1, str2, predicate_ref_number);
         assert_eq!(
             result.to_raw().build(),
             "search::highlight('<b>', '</b>', 1)"
@@ -213,7 +213,7 @@ mod test_search_highlight {
         let str1 = Field::new("str1");
         let str2 = Field::new("str2");
         let predicate_ref_number = Field::new("predicate_ref_number");
-        let result = search_highlight!(str1, str2, predicate_ref_number);
+        let result = search::highlight!(str1, str2, predicate_ref_number);
         assert_eq!(
             result.to_raw().build(),
             "search::highlight(str1, str2, predicate_ref_number)"
@@ -237,7 +237,7 @@ mod test_search_highlight {
         let str1 = Param::new("str1");
         let str2 = Param::new("str2");
         let predicate_ref_number = Param::new("predicate_ref_number");
-        let result = search_highlight!(str1, str2, predicate_ref_number);
+        let result = search::highlight!(str1, str2, predicate_ref_number);
         assert_eq!(
             result.to_raw().build(),
             "search::highlight($str1, $str2, $predicate_ref_number)"
