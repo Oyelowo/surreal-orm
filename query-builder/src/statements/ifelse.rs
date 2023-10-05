@@ -90,34 +90,8 @@ pub fn if_(condition: impl Conditional) -> IfStatement {
     IfStatement::new(condition)
 }
 
-#[macro_export]
-macro_rules! if_block {
-    (if ($condition:expr) then { $($then_body:expr;)+ } $(else if ($elif_condition:expr) then { $($elif_body:expr;)+ })* $(else { $($else_body:expr;)+ })?) => {
-        {
-            let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
-
-            let if_condition = $crate::statements::if_($condition);
-            let if_block = $crate::block! { $($then_body;)+ };
-            __statements.push(if_condition.then(if_block).into());
-
-            $(
-                let elif_condition = $crate::statements::if_($elif_condition);
-                let elif_block = $crate::block! { $($elif_body;)+ };
-                __statements.push(elif_condition.else_if(elif_block).into());
-            )*
-
-            $(
-                let else_block = $crate::block! { $($else_body;)+ };
-                __statements.push(else_block.into());
-            )?
-
-            $crate::statements::utils::QueryChain::from(__statements)
-        }
-    };
-}
-
 #[derive(Debug, Clone)]
-pub struct IfElseExpression(Expression);
+struct IfElseExpression(Expression);
 
 impl From<Expression> for IfElseExpression {
     fn from(value: Expression) -> Self {

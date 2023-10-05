@@ -407,7 +407,6 @@ macro_rules! block_inner {
             let ref $param = $crate::Param::new(stringify!($param));
             let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
 
-            // let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
             $statements.push(for_loop.into());
             $crate::block_inner!($statements; $($rest)*);
     }};
@@ -416,7 +415,6 @@ macro_rules! block_inner {
             let ref $param = $crate::Param::new(stringify!($param));
             let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
 
-            // let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
             $statements.push(for_loop.clone().into());
             $crate::block_inner!($statements; $($rest)*);
     }};
