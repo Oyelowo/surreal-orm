@@ -202,7 +202,7 @@ impl MyFieldReceiver {
         field_name_normalized: &String,
         model_type: &DataType,
         table: &String,
-    ) -> Option<FieldTypeDerived> {
+    ) -> Result<Option<FieldTypeDerived>, &'static str> {
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
 
@@ -223,7 +223,7 @@ impl MyFieldReceiver {
                     item_assert_fn,
                     ..
                 } if !type_.is_array() & (item_assert.is_some() || item_assert_fn.is_some()) => {
-                    panic!("attributes  `item_assert`, or `item_assert_fn` can only be used when type is array.")
+                    return Err("attributes  `item_assert`, or `item_assert_fn` can only be used when type is array.")
                 }
                 MyFieldReceiver {
                     type_: Some(type_),
@@ -264,7 +264,7 @@ impl MyFieldReceiver {
                                            ));
                             }
                             _ => {
-                                panic!("when link_one or link_self attribute is used, type must be record or record(<ref_node_table_name>)");
+                                return Err("when link_one or link_self attribute is used, type must be record or record(<ref_node_table_name>)");
                             }
                         }
                     } else if let Some(link_many_ref_node) = link_many {
@@ -294,29 +294,30 @@ impl MyFieldReceiver {
                                         ));
                                             }
                                             _ => {
-                                                panic!("when link_many attribute is provided, type_ should reference a single table in the format  - array<record<table>>");
+                                                return Err("when link_many attribute is provided, type_ should reference a single table in the format  - array<record<table>>");
                                             }
                                         }
                                     }
                                     _ => {
-                                        panic!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>. Got - {}", item_type.deref());
+                                            let err = format!("when link_many attribute is provided, type_ must be of type array<record> or array<record<ref_node_table_name>>. Got - {}", item_type.deref());
+                                        return Err(err.as_str());
                                     }
                                 }
                             }
                             _ => {
-                                panic!("type must be `array` when link_many attribute is used")
+                                return Err("type must be `array` when link_many attribute is used")
                             }
                         }
                     } else if let FieldType::Array(item_type, _) = field_type {
                         // TODO: see if we can allow this
                         if item_type.is_any() && !self.type_is_inferrable(field_name_normalized) {
-                            panic!(
-                                "Not able to infer array content type. Content type must 
+                            let err = format!(                                "Not able to infer array content type. Content type must 
                     be provided when type is array and the compiler cannot infer the type. 
                     Please, provide `item_type` for the field - {}. 
                     e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
                                 &field_name_normalized
                             );
+                            return Err(err.as_str());
                         }
                     }
                 }
@@ -331,18 +332,20 @@ impl MyFieldReceiver {
                     "id" => {
                         if !field_type.is_record_of_the_table(table) && !field_type.is_record_any()
                         {
-                            panic!(
+                            let err = format!(
                                 "`id` field must be of type `record({})` or `record()`",
                                 table
                             );
+                            return Err(err.as_str());
                         }
                     }
                     "in" | "out" => {
                         if !field_type.is_record() {
-                            panic!(
+                            let err = format!(
                                 "`{}` field must be of type `record()`",
                                 field_name_normalized
                             );
+                            return Err(err.as_str());
                         }
                     }
                     _ => {}
@@ -440,7 +443,7 @@ impl MyFieldReceiver {
             // define_field_methods.push(quote!(.type_(#crate_name::FieldType::String)));
             // let content
             let ft_string = field_type.to_string();
-            Some(FieldTypeDerived {
+            Ok(Some(FieldTypeDerived {
                 // TODO: Remove commented out codde
                 // field_type: quote!(#type_.parse::<#crate_name::FieldType>()
                 //                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
@@ -456,11 +459,13 @@ impl MyFieldReceiver {
                 // }),
                 static_assertion: quote!( # ( #static_assertions ) *),
                 // #( # define_array_field_item_methods) *
-            })
+            }))
         } else if self.type_is_inferrable(&field_name_normalized.to_string()) {
-            Some(self.infer_surreal_type_heuristically(field_name_normalized))
+            Ok(Some(
+                self.infer_surreal_type_heuristically(field_name_normalized),
+            ))
         } else {
-            None
+            Ok(None)
         }
     }
 
@@ -846,18 +851,18 @@ impl MyFieldReceiver {
         get_vector_item_type(ty).map(|t| t.into_token_stream())
     }
 
-    pub fn get_fallback_array_item_concrete_type(&self) -> TokenStream {
+    pub fn get_fallback_array_item_concrete_type(&self) -> Result<TokenStream, &str> {
         let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
 
         let item_type = match field_type {
             FieldType::Array(item_type, _) => item_type,
             // TODO: Check if to error out here or just use Any
-            _ => panic!("Must be array type"),
+            _ => return Err("Must be array type"),
             // _ => Box::new(FieldType::Any),
         };
 
         let crate_name = get_crate_name(false);
-        match item_type.deref() {
+        let value = match item_type.deref() {
             FieldType::Any => {
                 quote!(#crate_name::sql::Value)
             }
@@ -920,7 +925,8 @@ impl MyFieldReceiver {
             FieldType::Geometry(_) => {
                 quote!(#crate_name::sql::Geometry)
             }
-        }
+        };
+        Ok(value)
     }
 }
 
@@ -1034,7 +1040,7 @@ impl ReferencedNodeMeta {
         field_name_normalized: &String,
         data_type: &DataType,
         table: &String,
-    ) -> Self {
+    ) -> Result<Self, &'static str> {
         let crate_name = get_crate_name(false);
         let mut define_field: Option<TokenStream> = None;
         let mut define_field_methods = vec![];
@@ -1042,7 +1048,7 @@ impl ReferencedNodeMeta {
         let mut static_assertions = vec![];
 
         let field_type_resolved = if let Some(type_data) =
-            field_receiver.get_type(field_name_normalized, data_type, table)
+            field_receiver.get_type(field_name_normalized, data_type, table)?
         {
             let FieldTypeDerived {
                 field_type,
@@ -1062,7 +1068,7 @@ impl ReferencedNodeMeta {
             // time. Doing that with the `define` function attributes at compile-time may be tricky/impossible.
             field_type
         } else {
-            panic!("Invalid type provided");
+            return Err("Invalid type provided");
         };
 
         match field_receiver {
@@ -1096,7 +1102,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                return Err("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     assert,
     assert_fn,
     value,
@@ -1135,7 +1141,7 @@ impl ReferencedNodeMeta {
                         || item_assert_fn.is_some()
                 ) =>
             {
-                panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
+                return Err("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:                 
     define,
     define_fn,
     assert,
@@ -1152,7 +1158,7 @@ impl ReferencedNodeMeta {
                 define_fn: Some(_),
                 ..
             } => {
-                panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                return Err("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
                 define: Some(define),
@@ -1162,7 +1168,7 @@ impl ReferencedNodeMeta {
                 if define.to_token_stream().to_string().chars().count() < 3 {
                     // If empty, we get only the `()` of the function, so we can assume that it is empty
                     // if there are less than 3 characters.
-                    panic!("define attribute is empty. Please provide a define_fn attribute.");
+                    return Err("define attribute is empty. Please provide a define_fn attribute.");
                 }
                 define_field = Some(
                     quote!(#define.on_table(Self::table_name()).type_(#field_type_resolved).to_raw()),
@@ -1173,7 +1179,9 @@ impl ReferencedNodeMeta {
                 ..
             } => {
                 if define_fn.to_token_stream().to_string().is_empty() {
-                    panic!("define_fn attribute is empty. Please provide a define_fn attribute.");
+                    return Err(
+                        "define_fn attribute is empty. Please provide a define_fn attribute.",
+                    );
                 }
 
                 define_field = Some(quote!(#define_fn().type_(#field_type_resolved).to_raw()));
@@ -1187,7 +1195,7 @@ impl ReferencedNodeMeta {
                 item_assert_fn: Some(_),
                 ..
             } => {
-                panic!("item_assert and item_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                return Err("item_assert and item_assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
                 item_assert: Some(item_assert),
@@ -1212,7 +1220,7 @@ impl ReferencedNodeMeta {
                 value_fn: Some(_value_fn),
                 ..
             } => {
-                panic!("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                return Err("value and value_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
                 value: Some(value),
@@ -1301,7 +1309,7 @@ impl ReferencedNodeMeta {
                 assert_fn: Some(_),
                 ..
             } => {
-                panic!("assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                return Err("assert and assert_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
                 assert: Some(assert),
@@ -1326,7 +1334,7 @@ impl ReferencedNodeMeta {
                 permissions_fn: Some(_),
                 ..
             } => {
-                panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
+                return Err("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two.");
             }
             MyFieldReceiver {
                 permissions: Some(permissions),
@@ -1370,7 +1378,7 @@ impl ReferencedNodeMeta {
 
         self.field_type_validation_asserts.extend(static_assertions);
 
-        self
+        Ok(self)
     }
 
     pub(crate) fn from_simple_array(normalized_field_name: &::syn::Ident) -> Self {
@@ -1700,7 +1708,7 @@ pub struct TableDeriveAttributes {
 }
 
 impl TableDeriveAttributes {
-    pub fn get_table_definition_token(&self) -> TokenStream {
+    pub fn get_table_definition_token(&self) -> Result<TokenStream, &str> {
         let TableDeriveAttributes {
             ref drop,
             ref flexible,
@@ -1725,7 +1733,7 @@ impl TableDeriveAttributes {
                 || permissions.is_some()
                 || permissions_fn.is_some())
         {
-            panic!("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
+            return Err("Invalid combination. When `define` or `define_fn`, the following attributes cannot be use in combination to prevent confusion:
                             drop,
                             flexible,
                             as,
@@ -1746,7 +1754,7 @@ impl TableDeriveAttributes {
             (None, Some(define_fn)) => {
                 define_table = Some(quote!(#define_fn().to_raw()));
             },
-            (Some(_), Some(_)) => panic!("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err("define and define_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
         };
 
@@ -1766,7 +1774,7 @@ impl TableDeriveAttributes {
             (None, Some(as_fn)) => {
                     define_table_methods.push(quote!(.as_(#as_fn())));
             },
-            (Some(_), Some(_)) => panic!("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err("as and as_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
         };
 
@@ -1781,16 +1789,16 @@ impl TableDeriveAttributes {
             (Some(p), None) => {
                     define_table_methods.push(p.get_token_stream());
             },
-            (Some(_), Some(_)) => panic!("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
+            (Some(_), Some(_)) => return Err("permissions and permissions_fn attribute cannot be provided at the same time to prevent ambiguity. Use either of the two."),
             (None, None) => (),
         };
 
-        define_table.unwrap_or_else(|| {
+        Ok(define_table.unwrap_or_else(|| {
             quote!(
                 #crate_name::statements::define_table(Self::table_name())
                 #( #define_table_methods) *
                 .to_raw()
             )
-        })
+        }))
     }
 }
