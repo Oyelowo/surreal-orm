@@ -8,6 +8,8 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use surreal_query_builder::sql;
+use syn::{parse_macro_input, LitStr};
 mod models;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
@@ -23,4 +25,22 @@ pub fn surreal_edge_trait_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Object, attributes(surreal_orm))]
 pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
     models::object::generate_fields_getter_trait(input)
+}
+
+#[proc_macro]
+pub fn query(raw_input: TokenStream) -> TokenStream {
+    let r_input = raw_input.clone();
+    let input = parse_macro_input!(r_input as LitStr);
+    let input = input.value();
+    let sql = sql::parse(input.as_str());
+
+    match sql {
+        Ok(value) => value,
+        Err(value) => {
+            return syn::Error::new_spanned(input, value)
+                .to_compile_error()
+                .into()
+        }
+    };
+    raw_input
 }

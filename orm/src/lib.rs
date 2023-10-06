@@ -200,6 +200,9 @@ pub use surreal_derive::Node;
 #[doc = include_str!("docs/object_field_attributes.md")]
 pub use surreal_derive::Object;
 
+// #[doc = include_str!("docs/query_description.md")]
+pub use surreal_derive::query;
+
 #[doc(hidden)]
 // pub use serde;
 pub use surreal_query_builder::*;
