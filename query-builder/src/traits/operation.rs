@@ -7,7 +7,7 @@
 
 use crate::{
     Aliasable, ArrayLike, Binding, BindingsList, Buildable, Conditional, Erroneous, ErrorList,
-    GeometryLike, NumberLike, Ordinal, Parametric, Setter, ValueLike,
+    GeometryLike, NumberLike, Ordinal, Parametric, Setter, StrandLike, ValueLike,
 };
 use std::fmt::Display;
 use surrealdb::sql;
@@ -1224,6 +1224,64 @@ pub trait Operatable: Sized + Parametric + Buildable + Erroneous {
     {
         let value: GeometryLike = value.into();
         self.generate_query(sql::Operator::Intersects, value)
+    }
+
+    /// `@@` Checks whether the terms are found in a full-text indexed field
+    ///
+    /// # Arguments
+    ///
+    /// * `terms` - The terms to search for in the full-text indexed field.
+    ///  can also be a `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// # use surreal_orm::*;
+    ///
+    /// # let content = Field::new("content");
+    /// let query = content.matches("hello world");
+    /// assert_eq!(query.to_raw().build(), "content @@ 'hello world'");
+    /// ```
+    fn matches<T>(&self, terms: T) -> Operation
+    where
+        T: Into<StrandLike>,
+    {
+        self.generate_query(sql::Operator::Matches(None), terms.into())
+    }
+
+    /// `@[ref]@` Same as `matches` but using the matches operator with a reference checks whether the terms are found,
+    /// highlights the searched terms, and computes the full-text score.
+    ///
+    /// # Arguments
+    ///
+    /// * `reference` - Optional. The specific reference or dictionary against which to perform the full-text search.
+    ///  can also be a `Field` or `Param`.
+    /// * `terms` - The terms to search for in the full-text indexed field.
+    ///  can also be a `Field` or `Param`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use surreal_query_builder as surreal_orm;
+    /// # use surreal_orm::*;
+    ///
+    /// # let content = Field::new("content");
+    ///
+    /// let query = content.matches_with_ref(1, "hello world");
+    /// assert_eq!(query.to_raw().build(), "content @1@ 'hello world'");
+    /// ```
+    fn matches_with_ref<T>(&self, reference: impl Into<NumberLike>, terms: T) -> Operation
+    where
+        T: Into<StrandLike>,
+    {
+        let reference: NumberLike = reference.into();
+        let mut operation = self.generate_query(format!("@{}@", reference.build()), terms.into());
+
+        operation.bindings.extend(reference.get_bindings());
+        operation.errors.extend(reference.get_errors());
+
+        operation
     }
 
     /// Check whether the value of the field is between the given lower and upper bounds.

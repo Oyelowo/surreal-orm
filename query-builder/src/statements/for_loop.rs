@@ -376,7 +376,6 @@ mod tests {
         let for_loop = for_(__name).in_(vec!["Oyelowo", "Oyedayo"]).block(block! {
             LET nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
 
-
             select(All).from(person_table).where_(user_name.eq(nick_name));
         });
 
