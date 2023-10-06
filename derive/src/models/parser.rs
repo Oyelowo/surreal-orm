@@ -336,12 +336,11 @@ pub enum DataType {
 }
 
 impl SchemaFieldsProperties {
-    /// .
-    ///
-    /// # Panics
-    ///
-    /// Panics if .
-    pub(crate) fn from_receiver_data(args: SchemaPropertiesArgs, data_type: DataType) -> Self {
+    /// Derive the schema properties for a struct
+    pub(crate) fn from_receiver_data(
+        args: SchemaPropertiesArgs,
+        data_type: DataType,
+    ) -> Result<Vec<Self>, Vec<&'static str>> {
         let SchemaPropertiesArgs {
             data,
             struct_level_casing,
@@ -350,7 +349,10 @@ impl SchemaFieldsProperties {
             ..
         } = args;
 
-        let fields = data
+        // Result<Vec<Self>, &'static str>
+        let errors = vec![];
+
+        let fields= data
             .as_ref()
             .take_struct()
             .expect("Should never be enum")
@@ -538,7 +540,11 @@ impl SchemaFieldsProperties {
                     let array_trait = if field_receiver.is_list() {
                         array_element
                         .or_else(||field_receiver.get_array_item_type())
-                        .or_else(|| Some(field_receiver.get_fallback_array_item_concrete_type()))
+                        .or_else(|| {
+                                Some(field_receiver.get_fallback_array_item_concrete_type().map_err(|_| {
+                                    errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
+                                }).unwrap_or_default())
+                            })
                         .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         })
@@ -693,7 +699,7 @@ impl SchemaFieldsProperties {
                     RelationType::LinkSelf(node_object) => {
                         let foreign_node = format_ident!("{node_object}");
                         if *struct_name_ident != node_object.to_string() {
-                            panic!("The field - `{field_name_original}` - has a linkself \
+                            errors.push("The field - `{field_name_original}` - has a linkself \
                                    attribute or type that is not pointing to the current struct. \
                                    Make sure the field attribute is link_self=\"{struct_name_ident}\" \
                                    and the type is LinkSelf<{struct_name_ident}>. ");
@@ -783,7 +789,7 @@ impl SchemaFieldsProperties {
 
                 store
             });
-        fields
+        Ok(fields)
     }
 }
 
