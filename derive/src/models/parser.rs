@@ -19,6 +19,7 @@ use quote::{format_ident, quote};
 use super::{
     attributes::{MyFieldReceiver, NormalisedField, ReferencedNodeMeta, Relate},
     casing::CaseString,
+    errors::ExtractorResult,
     get_crate_name,
     relations::{EdgeDirection, NodeTypeName, RelateAttribute, RelationType},
     variables::VariablesModelMacro,
@@ -340,7 +341,7 @@ impl SchemaFieldsProperties {
     pub(crate) fn from_receiver_data(
         args: SchemaPropertiesArgs,
         data_type: DataType,
-    ) -> Result<Vec<Self>, Vec<&'static str>> {
+    ) -> ExtractorResult<Self> {
         let SchemaPropertiesArgs {
             data,
             struct_level_casing,
@@ -349,217 +350,249 @@ impl SchemaFieldsProperties {
             ..
         } = args;
 
-        // Result<Vec<Self>, &'static str>
-        let errors = vec![];
-
-        let fields= data
+        let store = Self::default();
+        for field_receiver in data
             .as_ref()
             .take_struct()
             .expect("Should never be enum")
             .fields
-            .into_iter()
-            .fold(Self::default(), |mut store, field_receiver| {
-                let crate_name = get_crate_name(false);
-                let field_type = &field_receiver.ty;
-                let field_name_original = field_receiver.ident.as_ref().unwrap();
-                let relationship = RelationType::from(field_receiver);
-                let NormalisedField {
-                         ref field_ident_normalised,
-                         ref field_ident_normalised_as_str,
-                } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
+        {
+            let store = Self::default();
+            let crate_name = get_crate_name(false);
+            let field_type = &field_receiver.ty;
+            let field_name_original = field_receiver.ident.as_ref().unwrap();
+            let relationship = RelationType::from(field_receiver);
+            let NormalisedField {
+                ref field_ident_normalised,
+                ref field_ident_normalised_as_str,
+            } = NormalisedField::from_receiever(field_receiver, struct_level_casing);
 
-                let VariablesModelMacro {
-                    ___________graph_traversal_string,
-                    ____________update_many_bindings,
-                    _____field_names,
-                    schema_instance,
-                    bindings,
-                    ..
-                } = VariablesModelMacro::new();
+            let VariablesModelMacro {
+                ___________graph_traversal_string,
+                ____________update_many_bindings,
+                _____field_names,
+                schema_instance,
+                bindings,
+                ..
+            } = VariablesModelMacro::new();
 
-                let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
-                        ReferencedNodeMeta::from_record_link(node_object, field_ident_normalised, struct_name_ident, is_list)
-                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)
+            let get_link_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+                ReferencedNodeMeta::from_record_link(
+                    node_object,
+                    field_ident_normalised,
+                    struct_name_ident,
+                    is_list,
+                )
+                .with_field_definition(
+                    field_receiver,
+                    struct_name_ident,
+                    field_ident_normalised_as_str,
+                    &data_type,
+                    &table_name,
+                )
+            };
+
+            let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
+                ReferencedNodeMeta::from_nested(
+                    node_object,
+                    field_ident_normalised,
+                    struct_name_ident,
+                    is_list,
+                )
+                .with_field_definition(
+                    field_receiver,
+                    struct_name_ident,
+                    field_ident_normalised_as_str,
+                    &data_type,
+                    &table_name,
+                )
+            };
+
+            let update_ser_field_type = |serializable_field_type: &mut Vec<TokenStream>| {
+                if !field_receiver.skip_serializing && !field_receiver.skip {
+                    serializable_field_type
+                        .push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
+                }
+            };
+
+            let mut update_aliases_struct_fields_types_kv = || {
+                store
+                    .aliases_struct_fields_types_kv
+                    .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
+
+                store
+                    .aliases_struct_fields_names_kv
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+            };
+
+            let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
+                let field_name_as_camel = format_ident!(
+                    "{}_______________",
+                    field_ident_normalised_as_str
+                        .to_string()
+                        .to_case(Case::Pascal)
+                );
+
+                let numeric_trait = if field_receiver.is_numeric() {
+                    quote!(
+                        impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
+
+                        impl From<self::#field_name_as_camel> for #crate_name::NumberLike {
+                            fn from(val: self::#field_name_as_camel) -> Self {
+                                val.0.into()
+                            }
+                        }
+
+                        impl From<&self::#field_name_as_camel> for #crate_name::NumberLike {
+                            fn from(val: &self::#field_name_as_camel) -> Self {
+                                val.clone().0.into()
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn add(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                        query_string: format!("{} + {}", self.build(), rhs.build()),
+                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                        errors: vec![],
+                                    }
+                                }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn sub(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} - {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn mul(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} * {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn div(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} / {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn add(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                        query_string: format!("{} + {}", self.build(), rhs.build()),
+                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                        errors: vec![],
+                                    }
+                                }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn sub(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} - {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn mul(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} * {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+
+                        impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_as_camel {
+                            type Output = #crate_name::Operation;
+
+                            fn div(self, rhs: T) -> Self::Output {
+                                let rhs: #crate_name::NumberLike = rhs.into();
+
+                                #crate_name::Operation {
+                                    query_string: format!("{} / {}", self.build(), rhs.build()),
+                                    bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+                                    errors: vec![],
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    quote!()
                 };
 
-                let get_nested_meta_with_defs = |node_object: &NodeTypeName, is_list: bool| {
-                        ReferencedNodeMeta::from_nested(node_object, field_ident_normalised, struct_name_ident, is_list)
-                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)
-                };
-
-                let update_ser_field_type = |serializable_field_type: & mut Vec<TokenStream>| {
-                    if !field_receiver.skip_serializing && !field_receiver.skip {
-                        serializable_field_type.push(quote!(#crate_name::Field::new(#field_ident_normalised_as_str)));
-                    }
-                };
-
-                let mut update_aliases_struct_fields_types_kv = || {
-                    store.aliases_struct_fields_types_kv
-                        .push(quote!(pub #field_ident_normalised: #crate_name::AliasName, ));
-
-                    store.aliases_struct_fields_names_kv
-                        .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
-                };
-
-                let mut update_field_names_fields_types_kv = |array_element: Option<TokenStream>| {
-                    let field_name_as_camel = format_ident!("{}_______________", field_ident_normalised_as_str.to_string().to_case(Case::Pascal));
-
-                    let numeric_trait = if field_receiver.is_numeric(){
-                        quote!(
-                            impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
-
-                            impl From<self::#field_name_as_camel> for #crate_name::NumberLike {
-                                fn from(val: self::#field_name_as_camel) -> Self {
-                                    val.0.into()
-                                }
-                            }
-
-                            impl From<&self::#field_name_as_camel> for #crate_name::NumberLike {
-                                fn from(val: &self::#field_name_as_camel) -> Self {
-                                    val.clone().0.into()
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for #field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn add(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                            query_string: format!("{} + {}", self.build(), rhs.build()),
-                                            bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                            errors: vec![],
-                                        }
-                                    }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for #field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn sub(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} - {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for #field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn mul(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} * {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for #field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn div(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} / {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Add<T> for &#field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn add(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                            query_string: format!("{} + {}", self.build(), rhs.build()),
-                                            bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                            errors: vec![],
-                                        }
-                                    }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Sub<T> for &#field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn sub(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} - {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Mul<T> for &#field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn mul(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} * {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-
-                            impl<T: ::std::convert::Into<#crate_name::NumberLike>> ::std::ops::Div<T> for &#field_name_as_camel {
-                                type Output = #crate_name::Operation;
-
-                                fn div(self, rhs: T) -> Self::Output {
-                                    let rhs: #crate_name::NumberLike = rhs.into();
-
-                                    #crate_name::Operation {
-                                        query_string: format!("{} / {}", self.build(), rhs.build()),
-                                        bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
-                                        errors: vec![],
-                                    }
-                                }
-                            }
-                        )
-                    } else {
-                        quote!()
-                    };
-
-                    // Only works for vectors
-                    let array_trait = if field_receiver.is_list() {
-                        array_element
+                // Only works for vectors
+                let array_trait = if field_receiver.is_list() {
+                    array_element
                         .or_else(||field_receiver.get_array_item_type())
                         .or_else(|| {
-                                Some(field_receiver.get_fallback_array_item_concrete_type().map_err(|_| {
-                                    errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
+                                Some(field_receiver.get_fallback_array_item_concrete_type().map_err(|e| {
+                                    // errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
+                                    syn::Error::new_spanned(field_type, e)
                                 }).unwrap_or_default())
                             })
                         .map(|items|{
                             quote!(impl #crate_name::SetterArray<#items> for self::#field_name_as_camel  {})
                         })
-                        .unwrap_or_default()} else {
-                            quote!()
-                    };
+                        .unwrap_or_default()
+                } else {
+                    quote!()
+                };
 
-                    let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str()) && matches!(data_type, DataType::Edge);
-                    let field_type_for_setter = if field_ident_normalised_as_str == "id" || is_edge_nodes{
+                let is_edge_nodes = ["in", "out"].contains(&field_ident_normalised_as_str.as_str())
+                    && matches!(data_type, DataType::Edge);
+                let field_type_for_setter =
+                    if field_ident_normalised_as_str == "id" || is_edge_nodes {
                         quote!(#crate_name::sql::Thing)
                     } else {
                         quote!(#field_type)
                     };
 
-                    store.field_wrapper_type_custom_implementations
+                store.field_wrapper_type_custom_implementations
                         .push(quote!(
                             #[derive(Debug, Clone)]
                             pub struct #field_name_as_camel(pub #crate_name::Field);
@@ -637,159 +670,210 @@ impl SchemaFieldsProperties {
                             #array_trait
                         ));
 
-                        store.schema_struct_fields_types_kv
-                            .push(quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ));
+                store.schema_struct_fields_types_kv.push(
+                    quote!(pub #field_ident_normalised: #_____field_names::#field_name_as_camel, ),
+                );
 
-                        store.schema_struct_fields_names_kv
-                            .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
+                store
+                    .schema_struct_fields_names_kv
+                    .push(quote!(#field_ident_normalised: #field_ident_normalised_as_str.into(),));
 
-                        store.schema_struct_fields_names_kv_prefixed
+                store.schema_struct_fields_names_kv_prefixed
                             .push(quote!(#field_ident_normalised:
                                                 #crate_name::Field::new(format!("{}.{}", prefix.build(), #field_ident_normalised_as_str))
                                                 .with_bindings(prefix.get_bindings()).into(),));
 
-                    store.schema_struct_fields_names_kv_empty
-                        .push(quote!(#field_ident_normalised: "".into(),));
+                store
+                    .schema_struct_fields_names_kv_empty
+                    .push(quote!(#field_ident_normalised: "".into(),));
 
-                    store.connection_with_field_appended
+                store.connection_with_field_appended
                         .push(quote!(
                                     #schema_instance.#field_ident_normalised = #schema_instance.#field_ident_normalised
                                       .set_graph_string(format!("{}.{}", #___________graph_traversal_string, #field_ident_normalised_as_str))
                                             .#____________update_many_bindings(#bindings).into();
                                 ));
+            };
 
-                };
+            let mut insert_non_null_updater_token = |updater_field_token: TokenStream| {
+                let is_invalid =
+                    &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
+                if !is_invalid {
+                    store
+                        .non_null_updater_fields
+                        .push(updater_field_token.clone());
+                }
+                // We dont care about the field type. We just use this struct to check for
+                // renamed serialed field names at compile time by asserting that the a field
+                // exist.
+                store
+                    .renamed_serialized_fields
+                    .push(quote!(pub #field_ident_normalised: &'static str, ));
+            };
 
-                let mut insert_non_null_updater_token = |updater_field_token:  TokenStream| {
-                    let is_invalid = &["id", "in", "out"].contains(&field_ident_normalised_as_str.as_str());
-                    if !is_invalid {
-                        store.non_null_updater_fields.push(updater_field_token.clone());
-                    }
-                    // We dont care about the field type. We just use this struct to check for
-                    // renamed serialed field names at compile time by asserting that the a field
-                    // exist.
-                    store.renamed_serialized_fields.push(quote!(pub #field_ident_normalised: &'static str, ));
-                };
+            update_ser_field_type(&mut store.serializable_fields);
 
-                update_ser_field_type(&mut store.serializable_fields);
+            let referenced_node_meta = match relationship.clone() {
+                RelationType::Relate(relation) => {
+                    store
+                        .node_edge_metadata
+                        .update(&relation, struct_name_ident, field_type);
+                    update_aliases_struct_fields_types_kv();
+                    let connection = relation.connection_model;
+                    store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
+                    ReferencedNodeMeta::default()
+                }
 
-                let referenced_node_meta = match relationship.clone() {
-                    RelationType::Relate(relation) => {
-                            store.node_edge_metadata.update(&relation, struct_name_ident, field_type);
-                        update_aliases_struct_fields_types_kv();
-                        let connection = relation.connection_model;
-                        store.fields_relations_aliased.push(quote!(#crate_name::Field::new(#connection).__as__(#crate_name::AliasName::new(#field_ident_normalised_as_str))));
-                            ReferencedNodeMeta::default()
+                RelationType::LinkOne(node_object) => {
+                    let foreign_node = format_ident!("{node_object}");
+                    update_ser_field_type(&mut store.link_one_fields);
+                    update_ser_field_type(&mut store.link_one_and_self_fields);
+                    update_ser_field_type(&mut store.linked_fields);
+                    update_field_names_fields_types_kv(None);
 
-                    },
+                    insert_non_null_updater_token(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    );
 
-                    RelationType::LinkOne(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        update_ser_field_type(&mut store.link_one_fields);
-                        update_ser_field_type(&mut store.link_one_and_self_fields);
-                        update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(None);
+                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
+                    get_link_meta_with_defs(&node_object, false)
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
+                }
 
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
-
-                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object, false).map_err(|e| errors.push(e)).unwrap()
-                    }
-
-                    RelationType::LinkSelf(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        if *struct_name_ident != node_object.to_string() {
-                            errors.push("The field - `{field_name_original}` - has a linkself \
+                RelationType::LinkSelf(node_object) => {
+                    let foreign_node = format_ident!("{node_object}");
+                    if *struct_name_ident != node_object.to_string() {
+                        return Err(syn::Error::new_spanned(
+                            field_name_original,
+                            "The field - `{field_name_original}` - has a linkself \
                                    attribute or type that is not pointing to the current struct. \
                                    Make sure the field attribute is link_self=\"{struct_name_ident}\" \
-                                   and the type is LinkSelf<{struct_name_ident}>. ");
-                        }
-
-                        update_ser_field_type(&mut store.link_self_fields);
-                        update_ser_field_type(&mut store.link_one_and_self_fields);
-                        update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(None);
-
-                        store.non_null_updater_fields.push(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
-
-                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
-
-                        get_link_meta_with_defs(&node_object, false)
+                                   and the type is LinkSelf<{struct_name_ident}>. ",
+                        )
+                        .into());
                     }
 
-                    RelationType::LinkMany(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        update_ser_field_type(&mut store.link_many_fields);
-                        update_ser_field_type(&mut store.linked_fields);
-                        update_field_names_fields_types_kv(Some(quote!(<#foreign_node as #crate_name::Model>::Id)));
+                    update_ser_field_type(&mut store.link_self_fields);
+                    update_ser_field_type(&mut store.link_one_and_self_fields);
+                    update_ser_field_type(&mut store.linked_fields);
+                    update_field_names_fields_types_kv(None);
 
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
+                    store.non_null_updater_fields.push(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    );
 
-                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object, true)
-                    }
+                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkSelf<#foreign_node>);));
 
-                    RelationType::NestObject(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
-                        update_field_names_fields_types_kv(None);
-
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ));
-
-                        get_nested_meta_with_defs(&node_object, false)
-                    },
-
-                    RelationType::NestArray(node_object) => {
-                        let foreign_node = format_ident!("{node_object}");
-
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
-
-                        store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
-
-                        update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
-                        get_nested_meta_with_defs(&node_object, true)
-                    },
-                    RelationType::None => {
-                        update_field_names_fields_types_kv(None);
-                        insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
-
-                        let ref_node_meta = if field_receiver.is_list(){
-                                                 ReferencedNodeMeta::from_simple_array( field_ident_normalised)
-                                            }else{
-                                                ReferencedNodeMeta::default()
-                                            };
-                        ref_node_meta
-                            .with_field_definition(field_receiver, struct_name_ident, field_ident_normalised_as_str, &data_type, &table_name)
-                    }
-                };
-
-                if field_ident_normalised_as_str == "id" {
-                    store.table_id_type =   quote!(#field_type);
-                    // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
+                    get_link_meta_with_defs(&node_object, false)
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
 
-                if !referenced_node_meta.field_definition.is_empty() {
-                    store.field_definitions.push(referenced_node_meta.field_definition);
+                RelationType::LinkMany(node_object) => {
+                    let foreign_node = format_ident!("{node_object}");
+                    update_ser_field_type(&mut store.link_many_fields);
+                    update_ser_field_type(&mut store.linked_fields);
+                    update_field_names_fields_types_kv(Some(
+                        quote!(<#foreign_node as #crate_name::Model>::Id),
+                    ));
+
+                    insert_non_null_updater_token(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    );
+
+                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkMany<#foreign_node>);));
+                    get_link_meta_with_defs(&node_object, true)
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
                 }
 
-                store.static_assertions.push(referenced_node_meta.foreign_node_type_validator);
-                store.static_assertions.extend(referenced_node_meta.field_type_validation_asserts);
+                RelationType::NestObject(node_object) => {
+                    let foreign_node = format_ident!("{node_object}");
+                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #foreign_node);));
+                    update_field_names_fields_types_kv(None);
 
-                store.imports_referenced_node_schema
-                    .insert(referenced_node_meta.foreign_node_schema_import.into());
+                    insert_non_null_updater_token(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<<#field_type as #crate_name::Object>::NonNullUpdater>, ),
+                    );
 
-                store.record_link_fields_methods
-                    .push(referenced_node_meta.record_link_default_alias_as_method);
+                    get_nested_meta_with_defs(&node_object, false)
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
+                }
 
+                RelationType::NestArray(node_object) => {
+                    let foreign_node = format_ident!("{node_object}");
 
+                    insert_non_null_updater_token(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    );
 
-                store.serialized_field_names_normalised
-                    .push(field_ident_normalised_as_str.to_owned());
+                    store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
 
+                    update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
+                    get_nested_meta_with_defs(&node_object, true)
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
+                }
+                RelationType::None => {
+                    update_field_names_fields_types_kv(None);
+                    insert_non_null_updater_token(
+                        quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
+                    );
 
+                    let ref_node_meta = if field_receiver.is_list() {
+                        ReferencedNodeMeta::from_simple_array(field_ident_normalised)
+                    } else {
+                        ReferencedNodeMeta::default()
+                    };
+                    ref_node_meta
+                        .with_field_definition(
+                            field_receiver,
+                            struct_name_ident,
+                            field_ident_normalised_as_str,
+                            &data_type,
+                            &table_name,
+                        )
+                        .map_err(|e| syn::Error::new_spanned(field_name_original, e.to_string()))?
+                }
+            };
+
+            if field_ident_normalised_as_str == "id" {
+                store.table_id_type = quote!(#field_type);
+                // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::SurrealId<#struct_name_ident>);));
+            }
+
+            if !referenced_node_meta.field_definition.is_empty() {
                 store
-            });
-        Ok(fields)
+                    .field_definitions
+                    .push(referenced_node_meta.field_definition);
+            }
+
+            store
+                .static_assertions
+                .push(referenced_node_meta.foreign_node_type_validator);
+            store
+                .static_assertions
+                .extend(referenced_node_meta.field_type_validation_asserts);
+
+            store
+                .imports_referenced_node_schema
+                .insert(referenced_node_meta.foreign_node_schema_import.into());
+
+            store
+                .record_link_fields_methods
+                .push(referenced_node_meta.record_link_default_alias_as_method);
+
+            store
+                .serialized_field_names_normalised
+                .push(field_ident_normalised_as_str.to_owned());
+        }
+
+        // let fields = data
+        //     .as_ref()
+        //     .take_struct()
+        //     .expect("Should never be enum")
+        //     .fields
+        //     .into_iter()
+        //     .fold(Self::default(), |mut store, field_receiver| {});
+        Ok(store)
+        // Ok(fields)
     }
 }
 
