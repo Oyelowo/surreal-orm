@@ -17,6 +17,7 @@ darling = { workspace = true }
 convert_case = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
+thiserror = { workspace = true }
 
 
 serde = { workspace = true }

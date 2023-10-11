@@ -693,7 +693,7 @@ impl SchemaFieldsProperties {
                         insert_non_null_updater_token(quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ));
 
                         store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, #crate_name::LinkOne<#foreign_node>);));
-                        get_link_meta_with_defs(&node_object, false)
+                        get_link_meta_with_defs(&node_object, false).map_err(|e| errors.push(e)).unwrap()
                     }
 
                     RelationType::LinkSelf(node_object) => {
