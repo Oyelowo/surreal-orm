@@ -6,6 +6,7 @@
  */
 
 use convert_case::{Case, Casing};
+use thiserror::Error;
 
 pub(crate) fn validate_table_name<'a>(
     struct_name_ident: &proc_macro2::Ident,
@@ -25,3 +26,23 @@ pub(crate) fn validate_table_name<'a>(
 
     table_name
 }
+
+#[derive(Error, Debug)]
+pub enum ExtractorError {
+    #[error("{0}")]
+    Syn(#[from] syn::Error),
+
+    #[error("{0}")]
+    Darling(#[from] darling::Error),
+}
+
+impl ExtractorError {
+    pub fn write_errors(self) -> proc_macro2::TokenStream {
+        match self {
+            ExtractorError::Syn(err) => err.to_compile_error(),
+            ExtractorError::Darling(err) => err.write_errors(),
+        }
+    }
+}
+
+pub type ExtractorResult<T> = std::result::Result<T, ExtractorError>;
