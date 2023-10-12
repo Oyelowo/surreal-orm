@@ -77,7 +77,7 @@ impl ToTokens for NodeToken {
             table_name: table_name_str.to_string(),
         };
 
-        let SchemaFieldsProperties {
+        let Ok(SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -102,7 +102,12 @@ impl ToTokens for NodeToken {
             renamed_serialized_fields,
             table_id_type,
             ..
-        } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node);
+        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node)
+        else {
+            return tokens.extend(
+                syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
+            );
+        };
 
         let node_edge_metadata_tokens = node_edge_metadata.generate_token_stream();
         // let imports_referenced_node_schema = imports_referenced_node_schema.dedup_by(|a, b| a.to_string() == b.to_string());
@@ -134,7 +139,12 @@ impl ToTokens for NodeToken {
             .map(|f| f.to_string())
             .collect::<Vec<_>>();
 
-        let table_definitions = self.get_table_definition_token();
+        let Ok(table_definitions) = self.get_table_definition_token() else {
+            return tokens.extend(
+                syn::Error::new_spanned(self, "Problem getting table definition.")
+                    .to_compile_error(),
+            );
+        };
 
         // #[derive(#crate::Model, #crate_name::serde::Serialize, #crate_name::serde::Deserialize, Debug, Clone)]
         // #[serde(rename_all = "camelCase")]

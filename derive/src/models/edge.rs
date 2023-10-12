@@ -65,7 +65,12 @@ impl ToTokens for EdgeToken {
             relax_table_name,
             ..
         } = &self.0;
-        let table_definitions = self.get_table_definition_token();
+        let Ok(table_definitions) = self.get_table_definition_token() else {
+            return tokens.extend(
+                syn::Error::new_spanned(self, "Error in parsing table definition")
+                    .to_compile_error(),
+            );
+        };
 
         let table_name_ident = &format_ident!(
             "{}",
@@ -103,7 +108,7 @@ impl ToTokens for EdgeToken {
             table_name: table_name_str.to_string(), // table_name_ident,
         };
 
-        let SchemaFieldsProperties {
+        let Ok(SchemaFieldsProperties {
             schema_struct_fields_types_kv,
             schema_struct_fields_names_kv,
             schema_struct_fields_names_kv_prefixed,
@@ -125,7 +130,12 @@ impl ToTokens for EdgeToken {
             renamed_serialized_fields,
             table_id_type,
             ..
-        } = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Edge);
+        }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Edge)
+        else {
+            return tokens.extend(
+                syn::Error::new_spanned(self, "Error in parsing struct fields").to_compile_error(),
+            );
+        };
         // if serialized_field_names_normalised.conta("")
         if !serialized_field_names_normalised.contains(&"in".into())
             || !serialized_field_names_normalised.contains(&"out".into())
