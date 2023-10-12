@@ -1,3 +1,12 @@
+use async_trait::async_trait;
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use surreal_orm::{
+    self,
+    statements::{create, create_only, delete, info_for, select, select_value},
+    *,
+};
+use surrealdb::{self, engine::local::Mem, Surreal};
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
 // #[surreal_orm(table_name = "planet")]
@@ -50,7 +59,7 @@ use std::collections::HashMap;
 //   # Create a migration directory with either both up/down migations or just up.
 //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
 //   # Example: 2382320302303__up__create_planet.sql
-//   # Example: 2382320302303__down__create_planet.sql
+//   # Example: 2382320302303__down__delete_planet.sql
 //
 // # Migration directory
 // - get all fields defintions from migration directory
@@ -60,7 +69,7 @@ use std::collections::HashMap;
 //
 //
 // # Create a migration table in the database with fields for the migration name, timestamp, direction, status, etc
-// # Example: CREATE TABLE migrations (id int, name string, timestamp int, direction string, status string)
+// # Example: CREATE TABLE migration (id int, name string, timestamp int, direction string, status string)
 //
 // 1. # Get all migrations names from the database
 // e.g: SELECT name FROM migrations
@@ -125,31 +134,12 @@ use std::collections::HashMap;
 //    - add index
 //    - remove index
 //
-pub fn migrate() {
-    println!("migrator");
-}
-
-pub fn generate_migrations() {
-    println!("migrator");
-}
-
-pub fn apply_migrations() {
-    println!("migrator");
-}
-
-// pub fn run_migrations() {
-//     println!("migrator");
-// }
-
-// pub fn rollback_migration() {
-//     println!("migrator");
-// }
 
 struct Database {
     // connection details here
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 struct SurrealSchema {
     events: HashMap<String, String>,
     indexes: HashMap<String, String>,
@@ -157,33 +147,86 @@ struct SurrealSchema {
     fields: HashMap<String, String>,
 }
 
+// #[async_trait]
 impl Database {
-    pub fn get_current_schema(&self, table_name: &str) -> SurrealSchema {
+    pub async fn get_current_schema(&self, table_name: &str) -> SurrealSchema {
         // db.query("INFO FOR TABLE planet")
-        SurrealSchema::default()
+        // SurrealSchema::default()
+        let db = self.get_db();
+
+        // db.query("INFO FOR TABLE type::table($table)")
+        //     .bind("table", table_name)
+        //     .run()
+        //     .await
+        //     .unwrap();
+
+        info_for()
+            .table(table_name.to_string())
+            .get_data::<SurrealSchema>(db)
+            .await
+            .unwrap()
+            .unwrap()
+        // .run(db)
+        // .await
+        // .unwrap()
+        // .take::<Option<SurrealSchema>>(0)
+        // .expect("failed to take schema value")
+        // .expect("schema value is empty")
     }
 
-    pub fn execute(&self, query: String) {
-        // db.query(query)
+    pub fn get_db(&self) -> Surreal {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await.unwrap();
+        db
+    }
+
+    pub async fn execute(&self, query: String) {
         println!("Executing query: {}", query);
+        self.get_db().query(query).run().await.unwrap();
     }
 
     pub fn get_applied_migrations_from_db(&self) -> Vec<String> {
         // db.query("SELECT name FROM migrations")
-        vec![
-            "20230912__up__add_name".into(),
-            "20230912__down__remove_name".into(),
-        ]
+
+        let Migration { name, .. } = Migration::schema();
+        let migration = Migration::table_name();
+
+        // select [{ name: "Oyelowo" }]
+        // select valeu [ "Oyelowo" ]
+        // select_only. Just on object => { name: "Oyelowo" }
+        let migration_names = select_value(name)
+            .from(migration)
+            .return_many::<String>(self.get_db())
+            .await
+            .unwrap();
+        // vec![
+        //     "20230912__up__add_name".into(),
+        //     "20230912__down__remove_name".into(),
+        // ]
+        migration_names
     }
 
     pub fn mark_migration_as_applied(&self, migration_name: &str) {
         // db.query("CREATE migrations::name CONTENT {name: migration_name}")
         println!("Applying migration: {}", migration_name);
-        let query = format!(
-            "CREATE migrations::name CONTENT {{name: {}}}",
-            migration_name
-        );
-        self.execute(query)
+        // let query = format!(
+        //     "CREATE migrations::name CONTENT {{name: {}}}",
+        //     migration_name
+        // );
+
+        let migration = Migration {
+            id: Migration::create_id(migration_name),
+            name: migration_name.into(),
+            direction: Direction::Oneway { up: "".into() },
+        };
+
+        // self.execute(query)
+        let migration = create()
+            .content(migration)
+            .get_one(self.get_db())
+            .await
+            .unwrap();
+        migration
     }
 
     pub fn unmark_migration(&self, migration_name: &str) {
@@ -191,8 +234,11 @@ impl Database {
         // db.query("DELETE migrations::name")
         // db.query("DELETE migrations WHERE name = migration_name")
         println!("Unmark migration: {}", migration_name);
-        let query = format!("DELETE migrations::{}", migration_name);
-        self.execute(query)
+        // let query = format!("DELETE migrations::{}", migration_name);
+        // self.execute(query)
+
+        delete(Migration::create_id(migration_name)).run(self.get_db());
+        println!("Migration unmarked: {}", migration_name);
     }
 }
 
@@ -210,6 +256,7 @@ impl Database {
 //     Oneway,
 // }
 
+#[derive(Serialize, Deserialize)]
 enum Direction {
     TwoWay { up: String, down: String },
     Oneway { up: String },
@@ -239,8 +286,14 @@ impl Direction {
     }
 }
 
+// Warn when id field not included in a model
+
 // Migratiions from migration directory
+#[derive(Node, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "migration")]
 pub struct Migration {
+    id: SurrealId<String>,
     name: String,
     // timestamp: String,
     // up: String,
@@ -252,12 +305,14 @@ pub struct Migration {
 pub fn get_all_migrations_from_dir() -> Vec<Migration> {
     vec![
         Migration {
+            id: Migration::create_id("20230912__up__add_name"),
             name: "20230912__up__add_name".into(),
             direction: Direction::Oneway {
                 up: "CREATE TABLE planet;".into(),
             },
         },
         Migration {
+            id: Migration::create_id("20230912__down__remove_name"),
             name: "20230912__down__remove_name".into(),
             direction: Direction::Oneway {
                 up: "DROP TABLE planet;".into(),
@@ -267,10 +322,15 @@ pub fn get_all_migrations_from_dir() -> Vec<Migration> {
 }
 
 pub fn get_migration_by_name_from_dir(migration_name: &str) -> Option<Migration> {
+    //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
+    //   # Example: 2382320302303__up__create_planet.sql
+    //   # Example: 2382320302303__down__delete_planet.sql
+
     // let migrations = get_all_migrations_from_dir();
     // migrations.into_iter().find(|m| m.name == migration_name)
 
     Some(Migration {
+        id: Migration::create_id("20230912__up__add_name"),
         name: "20230912__up__add_name".into(),
         direction: Direction::Oneway {
             up: "CREATE TABLE planet;".into(),
@@ -280,22 +340,12 @@ pub fn get_migration_by_name_from_dir(migration_name: &str) -> Option<Migration>
 
 pub fn run_migrations(db: &mut Database) {
     let applied_migrations = db.get_applied_migrations_from_db();
-    // let all_migration_names = get_all_migrations_from_dir()
-    //     .into_iter()
-    //     .map(|m| m.name)
-    //     .collect::<Vec<_>>();
     let all_migrations = get_all_migrations_from_dir();
 
     for migration in all_migrations {
         if !applied_migrations.contains(&migration.name) {
             db.execute(migration.direction.get_up_migration());
             db.mark_migration_as_applied(&migration.name);
-            // if migration.direction.is_two_way() {
-            //     panic!("Two way migrations are not supported yet");
-            // } else if migration.direction.is_one_way() {
-            //     db.execute(migration.direction.up);
-            //     db.mark_migration_as_applied(&migration.name);
-            // }
         }
     }
 }
@@ -316,4 +366,53 @@ pub fn rollback_migration(db: &mut Database, migration_name: &str) {
             migration_name
         );
     }
+}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "planet")]
+pub struct Planet {
+    pub id: SurrealSimpleId<Self>,
+    pub name: String,
+    pub population: u64,
+    pub created: DateTime<Utc>,
+    pub tags: Vec<u64>,
+}
+
+// Migration files in migration directory
+// Current schema in codebase
+// Current schema in database
+//
+
+enum FieldChange {
+    // Detection: When a new field exists in the codebase but not in the database
+    Add { name: String, definition: String },
+    // Detection: When a field exists in the database but not in the codebase
+    Remove { name: String },
+
+    // Detection: Strategies mentioned earlier.
+    Rename { old_name: String, new_name: String },
+}
+
+pub fn create_migration_file(queries: Vec<String>, direction: Direction, name: &str) {
+    //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
+    //   # Example: 2382320302303__up__create_planet.sql
+    //   # Example: 2382320302303__down__delete_planet.sql
+    // let timestamp = Utc::now().timestamp();
+    println!("Creating migration file: {}", name);
+    let timestamp = Utc::now().format("%Y%m%d%H%M%S").to_string();
+    fs::create_dir_all("migrations");
+
+    let path = format!("migrations/{}__{}__{}.sql", "timestamp", direction, name);
+    let mut file = File::create(path).unwrap();
+
+    let queries = queries.join(";\n");
+    file.write_all(queries).unwrap();
+
+    println!("Migration file created at: {}", path);
+}
+
+pub fn extract_schema_from_models() -> SurrealSchema {
+    let x = Planet::schema();
+    SurrealSchema::default()
 }
