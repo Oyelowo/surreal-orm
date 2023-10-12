@@ -36,6 +36,21 @@ where
 
         Ok(query.await.map_err(SurrealOrmError::QueryRun)?)
     }
+
+    /// Runs the statement against the database and returns the deserialized result.
+    async fn get_data<T>(
+        &self,
+        db: Surreal<impl surrealdb::Connection>,
+    ) -> SurrealOrmResult<Option<T>>
+    where
+        T: Sized + Serialize + DeserializeOwned,
+    {
+        let mut response = self.run(db).await?;
+
+        Ok(response
+            .take::<Option<T>>(0)
+            .map_err(SurrealOrmError::Deserialization)?)
+    }
 }
 
 impl<Q> Runnable for Q where Q: Queryable {}
