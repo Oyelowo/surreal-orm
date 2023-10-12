@@ -1,6 +1,6 @@
-use migrator::migrate;
+// use migrator::migrate;
 
 fn main() {
-    migrate();
+    // migrate();
     println!("Hello, world!");
 }
