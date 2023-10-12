@@ -4,6 +4,7 @@ workspace.resolver = "2"
 members = [
   "orm",
   "query-builder",
+  "migrator",
   "derive",
   "models",
   "orm-tests",
@@ -22,6 +23,7 @@ documentation = "https://codebreather.com/oyelowo"
 surreal-derive = { path = "derive" }
 surreal-orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
+migrator = { path = "migrator" }
 surreal-models = { path = "models" }
 
 surrealdb = { version = "1.0.0", features = [
