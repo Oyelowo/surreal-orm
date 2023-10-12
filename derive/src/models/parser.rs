@@ -350,14 +350,13 @@ impl SchemaFieldsProperties {
             ..
         } = args;
 
-        let store = Self::default();
+        let mut store = Self::default();
         for field_receiver in data
             .as_ref()
             .take_struct()
             .expect("Should never be enum")
             .fields
         {
-            let store = Self::default();
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
             let field_name_original = field_receiver.ident.as_ref().unwrap();
