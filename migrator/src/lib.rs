@@ -6,7 +6,11 @@ use surreal_orm::{
     statements::{create, create_only, delete, info_for, select, select_value},
     *,
 };
-use surrealdb::{self, engine::local::Mem, Surreal};
+use surrealdb::{
+    self,
+    engine::local::{Db, Mem},
+    Surreal,
+};
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
 // #[surreal_orm(table_name = "planet")]
@@ -44,7 +48,12 @@ use surrealdb::{self, engine::local::Mem, Surreal};
 // DEFINE INDEX ....
 //
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    fs::{self, File},
+    io::Write,
+};
 
 // TODOs
 // Extract the schema from the struct
@@ -152,7 +161,7 @@ impl Database {
     pub async fn get_current_schema(&self, table_name: &str) -> SurrealSchema {
         // db.query("INFO FOR TABLE planet")
         // SurrealSchema::default()
-        let db = self.get_db();
+        let db = self.db().await;
 
         // db.query("INFO FOR TABLE type::table($table)")
         //     .bind("table", table_name)
@@ -174,7 +183,7 @@ impl Database {
         // .expect("schema value is empty")
     }
 
-    pub fn get_db(&self) -> Surreal {
+    pub async fn db(&self) -> Surreal<Db> {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await.unwrap();
         db
@@ -182,13 +191,13 @@ impl Database {
 
     pub async fn execute(&self, query: String) {
         println!("Executing query: {}", query);
-        self.get_db().query(query).run().await.unwrap();
+        self.db().await.query(query).await.unwrap();
     }
 
-    pub fn get_applied_migrations_from_db(&self) -> Vec<String> {
+    pub async fn get_applied_migrations_from_db(&self) -> Vec<String> {
         // db.query("SELECT name FROM migrations")
 
-        let Migration { name, .. } = Migration::schema();
+        let migration::Schema { name, .. } = Migration::schema();
         let migration = Migration::table_name();
 
         // select [{ name: "Oyelowo" }]
@@ -196,7 +205,7 @@ impl Database {
         // select_only. Just on object => { name: "Oyelowo" }
         let migration_names = select_value(name)
             .from(migration)
-            .return_many::<String>(self.get_db())
+            .return_many::<String>(self.db().await)
             .await
             .unwrap();
         // vec![
@@ -206,7 +215,7 @@ impl Database {
         migration_names
     }
 
-    pub fn mark_migration_as_applied(&self, migration_name: &str) {
+    pub async fn mark_migration_as_applied(&self, migration_name: &str) -> Migration {
         // db.query("CREATE migrations::name CONTENT {name: migration_name}")
         println!("Applying migration: {}", migration_name);
         // let query = format!(
@@ -215,7 +224,7 @@ impl Database {
         // );
 
         let migration = Migration {
-            id: Migration::create_id(migration_name),
+            id: Migration::create_id(migration_name.into()),
             name: migration_name.into(),
             direction: Direction::Oneway { up: "".into() },
         };
@@ -223,13 +232,13 @@ impl Database {
         // self.execute(query)
         let migration = create()
             .content(migration)
-            .get_one(self.get_db())
+            .get_one(self.db().await)
             .await
             .unwrap();
         migration
     }
 
-    pub fn unmark_migration(&self, migration_name: &str) {
+    pub async fn unmark_migration(&self, migration_name: &str) {
         // Use either of the two
         // db.query("DELETE migrations::name")
         // db.query("DELETE migrations WHERE name = migration_name")
@@ -237,7 +246,7 @@ impl Database {
         // let query = format!("DELETE migrations::{}", migration_name);
         // self.execute(query)
 
-        delete(Migration::create_id(migration_name)).run(self.get_db());
+        delete::<Migration>(Migration::create_id(migration_name)).run(self.db().await);
         println!("Migration unmarked: {}", migration_name);
     }
 }
@@ -256,10 +265,25 @@ impl Database {
 //     Oneway,
 // }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 enum Direction {
     TwoWay { up: String, down: String },
     Oneway { up: String },
+}
+
+impl Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Oneway { up } => write!(f, "{}", up),
+            Self::TwoWay { up, down } => write!(f, "{}", up),
+        }
+    }
+}
+
+impl From<Direction> for String {
+    fn from(direction: Direction) -> Self {
+        direction.to_string()
+    }
 }
 
 impl Direction {
@@ -289,15 +313,17 @@ impl Direction {
 // Warn when id field not included in a model
 
 // Migratiions from migration directory
-#[derive(Node, Serialize, Deserialize)]
+#[derive(Node, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "migration")]
 pub struct Migration {
-    id: SurrealId<String>,
+    id: SurrealId<Self, String>,
+    // #[surreal_orm(type_ = "duration")]
     name: String,
     // timestamp: String,
     // up: String,
     // down: String,
+    #[surreal_orm(type_ = "string")]
     direction: Direction,
     // status: String,
 }
@@ -305,14 +331,14 @@ pub struct Migration {
 pub fn get_all_migrations_from_dir() -> Vec<Migration> {
     vec![
         Migration {
-            id: Migration::create_id("20230912__up__add_name"),
+            id: Migration::create_id("20230912__up__add_name".into()),
             name: "20230912__up__add_name".into(),
             direction: Direction::Oneway {
                 up: "CREATE TABLE planet;".into(),
             },
         },
         Migration {
-            id: Migration::create_id("20230912__down__remove_name"),
+            id: Migration::create_id("20230912__down__remove_name".into()),
             name: "20230912__down__remove_name".into(),
             direction: Direction::Oneway {
                 up: "DROP TABLE planet;".into(),
@@ -330,7 +356,7 @@ pub fn get_migration_by_name_from_dir(migration_name: &str) -> Option<Migration>
     // migrations.into_iter().find(|m| m.name == migration_name)
 
     Some(Migration {
-        id: Migration::create_id("20230912__up__add_name"),
+        id: Migration::create_id("20230912__up__add_name".into()),
         name: "20230912__up__add_name".into(),
         direction: Direction::Oneway {
             up: "CREATE TABLE planet;".into(),
@@ -338,10 +364,11 @@ pub fn get_migration_by_name_from_dir(migration_name: &str) -> Option<Migration>
     })
 }
 
-pub fn run_migrations(db: &mut Database) {
+pub async fn run_migrations(db: &mut Database) {
     let applied_migrations = db.get_applied_migrations_from_db();
     let all_migrations = get_all_migrations_from_dir();
 
+    let applied_migrations = applied_migrations.await;
     for migration in all_migrations {
         if !applied_migrations.contains(&migration.name) {
             db.execute(migration.direction.get_up_migration());
@@ -375,7 +402,7 @@ pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     pub population: u64,
-    pub created: DateTime<Utc>,
+    pub created: chrono::DateTime<Utc>,
     pub tags: Vec<u64>,
 }
 
@@ -401,13 +428,13 @@ pub fn create_migration_file(queries: Vec<String>, direction: Direction, name: &
     // let timestamp = Utc::now().timestamp();
     println!("Creating migration file: {}", name);
     let timestamp = Utc::now().format("%Y%m%d%H%M%S").to_string();
-    fs::create_dir_all("migrations");
+    let _ = fs::create_dir_all("migrations").expect("Problem creating migrations directory");
 
     let path = format!("migrations/{}__{}__{}.sql", "timestamp", direction, name);
-    let mut file = File::create(path).unwrap();
+    let mut file = File::create(&path).unwrap();
 
     let queries = queries.join(";\n");
-    file.write_all(queries).unwrap();
+    file.write_all(queries.as_bytes()).unwrap();
 
     println!("Migration file created at: {}", path);
 }
