@@ -14,3 +14,5 @@ surrealdb = { workspace = true }
 async-trait = { workspace = true }
 serde = { workspace = true }
 chrono = { workspace = true }
+tokio = { workspace = true }
+nom = { workspace = true }

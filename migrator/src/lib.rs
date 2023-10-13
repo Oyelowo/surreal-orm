@@ -144,23 +144,61 @@ use std::{
 //    - remove index
 //
 
-struct Database {
+pub struct Database {
     // connection details here
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
-struct SurrealSchema {
+pub struct TableInfo {
     events: HashMap<String, String>,
     indexes: HashMap<String, String>,
     tables: HashMap<String, String>,
     fields: HashMap<String, String>,
 }
 
+impl TableInfo {
+    pub fn get_fields(&self) -> Info {
+        self.fields.clone()
+    }
+
+    pub fn get_fields_names(&self) -> Vec<String> {
+        self.fields.keys().cloned().collect()
+    }
+
+    pub fn get_fields_definitions(&self) -> Vec<String> {
+        self.fields.values().cloned().collect()
+    }
+}
+
 // #[async_trait]
 impl Database {
-    pub async fn get_current_schema(&self, table_name: &str) -> SurrealSchema {
+    pub fn init() -> Self {
+        Self {}
+    }
+
+    pub async fn get_db_info(db: Surreal<Db>) -> DbInfo {
+        // let db = self.db().await;
+        info_for()
+            .database()
+            .get_data::<DbInfo>(db)
+            .await
+            .unwrap()
+            .unwrap()
+    }
+
+    pub async fn get_table_info(db: Surreal<Db>, table_name: String) -> TableInfo {
+        // let db = self.db().await;
+        info_for()
+            .table(table_name)
+            .get_data::<TableInfo>(db)
+            .await
+            .unwrap()
+            .unwrap()
+    }
+
+    pub async fn get_current_schema(&self, table_name: &str) -> TableInfo {
         // db.query("INFO FOR TABLE planet")
-        // SurrealSchema::default()
+        // TableInfo::default()
         let db = self.db().await;
 
         // db.query("INFO FOR TABLE type::table($table)")
@@ -171,14 +209,14 @@ impl Database {
 
         info_for()
             .table(table_name.to_string())
-            .get_data::<SurrealSchema>(db)
+            .get_data::<TableInfo>(db)
             .await
             .unwrap()
             .unwrap()
         // .run(db)
         // .await
         // .unwrap()
-        // .take::<Option<SurrealSchema>>(0)
+        // .take::<Option<TableInfo>>(0)
         // .expect("failed to take schema value")
         // .expect("schema value is empty")
     }
@@ -226,7 +264,9 @@ impl Database {
         let migration = Migration {
             id: Migration::create_id(migration_name.into()),
             name: migration_name.into(),
-            direction: Direction::Oneway { up: "".into() },
+            direction: Direction::Oneway {
+                up: vec!["CREATE migrations::name CONTENT {{name: {}}}".to_string()],
+            },
         };
 
         // self.execute(query)
@@ -265,21 +305,48 @@ impl Database {
 //     Oneway,
 // }
 
+type Queries = Vec<String>;
 #[derive(Serialize, Deserialize, Clone, Debug)]
-enum Direction {
-    TwoWay { up: String, down: String },
-    Oneway { up: String },
+pub enum Direction {
+    TwoWay { up: Queries, down: Queries },
+    Oneway { up: Queries },
+}
+
+impl Direction {
+    pub fn new(up: Vec<String>, down: Option<Queries>) -> Self {
+        // let up = up.into();
+        match down {
+            Some(down) => Self::TwoWay { up, down },
+            None => Self::Oneway { up },
+        }
+    }
 }
 
 impl Display for Direction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Oneway { up } => write!(f, "{}", up),
-            Self::TwoWay { up, down } => write!(f, "{}", up),
+            Self::Oneway { up } => write!(f, "{}", up.join(";\n")),
+            Self::TwoWay { up, down } => write!(f, "{}", up.join(";\n")),
         }
     }
 }
 
+// #[derive(Serialize, Deserialize, Clone, Debug)]
+// enum Direction {
+//     Up,
+//     Down,
+// }
+//
+// impl Display for Direction {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let direction = match self {
+//             Self::Up => "up",
+//             Self::Down => "down",
+//         };
+//         write!(f, "{}", direction)
+//     }
+// }
+//
 impl From<Direction> for String {
     fn from(direction: Direction) -> Self {
         direction.to_string()
@@ -297,14 +364,14 @@ impl Direction {
 
     pub fn get_up_migration(&self) -> String {
         match self {
-            Direction::TwoWay { up, .. } => up.clone(),
-            Direction::Oneway { up } => up.clone(),
+            Direction::TwoWay { up, .. } => up.join("\n"),
+            Direction::Oneway { up } => up.join("\n"),
         }
     }
 
     pub fn get_down_migration(&self) -> Option<String> {
         match self {
-            Direction::TwoWay { down, .. } => Some(down.clone()),
+            Direction::TwoWay { down, .. } => Some(down.join(";\n")),
             Direction::Oneway { up } => None,
         }
     }
@@ -313,18 +380,18 @@ impl Direction {
 // Warn when id field not included in a model
 
 // Migratiions from migration directory
-#[derive(Node, Serialize, Deserialize, Clone)]
+#[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "migration")]
 pub struct Migration {
-    id: SurrealId<Self, String>,
+    pub id: SurrealId<Self, String>,
     // #[surreal_orm(type_ = "duration")]
-    name: String,
+    pub name: String,
     // timestamp: String,
     // up: String,
     // down: String,
     #[surreal_orm(type_ = "string")]
-    direction: Direction,
+    pub direction: Direction,
     // status: String,
 }
 
@@ -334,14 +401,14 @@ pub fn get_all_migrations_from_dir() -> Vec<Migration> {
             id: Migration::create_id("20230912__up__add_name".into()),
             name: "20230912__up__add_name".into(),
             direction: Direction::Oneway {
-                up: "CREATE TABLE planet;".into(),
+                up: vec!["DROP TABLE planet;".into()],
             },
         },
         Migration {
             id: Migration::create_id("20230912__down__remove_name".into()),
             name: "20230912__down__remove_name".into(),
             direction: Direction::Oneway {
-                up: "DROP TABLE planet;".into(),
+                up: vec!["DROP TABLE planet;".into()],
             },
         },
     ]
@@ -359,7 +426,7 @@ pub fn get_migration_by_name_from_dir(migration_name: &str) -> Option<Migration>
         id: Migration::create_id("20230912__up__add_name".into()),
         name: "20230912__up__add_name".into(),
         direction: Direction::Oneway {
-            up: "CREATE TABLE planet;".into(),
+            up: vec!["CREATE TABLE planet;".into()],
         },
     })
 }
@@ -395,6 +462,40 @@ pub fn rollback_migration(db: &mut Database, migration_name: &str) {
     }
 }
 
+// INFO FOR DB
+// [
+//     {
+//         "analyzers": {},
+//         "functions": {},
+//         "params": {},
+//         "scopes": {},
+//         "tables": {
+//             "movie": "DEFINE TABLE movie SCHEMALESS",
+//             "person": "DEFINE TABLE person SCHEMAFULL CHANGEFEED 1d"
+//         },
+//         "tokens": {},
+//         "users": {}
+//     }
+// ]
+
+type Info = HashMap<String, String>;
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DbInfo {
+    analyzers: Info,
+    functions: Info,
+    params: Info,
+    scopes: Info,
+    tables: Info,
+    tokens: Info,
+    users: Info,
+}
+
+impl DbInfo {
+    pub fn get_tables(&self) -> Vec<String> {
+        self.tables.keys().cloned().collect()
+    }
+}
+
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
@@ -403,7 +504,17 @@ pub struct Planet {
     pub name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
-    pub tags: Vec<u64>,
+    pub tags: Vec<String>,
+}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "student")]
+pub struct Student {
+    pub id: SurrealSimpleId<Self>,
+    pub school: String,
+    pub age: u8,
+    pub class: String,
 }
 
 // Migration files in migration directory
@@ -421,7 +532,11 @@ enum FieldChange {
     Rename { old_name: String, new_name: String },
 }
 
-pub fn create_migration_file(queries: Vec<String>, direction: Direction, name: &str) {
+pub fn create_migration_file(
+    // queries: Vec<String>,
+    direction: Direction,
+    name: impl Into<String> + std::fmt::Display,
+) {
     //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
     //   # Example: 2382320302303__up__create_planet.sql
     //   # Example: 2382320302303__down__delete_planet.sql
@@ -430,16 +545,34 @@ pub fn create_migration_file(queries: Vec<String>, direction: Direction, name: &
     let timestamp = Utc::now().format("%Y%m%d%H%M%S").to_string();
     let _ = fs::create_dir_all("migrations").expect("Problem creating migrations directory");
 
-    let path = format!("migrations/{}__{}__{}.sql", "timestamp", direction, name);
+    let direction_arrow = match direction {
+        Direction::Oneway { .. } => "up",
+        Direction::TwoWay { .. } => "down",
+    };
+    let path = format!(
+        "migrations/{}__{}__{}.sql",
+        timestamp, direction_arrow, name
+    );
     let mut file = File::create(&path).unwrap();
 
+    let queries = vec![direction.to_string()];
     let queries = queries.join(";\n");
     file.write_all(queries.as_bytes()).unwrap();
 
     println!("Migration file created at: {}", path);
 }
 
-pub fn extract_schema_from_models() -> SurrealSchema {
+pub fn extract_schema_from_models() -> TableInfo {
     let x = Planet::schema();
-    SurrealSchema::default()
+    TableInfo::default()
 }
+
+// // Get all up migrations from migration directory
+//
+// Run all up migrations as a transaction in an in-memory db
+//
+// Parse all the table names available in all the queries into a HashSet
+// Get all the table names from the in-memory db
+//
+// Get all the tables and corresponding field definitiins from teh codebase e.g Field(for now)
+// Do a left and right diff to know which tables/fields to remove or add, or change
