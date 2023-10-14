@@ -1,4 +1,4 @@
-use m::{Database, Planet, Student};
+use m::{Database, Direction, Migration, Planet, Student};
 use migrator as m;
 use surreal_orm::{statements::info_for, Buildable, Model, Node, Runnable, SurrealCrudNode, ToRaw};
 
@@ -28,7 +28,6 @@ async fn main() {
     let queries = [statement1, statement2].concat();
     // let queries = vec![statement1, statement2];
     // let direction = m::Direction::get_up_migration(&self);
-    let direction = m::Direction::new(queries, None);
     let name = "create_users_table";
     // m::create_migration_file(direction.clone(), name);
 
@@ -38,11 +37,21 @@ async fn main() {
     //     .map(|m| m.direction.get_up_migration())
     //     .collect::<Vec<_>>()
     //     .join("\n");
+    let up_queries = queries.join(";\n");
+    // let down_queries = queries.join(";\n");
+    let down_queries =
+        "REMOVE fake_field on table person;\nREMOVE fake_name on table person".to_string();
+    Migration::create_migration_file(up_queries, Some(down_queries), name);
+    // println!("query: {:#?}", query);
 
-    let queries = direction.get_up_migration();
     // Run them as a transaction
     // From DB
-    let db = m::Database::init().db().await;
+    let db = m::Database::init().await;
+    let db_info = db.get_db_info().await.unwrap();
+    // println!("db info: {:#?}", db_info);
+
+    let table_info = db.get_table_info("person".into()).await.unwrap();
+    // println!("table info: {:#?}", table_info);
 
     // let query_to_run = format!("BEGIN TRANSACTION; {queries} COMMIT TRANSACTION; ");
     // println!("query_to_run: {:#?}", query_to_run);
@@ -77,8 +86,8 @@ async fn main() {
     // println!("Hello, world!, {all_migrations:#?}");
 
     // get all scehma from codebase
-    let migs = m::Migration::get_ups_from_migrations_dir();
-    println!("migs: {:#?}", migs);
+    // let migs = m::Migration::get_all_from_migrations_dir();
+    // println!("migs: {:#?}", migs);
 }
 
 // UPDATE person SET firstName = none;

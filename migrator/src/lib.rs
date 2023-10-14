@@ -148,7 +148,7 @@ use std::{
 //
 
 #[derive(Error, Debug)]
-enum MigrationError {
+pub enum MigrationError {
     #[error("Migration already exists")]
     MigrationAlreadyExists,
     #[error("Migration does not exist")]
@@ -391,7 +391,7 @@ pub struct Migration {
 }
 
 #[derive(Debug)]
-enum Direction {
+pub enum Direction {
     Up,
     Down,
 }
@@ -467,8 +467,8 @@ impl Migration {
     }
 
     pub fn create_migration_file(
-        query: String,
-        direction: Direction,
+        up_query: String,
+        down_query: Option<String>,
         name: impl Into<String> + std::fmt::Display,
     ) {
         //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
@@ -479,12 +479,23 @@ impl Migration {
         let timestamp = Utc::now().format("%Y%m%d%H%M%S").to_string();
         let _ = fs::create_dir_all("migrations").expect("Problem creating migrations directory");
 
-        let path = format!("migrations/{}__{}__{}.sql", timestamp, direction, name);
-        let mut file = File::create(&path).unwrap();
+        let create_path =
+            |direction: Direction| format!("migrations/{}__{}__{}.sql", timestamp, direction, name);
 
-        file.write_all(query.as_bytes()).unwrap();
+        let up_file_path = create_path(Direction::Up);
+        let mut up_file = File::create(&up_file_path).unwrap();
+        up_file.write_all(up_query.as_bytes()).unwrap();
 
-        println!("Migration file created at: {}", path);
+        println!("Up Migration file created at: {}", up_file_path);
+
+        if let Some(down_query) = down_query {
+            let down_file_path = create_path(Direction::Down);
+            let mut down_file = File::create(&down_file_path).unwrap();
+            down_file.write_all(down_query.as_bytes()).unwrap();
+            println!("Down Migration file created at: {}", down_file_path);
+        }
+
+        println!("Migration file created: {}", name);
     }
 
     pub async fn run_migrations(db: &mut Database) -> MigrationResult<()> {
