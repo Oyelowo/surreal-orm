@@ -30,7 +30,7 @@ async fn main() {
     // let direction = m::Direction::get_up_migration(&self);
     let direction = m::Direction::new(queries, None);
     let name = "create_users_table";
-    // m::create_migration_file(direction, name);
+    // m::create_migration_file(direction.clone(), name);
 
     //
     // let queries = all_migrations
@@ -44,32 +44,32 @@ async fn main() {
     // From DB
     let db = m::Database::init().db().await;
 
-    let query_to_run = format!("BEGIN TRANSACTION; {queries} COMMIT TRANSACTION; ");
-    println!("query_to_run: {:#?}", query_to_run);
-    db.query(query_to_run).await;
-    // ------
-
-    // --- Get metadata from in-memory db
-    // db.execute(query_to_run).await;
-
-    let db_info = m::Database::get_db_info(db.clone()).await;
-    println!("tables: {:#?}", db_info.get_tables());
-
-    let table_info = m::Database::get_table_info(db.clone(), "planet".into()).await;
-    println!("table field defs: {:#?}", table_info.get_fields());
-    println!("table field names: {:#?}", table_info.get_fields_names());
-    println!(
-        "table field defs: {:#?}",
-        table_info.get_fields_definitions()
-    );
-    let table_info = m::Database::get_table_info(db.clone(), "student".into()).await;
-    println!("table field defs: {:#?}", table_info.get_fields());
-    println!("table field names: {:#?}", table_info.get_fields_names());
-    println!(
-        "table field defs: {:#?}",
-        table_info.get_fields_definitions()
-    );
-    // Get all tables from queries within the directory using a parser.
+    // let query_to_run = format!("BEGIN TRANSACTION; {queries} COMMIT TRANSACTION; ");
+    // println!("query_to_run: {:#?}", query_to_run);
+    // db.query(query_to_run).await;
+    // // ------
+    //
+    // // --- Get metadata from in-memory db
+    // // db.execute(query_to_run).await;
+    //
+    // let db_info = m::Database::get_db_info(db.clone()).await;
+    // println!("tables: {:#?}", db_info.get_tables());
+    //
+    // let table_info = m::Database::get_table_info(db.clone(), "planet".into()).await;
+    // println!("table field defs: {:#?}", table_info.get_fields());
+    // println!("table field names: {:#?}", table_info.get_fields_names());
+    // println!(
+    //     "table field defs: {:#?}",
+    //     table_info.get_fields_definitions()
+    // );
+    // let table_info = m::Database::get_table_info(db.clone(), "student".into()).await;
+    // println!("table field defs: {:#?}", table_info.get_fields());
+    // println!("table field names: {:#?}", table_info.get_fields_names());
+    // println!(
+    //     "table field defs: {:#?}",
+    //     table_info.get_fields_definitions()
+    // );
+    // // Get all tables from queries within the directory using a parser.
 
     // ###########
     // From migrations directory
@@ -77,4 +77,10 @@ async fn main() {
     // println!("Hello, world!, {all_migrations:#?}");
 
     // get all scehma from codebase
+    let migs = m::Migration::get_ups_from_migrations_dir();
+    println!("migs: {:#?}", migs);
 }
+
+// UPDATE person SET firstName = none;
+// #
+// # REMOVE FIELD firstName ON TABLE person;

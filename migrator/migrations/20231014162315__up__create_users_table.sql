@@ -1,0 +1,9 @@
+DEFINE FIELD id ON TABLE planet TYPE record<planet>;;
+DEFINE FIELD name ON TABLE planet TYPE string;;
+DEFINE FIELD population ON TABLE planet TYPE int;;
+DEFINE FIELD created ON TABLE planet TYPE datetime;;
+DEFINE FIELD tags ON TABLE planet TYPE array<any>;;
+DEFINE FIELD id ON TABLE student TYPE record<student>;;
+DEFINE FIELD school ON TABLE student TYPE string;;
+DEFINE FIELD age ON TABLE student TYPE int;;
+DEFINE FIELD class ON TABLE student TYPE string;
