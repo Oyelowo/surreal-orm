@@ -21,6 +21,13 @@ use crate::{
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
 
+#[derive(Debug, Clone)]
+pub struct FieldMetadata {
+    pub name: Field,
+    pub old_name: Option<Field>,
+    pub definition: Raw,
+}
+
 /// Model is a trait signifying superset of Node and Edge.
 /// i.e both are Model
 pub trait Model: Sized {
@@ -63,6 +70,9 @@ pub trait Model: Sized {
     fn define_table() -> Raw;
     /// Get model's fields definitions statements as a list
     fn define_fields() -> Vec<Raw>;
+
+    /// Get old name of field
+    fn get_field_meta() -> Vec<FieldMetadata>;
 
     /// Create a new SurrealId from a string
     fn create_thing(id: impl Into<sql::Id>) -> Thing {

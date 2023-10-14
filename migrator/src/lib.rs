@@ -123,6 +123,7 @@ use std::{
 //       new field name. If it exists, then we can skip the migration.
 //       struct Planet {
 //            pub id: SurrealSimpleId<Self>,
+//            pub name: String,
 //            #[surreal_orm(old_name="name")]
 //            pub firstName: String,
 //       }

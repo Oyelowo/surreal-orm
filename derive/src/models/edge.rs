@@ -129,6 +129,7 @@ impl ToTokens for EdgeToken {
             non_null_updater_fields,
             renamed_serialized_fields,
             table_id_type,
+            field_metadata,
             ..
         }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Edge)
         else {
@@ -272,6 +273,10 @@ impl ToTokens for EdgeToken {
                         vec![
                            #( #field_definitions), *
                         ]
+                    }
+        
+                    fn get_field_meta() -> ::std::vec::Vec<#crate_name::FieldMetadata> {
+                        return vec![#( #field_metadata), *]
                     }
                 }
 

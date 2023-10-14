@@ -114,6 +114,9 @@ pub struct MyFieldReceiver {
     attrs: Vec<syn::Attribute>,
 
     #[darling(default)]
+    pub(crate) old_name: Option<String>,
+
+    #[darling(default)]
     pub(crate) rename: Option<Rename>,
 
     // reference singular: LinkOne<Account>

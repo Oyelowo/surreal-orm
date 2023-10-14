@@ -101,6 +101,7 @@ impl ToTokens for NodeToken {
             non_null_updater_fields,
             renamed_serialized_fields,
             table_id_type,
+            field_metadata,
             ..
         }) = SchemaFieldsProperties::from_receiver_data(schema_props_args, DataType::Node)
         else {
@@ -285,6 +286,10 @@ impl ToTokens for NodeToken {
 
                 fn get_link_many_fields() -> ::std::vec::Vec<#crate_name::Field> {
                     return vec![#( #link_many_fields), *]
+                }
+
+                fn get_field_meta() -> ::std::vec::Vec<#crate_name::FieldMetadata> {
+                    return vec![#( #field_metadata), *]
                 }
 
                 fn define_table() -> #crate_name::Raw {
