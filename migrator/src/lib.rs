@@ -3,9 +3,8 @@ use chrono::Utc;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    self,
     statements::{begin_transaction, create, create_only, delete, info_for, select, select_value},
-    *,
+    Edge, Node, *,
 };
 use surrealdb::{
     self,
@@ -55,6 +54,7 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::Write,
+    ops::Deref,
     path::Path,
 };
 
@@ -182,7 +182,7 @@ enum MigrationType {
     Index,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TableInfo {
     events: HashMap<String, String>,
     indexes: HashMap<String, String>,
@@ -204,9 +204,89 @@ impl TableInfo {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct LiveTableInfo(TableInfo);
+
+impl From<TableInfo> for LiveTableInfo {
+    fn from(value: TableInfo) -> Self {
+        Self(value)
+    }
+}
+
+impl Deref for LiveTableInfo {
+    type Target = TableInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CodeBaseTableInfo(TableInfo);
+
+impl From<TableInfo> for CodeBaseTableInfo {
+    fn from(value: TableInfo) -> Self {
+        Self(value)
+    }
+}
+
+impl Deref for CodeBaseTableInfo {
+    type Target = TableInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LiveDbInfo(DbInfo);
+
+impl From<DbInfo> for LiveDbInfo {
+    fn from(value: DbInfo) -> Self {
+        Self(value)
+    }
+}
+
+impl Deref for LiveDbInfo {
+    type Target = DbInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct CodeBaseDbInfo(DbInfo);
+
+impl CodeBaseDbInfo {
+    pub fn new(db_info: DbInfo) -> Self {
+        Self(db_info)
+    }
+}
+
+impl std::ops::DerefMut for CodeBaseDbInfo {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Deref for CodeBaseDbInfo {
+    type Target = DbInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+// impl CodeBaseDbInfo {
+//     pub fn into_inner(self) -> DbInfo {
+//         self.0
+//     }
+// }
+
 // format: <timestamp>__<direction>__<name>.sql
 #[derive(Debug, Clone)]
-struct MigrationName(String);
+pub struct MigrationName(String);
 
 impl<T: Into<String>> From<T> for MigrationName {
     fn from(name: T) -> Self {
@@ -279,22 +359,22 @@ impl Database {
         self.db.clone()
     }
 
-    pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
+    pub async fn get_db_info(&self) -> MigrationResult<LiveDbInfo> {
         let info = info_for()
             .database()
             .get_data::<DbInfo>(self.db())
             .await?
             .unwrap();
-        Ok(info)
+        Ok(info.into())
     }
 
-    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableInfo> {
+    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<LiveTableInfo> {
         let info = info_for()
             .table(table_name)
             .get_data::<TableInfo>(self.db())
             .await?
             .unwrap();
-        Ok(info)
+        Ok(info.into())
     }
 
     pub async fn get_current_schema(&self, table_name: &str) -> MigrationResult<TableInfo> {
@@ -327,6 +407,51 @@ impl Database {
         //     "20230912__down__remove_name".into(),
         // ]
         Ok(migration_names)
+    }
+
+    pub fn get_codebase_schema_queries(&self) -> String {
+        let animal_tables = Animal::define_table().to_raw().build();
+        let animal_fields = Animal::define_fields()
+            .iter()
+            .map(|f| f.to_raw().build())
+            .collect::<Vec<_>>()
+            .join(";\n");
+        let animal_eats_crop_tables = AnimalEatsCrop::define_table().to_raw().build();
+        let animal_eats_crop_fields = AnimalEatsCrop::define_fields()
+            .iter()
+            .map(|f| f.to_raw().build())
+            .collect::<Vec<_>>()
+            .join(";\n");
+        let crop_tables = Crop::define_table().to_raw().build();
+        let crop_fields = Crop::define_fields()
+            .iter()
+            .map(|f| f.to_raw().build())
+            .collect::<Vec<_>>()
+            .join(";\n");
+
+        let queries_joined = [
+            animal_tables,
+            animal_fields,
+            animal_eats_crop_tables,
+            animal_eats_crop_fields,
+            crop_tables,
+            crop_fields,
+        ]
+        .join(";\n");
+        // let queries_joined = format!("{};\n{}", tables, fields);
+
+        queries_joined
+    }
+
+    pub async fn run_codebase_schema_queries(&self) -> MigrationResult<()> {
+        let queries = self.get_codebase_schema_queries();
+        begin_transaction()
+            .query(Raw::new(queries))
+            .commit_transaction()
+            .run(self.db())
+            .await?;
+
+        Ok(())
     }
 
     pub async fn run_migrations_in_local_dir(&self) -> MigrationResult<()> {
@@ -567,15 +692,15 @@ impl Migration {
 // ]
 
 type Info = HashMap<String, String>;
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct DbInfo {
-    analyzers: Info,
-    functions: Info,
-    params: Info,
-    scopes: Info,
-    tables: Info,
-    tokens: Info,
-    users: Info,
+    pub analyzers: Info,
+    pub functions: Info,
+    pub params: Info,
+    pub scopes: Info,
+    pub tables: Info,
+    pub tokens: Info,
+    pub users: Info,
 }
 
 impl DbInfo {
@@ -605,6 +730,38 @@ pub struct Student {
     pub class: String,
 }
 
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "animal")]
+pub struct Animal {
+    pub id: SurrealSimpleId<Self>,
+    pub species: String,
+    pub attributes: Vec<String>,
+    pub created_at: chrono::DateTime<Utc>,
+}
+
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "eats")]
+pub struct Eats<In: Node, Out: Node> {
+    pub id: SurrealSimpleId<Self>,
+    #[serde(rename = "in")]
+    pub in_: In,
+    pub out: Out,
+    pub place: String,
+    pub created_at: chrono::DateTime<Utc>,
+}
+
+pub type AnimalEatsCrop = Eats<Animal, Crop>;
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "crop")]
+pub struct Crop {
+    pub id: SurrealSimpleId<Self>,
+    pub color: String,
+}
+
 // Migration files in migration directory
 // Current schema in codebase
 // Current schema in database
@@ -620,10 +777,10 @@ enum FieldChange {
     Rename { old_name: String, new_name: String },
 }
 
-pub fn extract_schema_from_models() -> TableInfo {
-    let x = Planet::schema();
-    TableInfo::default()
-}
+// pub fn extract_schema_from_models() -> TableInfo {
+//     let x = Planet::schema();
+//     TableInfo::default()
+// }
 
 // // Get all up migrations from migration directory
 //
