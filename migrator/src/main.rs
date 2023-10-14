@@ -1,4 +1,4 @@
-use m::{Database, Direction, Migration, Planet, Student};
+use m::{CodeBaseDbInfo, Database, DbInfo, Direction, Migration, Planet, Student};
 use migrator as m;
 use surreal_orm::{
     statements::{begin_transaction, info_for},
@@ -58,6 +58,15 @@ async fn main() {
     let table_info = db.get_table_info("planet".into()).await.unwrap();
 
     println!("table info: {:#?}", table_info.get_fields_definitions());
+
+    let db2 = m::Database::init().await;
+    db2.run_codebase_schema_queries().await.unwrap();
+    let db_info2 = db2.get_db_info().await.unwrap();
+    println!("db info2: {:#?}", db_info2);
+
+    let table_info2 = db2.get_table_info("eats".into()).await.unwrap();
+
+    println!("table info2: {:#?}", table_info2.get_fields_definitions());
     // let migs = m::Migration::get_all_from_migrations_dir();
     // println!("migs: {:#?}", migs);
 }
@@ -65,3 +74,30 @@ async fn main() {
 // UPDATE person SET firstName = none;
 // #
 // # REMOVE FIELD firstName ON TABLE person;
+//
+//
+// fn get_code_base_db_info() -> CodeBaseDbInfo {
+//     let fields = HashMap::new();
+//     tables.insert(
+//         "planet".to_string(),
+//         Planet::define_fields()
+//             .iter()
+//             .map(|f| f.to_raw().build())
+//             .collect::<Vec<_>>(),
+//     );
+//     tables.insert(
+//         "student".to_string(),
+//         Student::define_fields()
+//             .iter()
+//             .map(|f| f.to_raw().build())
+//             .collect::<Vec<_>>(),
+//     );
+//     let tables = HashMap::new();
+//     tables.insert("planet".to_string(), Planet::define_table());
+//     tables.insert("student".to_string(), Student::define_table());
+//
+//     let db_info = DbInfo {
+//         tables,
+//         ..Default::default()
+//     };
+// }
