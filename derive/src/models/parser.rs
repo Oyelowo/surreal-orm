@@ -278,6 +278,7 @@ pub struct SchemaFieldsProperties {
     /// ```
     pub record_link_fields_methods: Vec<TokenStream>,
     pub field_definitions: Vec<TokenStream>,
+    pub field_metadata: Vec<TokenStream>,
     pub node_edge_metadata: NodeEdgeMetadataStore,
     pub fields_relations_aliased: Vec<TokenStream>,
     pub non_null_updater_fields: Vec<TokenStream>,
@@ -360,6 +361,7 @@ impl SchemaFieldsProperties {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
             let field_name_original = field_receiver.ident.as_ref().unwrap();
+            let old_field_name = field_receiver.old_name.to_string();
             let relationship = RelationType::from(field_receiver);
             let NormalisedField {
                 ref field_ident_normalised,
@@ -842,6 +844,14 @@ impl SchemaFieldsProperties {
                 store
                     .field_definitions
                     .push(referenced_node_meta.field_definition);
+
+                store
+                    .field_metadata
+                    .push(quote::quote!(#crate_name::FieldMetadata {
+                        name: #field_ident_normalised_as_str.into(),
+                        old_name: #old_field_name.into(),
+                        definition: #referenced_node_meta.field_definition,
+                    }));
             }
 
             store
