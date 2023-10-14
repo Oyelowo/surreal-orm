@@ -4,7 +4,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
     self,
-    statements::{create, create_only, delete, info_for, select, select_value},
+    statements::{begin_transaction, create, create_only, delete, info_for, select, select_value},
     *,
 };
 use surrealdb::{
@@ -329,6 +329,24 @@ impl Database {
         Ok(migration_names)
     }
 
+    pub async fn run_migrations_in_local_dir(&self) -> MigrationResult<()> {
+        // Get all migrations from the migrations directory
+        let all_migrations = Migration::get_all_from_migrations_dir();
+        let queries = all_migrations
+            .into_iter()
+            .map(|m| m.up)
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Run them as a transaction against a local in-memory database
+        begin_transaction()
+            .query(Raw::new(queries))
+            .commit_transaction()
+            .run(self.db())
+            .await?;
+        Ok(())
+    }
+
     pub async fn mark_migration_as_applied(
         &self,
         migration_name: impl Into<MigrationName>,
@@ -383,10 +401,10 @@ impl MigrationMetadata {}
 pub struct Migration {
     pub id: SurrealId<Self, String>,
     pub name: String,
-    timestamp: String,
-    up: String,
+    pub timestamp: String,
+    pub up: String,
     #[surreal_orm(type_ = "option<string>")]
-    down: Option<String>,
+    pub down: Option<String>,
     // status: String,
 }
 
