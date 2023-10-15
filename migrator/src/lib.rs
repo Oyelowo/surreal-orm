@@ -3,7 +3,10 @@ use chrono::Utc;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    statements::{begin_transaction, create, create_only, delete, info_for, select, select_value},
+    statements::{
+        begin_transaction, create, create_only, delete, info_for, remove_table, select,
+        select_value,
+    },
     Edge, Node, *,
 };
 use surrealdb::{
@@ -50,7 +53,7 @@ use thiserror::Error;
 //
 
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fmt::Display,
     fs::{self, File},
     io::Write,
@@ -411,6 +414,7 @@ impl Database {
     }
 
     pub fn get_codebase_schema_queries(&self) -> String {
+        // Test data
         let animal_tables = Animal::define_table().to_raw().build();
         let animal_fields = Animal::define_fields()
             .iter()
@@ -435,8 +439,8 @@ impl Database {
             animal_fields,
             animal_eats_crop_tables,
             animal_eats_crop_fields,
-            crop_tables,
-            crop_fields,
+            // crop_tables,
+            // crop_fields,
         ]
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
@@ -502,6 +506,166 @@ impl Database {
         delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
             .run(self.db());
         println!("Migration unmarked: {}", migration_name);
+        Ok(())
+    }
+
+    pub async fn run_migrations() -> MigrationResult<()> {
+        let mut up_queries = vec![];
+        let mut down_queries: Vec<String> = vec![];
+        // let mut diff_queries_to_add = vec![];
+        //  DIFFING
+        //  LEFT
+        //
+        // Left = migration directory
+        // Right = codebase
+        //
+        // 1. Get all migrations from migration directory synced with db - Left
+        let left_db = Self::init().await;
+        let left = left_db.run_migrations_in_local_dir().await?;
+        let left_db_info = left_db.get_db_info().await.unwrap();
+        let left_tables = HashSet::<String>::from_iter(left_db_info.get_tables());
+        println!("left db info: {:#?}", left_db_info.get_tables());
+        // let left_table_info = db.get_table_info("planet".into()).await.unwrap();
+        //
+        // 2. Get all migrations from codebase synced with db - Right
+        let right_db = Self::init().await;
+        let right = right_db.run_codebase_schema_queries().await?;
+        let right_db_info = right_db.get_db_info().await.unwrap();
+        let right_tables = HashSet::from_iter(right_db_info.get_tables());
+        println!("right db info: {:#?}", right_db_info.get_tables());
+        // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
+        // 3. Diff them
+        //
+        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
+        // params, etc)
+        // a. If there a Table in left that is not in right, left - right =
+        // left.difference(right)
+        // let left_diff = left_tables.clone();
+        let left_diff = left_tables.difference(&right_tables).collect::<Vec<_>>();
+
+        //     (i) up => REMOVE TABLE table_name;
+        up_queries.extend(
+            left_diff
+                .iter()
+                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build()),
+        );
+        //
+        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
+        let left_diff_def = left_diff
+            .iter()
+            .map(|&t| {
+                left_db_info
+                    .get_table_def(t.to_string())
+                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.")
+                    .to_string()
+            })
+            .collect::<Vec<_>>();
+        down_queries.extend(left_diff_def);
+
+        //
+        // b. If there a Table in right that is not in left, right - left =
+        // right.difference(left)
+        let right_diff = right_tables.difference(&left_tables).collect::<Vec<_>>();
+
+        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
+        let right_diff_def = left_diff
+            .iter()
+            .map(|&t| {
+                left_db_info
+                    .get_table_def(t.to_string())
+                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string()
+            })
+            .collect::<Vec<_>>();
+
+        up_queries.extend(right_diff_def);
+
+        //    (ii) down => REMOVE TABLE table_name;
+        down_queries.extend(
+            right_diff
+                .iter()
+                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
+                .collect::<Vec<_>>(),
+        );
+        //
+        //
+        // c. If there a Table in left and in right, left.intersection(right)
+        let intersection = left_tables.intersection(&right_tables).collect::<Vec<_>>();
+        for table in intersection {
+            let right_table_def = right_db_info.get_table_def(table.to_string());
+            let left_table_def = left_db_info.get_table_def(table.to_string());
+            // compare the two table definitions
+            match (left_table_def, right_table_def) {
+                (Some(l), Some(r)) if l == r => {
+                    // do nothing
+                    println!("Table {} is the same in both left and right", table);
+                }
+                (Some(l), Some(r)) => {
+                    println!("Table {} is different in both left and right. Use codebase as master/super", table);
+                    // (i) up => Use Right table definitions(codebase definition)
+                    up_queries.push(r.to_string());
+                    // (ii) down => Use Left table definitions(migration directory definition)
+                    down_queries.push(l.to_string());
+                }
+                _ => {
+                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                }
+            }
+        }
+        Migration::create_migration_file(
+            up_queries.join(";\n"),
+            Some(down_queries.join(";\n")),
+            "test_migration".to_string(),
+        );
+        //    First check if left def is same as right def
+        //          if same:
+        //                  do nothing
+        //          else:
+        //          (i) up => Use Right table definitions(codebase definition)
+        //          (ii) down => Use Left table definitions(migration directory definition)
+        //
+        // For Fields
+        //  a. If there a Field in left that is not in right,
+        //          (i) up => REMOVE FIELD
+        //          (ii) down => ADD FIELD
+        //  b. If there a Field in right that is not in left,
+        //        (i) up => ADD FIELD
+        //        (ii) down => REMOVE FIELD
+        //  c. If there a Field in left and in right,
+        //      (i) up => Use Right field definitions
+        //      (ii) down => Use Left field definitions
+        //  d. If there is a field name change,
+        //    Get old and new names. Surrealdb does not support Alter statement
+        //    (i) up =>
+        //              DEFINE FIELD new_name on TABLE table_name;
+        //              UPDATE table_name SET new_name = old_name;
+        //              REMOVE old_name on TABLE table_name; or UPDATE table_name SET old_name = none;
+        //    (ii) down =>
+        //          DEFINE FIELD old_name on TABLE table_name;
+        //          UPDATE table_name SET old_name = new_name;
+        //          REMOVE new_name on TABLE table_name; or UPDATE table_name SET new_name = none;
+        //
+        //o
+        //
+        // 4. Aggregate all the new up and down queries
+        // 5. Run the queries as a transaction
+        // 6. Update the migration directory with the new migrations queries i.e m::create_migration_file(up, down, name);
+        // 7. Mark the queries as registered i.e mark_migration_as_applied
+
+        // Run the diff
+        // 5. Update the migration directory
+        //
+
+        // Old rough implementation
+        // let applied_migrations = db.get_applied_migrations_from_db();
+        // let all_migrations = Self::get_all_from_migrations_dir();
+        //
+        // let applied_migrations = applied_migrations.await?;
+        // for migration in all_migrations {
+        //     if !applied_migrations.contains(&migration.name) {
+        //         db.execute(migration.up);
+        //         db.mark_migration_as_applied(migration.name);
+        //     }
+        // }
         Ok(())
     }
 }
@@ -642,20 +806,6 @@ impl Migration {
         println!("Migration file created: {}", name);
     }
 
-    pub async fn run_migrations(db: &mut Database) -> MigrationResult<()> {
-        let applied_migrations = db.get_applied_migrations_from_db();
-        let all_migrations = Self::get_all_from_migrations_dir();
-
-        let applied_migrations = applied_migrations.await?;
-        for migration in all_migrations {
-            if !applied_migrations.contains(&migration.name) {
-                db.execute(migration.up);
-                db.mark_migration_as_applied(migration.name);
-            }
-        }
-        Ok(())
-    }
-
     pub fn rollback_migration(db: &mut Database, migration_name: MigrationName) {
         let migration = Self::get_migrations_by_name(migration_name.clone());
         if let Some(migration) = migration {
@@ -708,6 +858,10 @@ impl DbInfo {
     pub fn get_tables(&self) -> Vec<String> {
         self.tables.keys().cloned().collect()
     }
+
+    pub fn get_table_def(&self, table_name: String) -> Option<&String> {
+        self.tables.get(&table_name)
+    }
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
@@ -715,6 +869,7 @@ impl DbInfo {
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
+    // #[surreal_orm(planet_name = "firstName")]
     pub name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
