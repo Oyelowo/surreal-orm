@@ -7,6 +7,7 @@ use surreal_orm::{
 
 #[tokio::main]
 async fn main() {
+    m::Database::run_migrations().await;
     // let statement1 = Planet::default().create().to_raw().build();
     // let statement2 = Planet {
     //     name: "Earth".to_string(),

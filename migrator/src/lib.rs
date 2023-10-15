@@ -56,7 +56,7 @@ use std::{
     collections::{HashMap, HashSet},
     fmt::Display,
     fs::{self, File},
-    io::Write,
+    io::{stdin, Write},
     ops::Deref,
     path::Path,
 };
@@ -437,8 +437,8 @@ impl Database {
         let queries_joined = [
             animal_tables,
             animal_fields,
-            animal_eats_crop_tables,
-            animal_eats_crop_fields,
+            // animal_eats_crop_tables,
+            // animal_eats_crop_fields,
             // crop_tables,
             // crop_fields,
         ]
@@ -459,7 +459,7 @@ impl Database {
         Ok(())
     }
 
-    pub async fn run_migrations_in_local_dir(&self) -> MigrationResult<()> {
+    pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
         // Get all migrations from the migrations directory
         let all_migrations = Migration::get_all_from_migrations_dir();
         let queries = all_migrations
@@ -469,11 +469,13 @@ impl Database {
             .join("\n");
 
         // Run them as a transaction against a local in-memory database
-        begin_transaction()
-            .query(Raw::new(queries))
-            .commit_transaction()
-            .run(self.db())
-            .await?;
+        if !queries.is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(self.db())
+                .await?;
+        }
         Ok(())
     }
 
@@ -510,6 +512,7 @@ impl Database {
     }
 
     pub async fn run_migrations() -> MigrationResult<()> {
+        println!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries: Vec<String> = vec![];
         // let mut diff_queries_to_add = vec![];
@@ -521,7 +524,7 @@ impl Database {
         //
         // 1. Get all migrations from migration directory synced with db - Left
         let left_db = Self::init().await;
-        let left = left_db.run_migrations_in_local_dir().await?;
+        let left = left_db.run_local_dir_migrations().await.expect("flops");
         let left_db_info = left_db.get_db_info().await.unwrap();
         let left_tables = HashSet::<String>::from_iter(left_db_info.get_tables());
         println!("left db info: {:#?}", left_db_info.get_tables());
@@ -562,20 +565,22 @@ impl Database {
             .collect::<Vec<_>>();
         down_queries.extend(left_diff_def);
 
-        //
+        // RIGHT SIDE
         // b. If there a Table in right that is not in left, right - left =
         // right.difference(left)
         let right_diff = right_tables.difference(&left_tables).collect::<Vec<_>>();
 
         //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
-        let right_diff_def = left_diff
+        let right_diff_def = right_diff
             .iter()
             .map(|&t| {
-                left_db_info
+                right_db_info
                     .get_table_def(t.to_string())
                     .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string()
             })
             .collect::<Vec<_>>();
+
+        println!("Running migrations2 {right_diff_def:#?}");
 
         up_queries.extend(right_diff_def);
 
@@ -611,11 +616,30 @@ impl Database {
                 }
             }
         }
-        Migration::create_migration_file(
-            up_queries.join(";\n"),
-            Some(down_queries.join(";\n")),
-            "test_migration".to_string(),
-        );
+        // TODO: Create a warning to prompt user if they truly want to create empty migrations
+        let up_queries = up_queries.join(";\n");
+        let down_queries = down_queries.join(";\n");
+        if up_queries.is_empty() && down_queries.is_empty() {
+            println!("Are you sure you want to generate an empty migration? (y/n)");
+            std::io::stdout().flush().unwrap();
+
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+
+            if input.trim() == "y" {
+                Migration::create_migration_file(
+                    up_queries,
+                    Some(down_queries),
+                    "test_migration".to_string(),
+                );
+            }
+        } else {
+            Migration::create_migration_file(
+                up_queries,
+                Some(down_queries),
+                "test_migration".to_string(),
+            );
+        }
         //    First check if left def is same as right def
         //          if same:
         //                  do nothing
@@ -888,7 +912,7 @@ pub struct Student {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "animal")]
+#[surreal_orm(table_name = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
