@@ -265,31 +265,31 @@ impl ToTokens for NodeToken {
                 }
 
                 fn get_serializable_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #serializable_fields), *]
+                    return ::std::vec![#( #serializable_fields), *]
                 }
 
                 fn get_linked_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #linked_fields), *]
+                    return ::std::vec![#( #linked_fields), *]
                 }
 
                 fn get_link_one_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #link_one_fields), *]
+                    return ::std::vec![#( #link_one_fields), *]
                 }
 
                 fn get_link_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #link_self_fields), *]
+                    return ::std::vec![#( #link_self_fields), *]
                 }
 
                 fn get_link_one_and_self_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #link_one_and_self_fields), *]
+                    return ::std::vec![#( #link_one_and_self_fields), *]
                 }
 
                 fn get_link_many_fields() -> ::std::vec::Vec<#crate_name::Field> {
-                    return vec![#( #link_many_fields), *]
+                    return ::std::vec![#( #link_many_fields), *]
                 }
 
                 fn get_field_meta() -> ::std::vec::Vec<#crate_name::FieldMetadata> {
-                    return vec![#( #field_metadata), *]
+                    return ::std::vec![#( #field_metadata), *]
                 }
 
                 fn define_table() -> #crate_name::Raw {
@@ -297,7 +297,7 @@ impl ToTokens for NodeToken {
                 }
 
                 fn define_fields() -> ::std::vec::Vec<#crate_name::Raw> {
-                    vec![
+                    ::std::vec![
                        #( #field_definitions), *
                     ]
                 }

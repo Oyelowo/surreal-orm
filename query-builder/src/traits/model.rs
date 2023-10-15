@@ -21,11 +21,13 @@ use crate::{
 use serde::{de::DeserializeOwned, Serialize};
 use surrealdb::sql::{self, Thing};
 
+#[doc(hidden)]
 #[derive(Debug, Clone)]
 pub struct FieldMetadata {
     pub name: Field,
     pub old_name: Option<Field>,
-    pub definition: Raw,
+    // A single field can have multiple definitions. e.g item assetions and whatnot
+    pub definition: Vec<Raw>,
 }
 
 /// Model is a trait signifying superset of Node and Edge.

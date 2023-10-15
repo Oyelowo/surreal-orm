@@ -493,6 +493,10 @@ impl Model for TestUser {
     fn define_fields() -> Vec<crate::Raw> {
         unimplemented!()
     }
+
+    fn get_field_meta() -> Vec<crate::FieldMetadata> {
+        unimplemented!()
+    }
 }
 
 #[cfg(test)]
