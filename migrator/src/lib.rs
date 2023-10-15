@@ -439,8 +439,8 @@ impl Database {
             animal_fields,
             // animal_eats_crop_tables,
             // animal_eats_crop_fields,
-            // crop_tables,
-            // crop_fields,
+            crop_tables,
+            crop_fields,
         ]
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
@@ -617,8 +617,8 @@ impl Database {
             }
         }
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
-        let up_queries = up_queries.join(";\n");
-        let down_queries = down_queries.join(";\n");
+        let up_queries = format!("{};", up_queries.join(";\n").trim_end_matches(";"));
+        let down_queries = format!("{};", down_queries.join(";\n").trim_end_matches(";"));
         if up_queries.is_empty() && down_queries.is_empty() {
             println!("Are you sure you want to generate an empty migration? (y/n)");
             std::io::stdout().flush().unwrap();
@@ -936,7 +936,7 @@ pub type AnimalEatsCrop = Eats<Animal, Crop>;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "crop")]
+#[surreal_orm(table_name = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,
