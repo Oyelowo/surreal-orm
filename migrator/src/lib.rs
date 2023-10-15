@@ -4,8 +4,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
-        begin_transaction, create, create_only, delete, info_for, remove_table, select,
-        select_value,
+        begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
+        select, select_value,
     },
     Edge, Node, *,
 };
@@ -201,6 +201,10 @@ impl TableInfo {
 
     pub fn get_fields_names(&self) -> Vec<String> {
         self.fields.keys().cloned().collect()
+    }
+
+    pub fn get_field_definition(&self, field_name: String) -> Option<String> {
+        self.fields.get(&field_name).cloned()
     }
 
     pub fn get_fields_definitions(&self) -> Vec<String> {
@@ -600,7 +604,11 @@ impl Database {
             let left_table_def = left_db_info.get_table_def(table.to_string());
             // compare the two table definitions
             match (left_table_def, right_table_def) {
+                //    First check if left def is same as right def
                 (Some(l), Some(r)) if l == r => {
+                    //          if same:
+                    //                  do nothing
+                    //          else:
                     // do nothing
                     println!("Table {} is the same in both left and right", table);
                 }
@@ -617,9 +625,18 @@ impl Database {
             }
         }
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
-        let up_queries = format!("{};", up_queries.join(";\n").trim_end_matches(";"));
-        let down_queries = format!("{};", down_queries.join(";\n").trim_end_matches(";"));
-        if up_queries.is_empty() && down_queries.is_empty() {
+        let up_queries_str = if up_queries.is_empty() {
+            "".to_string()
+        } else {
+            format!("{};", up_queries.join(";\n").trim_end_matches(";"))
+        };
+
+        let down_queries_str = if down_queries.is_empty() {
+            "".to_string()
+        } else {
+            format!("{};", down_queries.join(";\n").trim_end_matches(";"))
+        };
+        if up_queries_str.is_empty() && down_queries_str.is_empty() {
             println!("Are you sure you want to generate an empty migration? (y/n)");
             std::io::stdout().flush().unwrap();
 
@@ -628,27 +645,127 @@ impl Database {
 
             if input.trim() == "y" {
                 Migration::create_migration_file(
-                    up_queries,
-                    Some(down_queries),
+                    up_queries_str,
+                    Some(down_queries_str),
                     "test_migration".to_string(),
                 );
             }
         } else {
             Migration::create_migration_file(
-                up_queries,
-                Some(down_queries),
+                up_queries_str,
+                Some(down_queries_str),
                 "test_migration".to_string(),
             );
         }
-        //    First check if left def is same as right def
-        //          if same:
-        //                  do nothing
-        //          else:
-        //          (i) up => Use Right table definitions(codebase definition)
-        //          (ii) down => Use Left table definitions(migration directory definition)
+
+        for t in left_tables {
+            println!("table: {}", t);
+            let left_table_info = left_db.get_table_info(t.to_string()).await.unwrap();
+            let left_fields_names =
+                HashSet::<String>::from_iter(left_table_info.get_fields_names());
+            let right_table_info = right_db.get_table_info(t.to_string()).await.unwrap();
+            let right_field_names =
+                HashSet::<String>::from_iter(right_table_info.get_fields_names());
+            // println!("left table info: {:#?}", lf.get_fields_definitions());
+            // println!("right table info: {:#?}", rf.get_fields_definitions());
+
+            let left_fields_diff = left_fields_names
+                .difference(&right_field_names)
+                .collect::<Vec<_>>();
+
+            //     (i) up => REMOVE FIELD field_name on TABLE table_name;
+            up_queries.extend(
+                left_fields_diff
+                    .iter()
+                    .map(|&f_name| {
+                        remove_field(f_name.to_string())
+                            .on_table(t.to_string())
+                            .to_raw()
+                            .build()
+                    })
+                    .collect::<Vec<_>>(),
+            );
+
+            //     (ii) down => ADD FIELD field_name on TABLE table_name;
+            let left_fields_diff_def = left_fields_diff
+                .iter()
+                .map(|&f_name| {
+                    left_table_info
+                        .get_field_definition(f_name.to_string())
+                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
+                        .to_string()
+                })
+                .collect::<Vec<_>>();
+
+            down_queries.extend(left_fields_diff_def);
+
+            // RIGHT SIDE
+            // b. If there a Table in right that is not in left, right - left =
+            // right.difference(left)
+            let right_fields_diff = right_field_names
+                .difference(&left_fields_names)
+                .collect::<Vec<_>>();
+
+            //    (i) up => ADD FIELD field_name on TABLE table_name;
+            let right_fields_diff_def = right_fields_diff
+                .iter()
+                .map(|&f_name| {
+                    right_table_info
+                        .get_field_definition(f_name.to_string())
+                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
+                        .to_string()
+                })
+                .collect::<Vec<_>>();
+
+            up_queries.extend(right_fields_diff_def);
+
+            //    (ii) down => REMOVE FIELD field_name on TABLE table_name;
+            down_queries.extend(
+                right_fields_diff
+                    .iter()
+                    .map(|&f_name| {
+                        remove_field(f_name.to_string())
+                            .on_table(t.to_string())
+                            .to_raw()
+                            .build()
+                    })
+                    .collect::<Vec<_>>(),
+            );
+
+            // c. If there a Field in left and in right, left.intersection(right)
+            let intersection = left_fields_names
+                .intersection(&right_field_names)
+                .collect::<Vec<_>>();
+
+            for field in intersection {
+                let right_field_def = right_table_info.get_field_definition(field.to_string());
+                let left_field_def = left_table_info.get_field_definition(field.to_string());
+                // compare the two field definitions
+                match (left_field_def, right_field_def) {
+                    //    First check if left def is same as right def
+                    (Some(l), Some(r)) if l == r => {
+                        //          if same:
+                        //                  do nothing
+                        //          else:
+                        // do nothing
+                        println!("Field {} is the same in both left and right", field);
+                    }
+                    (Some(l), Some(r)) => {
+                        println!("Field {} is different in both left and right. Use codebase as master/super", field);
+                        // (i) up => Use Right table definitions(codebase definition)
+                        up_queries.push(r.to_string());
+                        // (ii) down => Use Left table definitions(migration directory definition)
+                        down_queries.push(l.to_string());
+                    }
+                    _ => {
+                        panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                    }
+                }
+            }
+        }
         //
         // For Fields
-        //  a. If there a Field in left that is not in right,
+        //  a. If there is a Field in left that is not in right,
         //          (i) up => REMOVE FIELD
         //          (ii) down => ADD FIELD
         //  b. If there a Field in right that is not in left,
