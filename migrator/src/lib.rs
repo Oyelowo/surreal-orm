@@ -675,33 +675,6 @@ impl Database {
             format!("{};", up_queries.join(";\n").trim_end_matches(";"))
         };
 
-        let down_queries_str = if down_queries.is_empty() {
-            "".to_string()
-        } else {
-            format!("{};", down_queries.join(";\n").trim_end_matches(";"))
-        };
-        if up_queries_str.is_empty() && down_queries_str.is_empty() {
-            println!("Are you sure you want to generate an empty migration? (y/n)");
-            std::io::stdout().flush().unwrap();
-
-            let mut input = String::new();
-            std::io::stdin().read_line(&mut input).unwrap();
-
-            if input.trim() == "y" {
-                Migration::create_migration_file(
-                    up_queries_str,
-                    Some(down_queries_str),
-                    "test_migration".to_string(),
-                );
-            }
-        } else {
-            Migration::create_migration_file(
-                up_queries_str,
-                Some(down_queries_str),
-                "test_migration".to_string(),
-            );
-        }
-
         for t in left_tables {
             println!("table: {}", t);
             let left_table_info = left_db.get_table_info(t.to_string()).await.unwrap();
@@ -808,6 +781,7 @@ impl Database {
             }
         }
 
+        // TODO: Check if a field is a renamed field first before doing earlier field logic
         // Get renamed fields
         let renamed_fields_in_codebase = right_db.get_codebase_renamed_fields_meta();
         for (table, rnfs) in renamed_fields_in_codebase {
@@ -890,6 +864,32 @@ impl Database {
             }
         }
 
+        let down_queries_str = if down_queries.is_empty() {
+            "".to_string()
+        } else {
+            format!("{};", down_queries.join(";\n").trim_end_matches(";"))
+        };
+        if up_queries_str.is_empty() && down_queries_str.is_empty() {
+            println!("Are you sure you want to generate an empty migration? (y/n)");
+            std::io::stdout().flush().unwrap();
+
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+
+            if input.trim() == "y" {
+                Migration::create_migration_file(
+                    up_queries_str,
+                    Some(down_queries_str),
+                    "test_migration".to_string(),
+                );
+            }
+        } else {
+            Migration::create_migration_file(
+                up_queries_str,
+                Some(down_queries_str),
+                "test_migration".to_string(),
+            );
+        }
         //
         // For Fields
         //  a. If there is a Field in left that is not in right,
