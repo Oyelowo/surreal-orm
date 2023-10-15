@@ -417,7 +417,8 @@ impl Database {
         Ok(migration_names)
     }
 
-    pub fn get_codebase_renamed_fields_meta(&self) -> Vec<FieldMetadata> {
+    pub fn get_codebase_renamed_fields_meta(&self) -> HashMap<String, Vec<FieldMetadata>> {
+        let mut code_renamed_fields = HashMap::new();
         let animal_fields_renamed = Animal::get_field_meta()
             .into_iter()
             .filter(|f| {
@@ -428,6 +429,7 @@ impl Database {
                 x
             })
             .collect::<Vec<_>>();
+        code_renamed_fields.insert(Animal::table_name().to_string(), animal_fields_renamed);
 
         let animal_eats_crop_fields_renamed = AnimalEatsCrop::get_field_meta()
             .into_iter()
@@ -439,6 +441,10 @@ impl Database {
                 x
             })
             .collect::<Vec<_>>();
+        code_renamed_fields.insert(
+            AnimalEatsCrop::table_name().to_string(),
+            animal_eats_crop_fields_renamed,
+        );
 
         let crop_fields_renamed = Crop::get_field_meta()
             .into_iter()
@@ -450,14 +456,9 @@ impl Database {
                 x
             })
             .collect::<Vec<_>>();
+        code_renamed_fields.insert(Crop::table_name().to_string(), crop_fields_renamed);
 
-        let fields_renamed = [
-            animal_fields_renamed,
-            animal_eats_crop_fields_renamed,
-            crop_fields_renamed,
-        ]
-        .concat();
-        fields_renamed
+        code_renamed_fields
     }
 
     pub fn get_codebase_schema_queries(&self) -> String {
