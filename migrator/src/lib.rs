@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value,
+        select, select_value, update,
     },
     Edge, Node, *,
 };
@@ -807,6 +807,89 @@ impl Database {
                 }
             }
         }
+
+        // Get renamed fields
+        let renamed_fields_in_codebase = right_db.get_codebase_renamed_fields_meta();
+        for (table, rnfs) in renamed_fields_in_codebase {
+            for rnf in rnfs {
+                let old_name = rnf.old_name;
+                let new_name = rnf.name;
+
+                // Check old name in the migration files latest state
+                // If it exists, we copy to the new field if new field does not yet exist in
+                // migration files latest state, else, we remove it
+                let left_table_fields_info = left_db.get_table_info(table.clone()).await.unwrap();
+                let left_table_fields_kv = left_table_fields_info.get_fields();
+                let left_new_name_field_def = left_table_fields_kv.get(&new_name.to_string());
+
+                let right_new_name_field_def = right_db
+                    .get_table_info(table.clone())
+                    .await
+                    .unwrap()
+                    .get_field_definition(new_name.to_string());
+
+                match (&left_new_name_field_def, &right_new_name_field_def) {
+                    (Some(l), Some(r)) if l == &r => {}
+                    (Some(l), Some(r)) => {
+                        // (i) up => Use Right table definitions(codebase definition) when new name
+                        // exists in both migration files latest state and codebase
+                        up_queries.push(r.to_string());
+                    }
+                    _ => {}
+                };
+
+                // TODO: Maybe also check if old_name is being newly used as an actual field name,
+                // in which case, we might want to not remove/delete the field?
+                if let Some(old_field_name) = old_name {
+                    match left_table_fields_info.get_field_definition(old_field_name.to_string()) {
+                        Some(left_old_name_def) => {
+                            // only set new name if it does not exist in the migration files latest state
+                            if left_table_fields_kv.get(&new_name.to_string()).is_none() {
+                                let up_q = Raw::new(format!(
+                                    "UPDATE {table} SET {new_name} = {old_field_name}"
+                                ))
+                                .to_raw()
+                                .build();
+                                up_queries.push(up_q);
+
+                                // Up query => REMOVE old_field_name in latest migration dir state;
+                                up_queries.push(
+                                    remove_field(old_field_name.to_string())
+                                        .on_table(table.clone())
+                                        .to_raw()
+                                        .build(),
+                                );
+
+                                // Reverse => Reuse old field definition from latest migration dir
+                                // state. We want this defined before we can reset Old field when
+                                // reverting.
+                                down_queries.push(left_old_name_def);
+
+                                // Reverse => UPDATE table_name SET old_field_name = new_name;
+                                let dwn_q = Raw::new(format!(
+                                    "UPDATE {table} SET {old_field_name} = {new_name}"
+                                ))
+                                .to_raw()
+                                .build();
+                                down_queries.push(dwn_q);
+
+                                // TODO: Confirm if the new field should be removed on revert
+                                down_queries.push(
+                                    remove_field(new_name.to_string())
+                                        .on_table(table.clone())
+                                        .to_raw()
+                                        .build(),
+                                );
+                            }
+                        }
+                        _ => {
+                            println!("old field - {old_field_name} renaming already done");
+                        }
+                    };
+                };
+            }
+        }
+
         //
         // For Fields
         //  a. If there is a Field in left that is not in right,
