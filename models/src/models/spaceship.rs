@@ -17,6 +17,7 @@ use surrealdb::sql;
 #[surreal_orm(table_name = "space_ship")]
 pub struct SpaceShip {
     pub id: SurrealId<Self, String>,
+    #[surreal_orm(old_name = "firstName")]
     pub name: String,
     pub created: DateTime<Utc>,
 }

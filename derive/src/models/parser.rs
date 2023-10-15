@@ -361,7 +361,10 @@ impl SchemaFieldsProperties {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
             let field_name_original = field_receiver.ident.as_ref().unwrap();
-            let old_field_name = field_receiver.old_name.to_string();
+            let old_field_name = match field_receiver.old_name.as_ref() {
+                Some(old_name) if !old_name.is_empty() => quote!(Some(#old_name.into())),
+                _ => quote!(::std::option::Option::None),
+            };
             let relationship = RelationType::from(field_receiver);
             let NormalisedField {
                 ref field_ident_normalised,
@@ -843,14 +846,15 @@ impl SchemaFieldsProperties {
             if !referenced_node_meta.field_definition.is_empty() {
                 store
                     .field_definitions
-                    .push(referenced_node_meta.field_definition);
+                    .push(referenced_node_meta.field_definition.clone());
 
+                let field_definition = referenced_node_meta.field_definition.clone();
                 store
                     .field_metadata
-                    .push(quote::quote!(#crate_name::FieldMetadata {
+                    .push(quote!(#crate_name::FieldMetadata {
                         name: #field_ident_normalised_as_str.into(),
-                        old_name: #old_field_name.into(),
-                        definition: #referenced_node_meta.field_definition,
+                        old_name: #old_field_name,
+                        definition: ::std::vec![ #field_definition ]
                     }));
             }
 
