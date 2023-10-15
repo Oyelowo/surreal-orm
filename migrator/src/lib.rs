@@ -569,7 +569,7 @@ impl Database {
         //
         // Left = migration directory
         // Right = codebase
-        //
+        // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
         let left_db = Self::init().await;
         let left = left_db.run_local_dir_migrations().await.expect("flops");
@@ -668,13 +668,8 @@ impl Database {
                 }
             }
         }
-        // TODO: Create a warning to prompt user if they truly want to create empty migrations
-        let up_queries_str = if up_queries.is_empty() {
-            "".to_string()
-        } else {
-            format!("{};", up_queries.join(";\n").trim_end_matches(";"))
-        };
 
+        // ### FIELDS DEFS
         for t in left_tables {
             println!("table: {}", t);
             let left_table_info = left_db.get_table_info(t.to_string()).await.unwrap();
@@ -818,7 +813,10 @@ impl Database {
                     match left_table_fields_info.get_field_definition(old_field_name.to_string()) {
                         Some(left_old_name_def) => {
                             // only set new name if it does not exist in the migration files latest state
-                            if left_table_fields_kv.get(&new_name.to_string()).is_none() {
+                            if left_table_fields_info
+                                .get_field_definition(new_name.to_string())
+                                .is_none()
+                            {
                                 let up_q = Raw::new(format!(
                                     "UPDATE {table} SET {new_name} = {old_field_name}"
                                 ))
@@ -864,6 +862,12 @@ impl Database {
             }
         }
 
+        // TODO: Create a warning to prompt user if they truly want to create empty migrations
+        let up_queries_str = if up_queries.is_empty() {
+            "".to_string()
+        } else {
+            format!("{};", up_queries.join(";\n").trim_end_matches(";"))
+        };
         let down_queries_str = if down_queries.is_empty() {
             "".to_string()
         } else {
