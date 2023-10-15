@@ -417,6 +417,49 @@ impl Database {
         Ok(migration_names)
     }
 
+    pub fn get_codebase_renamed_fields_meta(&self) -> Vec<FieldMetadata> {
+        let animal_fields_renamed = Animal::get_field_meta()
+            .into_iter()
+            .filter(|f| {
+                let x = f
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty());
+                x
+            })
+            .collect::<Vec<_>>();
+
+        let animal_eats_crop_fields_renamed = AnimalEatsCrop::get_field_meta()
+            .into_iter()
+            .filter(|f| {
+                let x = f
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty());
+                x
+            })
+            .collect::<Vec<_>>();
+
+        let crop_fields_renamed = Crop::get_field_meta()
+            .into_iter()
+            .filter(|f| {
+                let x = f
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty());
+                x
+            })
+            .collect::<Vec<_>>();
+
+        let fields_renamed = [
+            animal_fields_renamed,
+            animal_eats_crop_fields_renamed,
+            crop_fields_renamed,
+        ]
+        .concat();
+        fields_renamed
+    }
+
     pub fn get_codebase_schema_queries(&self) -> String {
         // Test data
         let animal_tables = Animal::define_table().to_raw().build();
