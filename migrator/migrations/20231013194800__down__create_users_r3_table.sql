@@ -1,2 +1,0 @@
-CREATE planet CONTENT { created: '1970-01-01T00:00:00Z', id: planet:cp0c2xgljuz25fpvo9dh, name: '', population: 0, tags: [] };;
-CREATE planet CONTENT { created: '1970-01-01T00:00:00Z', id: planet:qosgilsaqc33aoh6ps9y, name: 'Earth', population: 7000000000, tags: ['rocky', 'habitable'] };
