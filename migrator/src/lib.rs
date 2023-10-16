@@ -388,8 +388,8 @@ impl CodeBaseMeta {
         let queries_joined = [
             animal_tables,
             animal_fields,
-            // animal_eats_crop_tables,
-            // animal_eats_crop_fields,
+            animal_eats_crop_tables,
+            animal_eats_crop_fields,
             crop_tables,
             crop_fields,
         ]
@@ -1325,7 +1325,7 @@ pub struct Animal {
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "eats")]
+#[surreal_orm(table_name = "eats", schemafull)]
 pub struct Eats<In: Node, Out: Node> {
     pub id: SurrealSimpleId<Self>,
     #[serde(rename = "in")]
