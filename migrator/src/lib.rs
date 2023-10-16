@@ -702,13 +702,18 @@ impl Migration {
         let regex_down = Regex::new(r"(\d+)__down__(\w+).sql").unwrap();
 
         // read migrations directory
-        let migrations = fs::read_dir("migrations/").unwrap();
+        // check if dir exists
+        let migrations = fs::read_dir("migrations/");
+        if migrations.is_err() {
+            return vec![];
+        }
+            
 
         let mut migrations_meta = vec![];
 
         // get all migration names
-        for migration in migrations {
-            let migration = migration.unwrap();
+        for migration in migrations.expect("Problem reading migrations directory") {
+            let migration = migration.expect("Problem reading migration");
             let path = migration.path();
             let parent_dir = path.parent().unwrap();
             let path = path.to_str().unwrap();
@@ -1165,6 +1170,7 @@ impl DbObject<Fields> for SingleTableComparisonFields {
             diff_right
                 .iter()
                 .map(|f_name| {
+                // TODO: Removal should be done only if table exists in migration dir
                     remove_field(f_name.to_string())
                         .on_table(self.right_table.clone())
                         .to_raw()
@@ -1179,6 +1185,7 @@ impl DbObject<Fields> for SingleTableComparisonFields {
             self.diff_left()
                 .iter()
                 .map(|f_name| {
+                // TODO: Removal should be done only if table exists in codebase
                     remove_field(f_name.to_string())
                         .on_table(self.right_table.clone())
                         .to_raw()
@@ -1312,8 +1319,8 @@ impl DbInfo {
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(planet_name = "firstName")]
-    pub name: String,
+    #[surreal_orm(old_name = "name")]
+    pub first_name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
