@@ -400,6 +400,51 @@ impl CodeBaseMeta {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct FullDbInfo {
+    all_resources: DbInfo,
+    fields_by_table: HashMap<TableName, TableInfo>,
+}
+
+impl FullDbInfo {
+    pub fn tables(&self) -> Tables {
+        self.all_resources.tables()
+    }
+
+    pub fn get_table_info(&self, table_name: String) -> Option<&TableInfo> {
+        self.fields_by_table.get(&table_name)
+    }
+
+    pub fn get_table_names(&self) -> Vec<String> {
+        self.fields_by_table.keys().cloned().collect::<Vec<_>>()
+    }
+
+    pub fn get_field_def(&self, table_name: String, field_name: String) -> Option<String> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.fields().get_one_definition(field_name).clone()).flatten().cloned()
+    }
+    
+    pub fn get_table_fields(&self, table_name: String) -> Option<Fields> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.fields().clone())
+    }
+    
+    pub fn get_table_field_names(&self, table_name: String) -> Vec<String> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.fields().clone()).unwrap_or_default().get_names()
+    }
+    
+    pub fn get_table_field_names_as_set(&self, table_name: String) -> HashSet<String> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.fields().clone()).unwrap_or_default().get_names_as_set()
+    }
+}
+
+
 pub struct Database {
     // connection details here
     db: Surreal<Db>,
@@ -433,6 +478,21 @@ impl Database {
             .await?
             .unwrap();
         Ok(info.into())
+    }
+
+    pub async fn get_all_resources(&self) -> MigrationResult<FullDbInfo> {
+        let top_level_resources = self.get_db_info().await?;
+        let mut fields_by_table = HashMap::new();
+        for table_name in top_level_resources.tables().get_names() {
+            let table_info = self.get_table_info(table_name.clone()).await?;
+            fields_by_table.insert(table_name, table_info);
+        }
+        let all_resources = FullDbInfo {
+            all_resources: top_level_resources,
+            fields_by_table,
+        };
+        Ok(all_resources)
+        
     }
 
     pub async fn execute(&self, query: String) {
@@ -549,17 +609,18 @@ impl Database {
         let tables = ComparisonTables {
             left: left_tables,
             right: right_tables.clone(),
+            left_db,
+            right_db,
         }.get_queries();
         up_queries.extend(tables.up);
         down_queries.extend(tables.down);
 
-
-
+        
         for table_name in right_tables.get_names() {
             let left_table_info = left_db.get_table_info(table_name.clone()).await.expect("could not get left db table info");
             let right_table_info = right_db.get_table_info(table_name.clone()).await.expect("could not get right  db table info");
             
-            let queries = SingleTableComparisonFields {
+            let queries = TableComparisonFields {
                 left: left_table_info.fields(),
                 right: right_table_info.fields(),
                 right_table: table_name.clone(),
@@ -916,6 +977,7 @@ define_object_info!(
     Analyzers, Functions, Params, Scopes, Tables, Tokens, Users, Fields, Events, Indexes
 );
 
+#[async_trait::async_trait]
 trait DbObject<T>
 where
     T: Informational,
@@ -1044,8 +1106,10 @@ struct Queries {
 struct ComparisonTables {
     // Migrations latest state tables
     left: Tables,
+    left_resources: FullDbInfo,
     // Codebase latest state tables
     right: Tables,
+    right_resources: FullDbInfo,
 }
 
 impl DbObject<Tables> for ComparisonTables {
@@ -1059,6 +1123,192 @@ impl DbObject<Tables> for ComparisonTables {
 
     fn get_removal_query(&self, name: String) -> String {
          remove_table(name.to_string()).to_raw().build()
+    }
+
+
+    fn get_queries(&self) -> Queries {
+        let mut up_queries = vec![];
+        let mut down_queries = vec![];
+        // 3. Diff them
+        //
+        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
+        // params, etc)
+        // a. If there a Table in left that is not in right, left - right =
+        // left.difference(right)
+        // let left_diff = left_tables.clone();
+
+        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
+        //     (i) up => REMOVE TABLE table_name;
+        //     We dont need to remove fields since removing a table removes all fields
+        up_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|t| self.get_removal_query(t.to_string()))
+                .collect::<Vec<_>>(),
+        );
+            //
+            // let queries = TableComparisonFields {
+            //     left: left_table_info.fields(),
+            //     right: right_table_info.fields(),
+            //     right_table: table_name.clone(),
+            // }.get_queries();
+            //
+            // up_queries.extend(queries.up);
+            // down_queries.extend(queries.down);
+
+        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
+        //            We also use migration directory definition for fields for down reverse migration
+        down_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|t| {
+                   let x = self.get_left()
+                    .get_one_definition(t.to_string())
+                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
+                    
+                    // let fields = TableComparisonFields {
+                    //     left: left_table_info.fields(),
+                    //     right: right_table_info.fields(),
+                    //     right_table: t.to_string(),
+                    // };
+                    // let q = fields.diff_left().iter().map(|f| fields.get_left().get_one_definition(f.to_string())
+                    //     .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
+                    //     .to_string()
+                    // ).collect::<Vec<_>>();
+
+                    let table_info = self.left_resources.get_table_info(t.to_string());
+                    let q = if let Some(table_info) = table_info {
+                        let fields = table_info.fields();
+                        fields.get_all_definitions()
+                    } else {
+                        println!("Table fields definitions {} not found in migrations state", t);
+                        vec![]
+                    };
+                    [x, q.join(";\n")].join("\n")
+                })
+                .collect::<Vec<_>>()
+        );
+
+        // DEAL WITH RIGHT SIDE. i.e CODEBASE
+        //    (i) up => DEFINE <OBJECT> table_name; (Use codebase definition)
+        //        Since this tables would only exist in the codebase now and not in migration
+        //        directory, we are using codebase field definitions for up migration
+        up_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|t_name| {
+                    let x = self.get_right()
+                    .get_one_definition(t_name.to_string())
+                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
+
+                    let table_info = self.right_resources.get_table_info(t_name.to_string());
+                    let q = if let Some(table_info) = table_info {
+                        let fields = table_info.fields();
+                        fields.get_all_definitions()
+                    } else {
+                        println!("Table fields definitions {} not found in codebase state", t_name);
+                        vec![]
+                    };
+                    [x, q.join(";\n")].join("\n")
+                })
+                .collect::<Vec<_>>()
+        );
+
+        //    (ii) down => REMOVE <OBJECT> table_name;
+        //         We dont need to remove fields since removing a table removes all fields
+        down_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|t_name| self.get_removal_query(t_name.to_string()))
+                .collect::<Vec<_>>(),
+        );
+
+        // HANDLE INTERSECTION
+        for table in self.diff_intersect() {
+            let right_objects =self.get_right();
+            let right_object_def = right_objects.get_one_definition(table.to_string());
+            let left_objects = self.get_left();
+            let left_object_def = left_objects.get_one_definition(table.to_string());
+            // compare the two object definitions
+            match (left_object_def, right_object_def) {
+                //    First check if left def is same as right def
+                (Some(l), Some(r)) if l == r => {
+                    //          if same:
+                    //                  do nothing
+                    //          else:
+                    // do nothing
+                    println!("Object {} is the same in both left and right", table);
+                }
+                (Some(l), Some(r)) => {
+                    println!("Object {} is different in both left and right. Use codebase as master/super", table);
+                    println!("Left: {}", l);
+                    println!("Right: {}", r);
+                    
+                    // (i) up => Use Right object definitions(codebase definition)
+                    up_queries.push(r.to_string());
+                    // (ii) down => Use Left object definitions(migration directory definition)
+                    down_queries.push(l.to_string());
+                }
+                _ => {
+                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                }
+            }
+
+            // we have to diff left and right fields and prefer right if they are not same
+            let left_table_info = self.left_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
+            let right_table_info = self.right_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
+            
+            let right_fields = self.right_resources.get_table_field_names(table.to_string());
+            // add right field definition if left and right are different or left does not yet have
+            // the field
+            for fname in right_fields {
+                let left_field_def = left_table_info.get_one_definition(fname.to_string());
+                // let left_field_def = self.left_resources.get_field_def(table.to_string(), fname.to_string());
+                let right_field_def = right_table_info.get_one_definition(fname.to_string());
+                match (left_field_def.cloned(), right_field_def.cloned()) {
+                    //    First check if left def is same as right def
+                    (Some(l), Some(r)) if l.trim() == r.trim() => {
+                        //          if same:
+                        //                  do nothing
+                        //          else:
+                        // do nothing
+                        println!("Field {} is the same in both left and right", fname);
+                    }
+                    (Some(l), Some(r)) => {
+                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
+                        println!("Left: {:?}", l);
+                        println!("Right: {}", r);
+                        
+                        // (i) up => Use Right object definitions(codebase definition)
+                        up_queries.push(r.to_string());
+                        // (ii) down => Use Left object definitions(migration directory definition)
+                        down_queries.push(l.to_string());
+                    }
+                    (None, Some(r)) => {
+                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
+                        println!("Right: {}", r);
+                        
+                        // (i) up => Use Right object definitions(codebase definition)
+                        up_queries.push(r.to_string());
+                        // (ii) down => Use Left object definitions(migration directory definition)
+                        down_queries.push(remove_field(fname).on_table(table.to_string()).to_raw().build());
+                    }
+                    _ => {
+                        panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                    }
+                }
+            }
+            
+
+            // let common_fields = left_table_info.get_names_as_set().intersection(&right_table_info.get_names_as_set()).collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>();
+            
+            
+        }
+        Queries {
+            up: up_queries,
+            down: down_queries,
+        }
+
     }
 }
 
@@ -1087,7 +1337,7 @@ trait Tabular {
     fn tabe_name(&self) -> String;
 }
 
-struct SingleTableComparisonFields {
+struct TableComparisonFields {
     // Migrations latest state tables
     left: Fields,
     // Codebase latest state tables
@@ -1101,7 +1351,7 @@ struct SingleTableComparisonFields {
 //     }
 // }
 
-impl DbObject<Fields> for SingleTableComparisonFields {
+impl DbObject<Fields> for TableComparisonFields {
     fn get_left(&self) -> Fields {
         self.left.clone()
     }
