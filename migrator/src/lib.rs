@@ -478,7 +478,7 @@ impl Database {
             .join("\n");
 
         // Run them as a transaction against a local in-memory database
-        if !queries.is_empty() {
+        if !queries.trim().is_empty() {
             begin_transaction()
                 .query(Raw::new(queries))
                 .commit_transaction()
@@ -1318,6 +1318,7 @@ impl DbInfo {
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet")]
 pub struct Planet {
+    // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
     #[surreal_orm(old_name = "name")]
     pub first_name: String,

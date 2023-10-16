@@ -159,17 +159,20 @@ impl BeginTransactionStatement {
     }
 }
 
+#[derive(Debug, Clone)]
 enum TranctionCompletionType {
     CommitTransaction,
     CancelTransaction,
 }
 
+#[derive(Debug, Clone)]
 pub struct TransactionData {
     transaction_completion_type: Option<TranctionCompletionType>,
     queries: Vec<String>,
     bindings: BindingsList,
 }
 
+#[derive(Debug, Clone)]
 pub struct TransactionCompletion {
     data: TransactionData,
 }
@@ -189,7 +192,7 @@ impl Buildable for TransactionCompletion {
         output.push_str("BEGIN TRANSACTION;\n");
 
         self.data.queries.iter().for_each(|q| {
-            output.push_str(&format!("\n{};\n", q.trim_end_matches(';')));
+            output.push_str(&format!("\n{};\n", q.trim().trim_end_matches(';')));
         });
 
         if let Some(completion_type) = &self.data.transaction_completion_type {
@@ -201,7 +204,8 @@ impl Buildable for TransactionCompletion {
                     sql::statements::CancelStatement.to_string()
                 }
             };
-            output.push_str(&format!("\n{};\n\t", com_type));
+
+            output.push_str(&format!("\n{com_type};\n\t"));
         }
 
         output
