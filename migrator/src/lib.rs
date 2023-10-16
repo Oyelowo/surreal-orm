@@ -307,65 +307,19 @@ impl Display for MigrationName {
     }
 }
 
-pub struct Database {
-    // connection details here
-    db: Surreal<Db>,
-}
+struct CodeBaseMeta;
+type TableName = String;
 
-// #[async_trait]
-impl Database {
-    pub async fn init() -> Self {
-        let db = Surreal::new::<Mem>(()).await.unwrap();
-        db.use_ns("test").use_db("test").await.unwrap();
-        Self { db }
+impl CodeBaseMeta {
+    pub fn has_old_name_attr(table_name: String, field_name: String) -> Option<&FieldMetadata> {
+        Self::get_codebase_renamed_fields_meta()
+            .get(&table_name)
+            .unwrap_or(&vec![])
+            .into_iter()
+            .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
     }
 
-    pub fn db(&self) -> Surreal<Db> {
-        self.db.clone()
-    }
-
-    pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
-        let info = info_for()
-            .database()
-            .get_data::<DbInfo>(self.db())
-            .await?
-            .unwrap();
-        Ok(info.into())
-    }
-
-    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableInfo> {
-        let info = info_for()
-            .table(table_name)
-            .get_data::<TableInfo>(self.db())
-            .await?
-            .unwrap();
-        Ok(info.into())
-    }
-
-    pub async fn execute(&self, query: String) {
-        println!("Executing query: {}", query);
-        self.db().query(query).await.unwrap();
-    }
-
-    pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
-        let migration::Schema { name, .. } = Migration::schema();
-        let migration = Migration::table_name();
-
-        // select [{ name: "Oyelowo" }]
-        // select value [ "Oyelowo" ]
-        // select_only. Just on object => { name: "Oyelowo" }
-        let migration_names = select_value(name)
-            .from(migration)
-            .return_many::<String>(self.db())
-            .await?;
-        // vec![
-        //     "20230912__up__add_name".into(),
-        //     "20230912__down__remove_name".into(),
-        // ]
-        Ok(migration_names)
-    }
-
-    pub fn get_codebase_renamed_fields_meta(&self) -> HashMap<String, Vec<FieldMetadata>> {
+    pub fn get_codebase_renamed_fields_meta() -> HashMap<TableName, Vec<FieldMetadata>> {
         let mut code_renamed_fields = HashMap::new();
         let animal_fields_renamed = Animal::get_field_meta()
             .into_iter()
@@ -442,6 +396,65 @@ impl Database {
         // let queries_joined = format!("{};\n{}", tables, fields);
 
         queries_joined
+    }
+}
+
+pub struct Database {
+    // connection details here
+    db: Surreal<Db>,
+}
+
+// #[async_trait]
+impl Database {
+    pub async fn init() -> Self {
+        let db = Surreal::new::<Mem>(()).await.unwrap();
+        db.use_ns("test").use_db("test").await.unwrap();
+        Self { db }
+    }
+
+    pub fn db(&self) -> Surreal<Db> {
+        self.db.clone()
+    }
+
+    pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
+        let info = info_for()
+            .database()
+            .get_data::<DbInfo>(self.db())
+            .await?
+            .unwrap();
+        Ok(info.into())
+    }
+
+    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableInfo> {
+        let info = info_for()
+            .table(table_name)
+            .get_data::<TableInfo>(self.db())
+            .await?
+            .unwrap();
+        Ok(info.into())
+    }
+
+    pub async fn execute(&self, query: String) {
+        println!("Executing query: {}", query);
+        self.db().query(query).await.unwrap();
+    }
+
+    pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
+        let migration::Schema { name, .. } = Migration::schema();
+        let migration = Migration::table_name();
+
+        // select [{ name: "Oyelowo" }]
+        // select value [ "Oyelowo" ]
+        // select_only. Just on object => { name: "Oyelowo" }
+        let migration_names = select_value(name)
+            .from(migration)
+            .return_many::<String>(self.db())
+            .await?;
+        // vec![
+        //     "20230912__up__add_name".into(),
+        //     "20230912__down__remove_name".into(),
+        // ]
+        Ok(migration_names)
     }
 
     pub async fn run_codebase_schema_queries(&self) -> MigrationResult<()> {
@@ -533,282 +546,7 @@ impl Database {
         let right_tables = right_db_info.tables().get_names_as_set();
         println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
-        // 3. Diff them
-        //
-        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
-        // params, etc)
-        // a. If there a Table in left that is not in right, left - right =
-        // left.difference(right)
-        // let left_diff = left_tables.clone();
         let left_diff = left_tables.difference(&right_tables).collect::<Vec<_>>();
-
-        //     (i) up => REMOVE TABLE table_name;
-        up_queries.extend(
-            left_diff
-                .iter()
-                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build()),
-        );
-        //
-        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
-        let left_diff_def = left_diff
-            .iter()
-            .map(|&t| {
-                left_db_info.tables().get_one_definition(
-                    t.to_string())
-                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.")
-                    .to_string()
-            })
-            .collect::<Vec<_>>();
-        down_queries.extend(left_diff_def);
-
-        // RIGHT SIDE
-        // b. If there a Table in right that is not in left, right - left =
-        // right.difference(left)
-        let right_diff = right_tables.difference(&left_tables).collect::<Vec<_>>();
-
-        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
-        let right_diff_def = right_diff
-            .iter()
-            .map(|&t| {
-                right_db_info
-                    .get_table_def(t.to_string())
-                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string()
-            })
-            .collect::<Vec<_>>();
-
-        println!("Running migrations2 {right_diff_def:#?}");
-
-        up_queries.extend(right_diff_def);
-
-        //    (ii) down => REMOVE TABLE table_name;
-        down_queries.extend(
-            right_diff
-                .iter()
-                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
-                .collect::<Vec<_>>(),
-        );
-        //
-        //
-        // c. If there a Table in left and in right, left.intersection(right)
-        let intersection = left_tables.intersection(&right_tables).collect::<Vec<_>>();
-        for table in intersection {
-            let right_table_def = right_db_info.get_table_def(table.to_string());
-            let left_table_def = left_db_info.get_table_def(table.to_string());
-            // compare the two table definitions
-            match (left_table_def, right_table_def) {
-                //    First check if left def is same as right def
-                (Some(l), Some(r)) if l == r => {
-                    //          if same:
-                    //                  do nothing
-                    //          else:
-                    // do nothing
-                    println!("Table {} is the same in both left and right", table);
-                }
-                (Some(l), Some(r)) => {
-                    println!("Table {} is different in both left and right. Use codebase as master/super", table);
-                    // (i) up => Use Right table definitions(codebase definition)
-                    up_queries.push(r.to_string());
-                    // (ii) down => Use Left table definitions(migration directory definition)
-                    down_queries.push(l.to_string());
-                }
-                _ => {
-                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
-                }
-            }
-        }
-
-        // ### FIELDS DEFS
-        for t in left_tables {
-            println!("table: {}", t);
-            let left_table_info = left_db.get_table_info(t.to_string()).await.unwrap();
-            let left_fields_names =
-                HashSet::<String>::from_iter(left_table_info.get_fields_names());
-            let right_table_info = right_db.get_table_info(t.to_string()).await.unwrap();
-            let right_field_names =
-                HashSet::<String>::from_iter(right_table_info.get_fields_names());
-            // println!("left table info: {:#?}", lf.get_fields_definitions());
-            // println!("right table info: {:#?}", rf.get_fields_definitions());
-
-            let left_fields_diff = left_fields_names
-                .difference(&right_field_names)
-                .collect::<Vec<_>>();
-
-            //     (i) up => REMOVE FIELD field_name on TABLE table_name;
-            up_queries.extend(
-                left_fields_diff
-                    .iter()
-                    .map(|&f_name| {
-                        remove_field(f_name.to_string())
-                            .on_table(t.to_string())
-                            .to_raw()
-                            .build()
-                    })
-                    .collect::<Vec<_>>(),
-            );
-
-            //     (ii) down => ADD FIELD field_name on TABLE table_name;
-            let left_fields_diff_def = left_fields_diff
-                .iter()
-                .map(|&f_name| {
-                    left_table_info
-                        .get_field_definition(f_name.to_string())
-                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
-                        .to_string()
-                })
-                .collect::<Vec<_>>();
-
-            down_queries.extend(left_fields_diff_def);
-
-            // RIGHT SIDE
-            // b. If there a Table in right that is not in left, right - left =
-            // right.difference(left)
-            let right_fields_diff = right_field_names
-                .difference(&left_fields_names)
-                .collect::<Vec<_>>();
-
-            //    (i) up => ADD FIELD field_name on TABLE table_name;
-            let right_fields_diff_def = right_fields_diff
-                .iter()
-                .map(|&f_name| {
-                    right_table_info
-                        .get_field_definition(f_name.to_string())
-                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
-                        .to_string()
-                })
-                .collect::<Vec<_>>();
-
-            up_queries.extend(right_fields_diff_def);
-
-            //    (ii) down => REMOVE FIELD field_name on TABLE table_name;
-            down_queries.extend(
-                right_fields_diff
-                    .iter()
-                    .map(|&f_name| {
-                        remove_field(f_name.to_string())
-                            .on_table(t.to_string())
-                            .to_raw()
-                            .build()
-                    })
-                    .collect::<Vec<_>>(),
-            );
-
-            // c. If there a Field in left and in right, left.intersection(right)
-            let intersection = left_fields_names
-                .intersection(&right_field_names)
-                .collect::<Vec<_>>();
-
-            for field in intersection {
-                let right_field_def = right_table_info.get_field_definition(field.to_string());
-                let left_field_def = left_table_info.get_field_definition(field.to_string());
-                // compare the two field definitions
-                match (left_field_def, right_field_def) {
-                    //    First check if left def is same as right def
-                    (Some(l), Some(r)) if l == r => {
-                        //          if same:
-                        //                  do nothing
-                        //          else:
-                        // do nothing
-                        println!("Field {} is the same in both left and right", field);
-                    }
-                    (Some(l), Some(r)) => {
-                        println!("Field {} is different in both left and right. Use codebase as master/super", field);
-                        // (i) up => Use Right table definitions(codebase definition)
-                        up_queries.push(r.to_string());
-                        // (ii) down => Use Left table definitions(migration directory definition)
-                        down_queries.push(l.to_string());
-                    }
-                    _ => {
-                        panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
-                    }
-                }
-            }
-        }
-
-        // TODO: Check if a field is a renamed field first before doing earlier field logic
-        // Get renamed fields
-        let renamed_fields_in_codebase = right_db.get_codebase_renamed_fields_meta();
-        for (table, rnfs) in renamed_fields_in_codebase {
-            for rnf in rnfs {
-                let old_name = rnf.old_name;
-                let new_name = rnf.name;
-
-                // Check old name in the migration files latest state
-                // If it exists, we copy to the new field if new field does not yet exist in
-                // migration files latest state, else, we remove it
-                let left_table_fields_info = left_db.get_table_info(table.clone()).await.unwrap();
-                let left_table_fields_kv = left_table_fields_info.get_fields();
-                let left_new_name_field_def = left_table_fields_kv.get(&new_name.to_string());
-
-                let right_new_name_field_def = right_db
-                    .get_table_info(table.clone())
-                    .await
-                    .unwrap()
-                    .get_field_definition(new_name.to_string());
-
-                match (&left_new_name_field_def, &right_new_name_field_def) {
-                    (Some(l), Some(r)) if l == &r => {}
-                    (Some(l), Some(r)) => {
-                        // (i) up => Use Right table definitions(codebase definition) when new name
-                        // exists in both migration files latest state and codebase
-                        up_queries.push(r.to_string());
-                    }
-                    _ => {}
-                };
-
-                // TODO: Maybe also check if old_name is being newly used as an actual field name,
-                // in which case, we might want to not remove/delete the field?
-                if let Some(old_field_name) = old_name {
-                    match left_table_fields_info.get_field_definition(old_field_name.to_string()) {
-                        Some(left_old_name_def) => {
-                            // only set new name if it does not exist in the migration files latest state
-                            if left_table_fields_info
-                                .get_field_definition(new_name.to_string())
-                                .is_none()
-                            {
-                                let up_q = Raw::new(format!(
-                                    "UPDATE {table} SET {new_name} = {old_field_name}"
-                                ))
-                                .to_raw()
-                                .build();
-                                up_queries.push(up_q);
-
-                                // Up query => REMOVE old_field_name in latest migration dir state;
-                                up_queries.push(
-                                    remove_field(old_field_name.to_string())
-                                        .on_table(table.clone())
-                                        .to_raw()
-                                        .build(),
-                                );
-
-                                // Reverse => Reuse old field definition from latest migration dir
-                                // state. We want this defined before we can reset Old field when
-                                // reverting.
-                                down_queries.push(left_old_name_def);
-
-                                // Reverse => UPDATE table_name SET old_field_name = new_name;
-                                let dwn_q = Raw::new(format!(
-                                    "UPDATE {table} SET {old_field_name} = {new_name}"
-                                ))
-                                .to_raw()
-                                .build();
-                                down_queries.push(dwn_q);
-
-                                // TODO: Confirm if the new field should be removed on revert
-                                down_queries.push(
-                                    remove_field(new_name.to_string())
-                                        .on_table(table.clone())
-                                        .to_raw()
-                                        .build(),
-                                );
-                            }
-                        }
-                        _ => {
-                            println!("old field - {old_field_name} renaming already done");
-                        }
-                    };
-                };
-            }
-        }
 
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = if up_queries.is_empty() {
@@ -1219,6 +957,13 @@ impl DbObject<Tables> for ComparisonTables {
     fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
         let mut down_queries = vec![];
+        // 3. Diff them
+        //
+        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
+        // params, etc)
+        // a. If there a Table in left that is not in right, left - right =
+        // left.difference(right)
+        // let left_diff = left_tables.clone();
 
         // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
         //     (i) up => REMOVE TABLE table_name;
@@ -1341,9 +1086,37 @@ impl DbObject<Fields> for ComparisonFields {
                 .collect::<Vec<_>>(),
         );
 
+        let diff_right = self.diff_right();
+        let create = |direction: Direction| {
+            diff_right
+                .iter()
+                .filter_map(|r_field| {
+                    CodeBaseMeta::has_old_name_attr(
+                        self.right_table.to_string(),
+                        r_field.to_string(),
+                    )
+                })
+                .map(|field_meta| {
+                    let table = self.right_table.to_string();
+                    let new_name = field_meta.name;
+                    let old_field_name =  field_meta.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
+
+                    let (left, right) = match direction {
+                        Direction::Up => (new_name, old_field_name),
+                        Direction::Down => (old_field_name, new_name),
+                    };
+                    
+                    Raw::new(format!("UPDATE {table} SET {left} = {right}"))
+                        .to_raw()
+                        .build()
+                })
+                .collect::<Vec<_>>()
+        };
+        up_queries.extend(create(Direction::Up) );
+        
         //    (ii) down => REMOVE FIELD field_name on TABLE table_name;
         down_queries.extend(
-            self.diff_right()
+            diff_right
                 .iter()
                 .map(|&f_name| {
                     remove_field(f_name.to_string())
@@ -1380,6 +1153,7 @@ impl DbObject<Fields> for ComparisonFields {
                 })
                 .collect::<Vec<_>>(),
         );
+        down_queries.extend(create(Direction::Down) );
 
         // if field has attribute - old_name
         // old_name => left = true, right = false
