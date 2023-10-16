@@ -230,11 +230,11 @@ pub struct TableInfo {
 
 impl TableInfo {
     pub fn events(&self) -> Events {
-        self.events
+        self.events.clone()
     }
 
     pub fn indexes(&self) -> Indexes {
-        self.indexes
+        self.indexes.clone()
     }
 
     // This is usually empty in when getting the info from a table.
@@ -245,7 +245,7 @@ impl TableInfo {
     // }
 
     pub fn fields(&self) -> Fields {
-        self.fields
+        self.fields.clone()
     }
 }
 
@@ -311,10 +311,11 @@ struct CodeBaseMeta;
 type TableName = String;
 
 impl CodeBaseMeta {
-    pub fn has_old_name_attr(table_name: String, field_name: String) -> Option<&FieldMetadata> {
+    pub fn has_old_name_attr(table_name: String, field_name: String) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
+            .clone()
             .into_iter()
             .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
     }
@@ -363,7 +364,7 @@ impl CodeBaseMeta {
         code_renamed_fields
     }
 
-    pub fn get_codebase_schema_queries(&self) -> String {
+    pub fn get_codebase_schema_queries() -> String {
         // Test data
         let animal_tables = Animal::define_table().to_raw().build();
         let animal_fields = Animal::define_fields()
@@ -458,7 +459,7 @@ impl Database {
     }
 
     pub async fn run_codebase_schema_queries(&self) -> MigrationResult<()> {
-        let queries = self.get_codebase_schema_queries();
+        let queries = CodeBaseMeta::get_codebase_schema_queries();
         begin_transaction()
             .query(Raw::new(queries))
             .commit_transaction()
@@ -535,7 +536,7 @@ impl Database {
         let left_db = Self::init().await;
         let left = left_db.run_local_dir_migrations().await.expect("flops");
         let left_db_info = left_db.get_db_info().await.unwrap();
-        let left_tables = left_db_info.tables().get_names_as_set();
+        let left_tables = left_db_info.tables();
         println!("left db info: {:#?}", left_db_info.tables());
         // let left_table_info = db.get_table_info("planet".into()).await.unwrap();
         //
@@ -543,10 +544,33 @@ impl Database {
         let right_db = Self::init().await;
         let right = right_db.run_codebase_schema_queries().await?;
         let right_db_info = right_db.get_db_info().await.unwrap();
-        let right_tables = right_db_info.tables().get_names_as_set();
+        let right_tables = right_db_info.tables();
         println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
-        let left_diff = left_tables.difference(&right_tables).collect::<Vec<_>>();
+        let tables = ComparisonTables {
+            left: left_tables,
+            right: right_tables.clone(),
+        }.get_queries();
+        up_queries.extend(tables.up);
+        down_queries.extend(tables.down);
+
+
+
+        for table_name in right_tables.get_names() {
+            let left_table_info = left_db.get_table_info(table_name.clone()).await.expect("could not get left db table info");
+            let right_table_info = right_db.get_table_info(table_name.clone()).await.expect("could not get right  db table info");
+            
+            let queries = SingleTableComparisonFields {
+                left: left_table_info.fields(),
+                right: right_table_info.fields(),
+                right_table: table_name.clone(),
+            }.get_queries();
+            
+            up_queries.extend(queries.up);
+            down_queries.extend(queries.down);
+        }
+
+
 
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = if up_queries.is_empty() {
@@ -859,7 +883,7 @@ macro_rules! define_object_info {
             impl Informational for $ident {
                 // skills[*] is a valid field name in this context
                 fn get_names(&self) -> Vec<String> {
-                    self.0.keys().cloned().collect()
+                    self.0.0.keys().cloned().collect()
                 }
 
                 fn get_names_as_set(&self) -> HashSet<String> {
@@ -867,7 +891,7 @@ macro_rules! define_object_info {
                 }
 
                 fn get_all_definitions(&self) -> Vec<String> {
-                    self.0.values().cloned().collect()
+                    self.0.0.values().cloned().collect()
                 }
 
                 // Althought, I dont think u should do this, it is absolutely possible:
@@ -875,7 +899,7 @@ macro_rules! define_object_info {
                 // Above can be achieved just doing array<string> on the top level field - skills
                 // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
                 fn get_one_definition(&self, name: String) -> Option<&String> {
-                    self.0.get(&name)
+                    self.0.0.get(&name)
                 }
             }
 
@@ -896,17 +920,17 @@ where
     fn get_left(&self) -> T;
     fn get_right(&self) -> T;
 
-    fn diff_left(&self) -> Vec<&String> {
+    fn diff_left(&self) -> Vec<String> {
         self.get_left()
             .get_names_as_set()
             .difference(&self.get_right().get_names_as_set())
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
     }
-    fn diff_right(&self) -> Vec<&String> {
+    fn diff_right(&self) -> Vec<String> {
         self.get_right()
             .get_names_as_set()
             .difference(&self.get_left().get_names_as_set())
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>() .into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
     }
 
     fn diff_intersect(&self) -> Vec<String> {
@@ -938,11 +962,11 @@ struct ComparisonTables {
 
 impl DbObject<Tables> for ComparisonTables {
     fn get_left(&self) -> Tables {
-        self.left
+        self.left.clone()
     }
 
     fn get_right(&self) -> Tables {
-        self.right
+        self.right.clone()
     }
 
     fn get_removal_query(&self, name: &str) -> String {
@@ -970,7 +994,7 @@ impl DbObject<Tables> for ComparisonTables {
         up_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
+                .map(|t_name| remove_table(t_name.to_string()).to_raw().build())
                 .collect::<Vec<_>>(),
         );
 
@@ -978,7 +1002,9 @@ impl DbObject<Tables> for ComparisonTables {
         down_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|&t| self.get_left().get_one_definition(t.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .map(|t| self.get_left()
+                    .get_one_definition(t.to_string())
+                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
 
@@ -987,7 +1013,9 @@ impl DbObject<Tables> for ComparisonTables {
         up_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|&t_name| self.get_right().get_one_definition(t_name.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .map(|t_name| self.get_right()
+                    .get_one_definition(t_name.to_string())
+                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
 
@@ -995,14 +1023,16 @@ impl DbObject<Tables> for ComparisonTables {
         down_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
+                .map(|t_name| remove_table(t_name.to_string()).to_raw().build())
                 .collect::<Vec<_>>(),
         );
 
         // HANDLE INTERSECTION
         for table in self.diff_intersect() {
-            let right_table_def = self.get_right().get_one_definition(table.to_string());
-            let left_table_def = self.get_left().get_one_definition(table.to_string());
+            let right_tables =self.get_right();
+            let right_table_def = right_tables.get_one_definition(table.to_string());
+            let left_tables = self.get_left();
+            let left_table_def = left_tables.get_one_definition(table.to_string());
             // compare the two table definitions
             match (left_table_def, right_table_def) {
                 //    First check if left def is same as right def
@@ -1036,7 +1066,7 @@ trait Tabular {
     fn tabe_name(&self) -> String;
 }
 
-struct ComparisonFields {
+struct SingleTableComparisonFields {
     // Migrations latest state tables
     left: Fields,
     // Codebase latest state tables
@@ -1050,13 +1080,13 @@ struct ComparisonFields {
 //     }
 // }
 
-impl DbObject<Fields> for ComparisonFields {
+impl DbObject<Fields> for SingleTableComparisonFields {
     fn get_left(&self) -> Fields {
-        self.left
+        self.left.clone()
     }
 
     fn get_right(&self) -> Fields {
-        self.right
+        self.right.clone()
     }
 
     fn get_removal_query(&self, name: &str) -> String {
@@ -1077,7 +1107,7 @@ impl DbObject<Fields> for ComparisonFields {
         up_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|&f_name| {
+                .map(|f_name| {
                     self.get_right()
                         .get_one_definition(f_name.to_string())
                         .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
@@ -1118,9 +1148,9 @@ impl DbObject<Fields> for ComparisonFields {
         down_queries.extend(
             diff_right
                 .iter()
-                .map(|&f_name| {
+                .map(|f_name| {
                     remove_field(f_name.to_string())
-                        .on_table(self.right_table)
+                        .on_table(self.right_table.clone())
                         .to_raw()
                         .build()
                 })
@@ -1132,9 +1162,9 @@ impl DbObject<Fields> for ComparisonFields {
         up_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|&f_name| {
+                .map(|f_name| {
                     remove_field(f_name.to_string())
-                        .on_table(self.right_table)
+                        .on_table(self.right_table.clone())
                         .to_raw()
                         .build()
                 })
@@ -1145,7 +1175,7 @@ impl DbObject<Fields> for ComparisonFields {
         down_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|&f_name| {
+                .map(|f_name| {
                     self.get_left()
                         .get_one_definition(f_name.to_string())
                         .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
@@ -1175,8 +1205,10 @@ impl DbObject<Fields> for ComparisonFields {
         // down => remove(new_name)
 
         for field in self.diff_intersect() {
-            let right_field_def = self.get_right().get_one_definition(field.to_string());
-            let left_field_def = self.get_left().get_one_definition(field.to_string());
+            let right_tables = self.get_right();
+            let left_tables = self.get_left();
+            let right_field_def = right_tables.get_one_definition(field.to_string());
+            let left_field_def = left_tables.get_one_definition(field.to_string());
 
             // compare the two field definitions
             match (left_field_def, right_field_def) {
@@ -1201,9 +1233,22 @@ impl DbObject<Fields> for ComparisonFields {
             }
         }
 
-        todo!()
+        Queries {
+            up: up_queries,
+            down: down_queries,
+        }
     }
 }
+
+// struct AllTableComparisonFields {
+//     // Migrations latest state tables
+//     left: Fields,
+//     // Codebase latest state tables
+//     right: Fields,
+//     right_table: String,
+// }
+
+
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct DbInfo {
@@ -1218,31 +1263,31 @@ pub struct DbInfo {
 
 impl DbInfo {
     pub fn analyzers(&self) -> Analyzers {
-        self.analyzers
+        self.analyzers.clone()
     }
 
     pub fn functions(&self) -> Functions {
-        self.functions
+        self.functions.clone()
     }
 
     pub fn params(&self) -> Params {
-        self.params
+        self.params.clone()
     }
 
     pub fn scopes(&self) -> Scopes {
-        self.scopes
+        self.scopes.clone()
     }
 
     pub fn tables(&self) -> Tables {
-        self.tables
+        self.tables.clone()
     }
 
     pub fn tokens(&self) -> Tokens {
-        self.tokens
+        self.tokens.clone()
     }
 
     pub fn users(&self) -> Users {
-        self.users
+        self.users.clone()
     }
 }
 

@@ -1,4 +1,4 @@
-use m::{CodeBaseDbInfo, Database, DbInfo, Direction, Migration, Planet, Student};
+use m::{Database, DbInfo, Direction, Migration, Planet, Student};
 use migrator as m;
 use surreal_orm::{
     statements::{begin_transaction, info_for},
