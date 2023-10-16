@@ -941,11 +941,91 @@ where
             .collect::<Vec<_>>()
     }
 
-    fn get_removal_query(&self, name: &str) -> String;
+    fn get_removal_query(&self, name: String) -> String;
 
-    fn get_addition_query(&self, name: &str) -> String;
-    //
-    fn get_queries(&self) -> Queries;
+    fn get_queries(&self) -> Queries {
+        let mut up_queries = vec![];
+        let mut down_queries = vec![];
+        // 3. Diff them
+        //
+        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
+        // params, etc)
+        // a. If there a Table in left that is not in right, left - right =
+        // left.difference(right)
+        // let left_diff = left_tables.clone();
+
+        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
+        //     (i) up => REMOVE TABLE table_name;
+        up_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|n| self.get_removal_query(n.to_string()))
+                .collect::<Vec<_>>(),
+        );
+
+        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
+        down_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|t| self.get_left()
+                    .get_one_definition(t.to_string())
+                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .collect::<Vec<_>>(),
+        );
+
+        // DEAL WITH RIGHT SIDE. i.e CODEBASE
+        //    (i) up => DEFINE <OBJECT> table_name; (Use codebase definition)
+        up_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|t_name| self.get_right()
+                    .get_one_definition(t_name.to_string())
+                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .collect::<Vec<_>>(),
+        );
+
+        //    (ii) down => REMOVE <OBJECT> table_name;
+        down_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|t_name| self.get_removal_query(t_name.to_string()))
+                .collect::<Vec<_>>(),
+        );
+
+        // HANDLE INTERSECTION
+        for object in self.diff_intersect() {
+            let right_objects =self.get_right();
+            let right_object_def = right_objects.get_one_definition(object.to_string());
+            let left_objects = self.get_left();
+            let left_object_def = left_objects.get_one_definition(object.to_string());
+            // compare the two object definitions
+            match (left_object_def, right_object_def) {
+                //    First check if left def is same as right def
+                (Some(l), Some(r)) if l == r => {
+                    //          if same:
+                    //                  do nothing
+                    //          else:
+                    // do nothing
+                    println!("Object {} is the same in both left and right", object);
+                }
+                (Some(l), Some(r)) => {
+                    println!("Object {} is different in both left and right. Use codebase as master/super", object);
+                    // (i) up => Use Right object definitions(codebase definition)
+                    up_queries.push(r.to_string());
+                    // (ii) down => Use Left object definitions(migration directory definition)
+                    down_queries.push(l.to_string());
+                }
+                _ => {
+                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                }
+            }
+        }
+        Queries {
+            up: up_queries,
+            down: down_queries,
+        }
+
+    }
 }
 
 struct Queries {
@@ -969,96 +1049,29 @@ impl DbObject<Tables> for ComparisonTables {
         self.right.clone()
     }
 
-    fn get_removal_query(&self, name: &str) -> String {
-        // remove_table(name.to_string()).to_raw().build()
-        todo!()
+    fn get_removal_query(&self, name: String) -> String {
+         remove_table(name.to_string()).to_raw().build()
+    }
+}
+
+struct ComparisonEvents {
+    // Migrations latest state events
+    left: Events,
+    // Codebase latest state events
+    right: Events,
+}
+
+impl DbObject<Events> for ComparisonEvents {
+    fn get_left(&self) -> Events {
+        self.left.clone()
     }
 
-    fn get_addition_query(&self, name: &str) -> String {
-        todo!()
+    fn get_right(&self) -> Events {
+        self.right.clone()
     }
 
-    fn get_queries(&self) -> Queries {
-        let mut up_queries = vec![];
-        let mut down_queries = vec![];
-        // 3. Diff them
-        //
-        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
-        // params, etc)
-        // a. If there a Table in left that is not in right, left - right =
-        // left.difference(right)
-        // let left_diff = left_tables.clone();
-
-        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
-        //     (i) up => REMOVE TABLE table_name;
-        up_queries.extend(
-            self.diff_left()
-                .iter()
-                .map(|t_name| remove_table(t_name.to_string()).to_raw().build())
-                .collect::<Vec<_>>(),
-        );
-
-        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
-        down_queries.extend(
-            self.diff_left()
-                .iter()
-                .map(|t| self.get_left()
-                    .get_one_definition(t.to_string())
-                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
-                .collect::<Vec<_>>(),
-        );
-
-        // DEAL WITH RIGHT SIDE. i.e CODEBASE
-        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
-        up_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|t_name| self.get_right()
-                    .get_one_definition(t_name.to_string())
-                    .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
-                .collect::<Vec<_>>(),
-        );
-
-        //    (ii) down => REMOVE TABLE table_name;
-        down_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|t_name| remove_table(t_name.to_string()).to_raw().build())
-                .collect::<Vec<_>>(),
-        );
-
-        // HANDLE INTERSECTION
-        for table in self.diff_intersect() {
-            let right_tables =self.get_right();
-            let right_table_def = right_tables.get_one_definition(table.to_string());
-            let left_tables = self.get_left();
-            let left_table_def = left_tables.get_one_definition(table.to_string());
-            // compare the two table definitions
-            match (left_table_def, right_table_def) {
-                //    First check if left def is same as right def
-                (Some(l), Some(r)) if l == r => {
-                    //          if same:
-                    //                  do nothing
-                    //          else:
-                    // do nothing
-                    println!("Table {} is the same in both left and right", table);
-                }
-                (Some(l), Some(r)) => {
-                    println!("Table {} is different in both left and right. Use codebase as master/super", table);
-                    // (i) up => Use Right table definitions(codebase definition)
-                    up_queries.push(r.to_string());
-                    // (ii) down => Use Left table definitions(migration directory definition)
-                    down_queries.push(l.to_string());
-                }
-                _ => {
-                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
-                }
-            }
-        }
-        Queries {
-            up: up_queries,
-            down: down_queries,
-        }
+    fn get_removal_query(&self, name: String) -> String {
+         remove_table(name.to_string()).to_raw().build()
     }
 }
 
@@ -1089,13 +1102,13 @@ impl DbObject<Fields> for SingleTableComparisonFields {
         self.right.clone()
     }
 
-    fn get_removal_query(&self, name: &str) -> String {
-        todo!()
+    fn get_removal_query(&self, name: String) -> String {
+                    remove_field(name.to_string())
+                        .on_table(self.right_table.clone())
+                        .to_raw()
+                        .build()
     }
 
-    fn get_addition_query(&self, name: &str) -> String {
-        todo!()
-    }
 
     fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
