@@ -1183,8 +1183,6 @@ where
 
     fn get_addition_query(&self, name: &str) -> String;
     //
-    fn get_up_diff_queries(&self) -> Vec<String>;
-    fn get_down_diff_queries(&self) -> Vec<String>;
     fn get_queries(&self) -> Queries;
 }
 
@@ -1210,15 +1208,19 @@ impl DbObject<Tables> for ComparisonTables {
     }
 
     fn get_removal_query(&self, name: &str) -> String {
-        remove_table(name.to_string()).to_raw().build()
+        // remove_table(name.to_string()).to_raw().build()
+        todo!()
     }
 
     fn get_addition_query(&self, name: &str) -> String {
         todo!()
     }
 
-    fn get_up_diff_queries(&self) -> Vec<String> {
+    fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
+        let mut down_queries = vec![];
+
+        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
         //     (i) up => REMOVE TABLE table_name;
         up_queries.extend(
             self.diff_left()
@@ -1227,23 +1229,20 @@ impl DbObject<Tables> for ComparisonTables {
                 .collect::<Vec<_>>(),
         );
 
-        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
-        up_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|&t_name| self.get_right().get_one_definition(t_name.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
-                .collect::<Vec<_>>(),
-        );
-        todo!()
-    }
-
-    fn get_down_diff_queries(&self) -> Vec<String> {
-        let mut down_queries = vec![];
         //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
         down_queries.extend(
             self.diff_left()
                 .iter()
                 .map(|&t| self.get_left().get_one_definition(t.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .collect::<Vec<_>>(),
+        );
+
+        // DEAL WITH RIGHT SIDE. i.e CODEBASE
+        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
+        up_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|&t_name| self.get_right().get_one_definition(t_name.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
 
@@ -1255,13 +1254,7 @@ impl DbObject<Tables> for ComparisonTables {
                 .collect::<Vec<_>>(),
         );
 
-        down_queries
-    }
-
-    fn get_queries(&self) -> Queries {
-        let mut up_queries = self.get_up_diff_queries();
-        let mut down_queries = self.get_down_diff_queries();
-
+        // HANDLE INTERSECTION
         for table in self.diff_intersect() {
             let right_table_def = self.get_right().get_one_definition(table.to_string());
             let left_table_def = self.get_left().get_one_definition(table.to_string());
@@ -1291,6 +1284,150 @@ impl DbObject<Tables> for ComparisonTables {
             up: up_queries,
             down: down_queries,
         }
+    }
+}
+
+trait Tabular {
+    fn tabe_name(&self) -> String;
+}
+
+struct ComparisonFields {
+    // Migrations latest state tables
+    left: Fields,
+    // Codebase latest state tables
+    right: Fields,
+    right_table: String,
+}
+
+// impl Tabular for ComparisonFields {
+//     fn table_name(&self) -> String {
+//         "tables".to_string()
+//     }
+// }
+
+impl DbObject<Fields> for ComparisonFields {
+    fn get_left(&self) -> Fields {
+        self.left
+    }
+
+    fn get_right(&self) -> Fields {
+        self.right
+    }
+
+    fn get_removal_query(&self, name: &str) -> String {
+        todo!()
+    }
+
+    fn get_addition_query(&self, name: &str) -> String {
+        todo!()
+    }
+
+    fn get_queries(&self) -> Queries {
+        let mut up_queries = vec![];
+        let mut down_queries = vec![];
+        // DEAL WITH RIGHT SIDE. i.e CODEBASE
+        // b. If there a Table in right that is not in left, right - left =
+        // right.difference(left)
+        //    (i) up => ADD FIELD field_name on TABLE table_name;
+        up_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|&f_name| {
+                    self.get_right()
+                        .get_one_definition(f_name.to_string())
+                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
+                        .to_string()
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        //    (ii) down => REMOVE FIELD field_name on TABLE table_name;
+        down_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|&f_name| {
+                    remove_field(f_name.to_string())
+                        .on_table(self.right_table)
+                        .to_raw()
+                        .build()
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
+        //     (i) up => REMOVE FIELD field_name on TABLE table_name;
+        up_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|&f_name| {
+                    remove_field(f_name.to_string())
+                        .on_table(self.right_table)
+                        .to_raw()
+                        .build()
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        //     (ii) down => ADD FIELD field_name on TABLE table_name;
+        down_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|&f_name| {
+                    self.get_left()
+                        .get_one_definition(f_name.to_string())
+                        .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
+                        .to_string()
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        // if field has attribute - old_name
+        // old_name => left = true, right = false
+        // new_name => left = false, right = true
+        //
+        // left  -> migration dir
+        // up =>
+        //      1. define_field_left(new_name) // use def from right i.e codebase
+        //      2. UPDATE table_name SET new_name = old_name
+        //      3. remove(old_name)
+        //
+        // down => define_field_left(old_name) i.e use old def from left i.e migration dir
+        //      1. define_field_left(old_name) . Use old def from left i.e migration dir
+        //      2. UPDATE table_name SET old_name = new_name
+        //      3. remove(new_name)
+        //
+        // right -> codebase
+        // up => define_field_right(new_name) i.e use new def from right i.e codebase
+        // down => remove(new_name)
+
+        for field in self.diff_intersect() {
+            let right_field_def = self.get_right().get_one_definition(field.to_string());
+            let left_field_def = self.get_left().get_one_definition(field.to_string());
+
+            // compare the two field definitions
+            match (left_field_def, right_field_def) {
+                //    First check if left def is same as right def
+                (Some(l), Some(r)) if l == r => {
+                    //          if same:
+                    //                  do nothing
+                    //          else:
+                    // do nothing
+                    println!("Field {} is the same in both left and right", field);
+                }
+                (Some(l), Some(r)) => {
+                    println!("Field {} is different in both left and right. Use codebase as master/super", field);
+                    // (i) up => Use Right table definitions(codebase definition)
+                    up_queries.push(r.to_string());
+                    // (ii) down => Use Left table definitions(migration directory definition)
+                    down_queries.push(l.to_string());
+                }
+                _ => {
+                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                }
+            }
+        }
+
+        todo!()
     }
 }
 
