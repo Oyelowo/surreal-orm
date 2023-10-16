@@ -470,8 +470,7 @@ impl Database {
     }
 
     pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
-        // Get all migrations from the migrations directory
-        let all_migrations = Migration::get_all_from_migrations_dir();
+        let mut all_migrations = Migration::get_all_from_migrations_dir();
         let queries = all_migrations
             .into_iter()
             .map(|m| m.up)
@@ -743,6 +742,7 @@ impl Migration {
 
             migrations_meta.push(migration);
         }
+        migrations_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
         migrations_meta
     }
 
@@ -1010,6 +1010,9 @@ where
                 }
                 (Some(l), Some(r)) => {
                     println!("Object {} is different in both left and right. Use codebase as master/super", object);
+                    println!("Left: {}", l);
+                    println!("Right: {}", r);
+                    
                     // (i) up => Use Right object definitions(codebase definition)
                     up_queries.push(r.to_string());
                     // (ii) down => Use Left object definitions(migration directory definition)
