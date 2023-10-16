@@ -150,6 +150,40 @@ use std::{
 //    - add index
 //    - remove index
 //
+//
+//
+// DB info
+// [
+//     {
+//         "analyzers": {},
+//         "functions": {},
+//         "params": {},
+//         "scopes": {},
+//         "tables": {
+//             "movie": "DEFINE TABLE movie SCHEMALESS",
+//             "person": "DEFINE TABLE person SCHEMAFULL CHANGEFEED 1d",
+//             "user": "DEFINE TABLE user SCHEMAFULL",
+//             "userr": "DEFINE TABLE userr SCHEMAFULL"
+//         },
+//         "tokens": {},
+//         "users": {}
+//     }
+// ]
+//
+//
+// Table Info
+// [
+//     {
+//         "events": {},
+//         "fields": {
+//             "firstName": "DEFINE FIELD firstName ON person TYPE option<string>",
+//             "skills": "DEFINE FIELD skills ON person TYPE option<array>",
+//             "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
+//         },
+//         "indexes": {},
+//         "tables": {}
+//     }
+// ]
 
 #[derive(Error, Debug)]
 pub enum MigrationError {
@@ -188,109 +222,32 @@ enum MigrationType {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TableInfo {
-    events: HashMap<String, String>,
-    indexes: HashMap<String, String>,
-    tables: HashMap<String, String>,
-    fields: HashMap<String, String>,
+    events: Events,
+    indexes: Indexes,
+    tables: Tables,
+    fields: Fields,
 }
 
 impl TableInfo {
-    pub fn get_fields(&self) -> Info {
-        self.fields.clone()
+    pub fn events(&self) -> Events {
+        self.events
     }
 
-    pub fn get_fields_names(&self) -> Vec<String> {
-        self.fields.keys().cloned().collect()
+    pub fn indexes(&self) -> Indexes {
+        self.indexes
     }
 
-    pub fn get_field_definition(&self, field_name: String) -> Option<String> {
-        self.fields.get(&field_name).cloned()
-    }
+    // This is usually empty in when getting the info from a table.
+    // Only used when getting the info from a database.
+    // So, turning it off for now
+    // pub fn tables(&self) -> Tables {
+    //     self.tables
+    // }
 
-    pub fn get_fields_definitions(&self) -> Vec<String> {
-        self.fields.values().cloned().collect()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct LiveTableInfo(TableInfo);
-
-impl From<TableInfo> for LiveTableInfo {
-    fn from(value: TableInfo) -> Self {
-        Self(value)
+    pub fn fields(&self) -> Fields {
+        self.fields
     }
 }
-
-impl Deref for LiveTableInfo {
-    type Target = TableInfo;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct CodeBaseTableInfo(TableInfo);
-
-impl From<TableInfo> for CodeBaseTableInfo {
-    fn from(value: TableInfo) -> Self {
-        Self(value)
-    }
-}
-
-impl Deref for CodeBaseTableInfo {
-    type Target = TableInfo;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct LiveDbInfo(DbInfo);
-
-impl From<DbInfo> for LiveDbInfo {
-    fn from(value: DbInfo) -> Self {
-        Self(value)
-    }
-}
-
-impl Deref for LiveDbInfo {
-    type Target = DbInfo;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct CodeBaseDbInfo(DbInfo);
-
-impl CodeBaseDbInfo {
-    pub fn new(db_info: DbInfo) -> Self {
-        Self(db_info)
-    }
-}
-
-impl std::ops::DerefMut for CodeBaseDbInfo {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl Deref for CodeBaseDbInfo {
-    type Target = DbInfo;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-// impl CodeBaseDbInfo {
-//     pub fn into_inner(self) -> DbInfo {
-//         self.0
-//     }
-// }
 
 // format: <timestamp>__<direction>__<name>.sql
 #[derive(Debug, Clone)]
@@ -367,7 +324,7 @@ impl Database {
         self.db.clone()
     }
 
-    pub async fn get_db_info(&self) -> MigrationResult<LiveDbInfo> {
+    pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
         let info = info_for()
             .database()
             .get_data::<DbInfo>(self.db())
@@ -376,22 +333,13 @@ impl Database {
         Ok(info.into())
     }
 
-    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<LiveTableInfo> {
+    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableInfo> {
         let info = info_for()
             .table(table_name)
             .get_data::<TableInfo>(self.db())
             .await?
             .unwrap();
         Ok(info.into())
-    }
-
-    pub async fn get_current_schema(&self, table_name: &str) -> MigrationResult<TableInfo> {
-        let info = info_for()
-            .table(table_name.to_string())
-            .get_data::<TableInfo>(self.db())
-            .await?
-            .unwrap();
-        Ok(info)
     }
 
     pub async fn execute(&self, query: String) {
@@ -574,16 +522,16 @@ impl Database {
         let left_db = Self::init().await;
         let left = left_db.run_local_dir_migrations().await.expect("flops");
         let left_db_info = left_db.get_db_info().await.unwrap();
-        let left_tables = HashSet::<String>::from_iter(left_db_info.get_tables());
-        println!("left db info: {:#?}", left_db_info.get_tables());
+        let left_tables = left_db_info.tables().get_names_as_set();
+        println!("left db info: {:#?}", left_db_info.tables());
         // let left_table_info = db.get_table_info("planet".into()).await.unwrap();
         //
         // 2. Get all migrations from codebase synced with db - Right
         let right_db = Self::init().await;
         let right = right_db.run_codebase_schema_queries().await?;
         let right_db_info = right_db.get_db_info().await.unwrap();
-        let right_tables = HashSet::from_iter(right_db_info.get_tables());
-        println!("right db info: {:#?}", right_db_info.get_tables());
+        let right_tables = right_db_info.tables().get_names_as_set();
+        println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
         // 3. Diff them
         //
@@ -605,8 +553,8 @@ impl Database {
         let left_diff_def = left_diff
             .iter()
             .map(|&t| {
-                left_db_info
-                    .get_table_def(t.to_string())
+                left_db_info.tables().get_one_definition(
+                    t.to_string())
                     .expect("Table must be present. This is a bug. Please, report it to surrealorm repository.")
                     .to_string()
             })
@@ -1114,25 +1062,276 @@ impl Migration {
 //     }
 // ]
 
-type Info = HashMap<String, String>;
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+struct Info(HashMap<String, String>);
+
+trait Informational {
+    // skills[*] is a valid field name in this context
+    fn get_names(&self) -> Vec<String>;
+
+    fn get_names_as_set(&self) -> HashSet<String>;
+
+    fn get_all_definitions(&self) -> Vec<String>;
+
+    // Althought, I dont think u should do this, it is absolutely possible:
+    // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
+    // Above can be achieved just doing array<string> on the top level field - skills
+    // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
+    fn get_one_definition(&self, name: String) -> Option<&String>;
+}
+
+impl Informational for Info {
+    // skills[*] is a valid field name in this context
+    fn get_names(&self) -> Vec<String> {
+        self.0.keys().cloned().collect()
+    }
+
+    fn get_names_as_set(&self) -> HashSet<String> {
+        HashSet::from_iter(self.get_names())
+    }
+
+    fn get_all_definitions(&self) -> Vec<String> {
+        self.0.values().cloned().collect()
+    }
+
+    // Althought, I dont think u should do this, it is absolutely possible:
+    // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
+    // Above can be achieved just doing array<string> on the top level field - skills
+    // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
+    fn get_one_definition(&self, name: String) -> Option<&String> {
+        self.0.get(&name)
+    }
+}
+
+macro_rules! define_object_info {
+    ($($ident: ident),*) => {
+        $(
+            #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+            pub struct $ident(Info);
+
+            // impl Deref for $ident {
+            //     type Target = Info;
+            //
+            //     fn deref(&self) -> &Self::Target {
+            //         &self.0
+            //     }
+            // }
+
+
+            impl Informational for $ident {
+                // skills[*] is a valid field name in this context
+                fn get_names(&self) -> Vec<String> {
+                    self.0.keys().cloned().collect()
+                }
+
+                fn get_names_as_set(&self) -> HashSet<String> {
+                    HashSet::from_iter(self.get_names())
+                }
+
+                fn get_all_definitions(&self) -> Vec<String> {
+                    self.0.values().cloned().collect()
+                }
+
+                // Althought, I dont think u should do this, it is absolutely possible:
+                // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
+                // Above can be achieved just doing array<string> on the top level field - skills
+                // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
+                fn get_one_definition(&self, name: String) -> Option<&String> {
+                    self.0.get(&name)
+                }
+            }
+
+        )*
+    };
+}
+
+define_object_info!(
+    Analyzers, Functions, Params, Scopes, Tables, Tokens, Users, Fields, Events, Indexes
+);
+
+trait DbObject<T>
+where
+    T: Informational,
+{
+    // Left is from migration dir
+    // Right is from codebase
+    fn get_left(&self) -> T;
+    fn get_right(&self) -> T;
+
+    fn diff_left(&self) -> Vec<&String> {
+        self.get_left()
+            .get_names_as_set()
+            .difference(&self.get_right().get_names_as_set())
+            .collect::<Vec<_>>()
+    }
+    fn diff_right(&self) -> Vec<&String> {
+        self.get_right()
+            .get_names_as_set()
+            .difference(&self.get_left().get_names_as_set())
+            .collect::<Vec<_>>()
+    }
+
+    fn diff_intersect(&self) -> Vec<String> {
+        self.get_left()
+            .get_names_as_set()
+            .intersection(&self.get_right().get_names_as_set())
+            .cloned()
+            .collect::<Vec<_>>()
+    }
+
+    fn get_removal_query(&self, name: &str) -> String;
+
+    fn get_addition_query(&self, name: &str) -> String;
+    //
+    fn get_up_diff_queries(&self) -> Vec<String>;
+    fn get_down_diff_queries(&self) -> Vec<String>;
+    fn get_queries(&self) -> Queries;
+}
+
+struct Queries {
+    up: Vec<String>,
+    down: Vec<String>,
+}
+
+struct ComparisonTables {
+    // Migrations latest state tables
+    left: Tables,
+    // Codebase latest state tables
+    right: Tables,
+}
+
+impl DbObject<Tables> for ComparisonTables {
+    fn get_left(&self) -> Tables {
+        self.left
+    }
+
+    fn get_right(&self) -> Tables {
+        self.right
+    }
+
+    fn get_removal_query(&self, name: &str) -> String {
+        remove_table(name.to_string()).to_raw().build()
+    }
+
+    fn get_addition_query(&self, name: &str) -> String {
+        todo!()
+    }
+
+    fn get_up_diff_queries(&self) -> Vec<String> {
+        let mut up_queries = vec![];
+        //     (i) up => REMOVE TABLE table_name;
+        up_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
+                .collect::<Vec<_>>(),
+        );
+
+        //    (i) up => DEFINE TABLE table_name; (Use codebase definition)
+        up_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|&t_name| self.get_right().get_one_definition(t_name.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .collect::<Vec<_>>(),
+        );
+        todo!()
+    }
+
+    fn get_down_diff_queries(&self) -> Vec<String> {
+        let mut down_queries = vec![];
+        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
+        down_queries.extend(
+            self.diff_left()
+                .iter()
+                .map(|&t| self.get_left().get_one_definition(t.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
+                .collect::<Vec<_>>(),
+        );
+
+        //    (ii) down => REMOVE TABLE table_name;
+        down_queries.extend(
+            self.diff_right()
+                .iter()
+                .map(|&t_name| remove_table(t_name.to_string()).to_raw().build())
+                .collect::<Vec<_>>(),
+        );
+
+        down_queries
+    }
+
+    fn get_queries(&self) -> Queries {
+        let mut up_queries = self.get_up_diff_queries();
+        let mut down_queries = self.get_down_diff_queries();
+
+        for table in self.diff_intersect() {
+            let right_table_def = self.get_right().get_one_definition(table.to_string());
+            let left_table_def = self.get_left().get_one_definition(table.to_string());
+            // compare the two table definitions
+            match (left_table_def, right_table_def) {
+                //    First check if left def is same as right def
+                (Some(l), Some(r)) if l == r => {
+                    //          if same:
+                    //                  do nothing
+                    //          else:
+                    // do nothing
+                    println!("Table {} is the same in both left and right", table);
+                }
+                (Some(l), Some(r)) => {
+                    println!("Table {} is different in both left and right. Use codebase as master/super", table);
+                    // (i) up => Use Right table definitions(codebase definition)
+                    up_queries.push(r.to_string());
+                    // (ii) down => Use Left table definitions(migration directory definition)
+                    down_queries.push(l.to_string());
+                }
+                _ => {
+                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
+                }
+            }
+        }
+        Queries {
+            up: up_queries,
+            down: down_queries,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct DbInfo {
-    pub analyzers: Info,
-    pub functions: Info,
-    pub params: Info,
-    pub scopes: Info,
-    pub tables: Info,
-    pub tokens: Info,
-    pub users: Info,
+    pub analyzers: Analyzers,
+    pub functions: Functions,
+    pub params: Params,
+    pub scopes: Scopes,
+    pub tables: Tables,
+    pub tokens: Tokens,
+    pub users: Users,
 }
 
 impl DbInfo {
-    pub fn get_tables(&self) -> Vec<String> {
-        self.tables.keys().cloned().collect()
+    pub fn analyzers(&self) -> Analyzers {
+        self.analyzers
     }
 
-    pub fn get_table_def(&self, table_name: String) -> Option<&String> {
-        self.tables.get(&table_name)
+    pub fn functions(&self) -> Functions {
+        self.functions
+    }
+
+    pub fn params(&self) -> Params {
+        self.params
+    }
+
+    pub fn scopes(&self) -> Scopes {
+        self.scopes
+    }
+
+    pub fn tables(&self) -> Tables {
+        self.tables
+    }
+
+    pub fn tokens(&self) -> Tokens {
+        self.tokens
+    }
+
+    pub fn users(&self) -> Users {
+        self.users
     }
 }
 
