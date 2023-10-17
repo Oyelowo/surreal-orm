@@ -1258,16 +1258,17 @@ impl DbObject<Tables> for ComparisonTables {
             let left_table_info = self.left_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
             let right_table_info = self.right_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
             
-            let right_fields = self.right_resources.get_table_field_names(table.to_string());
+            let left_fields = self.left_resources.get_table_field_names_as_set(table.to_string());
+            let right_fields = self.right_resources.get_table_field_names_as_set(table.to_string());
             // add right field definition if left and right are different or left does not yet have
             // the field
-            for fname in right_fields {
+            for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
                 let left_field_def = left_table_info.get_one_definition(fname.to_string());
                 // let left_field_def = self.left_resources.get_field_def(table.to_string(), fname.to_string());
                 let right_field_def = right_table_info.get_one_definition(fname.to_string());
                 match (left_field_def.cloned(), right_field_def.cloned()) {
                     //    First check if left def is same as right def
-                    (Some(l), Some(r)) if l.trim() == r.trim() => {
+                    (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
                         //          if same:
                         //                  do nothing
                         //          else:
@@ -1287,11 +1288,35 @@ impl DbObject<Tables> for ComparisonTables {
                     (None, Some(r)) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
                         println!("Right: {}", r);
+
                         
                         // (i) up => Use Right object definitions(codebase definition)
                         up_queries.push(r.to_string());
+                        let renamed_field_meta = CodeBaseMeta::has_old_name_attr(table.to_string(), fname.to_string());    
+                        if let Some(rfm) = renamed_field_meta  {
+                            let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
+                            let new_name = rfm.name;
+                            // Set old name to new name
+                            up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
+                                .to_raw()
+                                .build());
+
+                            down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
+                                .to_raw()
+                                .build());
+                            
+                        }
                         // (ii) down => Use Left object definitions(migration directory definition)
-                        down_queries.push(remove_field(fname).on_table(table.to_string()).to_raw().build());
+                        down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                    }
+                    (Some(l), None) => {
+                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
+                        println!("Left alone: {}", l);
+                        
+                        // (i) up => Use Right object definitions(codebase definition)
+                        up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                        // (ii) down => Use Left object definitions(migration directory definition)
+                        down_queries.push(l);
                     }
                     _ => {
                         panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
