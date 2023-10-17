@@ -408,8 +408,8 @@ impl CodeBaseMeta {
             animal_fields,
             animal_eats_crop_tables,
             animal_eats_crop_fields,
-            crop_tables,
-            crop_fields,
+            // crop_tables,
+            // crop_fields,
         ]
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
@@ -637,19 +637,19 @@ impl Database {
         down_queries.extend(tables.down);
 
         
-        for table_name in right_tables.get_names() {
-            let left_table_info = left_db.get_table_info(table_name.clone()).await.expect("could not get left db table info");
-            let right_table_info = right_db.get_table_info(table_name.clone()).await.expect("could not get right  db table info");
-            
-            let queries = TableComparisonFields {
-                left: left_table_info.fields(),
-                right: right_table_info.fields(),
-                right_table: table_name.clone(),
-            }.get_queries();
-            
-            up_queries.extend(queries.up);
-            down_queries.extend(queries.down);
-        }
+        // for table_name in right_tables.get_names() {
+        //     let left_table_info = left_db.get_table_info(table_name.clone()).await.expect("could not get left db table info");
+        //     let right_table_info = right_db.get_table_info(table_name.clone()).await.expect("could not get right  db table info");
+        //
+        //     let queries = TableComparisonFields {
+        //         left: left_table_info.fields(),
+        //         right: right_table_info.fields(),
+        //         right_table: table_name.clone(),
+        //     }.get_queries();
+        //
+        //     up_queries.extend(queries.up);
+        //     down_queries.extend(queries.down);
+        // }
 
 
 
@@ -1306,7 +1306,7 @@ impl DbObject<Tables> for ComparisonTables {
                         // (ii) down => Use Left object definitions(migration directory definition)
                         down_queries.push(l.to_string());
                     }
-                    (None, Some(rdef)) => {
+                    (ldef, Some(rdef)) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
                         println!("Right: {}", rdef);
 
@@ -1645,7 +1645,8 @@ pub struct Student {
 #[surreal_orm(table_name = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
-    pub species: String,
+    #[surreal_orm(old_name = "species")]
+    pub name: String,
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
 }
