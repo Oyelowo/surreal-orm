@@ -442,11 +442,11 @@ impl FullDbInfo {
             .get(&table_name)
             .map(|t|{ 
                 let x = t.fields();
-                x.get_one_definition(field_name).cloned()
+                x.get_definition(field_name).cloned()
             }).flatten()
     }
     
-    pub fn get_table_fields(&self, table_name: String) -> Option<Fields> {
+    pub fn get_table_fields_data(&self, table_name: String) -> Option<Fields> {
         self.fields_by_table
             .get(&table_name)
             .map(|t| t.fields().clone())
@@ -658,12 +658,12 @@ impl Database {
         let up_queries_str = if up_queries.is_empty() {
             "".to_string()
         } else {
-            format!("{};", up_queries.join(";\n").trim_end_matches(";"))
+            format!("{};", up_queries.iter().map(|s|s.trim_end_matches(";")).collect::<Vec<_>>().join(";\n").trim().trim_end_matches(";"))
         };
         let down_queries_str = if down_queries.is_empty() {
             "".to_string()
         } else {
-            format!("{};", down_queries.join(";\n").trim_end_matches(";"))
+            format!("{};", down_queries.iter().map(|s|s.trim_end_matches(";")).collect::<Vec<_>>().join(";\n").trim().trim_end_matches(";"))
         };
         if up_queries_str.is_empty() && down_queries_str.is_empty() {
             println!("Are you sure you want to generate an empty migration? (y/n)");
@@ -927,7 +927,7 @@ trait Informational {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_one_definition(&self, name: String) -> Option<&String>;
+    fn get_definition(&self, name: String) -> Option<&String>;
 }
 
 impl Informational for Info {
@@ -948,7 +948,7 @@ impl Informational for Info {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_one_definition(&self, name: String) -> Option<&String> {
+    fn get_definition(&self, name: String) -> Option<&String> {
         self.0.get(&name)
     }
 }
@@ -986,7 +986,7 @@ macro_rules! define_object_info {
                 // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
                 // Above can be achieved just doing array<string> on the top level field - skills
                 // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-                fn get_one_definition(&self, name: String) -> Option<&String> {
+                fn get_definition(&self, name: String) -> Option<&String> {
                     self.0.0.get(&name)
                 }
             }
@@ -1057,7 +1057,7 @@ where
             self.diff_left()
                 .iter()
                 .map(|t| self.get_left()
-                    .get_one_definition(t.to_string())
+                    .get_definition(t.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
@@ -1068,7 +1068,7 @@ where
             self.diff_right()
                 .iter()
                 .map(|t_name| self.get_right()
-                    .get_one_definition(t_name.to_string())
+                    .get_definition(t_name.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
@@ -1084,9 +1084,9 @@ where
         // HANDLE INTERSECTION
         for object in self.diff_intersect() {
             let right_objects =self.get_right();
-            let right_object_def = right_objects.get_one_definition(object.to_string());
+            let right_object_def = right_objects.get_definition(object.to_string());
             let left_objects = self.get_left();
-            let left_object_def = left_objects.get_one_definition(object.to_string());
+            let left_object_def = left_objects.get_definition(object.to_string());
             // compare the two object definitions
             match (left_object_def, right_object_def) {
                 //    First check if left def is same as right def
@@ -1151,6 +1151,39 @@ impl DbObject<Tables> for ComparisonTables {
     fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
         let mut down_queries = vec![];
+
+        // validate old_name in codebase. If it exists on any field but not on any field in
+        // codebase
+        // in migration directory, throw an error because it means, it must have already been
+        // renamed or removed or first time migration is being created.
+        for table in self.get_right().get_names() {
+            let left_table_fields = self.left_resources.get_table_field_names(table.to_string());
+            let right_table_fields = self.right_resources.get_table_field_names(table.to_string());
+            for field in &right_table_fields {
+                let field_with_old_name = CodeBaseMeta
+                    ::find_field_has_old_name(table.to_string(), By::NewName(field.to_string()));    
+                println!("Table: {} Field: {} field_with_old_name: {:#?}", table, field, field_with_old_name.clone());
+                if let Some(field_with_old_name) = field_with_old_name {
+                    println!("Inner = Table: {} Field: {} field_with_old_name: {:#?}", table.clone(), field.clone(), field_with_old_name.clone());
+                    let old_name = field_with_old_name.old_name.unwrap();
+                    if self.left_resources.get_field_def(table.to_string(), old_name.to_string()).is_none() {
+                        panic!("'{old_name}' as old_name value on the '{table}' model struct/table \
+                        is invalid. You are attempting to rename \
+                        from {old_name} to {field} but {old_name} is not \
+                            currently in use in migration/live database. Please, \
+                            check that the field is not mispelled and is in the \
+                            right case or use one of the currently available \
+                            fields {}", left_table_fields.join(", "));
+                    }
+                }
+            }
+            println!("Table name: {}", table);
+            let l = self.left_resources.get_field_def(table.to_string(), "name".to_string()); 
+            let r = self.right_resources.get_field_def(table.to_string(), "name".to_string()); 
+            println!("Left Field name: {l:?}");
+            println!("Right Field name: {r:?}");
+        }
+
         // 3. Diff them
         //
         // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
@@ -1168,45 +1201,27 @@ impl DbObject<Tables> for ComparisonTables {
                 .map(|t| self.get_removal_query(t.to_string()))
                 .collect::<Vec<_>>(),
         );
-            //
-            // let queries = TableComparisonFields {
-            //     left: left_table_info.fields(),
-            //     right: right_table_info.fields(),
-            //     right_table: table_name.clone(),
-            // }.get_queries();
-            //
-            // up_queries.extend(queries.up);
-            // down_queries.extend(queries.down);
 
         //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
         //            We also use migration directory definition for fields for down reverse migration
         down_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|t| {
-                   let x = self.get_left()
-                    .get_one_definition(t.to_string())
+                .flat_map(|t| {
+                   let left_table_def = self.get_left()
+                    .get_definition(t.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
                     
-                    // let fields = TableComparisonFields {
-                    //     left: left_table_info.fields(),
-                    //     right: right_table_info.fields(),
-                    //     right_table: t.to_string(),
-                    // };
-                    // let q = fields.diff_left().iter().map(|f| fields.get_left().get_one_definition(f.to_string())
-                    //     .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
-                    //     .to_string()
-                    // ).collect::<Vec<_>>();
-
                     let table_info = self.left_resources.get_table_info(t.to_string());
-                    let q = if let Some(table_info) = table_info {
+                    let mut fields_defs = if let Some(table_info) = table_info {
                         let fields = table_info.fields();
                         fields.get_all_definitions()
                     } else {
                         println!("Table fields definitions {} not found in migrations state", t);
                         vec![]
                     };
-                    [x, q.join(";\n")].join("\n")
+                    fields_defs.insert(0, left_table_def);
+                    fields_defs
                 })
                 .collect::<Vec<_>>()
         );
@@ -1218,20 +1233,21 @@ impl DbObject<Tables> for ComparisonTables {
         up_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|t_name| {
-                    let x = self.get_right()
-                    .get_one_definition(t_name.to_string())
+                .flat_map(|t_name| {
+                    let right_table_def = self.get_right()
+                    .get_definition(t_name.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
 
                     let table_info = self.right_resources.get_table_info(t_name.to_string());
-                    let q = if let Some(table_info) = table_info {
+                    let mut right_fields_defs = if let Some(table_info) = table_info {
                         let fields = table_info.fields();
                         fields.get_all_definitions()
                     } else {
                         println!("Table fields definitions {} not found in codebase state", t_name);
                         vec![]
                     };
-                    [x, q.join(";\n")].join("\n")
+                    right_fields_defs.insert(0, right_table_def);
+                    right_fields_defs
                 })
                 .collect::<Vec<_>>()
         );
@@ -1248,9 +1264,9 @@ impl DbObject<Tables> for ComparisonTables {
         // HANDLE INTERSECTION
         for table in self.diff_intersect() {
             let right_objects =self.get_right();
-            let right_object_def = right_objects.get_one_definition(table.to_string());
+            let right_object_def = right_objects.get_definition(table.to_string());
             let left_objects = self.get_left();
-            let left_object_def = left_objects.get_one_definition(table.to_string());
+            let left_object_def = left_objects.get_definition(table.to_string());
             // compare the two object definitions
             match (left_object_def, right_object_def) {
                 (Some(l), Some(r)) if l == r => {
@@ -1273,16 +1289,16 @@ impl DbObject<Tables> for ComparisonTables {
             }
 
             // we have to diff left and right fields and prefer right if they are not same
-            let left_table_info = self.left_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
-            let right_table_info = self.right_resources.get_table_fields(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
+            let left_table_info = self.left_resources.get_table_fields_data(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
+            let right_table_info = self.right_resources.get_table_fields_data(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
             
             let left_fields = self.left_resources.get_table_field_names_as_set(table.to_string());
             let right_fields = self.right_resources.get_table_field_names_as_set(table.to_string());
             // add right field definition if left and right are different or left does not yet have
             // the field
             for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
-                let left_field_def = left_table_info.get_one_definition(fname.to_string());
-                let right_field_def = right_table_info.get_one_definition(fname.to_string());
+                let left_field_def = left_table_info.get_definition(fname.to_string());
+                let right_field_def = right_table_info.get_definition(fname.to_string());
                 match (left_field_def.cloned(), right_field_def.cloned()) {
                     //    First check if left def is same as right def
                     (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
@@ -1301,7 +1317,7 @@ impl DbObject<Tables> for ComparisonTables {
                             if let Some(rd) = rdef.clone() {
                                 up_queries.push(rd.to_string());
                             }
-                            if let Some(ld) = left_table_info.get_one_definition(old_name.to_string()) {
+                            if let Some(ld) = left_table_info.get_definition(old_name.to_string()) {
                                     // Set old name to new name
                                     up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
                                         .to_raw()
@@ -1413,7 +1429,7 @@ impl DbObject<Fields> for TableComparisonFields {
                 .iter()
                 .map(|f_name| {
                     self.get_right()
-                        .get_one_definition(f_name.to_string())
+                        .get_definition(f_name.to_string())
                         .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
                         .to_string()
                 })
@@ -1483,7 +1499,7 @@ impl DbObject<Fields> for TableComparisonFields {
                 .iter()
                 .map(|f_name| {
                     self.get_left()
-                        .get_one_definition(f_name.to_string())
+                        .get_definition(f_name.to_string())
                         .expect("Field must be present. This is a bug. Please, report it to surrealorm repository.")
                         .to_string()
                 })
@@ -1513,8 +1529,8 @@ impl DbObject<Fields> for TableComparisonFields {
         for field in self.diff_intersect() {
             let right_tables = self.get_right();
             let left_tables = self.get_left();
-            let right_field_def = right_tables.get_one_definition(field.to_string());
-            let left_field_def = left_tables.get_one_definition(field.to_string());
+            let right_field_def = right_tables.get_definition(field.to_string());
+            let left_field_def = left_tables.get_definition(field.to_string());
 
             // compare the two field definitions
             match (left_field_def, right_field_def) {
