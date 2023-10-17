@@ -310,14 +310,32 @@ impl Display for MigrationName {
 struct CodeBaseMeta;
 type TableName = String;
 
+
+pub enum By {
+   NewName(String),
+   OldName(String),
+}
+
 impl CodeBaseMeta {
-    pub fn has_old_name_attr(table_name: String, field_name: String) -> Option<FieldMetadata> {
+    pub fn find_field_with_oldname_attr(table_name: String, field_name: String) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
             .clone()
             .into_iter()
             .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
+    }
+    
+    pub fn find_field(table_name: String, by: By) -> Option<FieldMetadata> {
+        Self::get_codebase_renamed_fields_meta()
+            .get(&table_name)
+            .unwrap_or(&vec![])
+            .clone()
+            .into_iter()
+            .find(|f| match &by {
+                By::NewName(new_name) => f.name.to_string() == new_name.to_string() && f.old_name.is_some(),
+                By::OldName(old_name) =>  f.old_name.clone().filter(|n| n.to_string() == old_name.to_string()).is_some() && f.old_name.is_some(),
+            })
     }
 
     pub fn get_codebase_renamed_fields_meta() -> HashMap<TableName, Vec<FieldMetadata>> {
@@ -420,9 +438,11 @@ impl FullDbInfo {
     }
 
     pub fn get_field_def(&self, table_name: String, field_name: String) -> Option<String> {
-        self.fields_by_table
-            .get(&table_name)
-            .map(|t| t.fields().get_one_definition(field_name).clone()).flatten().cloned()
+        // self.fields_by_table
+        //     .get(&table_name)
+        //     .map(|t| t.fields()
+        //         .get_one_definition(field_name).clone()).flatten().cloned()
+        todo!()
     }
     
     pub fn get_table_fields(&self, table_name: String) -> Option<Fields> {
@@ -609,9 +629,10 @@ impl Database {
         let tables = ComparisonTables {
             left: left_tables,
             right: right_tables.clone(),
-            left_db,
-            right_db,
+            left_resources: left_db.get_all_resources().await.expect("nothing for u on left"),
+            right_resources: right_db.get_all_resources().await.expect("nothing for u on right"),
         }.get_queries();
+        
         up_queries.extend(tables.up);
         down_queries.extend(tables.down);
 
@@ -1285,14 +1306,14 @@ impl DbObject<Tables> for ComparisonTables {
                         // (ii) down => Use Left object definitions(migration directory definition)
                         down_queries.push(l.to_string());
                     }
-                    (None, Some(r)) => {
+                    (None, Some(rdef)) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Right: {}", r);
+                        println!("Right: {}", rdef);
 
                         
                         // (i) up => Use Right object definitions(codebase definition)
-                        up_queries.push(r.to_string());
-                        let renamed_field_meta = CodeBaseMeta::has_old_name_attr(table.to_string(), fname.to_string());    
+                        up_queries.push(rdef.to_string());
+                        let renamed_field_meta = CodeBaseMeta::find_field(table.to_string(), By::NewName(fname.to_string()));    
                         if let Some(rfm) = renamed_field_meta  {
                             let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
                             let new_name = rfm.name;
@@ -1301,22 +1322,29 @@ impl DbObject<Tables> for ComparisonTables {
                                 .to_raw()
                                 .build());
 
-                            down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
-                                .to_raw()
-                                .build());
                             
                         }
                         // (ii) down => Use Left object definitions(migration directory definition)
                         down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
                     }
-                    (Some(l), None) => {
+                    (Some(ldef), None) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Left alone: {}", l);
+                        println!("Left alone: {}", ldef);
                         
                         // (i) up => Use Right object definitions(codebase definition)
                         up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
                         // (ii) down => Use Left object definitions(migration directory definition)
-                        down_queries.push(l);
+                        down_queries.push(ldef);
+                        let renamed_field_meta = CodeBaseMeta::find_field(table.to_string(), By::OldName(fname.to_string()));    
+                        if let Some(rfm) = renamed_field_meta  {
+                            let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
+                            let new_name = rfm.name;
+                            // Set old name to new name
+                            down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
+                                .to_raw()
+                                .build());
+                            
+                        }
                     }
                     _ => {
                         panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
@@ -1417,7 +1445,7 @@ impl DbObject<Fields> for TableComparisonFields {
             diff_right
                 .iter()
                 .filter_map(|r_field| {
-                    CodeBaseMeta::has_old_name_attr(
+                    CodeBaseMeta::find_field_with_oldname_attr(
                         self.right_table.to_string(),
                         r_field.to_string(),
                     )
