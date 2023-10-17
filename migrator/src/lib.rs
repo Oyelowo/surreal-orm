@@ -326,7 +326,7 @@ impl CodeBaseMeta {
             .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
     }
     
-    pub fn find_field(table_name: String, by: By) -> Option<FieldMetadata> {
+    pub fn find_field_has_old_name(table_name: String, by: By) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
@@ -438,11 +438,12 @@ impl FullDbInfo {
     }
 
     pub fn get_field_def(&self, table_name: String, field_name: String) -> Option<String> {
-        // self.fields_by_table
-        //     .get(&table_name)
-        //     .map(|t| t.fields()
-        //         .get_one_definition(field_name).clone()).flatten().cloned()
-        todo!()
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t|{ 
+                let x = t.fields();
+                x.get_one_definition(field_name).cloned()
+            }).flatten()
     }
     
     pub fn get_table_fields(&self, table_name: String) -> Option<Fields> {
@@ -1252,11 +1253,7 @@ impl DbObject<Tables> for ComparisonTables {
             let left_object_def = left_objects.get_one_definition(table.to_string());
             // compare the two object definitions
             match (left_object_def, right_object_def) {
-                //    First check if left def is same as right def
                 (Some(l), Some(r)) if l == r => {
-                    //          if same:
-                    //                  do nothing
-                    //          else:
                     // do nothing
                     println!("Object {} is the same in both left and right", table);
                 }
@@ -1285,77 +1282,60 @@ impl DbObject<Tables> for ComparisonTables {
             // the field
             for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
                 let left_field_def = left_table_info.get_one_definition(fname.to_string());
-                // let left_field_def = self.left_resources.get_field_def(table.to_string(), fname.to_string());
                 let right_field_def = right_table_info.get_one_definition(fname.to_string());
                 match (left_field_def.cloned(), right_field_def.cloned()) {
                     //    First check if left def is same as right def
                     (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
-                        //          if same:
-                        //                  do nothing
-                        //          else:
                         // do nothing
                         println!("Field {} is the same in both left and right", fname);
                     }
-                    (Some(l), Some(r)) => {
+                    (ldef, rdef) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Left: {:?}", l);
-                        println!("Right: {}", r);
-                        
-                        // (i) up => Use Right object definitions(codebase definition)
-                        up_queries.push(r.to_string());
-                        // (ii) down => Use Left object definitions(migration directory definition)
-                        down_queries.push(l.to_string());
-                    }
-                    (ldef, Some(rdef)) => {
-                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Right: {}", rdef);
+                        println!("Right: {:?}", rdef);
 
-                        
-                        // (i) up => Use Right object definitions(codebase definition)
-                        up_queries.push(rdef.to_string());
-                        let renamed_field_meta = CodeBaseMeta::find_field(table.to_string(), By::NewName(fname.to_string()));    
+                        let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::NewName(fname.to_string()));    
                         if let Some(rfm) = renamed_field_meta  {
                             let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
                             let new_name = rfm.name;
-                            // Set old name to new name
-                            up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
-                                .to_raw()
-                                .build());
 
+                            if let Some(rd) = rdef.clone() {
+                                up_queries.push(rd.to_string());
+                            }
+                            if let Some(ld) = left_table_info.get_one_definition(old_name.to_string()) {
+                                    // Set old name to new name
+                                    up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
+                                        .to_raw()
+                                        .build());
+                                    up_queries.push(remove_field(old_name.to_string()).on_table(table.to_string()).to_raw().build());
                             
-                        }
-                        // (ii) down => Use Left object definitions(migration directory definition)
-                        down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                    }
-                    (Some(ldef), None) => {
-                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Left alone: {}", ldef);
-                        
-                        // (i) up => Use Right object definitions(codebase definition)
-                        up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                        // (ii) down => Use Left object definitions(migration directory definition)
-                        down_queries.push(ldef);
-                        let renamed_field_meta = CodeBaseMeta::find_field(table.to_string(), By::OldName(fname.to_string()));    
-                        if let Some(rfm) = renamed_field_meta  {
-                            let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
-                            let new_name = rfm.name;
-                            // Set old name to new name
-                            down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
-                                .to_raw()
-                                .build());
+                                    down_queries.push(ld.to_string());
+                                    down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
+                                        .to_raw()
+                                        .build());
+                                    down_queries.push(remove_field(new_name.to_string()).on_table(table.to_string()).to_raw().build());
+                            }
+                        } else {
+                            // (ii) down => Use Left object definitions(migration directory definition)
+                            if let Some(rd) = rdef.clone() {
+                                up_queries.push(rd.to_string());
+                                down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                            }
                             
+                            if let (Some(l), None) = (ldef, rdef) {
+                                // This is an old name in the migration file not in the code
+                                // base, but we want to be sure we've not already handled it
+                                // earlier above if any field has it as an old name
+                                let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
+                                if field_with_old_name.is_none(){
+                                    up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                                    down_queries.push(l.to_string());
+                                }
+                            };
+
                         }
-                    }
-                    _ => {
-                        panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
                     }
                 }
             }
-            
-
-            // let common_fields = left_table_info.get_names_as_set().intersection(&right_table_info.get_names_as_set()).collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>();
-            
-            
         }
         Queries {
             up: up_queries,
@@ -1649,6 +1629,7 @@ pub struct Animal {
     pub name: String,
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
+    pub terr: String,
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
