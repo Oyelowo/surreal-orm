@@ -636,8 +636,6 @@ impl Database {
         println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
         let tables = ComparisonTables {
-            left: left_tables,
-            right: right_tables.clone(),
             left_resources: left_db.get_all_resources().await.expect("nothing for u on left"),
             right_resources: right_db.get_all_resources().await.expect("nothing for u on right"),
         }.get_queries();
@@ -1135,20 +1133,20 @@ struct Queries {
 
 struct ComparisonTables {
     // Migrations latest state tables
-    left: Tables,
+    // left: Tables,
     left_resources: FullDbInfo,
     // Codebase latest state tables
-    right: Tables,
+    // right: Tables,
     right_resources: FullDbInfo,
 }
 
 impl DbObject<Tables> for ComparisonTables {
     fn get_left(&self) -> Tables {
-        self.left.clone()
+        self.left_resources.tables()
     }
 
     fn get_right(&self) -> Tables {
-        self.right.clone()
+        self.right_resources.tables()
     }
 
     fn get_removal_query(&self, name: String) -> String {
@@ -1655,11 +1653,11 @@ pub struct Student {
 #[surreal_orm(table_name = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(old_name = "terr")]
-    pub species_namx: String,
+    // #[surreal_orm(old_name = "species")]
+    pub species: String,
     pub attributes: Vec<String>,
-    // pub created_at: chrono::DateTime<Utc>,
-    // pub terr: String,
+    pub created_at: chrono::DateTime<Utc>,
+    pub terr: String,
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
