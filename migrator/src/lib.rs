@@ -1,3 +1,11 @@
+// TODOs:
+// Check within macro that:
+// two fields do not have same old_name value
+// old_name value is not same with any of the field names
+// old name value is currently in migration directory/live db state, which means it has not yet
+// been removed, therefore, still valid to be used as an annotation. The old_name attribute is
+// meant to be used temporarily to help with migrations. Once the migration is done, the old_name
+// attribute should be removed.
 use async_trait::async_trait;
 use chrono::Utc;
 use regex::Regex;
@@ -1641,8 +1649,8 @@ pub struct Student {
 #[surreal_orm(table_name = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(old_name = "species")]
-    pub name: String,
+    #[surreal_orm(old_name = "terr")]
+    pub sonja: String,
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub terr: String,
