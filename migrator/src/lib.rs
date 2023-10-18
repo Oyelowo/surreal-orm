@@ -417,8 +417,8 @@ impl CodeBaseMeta {
             animal_fields,
             animal_eats_crop_tables,
             animal_eats_crop_fields,
-            // crop_tables,
-            // crop_fields,
+            crop_tables,
+            crop_fields,
         ]
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
@@ -680,6 +680,8 @@ impl Database {
             
             match confirmation {
                 Ok(true) => {
+                    println!("UP MIGRATIOM: \n {}", up_queries_str);
+                    println!("DOWN MIGRATIOM: \n {}", down_queries_str);
                     Migration::create_migration_file(
                         up_queries_str,
                         Some(down_queries_str),
@@ -695,11 +697,14 @@ impl Database {
             };
 
         } else {
-            Migration::create_migration_file(
-                up_queries_str,
-                Some(down_queries_str),
-                "test_migration".to_string(),
-            );
+            println!("HERE=====");
+            println!("UP MIGRATIOM: \n {}", up_queries_str);
+            println!("DOWN MIGRATIOM: \n {}", down_queries_str);
+            // Migration::create_migration_file(
+            //     up_queries_str,
+            //     Some(down_queries_str),
+            //     "test_migration".to_string(),
+            // );
         }
         //
         // For Fields
@@ -1268,6 +1273,7 @@ impl DbObject<Tables> for ComparisonTables {
                         vec![]
                     };
                     right_fields_defs.insert(0, right_table_def);
+                    println!("right_fields_defs: {:#?}", right_fields_defs);
                     right_fields_defs
                 })
                 .collect::<Vec<_>>()
@@ -1307,7 +1313,9 @@ impl DbObject<Tables> for ComparisonTables {
                 }
             }
 
-                Queries {up: up_queries, down: down_queries} = self.field_diff_union(table);
+                let fdu = self.field_diff_union(table);
+                up_queries.extend(fdu.up);
+                down_queries.extend(fdu.down);
         }
         Queries {
             up: up_queries,
@@ -1367,35 +1375,28 @@ impl ComparisonTables {
                         }
                     } else {
                         // (ii) down => Use Left object definitions(migration directory definition)
-                        if let Some(rd) = rdef.clone() {
-                            up_queries.push(rd.to_string());
-                            down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                        }
-                
-                        if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
-                            // This is an old name in the migration file not in the code
-                            // base, but we want to be sure we've not already handled it
-                            // earlier above if any field has it as an old name
-                            let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
-                            
-                            if field_with_old_name.is_none(){
-                                up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                                down_queries.push(l.to_string());
-                            }
-                        };
                         
                         
                         let left_field_names = left_table_info.get_names_as_set();
                         let right_field_names = right_table_info.get_names_as_set();
+                        // 
                         // l -> [ a, b, c ] r -> [ a, b, e ] => [c, e]
                         let mut left_diff = left_field_names.difference(&right_field_names);
                         let mut right_diff = right_field_names.difference(&left_field_names);
                         
-                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1;
-                        let old_name = left_diff.next().expect("Must be a single item on the left here.").to_string();
-                        let new_name = right_diff.next().expect("Must be a single item on the right here.").to_string();
+                        let old_name = left_diff.clone().peekable().peek().expect("Must be a single item on the left here.").to_string();
+                        let new_name = right_diff.clone().peekable().peek().expect("Must be a single item on the right here.").to_string();
                         
-                        if is_single_code_field_change && &new_name == fname {
+                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1 && &new_name == fname;
+                        
+                        if let Some(rd) = rdef.clone() {
+                            up_queries.push(rd.to_string());
+                            if !is_single_code_field_change {
+                                down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                            }
+                        }
+                        
+                        if is_single_code_field_change {
                             // Implement a rename change
                             
                             let left_definition = left_table_info.get_definition(old_name.clone());
@@ -1427,9 +1428,10 @@ impl ComparisonTables {
                                                 new_name: change.new_name.to_string(),
                                                 left_definition: left_definition.expect("Left field definition must be present here. If not, this is a bug and should be reported"),
                                             });
-                                            println!("queries: {:#?}", queries);
                                             up_queries.extend(queries.up);
                                             down_queries.extend(queries.down);
+                                            println!("upqueries: {:#?}", up_queries);
+                                            println!("downqueries: {:#?}", down_queries);
 
                                                 println!(
                                                 "This is a rename change",
@@ -1440,6 +1442,20 @@ impl ComparisonTables {
                                 }
                                 Err(_) => println!("There was an error, please try again"),
                             }
+                        } else {
+                    
+                            if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
+                                // This is an old name in the migration file not in the code
+                                // base, but we want to be sure we've not already handled it
+                                // earlier above if any field has it as an old name
+                                let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
+                                
+                                if field_with_old_name.is_none(){
+                                    up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                                    down_queries.push(l.to_string());
+                                }
+                            };
+
                         }
 
                     }
@@ -1695,6 +1711,7 @@ impl DbObject<Fields> for TableComparisonFields {
                     //                  do nothing
                     //          else:
                     // do nothing
+                    // TODO: use a proper logger
                     println!("Field {} is the same in both left and right", field);
                 }
                 (Some(l), Some(r)) => {
@@ -1823,6 +1840,7 @@ pub type AnimalEatsCrop = Eats<Animal, Crop>;
 #[surreal_orm(table_name = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
+    // colour
     pub color: String,
 }
 
