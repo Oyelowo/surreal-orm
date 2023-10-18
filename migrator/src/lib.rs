@@ -8,6 +8,7 @@
 // attribute should be removed.
 use async_trait::async_trait;
 use chrono::Utc;
+use inquire::InquireError;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
@@ -23,7 +24,7 @@ use surrealdb::{
     Surreal,
 };
 use thiserror::Error;
-// #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+// #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)] 
 // #[serde(rename_all = "camelCase")]
 // #[surreal_orm(table_name = "planet")]
 // pub struct Planet {
@@ -221,12 +222,12 @@ pub enum MigrationError {
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
 
-enum MigrationType {
-    Field,
-    Table,
-    Event,
-    Index,
-}
+// enum MigrationType {
+//     Field,
+//     Table,
+//     Event,
+//     Index,
+// }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TableInfo {
@@ -672,19 +673,27 @@ impl Database {
             format!("{};", down_queries.iter().map(|s|s.trim_end_matches(";")).collect::<Vec<_>>().join(";\n").trim().trim_end_matches(";"))
         };
         if up_queries_str.is_empty() && down_queries_str.is_empty() {
-            println!("Are you sure you want to generate an empty migration? (y/n)");
-            std::io::stdout().flush().unwrap();
+            let confirmation = inquire::Confirm::new("Are you sure you want to generate an empty migration? (y/n)")
+                .with_default(false)
+                .with_help_message("This is good if you want to write out some queries manually")
+                .prompt();
+            
+            match confirmation {
+                Ok(true) => {
+                    Migration::create_migration_file(
+                        up_queries_str,
+                        Some(down_queries_str),
+                        "test_migration".to_string(),
+                    );
+                },
+                Ok(false) => {
+                    println!("No migration created"); 
+                },
+                Err(e) => {
+                    println!("Error: {}", e);
+                }
+            };
 
-            let mut input = String::new();
-            std::io::stdin().read_line(&mut input).unwrap();
-
-            if input.trim() == "y" {
-                Migration::create_migration_file(
-                    up_queries_str,
-                    Some(down_queries_str),
-                    "test_migration".to_string(),
-                );
-            }
         } else {
             Migration::create_migration_file(
                 up_queries_str,
@@ -1126,6 +1135,7 @@ where
     }
 }
 
+#[derive(Debug)]
 struct Queries {
     up: Vec<String>,
     down: Vec<String>,
@@ -1297,79 +1307,183 @@ impl DbObject<Tables> for ComparisonTables {
                 }
             }
 
-            // we have to diff left and right fields and prefer right if they are not same
-            let left_table_info = self.left_resources.get_table_fields_data(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
-            let right_table_info = self.right_resources.get_table_fields_data(table.to_string()).expect("Table must be present. This is a bug. Please, report it to surrealorm repository.");
-            
-            let left_fields = self.left_resources.get_table_field_names_as_set(table.to_string());
-            let right_fields = self.right_resources.get_table_field_names_as_set(table.to_string());
-            // add right field definition if left and right are different or left does not yet have
-            // the field
-            for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
-                let left_field_def = left_table_info.get_definition(fname.to_string());
-                let right_field_def = right_table_info.get_definition(fname.to_string());
-                let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::NewName(fname.to_string()));    
-                
-                match (left_field_def.cloned(), right_field_def.cloned()) {
-                    //    First check if left def is same as right def
-                    (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
-                        // do nothing
-                        println!("Field {} is the same in both left and right", fname);
-                    }
-                    (ldef, rdef) => {
-                        println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-
-                        println!("renamed_field_meta: {:#?}", renamed_field_meta);
-                        if let Some(rfm) = renamed_field_meta  {
-                            let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
-                            let new_name = rfm.name;
-
-                            if let Some(rd) = rdef.clone() {
-                                up_queries.push(rd.to_string());
-                            }
-                            if let Some(ld) = left_table_info.get_definition(old_name.to_string()) {
-                                    // Set old name to new name
-                                    up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
-                                        .to_raw()
-                                        .build());
-                                    up_queries.push(remove_field(old_name.to_string()).on_table(table.to_string()).to_raw().build());
-                            
-                                    down_queries.push(ld.to_string());
-                                    down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
-                                        .to_raw()
-                                        .build());
-                                    down_queries.push(remove_field(new_name.to_string()).on_table(table.to_string()).to_raw().build());
-                            }
-                        } else {
-                            // (ii) down => Use Left object definitions(migration directory definition)
-                            if let Some(rd) = rdef.clone() {
-                                up_queries.push(rd.to_string());
-                                down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                            }
-                            
-                            if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
-                        println!("Left: {ldef:?}. Right: {rdef:?}");
-                                // This is an old name in the migration file not in the code
-                                // base, but we want to be sure we've not already handled it
-                                // earlier above if any field has it as an old name
-                                let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
-                                println!("field_with_old_name: {:#?}", field_with_old_name);
-                                if field_with_old_name.is_none(){
-                                    up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                                    down_queries.push(l.to_string());
-                                }
-                            };
-
-                        }
-                    }
-                }
-            }
+                Queries {up: up_queries, down: down_queries} = self.field_diff_union(table);
         }
         Queries {
             up: up_queries,
             down: down_queries,
         }
 
+    }
+}
+
+impl ComparisonTables {
+    fn field_diff_union(&self, table: String)-> Queries {
+        let mut up_queries = vec![];
+        let mut down_queries = vec![];
+        // we have to diff left and right fields and prefer right if they are not same
+        let left_table_info = self.left_resources.get_table_fields_data(table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
+        let right_table_info = self.right_resources.get_table_fields_data(table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
+            
+        let left_fields = self.left_resources.get_table_field_names_as_set(table.to_string());
+        let right_fields = self.right_resources.get_table_field_names_as_set(table.to_string());
+        // add right field definition if left and right are different or left does not yet have
+        // the field
+        for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
+            let left_field_def = left_table_info.get_definition(fname.to_string());
+            let right_field_def = right_table_info.get_definition(fname.to_string());
+            let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::NewName(fname.to_string()));    
+    
+            match (left_field_def.cloned(), right_field_def.cloned()) {
+                //    First check if left def is same as right def
+                (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
+                    // do nothing
+                    println!("Field {} is the same in both left and right", fname);
+                }
+                (ldef, rdef) => {
+                    println!("Field {} is different in both left and right. Use codebase as master/super", fname);
+
+                    println!("renamed_field_meta: {:#?}", renamed_field_meta);
+                    if let Some(rfm) = renamed_field_meta  {
+                        let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
+                        let new_name = rfm.name;
+
+                        if let Some(rd) = rdef.clone() {
+                            up_queries.push(rd.to_string());
+                        }
+                        if let Some(ld) = left_table_info.get_definition(old_name.to_string()) {
+                            // Pseudo Renaming since Surrealdb does not support an ALTER statement
+                            // as of yet. 18th October, 2023.
+                                // Set old name to new name
+                                let queries = rename_field(FieldRenameOptions {
+                                    table: &table,
+                                    old_name: old_name.to_string(),
+                                    new_name: new_name.to_string(),
+                                    left_definition: ld,
+                                });
+                                
+                                up_queries.extend(queries.up);
+                                down_queries.extend(queries.down);
+                        }
+                    } else {
+                        // (ii) down => Use Left object definitions(migration directory definition)
+                        if let Some(rd) = rdef.clone() {
+                            up_queries.push(rd.to_string());
+                            down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                        }
+                
+                        if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
+                            // This is an old name in the migration file not in the code
+                            // base, but we want to be sure we've not already handled it
+                            // earlier above if any field has it as an old name
+                            let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
+                            
+                            if field_with_old_name.is_none(){
+                                up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
+                                down_queries.push(l.to_string());
+                            }
+                        };
+                        
+                        
+                        let left_field_names = left_table_info.get_names_as_set();
+                        let right_field_names = right_table_info.get_names_as_set();
+                        // l -> [ a, b, c ] r -> [ a, b, e ] => [c, e]
+                        let mut left_diff = left_field_names.difference(&right_field_names);
+                        let mut right_diff = right_field_names.difference(&left_field_names);
+                        
+                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1;
+                        let old_name = left_diff.next().expect("Must be a single item on the left here.").to_string();
+                        let new_name = right_diff.next().expect("Must be a single item on the right here.").to_string();
+                        
+                        if is_single_code_field_change && &new_name == fname {
+                            // Implement a rename change
+                            
+                            let left_definition = left_table_info.get_definition(old_name.clone());
+                            let change = Change {
+                                table: table.to_string(),
+                                old_name: old_name.clone(),
+                                new_name,
+                            };
+                            let options = vec![
+                                SingleFieldChangeType::Rename(&change),
+                                SingleFieldChangeType::Delete(&change),
+                            ];
+
+                            let ans: Result<SingleFieldChangeType, InquireError> =
+                                inquire::Select::new("Select the type of change you want", options).prompt();
+
+                            match ans {
+                                Ok(choice) => {
+                                    println!("You chose: {}", choice);
+                                    match choice {
+                                        SingleFieldChangeType::Delete(change) => println!(
+                                            "This is a delete change",
+                                            // change.old_name, change.new_name
+                                        ),
+                                        SingleFieldChangeType::Rename(change) => {
+                                            let queries = rename_field(FieldRenameOptions {
+                                                table: &table,
+                                                old_name: change.old_name.to_string(),
+                                                new_name: change.new_name.to_string(),
+                                                left_definition: left_definition.expect("Left field definition must be present here. If not, this is a bug and should be reported"),
+                                            });
+                                            println!("queries: {:#?}", queries);
+                                            up_queries.extend(queries.up);
+                                            down_queries.extend(queries.down);
+
+                                                println!(
+                                                "This is a rename change",
+                                                // change.old_name, change.new_name
+                                            )
+                                        },
+                                    }
+                                }
+                                Err(_) => println!("There was an error, please try again"),
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        Queries {
+            up: up_queries,
+            down: down_queries,
+        }
+    }
+}
+
+struct FieldRenameOptions<'a> {
+    table: &'a String,
+    old_name: String,
+    new_name: String,
+    left_definition: &'a String, 
+}
+
+fn rename_field(rename_opts: FieldRenameOptions) -> Queries {
+    let FieldRenameOptions {
+        table,
+        old_name,
+        new_name,
+        left_definition,
+    } = rename_opts;
+    let mut up_queries = vec![];
+    let mut down_queries = vec![];
+    up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
+            .to_raw()
+            .build());
+    up_queries.push(remove_field(old_name.to_string()).on_table(table.to_string()).to_raw().build());
+                
+    down_queries.push(left_definition.to_string());
+    down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
+            .to_raw()
+            .build());
+    down_queries.push(remove_field(new_name.to_string()).on_table(table.to_string()).to_raw().build());
+
+    Queries {
+        up: up_queries,
+        down: down_queries,
     }
 }
 
@@ -1412,6 +1526,35 @@ struct TableComparisonFields {
 //     }
 // }
 
+struct Change {
+    table: String,
+    old_name: String,
+    new_name: String,
+}
+
+enum SingleFieldChangeType<'a> {
+    // Delete { old_name: String, new_name: String },
+    // Rename { old_name: String, new_name: String },
+    Delete(&'a Change),
+    Rename(&'a Change),
+}
+
+impl<'a> Display for SingleFieldChangeType<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SingleFieldChangeType::Delete(change) => write!(
+                f,
+                "Delete old field '{}' and create a new one '{}' on table '{}'",
+                change.old_name, change.new_name, change.table
+            ),
+            SingleFieldChangeType::Rename(change) => write!(
+                f,
+                "Rename old field '{}' to new field '{}' on table '{}'",
+                change.old_name, change.new_name, change.table
+            ),
+        }
+    }
+}
 impl DbObject<Fields> for TableComparisonFields {
     fn get_left(&self) -> Fields {
         self.left.clone()
@@ -1657,7 +1800,8 @@ pub struct Animal {
     pub species: String,
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
-    pub terr: String,
+    pub err: String,
+    pub perre: String,
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
