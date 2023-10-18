@@ -1,0 +1,11 @@
+DEFINE TABLE eats SCHEMAFULL;
+DEFINE FIELD createdAt ON eats TYPE datetime;
+DEFINE FIELD place ON eats TYPE string;
+DEFINE FIELD out ON eats TYPE record;
+DEFINE FIELD id ON eats TYPE record<eats>;
+DEFINE FIELD in ON eats TYPE record;
+DEFINE TABLE crop SCHEMAFULL;
+DEFINE FIELD id ON crop TYPE record<crop>;
+DEFINE FIELD id ON animal TYPE record<animal>;
+DEFINE FIELD fama ON animal TYPE string;
+DEFINE FIELD attributes ON animal TYPE array;
