@@ -1195,8 +1195,6 @@ impl DbObject<Tables> for ComparisonTables {
                     }
                 }
             }
-            let l = self.left_resources.get_field_def(table.to_string(), "name".to_string()); 
-            let r = self.right_resources.get_field_def(table.to_string(), "name".to_string()); 
         }
 
         // 3. Diff them

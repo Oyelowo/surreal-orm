@@ -1,0 +1,1 @@
+REMOVE FIELD place ON TABLE eats;
