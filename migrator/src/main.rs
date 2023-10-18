@@ -1,3 +1,6 @@
+use std::fmt::Display;
+
+use inquire::InquireError;
 use m::{Database, DbInfo, Direction, Migration, Planet, Student};
 use migrator as m;
 use surreal_orm::{
@@ -8,6 +11,11 @@ use surreal_orm::{
 #[tokio::main]
 async fn main() {
     m::Database::run_migrations().await;
+    // let options: Vec<&str> = vec![
+    //     "Rename old field name to new field name",
+    //     "Delete old field and create a new one",
+    // ];
+
     // let statement1 = Planet::default().create().to_raw().build();
     // let statement2 = Planet {
     //     name: "Earth".to_string(),
