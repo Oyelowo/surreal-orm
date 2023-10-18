@@ -71,6 +71,7 @@ typed-builder = "0.16.2"
 rand = "0.8.5"
 
 # [dev-dependencies]
+inquire = "0.6.2"
 geo = { version = "0.26.0", features = ["use-serde"] }
 insta = "1.32.0"
 pretty_assertions = "1.4.0"
