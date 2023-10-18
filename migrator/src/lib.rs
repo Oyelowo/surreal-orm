@@ -1170,10 +1170,20 @@ impl DbObject<Tables> for ComparisonTables {
             for field in &right_table_fields {
                 let field_with_old_name = CodeBaseMeta
                     ::find_field_has_old_name(table.to_string(), By::NewName(field.to_string()));    
-                println!("Table: {} Field: {} field_with_old_name: {:#?}", table, field, field_with_old_name.clone());
+
                 if let Some(field_with_old_name) = field_with_old_name {
-                    println!("Inner = Table: {} Field: {} field_with_old_name: {:#?}", table.clone(), field.clone(), field_with_old_name.clone());
-                    let old_name = field_with_old_name.old_name.unwrap();
+                    let old_name = field_with_old_name.old_name.clone().unwrap();
+                    if self.left_resources.get_field_def(table.to_string(), field.to_string()).is_some() {
+                        panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
+                        Use a different name");
+
+                    }
+                    if right_table_fields.contains(&old_name.to_string()) {
+                        panic!("Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
+                            is currently used as a field on the struct. Please, use a different \
+                            value for the old_name on field '{field}'");
+                    }
+                    
                     if self.left_resources.get_field_def(table.to_string(), old_name.to_string()).is_none() {
                         panic!("'{old_name}' as old_name value on the '{table}' model struct/table \
                         is invalid. You are attempting to rename \
@@ -1185,11 +1195,8 @@ impl DbObject<Tables> for ComparisonTables {
                     }
                 }
             }
-            println!("Table name: {}", table);
             let l = self.left_resources.get_field_def(table.to_string(), "name".to_string()); 
             let r = self.right_resources.get_field_def(table.to_string(), "name".to_string()); 
-            println!("Left Field name: {l:?}");
-            println!("Right Field name: {r:?}");
         }
 
         // 3. Diff them
@@ -1283,8 +1290,6 @@ impl DbObject<Tables> for ComparisonTables {
                 }
                 (Some(l), Some(r)) => {
                     println!("Object {} is different in both left and right. Use codebase as master/super", table);
-                    println!("Left: {}", l);
-                    println!("Right: {}", r);
                     
                     // (i) up => Use Right object definitions(codebase definition)
                     up_queries.push(r.to_string());
@@ -1307,6 +1312,8 @@ impl DbObject<Tables> for ComparisonTables {
             for fname in right_fields.union(&left_fields).collect::<Vec<_>>() {
                 let left_field_def = left_table_info.get_definition(fname.to_string());
                 let right_field_def = right_table_info.get_definition(fname.to_string());
+                let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::NewName(fname.to_string()));    
+                
                 match (left_field_def.cloned(), right_field_def.cloned()) {
                     //    First check if left def is same as right def
                     (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
@@ -1315,9 +1322,8 @@ impl DbObject<Tables> for ComparisonTables {
                     }
                     (ldef, rdef) => {
                         println!("Field {} is different in both left and right. Use codebase as master/super", fname);
-                        println!("Right: {:?}", rdef);
 
-                        let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::NewName(fname.to_string()));    
+                        println!("renamed_field_meta: {:#?}", renamed_field_meta);
                         if let Some(rfm) = renamed_field_meta  {
                             let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
                             let new_name = rfm.name;
@@ -1345,11 +1351,13 @@ impl DbObject<Tables> for ComparisonTables {
                                 down_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
                             }
                             
-                            if let (Some(l), None) = (ldef, rdef) {
+                            if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
+                        println!("Left: {ldef:?}. Right: {rdef:?}");
                                 // This is an old name in the migration file not in the code
                                 // base, but we want to be sure we've not already handled it
                                 // earlier above if any field has it as an old name
                                 let field_with_old_name = CodeBaseMeta::find_field_has_old_name(table.to_string(), By::OldName(fname.to_string()));    
+                                println!("field_with_old_name: {:#?}", field_with_old_name);
                                 if field_with_old_name.is_none(){
                                     up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
                                     down_queries.push(l.to_string());
@@ -1650,10 +1658,10 @@ pub struct Student {
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     #[surreal_orm(old_name = "terr")]
-    pub sonja: String,
+    pub species_namx: String,
     pub attributes: Vec<String>,
-    pub created_at: chrono::DateTime<Utc>,
-    pub terr: String,
+    // pub created_at: chrono::DateTime<Utc>,
+    // pub terr: String,
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
