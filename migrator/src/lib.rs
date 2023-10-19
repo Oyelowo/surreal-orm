@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user,
     },
     Edge, Node, *,
 };
@@ -443,6 +443,28 @@ impl FullDbInfo {
         self.all_resources.tables()
     }
 
+    pub fn params(&self) -> Params {
+        self.all_resources.params()
+    }
+
+    pub fn scopes(&self) -> Scopes {
+        self.all_resources.scopes()
+    }
+
+    pub fn functions(&self) -> Functions {
+        self.all_resources.functions()
+    }
+
+    pub fn tokens(&self) -> Tokens {
+        self.all_resources.tokens()
+    }
+
+    pub fn users(&self) -> Users {
+        self.all_resources.users()
+    }
+
+    
+
     pub fn get_table_info(&self, table_name: String) -> Option<&TableInfo> {
         self.fields_by_table.get(&table_name)
     }
@@ -647,6 +669,7 @@ impl Database {
         };
         let tables = init.new_tables().get_queries();
         let analyzers = init.new_analyzers().get_queries();
+        let params = init.new_params().get_queries();
 
         let resources = vec![tables, analyzers];
         for resource in resources {
@@ -1295,18 +1318,6 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
     }
 }
 
-enum DiffType {
-    Left(String),
-    Right(String),
-    Intersect {
-        left_table: String,
-        right_table: String,
-    },
-    Union {
-        left_table: String,
-        right_table: String,
-    },
-}
 
 
 #[derive(Debug, Clone)]
@@ -1316,6 +1327,7 @@ struct ComparisonsInit<'a> {
     // Codebase latest state tables
     right_resources: &'a FullDbInfo,
 }
+
 
 impl<'a> ComparisonsInit <'a>{
     pub fn new_fields(&self, table: String) -> ComparisonFields {
@@ -1337,6 +1349,31 @@ impl<'a> ComparisonsInit <'a>{
         }
     }
     
+    pub fn new_params(&self) -> ComparisonAnalyzers {
+        ComparisonAnalyzers{
+            resources: self,
+        }
+    }
+
+    pub fn new_scopes(&self) -> ComparisonScopes {
+        ComparisonScopes{
+            resources: self,
+        }
+    }
+
+    pub fn new_tokens(&self) -> ComparisonTokens {
+        ComparisonTokens{
+            resources: self,
+        }
+    }
+
+    pub fn new_users(&self) -> ComparisonUsers {
+        ComparisonUsers{
+            resources: self,
+        }
+    }
+
+    
 }
 struct ComparisonFields<'a> {
     table: String,
@@ -1344,10 +1381,6 @@ struct ComparisonFields<'a> {
 }
 
 impl<'a> ComparisonFields <'a> {
-    // fn init(resources: ComparisonsInit) -> ComparisonsInit {
-    //     resources
-    // }
-
     fn left_resources(&self) -> &FullDbInfo {
        self.resources.left_resources 
     }
@@ -1636,31 +1669,11 @@ struct FieldRenameOptions<'a> {
 }
 
 
-struct ComparisonEvents {
-    // Migrations latest state events
-    left: Events,
-    // Codebase latest state events
-    right: Events,
-}
-
-impl DbObject<Events> for ComparisonEvents {
-    fn get_left(&self) -> Events {
-        self.left.clone()
-    }
-
-    fn get_right(&self) -> Events {
-        self.right.clone()
-    }
-
-    fn get_removal_query(&self, name: String) -> String {
-         remove_table(name.to_string()).to_raw().build()
-    }
-}
 
 
 
 macro_rules! define_resource {
-    ($resource:ident, $resource_title_case:ident) => {
+    ($resource:ident, $resource_title_case:ident, $removal_fn_name:ident) => {
         paste! {
             struct [<Comparison$resource_title_case>]<'a> {
                 resources: &'a ComparisonsInit<'a>
@@ -1679,22 +1692,30 @@ macro_rules! define_resource {
 
             impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
                 fn get_left(&self) -> $resource_title_case {
-                    self.left_resources().[<$resource s>]()
+                    self.left_resources().[<$resource>]()
                 }
 
                 fn get_right(&self) -> $resource_title_case{
-                    self.right_resources().[<$resource s>]()
+                    self.right_resources().[<$resource>]()
                 }
 
                 fn get_removal_query(&self, name: String) -> String {
-                    [<remove_$resource>](name.to_string()).to_raw().build()
+                    $removal_fn_name(name.to_string()).to_raw().build()
                 }
             }
         }
     };
 }
 
-define_resource!(analyzer, Analyzers);
+define_resource!(analyzers, Analyzers, remove_analyzer);
+define_resource!(functions, Functions, remove_function);
+define_resource!(params, Params, remove_param);
+define_resource!(scopes, Scopes, remove_scope);
+define_resource!(tokens, Tokens, remove_token);
+define_resource!(users, Users, remove_user);
+define_resource!(indexes, Indexes, remove_index);
+define_resource!(events, Events, remove_event);
+
 
 trait Tabular {
     fn tabe_name(&self) -> String;
