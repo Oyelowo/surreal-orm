@@ -7,7 +7,7 @@
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
 use async_trait::async_trait;
-use nom::{IResult, branch::alt, bytes::complete::{tag, take_while_m_n, take_while1}, character::{complete::{multispace0, multispace1}, is_alphabetic}};
+use nom::{IResult, branch::alt, bytes::complete::{tag, take_while_m_n, take_while1, take_until1, take_till1}, character::{complete::{multispace0, multispace1}, is_alphabetic}, combinator::opt};
 use paste::paste;
 use chrono::Utc;
 use inquire::InquireError;
@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login,
     },
     Edge, Node, *,
 };
@@ -1708,6 +1708,7 @@ macro_rules! define_resource {
     };
 }
 
+#[derive(Debug, Clone)]
 enum PermissionScope {
     Root,
     Namespace,
@@ -1724,7 +1725,7 @@ impl Display for PermissionScope {
     }
 }
 
-enum DefineStatementTypeWithPermissionScope {
+pub enum DefineStatementTypeWithPermissionScope {
     Namespace,
     Database,
     User(UserPermissionScope),
@@ -1739,7 +1740,8 @@ enum DefineStatementTypeWithPermissionScope {
     // Index,
     // Event,
 }
-enum DefineStatementType {
+#[derive(Debug, Clone)]
+pub enum DefineStatementType {
     Namespace,
     Database,
     User,
@@ -1756,67 +1758,16 @@ enum DefineStatementType {
 }
 
 
-struct DefineStatementMeta {
+#[derive(Debug, Clone)]
+pub struct DefineStatementMeta {
     type_: DefineStatementType,
-    permission_scope: PermissionScope,
+    permission_scope: Option<PermissionScope>,
     name: String,
     // definition: String,
 }
 
-fn parse_define_statement(input: &str) -> IResult<&str, DefineStatementMeta> {
-    let (input, _) = multispace0(input)?;
-    let (input, define) = take_while1(char::is_alphabetic)(input)?;
-    let (input, define) = if define.to_lowercase() == "define" {
-        (input, define)
-    } else {
-        return Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Tag,
-        )));
-    };
+fn parse_define_from_on(input: &str) -> IResult<&str, PermissionScope> {
     let (input, _) = multispace1(input)?;
-
-    let (input, define) = take_while1(char::is_alphabetic)(input)?;
-    // DefineStatementType
-    let (input, type_) = if define.to_lowercase() == "namespace" {
-        (input, DefineStatementType::Namespace)
-    } else if define.to_lowercase() == "database" {
-        (input, DefineStatementType::Database)
-    } else if define.to_lowercase() == "user" {
-        (input, DefineStatementType::User)
-    } else if define.to_lowercase() == "token" {
-        (input, DefineStatementType::Token)
-    } else if define.to_lowercase() == "scope" {
-        (input, DefineStatementType::Scope)
-    } else if define.to_lowercase() == "param" {
-        (input, DefineStatementType::Param)
-    } else if define.to_lowercase() == "function" {
-        (input, DefineStatementType::Function)
-    } else if define.to_lowercase() == "analyzer" {
-        (input, DefineStatementType::Analyzer)
-    } else if define.to_lowercase() == "login" {
-        (input, DefineStatementType::Login)
-    } else if define.to_lowercase() == "field" {
-        (input, DefineStatementType::Field)
-    } else if define.to_lowercase() == "table" {
-        (input, DefineStatementType::Table)
-    } else if define.to_lowercase() == "index" {
-        (input, DefineStatementType::Index)
-    } else if define.to_lowercase() == "event" {
-        (input, DefineStatementType::Event)
-    } else {
-        return Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Tag,
-        )));
-    };
-    
-    let (input, _) = multispace1(input)?;
-    
-    let (input, name) = take_while1(|c: char| !c.is_whitespace() || c != '{')(input)?;
-    
-    let (input, _) = multispace1(input)?;
-    
     let (input, on) = take_while1(char::is_alphabetic)(input)?;
     let (input, on) = if on.to_lowercase() == "on" {
         (input, on)
@@ -1842,6 +1793,69 @@ fn parse_define_statement(input: &str) -> IResult<&str, DefineStatementMeta> {
             nom::error::ErrorKind::Tag,
         )));
     };
+
+    Ok((input, permission_scope))
+}
+
+
+pub fn parse_define_statement(input: &str) -> IResult<&str, DefineStatementMeta> {
+    let (input, _) = multispace0(input)?;
+    let (input, define) = take_while1(char::is_alphabetic)(input)?;
+    let (input, define) = if define.to_lowercase() == "define" {
+        (input, define)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    let (input, _) = multispace1(input)?;
+
+    let (input, define_type_) = take_while1(char::is_alphabetic)(input)?;
+    // DefineStatementType
+    let (input, type_) = if define_type_.to_lowercase() == "namespace" {
+        (input, DefineStatementType::Namespace)
+    } else if define_type_.to_lowercase() == "database" {
+        (input, DefineStatementType::Database)
+    } else if define_type_.to_lowercase() == "user" {
+        (input, DefineStatementType::User)
+    } else if define_type_.to_lowercase() == "token" {
+        (input, DefineStatementType::Token)
+    } else if define_type_.to_lowercase() == "scope" {
+        (input, DefineStatementType::Scope)
+    } else if define_type_.to_lowercase() == "param" {
+        (input, DefineStatementType::Param)
+    } else if define_type_.to_lowercase() == "function" {
+        (input, DefineStatementType::Function)
+    } else if define_type_.to_lowercase() == "analyzer" {
+        (input, DefineStatementType::Analyzer)
+    } else if define_type_.to_lowercase() == "login" {
+        (input, DefineStatementType::Login)
+    } else if define_type_.to_lowercase() == "field" {
+        (input, DefineStatementType::Field)
+    } else if define_type_.to_lowercase() == "table" {
+        (input, DefineStatementType::Table)
+    } else if define_type_.to_lowercase() == "index" {
+        (input, DefineStatementType::Index)
+    } else if define_type_.to_lowercase() == "event" {
+        (input, DefineStatementType::Event)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    
+    let (input, _) = multispace1(input)?;
+    
+    // let (input, name) = take_while1(|c: char| c.is_alphanumeric() || c == ':' || c == '$' || c == '_' || c == '-' )(input)?;
+    // let (input, name) = take_until1(" ")(input)?;
+    let (input, name) = take_till1(char::is_whitespace)(input)?;
+    println!("name: {}", name);
+    println!("input: {}", input);
+    
+    let (input, permission_scope) = opt(parse_define_from_on)(input)?;
+    
     let stmt = DefineStatementMeta {
         type_,
         permission_scope,
@@ -1851,7 +1865,7 @@ fn parse_define_statement(input: &str) -> IResult<&str, DefineStatementMeta> {
     Ok((input, stmt))
 }
 
-fn generate_removal_statement(define_statement: String, name: String) -> String {
+pub fn generate_removal_statement(define_statement: String, name: String, table: Option<String>) -> String {
     let (_, stmt) = parse_define_statement(&define_statement).expect("Invalid define statement");
     let removal_stmt = match stmt.type_ {
         DefineStatementType::Namespace => {
@@ -1862,7 +1876,7 @@ fn generate_removal_statement(define_statement: String, name: String) -> String 
         },
         DefineStatementType::User => {
             let remove_init = remove_user(name.to_string());
-            let remove_stmt = match stmt.permission_scope {
+            let remove_stmt = match stmt.permission_scope .expect("Permission scope must be specified in define user statement"){
                 PermissionScope::Root => remove_init.on_root(),
                 PermissionScope::Namespace => remove_init.on_namespace(),
                 PermissionScope::Database => remove_init.on_database(),
@@ -1871,27 +1885,66 @@ fn generate_removal_statement(define_statement: String, name: String) -> String 
         },
         DefineStatementType::Token => {
             let remove_init = remove_token(name.to_string());
-            let remove_stmt = match stmt.permission_scope {
-                PermissionScope::Root => remove_init.on_root(),
+            let remove_stmt = match stmt.permission_scope .expect("Permission scope must be specified in define token statement"){
                 PermissionScope::Namespace => remove_init.on_namespace(),
                 PermissionScope::Database => remove_init.on_database(),
+                PermissionScope::Root => panic!("Tokens cannot be defined on root"),
             };
             remove_stmt.to_raw().build()
         },
-        DefineStatementType::Scope => todo!(),
-        DefineStatementType::Param => todo!(),
-        DefineStatementType::Function => todo!(),
-        DefineStatementType::Analyzer => todo!(),
-        DefineStatementType::Login => todo!(),
-        DefineStatementType::Field => todo!(),
-        DefineStatementType::Table => todo!(),
-        DefineStatementType::Index => todo!(),
-        DefineStatementType::Event => todo!(),
+        DefineStatementType::Scope => {
+             remove_scope(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Param => {
+            remove_param(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Function => {
+            remove_function(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Analyzer => {
+            remove_analyzer(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Login => {
+            let remove_init = remove_login(name.to_string());
+            let remove_stmt = match stmt.permission_scope.expect("Permission scope must be specified in define Login statement"){
+                PermissionScope::Namespace => remove_init.on_namespace(),
+                PermissionScope::Database => remove_init.on_database(),
+                PermissionScope::Root => panic!("Logins cannot be defined on root"),
+            };
+            remove_stmt.to_raw().build()
+        },
+        DefineStatementType::Field => {
+            remove_field(name.to_string()).on_table(table.expect("table must be present for field definition").to_string()).to_raw().build()
+        },
+        DefineStatementType::Table => {
+            remove_table(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Index => {
+            remove_index(name.to_string()).on_table(table.expect("table must be present for index definition").to_string()).to_raw().build()
+        },
+        DefineStatementType::Event => {
+            remove_event(name.to_string()).on_table(table.expect("table must be present for event definition").to_string()).to_raw().build()
+        },
     };
 
-    todo!()
+    removal_stmt
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_remove_statement_generation_for_define_user_on_namespace(){
+    let stmt = generate_removal_statement(
+        "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+        "Oyelowo".into(),
+        None,
+    );
+    assert_eq!(stmt, "fail first");
+        
+    }
+}
 
 define_resource!(analyzers, Analyzers);
 impl<'a> ComparisonAnalyzers<'a> {
