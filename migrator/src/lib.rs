@@ -664,8 +664,13 @@ impl Database {
         let tables = init.new_tables().get_queries();
         let analyzers = init.new_analyzers().get_queries();
         let params = init.new_params().get_queries();
+        let functions = init.new_functions().get_queries();
+        let scopes = init.new_scopes().get_queries();
+        let tokens = init.new_tokens().get_queries();
+        let users = init.new_users().get_queries();
+        
+        let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
-        let resources = vec![tables, analyzers];
         for resource in resources {
             up_queries.extend(resource.up);
             down_queries.extend(resource.down);
@@ -1406,6 +1411,12 @@ impl<'a> ComparisonsInit <'a>{
             resources: self,
         }
     }
+    
+    pub fn new_functions(&self) -> ComparisonFunctions {
+        ComparisonFunctions {
+            resources: self,
+        }
+    }
 }
 
     
@@ -1422,6 +1433,13 @@ impl<'a> ComparisonFields <'a> {
     
     fn right_resources(&self) -> &FullDbInfo {
        self.resources.right_resources
+    }
+    
+    fn get_removal_query_from_resource_name(&self, name: String) -> String {
+                    remove_field(name.to_string())
+                        .on_table(self.table.clone())
+                        .to_raw()
+                        .build()
     }
     
     fn diff_right(&self) -> HashSet<String> {
@@ -1576,11 +1594,11 @@ impl<'a> ComparisonFields <'a> {
                                                     // change.old_name, change.new_name
                                                 );
                                                     
-                                                    up_queries.push(self.get_removal_query_from_left(change.old_name.to_string()));
+                                                    up_queries.push(self.get_removal_query_from_resource_name(change.old_name.to_string()));
                                                     let old_name_field_def = self.left_resources().get_field_def(self.table.to_string(), change.old_name.to_string());
                                                     if let Some(old_field_def) = old_name_field_def  {
                                                         down_queries.push(old_field_def.to_string());
-                                                        down_queries.push(self.get_removal_query_from_right(change.new_name.to_string()));
+                                                        down_queries.push(self.get_removal_query_from_resource_name(change.new_name.to_string()));
                                                     }
 
                                                 },
@@ -1893,33 +1911,6 @@ impl<'a> Display for SingleFieldChangeType<'a> {
                 change.old_name, change.new_name, change.table
             ),
         }
-    }
-}
-impl<'a> DbObject<Fields> for ComparisonFields<'a> {
-    fn get_left(&self) -> Fields {
-        self.left_resources().get_table_fields_data(self.table.to_string()).unwrap_or_default()
-    }
-
-    fn get_right(&self) -> Fields {
-        self.right_resources().get_table_fields_data(self.table.to_string()).unwrap_or_default()
-    }
-
-    fn get_removal_query_from_resource_name(&self, name: String) -> String {
-                    remove_field(name.to_string())
-                        .on_table(self.table.clone())
-                        .to_raw()
-                        .build()
-    }
-
-
-    fn get_queries(&self) -> Queries {todo!()}
-
-    fn get_removal_query_from_left(&self,resource_name:String) -> String {
-        unimplemented!()
-    }
-
-    fn get_removal_query_from_right(&self,resource_name:String) -> String {
-        unimplemented!()
     }
 }
 
