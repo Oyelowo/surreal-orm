@@ -1148,10 +1148,8 @@ struct Queries {
 
 struct ComparisonTables {
     // Migrations latest state tables
-    // left: Tables,
     left_resources: FullDbInfo,
     // Codebase latest state tables
-    // right: Tables,
     right_resources: FullDbInfo,
 }
 
@@ -1178,36 +1176,11 @@ impl DbObject<Tables> for ComparisonTables {
         // in migration directory, throw an error because it means, it must have already been
         // renamed or removed or first time migration is being created.
         for table in self.get_right().get_names() {
-            let left_table_fields = self.left_resources.get_table_field_names(table.to_string());
-            let right_table_fields = self.right_resources.get_table_field_names(table.to_string());
-            for field in &right_table_fields {
-                let field_with_old_name = CodeBaseMeta
-                    ::find_field_has_old_name(table.to_string(), By::NewName(field.to_string()));    
-
-                if let Some(field_with_old_name) = field_with_old_name {
-                    let old_name = field_with_old_name.old_name.clone().unwrap();
-                    if self.left_resources.get_field_def(table.to_string(), field.to_string()).is_some() {
-                        panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
-                        Use a different name");
-
-                    }
-                    if right_table_fields.contains(&old_name.to_string()) {
-                        panic!("Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
-                            is currently used as a field on the struct. Please, use a different \
-                            value for the old_name on field '{field}'");
-                    }
-                    
-                    if self.left_resources.get_field_def(table.to_string(), old_name.to_string()).is_none() {
-                        panic!("'{old_name}' as old_name value on the '{table}' model struct/table \
-                        is invalid. You are attempting to rename \
-                        from {old_name} to {field} but {old_name} is not \
-                            currently in use in migration/live database. Please, \
-                            check that the field is not mispelled and is in the \
-                            right case or use one of the currently available \
-                            fields {}", left_table_fields.join(", "));
-                    }
-                }
-            }
+            ComparisonFields {
+                table: table.to_string(),
+                left_resources: self.left_resources.clone(),
+                right_resources: self.right_resources.clone(),
+            }.validate_field_rename();
         }
 
         // 3. Diff them
@@ -1271,16 +1244,24 @@ impl DbObject<Tables> for ComparisonTables {
                     .get_definition(t_name.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
 
-                    let table_info = self.right_resources.get_table_info(t_name.to_string());
-                    let mut right_fields_defs = if let Some(table_info) = table_info {
-                        let fields = table_info.fields();
-                        fields.get_all_definitions()
-                    } else {
-                        println!("Table fields definitions {} not found in codebase state", t_name);
-                        vec![]
+                    // let table_info = self.right_resources.get_table_info(t_name.to_string());
+                    // let mut right_fields_defs = if let Some(table_info) = table_info {
+                    //     let fields = table_info.fields();
+                    //     fields.get_all_definitions()
+                    // } else {
+                    //     println!("Table fields definitions {} not found in codebase state", t_name);
+                    //     vec![]
+                    // };
+
+                    let fields_comparison = ComparisonFields {
+                        table: t_name.to_string(),
+                        left_resources: self.left_resources.clone(),
+                        right_resources: self.right_resources.clone(),
                     };
+                    
+                    let mut right_fields_defs = fields_comparison.diff_right_as_vec();
+
                     right_fields_defs.insert(0, right_table_def);
-                    println!("right_fields_defs: {:#?}", right_fields_defs);
                     right_fields_defs
                 })
                 .collect::<Vec<_>>()
@@ -1326,9 +1307,9 @@ impl DbObject<Tables> for ComparisonTables {
                     right_resources: self.right_resources.clone(),
                 };
             
-                let fdu = fields_comparison.diff_union_queries();
-                up_queries.extend(fdu.up);
-                down_queries.extend(fdu.down);
+                let fields_diff_union = fields_comparison.diff_union_queries();
+                up_queries.extend(fields_diff_union.up);
+                down_queries.extend(fields_diff_union.down);
         }
         Queries {
             up: up_queries,
@@ -1362,6 +1343,9 @@ struct ComparisonFields {
 }
 
 impl ComparisonFields {
+    // fn init() {
+    //
+    // }
     fn diff_right(&self) -> HashSet<String> {
         self.get_right()
             .get_names_as_set()
@@ -1402,11 +1386,11 @@ impl ComparisonFields {
     }
 
     fn get_left(&self) -> Fields {
-        self.left_resources.get_table_fields_data(self.table).unwrap_or_default()
+        self.left_resources.get_table_fields_data(self.table.to_string()).unwrap_or_default()
     }
 
     fn get_right(&self) -> Fields {
-        self.right_resources.get_table_fields_data(self.table).unwrap_or_default()
+        self.right_resources.get_table_fields_data(self.table.to_string()).unwrap_or_default()
     }
     
 
@@ -1587,7 +1571,42 @@ impl ComparisonFields {
             up: up_queries,
             down: down_queries,
         }
-}
+    }
+
+    fn validate_field_rename(&self) {
+            let table = self.table.clone();
+            let left_table_fields = self.left_resources.get_table_field_names(table.to_string());
+            let right_table_fields = self.right_resources.get_table_field_names(table.to_string());
+            for field in &right_table_fields {
+                let field_with_old_name = CodeBaseMeta
+                    ::find_field_has_old_name(table.to_string(), By::NewName(field.to_string()));    
+
+                if let Some(field_with_old_name) = field_with_old_name {
+                    let old_name = field_with_old_name.old_name.clone().unwrap();
+                    if self.left_resources.get_field_def(table.to_string(), field.to_string()).is_some() {
+                        panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
+                        Use a different name");
+
+                    }
+                    if right_table_fields.contains(&old_name.to_string()) {
+                        panic!("Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
+                            is currently used as a field on the struct. Please, use a different \
+                            value for the old_name on field '{field}'");
+                    }
+                    
+                    if self.left_resources.get_field_def(table.to_string(), old_name.to_string()).is_none() {
+                        panic!("'{old_name}' as old_name value on the '{table}' model struct/table \
+                        is invalid. You are attempting to rename \
+                        from {old_name} to {field} but {old_name} is not \
+                            currently in use in migration/live database. Please, \
+                            check that the field is not mispelled and is in the \
+                            right case or use one of the currently available \
+                            fields {}", left_table_fields.join(", "));
+                    }
+                }
+            }
+
+    }
 
 }
 
@@ -1922,7 +1941,6 @@ pub type AnimalEatsCrop = Eats<Animal, Crop>;
 #[surreal_orm(table_name = "crop", schemafull)]
 pub struct Crop {
     pub id: SurrealSimpleId<Self>,
-    // colour
     pub color: String,
 }
 
