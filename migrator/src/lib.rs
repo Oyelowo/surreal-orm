@@ -2269,13 +2269,37 @@ mod tests {
     use super::*;
 
     fn test_remove_statement_generation_for_define_user_on_namespace(){
-        let stmt = generate_removal_statement(
+        let stmt = generate_removal_statement2(
             "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
             "Oyelowo".into(),
             None,
         );
-        assert_eq!(stmt, "fail first");
+        assert_eq!(stmt, "REMOVE USER Oyelowo ON NAMESPACE".to_string());
         
     }
+
+    fn test_remove_statement_generation_for_define_user_on_database(){
+        let stmt = generate_removal_statement2(
+            "DEFINE USER Oyelowo ON DATABASE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+            "Oyelowo".into(),
+            None,
+        );
+        assert_eq!(stmt, "REMOVE USER Oyelowo ON DATABASE".to_string());
+    }
+
+
+//         let xx = "
+// -- Set the name of the token
+// DEFINE TOKEN token_name
+//   -- Use this OAuth provider for scope authorization
+//   ON NAMESPACE
+//   -- Specify the cryptographic signature algorithm used to sign the token
+//   TYPE HS512
+//   -- Specify the public key so we can verify the authenticity of the token
+//   VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8'
+// ;
+// ".into();
+//     let stm = generate_removal_statement2(xx, "token_name".into(), None);
+
 }
 
