@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update,
+        select, select_value, update, remove_analyzer,
     },
     Edge, Node, *,
 };
@@ -434,6 +434,10 @@ pub struct FullDbInfo {
 }
 
 impl FullDbInfo {
+    pub fn analyzers(&self) -> Analyzers {
+        self.all_resources.analyzers()
+    }
+    
     pub fn tables(&self) -> Tables {
         self.all_resources.tables()
     }
@@ -641,9 +645,14 @@ impl Database {
             right_resources: &right_db.get_all_resources().await.expect("nothing for u on right"),
         };
         let tables = init.new_tables().get_queries();
+        let analyzers = init.new_analyzers().get_queries();
+
+        let resources = vec![tables, analyzers];
+        for resource in resources {
+            up_queries.extend(resource.up);
+            down_queries.extend(resource.down);
+        }
         
-        up_queries.extend(tables.up);
-        down_queries.extend(tables.down);
 
         
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
@@ -1133,10 +1142,6 @@ struct Queries {
 
 struct ComparisonTables<'a> {
     resources: &'a ComparisonsInit<'a>
-    // // Migrations latest state tables
-    // left_resources: FullDbInfo,
-    // // Codebase latest state tables
-    // right_resources: FullDbInfo,
 }
 
 impl<'a> ComparisonTables <'a>{
@@ -1149,6 +1154,7 @@ impl<'a> ComparisonTables <'a>{
     }
     
 }
+
 
 impl<'a> DbObject<Tables> for ComparisonTables <'a>{
     fn get_left(&self) -> Tables {
@@ -1320,6 +1326,12 @@ impl<'a> ComparisonsInit <'a>{
     
     pub fn new_tables(&self) -> ComparisonTables {
         ComparisonTables{
+            resources: self,
+        }
+    }
+    
+    pub fn new_analyzers(&self) -> ComparisonAnalyzers {
+        ComparisonAnalyzers{
             resources: self,
         }
     }
@@ -1644,6 +1656,35 @@ impl DbObject<Events> for ComparisonEvents {
     }
 }
 
+struct ComparisonAnalyzers<'a> {
+    resources: &'a ComparisonsInit<'a>
+}
+
+impl<'a> ComparisonAnalyzers <'a>{
+    fn left_resources(&self) -> &FullDbInfo {
+        self.resources.left_resources
+    }
+    
+    fn right_resources(&self) -> &FullDbInfo {
+        self.resources.right_resources
+    }
+    
+}
+
+impl<'a> DbObject<Analyzers> for ComparisonAnalyzers <'a>{ 
+    fn get_left(&self) -> Analyzers {
+        self.left_resources().analyzers()
+    }
+
+    fn get_right(&self) -> Analyzers {
+        self.right_resources().analyzers()
+    }
+
+    fn get_removal_query(&self, name: String) -> String {
+         remove_analyzer(name.to_string()).to_raw().build()
+    }
+
+}
 trait Tabular {
     fn tabe_name(&self) -> String;
 }
