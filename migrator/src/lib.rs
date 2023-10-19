@@ -7,6 +7,7 @@
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
 use async_trait::async_trait;
+use nom::{IResult, branch::alt, bytes::complete::{tag, take_while_m_n, take_while1}, character::{complete::{multispace0, multispace1}, is_alphabetic}};
 use paste::paste;
 use chrono::Utc;
 use inquire::InquireError;
@@ -15,14 +16,14 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope,
     },
     Edge, Node, *,
 };
 use surrealdb::{
     self,
     engine::local::{Db, Mem},
-    Surreal,
+    Surreal, sql::Query,
 };
 use thiserror::Error;
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)] 
@@ -48,8 +49,8 @@ use thiserror::Error;
 //    DEFINE FIELD tags TYPE array<int>,
 // ]
 //
-//
 // # Tables
+//
 // Planet::get_table_def()
 //
 // DEFINE TABLE planet; // permissions, assertions etc
@@ -1673,7 +1674,7 @@ struct FieldRenameOptions<'a> {
 
 
 macro_rules! define_resource {
-    ($resource:ident, $resource_title_case:ident, $removal_fn_name:ident) => {
+    ($resource:ident, $resource_title_case:ident) => {
         paste! {
             struct [<Comparison$resource_title_case>]<'a> {
                 resources: &'a ComparisonsInit<'a>
@@ -1700,21 +1701,188 @@ macro_rules! define_resource {
                 }
 
                 fn get_removal_query(&self, name: String) -> String {
-                    $removal_fn_name(name.to_string()).to_raw().build()
+                    self.remove_resource(name.to_string())
                 }
             }
         }
     };
 }
 
-define_resource!(analyzers, Analyzers, remove_analyzer);
-define_resource!(functions, Functions, remove_function);
-define_resource!(params, Params, remove_param);
-define_resource!(scopes, Scopes, remove_scope);
-define_resource!(tokens, Tokens, remove_token);
-define_resource!(users, Users, remove_user);
-define_resource!(indexes, Indexes, remove_index);
-define_resource!(events, Events, remove_event);
+enum PermissionScope {
+    Root,
+    Namespace,
+    Database
+}
+
+impl Display for PermissionScope {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PermissionScope::Root => write!(f, "ROOT"),
+            PermissionScope::Namespace => write!(f, "NAMESPACE"),
+            PermissionScope::Database => write!(f, "DATABASE"),
+        }
+    }
+}
+
+enum DefineStatementTypeWithPermissionScope {
+    Namespace,
+    Database,
+    User(UserPermissionScope),
+    Login(NamespaceOrDatabase),
+    Token(NamespaceOrDatabase),
+    Scope,
+    Param,
+    Function,
+    Analyzer,
+    Field,
+    // Table,
+    // Index,
+    // Event,
+}
+enum DefineStatementType {
+    Namespace,
+    Database,
+    User,
+    Token,
+    Scope,
+    Param,
+    Function,
+    Analyzer,
+    Login,
+    Field,
+    Table,
+    Index,
+    Event,
+}
+
+fn parse_permission_scope(input: &str) -> IResult<&str, PermissionScope> {
+    let (input, _) = multispace0(input)?;
+    let (input, define) = take_while1(char::is_alphabetic)(input)?;
+    let (input, define) = if define.to_lowercase() == "define" {
+        (input, define)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    let (input, _) = multispace1(input)?;
+
+    let (input, define) = take_while1(char::is_alphabetic)(input)?;
+    // DefineStatementType
+    let (input, type_) = if define.to_lowercase() == "namespace" {
+        (input, DefineStatementType::Namespace)
+    } else if define.to_lowercase() == "database" {
+        (input, DefineStatementType::Database)
+    } else if define.to_lowercase() == "user" {
+        (input, DefineStatementType::User)
+    } else if define.to_lowercase() == "token" {
+        (input, DefineStatementType::Token)
+    } else if define.to_lowercase() == "scope" {
+        (input, DefineStatementType::Scope)
+    } else if define.to_lowercase() == "param" {
+        (input, DefineStatementType::Param)
+    } else if define.to_lowercase() == "function" {
+        (input, DefineStatementType::Function)
+    } else if define.to_lowercase() == "analyzer" {
+        (input, DefineStatementType::Analyzer)
+    } else if define.to_lowercase() == "login" {
+        (input, DefineStatementType::Login)
+    } else if define.to_lowercase() == "field" {
+        (input, DefineStatementType::Field)
+    } else if define.to_lowercase() == "table" {
+        (input, DefineStatementType::Table)
+    } else if define.to_lowercase() == "index" {
+        (input, DefineStatementType::Index)
+    } else if define.to_lowercase() == "event" {
+        (input, DefineStatementType::Event)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    
+    let (input, _) = multispace1(input)?;
+    
+    let (input, on) = take_while1(char::is_alphabetic)(input)?;
+    let (input, on) = if on.to_lowercase() == "on" {
+        (input, on)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    
+    let (input, _) = multispace1(input)?;
+
+    let (input, permission_scope) = take_while1(char::is_alphabetic)(input)?;
+    let (input, permission_scope) = if permission_scope.to_lowercase() == "root" {
+        (input, PermissionScope::Root)
+    } else if permission_scope.to_lowercase() == "namespace" {
+        (input, PermissionScope::Namespace)
+    } else if permission_scope.to_lowercase() == "database" {
+        (input, PermissionScope::Database)
+    } else {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    };
+    
+    Ok((input, permission_scope))
+}
+
+fn generate_removal_statement(define_statement: String) -> String {
+    todo!()
+}
+
+
+define_resource!(analyzers, Analyzers);
+impl<'a> ComparisonAnalyzers<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        remove_analyzer(name.to_string()).to_raw().build()
+    }
+}
+
+define_resource!(functions, Functions);
+impl<'a> ComparisonFunctions<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        remove_function(name.to_string()).to_raw().build()
+    }
+}
+
+
+define_resource!(params, Params);
+impl<'a> ComparisonParams<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        remove_param(name.to_string()).to_raw().build()
+    }
+}
+
+define_resource!(scopes, Scopes);
+impl<'a> ComparisonScopes<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        remove_scope(name.to_string()).to_raw().build()
+    }
+}
+
+define_resource!(tokens, Tokens);
+impl<'a> ComparisonTokens<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        // TODO: We need to get scope selection i.e whether namespace or database
+        remove_token(name.to_string()).on_namespace().to_raw().build()
+    }
+}
+
+define_resource!(users, Users);
+impl<'a> ComparisonUsers<'a> {
+    fn remove_resource(&self, name: String) -> String {
+        // TODO: We need to get scope selection i.e whether root, namespace or database
+        remove_user(name.to_string()).on_namespace().to_raw().build()
+    }
+}
 
 
 trait Tabular {
@@ -1814,6 +1982,7 @@ impl DbInfo {
     pub fn tokens(&self) -> Tokens {
         self.tokens.clone()
     }
+    
 
     pub fn users(&self) -> Users {
         self.users.clone()
