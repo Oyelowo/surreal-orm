@@ -1931,20 +1931,112 @@ pub fn generate_removal_statement(define_statement: String, name: String, table:
 }
 
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn test_remove_statement_generation_for_define_user_on_namespace(){
-    let stmt = generate_removal_statement(
-        "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
-        "Oyelowo".into(),
-        None,
-    );
-    assert_eq!(stmt, "fail first");
+fn generate_removal_statement2(define_statement: String, name: String, table: Option<String>){
+    use surreal_orm::sql::{self, Base, Statement, statements::DefineStatement};
+    let query = surreal_orm::sql::parse(define_statement.as_str()).expect("Invalid statment");
+    let stmt = query[0].clone();
+    let get_error = |resource_name: String| {
+        if resource_name != name {
+            panic!("Resource name in define statement does not match name in removal statement");
+        }
+    };
+    match stmt {
+        Statement::Define(define_stmt) => {
+            match  define_stmt {
+                DefineStatement::Namespace(ns) => {
+                    get_error(ns.name.to_raw());
+                    remove_namespace(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Database(db) => {
+                    get_error(db.name.to_raw());
+                    remove_database(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Function(fn_) => {
+                    get_error(fn_.name.to_raw());
+                    remove_function(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Analyzer(analyzer) => {
+                    get_error(analyzer.name.to_raw());
+                    remove_analyzer(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Token(tk) => {
+                    get_error(tk.name.to_raw());
+                    
+                    let remove_init = remove_token(name.to_string());
+                    let remove_stmt = match tk.base {
+                        Base::Ns => remove_init.on_namespace(),
+                        Base::Db => remove_init.on_database(),
+                        Base::Root => remove_init.on_database(),
+                        Base::Sc(sc_name) => remove_init.on_scope(sc_name.to_raw()),
+                    };
+                    remove_stmt.to_raw().build()
+                },
+                DefineStatement::Scope(sc) => {
+                    get_error(sc.name.to_raw());
+                    remove_scope(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Param(_) => {
+                    get_error(name.to_string());
+                    remove_param(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Table(table) => {
+                    get_error(table.name.to_raw());
+                    remove_table(name.to_string()).to_raw().build()
+                },
+                DefineStatement::Event(ev) => {
+                    get_error(ev.name.to_raw());
+                    remove_event(name.to_string()).on_table(table.expect("Invalid event. Event must be attached to a table.")).to_raw().build()
+                },
+                DefineStatement::Field(field) => {
+                    get_error(field.name.to_string());
+                    remove_field(name.to_string()).on_table(table.expect("Invalid field. Field must be attached to a table.")).to_raw().build()
+                },
+                DefineStatement::Index(index) => {
+                    get_error(index.name.to_string());
+                    remove_index(name.to_string()).on_table(table.expect("Invalid index. Index must be attached to a table.")).to_raw().build()
+                },
+                DefineStatement::User(user) => {
+                    get_error(user.name.to_raw());
+                    let remove_init = remove_user(name.to_string());
+                    let remove_stmt = match user.base {
+                        Base::Ns => remove_init.on_namespace(),
+                        Base::Db => remove_init.on_database(),
+                        Base::Root => remove_init.on_database(),
+                        Base::Sc(sc_name) => panic!("Users cannot be defined on scope"),
+                    };
+                    remove_stmt.to_raw().build()
+                },
+                DefineStatement::MlModel(ml) => {
+	                // 	TODO: Implement define ml model statmement
+	                // 	write!(f, "DEFINE MODEL ml::{}<{}>", self.name, self.version)?;
+	                // 		write!(f, "PERMISSIONS {}", self.permissions)?;
+	                // get_error(ml.name.to_raw());
+                    // remove_ml_model(name.to_string()).to_raw().build()
+                    todo!()
+                },
+            }
+        },
+        _ => panic!("Not a define statement. Expexted a define statement"),
         
-    }
+    };
+    
+    
+    // let x = stmt.unwrap();
+    // let x = x[0].clone();
+    // if let Statement::Define(x) = x {
+    //     match x {
+    //         DefineStatement::Token(token) => {
+    //             // token.base
+    //             Base:
+    //             println!("token: {:#?}", token);
+    //         }
+    //         _ => {}
+    //     }
+    //     // println!("x: {:#?}", x);
+    // }
+
 }
+
 
 define_resource!(analyzers, Analyzers);
 impl<'a> ComparisonAnalyzers<'a> {
@@ -2184,3 +2276,20 @@ enum FieldChange {
 //
 // Get all the tables and corresponding field definitiins from teh codebase e.g Field(for now)
 // Do a left and right diff to know which tables/fields to remove or add, or change
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_remove_statement_generation_for_define_user_on_namespace(){
+        let stmt = generate_removal_statement(
+            "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+            "Oyelowo".into(),
+            None,
+        );
+        assert_eq!(stmt, "fail first");
+        
+    }
+}
+
