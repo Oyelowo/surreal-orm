@@ -1,16 +1,50 @@
 use std::fmt::Display;
 
 use inquire::InquireError;
-use m::{Database, DbInfo, Direction, Migration, Planet, Student};
+use m::{generate_removal_statement, Planet, Student};
 use migrator as m;
 use surreal_orm::{
     statements::{begin_transaction, info_for},
     transaction, Buildable, Model, Node, Raw, Runnable, SurrealCrudNode, ToRaw,
 };
+use surrealdb::sql::{
+    statements::{DefineStatement, DefineTokenStatement},
+    Base, Statement,
+};
 
 #[tokio::main]
 async fn main() {
-    m::Database::run_migrations().await;
+    // let stmt = generate_removal_statement(
+    //     // "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+    //     // "DEFINE USER Oyelowo ON datAbase PASSWORD 'mapleleaf' ROLES OWNER".into(),
+    //     // "DEFINE USER Oyelowo on DATABASE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+    //     // "DEFINE LOGIN username on DATABASE".into(),
+    //     "DEFINE TOKEN token_name
+    //             ON SCOPE account
+    //             TYPE HS512
+    //             VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8'
+    //         ;".into(),
+    //     "token_name".into(),
+    //     None,
+    // );
+
+    let xx = "
+-- Set the name of the token
+DEFINE TOKEN token_name
+  -- Use this OAuth provider for scope authorization
+  ON NAMESPACE
+  -- Specify the cryptographic signature algorithm used to sign the token
+  TYPE HS512
+  -- Specify the public key so we can verify the authenticity of the token
+  VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8'
+;
+".to_string();
+    let xx = "DEFINE FIELD name ON TABLE planet;".into();
+    let stm = generate_removal_statement(xx, "name".into(), Some("planet".to_string()));
+    println!("stm: {:#?}", stm);
+
+    // println!("stmt: {:#?}", stmt);
+    // m::Database::run_migrations().await;
     // let options: Vec<&str> = vec![
     //     "Rename old field name to new field name",
     //     "Delete old field and create a new one",

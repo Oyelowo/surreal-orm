@@ -224,13 +224,6 @@ pub enum MigrationError {
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
 
-// enum MigrationType {
-//     Field,
-//     Table,
-//     Event,
-//     Index,
-// }
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TableInfo {
     events: Events,
@@ -479,7 +472,7 @@ impl FullDbInfo {
             .get(&table_name)
             .map(|t|{ 
                 let x = t.fields();
-                x.get_definition(field_name).cloned()
+                x.get_definition(&field_name).cloned()
             }).flatten()
     }
     
@@ -966,7 +959,7 @@ trait Informational {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: String) -> Option<&String>;
+    fn get_definition(&self, name: &String) -> Option<&String>;
 }
 
 impl Informational for Info {
@@ -987,8 +980,8 @@ impl Informational for Info {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: String) -> Option<&String> {
-        self.0.get(&name)
+    fn get_definition(&self, name: &String) -> Option<&String> {
+        self.0.get(name)
     }
 }
 
@@ -1025,8 +1018,8 @@ macro_rules! define_object_info {
                 // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
                 // Above can be achieved just doing array<string> on the top level field - skills
                 // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-                fn get_definition(&self, name: String) -> Option<&String> {
-                    self.0.0.get(&name)
+                fn get_definition(&self, name: &String) -> Option<&String> {
+                    self.0.0.get(name)
                 }
             }
 
@@ -1048,6 +1041,9 @@ where
     fn get_left(&self) -> T;
     fn get_right(&self) -> T;
 
+    // fn left_resources(&self) -> &FullDbInfo;
+    // fn right_resources(&self) -> &FullDbInfo;
+    
     fn diff_left(&self) -> Vec<String> {
         self.get_left()
             .get_names_as_set()
@@ -1069,7 +1065,29 @@ where
             .collect::<Vec<_>>()
     }
 
-    fn get_removal_query(&self, name: String) -> String;
+    fn get_removal_query_from_left(&self, resource_name: String) -> String;
+    fn get_removal_query_from_right(&self, resource_name: String) -> String;
+    // fn get_removal_query_from_resource_def_for_left(
+    //     &self,
+    //     define_statement: String,
+    //     resource_name: String,
+    //     table: Option<String>
+    // ) -> String {
+    //     let def = self.left_resources()..get_definition(define_statement).unwrap().to_string();
+    //     generate_removal_statement(def, resource_name, table)
+    // }
+    //
+    // fn get_removal_query_from_resource_def_for_right(
+    //     &self,
+    //     define_statement: String,
+    //     resource_name: String,
+    //     table: Option<String>
+    // ) -> String {
+    //     let def = self.right_resources().get_definition(define_statement).unwrap().to_string();
+    //     generate_removal_statement(def, resource_name, table)
+    // }
+    
+    fn get_removal_query_from_resource_name(&self, name: String) -> String;
 
     fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
@@ -1087,7 +1105,7 @@ where
         up_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|n| self.get_removal_query(n.to_string()))
+                .map(|n| self.get_removal_query_from_left(n.to_string()))
                 .collect::<Vec<_>>(),
         );
 
@@ -1096,7 +1114,7 @@ where
             self.diff_left()
                 .iter()
                 .map(|t| self.get_left()
-                    .get_definition(t.to_string())
+                    .get_definition(&t)
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
@@ -1107,7 +1125,7 @@ where
             self.diff_right()
                 .iter()
                 .map(|t_name| self.get_right()
-                    .get_definition(t_name.to_string())
+                    .get_definition(&t_name)
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
                 .collect::<Vec<_>>(),
         );
@@ -1116,16 +1134,16 @@ where
         down_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|t_name| self.get_removal_query(t_name.to_string()))
+                .map(|t_name| self.get_removal_query_from_left(t_name.to_string()))
                 .collect::<Vec<_>>(),
         );
 
         // HANDLE INTERSECTION
         for object in self.diff_intersect() {
             let right_objects =self.get_right();
-            let right_object_def = right_objects.get_definition(object.to_string());
+            let right_object_def = right_objects.get_definition(&object);
             let left_objects = self.get_left();
-            let left_object_def = left_objects.get_definition(object.to_string());
+            let left_object_def = left_objects.get_definition(&object);
             // compare the two object definitions
             match (left_object_def, right_object_def) {
                 //    First check if left def is same as right def
@@ -1181,7 +1199,8 @@ impl<'a> ComparisonTables <'a>{
 }
 
 
-impl<'a> DbObject<Tables> for ComparisonTables <'a>{
+impl<'a> DbObject<Tables> for ComparisonTables <'a> {
+// impl<'a> ComparisonTables <'a>{
     fn get_left(&self) -> Tables {
         self.left_resources().tables()
     }
@@ -1190,10 +1209,10 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
         self.right_resources().tables()
     }
 
-    fn get_removal_query(&self, name: String) -> String {
-         remove_table(name.to_string()).to_raw().build()
-    }
-
+    // fn get_removal_query_from_resource_name(&self, name: String) -> String {
+    //      remove_table(name.to_string()).to_raw().build()
+    // }
+    //
 
     fn get_queries(&self) -> Queries {
         let mut up_queries = vec![];
@@ -1226,7 +1245,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
         up_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|t| self.get_removal_query(t.to_string()))
+                .map(|t| self.get_removal_query_from_left(t.to_string()))
                 .collect::<Vec<_>>(),
         );
 
@@ -1238,7 +1257,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
                 .iter()
                 .flat_map(|table| {
                    let left_table_def = self.get_left()
-                    .get_definition(table.to_string())
+                    .get_definition(&table)
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
                     
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
@@ -1259,7 +1278,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
                 .iter()
                 .flat_map(|table| {
                     let right_table_def = self.get_right()
-                    .get_definition(table.to_string())
+                    .get_definition(table)
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
 
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
@@ -1276,16 +1295,16 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
         down_queries.extend(
             self.diff_right()
                 .iter()
-                .map(|t_name| self.get_removal_query(t_name.to_string()))
+                .map(|t_name| self.get_removal_query_from_left(t_name.to_string()))
                 .collect::<Vec<_>>(),
         );
 
         // HANDLE INTERSECTION
         for table in self.diff_intersect() {
             let right_objects =self.get_right();
-            let right_object_def = right_objects.get_definition(table.to_string());
+            let right_object_def = right_objects.get_definition(&table);
             let left_objects = self.get_left();
-            let left_object_def = left_objects.get_definition(table.to_string());
+            let left_object_def = left_objects.get_definition(&table);
             // compare the two object definitions
             match (left_object_def, right_object_def) {
                 (Some(l), Some(r)) if l == r => {
@@ -1303,7 +1322,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
                 _ => {
                     panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
                 }
-            }
+            };
 
                 let fields_comaparer = comparison_init.new_fields(table.to_string());
                 let mut fields_diff_union = fields_comaparer.table_intersection_queries();
@@ -1316,6 +1335,20 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a>{
             down: down_queries,
         }
 
+    }
+
+    fn get_removal_query_from_left(&self, resource_name: String) -> String {
+        let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
+        generate_removal_statement(def, resource_name, None)
+    }
+
+    fn get_removal_query_from_right(&self,resource_name: String) -> String {
+        let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
+        generate_removal_statement(def, resource_name, None)
+    }
+
+    fn get_removal_query_from_resource_name(&self,name:String) -> String {
+        remove_table(name.to_string()).to_raw().build()
     }
 }
 
@@ -1373,9 +1406,10 @@ impl<'a> ComparisonsInit <'a>{
             resources: self,
         }
     }
+}
 
     
-}
+
 struct ComparisonFields<'a> {
     table: String,
     resources: &'a ComparisonsInit<'a>
@@ -1456,8 +1490,8 @@ impl<'a> ComparisonFields <'a> {
         // add right field definition if left and right are different or left does not yet have
         // the field
         for fname in self.diff_union() {
-            let left_field_def = left_table_info.get_definition(fname.to_string());
-            let right_field_def = right_table_info.get_definition(fname.to_string());
+            let left_field_def = left_table_info.get_definition(&fname);
+            let right_field_def = right_table_info.get_definition(&fname);
             let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(self.table.to_string(), By::NewName(fname.to_string()));    
     
             match (left_field_def.cloned(), right_field_def.cloned()) {
@@ -1477,7 +1511,7 @@ impl<'a> ComparisonFields <'a> {
                         if let Some(rd) = rdef.clone() {
                             up_queries.push(rd.to_string());
                         }
-                        if let Some(ld) = left_table_info.get_definition(old_name.to_string()) {
+                        if let Some(ld) = left_table_info.get_definition(&old_name.to_string()) {
                             // Pseudo Renaming since Surrealdb does not support an ALTER statement
                             // as of yet. 18th October, 2023.
                                 // Set old name to new name
@@ -1519,7 +1553,7 @@ impl<'a> ComparisonFields <'a> {
                                                             
                                 if new_name.to_string() == fname {
                                     // and the old_name attribute is not explicitly used.
-                                    let left_definition = left_table_info.get_definition(old_name.clone());
+                                    let left_definition = left_table_info.get_definition(old_name);
                                     let change = Change {
                                         table: self.table.to_string(),
                                         old_name: old_name.to_string(),
@@ -1542,11 +1576,11 @@ impl<'a> ComparisonFields <'a> {
                                                     // change.old_name, change.new_name
                                                 );
                                                     
-                                                    up_queries.push(self.get_removal_query(change.old_name.to_string()));
+                                                    up_queries.push(self.get_removal_query_from_left(change.old_name.to_string()));
                                                     let old_name_field_def = self.left_resources().get_field_def(self.table.to_string(), change.old_name.to_string());
                                                     if let Some(old_field_def) = old_name_field_def  {
                                                         down_queries.push(old_field_def.to_string());
-                                                        down_queries.push(self.get_removal_query(change.new_name.to_string()));
+                                                        down_queries.push(self.get_removal_query_from_right(change.new_name.to_string()));
                                                     }
 
                                                 },
@@ -1580,7 +1614,7 @@ impl<'a> ComparisonFields <'a> {
                                 
                                 if field_with_old_name.is_none(){
                                     // up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                                    up_queries.push(self.get_removal_query(fname.to_string()));
+                                    up_queries.push(self.get_removal_query_from_resource_name(fname.to_string()));
                                     down_queries.push(l.to_string());
                                 }
                             };
@@ -1700,9 +1734,26 @@ macro_rules! define_resource {
                     self.right_resources().[<$resource>]()
                 }
 
-                fn get_removal_query(&self, name: String) -> String {
-                    self.remove_resource(name.to_string())
+                // fn get_removal_query(&self, name: String) -> String {
+                //     // self.remove_resource(name.to_string())
+                //     let def = self.get_left().get_definition(define_statement).unwrap().to_string();
+                //     generate_removal_statement(def, resource_name, table)
+                // }
+
+                fn get_removal_query_from_left(&self, resource_name:String) -> String {
+                    let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
+                    generate_removal_statement(def, resource_name, None)
                 }
+
+                fn get_removal_query_from_right(&self,resource_name:String) -> String {
+                    let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
+                    generate_removal_statement(def, resource_name, None)
+                }
+
+                fn get_removal_query_from_resource_name(&self,name:String) -> String {
+                    unimplemented!()
+                }
+
             }
         }
     };
@@ -1847,17 +1898,6 @@ impl<'a> ComparisonUsers<'a> {
 }
 
 
-trait Tabular {
-    fn tabe_name(&self) -> String;
-}
-
-
-// impl Tabular for ComparisonFields {
-//     fn table_name(&self) -> String {
-//         "tables".to_string()
-//     }
-// }
-
 struct Change {
     table: String,
     old_name: String,
@@ -1896,7 +1936,7 @@ impl<'a> DbObject<Fields> for ComparisonFields<'a> {
         self.right_resources().get_table_fields_data(self.table.to_string()).unwrap_or_default()
     }
 
-    fn get_removal_query(&self, name: String) -> String {
+    fn get_removal_query_from_resource_name(&self, name: String) -> String {
                     remove_field(name.to_string())
                         .on_table(self.table.clone())
                         .to_raw()
@@ -1905,6 +1945,14 @@ impl<'a> DbObject<Fields> for ComparisonFields<'a> {
 
 
     fn get_queries(&self) -> Queries {todo!()}
+
+    fn get_removal_query_from_left(&self,resource_name:String) -> String {
+        unimplemented!()
+    }
+
+    fn get_removal_query_from_right(&self,resource_name:String) -> String {
+        unimplemented!()
+    }
 }
 
 
@@ -2077,6 +2125,4 @@ mod tests {
 // ;
 // ".into();
 //     let stm = generate_removal_statement2(xx, "token_name".into(), None);
-
 }
-
