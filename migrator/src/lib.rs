@@ -1207,21 +1207,13 @@ impl DbObject<Tables> for ComparisonTables {
         down_queries.extend(
             self.diff_left()
                 .iter()
-                .flat_map(|t| {
+                .flat_map(|table| {
                    let left_table_def = self.get_left()
-                    .get_definition(t.to_string())
+                    .get_definition(table.to_string())
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
                     
-                    // let table_info = self.left_resources.get_table_info(t.to_string());
-                    // let mut fields_defs = if let Some(table_info) = table_info {
-                    //     let fields = table_info.fields();
-                    //     fields.get_all_definitions()
-                    // } else {
-                    //     println!("Table fields definitions {} not found in migrations state", t);
-                    //     vec![]
-                    // };
                     let fields_comparison = ComparisonFields {
-                        table: t.to_string(),
+                        table: table.to_string(),
                         left_resources: self.left_resources.clone(),
                         right_resources: self.right_resources.clone(),
                     };
@@ -1307,7 +1299,7 @@ impl DbObject<Tables> for ComparisonTables {
                     right_resources: self.right_resources.clone(),
                 };
             
-                let fields_diff_union = fields_comparison.diff_union_queries();
+                let fields_diff_union = fields_comparison.table_intersection_queries();
                 up_queries.extend(fields_diff_union.up);
                 down_queries.extend(fields_diff_union.down);
         }
@@ -1402,7 +1394,7 @@ impl ComparisonFields {
     //                     .build()
     // }
 
-    fn diff_union_queries(&self)-> Queries {
+    fn table_intersection_queries(&self)-> Queries {
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         // we have to diff left and right fields and prefer right if they are not same
@@ -1457,13 +1449,13 @@ impl ComparisonFields {
                         let right_field_names = right_table_info.get_names_as_set();
                         // 
                         // l -> [ a, b, c ] r -> [ a, b, e ] => [c, e]
-                        let mut left_diff = left_field_names.difference(&right_field_names);
-                        let mut right_diff = right_field_names.difference(&left_field_names);
+                        let left_diff = left_field_names.difference(&right_field_names);
+                        let right_diff = right_field_names.difference(&left_field_names);
                         
                         let old_name = left_diff.clone().peekable().peek().expect("Must be a single item on the left here.").to_string();
                         let new_name = right_diff.clone().peekable().peek().expect("Must be a single item on the right here.").to_string();
                         
-                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1 && new_name == fname;
+                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1 ;
                         
                         if let Some(rd) = rdef.clone() {
                             up_queries.push(rd.to_string());
@@ -1473,8 +1465,9 @@ impl ComparisonFields {
                         }
                         
                         if is_single_code_field_change {
-                            // Implement a rename change
-                            
+                            if new_name == fname {
+                            // Implement a rename change when a single field name is changed
+                            // and the old_name attribute is not explicitly used.
                             let left_definition = left_table_info.get_definition(old_name.clone());
                             let change = Change {
                                 table: self.table.to_string(),
@@ -1517,6 +1510,8 @@ impl ComparisonFields {
                                     }
                                 }
                                 Err(_) => println!("There was an error, please try again"),
+                            }
+
                             }
                         } else {
                     
