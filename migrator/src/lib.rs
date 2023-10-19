@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login, define_event,
     },
     Edge, Node, *,
 };
@@ -474,6 +474,18 @@ impl FullDbInfo {
                 let x = t.fields();
                 x.get_definition(&field_name).cloned()
             }).flatten()
+    }
+    
+    pub fn get_table_indexes_data(&self, table_name: String) -> Option<Indexes> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.indexes().clone())
+    }
+    
+    pub fn get_table_events_data(&self, table_name: String) -> Option<Events> {
+        self.fields_by_table
+            .get(&table_name)
+            .map(|t| t.events().clone())
     }
     
     pub fn get_table_fields_data(&self, table_name: String) -> Option<Fields> {
@@ -1201,6 +1213,16 @@ impl<'a> ComparisonTables <'a>{
         self.resources.right_resources
     }
     
+    fn diff_union(&self) -> HashSet<String> {
+        self.left_resources()
+            .tables()
+            .get_names_as_set()
+            .union(&self
+                .right_resources()
+                .tables()
+                .get_names_as_set()
+            ).cloned().collect::<HashSet<_>>()
+    }
 }
 
 
@@ -1266,9 +1288,13 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
                     
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
+                    let indexes_comaparer = comparison_init.new_indexes(table.to_string());
                     
                     let mut fields_defs = fields_comaparer.diff_left_as_vec();
                     fields_defs.insert(0, left_table_def);
+                    
+                    fields_defs.extend(indexes_comaparer.diff_left());
+
                     fields_defs
                 })
                 .collect::<Vec<_>>()
@@ -1287,9 +1313,14 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
                     .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
 
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
+                    let indexes_comaparer = comparison_init.new_indexes(table.to_string());
+                    
                     let mut right_fields_defs = fields_comaparer.diff_right_as_vec();
 
                     right_fields_defs.insert(0, right_table_def);
+                    
+                    right_fields_defs.extend(indexes_comaparer.diff_right());
+                    
                     right_fields_defs
                 })
                 .collect::<Vec<_>>()
@@ -1330,11 +1361,24 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
             };
 
                 let fields_comaparer = comparison_init.new_fields(table.to_string());
+                let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
+            
                 let mut fields_diff_union = fields_comaparer.table_intersection_queries();
             
                 up_queries.extend(fields_diff_union.up);
                 down_queries.extend(fields_diff_union.down);
+            
+                up_queries.extend(indexes_comaparer.up);
+                down_queries.extend(indexes_comaparer.down);
         }
+
+        // for table in self.diff_union() {
+        //     let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
+        //
+        //
+        //     up_queries.extend(indexes_comaparer.up);
+        //     down_queries.extend(indexes_comaparer.down);
+        // }
         Queries {
             up: up_queries,
             down: down_queries,
@@ -1375,6 +1419,19 @@ impl<'a> ComparisonsInit <'a>{
             resources: self
         }
     }
+    pub fn new_indexes(&self, table: String) -> ComparisonIndexes {
+        ComparisonIndexes {
+            table: table.to_string(),
+            resources: self
+        }
+    }
+    
+    // pub fn new_events(&self, table: String) -> ComparisonEvents {
+    //     ComparisonEvents {
+    //         table: table.to_string(),
+    //         resources: self
+    //     }
+    // }
     
     pub fn new_tables(&self) -> ComparisonTables {
         ComparisonTables{
@@ -1883,6 +1940,53 @@ define_resource!(tokens, Tokens);
 
 define_resource!(users, Users);
 
+struct ComparisonIndexes<'a> {
+    table: String,
+    resources: &'a ComparisonsInit<'a>,
+}
+impl<'a> ComparisonIndexes<'a> {
+    fn left_resources(&self) -> &FullDbInfo {
+        self.resources.left_resources
+    }
+    fn right_resources(&self) -> &FullDbInfo {
+        self.resources.right_resources
+    }
+}
+impl<'a> DbObject<Indexes> for ComparisonIndexes<'a> {
+    fn get_left(&self) -> Indexes {
+        self.left_resources().get_table_indexes_data(self.table.clone()).unwrap_or_default()
+    }
+    
+    fn get_right(&self) -> Indexes {
+        self.right_resources().get_table_indexes_data(self.table.clone()).unwrap_or_default()
+    }
+    
+    fn get_removal_query_from_left(&self, resource_name: String) -> String {
+        let def = self
+            .get_left()
+            .get_definition(&resource_name)
+            .unwrap()
+            .to_string();
+        generate_removal_statement(def, resource_name, None)
+    }
+    
+    fn get_removal_query_from_right(&self, resource_name: String) -> String {
+        let def = self
+            .get_right()
+            .get_definition(&resource_name)
+            .unwrap()
+            .to_string();
+        generate_removal_statement(def, resource_name, None)
+    }
+    
+    fn get_removal_query_from_resource_name(&self, name: String) -> String {
+        remove_index(name.to_string())
+            .on_table(self.table.clone())
+            .to_raw()
+            .build()
+    }
+}
+
 
 struct Change {
     table: String,
@@ -1992,7 +2096,25 @@ pub struct Animal {
     pub characteristics: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub err: String,
-    pub perre: String,
+    pub speed: u64,
+}
+
+impl TableEvents for Animal {
+    fn all(&self) -> Vec<Raw> {
+        let animal::Schema { species, speed, .. } = Animal::schema();
+        
+        let event1 = define_event("event1".into())
+            .on_table("animal".to_string())
+            .when(cond(species.eq("Homo Erectus").and(speed.gt(545))))
+            .to_raw()
+            .build();
+        
+        vec![event1]
+    }
+}
+
+trait TableEvents {
+   fn all(&self) -> Vec<Raw>; 
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
