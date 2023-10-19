@@ -24,7 +24,9 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Token};
+use crate::{
+    Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Scope, Token, TokenTarget,
+};
 
 use super::NamespaceOrDatabase;
 
@@ -50,13 +52,15 @@ pub fn remove_token(token: impl Into<Token>) -> RemoveTokenStatementInit {
     RemoveTokenStatementInit {
         token: token.into(),
         on: None,
+        // bindings: vec![],
     }
 }
 
 /// Remove token statement
 pub struct RemoveTokenStatementInit {
     token: Token,
-    on: Option<NamespaceOrDatabase>,
+    on: Option<TokenTarget>,
+    // bindings: BindingsList,
 }
 
 /// Remove token statement
@@ -79,13 +83,22 @@ impl From<RemoveTokenStatementInit> for RemoveTokenStatement {
 impl RemoveTokenStatementInit {
     /// Specify to remove the token from namespace
     pub fn on_namespace(mut self) -> RemoveTokenStatement {
-        self.on = Some(NamespaceOrDatabase::Namespace);
+        self.on = Some(TokenTarget::Namespace);
         self.into()
     }
 
     /// Specify to remove the token from database
     pub fn on_database(mut self) -> RemoveTokenStatement {
-        self.on = Some(NamespaceOrDatabase::Database);
+        self.on = Some(TokenTarget::Database);
+        self.into()
+    }
+
+    /// Specify to remove the token from scope
+    pub fn on_scope(mut self, scope_name: impl Into<Scope>) -> RemoveTokenStatement {
+        // let binding = Binding::new(scope_name.into());
+        // self.bindings.push(binding.clone());
+        // self.value = Some(binding.get_param_dollarised().to_owned());
+        self.on = Some(TokenTarget::Scope(scope_name.into().into()));
         self.into()
     }
 }
