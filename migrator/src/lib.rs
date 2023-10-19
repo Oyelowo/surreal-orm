@@ -7,6 +7,7 @@
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
 use async_trait::async_trait;
+use paste::paste;
 use chrono::Utc;
 use inquire::InquireError;
 use regex::Regex;
@@ -14,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope,
     },
     Edge, Node, *,
 };
@@ -1656,35 +1657,45 @@ impl DbObject<Events> for ComparisonEvents {
     }
 }
 
-struct ComparisonAnalyzers<'a> {
-    resources: &'a ComparisonsInit<'a>
+
+
+macro_rules! define_resource {
+    ($resource:ident, $resource_title_case:ident) => {
+        paste! {
+            struct [<Comparison$resource_title_case>]<'a> {
+                resources: &'a ComparisonsInit<'a>
+            }
+            
+            impl<'a> [<Comparison$resource_title_case>]<'a>{
+                fn left_resources(&self) -> &FullDbInfo {
+                    self.resources.left_resources
+                }
+                
+                fn right_resources(&self) -> &FullDbInfo {
+                    self.resources.right_resources
+                }
+                
+            }
+
+            impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
+                fn get_left(&self) -> $resource_title_case {
+                    self.left_resources().[<$resource s>]()
+                }
+
+                fn get_right(&self) -> $resource_title_case{
+                    self.right_resources().[<$resource s>]()
+                }
+
+                fn get_removal_query(&self, name: String) -> String {
+                    [<remove_$resource>](name.to_string()).to_raw().build()
+                }
+            }
+        }
+    };
 }
 
-impl<'a> ComparisonAnalyzers <'a>{
-    fn left_resources(&self) -> &FullDbInfo {
-        self.resources.left_resources
-    }
-    
-    fn right_resources(&self) -> &FullDbInfo {
-        self.resources.right_resources
-    }
-    
-}
+define_resource!(analyzer, Analyzers);
 
-impl<'a> DbObject<Analyzers> for ComparisonAnalyzers <'a>{ 
-    fn get_left(&self) -> Analyzers {
-        self.left_resources().analyzers()
-    }
-
-    fn get_right(&self) -> Analyzers {
-        self.right_resources().analyzers()
-    }
-
-    fn get_removal_query(&self, name: String) -> String {
-         remove_analyzer(name.to_string()).to_raw().build()
-    }
-
-}
 trait Tabular {
     fn tabe_name(&self) -> String;
 }
