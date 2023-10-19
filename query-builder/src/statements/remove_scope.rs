@@ -16,6 +16,7 @@ REMOVE [
     | DATABASE @name
     | LOGIN @name ON [ NAMESPACE | DATABASE ]
     | TOKEN @name ON [ NAMESPACE | DATABASE ]
+    | USER @name ON [ ROOT | NAMESPACE | DATABASE ]
     | SCOPE @name
     | TABLE @name
     | EVENT @name ON [ TABLE ] @table

@@ -28,6 +28,10 @@ pub struct Login(sql::Idiom);
 #[derive(Debug, Clone)]
 pub struct Token(sql::Idiom);
 
+/// Surreal token
+#[derive(Debug, Clone)]
+pub struct User(sql::Idiom);
+
 /// Surreal scope
 #[derive(Debug, Clone)]
 pub struct Scope(sql::Idiom);
@@ -134,7 +138,7 @@ macro_rules! impl_new_for_all {
     };
 }
 
-impl_new_for_all!(Namespace, Database, Login, Token, Scope, Event, TableIndex);
+impl_new_for_all!(Namespace, Database, Login, Token, User, Scope, Event, TableIndex);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
@@ -171,7 +175,7 @@ macro_rules! impl_display_for_all {
     )*
     };
 }
-impl_display_for_all!(Namespace, Database, Login, Token, Scope, Table, Event, TableIndex);
+impl_display_for_all!(Namespace, Database, Login, Token, User, Scope, Table, Event, TableIndex);
 
 /// Wrapper around Surreal idiom. X suffix stands for extra.
 pub struct Idiomx(sql::Idiom);

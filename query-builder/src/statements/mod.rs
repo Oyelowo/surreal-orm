@@ -44,6 +44,7 @@ pub(crate) mod remove_param;
 pub(crate) mod remove_scope;
 pub(crate) mod remove_table;
 pub(crate) mod remove_token;
+pub(crate) mod remove_user;
 pub(crate) mod return_;
 pub(crate) mod select;
 pub(crate) mod select_surreal_id_range;
@@ -96,6 +97,7 @@ pub use remove_param::{remove_param, RemoveParamStatement};
 pub use remove_scope::{remove_scope, RemoveScopeStatement};
 pub use remove_table::{remove_table, RemoveTableStatement};
 pub use remove_token::{remove_token, RemoveTokenStatement};
+pub use remove_user::{remove_user, RemoveUserStatement};
 pub use return_::{return_, ReturnStatement};
 pub use select::{
     order, select, select_diff, select_value, Order, Orderables, SelectStatement,
