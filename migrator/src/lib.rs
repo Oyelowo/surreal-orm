@@ -636,31 +636,16 @@ impl Database {
         let right_tables = right_db_info.tables();
         println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
-        let tables = ComparisonTables {
-            left_resources: left_db.get_all_resources().await.expect("nothing for u on left"),
-            right_resources: right_db.get_all_resources().await.expect("nothing for u on right"),
-        }.get_queries();
+        let init = ComparisonsInit {
+            left_resources: &left_db.get_all_resources().await.expect("nothing for u on left"),
+            right_resources: &right_db.get_all_resources().await.expect("nothing for u on right"),
+        };
+        let tables = init.new_tables().get_queries();
         
         up_queries.extend(tables.up);
         down_queries.extend(tables.down);
 
         
-        // for table_name in right_tables.get_names() {
-        //     let left_table_info = left_db.get_table_info(table_name.clone()).await.expect("could not get left db table info");
-        //     let right_table_info = right_db.get_table_info(table_name.clone()).await.expect("could not get right  db table info");
-        //
-        //     let queries = TableComparisonFields {
-        //         left: left_table_info.fields(),
-        //         right: right_table_info.fields(),
-        //         right_table: table_name.clone(),
-        //     }.get_queries();
-        //
-        //     up_queries.extend(queries.up);
-        //     down_queries.extend(queries.down);
-        // }
-
-
-
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = if up_queries.is_empty() {
             "".to_string()
@@ -1146,20 +1131,32 @@ struct Queries {
     down: Vec<String>,
 }
 
-struct ComparisonTables {
-    // Migrations latest state tables
-    left_resources: FullDbInfo,
-    // Codebase latest state tables
-    right_resources: FullDbInfo,
+struct ComparisonTables<'a> {
+    resources: &'a ComparisonsInit<'a>
+    // // Migrations latest state tables
+    // left_resources: FullDbInfo,
+    // // Codebase latest state tables
+    // right_resources: FullDbInfo,
 }
 
-impl DbObject<Tables> for ComparisonTables {
+impl<'a> ComparisonTables <'a>{
+    fn left_resources(&self) -> &FullDbInfo {
+        self.resources.left_resources
+    }
+    
+    fn right_resources(&self) -> &FullDbInfo {
+        self.resources.right_resources
+    }
+    
+}
+
+impl<'a> DbObject<Tables> for ComparisonTables <'a>{
     fn get_left(&self) -> Tables {
-        self.left_resources.tables()
+        self.left_resources().tables()
     }
 
     fn get_right(&self) -> Tables {
-        self.right_resources.tables()
+        self.right_resources().tables()
     }
 
     fn get_removal_query(&self, name: String) -> String {
@@ -1171,8 +1168,8 @@ impl DbObject<Tables> for ComparisonTables {
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         let comparison_init = ComparisonsInit{
-            left_resources: &self.left_resources, 
-            right_resources: &self.right_resources
+            left_resources: &self.resources.left_resources, 
+            right_resources: &self.resources.right_resources
         }; 
 
         // validate old_name in codebase. If it exists on any field but not on any field in
@@ -1321,12 +1318,11 @@ impl<'a> ComparisonsInit <'a>{
         }
     }
     
-    // pub fn new_tables(self, table: String) -> ComparisonFields {
-    //     ComparisonFields{
-    //         table: table.to_string(),
-    //         resources: self
-    //     }
-    // }
+    pub fn new_tables(&self) -> ComparisonTables {
+        ComparisonTables{
+            resources: self,
+        }
+    }
     
 }
 struct ComparisonFields<'a> {
@@ -1339,6 +1335,14 @@ impl<'a> ComparisonFields <'a> {
     //     resources
     // }
 
+    fn left_resources(&self) -> &FullDbInfo {
+       self.resources.left_resources 
+    }
+    
+    fn right_resources(&self) -> &FullDbInfo {
+       self.resources.right_resources
+    }
+    
     fn diff_right(&self) -> HashSet<String> {
         self.get_right()
             .get_names_as_set()
@@ -1386,13 +1390,6 @@ impl<'a> ComparisonFields <'a> {
         self.resources.right_resources.get_table_fields_data(self.table.to_string()).unwrap_or_default()
     }
 
-    fn left_resources(&self) -> FullDbInfo {
-       self.resources.left_resources.clone() 
-    }
-    
-    fn right_resources(&self) -> FullDbInfo {
-       self.resources.right_resources.clone() 
-    }
 
 
     // fn get_removal_query(&self, name: String) -> String {
