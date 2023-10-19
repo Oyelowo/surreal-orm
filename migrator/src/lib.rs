@@ -1853,49 +1853,17 @@ pub fn generate_removal_statement(define_statement: String, name: String, table:
 
 
 define_resource!(analyzers, Analyzers);
-impl<'a> ComparisonAnalyzers<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        remove_analyzer(name.to_string()).to_raw().build()
-    }
-}
 
 define_resource!(functions, Functions);
-impl<'a> ComparisonFunctions<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        remove_function(name.to_string()).to_raw().build()
-    }
-}
 
 
 define_resource!(params, Params);
-impl<'a> ComparisonParams<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        remove_param(name.to_string()).to_raw().build()
-    }
-}
 
 define_resource!(scopes, Scopes);
-impl<'a> ComparisonScopes<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        remove_scope(name.to_string()).to_raw().build()
-    }
-}
 
 define_resource!(tokens, Tokens);
-impl<'a> ComparisonTokens<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        // TODO: We need to get scope selection i.e whether namespace or database
-        remove_token(name.to_string()).on_namespace().to_raw().build()
-    }
-}
 
 define_resource!(users, Users);
-impl<'a> ComparisonUsers<'a> {
-    fn remove_resource(&self, name: String) -> String {
-        // TODO: We need to get scope selection i.e whether root, namespace or database
-        remove_user(name.to_string()).on_namespace().to_raw().build()
-    }
-}
 
 
 struct Change {
