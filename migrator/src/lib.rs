@@ -1931,16 +1931,16 @@ pub fn generate_removal_statement(define_statement: String, name: String, table:
 }
 
 
-fn generate_removal_statement2(define_statement: String, name: String, table: Option<String>){
+pub fn generate_removal_statement2(define_statement: String, name: String, table: Option<String>) -> String{
     use surreal_orm::sql::{self, Base, Statement, statements::DefineStatement};
     let query = surreal_orm::sql::parse(define_statement.as_str()).expect("Invalid statment");
     let stmt = query[0].clone();
     let get_error = |resource_name: String| {
         if resource_name != name {
-            panic!("Resource name in define statement does not match name in removal statement");
+            panic!("Resource name - {} - in define statement does not match name - {} - in removal statement", resource_name, name);
         }
     };
-    match stmt {
+    let stmt = match stmt {
         Statement::Define(define_stmt) => {
             match  define_stmt {
                 DefineStatement::Namespace(ns) => {
@@ -2020,21 +2020,7 @@ fn generate_removal_statement2(define_statement: String, name: String, table: Op
         
     };
     
-    
-    // let x = stmt.unwrap();
-    // let x = x[0].clone();
-    // if let Statement::Define(x) = x {
-    //     match x {
-    //         DefineStatement::Token(token) => {
-    //             // token.base
-    //             Base:
-    //             println!("token: {:#?}", token);
-    //         }
-    //         _ => {}
-    //     }
-    //     // println!("x: {:#?}", x);
-    // }
-
+    stmt
 }
 
 
