@@ -1778,9 +1778,10 @@ pub struct Student {
 #[surreal_orm(table_name = "animal", schemafull)]
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(old_name = "species")]
     pub species: String,
-    pub attributes: Vec<String>,
+    // Improve error essage for old_nmae using word similarity algo
+    #[surreal_orm(old_name = "attributes")]
+    pub characteristics: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub err: String,
     pub perre: String,
