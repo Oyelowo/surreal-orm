@@ -55,21 +55,21 @@ pub fn remove_user(user: impl Into<User>) -> RemoveUserStatementInit {
 }
 
 #[allow(missing_docs)]
-pub enum UserScopeSpace {
+pub enum UserPermissionScope {
     Namespace,
     Database,
     Root,
 }
 
-impl Display for UserScopeSpace {
+impl Display for UserPermissionScope {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",
             match self {
-                UserScopeSpace::Namespace => "NAMESPACE",
-                UserScopeSpace::Database => "DATABASE",
-                UserScopeSpace::Root => "ROOT",
+                UserPermissionScope::Namespace => "NAMESPACE",
+                UserPermissionScope::Database => "DATABASE",
+                UserPermissionScope::Root => "ROOT",
             }
         )
     }
@@ -78,7 +78,7 @@ impl Display for UserScopeSpace {
 /// Remove User statement
 pub struct RemoveUserStatementInit {
     user: User,
-    on: Option<UserScopeSpace>,
+    on: Option<UserPermissionScope>,
 }
 
 /// Remove User statement
@@ -101,19 +101,19 @@ impl From<RemoveUserStatementInit> for RemoveUserStatement {
 impl RemoveUserStatementInit {
     /// Specify to remove the User from root
     pub fn on_root(mut self) -> RemoveUserStatement {
-        self.on = Some(UserScopeSpace::Root);
+        self.on = Some(UserPermissionScope::Root);
         self.into()
     }
 
     /// Specify to remove the User from namespace
     pub fn on_namespace(mut self) -> RemoveUserStatement {
-        self.on = Some(UserScopeSpace::Namespace);
+        self.on = Some(UserPermissionScope::Namespace);
         self.into()
     }
 
     /// Specify to remove the User from database
     pub fn on_database(mut self) -> RemoveUserStatement {
-        self.on = Some(UserScopeSpace::Database);
+        self.on = Some(UserPermissionScope::Database);
         self.into()
     }
 }
