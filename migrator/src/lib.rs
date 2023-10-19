@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database,
     },
     Edge, Node, *,
 };
@@ -1755,7 +1755,15 @@ enum DefineStatementType {
     Event,
 }
 
-fn parse_permission_scope(input: &str) -> IResult<&str, PermissionScope> {
+
+struct DefineStatementMeta {
+    type_: DefineStatementType,
+    permission_scope: PermissionScope,
+    name: String,
+    // definition: String,
+}
+
+fn parse_define_statement(input: &str) -> IResult<&str, DefineStatementMeta> {
     let (input, _) = multispace0(input)?;
     let (input, define) = take_while1(char::is_alphabetic)(input)?;
     let (input, define) = if define.to_lowercase() == "define" {
@@ -1805,6 +1813,10 @@ fn parse_permission_scope(input: &str) -> IResult<&str, PermissionScope> {
     
     let (input, _) = multispace1(input)?;
     
+    let (input, name) = take_while1(|c: char| !c.is_whitespace() || c != '{')(input)?;
+    
+    let (input, _) = multispace1(input)?;
+    
     let (input, on) = take_while1(char::is_alphabetic)(input)?;
     let (input, on) = if on.to_lowercase() == "on" {
         (input, on)
@@ -1830,11 +1842,53 @@ fn parse_permission_scope(input: &str) -> IResult<&str, PermissionScope> {
             nom::error::ErrorKind::Tag,
         )));
     };
+    let stmt = DefineStatementMeta {
+        type_,
+        permission_scope,
+        name: name.to_string(),
+    };
     
-    Ok((input, permission_scope))
+    Ok((input, stmt))
 }
 
-fn generate_removal_statement(define_statement: String) -> String {
+fn generate_removal_statement(define_statement: String, name: String) -> String {
+    let (_, stmt) = parse_define_statement(&define_statement).expect("Invalid define statement");
+    let removal_stmt = match stmt.type_ {
+        DefineStatementType::Namespace => {
+            remove_namespace(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::Database => {
+            remove_database(name.to_string()).to_raw().build()
+        },
+        DefineStatementType::User => {
+            let remove_init = remove_user(name.to_string());
+            let remove_stmt = match stmt.permission_scope {
+                PermissionScope::Root => remove_init.on_root(),
+                PermissionScope::Namespace => remove_init.on_namespace(),
+                PermissionScope::Database => remove_init.on_database(),
+            };
+            remove_stmt.to_raw().build()
+        },
+        DefineStatementType::Token => {
+            let remove_init = remove_token(name.to_string());
+            let remove_stmt = match stmt.permission_scope {
+                PermissionScope::Root => remove_init.on_root(),
+                PermissionScope::Namespace => remove_init.on_namespace(),
+                PermissionScope::Database => remove_init.on_database(),
+            };
+            remove_stmt.to_raw().build()
+        },
+        DefineStatementType::Scope => todo!(),
+        DefineStatementType::Param => todo!(),
+        DefineStatementType::Function => todo!(),
+        DefineStatementType::Analyzer => todo!(),
+        DefineStatementType::Login => todo!(),
+        DefineStatementType::Field => todo!(),
+        DefineStatementType::Table => todo!(),
+        DefineStatementType::Index => todo!(),
+        DefineStatementType::Event => todo!(),
+    };
+
     todo!()
 }
 
