@@ -1401,8 +1401,6 @@ impl ComparisonFields {
         let left_table_info = self.left_resources.get_table_fields_data(self.table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
         let right_table_info = self.right_resources.get_table_fields_data(self.table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
             
-        // let left_fields = self.left_resources.get_table_field_names_as_set(table.to_string());
-        // let right_fields = self.right_resources.get_table_field_names_as_set(table.to_string());
         // add right field definition if left and right are different or left does not yet have
         // the field
         for fname in self.diff_union() {
@@ -1449,13 +1447,13 @@ impl ComparisonFields {
                         let right_field_names = right_table_info.get_names_as_set();
                         // 
                         // l -> [ a, b, c ] r -> [ a, b, e ] => [c, e]
-                        let left_diff = left_field_names.difference(&right_field_names);
-                        let right_diff = right_field_names.difference(&left_field_names);
+                        let left_diff = left_field_names.difference(&right_field_names).collect::<Vec<_>>();
+                        let right_diff = right_field_names.difference(&left_field_names).collect::<Vec<_>>();
                         
-                        let old_name = left_diff.clone().peekable().peek().expect("Must be a single item on the left here.").to_string();
-                        let new_name = right_diff.clone().peekable().peek().expect("Must be a single item on the right here.").to_string();
+                        let old_name = left_diff.first();
+                        let new_name = right_diff.first();
                         
-                        let is_single_code_field_change = left_diff.clone().count() == 1 && right_diff.clone().count() == 1 ;
+                        let is_single_code_field_change = left_diff.clone().len() == 1 && right_diff.clone().len() == 1 ;
                         
                         if let Some(rd) = rdef.clone() {
                             up_queries.push(rd.to_string());
@@ -1465,53 +1463,60 @@ impl ComparisonFields {
                         }
                         
                         if is_single_code_field_change {
-                            if new_name == fname {
-                            // Implement a rename change when a single field name is changed
-                            // and the old_name attribute is not explicitly used.
-                            let left_definition = left_table_info.get_definition(old_name.clone());
-                            let change = Change {
-                                table: self.table.to_string(),
-                                old_name: old_name.clone(),
-                                new_name,
-                            };
-                            let options = vec![
-                                SingleFieldChangeType::Rename(&change),
-                                SingleFieldChangeType::Delete(&change),
-                            ];
+                            if let (Some(old_name), Some(new_name)) = (old_name.cloned(), new_name.cloned()) {
+                                                            
+                                if new_name.to_string() == fname {
+                                    // and the old_name attribute is not explicitly used.
+                                    let left_definition = left_table_info.get_definition(old_name.clone());
+                                    let change = Change {
+                                        table: self.table.to_string(),
+                                        old_name: old_name.to_string(),
+                                        new_name: new_name.to_string(),
+                                    };
+                                    let options = vec![
+                                        SingleFieldChangeType::Rename(&change),
+                                        SingleFieldChangeType::Delete(&change),
+                                    ];
 
-                            let ans: Result<SingleFieldChangeType, InquireError> =
-                                inquire::Select::new("Select the type of change you want", options).prompt();
+                                    let ans: Result<SingleFieldChangeType, InquireError> =
+                                        inquire::Select::new("Select the type of change you want", options).prompt();
 
-                            match ans {
-                                Ok(choice) => {
-                                    println!("You chose: {}", choice);
-                                    match choice {
-                                        SingleFieldChangeType::Delete(change) => println!(
-                                            "This is a delete change",
-                                            // change.old_name, change.new_name
-                                        ),
-                                        SingleFieldChangeType::Rename(change) => {
-                                            let queries = Self::rename_field(FieldRenameOptions {
-                                                table: &self.table,
-                                                old_name: change.old_name.to_string(),
-                                                new_name: change.new_name.to_string(),
-                                                left_definition: left_definition.expect("Left field definition must be present here. If not, this is a bug and should be reported"),
-                                            });
-                                            up_queries.extend(queries.up);
-                                            down_queries.extend(queries.down);
-                                            println!("upqueries: {:#?}", up_queries);
-                                            println!("downqueries: {:#?}", down_queries);
+                                    match ans {
+                                        Ok(choice) => {
+                                            match choice {
+                                                SingleFieldChangeType::Delete(change) => {
+                                                    println!(
+                                                    "This is a delete change",
+                                                    // change.old_name, change.new_name
+                                                );
+                                                    
+                                                    up_queries.push(self.get_removal_query(change.old_name.to_string()));
+                                                    let old_name_field_def = self.left_resources.get_field_def(self.table.to_string(), change.old_name.to_string());
+                                                    if let Some(old_field_def) = old_name_field_def  {
+                                                        down_queries.push(old_field_def.to_string());
+                                                        down_queries.push(self.get_removal_query(change.new_name.to_string()));
+                                                    }
 
-                                                println!(
-                                                "This is a rename change",
-                                                // change.old_name, change.new_name
-                                            )
-                                        },
+                                                },
+                                                SingleFieldChangeType::Rename(change) => {
+                                                    let queries = Self::rename_field(FieldRenameOptions {
+                                                        table: &self.table,
+                                                        old_name: change.old_name.to_string(),
+                                                        new_name: change.new_name.to_string(),
+                                                        left_definition: left_definition.expect("Left field definition must be present here. If not, this is a bug and should be reported"),
+                                                    });
+                                                    up_queries.extend(queries.up);
+                                                    down_queries.extend(queries.down);
+                                                },
+                                            }
+                                        }
+                                        Err(_) => println!("There was an error, please try again"),
                                     }
-                                }
-                                Err(_) => println!("There was an error, please try again"),
-                            }
 
+
+                                }
+
+                                
                             }
                         } else {
                     
