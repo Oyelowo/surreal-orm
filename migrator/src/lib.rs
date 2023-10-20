@@ -394,6 +394,9 @@ impl CodeBaseMeta {
             .map(|f| f.to_raw().build())
             .collect::<Vec<_>>()
             .join(";\n");
+
+        let animal_events = Animal::events().iter().map(|e| e.to_raw().build()).collect::<Vec<_>>().join(";\n");
+
         let animal_eats_crop_tables = AnimalEatsCrop::define_table().to_raw().build();
         let animal_eats_crop_fields = AnimalEatsCrop::define_fields()
             .iter()
@@ -414,6 +417,7 @@ impl CodeBaseMeta {
             animal_eats_crop_fields,
             crop_tables,
             crop_fields,
+            animal_events,
         ]
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
@@ -476,13 +480,13 @@ impl FullDbInfo {
             }).flatten()
     }
     
-    pub fn get_table_indexes_data(&self, table_name: String) -> Option<Indexes> {
+    pub fn get_table_indexes(&self, table_name: String) -> Option<Indexes> {
         self.fields_by_table
             .get(&table_name)
             .map(|t| t.indexes().clone())
     }
     
-    pub fn get_table_events_data(&self, table_name: String) -> Option<Events> {
+    pub fn get_table_events(&self, table_name: String) -> Option<Events> {
         self.fields_by_table
             .get(&table_name)
             .map(|t| t.events().clone())
@@ -1122,7 +1126,10 @@ where
         up_queries.extend(
             self.diff_left()
                 .iter()
-                .map(|n| self.get_removal_query_from_left(n.to_string()))
+                .map(|n| {
+                    println!("Removing table: {}", n);
+                    self.get_removal_query_from_left(n.to_string())}
+                )
                 .collect::<Vec<_>>(),
         );
 
@@ -1157,6 +1164,7 @@ where
 
         // HANDLE INTERSECTION
         for object in self.diff_intersect() {
+
             let right_objects =self.get_right();
             let right_object_def = right_objects.get_definition(&object);
             let left_objects = self.get_left();
@@ -1314,12 +1322,15 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
 
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
                     let indexes_comaparer = comparison_init.new_indexes(table.to_string());
+                    let events_comaparer = comparison_init.new_events(table.to_string());
                     
                     let mut right_fields_defs = fields_comaparer.diff_right_as_vec();
 
                     right_fields_defs.insert(0, right_table_def);
                     
                     right_fields_defs.extend(indexes_comaparer.diff_right());
+                    right_fields_defs.extend(events_comaparer.diff_right());
+                    println!("events_comaparer.diff_right(): {:?}", events_comaparer.diff_right());
                     
                     right_fields_defs
                 })
@@ -1362,6 +1373,8 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
 
                 let fields_comaparer = comparison_init.new_fields(table.to_string());
                 let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
+                let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
+            
             
                 let mut fields_diff_union = fields_comaparer.table_intersection_queries();
             
@@ -1370,14 +1383,24 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
             
                 up_queries.extend(indexes_comaparer.up);
                 down_queries.extend(indexes_comaparer.down);
+
+                up_queries.extend(events_comaparer.up);
+                down_queries.extend(events_comaparer.down);
         }
 
         // for table in self.diff_union() {
         //     let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
+        //     let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
+        //
+        //     println!("indexes_comaparer: {:?}", indexes_comaparer);
+        //     println!("events_comaparer: {:?}", events_comaparer);
         //
         //
         //     up_queries.extend(indexes_comaparer.up);
+        //     up_queries.extend(events_comaparer.up);
+        //
         //     down_queries.extend(indexes_comaparer.down);
+        //     down_queries.extend(events_comaparer.down);
         // }
         Queries {
             up: up_queries,
@@ -1426,12 +1449,12 @@ impl<'a> ComparisonsInit <'a>{
         }
     }
     
-    // pub fn new_events(&self, table: String) -> ComparisonEvents {
-    //     ComparisonEvents {
-    //         table: table.to_string(),
-    //         resources: self
-    //     }
-    // }
+    pub fn new_events(&self, table: String) -> ComparisonEvents {
+        ComparisonEvents {
+            table: table.to_string(),
+            resources: self
+        }
+    }
     
     pub fn new_tables(&self) -> ComparisonTables {
         ComparisonTables{
@@ -1940,52 +1963,141 @@ define_resource!(tokens, Tokens);
 
 define_resource!(users, Users);
 
-struct ComparisonIndexes<'a> {
-    table: String,
-    resources: &'a ComparisonsInit<'a>,
+
+
+// struct ComparisonIndexes<'a> {
+//     table: String,
+//     resources: &'a ComparisonsInit<'a>,
+// }
+// impl<'a> ComparisonIndexes<'a> {
+//     fn left_resources(&self) -> &FullDbInfo {
+//         self.resources.left_resources
+//     }
+//     fn right_resources(&self) -> &FullDbInfo {
+//         self.resources.right_resources
+//     }
+// }
+// impl<'a> DbObject<Indexes> for ComparisonIndexes<'a> {
+//     fn get_left(&self) -> Indexes {
+//         self.left_resources().get_table_indexes(self.table.clone()).unwrap_or_default()
+//     }
+//
+//     fn get_right(&self) -> Indexes {
+//         self.right_resources().get_table_indexes(self.table.clone()).unwrap_or_default()
+//     }
+//
+//     fn get_removal_query_from_left(&self, resource_name: String) -> String {
+//         let def = self
+//             .get_left()
+//             .get_definition(&resource_name)
+//             .unwrap()
+//             .to_string();
+//         generate_removal_statement(def, resource_name, None)
+//     }
+//
+//     fn get_removal_query_from_right(&self, resource_name: String) -> String {
+//         let def = self
+//             .get_right()
+//             .get_definition(&resource_name)
+//             .unwrap()
+//             .to_string();
+//         generate_removal_statement(def, resource_name, None)
+//     }
+//
+//     fn get_removal_query_from_resource_name(&self, name: String) -> String {
+//         remove_index(name.to_string())
+//             .on_table(self.table.clone())
+//             .to_raw()
+//             .build()
+//     }
+// }
+
+macro_rules! define_table_resource {
+    ($resource:ident, $resource_title_case:ident, $removal_fn_name: ident) => {
+        paste! {
+            struct [<Comparison$resource_title_case>]<'a> {
+                table: String,
+                resources: &'a ComparisonsInit<'a>
+            }
+            
+            impl<'a> [<Comparison$resource_title_case>]<'a>{
+                fn left_resources(&self) -> &FullDbInfo {
+                    self.resources.left_resources
+                }
+                
+                fn right_resources(&self) -> &FullDbInfo {
+                    self.resources.right_resources
+                }
+                
+            }
+
+            impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
+                fn get_left(&self) -> $resource_title_case {
+                    let x = self.left_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
+        println!("Table: {:?}", self.table);
+        println!("LeftNEW: {:?}", x);
+                    x
+                }
+
+                fn get_right(&self) -> $resource_title_case  {
+                    let x = self.right_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
+        println!("RightNEW: {:?}", x);
+                    x
+                }
+
+                fn get_removal_query_from_left(&self, resource_name: String) -> String {
+                        println!("Resource name: {}", resource_name);
+            // println!("LEft diff aererehh w: {:?}", self.diff_left());
+        // println!("Right diff aererehh w: {:?}", self.diff_right());
+        // println!("Inner diff aererehh w: {:?}", self.diff_intersect());
+        //
+        // println!("Right Remove stmt diff aererehh w: {:?}", self.get_removal_query_from_left("event1".to_string()));
+                    let def = self
+                        .get_left()
+                        .get_definition(&resource_name)
+                        .cloned()
+                        .unwrap_or_default()
+                        // .expect("problem1")
+                        .to_string();
+        println!("Defffff: {}", def);
+                    if def.is_empty() {
+                        return String::new()
+                    }
+                    let g = generate_removal_statement(def, resource_name, None);
+        println!("Generated: {}", g);
+                    g
+                }
+
+                fn get_removal_query_from_right(&self, resource_name: String) -> String {
+                    let def = self
+                        .get_right()
+                        .get_definition(&resource_name)
+                        .cloned()
+                        .unwrap_or_default()
+                        // .expect("problem2")
+                        .to_string();
+        println!("Defffff: {}", def);
+                    if def.is_empty() {
+                        return String::new()
+                    }
+                    let g = generate_removal_statement(def, resource_name, None);
+        println!("Generated: {}", g);
+                    g
+                }
+
+                fn get_removal_query_from_resource_name(&self, name: String) -> String {
+                    $removal_fn_name(name.to_string())
+                        .on_table(self.table.clone())
+                        .to_raw()
+                        .build()
+                }
+            }
+        }
+    };
 }
-impl<'a> ComparisonIndexes<'a> {
-    fn left_resources(&self) -> &FullDbInfo {
-        self.resources.left_resources
-    }
-    fn right_resources(&self) -> &FullDbInfo {
-        self.resources.right_resources
-    }
-}
-impl<'a> DbObject<Indexes> for ComparisonIndexes<'a> {
-    fn get_left(&self) -> Indexes {
-        self.left_resources().get_table_indexes_data(self.table.clone()).unwrap_or_default()
-    }
-    
-    fn get_right(&self) -> Indexes {
-        self.right_resources().get_table_indexes_data(self.table.clone()).unwrap_or_default()
-    }
-    
-    fn get_removal_query_from_left(&self, resource_name: String) -> String {
-        let def = self
-            .get_left()
-            .get_definition(&resource_name)
-            .unwrap()
-            .to_string();
-        generate_removal_statement(def, resource_name, None)
-    }
-    
-    fn get_removal_query_from_right(&self, resource_name: String) -> String {
-        let def = self
-            .get_right()
-            .get_definition(&resource_name)
-            .unwrap()
-            .to_string();
-        generate_removal_statement(def, resource_name, None)
-    }
-    
-    fn get_removal_query_from_resource_name(&self, name: String) -> String {
-        remove_index(name.to_string())
-            .on_table(self.table.clone())
-            .to_raw()
-            .build()
-    }
-}
+
+define_table_resource!(events, Events, remove_event);
+define_table_resource!(indexes, Indexes, remove_index);
 
 
 struct Change {
@@ -2100,21 +2212,21 @@ pub struct Animal {
 }
 
 impl TableEvents for Animal {
-    fn all(&self) -> Vec<Raw> {
+    fn events() -> Vec<Raw> {
         let animal::Schema { species, speed, .. } = Animal::schema();
         
-        let event1 = define_event("event1".into())
+        let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Erectus").and(speed.gt(545))))
-            .to_raw()
-            .build();
+            .then(select(All).from(Crop::table_name()))
+            .to_raw();
         
         vec![event1]
     }
 }
 
 trait TableEvents {
-   fn all(&self) -> Vec<Raw>; 
+   fn events() -> Vec<Raw>; 
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
