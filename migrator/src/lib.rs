@@ -1182,6 +1182,125 @@ where
     }
 }
 
+#[async_trait::async_trait]
+trait TableResourcesMeta<T>
+where
+    T: Informational,
+{
+    // Left is from migration dir
+    fn get_left(&self) -> T;
+    // Right is from codebase
+    fn get_right(&self) -> T;
+    
+    fn get_table(&self) -> String;
+    fn get_comparer(&self) -> String;
+    
+
+    // fn left_resources(&self) -> &FullDbInfo;
+    // fn right_resources(&self) -> &FullDbInfo;
+    
+    fn diff_left(&self) -> Vec<String> {
+        self.get_left()
+            .get_names_as_set()
+            .difference(&self.get_right().get_names_as_set())
+            .collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
+    }
+    
+    fn diff_right(&self) -> Vec<String> {
+        self.get_right()
+            .get_names_as_set()
+            .difference(&self.get_left().get_names_as_set())
+            .collect::<Vec<_>>() .into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
+    }
+
+    fn def_table_left(&self) -> BiQueries {
+        let diff_right = self.get_left().get_names().iter().fold(BiQueries::default(), |mut acc, name| {
+            let def_up = self.get_left().get_definition(name)
+                .expect("As long as the name exists the defintion should ideally also exists. \
+                    So this is a error and should be reported.").to_string();
+            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
+            acc.add_def(def_up);
+            acc.add_removal(removal_down);
+            acc
+        });
+        
+        diff_right
+    }
+    
+    fn def_table_right(&self) -> BiQueries {
+        let diff_right = self.get_right().get_names().iter().fold(BiQueries::default(), |mut acc, name| {
+            let def_up = self.get_right().get_definition(name)
+                .expect("As long as the name exists the defintion should ideally also exists. \
+                    So this is a error and should be reported.").to_string();
+            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
+            acc.add_def(def_up);
+            acc.add_removal(removal_down);
+            acc
+        });
+        
+        diff_right
+    }
+
+    fn diff_table_intersect(&self) -> Queries {
+        // Removal of resource from codebase i.e Present in migration directory but not in
+        // codebase
+        let def_left = self.def_table_left();
+        // Addition of resource to codebase i.e Present in codebase but not in migration
+        let def_right = self.def_table_right();
+        //
+        // 
+        // Update of resource in codebase i.e Present in both migration directory and codebase but
+        // changed
+        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] => 
+        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+        // SubResource e.g events, indexes and fields
+        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+        let diff_right = self.get_right()
+            .get_names_as_set()
+            .union(&self.get_left().get_names_as_set())
+            .into_iter()
+            .fold(Queries::default(), |mut acc, name| {
+            let def_up = self.get_right().get_definition(name)
+                .expect("As long as the name exists the defintion should ideally also exists. \
+                    So this is a error and should be reported.").to_string();
+            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
+            acc.add_def(def_up);
+            acc.add_removal(removal_down);
+            acc
+        });
+        
+        diff_right
+    }
+
+
+    fn diff_intersect(&self) -> Vec<String> {
+        self.get_left()
+            .get_names_as_set()
+            .intersection(&self.get_right().get_names_as_set())
+            .cloned()
+            .collect::<Vec<_>>()
+    }
+}
+
+#[derive(Debug, Default)]
+struct BiQueries {
+    definitions: Vec<String>,
+    removals: Vec<String>,
+}
+
+impl BiQueries {
+    fn new() -> Self { Self { definitions: vec![], removals : vec![]} }
+
+    fn add_def(&mut self, query: String) {
+        self.definitions.push(query);
+    }
+
+    fn add_removal(&mut self, query: String) {
+        self.removals.push(query);
+    }
+}
+
 #[derive(Debug, Default)]
 struct Queries {
     up: Vec<String>,
@@ -1425,7 +1544,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
     fn get_removal_query_from_left(&self, resource_name: String) -> String {
         // let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
         // generate_removal_statement(&def, resource_name, None)
-        "REMOVE TABLE fake".to_string()
+        "REMOVE TABLE animal".to_string()
     }
 
     fn get_removal_query_from_right(&self,resource_name: String) -> String {
