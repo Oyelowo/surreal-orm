@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use surreal_orm::{
     statements::{
         begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login, define_event,
+        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login, define_event, define_index,
     },
     Edge, Node, *,
 };
@@ -225,14 +225,14 @@ pub enum MigrationError {
 pub type MigrationResult<T> = Result<T, MigrationError>;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct TableInfo {
+pub struct TableResources {
     events: Events,
     indexes: Indexes,
     tables: Tables,
     fields: Fields,
 }
 
-impl TableInfo {
+impl TableResources {
     pub fn events(&self) -> Events {
         self.events.clone()
     }
@@ -386,39 +386,19 @@ impl CodeBaseMeta {
         code_renamed_fields
     }
 
-    pub fn get_codebase_schema_queries() -> String {
-        // Test data
-        let animal_tables = Animal::define_table().to_raw().build();
-        let animal_fields = Animal::define_fields()
-            .iter()
-            .map(|f| f.to_raw().build())
-            .collect::<Vec<_>>()
-            .join(";\n");
-
-        let animal_events = Animal::events().iter().map(|e| e.to_raw().build()).collect::<Vec<_>>().join(";\n");
-
-        let animal_eats_crop_tables = AnimalEatsCrop::define_table().to_raw().build();
-        let animal_eats_crop_fields = AnimalEatsCrop::define_fields()
-            .iter()
-            .map(|f| f.to_raw().build())
-            .collect::<Vec<_>>()
-            .join(";\n");
-        let crop_tables = Crop::define_table().to_raw().build();
-        let crop_fields = Crop::define_fields()
-            .iter()
-            .map(|f| f.to_raw().build())
-            .collect::<Vec<_>>()
-            .join(";\n");
-
+    pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
         let queries_joined = [
-            animal_tables,
-            animal_fields,
-            animal_eats_crop_tables,
-            animal_eats_crop_fields,
-            crop_tables,
-            crop_fields,
-            animal_events,
+            db_resources.tokens(),
+            db_resources.scopes(),
+            db_resources.analyzers(),
+            db_resources.params(),
+            db_resources.functions(),
+            db_resources.users(),
+            db_resources.tables(),
         ]
+        .iter()
+        .flat_map(|res_raw| res_raw.iter().map(|r| r.to_raw().build()))
+        .collect::<Vec<_>>()
         .join(";\n");
         // let queries_joined = format!("{};\n{}", tables, fields);
 
@@ -429,7 +409,7 @@ impl CodeBaseMeta {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FullDbInfo {
     all_resources: DbInfo,
-    fields_by_table: HashMap<TableName, TableInfo>,
+    table_resources: HashMap<TableName, TableResources>,
 }
 
 impl FullDbInfo {
@@ -463,16 +443,16 @@ impl FullDbInfo {
 
     
 
-    pub fn get_table_info(&self, table_name: String) -> Option<&TableInfo> {
-        self.fields_by_table.get(&table_name)
+    pub fn get_table_info(&self, table_name: String) -> Option<&TableResources> {
+        self.table_resources.get(&table_name)
     }
 
     pub fn get_table_names(&self) -> Vec<String> {
-        self.fields_by_table.keys().cloned().collect::<Vec<_>>()
+        self.table_resources.keys().cloned().collect::<Vec<_>>()
     }
 
     pub fn get_field_def(&self, table_name: String, field_name: String) -> Option<String> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t|{ 
                 let x = t.fields();
@@ -481,31 +461,31 @@ impl FullDbInfo {
     }
     
     pub fn get_table_indexes(&self, table_name: String) -> Option<Indexes> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t| t.indexes().clone())
     }
     
     pub fn get_table_events(&self, table_name: String) -> Option<Events> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t| t.events().clone())
     }
     
     pub fn get_table_fields_data(&self, table_name: String) -> Option<Fields> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t| t.fields().clone())
     }
     
     pub fn get_table_field_names(&self, table_name: String) -> Vec<String> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t| t.fields().clone()).unwrap_or_default().get_names()
     }
     
     pub fn get_table_field_names_as_set(&self, table_name: String) -> HashSet<String> {
-        self.fields_by_table
+        self.table_resources
             .get(&table_name)
             .map(|t| t.fields().clone()).unwrap_or_default().get_names_as_set()
     }
@@ -538,10 +518,10 @@ impl Database {
         Ok(info.into())
     }
 
-    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableInfo> {
+    pub async fn get_table_info(&self, table_name: String) -> MigrationResult<TableResources> {
         let info = info_for()
             .table(table_name)
-            .get_data::<TableInfo>(self.db())
+            .get_data::<TableResources>(self.db())
             .await?
             .unwrap();
         Ok(info.into())
@@ -556,7 +536,7 @@ impl Database {
         }
         let all_resources = FullDbInfo {
             all_resources: top_level_resources,
-            fields_by_table,
+            table_resources: fields_by_table,
         };
         Ok(all_resources)
         
@@ -586,7 +566,7 @@ impl Database {
     }
 
     pub async fn run_codebase_schema_queries(&self) -> MigrationResult<()> {
-        let queries = CodeBaseMeta::get_codebase_schema_queries();
+        let queries = CodeBaseMeta::get_codebase_schema_queries(Resources);
         begin_transaction()
             .query(Raw::new(queries))
             .commit_transaction()
@@ -1202,10 +1182,22 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct Queries {
     up: Vec<String>,
     down: Vec<String>,
+}
+
+impl Queries {
+    fn new() -> Self { Self { up: vec![], down : vec![]} }
+
+    fn add_up(&mut self, query: String) {
+        self.up.push(query);
+    }
+
+    fn add_down(&mut self, query: String) {
+        self.down.push(query);
+    }
 }
 
 struct ComparisonTables<'a> {
@@ -1297,11 +1289,14 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
                     
                     let fields_comaparer = comparison_init.new_fields(table.to_string());
                     let indexes_comaparer = comparison_init.new_indexes(table.to_string());
+                    let events_comaparer = comparison_init.new_events(table.to_string());
                     
                     let mut fields_defs = fields_comaparer.diff_left_as_vec();
                     fields_defs.insert(0, left_table_def);
                     
+                    // Attach migration dir/live db state definition to the top of the list
                     fields_defs.extend(indexes_comaparer.diff_left());
+                    fields_defs.extend(events_comaparer.diff_left());
 
                     fields_defs
                 })
@@ -1328,6 +1323,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
 
                     right_fields_defs.insert(0, right_table_def);
                     
+                    // Attach codebase definition to the top of the list
                     right_fields_defs.extend(indexes_comaparer.diff_right());
                     right_fields_defs.extend(events_comaparer.diff_right());
                     println!("events_comaparer.diff_right(): {:?}", events_comaparer.diff_right());
@@ -1347,7 +1343,7 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
         );
 
         // HANDLE INTERSECTION
-        for table in self.diff_intersect() {
+        for table in ["animal".to_string()] {
             let right_objects =self.get_right();
             let right_object_def = right_objects.get_definition(&table);
             let left_objects = self.get_left();
@@ -1372,20 +1368,37 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
             };
 
                 let fields_comaparer = comparison_init.new_fields(table.to_string());
-                let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
-                let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
+                let indexes_comaparer = comparison_init.new_indexes(table.to_string());
+                // let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
+                let events_comaparer = comparison_init.new_events(table.to_string());
             
+                let events_diff_right = events_comaparer.get_right().get_names().iter().fold(Queries::default(), |mut acc, name| {
+                    let def_up = events_comaparer.get_right().get_definition(name).unwrap().to_string();
+                    let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(table.to_string()));
+                    acc.add_up(def_up);
+                    acc.add_down(removal_down);
+                    acc
+                });
+            
+                let indexes_diff_right = indexes_comaparer.get_right().get_names().iter().fold(Queries::default(), |mut acc, name| {
+                    let def_up = indexes_comaparer.get_right().get_definition(name).unwrap().to_string();
+                    let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(table.to_string()));
+                    acc.add_up(def_up);
+                    acc.add_down(removal_down);
+                    acc
+                });
             
                 let mut fields_diff_union = fields_comaparer.table_intersection_queries();
             
                 up_queries.extend(fields_diff_union.up);
                 down_queries.extend(fields_diff_union.down);
             
-                up_queries.extend(indexes_comaparer.up);
-                down_queries.extend(indexes_comaparer.down);
+                up_queries.extend(events_diff_right.up);
+                down_queries.extend(events_diff_right.down);
+            
+                up_queries.extend(indexes_diff_right.up);
+                down_queries.extend(indexes_diff_right.down);
 
-                up_queries.extend(events_comaparer.up);
-                down_queries.extend(events_comaparer.down);
         }
 
         // for table in self.diff_union() {
@@ -1410,13 +1423,15 @@ impl<'a> DbObject<Tables> for ComparisonTables <'a> {
     }
 
     fn get_removal_query_from_left(&self, resource_name: String) -> String {
-        let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
-        generate_removal_statement(def, resource_name, None)
+        // let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
+        // generate_removal_statement(&def, resource_name, None)
+        "REMOVE TABLE fake".to_string()
     }
 
     fn get_removal_query_from_right(&self,resource_name: String) -> String {
-        let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
-        generate_removal_statement(def, resource_name, None)
+        // let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
+        // generate_removal_statement(&def, resource_name, None)
+        "REMOVE TABLE fake".to_string()
     }
 
     fn get_removal_query_from_resource_name(&self,name:String) -> String {
@@ -1840,12 +1855,12 @@ macro_rules! define_resource {
 
                 fn get_removal_query_from_left(&self, resource_name:String) -> String {
                     let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
-                    generate_removal_statement(def, resource_name, None)
+                    generate_removal_statement(&def, resource_name, None)
                 }
 
                 fn get_removal_query_from_right(&self,resource_name:String) -> String {
                     let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
-                    generate_removal_statement(def, resource_name, None)
+                    generate_removal_statement(&def, resource_name, None)
                 }
 
                 fn get_removal_query_from_resource_name(&self,name:String) -> String {
@@ -1857,9 +1872,9 @@ macro_rules! define_resource {
     };
 }
 
-pub fn generate_removal_statement(define_statement: String, name: String, table: Option<String>) -> String{
+pub fn generate_removal_statement(define_statement: &String, name: String, table: Option<String>) -> String{
     use surreal_orm::sql::{self, Base, Statement, statements::DefineStatement};
-    let query = surreal_orm::sql::parse(define_statement.as_str()).expect("Invalid statment");
+    let query = surreal_orm::sql::parse(define_statement).expect("Invalid statment");
     let stmt = query[0].clone();
     let get_error = |resource_name: String| {
         if resource_name != name {
@@ -2015,6 +2030,7 @@ define_resource!(users, Users);
 macro_rules! define_table_resource {
     ($resource:ident, $resource_title_case:ident, $removal_fn_name: ident) => {
         paste! {
+            #[derive(Debug, Clone)]
             struct [<Comparison$resource_title_case>]<'a> {
                 table: String,
                 resources: &'a ComparisonsInit<'a>
@@ -2034,14 +2050,11 @@ macro_rules! define_table_resource {
             impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
                 fn get_left(&self) -> $resource_title_case {
                     let x = self.left_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
-        println!("Table: {:?}", self.table);
-        println!("LeftNEW: {:?}", x);
                     x
                 }
 
                 fn get_right(&self) -> $resource_title_case  {
                     let x = self.right_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
-        println!("RightNEW: {:?}", x);
                     x
                 }
 
@@ -2063,7 +2076,7 @@ macro_rules! define_table_resource {
                     if def.is_empty() {
                         return String::new()
                     }
-                    let g = generate_removal_statement(def, resource_name, None);
+                    let g = generate_removal_statement(&def, resource_name, None);
         println!("Generated: {}", g);
                     g
                 }
@@ -2080,7 +2093,7 @@ macro_rules! define_table_resource {
                     if def.is_empty() {
                         return String::new()
                     }
-                    let g = generate_removal_statement(def, resource_name, None);
+                    let g = generate_removal_statement(&def, resource_name, None);
         println!("Generated: {}", g);
                     g
                 }
@@ -2176,7 +2189,7 @@ impl DbInfo {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "planet")]
+#[surreal_orm(table_name = "planet", schemafull)]
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
@@ -2187,15 +2200,19 @@ pub struct Planet {
     pub tags: Vec<String>,
 }
 
+impl TableEvents for Planet { }
+
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "student")]
+#[surreal_orm(table_name = "student", schemafull)]
 pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub school: String,
     pub age: u8,
     pub class: String,
 }
+
+impl TableEvents for Student { }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -2213,7 +2230,7 @@ pub struct Animal {
 
 impl TableEvents for Animal {
     fn events() -> Vec<Raw> {
-        let animal::Schema { species, speed, .. } = Animal::schema();
+        let animal::Schema { species, speed, .. } = Self::schema();
         
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
@@ -2221,12 +2238,93 @@ impl TableEvents for Animal {
             .then(select(All).from(Crop::table_name()))
             .to_raw();
         
-        vec![event1]
+        let event2 = define_event("event2".to_string())
+            .on_table("animal".to_string())
+            .when(cond(species.eq("Homo Sapien").and(speed.lt(10))))
+            .then(select(All).from(AnimalEatsCrop::table_name()))
+            .to_raw();
+        vec![event1, event2]
+    }
+
+    fn indexes() -> Vec<Raw> {
+        let animal::Schema { species, speed, .. } = Self::schema();
+        
+        let idx1 = define_index("species_speed_idx".to_string())
+        .on_table(Self::table_name()).fields(arr![species, speed]).unique().to_raw();
+        
+        vec![idx1]
     }
 }
 
-trait TableEvents {
-   fn events() -> Vec<Raw>; 
+trait TableEvents where Self: Model {
+   fn events() -> Vec<Raw>{
+        vec![]
+    } 
+    
+   fn indexes() -> Vec<Raw> {
+        vec![]
+    }
+    
+   fn fields() -> Vec<Raw> {
+        Self::define_fields()
+    } 
+    
+   fn table() -> Raw {
+        Self::define_table()
+    } 
+}
+
+
+macro_rules! create_table_defs {
+    ($($struct_table: ident),*) => {
+        ::std::vec![
+            $(
+                ::std::vec![<$struct_table as TableEvents>::table()],
+                <$struct_table as TableEvents>::fields(),
+                <$struct_table as TableEvents>::indexes(),
+                <$struct_table as TableEvents>::events(),
+            )*
+        ].into_iter().flatten().collect::<::std::vec::Vec<::surreal_orm::Raw>>()
+    };
+}
+
+
+trait DbResources {
+    fn tables(&self) -> Vec<Raw> {
+        vec![]
+    }
+    
+    fn analyzers(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn functions(&self)-> Vec<Raw> {
+        vec![]
+    }
+
+    fn params(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn scopes(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn tokens(&self)-> Vec<Raw> {
+        vec![]
+    }
+
+    fn users(&self)-> Vec<Raw> {
+        vec![]
+    }
+}
+
+struct Resources;
+
+impl DbResources  for Resources {
+    fn tables(&self) -> Vec<Raw> {
+        create_table_defs!(Animal, Crop, AnimalEatsCrop, Student, Planet)
+    }
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
@@ -2242,6 +2340,7 @@ pub struct Eats<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
+impl TableEvents for AnimalEatsCrop { }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -2250,6 +2349,8 @@ pub struct Crop {
     pub id: SurrealSimpleId<Self>,
     pub color: String,
 }
+
+impl TableEvents for Crop {}
 
 // Migration files in migration directory
 // Current schema in codebase
@@ -2288,7 +2389,7 @@ mod tests {
 
     fn test_remove_statement_generation_for_define_user_on_namespace(){
         let stmt = generate_removal_statement(
-            "DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+            &"DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".to_string(),
             "Oyelowo".into(),
             None,
         );
@@ -2298,7 +2399,7 @@ mod tests {
 
     fn test_remove_statement_generation_for_define_user_on_database(){
         let stmt = generate_removal_statement(
-            "DEFINE USER Oyelowo ON DATABASE PASSWORD 'mapleleaf' ROLES OWNER".into(),
+            &"DEFINE USER Oyelowo ON DATABASE PASSWORD 'mapleleaf' ROLES OWNER".to_string(),
             "Oyelowo".into(),
             None,
         );
