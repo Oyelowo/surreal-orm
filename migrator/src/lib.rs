@@ -670,28 +670,26 @@ impl Database {
             None
         } else {
             Some(format!(
-                "{};",
+                "{}",
                 up_queries
                     .iter()
                     .map(ToString::to_string)
                     .collect::<Vec<_>>()
-                    .join("")
+                    .join("\n")
                     .trim()
-                    .trim_end_matches(";")
             ))
         };
         let down_queries_str = if down_queries.is_empty() {
             None
         } else {
             Some(format!(
-                "{};",
+                "{}",
                 down_queries
                     .iter()
                     .map(ToString::to_string)
                     .collect::<Vec<_>>()
-                    .join("")
+                    .join("\n")
                     .trim()
-                    .trim_end_matches(";")
             ))
         };
         match (up_queries_str, down_queries_str) {
@@ -721,13 +719,13 @@ impl Database {
             }
          ( up_queries_str, down_queries_str) => {
             println!("HERE=====");
-            println!("UP MIGRATIOM: \n {:?}", up_queries_str);
-            println!("DOWN MIGRATIOM: \n {:?}", down_queries_str);
-            Migration::create_migration_file(
-                up_queries_str.unwrap_or_default(),
-                Some(down_queries_str.unwrap_or_default()),
-                "test_migration".to_string(),
-            );
+            println!("UP MIGRATIOM: \n {}", up_queries_str.unwrap_or_default());
+            println!("DOWN MIGRATIOM: \n {}", down_queries_str.unwrap_or_default());
+            // Migration::create_migration_file(
+            //     up_queries_str.unwrap_or_default(),
+            //     Some(down_queries_str.unwrap_or_default()),
+            //     "test_migration".to_string(),
+            // );
             }
         };
         //
@@ -1573,7 +1571,12 @@ impl Display for QueryType {
             QueryType::Update(upd) => upd.to_string(),
             QueryType::NewLine => "\n".to_string()
         };
-        write!(f, "{};", query.trim_end_matches(";"))
+        let end = if let QueryType::NewLine = self {
+            ""
+        } else {
+            ";"
+        };
+        write!(f, "{}{end}", query.trim_end_matches(";"))
     }
 }
 
@@ -1590,6 +1593,14 @@ impl Queries {
 
     pub fn get_down(&self) -> Vec<QueryType> {
         self.down.clone()
+    }
+
+    pub fn add_space_to_up(&mut self) {
+        self.up.push(QueryType::NewLine);
+    }
+
+    pub fn add_space_to_down(&mut self) {
+        self.down.push(QueryType::NewLine);
     }
 
     fn add_up(&mut self, query: QueryType) {
@@ -1723,21 +1734,9 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                 );
 
                     let delta = DeltaType::from((def_left, def_right));
-                        // DOWNs
-    // up: [
-    //     "DEFINE FIELD lastName ON planet TYPE string;",
-    //     "UPDATE planet SET lastName = firstName",
-    //     "REMOVE FIELD firstName ON TABLE planet;",
-    // ],
-    // down: [
-    //     "DEFINE FIELD firstName ON planet TYPE string;",
-    //     "REMOVE FIELD lastName ON TABLE planet;",
-    //     "DEFINE FIELD firstName ON planet TYPE string;",
-    // ],
                     match delta {
                         DeltaType::NoChange => {}
                         DeltaType::Create { right } => {
-                        // UPs
                         acc.add_up(QueryType::Define(right.clone()));
                         let new_name = name;
 
@@ -1753,6 +1752,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 right.generate_remove_stmt(old_name.into(), Some(table)),
                             ));
                         }
+                        acc.add_space_to_up();
 
 
                         if let Some(has_old_name) = has_old_name {
@@ -1762,10 +1762,8 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
                             let old_field_name_def_from_migraton_state =
                                 left.get_definition(&old_name.to_string()).expect(error.as_str());
-                            // left.get_definition(&old_name.to_string()).unwrap();
 
                             // Do some validations here:
-
                             acc.add_down(QueryType::Define(
                                 old_field_name_def_from_migraton_state.to_owned(),
                             ));
@@ -1780,6 +1778,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         acc.add_down(QueryType::Remove(
                             right.generate_remove_stmt(new_name.into(), Some(table)),
                         ));
+                        acc.add_space_to_down();
 
                         
                         }
@@ -1788,14 +1787,18 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 acc.add_up(QueryType::Remove(
                                     left.generate_remove_stmt(name.into(), Some(table)),
                                 ));
+                                                        acc.add_space_to_up();
                             
                                 acc.add_down(QueryType::Define(left));
+                                                        acc.add_space_to_down();
                             }
                         }
                         DeltaType::Update { left, right } => {
                             if left.trim() != right.trim() {
                                 acc.add_up(QueryType::Define(right));
+                                                        acc.add_space_to_up();
                                 acc.add_down(QueryType::Define(left));
+                                                        acc.add_space_to_down();
                             }
 
                         }
