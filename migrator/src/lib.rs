@@ -618,7 +618,7 @@ impl Database {
     pub async fn run_migrations() -> MigrationResult<()> {
         println!("Running migrations");
         let mut up_queries = vec![];
-        let mut down_queries: Vec<String> = vec![];
+        let mut down_queries = vec![];
         // let mut diff_queries_to_add = vec![];
         //  DIFFING
         //  LEFT
@@ -673,9 +673,9 @@ impl Database {
                 "{};",
                 up_queries
                     .iter()
-                    .map(|s| s.trim_end_matches(";"))
+                    .map(ToString::to_string)
                     .collect::<Vec<_>>()
-                    .join(";\n")
+                    .join("")
                     .trim()
                     .trim_end_matches(";")
             ))
@@ -687,9 +687,9 @@ impl Database {
                 "{};",
                 down_queries
                     .iter()
-                    .map(|s| s.trim_end_matches(";"))
+                    .map(ToString::to_string)
                     .collect::<Vec<_>>()
-                    .join(";\n")
+                    .join("")
                     .trim()
                     .trim_end_matches(";")
             ))
@@ -984,6 +984,7 @@ impl<T: Into<String>> From<T> for UpdateStatementRaw {
     }
 }
 
+#[derive(Debug, Clone)]
 struct RemoveStatementRaw(String);
 impl Display for RemoveStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1555,47 +1556,48 @@ where
 
 
 
+#[derive(Debug, Clone)]
 enum QueryType {
     Define(DefineStatementRaw),
     Remove(RemoveStatementRaw),
     Update(UpdateStatementRaw),
+    NewLine
 }
+
 
 impl Display for QueryType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                QueryType::Define(def) => def.to_string(),
-                QueryType::Remove(rem) => rem.to_string(),
-                QueryType::Update(up) => up.to_string(),
-            }
-        )
+        let query = match self {
+            QueryType::Define(def) => def.to_string(),
+            QueryType::Remove(rem) => rem.to_string(),
+            QueryType::Update(upd) => upd.to_string(),
+            QueryType::NewLine => "\n".to_string()
+        };
+        write!(f, "{};", query.trim_end_matches(";"))
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct Queries {
-    up: Vec<String>,
-    down: Vec<String>,
+    up: Vec<QueryType>,
+    down: Vec<QueryType>,
 }
 
 impl Queries {
-    pub fn get_up(&self) -> Vec<String> {
+    pub fn get_up(&self) -> Vec<QueryType> {
         self.up.clone()
     }
 
-    pub fn get_down(&self) -> Vec<String> {
+    pub fn get_down(&self) -> Vec<QueryType> {
         self.down.clone()
     }
 
     fn add_up(&mut self, query: QueryType) {
-        self.up.push(query.to_string());
+        self.up.push(query);
     }
 
     fn add_down(&mut self, query: QueryType) {
-        self.down.push(query.to_string());
+        self.down.push(query);
     }
 
     fn extend_up(&mut self, queries: Self) {
