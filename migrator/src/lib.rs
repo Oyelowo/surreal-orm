@@ -1182,6 +1182,30 @@ where
     }
 }
 
+struct ComparisonEvents2 {
+    
+    resources: Co
+}
+
+impl TableResourcesMeta<Events> for ComparisonEvents {
+    fn get_left(&self) -> T {
+        todo!()
+    }
+
+    fn get_right(&self) -> T {
+        todo!()
+    }
+
+    fn get_table(&self) -> String {
+        todo!()
+    }
+
+    fn get_comparer(&self) -> String {
+        todo!()
+    }
+}
+
+
 #[async_trait::async_trait]
 trait TableResourcesMeta<T>
 where
@@ -1241,7 +1265,7 @@ where
         diff_right
     }
 
-    fn diff_table_intersect(&self) -> Queries {
+    fn changes(&self) -> Vec< DiffChange>{
         // Removal of resource from codebase i.e Present in migration directory but not in
         // codebase
         let def_left = self.def_table_left();
@@ -1256,32 +1280,139 @@ where
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-        let diff_right = self.get_right()
+        let changes = self.get_right()
             .get_names_as_set()
             .union(&self.get_left().get_names_as_set())
             .into_iter()
-            .fold(Queries::default(), |mut acc, name| {
-            let def_up = self.get_right().get_definition(name)
-                .expect("As long as the name exists the defintion should ideally also exists. \
-                    So this is a error and should be reported.").to_string();
-            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
-            acc.add_def(def_up);
-            acc.add_removal(removal_down);
-            acc
-        });
-        
-        diff_right
-    }
+            .fold(vec![], |mut acc, name| {
+            let def_right = self.get_right().get_definition(name).cloned();
+            let def_left = self.get_left().get_definition(name).cloned();
+
+            let change = match (def_left, def_right) {
+                (None, Some(r)) => {
+                        let down =  generate_removal_statement(&r, name.to_string(), Some(self.get_table()));
+                        DiffChange::Creation { 
+                            up: r, 
+                            down 
+                        }
+                    }
+                (Some(l), None) => {
+                        DiffChange::Creation { 
+                            up: generate_removal_statement(&l, name.to_string(), Some(self.get_table())),
+                            down: l
+                        }
+                        
+                    },
+                (Some(l), Some(r)) => {
+                        if l.trim() == r.trim() {
+                            DiffChange::NoChange
+                        } else {
+                            DiffChange::Update {
+                                up: r,
+                                down: l
+                            }
+                        }
+                    },
+                (None, None) => unreachable!(),
+            };
+                        
+                    // let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
+                //     acc.add_up(def_up);
+                // acc.add_down(removal_down);
+                acc.push(change);
+                acc
+            });
+            
+            // let diff_right = self.get_right()
+            //     .get_names_as_set()
+            //     .union(&self.get_left().get_names_as_set())
+            //     .into_iter()
+            //     .fold(Queries::default(), |mut acc, name| {
+            //     let def_up = self.get_right().get_definition(name)
+            //         .expect("As long as the name exists the defintion should ideally also exists. \
+            //             So this is a error and should be reported.").to_string();
+            //     let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
+            //     acc.add_up(def_up);
+            //     acc.add_down(removal_down);
+            //     acc
+            // });
+            //
+            // diff_right
+            changes
+        }
 
 
-    fn diff_intersect(&self) -> Vec<String> {
-        self.get_left()
-            .get_names_as_set()
-            .intersection(&self.get_right().get_names_as_set())
-            .cloned()
-            .collect::<Vec<_>>()
+        fn diff_intersect(&self) -> Vec<String> {
+            self.get_left()
+                .get_names_as_set()
+                .intersection(&self.get_right().get_names_as_set())
+                .cloned()
+                .collect::<Vec<_>>()
+        }
     }
+
+    // Update of resource in codebase i.e Present in both migration directory and codebase but
+    // changed
+    // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] => 
+    //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+    // SubResource e.g events, indexes and fields
+    // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+    // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+
+    // changes
+// Direction or in terms of change type
+
+enum ChangeType {
+    
 }
+
+pub struct RightDef(String);
+pub struct RightNone;
+pub struct LeftDef(String);
+pub struct RemoveRightDef;
+pub struct RemoveLeftDef;
+
+pub enum DiffChange {
+    NoChange,
+    Update {
+        // up: RightDef,
+        // down: LeftDef
+        up: String,
+        down: String
+    },
+    Removal {
+        // up: RemoveLeftDef, // gen_removal_statement(LeftDef)
+        // down: LeftDef
+        up: String,
+        down: String
+    },
+    Creation {
+        // up: RightDef,
+        // down: RemoveRightDef
+        up: String,
+        down: String
+    },
+}
+
+pub struct Nothing;
+pub struct Something(String);
+
+pub enum Changes2 {
+    NoChange,
+    Update {
+        left: Something,
+        right: Something,
+    },
+    Removal {
+        left: Something , 
+        right: Nothing
+    },
+    Creation {
+        left: Nothing, 
+        right: Something
+    },
+}
+
 
 #[derive(Debug, Default)]
 struct BiQueries {
