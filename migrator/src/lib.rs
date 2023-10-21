@@ -1554,11 +1554,6 @@ where
 }
 
 
-#[derive(Debug, Default)]
-struct Queries {
-    up: Vec<String>,
-    down: Vec<String>,
-}
 
 enum QueryType {
     Define(DefineStatementRaw),
@@ -1580,14 +1575,13 @@ impl Display for QueryType {
     }
 }
 
-impl Queries {
-    fn new() -> Self {
-        Self {
-            up: vec![],
-            down: vec![],
-        }
-    }
+#[derive(Debug, Default)]
+struct Queries {
+    up: Vec<String>,
+    down: Vec<String>,
+}
 
+impl Queries {
     pub fn get_up(&self) -> Vec<String> {
         self.up.clone()
     }

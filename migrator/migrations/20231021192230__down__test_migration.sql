@@ -1,0 +1,2 @@
+REMOVE TABLE planet;
+REMOVE TABLE student;
