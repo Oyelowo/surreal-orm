@@ -657,7 +657,6 @@ impl Database {
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
 
-        println!("tables: {:#?}", tables);
 
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
@@ -668,9 +667,9 @@ impl Database {
 
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = if up_queries.is_empty() {
-            "".to_string()
+            None
         } else {
-            format!(
+            Some(format!(
                 "{};",
                 up_queries
                     .iter()
@@ -679,12 +678,12 @@ impl Database {
                     .join(";\n")
                     .trim()
                     .trim_end_matches(";")
-            )
+            ))
         };
         let down_queries_str = if down_queries.is_empty() {
-            "".to_string()
+            None
         } else {
-            format!(
+            Some(format!(
                 "{};",
                 down_queries
                     .iter()
@@ -693,9 +692,10 @@ impl Database {
                     .join(";\n")
                     .trim()
                     .trim_end_matches(";")
-            )
+            ))
         };
-        if up_queries_str.is_empty() && down_queries_str.is_empty() {
+        match (up_queries_str, down_queries_str) {
+        (None, None) => {
             let confirmation = inquire::Confirm::new(
                 "Are you sure you want to generate an empty migration? (y/n)",
             )
@@ -705,11 +705,9 @@ impl Database {
 
             match confirmation {
                 Ok(true) => {
-                    println!("UP MIGRATIOM: \n {}", up_queries_str);
-                    println!("DOWN MIGRATIOM: \n {}", down_queries_str);
                     Migration::create_migration_file(
-                        up_queries_str,
-                        Some(down_queries_str),
+                        String::new(),
+                        Some(String::new()),
                         "test_migration".to_string(),
                     );
                 }
@@ -720,16 +718,18 @@ impl Database {
                     println!("Error: {}", e);
                 }
             };
-        } else {
+            }
+         ( up_queries_str, down_queries_str) => {
             println!("HERE=====");
-            println!("UP MIGRATIOM: \n {}", up_queries_str);
-            println!("DOWN MIGRATIOM: \n {}", down_queries_str);
-            // Migration::create_migration_file(
-            //     up_queries_str,
-            //     Some(down_queries_str),
-            //     "test_migration".to_string(),
-            // );
-        }
+            println!("UP MIGRATIOM: \n {:?}", up_queries_str);
+            println!("DOWN MIGRATIOM: \n {:?}", down_queries_str);
+            Migration::create_migration_file(
+                up_queries_str.unwrap_or_default(),
+                Some(down_queries_str.unwrap_or_default()),
+                "test_migration".to_string(),
+            );
+            }
+        };
         //
         // For Fields
         //  a. If there is a Field in left that is not in right,
