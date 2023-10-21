@@ -7,26 +7,39 @@
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
 use async_trait::async_trait;
-use nom::{IResult, branch::alt, bytes::complete::{tag, take_while_m_n, take_while1, take_until1, take_till1}, character::{complete::{multispace0, multispace1}, is_alphabetic}, combinator::opt};
-use paste::paste;
 use chrono::Utc;
 use inquire::InquireError;
+use nom::{
+    branch::alt,
+    bytes::complete::{tag, take_till1, take_until1, take_while1, take_while_m_n},
+    character::{
+        complete::{multispace0, multispace1},
+        is_alphabetic,
+    },
+    combinator::opt,
+    IResult,
+};
+use paste::paste;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
+    sql::{Query, Table},
     statements::{
-        begin_transaction, create, create_only, delete, info_for, remove_field, remove_table,
-        select, select_value, update, remove_analyzer, remove_index, remove_event, remove_scope, remove_function, remove_param, remove_token, remove_user, NamespaceOrDatabase, UserPermissionScope, remove_namespace, remove_database, remove_login, define_event, define_index,
+        begin_transaction, create, create_only, define_event, define_index, delete, info_for,
+        remove_analyzer, remove_database, remove_event, remove_field, remove_function,
+        remove_index, remove_login, remove_namespace, remove_param, remove_scope, remove_table,
+        remove_token, remove_user, select, select_value, update, NamespaceOrDatabase,
+        UserPermissionScope,
     },
     Edge, Node, *,
 };
 use surrealdb::{
     self,
     engine::local::{Db, Mem},
-    Surreal, sql::Query,
+    Surreal,
 };
 use thiserror::Error;
-// #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)] 
+// #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 // #[serde(rename_all = "camelCase")]
 // #[surreal_orm(table_name = "planet")]
 // pub struct Planet {
@@ -224,7 +237,7 @@ pub enum MigrationError {
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct TableResources {
     events: Events,
     indexes: Indexes,
@@ -314,14 +327,16 @@ impl Display for MigrationName {
 struct CodeBaseMeta;
 type TableName = String;
 
-
 pub enum By {
-   NewName(String),
-   OldName(String),
+    NewName(String),
+    OldName(String),
 }
 
 impl CodeBaseMeta {
-    pub fn find_field_with_oldname_attr(table_name: String, field_name: String) -> Option<FieldMetadata> {
+    pub fn find_field_with_oldname_attr(
+        table_name: String,
+        field_name: String,
+    ) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
@@ -329,7 +344,7 @@ impl CodeBaseMeta {
             .into_iter()
             .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
     }
-    
+
     pub fn find_field_has_old_name(table_name: String, by: By) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
@@ -337,8 +352,16 @@ impl CodeBaseMeta {
             .clone()
             .into_iter()
             .find(|f| match &by {
-                By::NewName(new_name) => f.name.to_string() == new_name.to_string() && f.old_name.is_some(),
-                By::OldName(old_name) =>  f.old_name.clone().filter(|n| n.to_string() == old_name.to_string()).is_some() && f.old_name.is_some(),
+                By::NewName(new_name) => {
+                    f.name.to_string() == new_name.to_string() && f.old_name.is_some()
+                }
+                By::OldName(old_name) => {
+                    f.old_name
+                        .clone()
+                        .filter(|n| n.to_string() == old_name.to_string())
+                        .is_some()
+                        && f.old_name.is_some()
+                }
             })
     }
 
@@ -406,17 +429,17 @@ impl CodeBaseMeta {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default)]
 pub struct FullDbInfo {
     all_resources: DbInfo,
-    table_resources: HashMap<TableName, TableResources>,
+    table_resources: HashMap<Table, TableResources>,
 }
 
 impl FullDbInfo {
     pub fn analyzers(&self) -> Analyzers {
         self.all_resources.analyzers()
     }
-    
+
     pub fn tables(&self) -> Tables {
         self.all_resources.tables()
     }
@@ -441,56 +464,62 @@ impl FullDbInfo {
         self.all_resources.users()
     }
 
-    
-
-    pub fn get_table_info(&self, table_name: String) -> Option<&TableResources> {
+    pub fn get_table_info(&self, table_name: Table) -> Option<&TableResources> {
         self.table_resources.get(&table_name)
     }
 
-    pub fn get_table_names(&self) -> Vec<String> {
+    pub fn get_table_names(&self) -> Vec<Table> {
         self.table_resources.keys().cloned().collect::<Vec<_>>()
     }
 
-    pub fn get_field_def(&self, table_name: String, field_name: String) -> Option<String> {
+    pub fn get_field_def(
+        &self,
+        table_name: Table,
+        field_name: Field,
+    ) -> Option<DefineStatementRaw> {
         self.table_resources
             .get(&table_name)
-            .map(|t|{ 
+            .map(|t| {
                 let x = t.fields();
-                x.get_definition(&field_name).cloned()
-            }).flatten()
+                x.get_definition(&field_name.to_string()).cloned()
+            })
+            .flatten()
     }
-    
-    pub fn get_table_indexes(&self, table_name: String) -> Option<Indexes> {
+
+    pub fn get_table_indexes(&self, table_name: Table) -> Option<Indexes> {
         self.table_resources
             .get(&table_name)
             .map(|t| t.indexes().clone())
     }
-    
-    pub fn get_table_events(&self, table_name: String) -> Option<Events> {
+
+    pub fn get_table_events(&self, table_name: Table) -> Option<Events> {
         self.table_resources
             .get(&table_name)
             .map(|t| t.events().clone())
     }
-    
-    pub fn get_table_fields_data(&self, table_name: String) -> Option<Fields> {
+
+    pub fn get_table_fields(&self, table_name: Table) -> Option<Fields> {
         self.table_resources
             .get(&table_name)
             .map(|t| t.fields().clone())
     }
-    
-    pub fn get_table_field_names(&self, table_name: String) -> Vec<String> {
+
+    pub fn get_table_field_names(&self, table_name: Table) -> Vec<String> {
         self.table_resources
             .get(&table_name)
-            .map(|t| t.fields().clone()).unwrap_or_default().get_names()
+            .map(|t| t.fields().clone())
+            .unwrap_or_default()
+            .get_names()
     }
-    
-    pub fn get_table_field_names_as_set(&self, table_name: String) -> HashSet<String> {
+
+    pub fn get_table_field_names_as_set(&self, table_name: Table) -> HashSet<String> {
         self.table_resources
             .get(&table_name)
-            .map(|t| t.fields().clone()).unwrap_or_default().get_names_as_set()
+            .map(|t| t.fields().clone())
+            .unwrap_or_default()
+            .get_names_as_set()
     }
 }
-
 
 pub struct Database {
     // connection details here
@@ -532,14 +561,13 @@ impl Database {
         let mut fields_by_table = HashMap::new();
         for table_name in top_level_resources.tables().get_names() {
             let table_info = self.get_table_info(table_name.clone()).await?;
-            fields_by_table.insert(table_name, table_info);
+            fields_by_table.insert(table_name.into(), table_info);
         }
         let all_resources = FullDbInfo {
             all_resources: top_level_resources,
             table_resources: fields_by_table,
         };
         Ok(all_resources)
-        
     }
 
     pub async fn execute(&self, query: String) {
@@ -654,43 +682,67 @@ impl Database {
         println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
         let init = ComparisonsInit {
-            left_resources: &left_db.get_all_resources().await.expect("nothing for u on left"),
-            right_resources: &right_db.get_all_resources().await.expect("nothing for u on right"),
+            left_resources: &left_db
+                .get_all_resources()
+                .await
+                .expect("nothing for u on left"),
+            right_resources: &right_db
+                .get_all_resources()
+                .await
+                .expect("nothing for u on right"),
         };
-        let tables = init.new_tables().get_queries();
-        let analyzers = init.new_analyzers().get_queries();
-        let params = init.new_params().get_queries();
-        let functions = init.new_functions().get_queries();
-        let scopes = init.new_scopes().get_queries();
-        let tokens = init.new_tokens().get_queries();
-        let users = init.new_users().get_queries();
-        
+        let tables = init.new_tables().queries();
+        let analyzers = init.new_analyzers().queries();
+        let params = init.new_params().queries();
+        let functions = init.new_functions().queries();
+        let scopes = init.new_scopes().queries();
+        let tokens = init.new_tokens().queries();
+        let users = init.new_users().queries();
+
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
         for resource in resources {
             up_queries.extend(resource.up);
             down_queries.extend(resource.down);
         }
-        
 
-        
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = if up_queries.is_empty() {
             "".to_string()
         } else {
-            format!("{};", up_queries.iter().map(|s|s.trim_end_matches(";")).collect::<Vec<_>>().join(";\n").trim().trim_end_matches(";"))
+            format!(
+                "{};",
+                up_queries
+                    .iter()
+                    .map(|s| s.trim_end_matches(";"))
+                    .collect::<Vec<_>>()
+                    .join(";\n")
+                    .trim()
+                    .trim_end_matches(";")
+            )
         };
         let down_queries_str = if down_queries.is_empty() {
             "".to_string()
         } else {
-            format!("{};", down_queries.iter().map(|s|s.trim_end_matches(";")).collect::<Vec<_>>().join(";\n").trim().trim_end_matches(";"))
+            format!(
+                "{};",
+                down_queries
+                    .iter()
+                    .map(|s| s.trim_end_matches(";"))
+                    .collect::<Vec<_>>()
+                    .join(";\n")
+                    .trim()
+                    .trim_end_matches(";")
+            )
         };
         if up_queries_str.is_empty() && down_queries_str.is_empty() {
-            let confirmation = inquire::Confirm::new("Are you sure you want to generate an empty migration? (y/n)")
-                .with_default(false)
-                .with_help_message("This is good if you want to write out some queries manually")
-                .prompt();
-            
+            let confirmation = inquire::Confirm::new(
+                "Are you sure you want to generate an empty migration? (y/n)",
+            )
+            .with_default(false)
+            .with_help_message("This is good if you want to write out some queries manually")
+            .prompt();
+
             match confirmation {
                 Ok(true) => {
                     println!("UP MIGRATIOM: \n {}", up_queries_str);
@@ -700,15 +752,14 @@ impl Database {
                         Some(down_queries_str),
                         "test_migration".to_string(),
                     );
-                },
+                }
                 Ok(false) => {
-                    println!("No migration created"); 
-                },
+                    println!("No migration created");
+                }
                 Err(e) => {
                     println!("Error: {}", e);
                 }
             };
-
         } else {
             println!("HERE=====");
             println!("UP MIGRATIOM: \n {}", up_queries_str);
@@ -823,7 +874,6 @@ impl Migration {
         if migrations.is_err() {
             return vec![];
         }
-            
 
         let mut migrations_meta = vec![];
 
@@ -946,7 +996,169 @@ impl Migration {
 // ]
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-struct Info(HashMap<String, String>);
+struct Info(HashMap<String, DefineStatementRaw>);
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+struct DefineStatementRaw(String);
+struct RemoveStatementRaw(String);
+struct FieldName(String);
+struct DefineStmtName(String);
+
+impl Display for DefineStmtName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
+impl<T: Into<String>> From<T> for DefineStmtName {
+    fn from(value: T) -> Self {
+        let str: String = value.into();
+        Self(str)
+    }
+}
+
+struct RemoveStmtName(String);
+
+impl From<String> for RemoveStatementRaw {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+struct TableRaw(String);
+
+impl DefineStatementRaw {
+    /// Table name is only required/necessary when generating table resources such as fields, indexes, events
+    pub fn generate_remove_stmt(
+        &self,
+        define_statement_name: DefineStmtName,
+        table: Option<Table>,
+    ) -> RemoveStatementRaw {
+        use surreal_orm::sql::{self, statements::DefineStatement, Base, Statement};
+        let query = surreal_orm::sql::parse(&self.to_string()).expect("Invalid statment");
+        let stmt = query[0].clone();
+        let get_error = |resource_name: String| {
+            if resource_name != define_statement_name.to_string() {
+                panic!("Resource name - {} - in define statement does not match name - {} - in removal statement", resource_name, define_statement_name);
+            }
+        };
+        let stmt = match stmt {
+            Statement::Define(define_stmt) => {
+                match define_stmt {
+                    DefineStatement::Namespace(ns) => {
+                        get_error(ns.name.to_raw());
+                        remove_namespace(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Database(db) => {
+                        get_error(db.name.to_raw());
+                        remove_database(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Function(fn_) => {
+                        get_error(fn_.name.to_raw());
+                        remove_function(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Analyzer(analyzer) => {
+                        get_error(analyzer.name.to_raw());
+                        remove_analyzer(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Token(tk) => {
+                        get_error(tk.name.to_raw());
+
+                        let remove_init = remove_token(define_statement_name.to_string());
+                        let remove_stmt = match tk.base {
+                            Base::Ns => remove_init.on_namespace(),
+                            Base::Db => remove_init.on_database(),
+                            Base::Root => remove_init.on_database(),
+                            Base::Sc(sc_name) => remove_init.on_scope(sc_name.to_raw()),
+                        };
+                        remove_stmt.to_raw().build()
+                    }
+                    DefineStatement::Scope(sc) => {
+                        get_error(sc.name.to_raw());
+                        remove_scope(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Param(_) => {
+                        get_error(define_statement_name.to_string());
+                        remove_param(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Table(table) => {
+                        get_error(table.name.to_raw());
+                        remove_table(define_statement_name.to_string())
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Event(ev) => {
+                        get_error(ev.name.to_raw());
+                        remove_event(define_statement_name.to_string())
+                            .on_table(
+                                table.expect("Invalid event. Event must be attached to a table."),
+                            )
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Field(field) => {
+                        get_error(field.name.to_string());
+                        remove_field(define_statement_name.to_string())
+                            .on_table(
+                                table.expect("Invalid field. Field must be attached to a table."),
+                            )
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::Index(index) => {
+                        get_error(index.name.to_string());
+                        remove_index(define_statement_name.to_string())
+                            .on_table(
+                                table.expect("Invalid index. Index must be attached to a table."),
+                            )
+                            .to_raw()
+                            .build()
+                    }
+                    DefineStatement::User(user) => {
+                        get_error(user.name.to_raw());
+                        let remove_init = remove_user(define_statement_name.to_string());
+                        let remove_stmt = match user.base {
+                            Base::Ns => remove_init.on_namespace(),
+                            Base::Db => remove_init.on_database(),
+                            Base::Root => remove_init.on_database(),
+                            Base::Sc(sc_name) => panic!("Users cannot be defined on scope"),
+                        };
+                        remove_stmt.to_raw().build()
+                    }
+                    DefineStatement::MlModel(ml) => {
+                        // 	TODO: Implement define ml model statmement
+                        // 	write!(f, "DEFINE MODEL ml::{}<{}>", self.name, self.version)?;
+                        // 		write!(f, "PERMISSIONS {}", self.permissions)?;
+                        // get_error(ml.name.to_raw());
+                        // remove_ml_model(name.to_string()).to_raw().build()
+                        todo!()
+                    }
+                }
+            }
+            _ => panic!("Not a define statement. Expected a define statement"),
+        };
+
+        stmt.into()
+    }
+}
+
+impl Display for DefineStatementRaw {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{};", self.0)
+    }
+}
 
 trait Informational {
     // skills[*] is a valid field name in this context
@@ -954,13 +1166,13 @@ trait Informational {
 
     fn get_names_as_set(&self) -> HashSet<String>;
 
-    fn get_all_definitions(&self) -> Vec<String>;
+    fn get_all_definitions(&self) -> Vec<DefineStatementRaw>;
 
     // Althought, I dont think u should do this, it is absolutely possible:
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: &String) -> Option<&String>;
+    fn get_definition(&self, name: &String) -> Option<&DefineStatementRaw>;
 }
 
 impl Informational for Info {
@@ -973,7 +1185,7 @@ impl Informational for Info {
         HashSet::from_iter(self.get_names())
     }
 
-    fn get_all_definitions(&self) -> Vec<String> {
+    fn get_all_definitions(&self) -> Vec<DefineStatementRaw> {
         self.0.values().cloned().collect()
     }
 
@@ -981,7 +1193,7 @@ impl Informational for Info {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: &String) -> Option<&String> {
+    fn get_definition(&self, name: &String) -> Option<&DefineStatementRaw> {
         self.0.get(name)
     }
 }
@@ -1011,7 +1223,7 @@ macro_rules! define_object_info {
                     HashSet::from_iter(self.get_names())
                 }
 
-                fn get_all_definitions(&self) -> Vec<String> {
+                fn get_all_definitions(&self) -> Vec<DefineStatementRaw> {
                     self.0.0.values().cloned().collect()
                 }
 
@@ -1019,7 +1231,7 @@ macro_rules! define_object_info {
                 // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
                 // Above can be achieved just doing array<string> on the top level field - skills
                 // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-                fn get_definition(&self, name: &String) -> Option<&String> {
+                fn get_definition(&self, name: &String) -> Option<&DefineStatementRaw> {
                     self.0.0.get(name)
                 }
             }
@@ -1032,180 +1244,130 @@ define_object_info!(
     Analyzers, Functions, Params, Scopes, Tables, Tokens, Users, Fields, Events, Indexes
 );
 
-#[async_trait::async_trait]
-trait DbObject<T>
+struct ComparisonParam<'a> {
+    resources: &'a ComparisonsInit<'a>,
+}
+
+impl<'a> DbResourcesMeta<Params> for ComparisonParam<'a> {
+    fn get_left(&self) -> Params {
+        self.resources.left_resources.params()
+    }
+
+    fn get_right(&self) -> Params {
+        self.resources.right_resources.params()
+    }
+}
+
+macro_rules! define_top_level_resource {
+    ($($resource_name:ident, $resource_type:ident);*) => {
+        paste::paste! {
+            $(
+                struct [<Comparison $resource_type>]<'a> {
+                    resources: ComparisonsInit<'a>
+                }
+
+                impl<'a> DbResourcesMeta<[<$resource_type>]> for [<Comparison $resource_type>] <'a>{
+                    fn get_left(&self) -> [<$resource_type>] {
+                        self.resources.left_resources.[<$resource_name>]()
+                    }
+
+                    fn get_right(&self) -> [<$resource_type>] {
+                        self.resources.right_resources.[<$resource_name>]()
+                    }
+                }
+            )*
+        }
+    };
+}
+
+define_top_level_resource!(
+    tables, Tables;
+    analyzers, Analyzers;
+    functions, Functions;
+    params, Params;
+    scopes, Scopes;
+    tokens, Tokens;
+    users, Users
+);
+
+trait DbResourcesMeta<T>
 where
     T: Informational,
 {
     // Left is from migration dir
-    // Right is from codebase
     fn get_left(&self) -> T;
+    // Right is from codebase
     fn get_right(&self) -> T;
 
-    // fn left_resources(&self) -> &FullDbInfo;
-    // fn right_resources(&self) -> &FullDbInfo;
-    
-    fn diff_left(&self) -> Vec<String> {
-        self.get_left()
+    fn queries(&self) -> Queries {
+        // Update of resource in codebase i.e Present in both migration directory and codebase but
+        // changed
+        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
+        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+        // SubResource e.g events, indexes and fields
+        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+        // let mut queries = Queries::default();
+        let queries = self
+            .get_right()
             .get_names_as_set()
-            .difference(&self.get_right().get_names_as_set())
-            .collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
-    }
-    fn diff_right(&self) -> Vec<String> {
-        self.get_right()
-            .get_names_as_set()
-            .difference(&self.get_left().get_names_as_set())
-            .collect::<Vec<_>>() .into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
-    }
+            .union(&self.get_left().get_names_as_set())
+            .into_iter()
+            .fold(Queries::default(), |mut acc, name| {
+                let def_right = self.get_right().get_definition(name).cloned();
+                let def_left = self.get_left().get_definition(name).cloned();
 
-    fn diff_intersect(&self) -> Vec<String> {
-        self.get_left()
-            .get_names_as_set()
-            .intersection(&self.get_right().get_names_as_set())
-            .cloned()
-            .collect::<Vec<_>>()
-    }
+                match (def_left, def_right) {
+                    (None, Some(r)) => {
+                        // let down = generate_removal_statement(&r, name.to_string(), None);
+                        acc.add_up(r);
+                        acc.add_down(r.generate_remove_stmt(name.into(), None));
+                    }
+                    (Some(l), None) => {
+                        let up = generate_removal_statement(&l, name.to_string(), None);
+                        acc.add_up(up);
+                        acc.add_down(l);
+                    }
+                    (Some(l), Some(r)) => {
+                        if l.trim() != r.trim() {
+                            acc.add_up(r);
+                            acc.add_down(l);
+                        }
+                    }
+                    (None, None) => unreachable!(),
+                };
 
-    fn get_removal_query_from_left(&self, resource_name: String) -> String;
-    fn get_removal_query_from_right(&self, resource_name: String) -> String;
-    // fn get_removal_query_from_resource_def_for_left(
-    //     &self,
-    //     define_statement: String,
-    //     resource_name: String,
-    //     table: Option<String>
-    // ) -> String {
-    //     let def = self.left_resources()..get_definition(define_statement).unwrap().to_string();
-    //     generate_removal_statement(def, resource_name, table)
-    // }
-    //
-    // fn get_removal_query_from_resource_def_for_right(
-    //     &self,
-    //     define_statement: String,
-    //     resource_name: String,
-    //     table: Option<String>
-    // ) -> String {
-    //     let def = self.right_resources().get_definition(define_statement).unwrap().to_string();
-    //     generate_removal_statement(def, resource_name, table)
-    // }
-    
-    fn get_removal_query_from_resource_name(&self, name: String) -> String;
-
-    fn get_queries(&self) -> Queries {
-        let mut up_queries = vec![];
-        let mut down_queries = vec![];
-        // 3. Diff them
-        //
-        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
-        // params, etc)
-        // a. If there a Table in left that is not in right, left - right =
-        // left.difference(right)
-        // let left_diff = left_tables.clone();
-
-        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
-        //     (i) up => REMOVE TABLE table_name;
-        up_queries.extend(
-            self.diff_left()
-                .iter()
-                .map(|n| {
-                    println!("Removing table: {}", n);
-                    self.get_removal_query_from_left(n.to_string())}
-                )
-                .collect::<Vec<_>>(),
-        );
-
-        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
-        down_queries.extend(
-            self.diff_left()
-                .iter()
-                .map(|t| self.get_left()
-                    .get_definition(&t)
-                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
-                .collect::<Vec<_>>(),
-        );
-
-        // DEAL WITH RIGHT SIDE. i.e CODEBASE
-        //    (i) up => DEFINE <OBJECT> table_name; (Use codebase definition)
-        up_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|t_name| self.get_right()
-                    .get_definition(&t_name)
-                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string())
-                .collect::<Vec<_>>(),
-        );
-
-        //    (ii) down => REMOVE <OBJECT> table_name;
-        down_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|t_name| self.get_removal_query_from_left(t_name.to_string()))
-                .collect::<Vec<_>>(),
-        );
-
-        // HANDLE INTERSECTION
-        for object in self.diff_intersect() {
-
-            let right_objects =self.get_right();
-            let right_object_def = right_objects.get_definition(&object);
-            let left_objects = self.get_left();
-            let left_object_def = left_objects.get_definition(&object);
-            // compare the two object definitions
-            match (left_object_def, right_object_def) {
-                //    First check if left def is same as right def
-                (Some(l), Some(r)) if l == r => {
-                    //          if same:
-                    //                  do nothing
-                    //          else:
-                    // do nothing
-                    println!("Object {} is the same in both left and right", object);
-                }
-                (Some(l), Some(r)) => {
-                    println!("Object {} is different in both left and right. Use codebase as master/super", object);
-                    println!("Left: {}", l);
-                    println!("Right: {}", r);
-                    
-                    // (i) up => Use Right object definitions(codebase definition)
-                    up_queries.push(r.to_string());
-                    // (ii) down => Use Left object definitions(migration directory definition)
-                    down_queries.push(l.to_string());
-                }
-                _ => {
-                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
-                }
-            }
-        }
-        Queries {
-            up: up_queries,
-            down: down_queries,
-        }
-
+                acc
+            });
+        queries
     }
 }
 
-struct ComparisonEvents2 {
-    
+struct ComparisonEvents<'a> {
+    table: String,
+    resources: &'a ComparisonsInit<'a>,
 }
 
-impl TableResourcesMeta<Events> for ComparisonEvents2 {
+impl<'a> TableResourcesMeta<Events> for ComparisonEvents<'a> {
     fn get_left(&self) -> Events {
-        todo!()
+        self.resources
+            .left_resources
+            .get_table_events(self.get_table())
+            .unwrap_or_default()
     }
 
     fn get_right(&self) -> Events {
-        todo!()
+        self.resources
+            .right_resources
+            .get_table_events(self.get_table())
+            .unwrap_or_default()
     }
 
     fn get_table(&self) -> String {
-        todo!()
-    }
-
-    fn get_comparer(&self) -> String {
-        todo!()
+        self.table.clone()
     }
 }
 
-
-#[async_trait::async_trait]
 trait TableResourcesMeta<T>
 where
     T: Informational,
@@ -1214,129 +1376,73 @@ where
     fn get_left(&self) -> T;
     // Right is from codebase
     fn get_right(&self) -> T;
-    
+
     fn get_table(&self) -> String;
-    fn get_comparer(&self) -> String;
-    
 
-    // fn left_resources(&self) -> &FullDbInfo;
-    // fn right_resources(&self) -> &FullDbInfo;
-    
-    fn diff_left(&self) -> Vec<String> {
-        self.get_left()
-            .get_names_as_set()
-            .difference(&self.get_right().get_names_as_set())
-            .collect::<Vec<_>>().into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
-    }
-    
-    fn diff_right(&self) -> Vec<String> {
-        self.get_right()
-            .get_names_as_set()
-            .difference(&self.get_left().get_names_as_set())
-            .collect::<Vec<_>>() .into_iter().map(ToOwned::to_owned).collect::<Vec<_>>()
-    }
-
-    fn def_table_left(&self) -> BiQueries {
-        let diff_right = self.get_left().get_names().iter().fold(BiQueries::default(), |mut acc, name| {
-            let def_up = self.get_left().get_definition(name)
-                .expect("As long as the name exists the defintion should ideally also exists. \
-                    So this is a error and should be reported.").to_string();
-            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
-            acc.add_def(def_up);
-            acc.add_removal(removal_down);
-            acc
-        });
-        
-        diff_right
-    }
-    
-    fn def_table_right(&self) -> BiQueries {
-        let diff_right = self.get_right().get_names().iter().fold(BiQueries::default(), |mut acc, name| {
-            let def_up = self.get_right().get_definition(name)
-                .expect("As long as the name exists the defintion should ideally also exists. \
-                    So this is a error and should be reported.").to_string();
-            let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
-            acc.add_def(def_up);
-            acc.add_removal(removal_down);
-            acc
-        });
-        
-        diff_right
-    }
-
-    fn changes(&self) -> Queries {
-        // Removal of resource from codebase i.e Present in migration directory but not in
-        // codebase
-        let def_left = self.def_table_left();
-        // Addition of resource to codebase i.e Present in codebase but not in migration
-        let def_right = self.def_table_right();
-        //
-        // 
+    fn queries(&self) -> Queries {
         // Update of resource in codebase i.e Present in both migration directory and codebase but
         // changed
-        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] => 
+        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
         //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
         // let mut queries = Queries::default();
-        let queries = self.get_right()
+        let queries = self
+            .get_right()
             .get_names_as_set()
             .union(&self.get_left().get_names_as_set())
             .into_iter()
             .fold(Queries::default(), |mut acc, name| {
-            let def_right = self.get_right().get_definition(name).cloned();
-            let def_left = self.get_left().get_definition(name).cloned();
+                let def_right = self.get_right().get_definition(name).cloned();
+                let def_left = self.get_left().get_definition(name).cloned();
 
-             match (def_left, def_right) {
-                (None, Some(r)) => {
-                        let down =  generate_removal_statement(&r, name.to_string(), Some(self.get_table()));
+                match (def_left, def_right) {
+                    (None, Some(r)) => {
+                        let down = generate_removal_statement(
+                            &r,
+                            name.to_string(),
+                            Some(self.get_table()),
+                        );
                         acc.add_up(r);
                         acc.add_down(down);
                     }
-                (Some(l), None) => {
-                        let up = generate_removal_statement(&l, name.to_string(), Some(self.get_table()));
+                    (Some(l), None) => {
+                        let up = generate_removal_statement(
+                            &l,
+                            name.to_string(),
+                            Some(self.get_table()),
+                        );
                         acc.add_up(up);
                         acc.add_down(l);
-                    },
-                (Some(l), Some(r)) => {
+                    }
+                    (Some(l), Some(r)) => {
                         if l.trim() != r.trim() {
                             acc.add_up(r);
                             acc.add_down(l);
                         }
-                    },
-                (None, None) => unreachable!(),
-            };
-                        
+                    }
+                    (None, None) => unreachable!(),
+                };
+
                 acc
             });
-            queries
-        }
-
-
-        fn diff_intersect(&self) -> Vec<String> {
-            self.get_left()
-                .get_names_as_set()
-                .intersection(&self.get_right().get_names_as_set())
-                .cloned()
-                .collect::<Vec<_>>()
-        }
+        queries
     }
+}
 
-    // Update of resource in codebase i.e Present in both migration directory and codebase but
-    // changed
-    // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] => 
-    //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-    // SubResource e.g events, indexes and fields
-    // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-    // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+// Update of resource in codebase i.e Present in both migration directory and codebase but
+// changed
+// [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
+//Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+// SubResource e.g events, indexes and fields
+// -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+// -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
 
-    // changes
+// changes
 // Direction or in terms of change type
 
-enum ChangeType {
-    
-}
+enum ChangeType {}
 
 pub struct RightDef(String);
 pub struct RightNone;
@@ -1350,19 +1456,19 @@ pub enum DiffChange {
         // up: RightDef,
         // down: LeftDef
         up: String,
-        down: String
+        down: String,
     },
     Removal {
         // up: RemoveLeftDef, // gen_removal_statement(LeftDef)
         // down: LeftDef
         up: String,
-        down: String
+        down: String,
     },
     Creation {
         // up: RightDef,
         // down: RemoveRightDef
         up: String,
-        down: String
+        down: String,
     },
 }
 
@@ -1371,20 +1477,10 @@ pub struct Something(String);
 
 pub enum Changes2 {
     NoChange,
-    Update {
-        left: Something,
-        right: Something,
-    },
-    Removal {
-        left: Something , 
-        right: Nothing
-    },
-    Creation {
-        left: Nothing, 
-        right: Something
-    },
+    Update { left: Something, right: Something },
+    Removal { left: Something, right: Nothing },
+    Creation { left: Nothing, right: Something },
 }
-
 
 #[derive(Debug, Default)]
 struct BiQueries {
@@ -1393,7 +1489,12 @@ struct BiQueries {
 }
 
 impl BiQueries {
-    fn new() -> Self { Self { definitions: vec![], removals : vec![]} }
+    fn new() -> Self {
+        Self {
+            definitions: vec![],
+            removals: vec![],
+        }
+    }
 
     fn add_def(&mut self, query: String) {
         self.definitions.push(query);
@@ -1411,7 +1512,12 @@ struct Queries {
 }
 
 impl Queries {
-    fn new() -> Self { Self { up: vec![], down : vec![]} }
+    fn new() -> Self {
+        Self {
+            up: vec![],
+            down: vec![],
+        }
+    }
 
     fn add_up(&mut self, query: String) {
         self.up.push(query);
@@ -1422,247 +1528,6 @@ impl Queries {
     }
 }
 
-struct ComparisonTables<'a> {
-    resources: &'a ComparisonsInit<'a>
-}
-
-impl<'a> ComparisonTables <'a>{
-    fn left_resources(&self) -> &FullDbInfo {
-        self.resources.left_resources
-    }
-    
-    fn right_resources(&self) -> &FullDbInfo {
-        self.resources.right_resources
-    }
-    
-    fn diff_union(&self) -> HashSet<String> {
-        self.left_resources()
-            .tables()
-            .get_names_as_set()
-            .union(&self
-                .right_resources()
-                .tables()
-                .get_names_as_set()
-            ).cloned().collect::<HashSet<_>>()
-    }
-}
-
-
-impl<'a> DbObject<Tables> for ComparisonTables <'a> {
-// impl<'a> ComparisonTables <'a>{
-    fn get_left(&self) -> Tables {
-        self.left_resources().tables()
-    }
-
-    fn get_right(&self) -> Tables {
-        self.right_resources().tables()
-    }
-
-    // fn get_removal_query_from_resource_name(&self, name: String) -> String {
-    //      remove_table(name.to_string()).to_raw().build()
-    // }
-    //
-
-    fn get_queries(&self) -> Queries {
-        let mut up_queries = vec![];
-        let mut down_queries = vec![];
-        let comparison_init = ComparisonsInit{
-            left_resources: &self.resources.left_resources, 
-            right_resources: &self.resources.right_resources
-        }; 
-
-        // validate old_name in codebase. If it exists on any field but not on any field in
-        // codebase
-        // in migration directory, throw an error because it means, it must have already been
-        // renamed or removed or first time migration is being created.
-        for table in self.get_right().get_names() {
-            let fields_comaparer = comparison_init.new_fields(table);
-            fields_comaparer.validate_field_rename();
-        }
-
-        // 3. Diff them
-        //
-        // // For Tables (Can probably use same heuristics for events, indexes, analyzers, functions,
-        // params, etc)
-        // a. If there a Table in left that is not in right, left - right =
-        // left.difference(right)
-        // let left_diff = left_tables.clone();
-
-        // DEAL WITH LEFT SIDE. i.e MIGRATION DIR
-        //     (i) up => REMOVE TABLE table_name;
-        //     We dont need to remove fields since removing a table removes all fields
-        up_queries.extend(
-            self.diff_left()
-                .iter()
-                .map(|t| self.get_removal_query_from_left(t.to_string()))
-                .collect::<Vec<_>>(),
-        );
-
-        //     (ii) down => DEFINE TABLE table_name; (Use migration directory definition)
-        //            We also use migration directory definition for fields for down reverse migration
-
-        down_queries.extend(
-            self.diff_left()
-                .iter()
-                .flat_map(|table| {
-                   let left_table_def = self.get_left()
-                    .get_definition(&table)
-                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
-                    
-                    let fields_comaparer = comparison_init.new_fields(table.to_string());
-                    let indexes_comaparer = comparison_init.new_indexes(table.to_string());
-                    let events_comaparer = comparison_init.new_events(table.to_string());
-                    
-                    let mut fields_defs = fields_comaparer.diff_left_as_vec();
-                    fields_defs.insert(0, left_table_def);
-                    
-                    // Attach migration dir/live db state definition to the top of the list
-                    fields_defs.extend(indexes_comaparer.diff_left());
-                    fields_defs.extend(events_comaparer.diff_left());
-
-                    fields_defs
-                })
-                .collect::<Vec<_>>()
-        );
-
-        // DEAL WITH RIGHT SIDE. i.e CODEBASE
-        //    (i) up => DEFINE <OBJECT> table_name; (Use codebase definition)
-        //        Since this tables would only exist in the codebase now and not in migration
-        //        directory, we are using codebase field definitions for up migration
-        up_queries.extend(
-            self.diff_right()
-                .iter()
-                .flat_map(|table| {
-                    let right_table_def = self.get_right()
-                    .get_definition(table)
-                    .expect("Object must be present. This is a bug. Please, report it to surrealorm repository.").to_string();
-
-                    let fields_comaparer = comparison_init.new_fields(table.to_string());
-                    let indexes_comaparer = comparison_init.new_indexes(table.to_string());
-                    let events_comaparer = comparison_init.new_events(table.to_string());
-                    
-                    let mut right_fields_defs = fields_comaparer.diff_right_as_vec();
-
-                    right_fields_defs.insert(0, right_table_def);
-                    
-                    // Attach codebase definition to the top of the list
-                    right_fields_defs.extend(indexes_comaparer.diff_right());
-                    right_fields_defs.extend(events_comaparer.diff_right());
-                    println!("events_comaparer.diff_right(): {:?}", events_comaparer.diff_right());
-                    
-                    right_fields_defs
-                })
-                .collect::<Vec<_>>()
-        );
-
-        //    (ii) down => REMOVE <OBJECT> table_name;
-        //         We dont need to remove fields since removing a table removes all fields
-        down_queries.extend(
-            self.diff_right()
-                .iter()
-                .map(|t_name| self.get_removal_query_from_left(t_name.to_string()))
-                .collect::<Vec<_>>(),
-        );
-
-        // HANDLE INTERSECTION
-        for table in ["animal".to_string()] {
-            let right_objects =self.get_right();
-            let right_object_def = right_objects.get_definition(&table);
-            let left_objects = self.get_left();
-            let left_object_def = left_objects.get_definition(&table);
-            // compare the two object definitions
-            match (left_object_def, right_object_def) {
-                (Some(l), Some(r)) if l == r => {
-                    // do nothing
-                    println!("Object {} is the same in both left and right", table);
-                }
-                (Some(l), Some(r)) => {
-                    println!("Object {} is different in both left and right. Use codebase as master/super", table);
-                    
-                    // (i) up => Use Right object definitions(codebase definition)
-                    up_queries.push(r.to_string());
-                    // (ii) down => Use Left object definitions(migration directory definition)
-                    down_queries.push(l.to_string());
-                }
-                _ => {
-                    panic!("This should never happen since it's an intersection and all table keys should have corresponding value definitions")
-                }
-            };
-
-                let fields_comaparer = comparison_init.new_fields(table.to_string());
-                let indexes_comaparer = comparison_init.new_indexes(table.to_string());
-                // let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
-                let events_comaparer = comparison_init.new_events(table.to_string());
-            
-                let events_diff_right = events_comaparer.get_right().get_names().iter().fold(Queries::default(), |mut acc, name| {
-                    let def_up = events_comaparer.get_right().get_definition(name).unwrap().to_string();
-                    let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(table.to_string()));
-                    acc.add_up(def_up);
-                    acc.add_down(removal_down);
-                    acc
-                });
-            
-                let indexes_diff_right = indexes_comaparer.get_right().get_names().iter().fold(Queries::default(), |mut acc, name| {
-                    let def_up = indexes_comaparer.get_right().get_definition(name).unwrap().to_string();
-                    let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(table.to_string()));
-                    acc.add_up(def_up);
-                    acc.add_down(removal_down);
-                    acc
-                });
-            
-                let mut fields_diff_union = fields_comaparer.table_intersection_queries();
-            
-                up_queries.extend(fields_diff_union.up);
-                down_queries.extend(fields_diff_union.down);
-            
-                up_queries.extend(events_diff_right.up);
-                down_queries.extend(events_diff_right.down);
-            
-                up_queries.extend(indexes_diff_right.up);
-                down_queries.extend(indexes_diff_right.down);
-
-        }
-
-        // for table in self.diff_union() {
-        //     let indexes_comaparer = comparison_init.new_indexes(table.to_string()).get_queries();
-        //     let events_comaparer = comparison_init.new_events(table.to_string()).get_queries();
-        //
-        //     println!("indexes_comaparer: {:?}", indexes_comaparer);
-        //     println!("events_comaparer: {:?}", events_comaparer);
-        //
-        //
-        //     up_queries.extend(indexes_comaparer.up);
-        //     up_queries.extend(events_comaparer.up);
-        //
-        //     down_queries.extend(indexes_comaparer.down);
-        //     down_queries.extend(events_comaparer.down);
-        // }
-        Queries {
-            up: up_queries,
-            down: down_queries,
-        }
-
-    }
-
-    fn get_removal_query_from_left(&self, resource_name: String) -> String {
-        // let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
-        // generate_removal_statement(&def, resource_name, None)
-        "REMOVE TABLE animal".to_string()
-    }
-
-    fn get_removal_query_from_right(&self,resource_name: String) -> String {
-        // let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
-        // generate_removal_statement(&def, resource_name, None)
-        "REMOVE TABLE fake".to_string()
-    }
-
-    fn get_removal_query_from_resource_name(&self,name:String) -> String {
-        remove_table(name.to_string()).to_raw().build()
-    }
-}
-
-
-
 #[derive(Debug, Clone)]
 struct ComparisonsInit<'a> {
     // Migrations latest state tables
@@ -1671,304 +1536,158 @@ struct ComparisonsInit<'a> {
     right_resources: &'a FullDbInfo,
 }
 
-
-impl<'a> ComparisonsInit <'a>{
+impl<'a> ComparisonsInit<'a> {
     pub fn new_fields(&self, table: String) -> ComparisonFields {
-        ComparisonFields{
+        ComparisonFields {
             table: table.to_string(),
-            resources: self
+            resources: self,
         }
     }
     pub fn new_indexes(&self, table: String) -> ComparisonIndexes {
         ComparisonIndexes {
             table: table.to_string(),
-            resources: self
+            resources: self,
         }
     }
-    
+
     pub fn new_events(&self, table: String) -> ComparisonEvents {
         ComparisonEvents {
             table: table.to_string(),
-            resources: self
+            resources: self,
         }
     }
-    
+
     pub fn new_tables(&self) -> ComparisonTables {
-        ComparisonTables{
-            resources: self,
-        }
+        ComparisonTables { resources: self }
     }
-    
+
     pub fn new_analyzers(&self) -> ComparisonAnalyzers {
-        ComparisonAnalyzers{
-            resources: self,
-        }
+        ComparisonAnalyzers { resources: self }
     }
-    
+
     pub fn new_params(&self) -> ComparisonAnalyzers {
-        ComparisonAnalyzers{
-            resources: self,
-        }
+        ComparisonAnalyzers { resources: self }
     }
 
     pub fn new_scopes(&self) -> ComparisonScopes {
-        ComparisonScopes{
-            resources: self,
-        }
+        ComparisonScopes { resources: self }
     }
 
     pub fn new_tokens(&self) -> ComparisonTokens {
-        ComparisonTokens{
-            resources: self,
-        }
+        ComparisonTokens { resources: self }
     }
 
     pub fn new_users(&self) -> ComparisonUsers {
-        ComparisonUsers{
-            resources: self,
-        }
+        ComparisonUsers { resources: self }
     }
-    
+
     pub fn new_functions(&self) -> ComparisonFunctions {
-        ComparisonFunctions {
-            resources: self,
-        }
+        ComparisonFunctions { resources: self }
     }
 }
-
-    
 
 struct ComparisonFields<'a> {
     table: String,
-    resources: &'a ComparisonsInit<'a>
+    resources: &'a ComparisonsInit<'a>,
 }
 
-impl<'a> ComparisonFields <'a> {
-    fn left_resources(&self) -> &FullDbInfo {
-       self.resources.left_resources 
-    }
-    
-    fn right_resources(&self) -> &FullDbInfo {
-       self.resources.right_resources
-    }
-    
-    fn get_removal_query_from_resource_name(&self, name: String) -> String {
-                    remove_field(name.to_string())
-                        .on_table(self.table.clone())
-                        .to_raw()
-                        .build()
-    }
-    
-    fn diff_right(&self) -> HashSet<String> {
-        self.get_right()
-            .get_names_as_set()
-            .difference(&self.get_left().get_names_as_set())
-            .cloned()
-            .collect::<HashSet<_>>()
-    }
-
-    fn diff_right_as_vec(&self) -> Vec<String> {
-        self.diff_right().into_iter().collect::<Vec<_>>()
-    }
-
-    fn diff_left_as_vec(&self) -> Vec<String> {
-        self.diff_left().into_iter().collect::<Vec<_>>()
-    }
-    
-    fn diff_left(&self) -> HashSet<String> {
-        self.get_left()
-            .get_names_as_set()
-            .difference(&self.get_right().get_names_as_set())
-            .cloned()
-            .collect::<HashSet<_>>()
-    }
-
-    fn diff_intersect(&self) -> HashSet<String> {
-        self.get_left()
-            .get_names_as_set()
-            .intersection(&self.get_right().get_names_as_set())
-            .cloned()
-            .collect::<HashSet<_>>()
-    }
-
-
-    fn diff_union(&self) -> HashSet<String> {
-        self.get_left()
-            .get_names_as_set()
-            .union(&self.get_right().get_names_as_set()).cloned().collect::<HashSet<_>>()
-    }
-
+impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     fn get_left(&self) -> Fields {
-        self.resources.left_resources.get_table_fields_data(self.table.to_string()).unwrap_or_default()
+        self.resources
+            .left_resources
+            .get_table_fields(self.get_table())
+            .unwrap_or_default()
     }
 
     fn get_right(&self) -> Fields {
-        self.resources.right_resources.get_table_fields_data(self.table.to_string()).unwrap_or_default()
+        self.resources
+            .right_resources
+            .get_table_fields(self.get_table())
+            .unwrap_or_default()
     }
 
+    fn get_table(&self) -> String {
+        self.table.clone()
+    }
 
+    fn queries(&self) -> Queries {
+        // Update of resource in codebase i.e Present in both migration directory and codebase but
+        // changed
+        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
+        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+        // SubResource e.g events, indexes and fields
+        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+        // let mut queries = Queries::default();
+        let queries = self
+            .get_right()
+            .get_names_as_set()
+            .union(&self.get_left().get_names_as_set())
+            .into_iter()
+            .fold(Queries::default(), |mut acc, name| {
+                let def_right = self.get_right().get_definition(name).cloned();
+                let def_left = self.get_left().get_definition(name).cloned();
 
-    // fn get_removal_query(&self, name: String) -> String {
-    //                 remove_field(name.to_string())
-    //                     .on_table(self.table.clone())
-    //                     .to_raw()
-    //                     .build()
-    // }
+                let has_old_name = CodeBaseMeta::find_field_has_old_name(
+                    self.get_table(),
+                    By::NewName(name.to_string()),
+                );
 
-    fn table_intersection_queries(&self)-> Queries {
-        let mut up_queries = vec![];
-        let mut down_queries = vec![];
-        // we have to diff left and right fields and prefer right if they are not same
-        let left_table_info = self.left_resources().get_table_fields_data(self.table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
-        let right_table_info = self.right_resources().get_table_fields_data(self.table.to_string()).expect("Fields must be present. This is a bug. Please, report it to surrealorm repository.");
-            
-        // add right field definition if left and right are different or left does not yet have
-        // the field
-        for fname in self.diff_union() {
-            let left_field_def = left_table_info.get_definition(&fname);
-            let right_field_def = right_table_info.get_definition(&fname);
-            let renamed_field_meta = CodeBaseMeta::find_field_has_old_name(self.table.to_string(), By::NewName(fname.to_string()));    
-    
-            match (left_field_def.cloned(), right_field_def.cloned()) {
-                //    First check if left def is same as right def
-                (Some(ldef), Some(rdef)) if ldef.trim() == rdef.trim() => {
-                    // do nothing
-                    println!("Field {} is the same in both left and right", fname);
-                }
-                (ldef, rdef) => {
-                    println!("Field {} is different in both left and right. Use codebase as master/super", fname);
+                match (def_left, def_right) {
+                    (None, Some(r)) => {
+                        let down = generate_removal_statement(
+                            &r,
+                            name.to_string(),
+                            Some(self.get_table()),
+                        );
 
-                    println!("renamed_field_meta: {:#?}", renamed_field_meta);
-                    if let Some(rfm) = renamed_field_meta  {
-                        let old_name = rfm.old_name.expect("Old name should be present here. If not, this is a bug and should be reported");
-                        let new_name = rfm.name;
+                        acc.add_up(r);
+                        if let Some(has_old_name) = has_old_name {
+                            let old_name = has_old_name.old_name.clone().unwrap();
+                            let copy_old_to_new = Raw::new(format!(
+                                "UPDATE {table} SET {new_name} = {old_name}",
+                                table = self.get_table(),
+                                old_name = old_name,
+                                new_name = name
+                            ));
 
-                        if let Some(rd) = rdef.clone() {
-                            up_queries.push(rd.to_string());
-                        }
-                        if let Some(ld) = left_table_info.get_definition(&old_name.to_string()) {
-                            // Pseudo Renaming since Surrealdb does not support an ALTER statement
-                            // as of yet. 18th October, 2023.
-                                // Set old name to new name
-                                let queries = Self::rename_field(FieldRenameOptions {
-                                    table: &self.table,
-                                    old_name: old_name.to_string(),
-                                    new_name: new_name.to_string(),
-                                    left_definition: ld,
-                                });
-                                
-                                up_queries.extend(queries.up);
-                                down_queries.extend(queries.down);
-                        }
-                    } else {
-                        // (ii) down => Use Left object definitions(migration directory definition)
-                        
-                        
-                        let left_field_names = left_table_info.get_names_as_set();
-                        let right_field_names = right_table_info.get_names_as_set();
-                        // 
-                        // l -> [ a, b, c ] r -> [ a, b, e ] => [c, e]
-                        let left_diff = left_field_names.difference(&right_field_names).collect::<Vec<_>>();
-                        let right_diff = right_field_names.difference(&left_field_names).collect::<Vec<_>>();
-                        
-                        let old_name = left_diff.first();
-                        let new_name = right_diff.first();
-                        
-                        let is_single_code_field_change = left_diff.clone().len() == 1 && right_diff.clone().len() == 1 ;
-                        
-                        if let Some(rd) = rdef.clone() {
-                            up_queries.push(rd.to_string());
-                            if !is_single_code_field_change {
-                                down_queries.push(remove_field(fname.to_string()).on_table(self.table.to_string()).to_raw().build());
-                            }
-                        }
-                        
-                        if is_single_code_field_change {
-                            if let (Some(old_name), Some(new_name)) = (old_name.cloned(), new_name.cloned()) {
-                                                            
-                                if new_name.to_string() == fname {
-                                    // and the old_name attribute is not explicitly used.
-                                    let left_definition = left_table_info.get_definition(old_name);
-                                    let change = Change {
-                                        table: self.table.to_string(),
-                                        old_name: old_name.to_string(),
-                                        new_name: new_name.to_string(),
-                                    };
-                                    let options = vec![
-                                        SingleFieldChangeType::Rename(&change),
-                                        SingleFieldChangeType::Delete(&change),
-                                    ];
-
-                                    let ans: Result<SingleFieldChangeType, InquireError> =
-                                        inquire::Select::new("Select the type of change you want", options).prompt();
-
-                                    match ans {
-                                        Ok(choice) => {
-                                            match choice {
-                                                SingleFieldChangeType::Delete(change) => {
-                                                    println!(
-                                                    "This is a delete change",
-                                                    // change.old_name, change.new_name
-                                                );
-                                                    
-                                                    up_queries.push(self.get_removal_query_from_resource_name(change.old_name.to_string()));
-                                                    let old_name_field_def = self.left_resources().get_field_def(self.table.to_string(), change.old_name.to_string());
-                                                    if let Some(old_field_def) = old_name_field_def  {
-                                                        down_queries.push(old_field_def.to_string());
-                                                        down_queries.push(self.get_removal_query_from_resource_name(change.new_name.to_string()));
-                                                    }
-
-                                                },
-                                                SingleFieldChangeType::Rename(change) => {
-                                                    let queries = Self::rename_field(FieldRenameOptions {
-                                                        table: &self.table,
-                                                        old_name: change.old_name.to_string(),
-                                                        new_name: change.new_name.to_string(),
-                                                        left_definition: left_definition.expect("Left field definition must be present here. If not, this is a bug and should be reported"),
-                                                    });
-                                                    up_queries.extend(queries.up);
-                                                    down_queries.extend(queries.down);
-                                                },
-                                            }
-                                        }
-                                        Err(_) => println!("There was an error, please try again"),
-                                    }
-
-
-                                }
-
-                                
-                            }
-                        } else {
-                    
-                            if let (Some(l), None) = (ldef.clone(), rdef.clone()) {
-                                // This is an old name in the migration file not in the code
-                                // base, but we want to be sure we've not already handled it
-                                // earlier above if any field has it as an old name
-                                let field_with_old_name = CodeBaseMeta::find_field_has_old_name(self.table.to_string(), By::OldName(fname.to_string()));    
-                                
-                                if field_with_old_name.is_none(){
-                                    // up_queries.push(remove_field(fname.to_string()).on_table(table.to_string()).to_raw().build());
-                                    up_queries.push(self.get_removal_query_from_resource_name(fname.to_string()));
-                                    down_queries.push(l.to_string());
-                                }
-                            };
-
+                            let up = generate_removal_statement(
+                                &r,
+                                old_name.to_string(),
+                                Some(self.get_table()),
+                            );
+                            acc.add_up(copy_old_to_new.build());
+                            acc.add_up(up);
                         }
 
+                        acc.add_down(down);
                     }
-                }
-            }
-        }
+                    (Some(l), None) => {
+                        let up = generate_removal_statement(
+                            &l,
+                            name.to_string(),
+                            Some(self.get_table()),
+                        );
+                        acc.add_up(up);
+                        acc.add_down(l);
+                    }
+                    (Some(l), Some(r)) => {
+                        if l.trim() != r.trim() {
+                            acc.add_up(r);
+                            acc.add_down(l);
+                        }
+                    }
+                    (None, None) => unreachable!(),
+                };
 
-        Queries {
-            up: up_queries,
-            down: down_queries,
-        }
+                acc
+            });
+        queries
     }
+}
 
-
-    fn rename_field( rename_opts: FieldRenameOptions) -> Queries {
+impl ComparisonFields {
+    fn rename_field(rename_opts: FieldRenameOptions) -> Queries {
         let FieldRenameOptions {
             table,
             old_name,
@@ -1977,16 +1696,30 @@ impl<'a> ComparisonFields <'a> {
         } = rename_opts;
         let mut up_queries = vec![];
         let mut down_queries = vec![];
-        up_queries.push(Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
+        up_queries.push(
+            Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}"))
                 .to_raw()
-                .build());
-        up_queries.push(remove_field(old_name.to_string()).on_table(table.to_string()).to_raw().build());
-                    
+                .build(),
+        );
+        up_queries.push(
+            remove_field(old_name.to_string())
+                .on_table(table.to_string())
+                .to_raw()
+                .build(),
+        );
+
         down_queries.push(left_definition.to_string());
-        down_queries.push(Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
+        down_queries.push(
+            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}"))
                 .to_raw()
-                .build());
-        down_queries.push(remove_field(new_name.to_string()).on_table(table.to_string()).to_raw().build());
+                .build(),
+        );
+        down_queries.push(
+            remove_field(new_name.to_string())
+                .on_table(table.to_string())
+                .to_raw()
+                .build(),
+        );
 
         Queries {
             up: up_queries,
@@ -1995,345 +1728,64 @@ impl<'a> ComparisonFields <'a> {
     }
 
     fn validate_field_rename(&self) {
-            let table = self.table.clone();
-            let left_table_fields = self.left_resources().get_table_field_names(table.to_string());
-            let right_table_fields = self.right_resources().get_table_field_names(table.to_string());
-            for field in &right_table_fields {
-                let field_with_old_name = CodeBaseMeta
-                    ::find_field_has_old_name(table.to_string(), By::NewName(field.to_string()));    
+        let table = self.table.clone();
+        let left_table_fields = self
+            .left_resources()
+            .get_table_field_names(table.to_string());
+        let right_table_fields = self
+            .right_resources()
+            .get_table_field_names(table.to_string());
+        for field in &right_table_fields {
+            let field_with_old_name = CodeBaseMeta::find_field_has_old_name(
+                table.to_string(),
+                By::NewName(field.to_string()),
+            );
 
-                if let Some(field_with_old_name) = field_with_old_name {
-                    let old_name = field_with_old_name.old_name.clone().unwrap();
-                    if self.left_resources().get_field_def(table.to_string(), field.to_string()).is_some() {
-                        panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
+            if let Some(field_with_old_name) = field_with_old_name {
+                let old_name = field_with_old_name.old_name.clone().unwrap();
+                if self
+                    .left_resources()
+                    .get_field_def(table.to_string(), field.to_string())
+                    .is_some()
+                {
+                    panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
                         Use a different name");
-
-                    }
-                    if right_table_fields.contains(&old_name.to_string()) {
-                        panic!("Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
+                }
+                if right_table_fields.contains(&old_name.to_string()) {
+                    panic!(
+                        "Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
                             is currently used as a field on the struct. Please, use a different \
-                            value for the old_name on field '{field}'");
-                    }
-                    
-                    if self.left_resources().get_field_def(table.to_string(), old_name.to_string()).is_none() {
-                        panic!("'{old_name}' as old_name value on the '{table}' model struct/table \
+                            value for the old_name on field '{field}'"
+                    );
+                }
+
+                if self
+                    .left_resources()
+                    .get_field_def(table.to_string(), old_name.to_string())
+                    .is_none()
+                {
+                    panic!(
+                        "'{old_name}' as old_name value on the '{table}' model struct/table \
                         is invalid. You are attempting to rename \
                         from {old_name} to {field} but {old_name} is not \
                             currently in use in migration/live database. Please, \
                             check that the field is not mispelled and is in the \
                             right case or use one of the currently available \
-                            fields {}", left_table_fields.join(", "));
-                    }
+                            fields {}",
+                        left_table_fields.join(", ")
+                    );
                 }
             }
-
+        }
     }
-
 }
 
 struct FieldRenameOptions<'a> {
     table: &'a String,
     old_name: String,
     new_name: String,
-    left_definition: &'a String, 
+    left_definition: &'a String,
 }
-
-
-
-
-
-macro_rules! define_resource {
-    ($resource:ident, $resource_title_case:ident) => {
-        paste! {
-            struct [<Comparison$resource_title_case>]<'a> {
-                resources: &'a ComparisonsInit<'a>
-            }
-            
-            impl<'a> [<Comparison$resource_title_case>]<'a>{
-                fn left_resources(&self) -> &FullDbInfo {
-                    self.resources.left_resources
-                }
-                
-                fn right_resources(&self) -> &FullDbInfo {
-                    self.resources.right_resources
-                }
-                
-            }
-
-            impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
-                fn get_left(&self) -> $resource_title_case {
-                    self.left_resources().[<$resource>]()
-                }
-
-                fn get_right(&self) -> $resource_title_case{
-                    self.right_resources().[<$resource>]()
-                }
-
-                // fn get_removal_query(&self, name: String) -> String {
-                //     // self.remove_resource(name.to_string())
-                //     let def = self.get_left().get_definition(define_statement).unwrap().to_string();
-                //     generate_removal_statement(def, resource_name, table)
-                // }
-
-                fn get_removal_query_from_left(&self, resource_name:String) -> String {
-                    let def = self.get_left().get_definition(&resource_name).unwrap().to_string();
-                    generate_removal_statement(&def, resource_name, None)
-                }
-
-                fn get_removal_query_from_right(&self,resource_name:String) -> String {
-                    let def = self.get_right().get_definition(&resource_name).unwrap().to_string();
-                    generate_removal_statement(&def, resource_name, None)
-                }
-
-                fn get_removal_query_from_resource_name(&self,name:String) -> String {
-                    unimplemented!()
-                }
-
-            }
-        }
-    };
-}
-
-pub fn generate_removal_statement(define_statement: &String, name: String, table: Option<String>) -> String{
-    use surreal_orm::sql::{self, Base, Statement, statements::DefineStatement};
-    let query = surreal_orm::sql::parse(define_statement).expect("Invalid statment");
-    let stmt = query[0].clone();
-    let get_error = |resource_name: String| {
-        if resource_name != name {
-            panic!("Resource name - {} - in define statement does not match name - {} - in removal statement", resource_name, name);
-        }
-    };
-    let stmt = match stmt {
-        Statement::Define(define_stmt) => {
-            match  define_stmt {
-                DefineStatement::Namespace(ns) => {
-                    get_error(ns.name.to_raw());
-                    remove_namespace(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Database(db) => {
-                    get_error(db.name.to_raw());
-                    remove_database(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Function(fn_) => {
-                    get_error(fn_.name.to_raw());
-                    remove_function(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Analyzer(analyzer) => {
-                    get_error(analyzer.name.to_raw());
-                    remove_analyzer(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Token(tk) => {
-                    get_error(tk.name.to_raw());
-                    
-                    let remove_init = remove_token(name.to_string());
-                    let remove_stmt = match tk.base {
-                        Base::Ns => remove_init.on_namespace(),
-                        Base::Db => remove_init.on_database(),
-                        Base::Root => remove_init.on_database(),
-                        Base::Sc(sc_name) => remove_init.on_scope(sc_name.to_raw()),
-                    };
-                    remove_stmt.to_raw().build()
-                },
-                DefineStatement::Scope(sc) => {
-                    get_error(sc.name.to_raw());
-                    remove_scope(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Param(_) => {
-                    get_error(name.to_string());
-                    remove_param(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Table(table) => {
-                    get_error(table.name.to_raw());
-                    remove_table(name.to_string()).to_raw().build()
-                },
-                DefineStatement::Event(ev) => {
-                    get_error(ev.name.to_raw());
-                    remove_event(name.to_string()).on_table(table.expect("Invalid event. Event must be attached to a table.")).to_raw().build()
-                },
-                DefineStatement::Field(field) => {
-                    get_error(field.name.to_string());
-                    remove_field(name.to_string()).on_table(table.expect("Invalid field. Field must be attached to a table.")).to_raw().build()
-                },
-                DefineStatement::Index(index) => {
-                    get_error(index.name.to_string());
-                    remove_index(name.to_string()).on_table(table.expect("Invalid index. Index must be attached to a table.")).to_raw().build()
-                },
-                DefineStatement::User(user) => {
-                    get_error(user.name.to_raw());
-                    let remove_init = remove_user(name.to_string());
-                    let remove_stmt = match user.base {
-                        Base::Ns => remove_init.on_namespace(),
-                        Base::Db => remove_init.on_database(),
-                        Base::Root => remove_init.on_database(),
-                        Base::Sc(sc_name) => panic!("Users cannot be defined on scope"),
-                    };
-                    remove_stmt.to_raw().build()
-                },
-                DefineStatement::MlModel(ml) => {
-	                // 	TODO: Implement define ml model statmement
-	                // 	write!(f, "DEFINE MODEL ml::{}<{}>", self.name, self.version)?;
-	                // 		write!(f, "PERMISSIONS {}", self.permissions)?;
-	                // get_error(ml.name.to_raw());
-                    // remove_ml_model(name.to_string()).to_raw().build()
-                    todo!()
-                },
-            }
-        },
-        _ => panic!("Not a define statement. Expexted a define statement"),
-        
-    };
-    
-    stmt
-}
-
-
-define_resource!(analyzers, Analyzers);
-
-define_resource!(functions, Functions);
-
-
-define_resource!(params, Params);
-
-define_resource!(scopes, Scopes);
-
-define_resource!(tokens, Tokens);
-
-define_resource!(users, Users);
-
-
-
-// struct ComparisonIndexes<'a> {
-//     table: String,
-//     resources: &'a ComparisonsInit<'a>,
-// }
-// impl<'a> ComparisonIndexes<'a> {
-//     fn left_resources(&self) -> &FullDbInfo {
-//         self.resources.left_resources
-//     }
-//     fn right_resources(&self) -> &FullDbInfo {
-//         self.resources.right_resources
-//     }
-// }
-// impl<'a> DbObject<Indexes> for ComparisonIndexes<'a> {
-//     fn get_left(&self) -> Indexes {
-//         self.left_resources().get_table_indexes(self.table.clone()).unwrap_or_default()
-//     }
-//
-//     fn get_right(&self) -> Indexes {
-//         self.right_resources().get_table_indexes(self.table.clone()).unwrap_or_default()
-//     }
-//
-//     fn get_removal_query_from_left(&self, resource_name: String) -> String {
-//         let def = self
-//             .get_left()
-//             .get_definition(&resource_name)
-//             .unwrap()
-//             .to_string();
-//         generate_removal_statement(def, resource_name, None)
-//     }
-//
-//     fn get_removal_query_from_right(&self, resource_name: String) -> String {
-//         let def = self
-//             .get_right()
-//             .get_definition(&resource_name)
-//             .unwrap()
-//             .to_string();
-//         generate_removal_statement(def, resource_name, None)
-//     }
-//
-//     fn get_removal_query_from_resource_name(&self, name: String) -> String {
-//         remove_index(name.to_string())
-//             .on_table(self.table.clone())
-//             .to_raw()
-//             .build()
-//     }
-// }
-
-macro_rules! define_table_resource {
-    ($resource:ident, $resource_title_case:ident, $removal_fn_name: ident) => {
-        paste! {
-            #[derive(Debug, Clone)]
-            struct [<Comparison$resource_title_case>]<'a> {
-                table: String,
-                resources: &'a ComparisonsInit<'a>
-            }
-            
-            impl<'a> [<Comparison$resource_title_case>]<'a>{
-                fn left_resources(&self) -> &FullDbInfo {
-                    self.resources.left_resources
-                }
-                
-                fn right_resources(&self) -> &FullDbInfo {
-                    self.resources.right_resources
-                }
-                
-            }
-
-            impl<'a> DbObject<$resource_title_case> for [<Comparison$resource_title_case>]<'a> {
-                fn get_left(&self) -> $resource_title_case {
-                    let x = self.left_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
-                    x
-                }
-
-                fn get_right(&self) -> $resource_title_case  {
-                    let x = self.right_resources().[<get_table_ $resource>](self.table.clone()).unwrap_or_default();
-                    x
-                }
-
-                fn get_removal_query_from_left(&self, resource_name: String) -> String {
-                        println!("Resource name: {}", resource_name);
-            // println!("LEft diff aererehh w: {:?}", self.diff_left());
-        // println!("Right diff aererehh w: {:?}", self.diff_right());
-        // println!("Inner diff aererehh w: {:?}", self.diff_intersect());
-        //
-        // println!("Right Remove stmt diff aererehh w: {:?}", self.get_removal_query_from_left("event1".to_string()));
-                    let def = self
-                        .get_left()
-                        .get_definition(&resource_name)
-                        .cloned()
-                        .unwrap_or_default()
-                        // .expect("problem1")
-                        .to_string();
-        println!("Defffff: {}", def);
-                    if def.is_empty() {
-                        return String::new()
-                    }
-                    let g = generate_removal_statement(&def, resource_name, None);
-        println!("Generated: {}", g);
-                    g
-                }
-
-                fn get_removal_query_from_right(&self, resource_name: String) -> String {
-                    let def = self
-                        .get_right()
-                        .get_definition(&resource_name)
-                        .cloned()
-                        .unwrap_or_default()
-                        // .expect("problem2")
-                        .to_string();
-        println!("Defffff: {}", def);
-                    if def.is_empty() {
-                        return String::new()
-                    }
-                    let g = generate_removal_statement(&def, resource_name, None);
-        println!("Generated: {}", g);
-                    g
-                }
-
-                fn get_removal_query_from_resource_name(&self, name: String) -> String {
-                    $removal_fn_name(name.to_string())
-                        .on_table(self.table.clone())
-                        .to_raw()
-                        .build()
-                }
-            }
-        }
-    };
-}
-
-define_table_resource!(events, Events, remove_event);
-define_table_resource!(indexes, Indexes, remove_index);
-
 
 struct Change {
     table: String,
@@ -2364,8 +1816,6 @@ impl<'a> Display for SingleFieldChangeType<'a> {
         }
     }
 }
-
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct DbInfo {
@@ -2402,7 +1852,6 @@ impl DbInfo {
     pub fn tokens(&self) -> Tokens {
         self.tokens.clone()
     }
-    
 
     pub fn users(&self) -> Users {
         self.users.clone()
@@ -2422,7 +1871,7 @@ pub struct Planet {
     pub tags: Vec<String>,
 }
 
-impl TableEvents for Planet { }
+impl TableEvents for Planet {}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -2434,7 +1883,7 @@ pub struct Student {
     pub class: String,
 }
 
-impl TableEvents for Student { }
+impl TableEvents for Student {}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -2453,13 +1902,13 @@ pub struct Animal {
 impl TableEvents for Animal {
     fn events() -> Vec<Raw> {
         let animal::Schema { species, speed, .. } = Self::schema();
-        
+
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Erectus").and(speed.gt(545))))
             .then(select(All).from(Crop::table_name()))
             .to_raw();
-        
+
         let event2 = define_event("event2".to_string())
             .on_table("animal".to_string())
             .when(cond(species.eq("Homo Sapien").and(speed.lt(10))))
@@ -2470,32 +1919,37 @@ impl TableEvents for Animal {
 
     fn indexes() -> Vec<Raw> {
         let animal::Schema { species, speed, .. } = Self::schema();
-        
+
         let idx1 = define_index("species_speed_idx".to_string())
-        .on_table(Self::table_name()).fields(arr![species, speed]).unique().to_raw();
-        
+            .on_table(Self::table_name())
+            .fields(arr![species, speed])
+            .unique()
+            .to_raw();
+
         vec![idx1]
     }
 }
 
-trait TableEvents where Self: Model {
-   fn events() -> Vec<Raw>{
-        vec![]
-    } 
-    
-   fn indexes() -> Vec<Raw> {
+trait TableEvents
+where
+    Self: Model,
+{
+    fn events() -> Vec<Raw> {
         vec![]
     }
-    
-   fn fields() -> Vec<Raw> {
-        Self::define_fields()
-    } 
-    
-   fn table() -> Raw {
-        Self::define_table()
-    } 
-}
 
+    fn indexes() -> Vec<Raw> {
+        vec![]
+    }
+
+    fn fields() -> Vec<Raw> {
+        Self::define_fields()
+    }
+
+    fn table() -> Raw {
+        Self::define_table()
+    }
+}
 
 macro_rules! create_table_defs {
     ($($struct_table: ident),*) => {
@@ -2510,17 +1964,16 @@ macro_rules! create_table_defs {
     };
 }
 
-
 trait DbResources {
     fn tables(&self) -> Vec<Raw> {
         vec![]
     }
-    
+
     fn analyzers(&self) -> Vec<Raw> {
         vec![]
     }
 
-    fn functions(&self)-> Vec<Raw> {
+    fn functions(&self) -> Vec<Raw> {
         vec![]
     }
 
@@ -2532,18 +1985,18 @@ trait DbResources {
         vec![]
     }
 
-    fn tokens(&self)-> Vec<Raw> {
+    fn tokens(&self) -> Vec<Raw> {
         vec![]
     }
 
-    fn users(&self)-> Vec<Raw> {
+    fn users(&self) -> Vec<Raw> {
         vec![]
     }
 }
 
 struct Resources;
 
-impl DbResources  for Resources {
+impl DbResources for Resources {
     fn tables(&self) -> Vec<Raw> {
         create_table_defs!(Animal, Crop, AnimalEatsCrop, Student, Planet)
     }
@@ -2562,7 +2015,7 @@ pub struct Eats<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
-impl TableEvents for AnimalEatsCrop { }
+impl TableEvents for AnimalEatsCrop {}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -2604,22 +2057,20 @@ enum FieldChange {
 // Get all the tables and corresponding field definitiins from teh codebase e.g Field(for now)
 // Do a left and right diff to know which tables/fields to remove or add, or change
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn test_remove_statement_generation_for_define_user_on_namespace(){
+    fn test_remove_statement_generation_for_define_user_on_namespace() {
         let stmt = generate_removal_statement(
             &"DEFINE USER Oyelowo ON NAMESPACE PASSWORD 'mapleleaf' ROLES OWNER".to_string(),
             "Oyelowo".into(),
             None,
         );
         assert_eq!(stmt, "REMOVE USER Oyelowo ON NAMESPACE".to_string());
-        
     }
 
-    fn test_remove_statement_generation_for_define_user_on_database(){
+    fn test_remove_statement_generation_for_define_user_on_database() {
         let stmt = generate_removal_statement(
             &"DEFINE USER Oyelowo ON DATABASE PASSWORD 'mapleleaf' ROLES OWNER".to_string(),
             "Oyelowo".into(),
@@ -2628,17 +2079,16 @@ mod tests {
         assert_eq!(stmt, "REMOVE USER Oyelowo ON DATABASE".to_string());
     }
 
-
-//         let xx = "
-// -- Set the name of the token
-// DEFINE TOKEN token_name
-//   -- Use this OAuth provider for scope authorization
-//   ON NAMESPACE
-//   -- Specify the cryptographic signature algorithm used to sign the token
-//   TYPE HS512
-//   -- Specify the public key so we can verify the authenticity of the token
-//   VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8'
-// ;
-// ".into();
-//     let stm = generate_removal_statement2(xx, "token_name".into(), None);
+    //         let xx = "
+    // -- Set the name of the token
+    // DEFINE TOKEN token_name
+    //   -- Use this OAuth provider for scope authorization
+    //   ON NAMESPACE
+    //   -- Specify the cryptographic signature algorithm used to sign the token
+    //   TYPE HS512
+    //   -- Specify the public key so we can verify the authenticity of the token
+    //   VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8'
+    // ;
+    // ".into();
+    //     let stm = generate_removal_statement2(xx, "token_name".into(), None);
 }
