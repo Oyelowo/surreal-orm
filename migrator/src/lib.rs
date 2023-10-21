@@ -337,7 +337,8 @@ impl CodeBaseMeta {
         table_name: Table,
         field_name: Field,
     ) -> Option<FieldMetadata> {
-        Self::get_codebase_renamed_fields_meta()
+        Resources
+            .tables_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
             .clone()
@@ -346,67 +347,26 @@ impl CodeBaseMeta {
     }
 
     pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
-        Self::get_codebase_renamed_fields_meta()
+        Resources
+            .tables_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
             .clone()
             .into_iter()
+            .filter(|field_meta| {
+                field_meta
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty())
+            })
             .find(|f| match &by {
-                By::NewName(new_name) => {
-                    f.name.to_string() == new_name.to_string() && f.old_name.is_some()
-                }
-                By::OldName(old_name) => {
-                    f.old_name
-                        .clone()
-                        .filter(|n| n.to_string() == old_name.to_string())
-                        .is_some()
-                        && f.old_name.is_some()
-                }
-            })
-    }
-
-    pub fn get_codebase_renamed_fields_meta() -> HashMap<Table, Vec<FieldMetadata>> {
-        let mut code_renamed_fields = HashMap::<Table, Vec<FieldMetadata>>::new();
-        let animal_fields_renamed = Animal::get_field_meta()
-            .into_iter()
-            .filter(|f| {
-                let x = f
+                By::NewName(new_name) => f.name.to_string() == new_name.to_string(),
+                By::OldName(old_name) => f
                     .old_name
                     .clone()
-                    .is_some_and(|o| !o.to_string().is_empty());
-                x
+                    .filter(|n| n.to_string() == old_name.to_string())
+                    .is_some(),
             })
-            .collect::<Vec<_>>();
-        code_renamed_fields.insert(Animal::table_name(), animal_fields_renamed);
-
-        let animal_eats_crop_fields_renamed = AnimalEatsCrop::get_field_meta()
-            .into_iter()
-            .filter(|f| {
-                let x = f
-                    .old_name
-                    .clone()
-                    .is_some_and(|o| !o.to_string().is_empty());
-                x
-            })
-            .collect::<Vec<_>>();
-        code_renamed_fields.insert(
-            AnimalEatsCrop::table_name(),
-            animal_eats_crop_fields_renamed,
-        );
-
-        let crop_fields_renamed = Crop::get_field_meta()
-            .into_iter()
-            .filter(|f| {
-                let x = f
-                    .old_name
-                    .clone()
-                    .is_some_and(|o| !o.to_string().is_empty());
-                x
-            })
-            .collect::<Vec<_>>();
-        code_renamed_fields.insert(Crop::table_name(), crop_fields_renamed);
-
-        code_renamed_fields
     }
 
     pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
@@ -2048,7 +2008,7 @@ pub struct Animal {
 }
 
 impl TableEvents for Animal {
-    fn events() -> Vec<Raw> {
+    fn events_definitions() -> Vec<Raw> {
         let animal::Schema { species, speed, .. } = Self::schema();
 
         let event1 = define_event("event1".to_string())
@@ -2065,7 +2025,7 @@ impl TableEvents for Animal {
         vec![event1, event2]
     }
 
-    fn indexes() -> Vec<Raw> {
+    fn indexes_definitions() -> Vec<Raw> {
         let animal::Schema { species, speed, .. } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
@@ -2082,31 +2042,57 @@ trait TableEvents
 where
     Self: Model,
 {
-    fn events() -> Vec<Raw> {
+    fn events_definitions() -> Vec<Raw> {
         vec![]
     }
 
-    fn indexes() -> Vec<Raw> {
+    fn indexes_definitions() -> Vec<Raw> {
         vec![]
     }
 
-    fn fields() -> Vec<Raw> {
+    fn fields_definitions() -> Vec<Raw> {
         Self::define_fields()
     }
 
-    fn table() -> Raw {
+    fn table_definitions() -> Raw {
         Self::define_table()
     }
+}
+
+macro_rules! create_table_defs2 {
+    ($($struct_table: ident),*) => {
+        fn tables(&self) -> Vec<Raw> {
+            ::std::vec![
+                $(
+                    ::std::vec![<$struct_table as TableEvents>::table_definitions()],
+                    <$struct_table as TableEvents>::fields_definitions(),
+                    <$struct_table as TableEvents>::indexes_definitions(),
+                    <$struct_table as TableEvents>::events_definitions(),
+                )*
+            ].into_iter().flatten().collect::<::std::vec::Vec<::surreal_orm::Raw>>()
+        }
+
+
+        fn tables_fields_meta(&self) -> HashMap<Table, Vec<FieldMetadata>> {
+            let mut meta = HashMap::<Table, Vec<FieldMetadata>>::new();
+            $(
+                meta.insert(<$struct_table as Model>::table_name(), <$struct_table as Model>::get_field_meta());
+            )*
+            meta
+        }
+
+
+    };
 }
 
 macro_rules! create_table_defs {
     ($($struct_table: ident),*) => {
         ::std::vec![
             $(
-                ::std::vec![<$struct_table as TableEvents>::table()],
-                <$struct_table as TableEvents>::fields(),
-                <$struct_table as TableEvents>::indexes(),
-                <$struct_table as TableEvents>::events(),
+                ::std::vec![<$struct_table as TableEvents>::table_definitions()],
+                <$struct_table as TableEvents>::fields_definitions(),
+                <$struct_table as TableEvents>::indexes_definitions(),
+                <$struct_table as TableEvents>::events_definitions(),
             )*
         ].into_iter().flatten().collect::<::std::vec::Vec<::surreal_orm::Raw>>()
     };
@@ -2115,6 +2101,10 @@ macro_rules! create_table_defs {
 trait DbResources {
     fn tables(&self) -> Vec<Raw> {
         vec![]
+    }
+
+    fn tables_fields_meta(&self) -> HashMap<Table, Vec<FieldMetadata>> {
+        HashMap::new()
     }
 
     fn analyzers(&self) -> Vec<Raw> {
@@ -2145,9 +2135,10 @@ trait DbResources {
 struct Resources;
 
 impl DbResources for Resources {
-    fn tables(&self) -> Vec<Raw> {
-        create_table_defs!(Animal, Crop, AnimalEatsCrop, Student, Planet)
-    }
+    // fn tables(&self) -> Vec<Raw> {
+    //     create_table_defs!(Animal, Crop, AnimalEatsCrop, Student, Planet)
+    // }
+    create_table_defs2!(Animal, Crop, AnimalEatsCrop, Student, Planet);
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
