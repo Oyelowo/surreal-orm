@@ -1807,8 +1807,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         if let Some(has_old_name) = has_old_name {
                             let old_name = has_old_name.old_name.clone().unwrap();
                             let left = self.get_left();
+                            let error = format!("The field - {name} - on table - {table} - already renamed or never existed before. \
+                                Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
                             let old_field_name_def_from_migraton_state =
-                                left.get_definition(&old_name.to_string()).unwrap();
+                                left.get_definition(&old_name.to_string()).expect(error.as_str());
+                            // left.get_definition(&old_name.to_string()).unwrap();
 
                             // Do some validations here:
 
@@ -1972,7 +1975,7 @@ impl DbInfo {
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(old_name = "name")]
+    // #[surreal_orm(old_name = "name")]
     pub first_name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
