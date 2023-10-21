@@ -37,7 +37,7 @@ pub struct User(sql::Idiom);
 pub struct Scope(sql::Idiom);
 
 /// Surreal table
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Table(sql::Table);
 
 /// Surreal event
