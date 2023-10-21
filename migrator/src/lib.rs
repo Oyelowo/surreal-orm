@@ -1332,7 +1332,7 @@ macro_rules! define_top_level_resource {
 }
 
 define_top_level_resource!(
-    tables, Tables;
+    // tables, Tables;
     analyzers, Analyzers;
     functions, Functions;
     params, Params;
@@ -1380,6 +1380,91 @@ where
                         if l.trim() != r.trim() {
                             acc.add_up(QueryType::Define(r));
                             acc.add_down(QueryType::Define(l));
+                        }
+                    }
+                    // This should never happen cos we're getting a union of left and right
+                    (None, None) => unreachable!(),
+                };
+
+                acc
+            });
+        queries
+    }
+}
+
+struct ComparisonTables<'a> {
+    resources: &'a ComparisonsInit<'a>,
+}
+
+impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
+    fn get_left(&self) -> Tables {
+        self.resources.left_resources.tables()
+    }
+
+    fn get_right(&self) -> Tables {
+        self.resources.right_resources.tables()
+    }
+
+    fn queries(&self) -> Queries {
+        // Update of resource in codebase i.e Present in both migration directory and codebase but
+        // changed
+        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
+        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
+        // SubResource e.g events, indexes and fields
+        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
+        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+        let queries = self
+            .get_right()
+            .get_names_as_set()
+            .union(&self.get_left().get_names_as_set())
+            .into_iter()
+            .fold(Queries::default(), |mut acc, table_name| {
+                let def_right = self.get_right().get_definition(table_name).cloned();
+                let def_left = self.get_left().get_definition(table_name).cloned();
+                let events = ComparisonEvents {
+                    table: &Table::from(table_name.clone()),
+                    resources: self.resources,
+                };
+                let indexes = ComparisonIndexes {
+                    table: &Table::from(table_name.clone()),
+                    resources: self.resources,
+                };
+                let fields = ComparisonFields {
+                    table: &Table::from(table_name.clone()),
+                    resources: self.resources,
+                };
+
+                match (def_left, def_right) {
+                    (None, Some(r)) => {
+                        acc.add_down(QueryType::Remove(
+                            r.generate_remove_stmt(table_name.into(), None),
+                        ));
+
+                        acc.add_up(QueryType::Define(r));
+                        acc.extend_up(events.queries());
+                        acc.extend_up(indexes.queries());
+                        acc.extend_up(fields.queries());
+                    }
+                    (Some(l), None) => {
+                        acc.add_up(QueryType::Remove(
+                            l.generate_remove_stmt(table_name.into(), None),
+                        ));
+                        acc.add_down(QueryType::Define(l));
+                        acc.extend_down(events.queries());
+                        acc.extend_down(indexes.queries());
+                        acc.extend_down(fields.queries());
+                    }
+                    (Some(l), Some(r)) => {
+                        if l.trim() != r.trim() {
+                            acc.add_up(QueryType::Define(r));
+                            acc.extend_up(events.queries());
+                            acc.extend_up(indexes.queries());
+                            acc.extend_up(fields.queries());
+
+                            acc.add_down(QueryType::Define(l));
+                            acc.extend_down(events.queries());
+                            acc.extend_down(indexes.queries());
+                            acc.extend_down(fields.queries());
                         }
                     }
                     // This should never happen cos we're getting a union of left and right
@@ -1461,6 +1546,7 @@ where
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
+        println!("Getting queries for table: {}", self.get_table());
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1606,12 +1692,28 @@ impl Queries {
         }
     }
 
+    pub fn get_up(&self) -> Vec<String> {
+        self.up.clone()
+    }
+
+    pub fn get_down(&self) -> Vec<String> {
+        self.down.clone()
+    }
+
     fn add_up(&mut self, query: QueryType) {
         self.up.push(query.to_string());
     }
 
     fn add_down(&mut self, query: QueryType) {
         self.down.push(query.to_string());
+    }
+
+    fn extend_up(&mut self, queries: Self) {
+        self.up.extend(queries.up);
+    }
+
+    fn extend_down(&mut self, queries: Self) {
+        self.down.extend(queries.down);
     }
 }
 
