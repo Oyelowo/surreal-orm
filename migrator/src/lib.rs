@@ -724,11 +724,11 @@ impl Database {
             println!("HERE=====");
             println!("UP MIGRATIOM: \n {}", up_queries_str);
             println!("DOWN MIGRATIOM: \n {}", down_queries_str);
-            // Migration::create_migration_file(
-            //     up_queries_str,
-            //     Some(down_queries_str),
-            //     "test_migration".to_string(),
-            // );
+            Migration::create_migration_file(
+                up_queries_str,
+                Some(down_queries_str),
+                "test_migration".to_string(),
+            );
         }
         //
         // For Fields
@@ -1273,6 +1273,7 @@ macro_rules! define_top_level_resource {
     ($($resource_name:ident, $resource_type:ident);*) => {
         paste::paste! {
             $(
+                #[derive(Debug)]
                 struct [<Comparison $resource_type>]<'a> {
                     resources: &'a ComparisonsInit<'a>
                 }
@@ -1393,6 +1394,10 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                     table: &Table::from(table_name.clone()),
                     resources: self.resources,
                 };
+                println!("Getting queries for table: {}", table_name);
+                println!("Events :{:#?}", events.queries());
+                println!("Indexes :{:#?}", indexes.queries());
+                println!("Fields :{:#?}", fields.queries());
 
                 match (def_left, def_right) {
                     (None, Some(r)) => {
@@ -1437,6 +1442,7 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
     }
 }
 
+#[derive(Debug)]
 struct ComparisonEvents<'a> {
     table: &'a Table,
     resources: &'a ComparisonsInit<'a>,
@@ -1462,6 +1468,7 @@ impl<'a> TableResourcesMeta<Events> for ComparisonEvents<'a> {
     }
 }
 
+#[derive(Debug)]
 struct ComparisonIndexes<'a> {
     table: &'a Table,
     resources: &'a ComparisonsInit<'a>,
@@ -1735,6 +1742,7 @@ impl<'a> ComparisonsInit<'a> {
     }
 }
 
+#[derive(Debug)]
 struct ComparisonFields<'a> {
     table: &'a Table,
     resources: &'a ComparisonsInit<'a>,
@@ -1777,9 +1785,10 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
             .fold(Queries::default(), |mut acc, name| {
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
+                let table = self.get_table();
 
                 let has_old_name = CodeBaseMeta::find_field_has_old_name(
-                    self.get_table(),
+                    table,
                     By::NewName(name.to_string()),
                 );
 
@@ -1788,7 +1797,6 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         // UPs
                         acc.add_up(QueryType::Define(r.clone()));
                         let new_name = name;
-                        let table = self.get_table();
 
                         if let Some(has_old_name) = &has_old_name {
                             let old_name = has_old_name.old_name.clone().unwrap();
@@ -1799,7 +1807,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                             acc.add_up(QueryType::Update(copy_old_to_new));
                             acc.add_up(QueryType::Remove(
-                                r.generate_remove_stmt(old_name.into(), Some(self.get_table())),
+                                r.generate_remove_stmt(old_name.into(), Some(table)),
                             ));
                         }
 
@@ -1826,11 +1834,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         }
 
                         acc.add_down(QueryType::Remove(
-                            r.generate_remove_stmt(new_name.into(), Some(self.get_table())),
+                            r.generate_remove_stmt(new_name.into(), Some(table)),
                         ));
                     }
                     (Some(l), None) => {
-                        acc.add_up(QueryType::Remove(l.generate_remove_stmt(name.into(), None)));
+                        acc.add_up(QueryType::Remove(l.generate_remove_stmt(name.into(), Some(table))));
                         acc.add_down(QueryType::Define(l));
                     }
                     (Some(l), Some(r)) => {
@@ -1975,8 +1983,8 @@ impl DbInfo {
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(old_name = "name")]
-    pub first_name: String,
+    #[surreal_orm(old_name = "firstName")]
+    pub last_name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
