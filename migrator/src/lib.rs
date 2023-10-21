@@ -23,7 +23,7 @@ use paste::paste;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
-    sql::{Query, Table},
+    sql::Query,
     statements::{
         begin_transaction, create, create_only, define_event, define_index, delete, info_for,
         remove_analyzer, remove_database, remove_event, remove_field, remove_function,
@@ -31,7 +31,7 @@ use surreal_orm::{
         remove_token, remove_user, select, select_value, update, NamespaceOrDatabase,
         UserPermissionScope,
     },
-    Edge, Node, *,
+    Edge, Node, Table, *,
 };
 use surrealdb::{
     self,
@@ -334,18 +334,18 @@ pub enum By {
 
 impl CodeBaseMeta {
     pub fn find_field_with_oldname_attr(
-        table_name: String,
-        field_name: String,
+        table_name: Table,
+        field_name: Field,
     ) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
             .clone()
             .into_iter()
-            .find(|f| f.name.to_string() == field_name && f.old_name.is_some())
+            .find(|f| f.name.to_string() == field_name.to_string() && f.old_name.is_some())
     }
 
-    pub fn find_field_has_old_name(table_name: String, by: By) -> Option<FieldMetadata> {
+    pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
         Self::get_codebase_renamed_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
@@ -365,8 +365,8 @@ impl CodeBaseMeta {
             })
     }
 
-    pub fn get_codebase_renamed_fields_meta() -> HashMap<TableName, Vec<FieldMetadata>> {
-        let mut code_renamed_fields = HashMap::new();
+    pub fn get_codebase_renamed_fields_meta() -> HashMap<Table, Vec<FieldMetadata>> {
+        let mut code_renamed_fields = HashMap::<Table, Vec<FieldMetadata>>::new();
         let animal_fields_renamed = Animal::get_field_meta()
             .into_iter()
             .filter(|f| {
@@ -377,7 +377,7 @@ impl CodeBaseMeta {
                 x
             })
             .collect::<Vec<_>>();
-        code_renamed_fields.insert(Animal::table_name().to_string(), animal_fields_renamed);
+        code_renamed_fields.insert(Animal::table_name(), animal_fields_renamed);
 
         let animal_eats_crop_fields_renamed = AnimalEatsCrop::get_field_meta()
             .into_iter()
@@ -390,7 +390,7 @@ impl CodeBaseMeta {
             })
             .collect::<Vec<_>>();
         code_renamed_fields.insert(
-            AnimalEatsCrop::table_name().to_string(),
+            AnimalEatsCrop::table_name(),
             animal_eats_crop_fields_renamed,
         );
 
@@ -404,7 +404,7 @@ impl CodeBaseMeta {
                 x
             })
             .collect::<Vec<_>>();
-        code_renamed_fields.insert(Crop::table_name().to_string(), crop_fields_renamed);
+        code_renamed_fields.insert(Crop::table_name(), crop_fields_renamed);
 
         code_renamed_fields
     }
@@ -486,35 +486,35 @@ impl FullDbInfo {
             .flatten()
     }
 
-    pub fn get_table_indexes(&self, table_name: Table) -> Option<Indexes> {
+    pub fn get_table_indexes(&self, table_name: &Table) -> Option<Indexes> {
         self.table_resources
-            .get(&table_name)
+            .get(table_name)
             .map(|t| t.indexes().clone())
     }
 
-    pub fn get_table_events(&self, table_name: Table) -> Option<Events> {
+    pub fn get_table_events(&self, table_name: &Table) -> Option<Events> {
         self.table_resources
-            .get(&table_name)
+            .get(table_name)
             .map(|t| t.events().clone())
     }
 
-    pub fn get_table_fields(&self, table_name: Table) -> Option<Fields> {
+    pub fn get_table_fields(&self, table_name: &Table) -> Option<Fields> {
         self.table_resources
-            .get(&table_name)
+            .get(table_name)
             .map(|t| t.fields().clone())
     }
 
-    pub fn get_table_field_names(&self, table_name: Table) -> Vec<String> {
+    pub fn get_table_field_names(&self, table_name: &Table) -> Vec<String> {
         self.table_resources
-            .get(&table_name)
+            .get(table_name)
             .map(|t| t.fields().clone())
             .unwrap_or_default()
             .get_names()
     }
 
-    pub fn get_table_field_names_as_set(&self, table_name: Table) -> HashSet<String> {
+    pub fn get_table_field_names_as_set(&self, table_name: &Table) -> HashSet<String> {
         self.table_resources
-            .get(&table_name)
+            .get(table_name)
             .map(|t| t.fields().clone())
             .unwrap_or_default()
             .get_names_as_set()
@@ -1001,6 +1001,14 @@ struct Info(HashMap<String, DefineStatementRaw>);
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 struct DefineStatementRaw(String);
 
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+struct UpdateStatementRaw(String);
+impl Display for UpdateStatementRaw {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
 struct RemoveStatementRaw(String);
 impl Display for RemoveStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1040,7 +1048,7 @@ impl DefineStatementRaw {
     pub fn generate_remove_stmt(
         &self,
         define_statement_name: DefineStmtName,
-        table: Option<Table>,
+        table: Option<&Table>,
     ) -> RemoveStatementRaw {
         use surreal_orm::sql::{self, statements::DefineStatement, Base, Statement};
         let query = surreal_orm::sql::parse(&self.to_string()).expect("Invalid statment");
@@ -1354,7 +1362,7 @@ where
 }
 
 struct ComparisonEvents<'a> {
-    table: String,
+    table: &'a Table,
     resources: &'a ComparisonsInit<'a>,
 }
 
@@ -1373,8 +1381,8 @@ impl<'a> TableResourcesMeta<Events> for ComparisonEvents<'a> {
             .unwrap_or_default()
     }
 
-    fn get_table(&self) -> String {
-        self.table.clone()
+    fn get_table(&self) -> &Table {
+        self.table
     }
 }
 
@@ -1387,7 +1395,7 @@ where
     // Right is from codebase
     fn get_right(&self) -> T;
 
-    fn get_table(&self) -> String;
+    fn get_table(&self) -> &Table;
 
     fn queries(&self) -> Queries {
         // Update of resource in codebase i.e Present in both migration directory and codebase but
@@ -1397,7 +1405,6 @@ where
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-        // let mut queries = Queries::default();
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1409,27 +1416,21 @@ where
 
                 match (def_left, def_right) {
                     (None, Some(r)) => {
-                        let down = generate_removal_statement(
-                            &r,
-                            name.to_string(),
-                            Some(self.get_table()),
-                        );
-                        acc.add_up(r);
-                        acc.add_down(down);
+                        acc.add_up(QueryType::Define(r));
+                        acc.add_down(QueryType::Remove(
+                            r.generate_remove_stmt(name.into(), Some(self.get_table())),
+                        ));
                     }
                     (Some(l), None) => {
-                        let up = generate_removal_statement(
-                            &l,
-                            name.to_string(),
-                            Some(self.get_table()),
-                        );
-                        acc.add_up(up);
-                        acc.add_down(l);
+                        acc.add_up(QueryType::Define(l));
+                        acc.add_down(QueryType::Remove(
+                            l.generate_remove_stmt(name.into(), Some(self.get_table())),
+                        ));
                     }
                     (Some(l), Some(r)) => {
                         if l.trim() != r.trim() {
-                            acc.add_up(r);
-                            acc.add_down(l);
+                            acc.add_up(QueryType::Define(r));
+                            acc.add_down(QueryType::Define(l));
                         }
                     }
                     (None, None) => unreachable!(),
@@ -1524,6 +1525,21 @@ struct Queries {
 enum QueryType {
     Define(DefineStatementRaw),
     Remove(RemoveStatementRaw),
+    Update(UpdateStatementRaw),
+}
+
+impl Display for QueryType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                QueryType::Define(def) => def.to_string(),
+                QueryType::Remove(rem) => rem.to_string(),
+                QueryType::Update(up) => up.to_string(),
+            }
+        )
+    }
 }
 
 impl Queries {
@@ -1535,17 +1551,11 @@ impl Queries {
     }
 
     fn add_up(&mut self, query: QueryType) {
-        self.up.push(match query {
-            QueryType::Define(def) => def.to_string(),
-            QueryType::Remove(rem) => rem.to_string(),
-        });
+        self.up.push(query.to_string());
     }
 
     fn add_down(&mut self, query: QueryType) {
-        self.down.push(match query {
-            QueryType::Define(def) => def.to_string(),
-            QueryType::Remove(rem) => rem.to_string(),
-        });
+        self.down.push(query.to_string());
     }
 }
 
@@ -1608,7 +1618,7 @@ impl<'a> ComparisonsInit<'a> {
 }
 
 struct ComparisonFields<'a> {
-    table: String,
+    table: &'a Table,
     resources: &'a ComparisonsInit<'a>,
 }
 
@@ -1627,8 +1637,8 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
             .unwrap_or_default()
     }
 
-    fn get_table(&self) -> String {
-        self.table.clone()
+    fn get_table(&self) -> &Table {
+        self.table
     }
 
     fn queries(&self) -> Queries {
@@ -1656,13 +1666,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                 match (def_left, def_right) {
                     (None, Some(r)) => {
-                        let down = generate_removal_statement(
-                            &r,
-                            name.to_string(),
-                            Some(self.get_table()),
-                        );
-
-                        acc.add_up(r);
+                        acc.add_up(QueryType::Define(r));
                         if let Some(has_old_name) = has_old_name {
                             let old_name = has_old_name.old_name.clone().unwrap();
                             let copy_old_to_new = Raw::new(format!(
