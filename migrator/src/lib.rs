@@ -1000,13 +1000,21 @@ struct Info(HashMap<String, DefineStatementRaw>);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 struct DefineStatementRaw(String);
+
 struct RemoveStatementRaw(String);
+impl Display for RemoveStatementRaw {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
 struct FieldName(String);
+
 struct DefineStmtName(String);
 
 impl Display for DefineStmtName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", self)
     }
 }
 
@@ -1151,6 +1159,10 @@ impl DefineStatementRaw {
         };
 
         stmt.into()
+    }
+
+    pub fn trim(&self) -> &str {
+        self.0.trim()
     }
 }
 
@@ -1307,7 +1319,6 @@ where
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-        // let mut queries = Queries::default();
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1319,21 +1330,20 @@ where
 
                 match (def_left, def_right) {
                     (None, Some(r)) => {
-                        // let down = generate_removal_statement(&r, name.to_string(), None);
-                        acc.add_up(r);
-                        acc.add_down(r.generate_remove_stmt(name.into(), None));
+                        acc.add_up(QueryType::Define(r));
+                        acc.add_down(QueryType::Remove(r.generate_remove_stmt(name.into(), None)));
                     }
                     (Some(l), None) => {
-                        let up = generate_removal_statement(&l, name.to_string(), None);
-                        acc.add_up(up);
-                        acc.add_down(l);
+                        acc.add_up(QueryType::Remove(l.generate_remove_stmt(name.into(), None)));
+                        acc.add_down(QueryType::Define(l));
                     }
                     (Some(l), Some(r)) => {
                         if l.trim() != r.trim() {
-                            acc.add_up(r);
-                            acc.add_down(l);
+                            acc.add_up(QueryType::Define(r));
+                            acc.add_down(QueryType::Define(l));
                         }
                     }
+                    // This should never happen cos we're getting a union of left and right
                     (None, None) => unreachable!(),
                 };
 
@@ -1511,6 +1521,11 @@ struct Queries {
     down: Vec<String>,
 }
 
+enum QueryType {
+    Define(DefineStatementRaw),
+    Remove(RemoveStatementRaw),
+}
+
 impl Queries {
     fn new() -> Self {
         Self {
@@ -1519,12 +1534,18 @@ impl Queries {
         }
     }
 
-    fn add_up(&mut self, query: String) {
-        self.up.push(query);
+    fn add_up(&mut self, query: QueryType) {
+        self.up.push(match query {
+            QueryType::Define(def) => def.to_string(),
+            QueryType::Remove(rem) => rem.to_string(),
+        });
     }
 
-    fn add_down(&mut self, query: String) {
-        self.down.push(query);
+    fn add_down(&mut self, query: QueryType) {
+        self.down.push(match query {
+            QueryType::Define(def) => def.to_string(),
+            QueryType::Remove(rem) => rem.to_string(),
+        });
     }
 }
 
