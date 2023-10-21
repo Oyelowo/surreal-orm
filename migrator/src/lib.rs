@@ -1394,46 +1394,43 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                     table: &Table::from(table_name.clone()),
                     resources: self.resources,
                 };
-                println!("def_left: {:#?}", def_left);
-                println!("def_right: {:#?}", def_right);
-                println!("fields: {:#?}", fields.queries());
+                let delta = DeltaType::from((def_left, def_right));
 
-                match (def_left, def_right) {
-                    (None, Some(r)) => {
+                match delta {
+                    DeltaType::NoChange => {
+                        acc.extend_up(events.queries());
+                        acc.extend_up(indexes.queries());
+                        acc.extend_up(fields.queries());
+                        
+                        acc.extend_down(events.queries());
+                        acc.extend_down(indexes.queries());
+                        acc.extend_down(fields.queries());
+                    }
+                    DeltaType::Update { left, right } => {
+                            acc.add_up(QueryType::Define(right));
+
+                            acc.add_down(QueryType::Define(left));
+                    }
+                    DeltaType::Create {right } => {
                         acc.add_down(QueryType::Remove(
-                            r.generate_remove_stmt(table_name.into(), None),
+                            right.generate_remove_stmt(table_name.into(), None),
                         ));
 
-                        acc.add_up(QueryType::Define(r));
+                        acc.add_up(QueryType::Define(right));
                         acc.extend_up(events.queries());
                         acc.extend_up(indexes.queries());
                         acc.extend_up(fields.queries());
+                        
                     }
-                    (Some(l), None) => {
+                    DeltaType::Remove {left } => {
                         acc.add_up(QueryType::Remove(
-                            l.generate_remove_stmt(table_name.into(), None),
+                            left.generate_remove_stmt(table_name.into(), None),
                         ));
-                        acc.add_down(QueryType::Define(l));
+                        acc.add_down(QueryType::Define(left));
                         acc.extend_down(events.queries());
                         acc.extend_down(indexes.queries());
                         acc.extend_down(fields.queries());
                     }
-                    (Some(l), Some(r)) => {
-                        if l.trim() != r.trim() {
-                            acc.add_up(QueryType::Define(r));
-
-                            acc.add_down(QueryType::Define(l));
-                        }
-                        acc.extend_up(events.queries());
-                        acc.extend_up(indexes.queries());
-                        acc.extend_up(fields.queries());
-                    
-                        acc.extend_down(events.queries());
-                        acc.extend_down(indexes.queries());
-                        acc.extend_down(fields.queries());
-                    }
-                    // This should never happen cos we're getting a union of left and right
-                    (None, None) => unreachable!(),
                 };
 
                 acc
@@ -1810,7 +1807,6 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     //     "REMOVE FIELD lastName ON TABLE planet;",
     //     "DEFINE FIELD firstName ON planet TYPE string;",
     // ],
-                    println!("field_meta_by_old_name: {:#?}", field_meta_by_old_name);
                     match delta {
                         DeltaType::NoChange => {}
                         DeltaType::Create { right } => {
