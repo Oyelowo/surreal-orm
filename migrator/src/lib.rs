@@ -1792,10 +1792,29 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                     By::NewName(name.to_string()),
                 );
 
-                match (def_left, def_right) {
-                    (None, Some(r)) => {
+                let field_meta_by_old_name = CodeBaseMeta::find_field_has_old_name(
+                    table,
+                    By::OldName(name.to_string()),
+                );
+
+                    let delta = DeltaType::from((def_left, def_right));
+                        // DOWNs
+    // up: [
+    //     "DEFINE FIELD lastName ON planet TYPE string;",
+    //     "UPDATE planet SET lastName = firstName",
+    //     "REMOVE FIELD firstName ON TABLE planet;",
+    // ],
+    // down: [
+    //     "DEFINE FIELD firstName ON planet TYPE string;",
+    //     "REMOVE FIELD lastName ON TABLE planet;",
+    //     "DEFINE FIELD firstName ON planet TYPE string;",
+    // ],
+                    println!("field_meta_by_old_name: {:#?}", field_meta_by_old_name);
+                    match delta {
+                        DeltaType::NoChange => {}
+                        DeltaType::Create { right } => {
                         // UPs
-                        acc.add_up(QueryType::Define(r.clone()));
+                        acc.add_up(QueryType::Define(right.clone()));
                         let new_name = name;
 
                         if let Some(has_old_name) = &has_old_name {
@@ -1807,11 +1826,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                             acc.add_up(QueryType::Update(copy_old_to_new));
                             acc.add_up(QueryType::Remove(
-                                r.generate_remove_stmt(old_name.into(), Some(table)),
+                                right.generate_remove_stmt(old_name.into(), Some(table)),
                             ));
                         }
 
-                        // DOWNs
+
                         if let Some(has_old_name) = has_old_name {
                             let old_name = has_old_name.old_name.clone().unwrap();
                             let left = self.get_left();
@@ -1831,28 +1850,70 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
                                     .build(),
                             );
+                            acc.add_down(QueryType::Update(copy_new_to_old));
                         }
 
                         acc.add_down(QueryType::Remove(
-                            r.generate_remove_stmt(new_name.into(), Some(table)),
+                            right.generate_remove_stmt(new_name.into(), Some(table)),
                         ));
-                    }
-                    (Some(l), None) => {
-                        acc.add_up(QueryType::Remove(l.generate_remove_stmt(name.into(), Some(table))));
-                        acc.add_down(QueryType::Define(l));
-                    }
-                    (Some(l), Some(r)) => {
-                        if l.trim() != r.trim() {
-                            acc.add_up(QueryType::Define(r));
-                            acc.add_down(QueryType::Define(l));
+
+                        
+                        }
+                        DeltaType::Remove { left } => {
+                            if field_meta_by_old_name.is_none() {
+                                acc.add_up(QueryType::Remove(
+                                    left.generate_remove_stmt(name.into(), Some(table)),
+                                ));
+                            
+                                acc.add_down(QueryType::Define(left));
+                            }
+                        }
+                        DeltaType::Update { left, right } => {
+                            if left.trim() != right.trim() {
+                                acc.add_up(QueryType::Define(right));
+                                acc.add_down(QueryType::Define(left));
+                            }
+
                         }
                     }
-                    (None, None) => unreachable!(),
-                };
+
 
                 acc
             });
         queries
+    }
+}
+
+
+#[derive(Debug)]
+enum DeltaType {
+    NoChange,
+    Create {
+        right: DefineStatementRaw,
+    },
+    Remove {
+        left: DefineStatementRaw,
+    },
+    Update {
+        left: DefineStatementRaw,
+        right: DefineStatementRaw,
+    },
+}
+
+impl From<(Option<DefineStatementRaw>, Option<DefineStatementRaw>)> for DeltaType {
+    fn from(value: (Option<DefineStatementRaw>, Option<DefineStatementRaw>)) -> Self {
+        match value {
+            (None, Some(r)) => DeltaType::Create { right: r },
+            (Some(l), None) => DeltaType::Remove { left: l },
+            (Some(l), Some(r)) => {
+                if l.trim() != r.trim() {
+                    DeltaType::Update { left: l, right: r }
+                } else {
+                    DeltaType::NoChange
+                }
+            }
+            (None, None) => unreachable!(),
+        }
     }
 }
 
