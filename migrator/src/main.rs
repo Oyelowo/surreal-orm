@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use inquire::InquireError;
-use m::{generate_removal_statement, Planet, Student};
+use m::{Planet, Student};
 use migrator as m;
 use surreal_orm::{
     statements::{begin_transaction, info_for},

@@ -1013,7 +1013,7 @@ impl Deref for UpdateStatementRaw {
 }
 impl Display for UpdateStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -1027,7 +1027,7 @@ impl<T: Into<String>> From<T> for UpdateStatementRaw {
 struct RemoveStatementRaw(String);
 impl Display for RemoveStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -1037,7 +1037,7 @@ struct DefineStmtName(String);
 
 impl Display for DefineStmtName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{}", self.0)
     }
 }
 
