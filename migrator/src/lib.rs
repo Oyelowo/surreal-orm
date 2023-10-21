@@ -1327,24 +1327,22 @@ where
             .fold(Queries::default(), |mut acc, name| {
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
+                let delta = DeltaType::from((def_left, def_right));
 
-                match (def_left, def_right) {
-                    (None, Some(r)) => {
-                        acc.add_down(QueryType::Remove(r.generate_remove_stmt(name.into(), None)));
-                        acc.add_up(QueryType::Define(r));
+                match delta {
+                    DeltaType::Create { right } => {
+                        acc.add_down(QueryType::Remove(right.generate_remove_stmt(name.into(), None)));
+                        acc.add_up(QueryType::Define(right));
                     }
-                    (Some(l), None) => {
-                        acc.add_up(QueryType::Remove(l.generate_remove_stmt(name.into(), None)));
-                        acc.add_down(QueryType::Define(l));
+                    DeltaType::Remove { left } => {
+                        acc.add_up(QueryType::Remove(left.generate_remove_stmt(name.into(), None)));
+                        acc.add_down(QueryType::Define(left));
                     }
-                    (Some(l), Some(r)) => {
-                        if l.trim() != r.trim() {
-                            acc.add_up(QueryType::Define(r));
-                            acc.add_down(QueryType::Define(l));
-                        }
+                    DeltaType::Update { left, right } => {
+                        acc.add_up(QueryType::Define(right));
+                        acc.add_down(QueryType::Define(left));
                     }
-                    // This should never happen cos we're getting a union of left and right
-                    (None, None) => unreachable!(),
+                    DeltaType::NoChange => {}
                 };
 
                 acc
@@ -1407,9 +1405,15 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                         acc.extend_down(fields.queries());
                     }
                     DeltaType::Update { left, right } => {
-                            acc.add_up(QueryType::Define(right));
-
-                            acc.add_down(QueryType::Define(left));
+                        acc.add_up(QueryType::Define(right));
+                        acc.extend_up(events.queries());
+                        acc.extend_up(indexes.queries());
+                        acc.extend_up(fields.queries());
+                    
+                        acc.add_down(QueryType::Define(left));
+                        acc.extend_down(events.queries());
+                        acc.extend_down(indexes.queries());
+                        acc.extend_down(fields.queries());
                     }
                     DeltaType::Create {right } => {
                         acc.add_down(QueryType::Remove(
@@ -1521,26 +1525,26 @@ where
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
 
-                match (def_left, def_right) {
-                    (None, Some(r)) => {
+                let delta = DeltaType::from((def_left, def_right));
+
+                match delta {
+                    DeltaType::Create {right } => {
                         acc.add_down(QueryType::Remove(
-                            r.generate_remove_stmt(name.into(), Some(self.get_table())),
+                            right.generate_remove_stmt(name.into(), Some(self.get_table())),
                         ));
-                        acc.add_up(QueryType::Define(r));
+                        acc.add_up(QueryType::Define(right));
                     }
-                    (Some(l), None) => {
+                    DeltaType::Remove { left } => {
                         acc.add_down(QueryType::Remove(
-                            l.generate_remove_stmt(name.into(), Some(self.get_table())),
+                            left.generate_remove_stmt(name.into(), Some(self.get_table())),
                         ));
-                        acc.add_up(QueryType::Define(l));
+                        acc.add_up(QueryType::Define(left));
                     }
-                    (Some(l), Some(r)) => {
-                        if l.trim() != r.trim() {
-                            acc.add_up(QueryType::Define(r));
-                            acc.add_down(QueryType::Define(l));
-                        }
+                    DeltaType::Update { left, right } => {
+                        acc.add_up(QueryType::Define(right));
+                        acc.add_down(QueryType::Define(left));
                     }
-                    (None, None) => unreachable!(),
+                    DeltaType::NoChange => {}
                 };
 
                 acc
@@ -1549,79 +1553,6 @@ where
     }
 }
 
-// Update of resource in codebase i.e Present in both migration directory and codebase but
-// changed
-// [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
-//Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-// SubResource e.g events, indexes and fields
-// -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-// -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-
-// changes
-// Direction or in terms of change type
-
-enum ChangeType {}
-
-pub struct RightDef(String);
-pub struct RightNone;
-pub struct LeftDef(String);
-pub struct RemoveRightDef;
-pub struct RemoveLeftDef;
-
-pub enum DiffChange {
-    NoChange,
-    Update {
-        // up: RightDef,
-        // down: LeftDef
-        up: String,
-        down: String,
-    },
-    Removal {
-        // up: RemoveLeftDef, // gen_removal_statement(LeftDef)
-        // down: LeftDef
-        up: String,
-        down: String,
-    },
-    Creation {
-        // up: RightDef,
-        // down: RemoveRightDef
-        up: String,
-        down: String,
-    },
-}
-
-pub struct Nothing;
-pub struct Something(String);
-
-pub enum Changes2 {
-    NoChange,
-    Update { left: Something, right: Something },
-    Removal { left: Something, right: Nothing },
-    Creation { left: Nothing, right: Something },
-}
-
-#[derive(Debug, Default)]
-struct BiQueries {
-    definitions: Vec<String>,
-    removals: Vec<String>,
-}
-
-impl BiQueries {
-    fn new() -> Self {
-        Self {
-            definitions: vec![],
-            removals: vec![],
-        }
-    }
-
-    fn add_def(&mut self, query: String) {
-        self.definitions.push(query);
-    }
-
-    fn add_removal(&mut self, query: String) {
-        self.removals.push(query);
-    }
-}
 
 #[derive(Debug, Default)]
 struct Queries {
