@@ -631,7 +631,6 @@ impl Database {
         let left = left_db.run_local_dir_migrations().await.expect("flops");
         let left_db_info = left_db.get_db_info().await.unwrap();
         let left_tables = left_db_info.tables();
-        println!("left db info: {:#?}", left_db_info.tables());
         // let left_table_info = db.get_table_info("planet".into()).await.unwrap();
         //
         // 2. Get all migrations from codebase synced with db - Right
@@ -639,7 +638,6 @@ impl Database {
         let right = right_db.run_codebase_schema_queries().await?;
         let right_db_info = right_db.get_db_info().await.unwrap();
         let right_tables = right_db_info.tables();
-        println!("right db info: {:#?}", right_db_info.tables());
         // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
         let init = ComparisonsInit {
             left_resources: &left_db
@@ -658,6 +656,8 @@ impl Database {
         let scopes = init.new_scopes().queries();
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
+
+        println!("tables: {:#?}", tables);
 
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
@@ -724,11 +724,11 @@ impl Database {
             println!("HERE=====");
             println!("UP MIGRATIOM: \n {}", up_queries_str);
             println!("DOWN MIGRATIOM: \n {}", down_queries_str);
-            Migration::create_migration_file(
-                up_queries_str,
-                Some(down_queries_str),
-                "test_migration".to_string(),
-            );
+            // Migration::create_migration_file(
+            //     up_queries_str,
+            //     Some(down_queries_str),
+            //     "test_migration".to_string(),
+            // );
         }
         //
         // For Fields
@@ -1394,10 +1394,9 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                     table: &Table::from(table_name.clone()),
                     resources: self.resources,
                 };
-                println!("Getting queries for table: {}", table_name);
-                println!("Events :{:#?}", events.queries());
-                println!("Indexes :{:#?}", indexes.queries());
-                println!("Fields :{:#?}", fields.queries());
+                println!("def_left: {:#?}", def_left);
+                println!("def_right: {:#?}", def_right);
+                println!("fields: {:#?}", fields.queries());
 
                 match (def_left, def_right) {
                     (None, Some(r)) => {
@@ -1422,15 +1421,16 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                     (Some(l), Some(r)) => {
                         if l.trim() != r.trim() {
                             acc.add_up(QueryType::Define(r));
-                            acc.extend_up(events.queries());
-                            acc.extend_up(indexes.queries());
-                            acc.extend_up(fields.queries());
 
                             acc.add_down(QueryType::Define(l));
-                            acc.extend_down(events.queries());
-                            acc.extend_down(indexes.queries());
-                            acc.extend_down(fields.queries());
                         }
+                        acc.extend_up(events.queries());
+                        acc.extend_up(indexes.queries());
+                        acc.extend_up(fields.queries());
+                    
+                        acc.extend_down(events.queries());
+                        acc.extend_down(indexes.queries());
+                        acc.extend_down(fields.queries());
                     }
                     // This should never happen cos we're getting a union of left and right
                     (None, None) => unreachable!(),
@@ -1438,6 +1438,7 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
 
                 acc
             });
+        println!("Queries: {:#?}", queries);
         queries
     }
 }
