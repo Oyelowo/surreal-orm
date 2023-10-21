@@ -1184,15 +1184,14 @@ where
 
 struct ComparisonEvents2 {
     
-    resources: Co
 }
 
-impl TableResourcesMeta<Events> for ComparisonEvents {
-    fn get_left(&self) -> T {
+impl TableResourcesMeta<Events> for ComparisonEvents2 {
+    fn get_left(&self) -> Events {
         todo!()
     }
 
-    fn get_right(&self) -> T {
+    fn get_right(&self) -> Events {
         todo!()
     }
 
@@ -1265,7 +1264,7 @@ where
         diff_right
     }
 
-    fn changes(&self) -> Vec< DiffChange>{
+    fn changes(&self) -> Queries {
         // Removal of resource from codebase i.e Present in migration directory but not in
         // codebase
         let def_left = self.def_table_left();
@@ -1280,65 +1279,38 @@ where
         // SubResource e.g events, indexes and fields
         // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
         // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-        let changes = self.get_right()
+        // let mut queries = Queries::default();
+        let queries = self.get_right()
             .get_names_as_set()
             .union(&self.get_left().get_names_as_set())
             .into_iter()
-            .fold(vec![], |mut acc, name| {
+            .fold(Queries::default(), |mut acc, name| {
             let def_right = self.get_right().get_definition(name).cloned();
             let def_left = self.get_left().get_definition(name).cloned();
 
-            let change = match (def_left, def_right) {
+             match (def_left, def_right) {
                 (None, Some(r)) => {
                         let down =  generate_removal_statement(&r, name.to_string(), Some(self.get_table()));
-                        DiffChange::Creation { 
-                            up: r, 
-                            down 
-                        }
+                        acc.add_up(r);
+                        acc.add_down(down);
                     }
                 (Some(l), None) => {
-                        DiffChange::Creation { 
-                            up: generate_removal_statement(&l, name.to_string(), Some(self.get_table())),
-                            down: l
-                        }
-                        
+                        let up = generate_removal_statement(&l, name.to_string(), Some(self.get_table()));
+                        acc.add_up(up);
+                        acc.add_down(l);
                     },
                 (Some(l), Some(r)) => {
-                        if l.trim() == r.trim() {
-                            DiffChange::NoChange
-                        } else {
-                            DiffChange::Update {
-                                up: r,
-                                down: l
-                            }
+                        if l.trim() != r.trim() {
+                            acc.add_up(r);
+                            acc.add_down(l);
                         }
                     },
                 (None, None) => unreachable!(),
             };
                         
-                    // let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
-                //     acc.add_up(def_up);
-                // acc.add_down(removal_down);
-                acc.push(change);
                 acc
             });
-            
-            // let diff_right = self.get_right()
-            //     .get_names_as_set()
-            //     .union(&self.get_left().get_names_as_set())
-            //     .into_iter()
-            //     .fold(Queries::default(), |mut acc, name| {
-            //     let def_up = self.get_right().get_definition(name)
-            //         .expect("As long as the name exists the defintion should ideally also exists. \
-            //             So this is a error and should be reported.").to_string();
-            //     let removal_down = generate_removal_statement(&def_up, name.to_string(), Some(self.get_table()));
-            //     acc.add_up(def_up);
-            //     acc.add_down(removal_down);
-            //     acc
-            // });
-            //
-            // diff_right
-            changes
+            queries
         }
 
 
