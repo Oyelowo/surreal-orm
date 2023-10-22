@@ -485,6 +485,104 @@ impl FullDbInfo {
 #[derive(Debug, Clone)]
 pub struct LeftDatabase(Database);
 
+impl LeftDatabase {
+    pub async fn resources(&self)-> LeftFullDbInfo {
+         LeftFullDbInfo(self
+            .0
+            .get_all_resources()
+            .await
+            .expect("nothing for u on left"))
+    }
+    
+    pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
+        let mut all_migrations = Migration::get_all_from_migrations_dir();
+        let queries = all_migrations
+            .into_iter()
+            .map(|m| m.up)
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Run them as a transaction against a local in-memory database
+        if !queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(self.db())
+                .await?;
+        }
+        Ok(())
+    }
+    pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
+        let migration::Schema { name, .. } = Migration::schema();
+        let migration = Migration::table_name();
+
+        // select [{ name: "Oyelowo" }]
+        // select value [ "Oyelowo" ]
+        // select_only. Just on object => { name: "Oyelowo" }
+        let migration_names = select_value(name)
+            .from(migration)
+            .return_many::<String>(self.db())
+            .await?;
+        // vec![
+        //     "20230912__up__add_name".into(),
+        //     "20230912__down__remove_name".into(),
+        // ]
+        Ok(migration_names)
+    }
+
+
+    pub async fn mark_migration_as_applied(
+        &self,
+        migration_name: impl Into<MigrationName>,
+    ) -> MigrationResult<MigrationMetadata> {
+        let migration_name: MigrationName = migration_name.into();
+        println!("Applying migration: {}", migration_name);
+
+        let migration = MigrationMetadata {
+            id: MigrationMetadata::create_id(migration_name.to_string()),
+            name: migration_name.to_string(),
+            timestamp: migration_name.timestamp().expect("Invalid timestamp"),
+        }
+        .create()
+        .get_one(self.db())
+        .await?;
+        println!("Migration applied: {}", migration_name);
+
+        Ok(migration)
+    }
+
+    pub async fn unmark_migration(
+        &self,
+        migration_name: impl Into<MigrationName>,
+    ) -> MigrationResult<()> {
+        let migration_name: MigrationName = migration_name.into();
+        println!("Unmark migration: {}", migration_name);
+        delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
+            .run(self.db());
+        println!("Migration unmarked: {}", migration_name);
+        Ok(())
+    }
+    
+    pub fn rollback_migration(db: &mut Self, migration_name: MigrationName) {
+        let migration = Migration::get_migrations_by_name(migration_name.clone());
+        if let Some(migration) = migration {
+            let down_migration = migration.down;
+            if let Some(down_migration) = down_migration {
+                // Raw::new(down_migration).run(db);
+                db.execute(down_migration);
+            } else {
+                println!("No down migration found for migration: {}", migration_name);
+            }
+            db.unmark_migration(migration.name);
+        } else {
+            println!(
+                "Cannot rollback migration: No migration found with name: {}",
+                migration_name
+            );
+        }
+    }
+}
+
 impl Deref for LeftDatabase {
     type Target = Database;
 
@@ -494,6 +592,28 @@ impl Deref for LeftDatabase {
 }
 #[derive(Debug, Clone)]
 pub struct RightDatabase(Database);
+
+impl RightDatabase {
+    pub async fn resources(&self)-> RightFullDbInfo {
+         RightFullDbInfo(self
+            .0
+            .get_all_resources()
+            .await
+            .expect("nothing for u on left"))
+    }
+    
+    pub async fn run_codebase_schema_queries(&self, code_resources: impl DbResources) -> MigrationResult<()> {
+        let queries = CodeBaseMeta::get_codebase_schema_queries(code_resources);
+        begin_transaction()
+            .query(Raw::new(queries))
+            .commit_transaction()
+            .run(self.db())
+            .await?;
+
+        Ok(())
+    }
+
+}
 
 impl Deref for RightDatabase {
     type Target = Database;
@@ -537,23 +657,6 @@ impl ComparisonDatabase {
         let right = RightDatabase(Database::init().await);
         Self { left, right }
     }
-    
-    pub async fn get_left_resources(&self)-> LeftFullDbInfo {
-         LeftFullDbInfo(self
-            .left
-            .get_all_resources()
-            .await
-            .expect("nothing for u on left"))
-    }
-
-    pub async fn get_right_resources(&self)-> RightFullDbInfo {
-         RightFullDbInfo(self
-            .right
-            .get_all_resources()
-            .await
-            .expect("nothing for u on left"))
-    }
-
 }
 
 #[derive(Debug, Clone)]
@@ -612,85 +715,6 @@ impl Database {
         self.db().query(query).await.unwrap();
     }
 
-    pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
-        let migration::Schema { name, .. } = Migration::schema();
-        let migration = Migration::table_name();
-
-        // select [{ name: "Oyelowo" }]
-        // select value [ "Oyelowo" ]
-        // select_only. Just on object => { name: "Oyelowo" }
-        let migration_names = select_value(name)
-            .from(migration)
-            .return_many::<String>(self.db())
-            .await?;
-        // vec![
-        //     "20230912__up__add_name".into(),
-        //     "20230912__down__remove_name".into(),
-        // ]
-        Ok(migration_names)
-    }
-
-    pub async fn run_codebase_schema_queries(&self, code_resources: impl DbResources) -> MigrationResult<()> {
-        let queries = CodeBaseMeta::get_codebase_schema_queries(code_resources);
-        begin_transaction()
-            .query(Raw::new(queries))
-            .commit_transaction()
-            .run(self.db())
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
-        let mut all_migrations = Migration::get_all_from_migrations_dir();
-        let queries = all_migrations
-            .into_iter()
-            .map(|m| m.up)
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        // Run them as a transaction against a local in-memory database
-        if !queries.trim().is_empty() {
-            begin_transaction()
-                .query(Raw::new(queries))
-                .commit_transaction()
-                .run(self.db())
-                .await?;
-        }
-        Ok(())
-    }
-
-    pub async fn mark_migration_as_applied(
-        &self,
-        migration_name: impl Into<MigrationName>,
-    ) -> MigrationResult<MigrationMetadata> {
-        let migration_name: MigrationName = migration_name.into();
-        println!("Applying migration: {}", migration_name);
-
-        let migration = MigrationMetadata {
-            id: MigrationMetadata::create_id(migration_name.to_string()),
-            name: migration_name.to_string(),
-            timestamp: migration_name.timestamp().expect("Invalid timestamp"),
-        }
-        .create()
-        .get_one(self.db())
-        .await?;
-        println!("Migration applied: {}", migration_name);
-
-        Ok(migration)
-    }
-
-    pub async fn unmark_migration(
-        &self,
-        migration_name: impl Into<MigrationName>,
-    ) -> MigrationResult<()> {
-        let migration_name: MigrationName = migration_name.into();
-        println!("Unmark migration: {}", migration_name);
-        delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
-            .run(self.db());
-        println!("Migration unmarked: {}", migration_name);
-        Ok(())
-    }
 
     pub async fn run_migrations() -> MigrationResult<()> {
         println!("Running migrations");
@@ -703,16 +727,14 @@ impl Database {
         // Right = codebase
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
-        let comparison_db = ComparisonDatabase::init().await;
-        let left_db = comparison_db.left;
-        left_db.run_local_dir_migrations().await.expect("flops");
+        let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
+        left.run_local_dir_migrations().await.expect("flops");
         //
         // 2. Get all migrations from codebase synced with db - Right
-        let right_db = Self::init().await;
-        right_db.run_codebase_schema_queries(Resources).await?;
+        right.run_codebase_schema_queries(Resources).await?;
         let init = ComparisonsInit {
-            left_resources: &comparison_db.get_left_resources().await,
-            right_resources: &comparison_db.get_right_resources().await,
+            left_resources: &left.resources().await,
+            right_resources: &right.resources().await,
         };
         let tables = init.new_tables().queries();
         let analyzers = init.new_analyzers().queries();
@@ -981,24 +1003,6 @@ impl Migration {
         println!("Migration file created: {}", name);
     }
 
-    pub fn rollback_migration(db: &mut Database, migration_name: MigrationName) {
-        let migration = Self::get_migrations_by_name(migration_name.clone());
-        if let Some(migration) = migration {
-            let down_migration = migration.down;
-            if let Some(down_migration) = down_migration {
-                // Raw::new(down_migration).run(db);
-                db.execute(down_migration);
-            } else {
-                println!("No down migration found for migration: {}", migration_name);
-            }
-            db.unmark_migration(migration.name);
-        } else {
-            println!(
-                "Cannot rollback migration: No migration found with name: {}",
-                migration_name
-            );
-        }
-    }
 }
 
 // INFO FOR DB
@@ -1610,7 +1614,8 @@ impl Display for QueryType {
             QueryType::Define(def) => def.to_string(),
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
-            QueryType::NewLine => "\n".to_string()
+            // TODO: Rethink new line handling
+            QueryType::NewLine => "".to_string()
         };
         let end = if let QueryType::NewLine = self {
             ""
@@ -1628,11 +1633,11 @@ struct Queries {
 }
 
 impl Queries {
-    pub fn add_space_to_up(&mut self) {
+    pub fn add_new_line_to_up(&mut self) {
         self.up.push(QueryType::NewLine);
     }
 
-    pub fn add_space_to_down(&mut self) {
+    pub fn add_new_line_to_down(&mut self) {
         self.down.push(QueryType::NewLine);
     }
 
@@ -1758,7 +1763,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 right.as_remove_statement(old_name.into(), Some(table)),
                             ));
                         }
-                        acc.add_space_to_up();
+                        acc.add_new_line_to_up();
 
 
                         if let Some(has_old_name) = has_old_name {
@@ -1784,7 +1789,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         acc.add_down(QueryType::Remove(
                             right.as_remove_statement(new_name.into(), Some(table)),
                         ));
-                        acc.add_space_to_down();
+                        acc.add_new_line_to_down();
 
                         
                         }
@@ -1793,18 +1798,18 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                                 acc.add_up(QueryType::Remove(
                                     left.as_remove_statement(name.into(), Some(table)),
                                 ));
-                                                        acc.add_space_to_up();
+                                                        acc.add_new_line_to_up();
                             
                                 acc.add_down(QueryType::Define(left));
-                                                        acc.add_space_to_down();
+                                                        acc.add_new_line_to_down();
                             }
                         }
                         DeltaType::Update { left, right } => {
                             if left.trim() != right.trim() {
                                 acc.add_up(QueryType::Define(right));
-                                                        acc.add_space_to_up();
+                                                        acc.add_new_line_to_up();
                                 acc.add_down(QueryType::Define(left));
-                                                        acc.add_space_to_down();
+                                                        acc.add_new_line_to_down();
                             }
 
                         }
