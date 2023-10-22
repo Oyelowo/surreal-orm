@@ -1449,15 +1449,15 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                 let delta = DeltaType::from((def_left, def_right));
 
                 let extend_table_resources_up = |acc: &mut Queries| {
-                        acc.extend_up(events.queries());
-                        acc.extend_up(indexes.queries());
                         acc.extend_up(fields.queries());
+                        acc.extend_up(indexes.queries());
+                        acc.extend_up(events.queries());
                 };
 
                 let extend_table_resources_down = |acc: &mut Queries| {
-                        acc.extend_down(events.queries());
-                        acc.extend_down(indexes.queries());
                         acc.extend_down(fields.queries());
+                        acc.extend_down(indexes.queries());
+                        acc.extend_down(events.queries());
                 };
 
                 match delta {
@@ -1982,7 +1982,7 @@ impl DbInfo {
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(old_name = "firstName")]
+    // #[surreal_orm(old_name = "firstName")]
     pub last_name: String,
     pub population: u64,
     pub created: chrono::DateTime<Utc>,
@@ -2010,7 +2010,7 @@ pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
     // Improve error essage for old_nmae using word similarity algo
-    #[surreal_orm(old_name = "attributes")]
+    // #[surreal_orm(old_name = "attributes")]
     pub characteristics: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub err: String,
