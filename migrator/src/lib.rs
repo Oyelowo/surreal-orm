@@ -481,6 +481,82 @@ impl FullDbInfo {
     }
 }
 
+
+#[derive(Debug, Clone)]
+pub struct LeftDatabase(Database);
+
+impl Deref for LeftDatabase {
+    type Target = Database;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+#[derive(Debug, Clone)]
+pub struct RightDatabase(Database);
+
+impl Deref for RightDatabase {
+    type Target = Database;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LeftFullDbInfo(FullDbInfo);
+
+impl Deref for LeftFullDbInfo {
+    type Target = FullDbInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RightFullDbInfo(FullDbInfo);
+
+impl Deref for RightFullDbInfo {
+    type Target = FullDbInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ComparisonDatabase {
+    left: LeftDatabase,
+    right: RightDatabase,
+}
+
+impl ComparisonDatabase {
+    pub async fn init() -> Self {
+        let left = LeftDatabase(Database::init().await);
+        let right = RightDatabase(Database::init().await);
+        Self { left, right }
+    }
+    
+    pub async fn get_left_resources(&self)-> LeftFullDbInfo {
+         LeftFullDbInfo(self
+            .left
+            .get_all_resources()
+            .await
+            .expect("nothing for u on left"))
+    }
+
+    pub async fn get_right_resources(&self)-> RightFullDbInfo {
+         RightFullDbInfo(self
+            .right
+            .get_all_resources()
+            .await
+            .expect("nothing for u on left"))
+    }
+
+}
+
+#[derive(Debug, Clone)]
 pub struct Database {
     // connection details here
     db: Surreal<Db>,
@@ -498,6 +574,7 @@ impl Database {
         self.db.clone()
     }
 
+    
     pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
         let info = info_for()
             .database()
@@ -553,8 +630,8 @@ impl Database {
         Ok(migration_names)
     }
 
-    pub async fn run_codebase_schema_queries(&self) -> MigrationResult<()> {
-        let queries = CodeBaseMeta::get_codebase_schema_queries(Resources);
+    pub async fn run_codebase_schema_queries(&self, code_resources: impl DbResources) -> MigrationResult<()> {
+        let queries = CodeBaseMeta::get_codebase_schema_queries(code_resources);
         begin_transaction()
             .query(Raw::new(queries))
             .commit_transaction()
@@ -619,7 +696,6 @@ impl Database {
         println!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries = vec![];
-        // let mut diff_queries_to_add = vec![];
         //  DIFFING
         //  LEFT
         //
@@ -627,27 +703,16 @@ impl Database {
         // Right = codebase
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
-        let left_db = Self::init().await;
-        let left = left_db.run_local_dir_migrations().await.expect("flops");
-        let left_db_info = left_db.get_db_info().await.unwrap();
-        let left_tables = left_db_info.tables();
-        // let left_table_info = db.get_table_info("planet".into()).await.unwrap();
+        let comparison_db = ComparisonDatabase::init().await;
+        let left_db = comparison_db.left;
+        left_db.run_local_dir_migrations().await.expect("flops");
         //
         // 2. Get all migrations from codebase synced with db - Right
         let right_db = Self::init().await;
-        let right = right_db.run_codebase_schema_queries().await?;
-        let right_db_info = right_db.get_db_info().await.unwrap();
-        let right_tables = right_db_info.tables();
-        // let rightt_table_info = db.get_table_info("planet".into()).await.unwrap();
+        right_db.run_codebase_schema_queries(Resources).await?;
         let init = ComparisonsInit {
-            left_resources: &left_db
-                .get_all_resources()
-                .await
-                .expect("nothing for u on left"),
-            right_resources: &right_db
-                .get_all_resources()
-                .await
-                .expect("nothing for u on right"),
+            left_resources: &comparison_db.get_left_resources().await,
+            right_resources: &comparison_db.get_right_resources().await,
         };
         let tables = init.new_tables().queries();
         let analyzers = init.new_analyzers().queries();
@@ -656,7 +721,6 @@ impl Database {
         let scopes = init.new_scopes().queries();
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
-
 
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
@@ -719,13 +783,13 @@ impl Database {
             }
          ( up_queries_str, down_queries_str) => {
             println!("HERE=====");
-            println!("UP MIGRATIOM: \n {}", up_queries_str.unwrap_or_default());
-            println!("DOWN MIGRATIOM: \n {}", down_queries_str.unwrap_or_default());
-            // Migration::create_migration_file(
-            //     up_queries_str.unwrap_or_default(),
-            //     Some(down_queries_str.unwrap_or_default()),
-            //     "test_migration".to_string(),
-            // );
+            println!("UP MIGRATIOM: \n {:#?}", up_queries_str.as_ref());
+            println!("DOWN MIGRATIOM: \n {:#?}", down_queries_str.as_ref());
+            Migration::create_migration_file(
+                up_queries_str.unwrap_or_default(),
+                Some(down_queries_str.unwrap_or_default()),
+                "test_migration".to_string(),
+            );
             }
         };
         //
@@ -957,7 +1021,7 @@ impl Migration {
 struct Info(HashMap<String, DefineStatementRaw>);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-struct DefineStatementRaw(String);
+pub struct DefineStatementRaw(String);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 struct UpdateStatementRaw(String);
@@ -1034,7 +1098,7 @@ struct TableRaw(String);
 
 impl DefineStatementRaw {
     /// Table name is only required/necessary when generating table resources such as fields, indexes, events
-    pub fn generate_remove_stmt(
+    pub fn as_remove_statement(
         &self,
         remove_stmt_name: RemoveStmtName,
         table: Option<&Table>,
@@ -1311,13 +1375,6 @@ where
     fn get_right(&self) -> T;
 
     fn queries(&self) -> Queries {
-        // Update of resource in codebase i.e Present in both migration directory and codebase but
-        // changed
-        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
-        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-        // SubResource e.g events, indexes and fields
-        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1330,11 +1387,11 @@ where
 
                 match delta {
                     DeltaType::Create { right } => {
-                        acc.add_down(QueryType::Remove(right.generate_remove_stmt(name.into(), None)));
-                        acc.add_up(QueryType::Define(right));
+                        acc.add_up(QueryType::Define(right.clone()));
+                        acc.add_down(QueryType::Remove(right.as_remove_statement(name.into(), None)));
                     }
                     DeltaType::Remove { left } => {
-                        acc.add_up(QueryType::Remove(left.generate_remove_stmt(name.into(), None)));
+                        acc.add_up(QueryType::Remove(left.as_remove_statement(name.into(), None)));
                         acc.add_down(QueryType::Define(left));
                     }
                     DeltaType::Update { left, right } => {
@@ -1364,13 +1421,6 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
     }
 
     fn queries(&self) -> Queries {
-        // Update of resource in codebase i.e Present in both migration directory and codebase but
-        // changed
-        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
-        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-        // SubResource e.g events, indexes and fields
-        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1379,6 +1429,7 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
             .fold(Queries::default(), |mut acc, table_name| {
                 let def_right = self.get_right().get_definition(table_name).cloned();
                 let def_left = self.get_left().get_definition(table_name).cloned();
+                
                 let events = ComparisonEvents {
                     table: &Table::from(table_name.clone()),
                     resources: self.resources,
@@ -1393,52 +1444,50 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                 };
                 let delta = DeltaType::from((def_left, def_right));
 
-                match delta {
-                    DeltaType::NoChange => {
+                let extend_table_resources_up = |acc: &mut Queries| {
                         acc.extend_up(events.queries());
                         acc.extend_up(indexes.queries());
                         acc.extend_up(fields.queries());
-                        
+                };
+
+                let extend_table_resources_down = |acc: &mut Queries| {
                         acc.extend_down(events.queries());
                         acc.extend_down(indexes.queries());
                         acc.extend_down(fields.queries());
+                };
+
+                match delta {
+                    DeltaType::NoChange => {
+                        extend_table_resources_up(&mut acc);
+                        extend_table_resources_down(&mut acc);
                     }
                     DeltaType::Update { left, right } => {
                         acc.add_up(QueryType::Define(right));
-                        acc.extend_up(events.queries());
-                        acc.extend_up(indexes.queries());
-                        acc.extend_up(fields.queries());
+                        extend_table_resources_up(&mut acc);
+                        extend_table_resources_down(&mut acc);
                     
                         acc.add_down(QueryType::Define(left));
-                        acc.extend_down(events.queries());
-                        acc.extend_down(indexes.queries());
-                        acc.extend_down(fields.queries());
                     }
-                    DeltaType::Create {right } => {
+                    DeltaType::Create { right } => {
                         acc.add_down(QueryType::Remove(
-                            right.generate_remove_stmt(table_name.into(), None),
+                            right.as_remove_statement(table_name.into(), None),
                         ));
 
                         acc.add_up(QueryType::Define(right));
-                        acc.extend_up(events.queries());
-                        acc.extend_up(indexes.queries());
-                        acc.extend_up(fields.queries());
+                        extend_table_resources_up(&mut acc);
                         
                     }
-                    DeltaType::Remove {left } => {
+                    DeltaType::Remove { left } => {
                         acc.add_up(QueryType::Remove(
-                            left.generate_remove_stmt(table_name.into(), None),
+                            left.as_remove_statement(table_name.into(), None),
                         ));
                         acc.add_down(QueryType::Define(left));
-                        acc.extend_down(events.queries());
-                        acc.extend_down(indexes.queries());
-                        acc.extend_down(fields.queries());
+                        extend_table_resources_down(&mut acc);
                     }
                 };
 
                 acc
             });
-        println!("Queries: {:#?}", queries);
         queries
     }
 }
@@ -1507,14 +1556,6 @@ where
     fn get_table(&self) -> &Table;
 
     fn queries(&self) -> Queries {
-        // Update of resource in codebase i.e Present in both migration directory and codebase but
-        // changed
-        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
-        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-        // SubResource e.g events, indexes and fields
-        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
-        println!("Getting queries for table: {}", self.get_table());
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1529,13 +1570,13 @@ where
                 match delta {
                     DeltaType::Create {right } => {
                         acc.add_down(QueryType::Remove(
-                            right.generate_remove_stmt(name.into(), Some(self.get_table())),
+                            right.as_remove_statement(name.into(), Some(self.get_table())),
                         ));
                         acc.add_up(QueryType::Define(right));
                     }
                     DeltaType::Remove { left } => {
                         acc.add_down(QueryType::Remove(
-                            left.generate_remove_stmt(name.into(), Some(self.get_table())),
+                            left.as_remove_statement(name.into(), Some(self.get_table())),
                         ));
                         acc.add_up(QueryType::Define(left));
                     }
@@ -1587,14 +1628,6 @@ struct Queries {
 }
 
 impl Queries {
-    pub fn get_up(&self) -> Vec<QueryType> {
-        self.up.clone()
-    }
-
-    pub fn get_down(&self) -> Vec<QueryType> {
-        self.down.clone()
-    }
-
     pub fn add_space_to_up(&mut self) {
         self.up.push(QueryType::NewLine);
     }
@@ -1623,32 +1656,12 @@ impl Queries {
 #[derive(Debug, Clone)]
 struct ComparisonsInit<'a> {
     // Migrations latest state tables
-    left_resources: &'a FullDbInfo,
+    left_resources: &'a LeftFullDbInfo,
     // Codebase latest state tables
-    right_resources: &'a FullDbInfo,
+    right_resources: &'a RightFullDbInfo,
 }
 
 impl<'a> ComparisonsInit<'a> {
-    pub fn new_fields(&self, table: &'a Table) -> ComparisonFields {
-        ComparisonFields {
-            table,
-            resources: self,
-        }
-    }
-    pub fn new_indexes(&self, table: &'a Table) -> ComparisonIndexes {
-        ComparisonIndexes {
-            table,
-            resources: self,
-        }
-    }
-
-    pub fn new_events(&self, table: &'a Table) -> ComparisonEvents {
-        ComparisonEvents {
-            table,
-            resources: self,
-        }
-    }
-
     pub fn new_tables(&self) -> ComparisonTables {
         ComparisonTables { resources: self }
     }
@@ -1706,13 +1719,6 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     // This does not use default implementation because it also has to handle
     // field name change/rename
     fn queries(&self) -> Queries {
-        // Update of resource in codebase i.e Present in both migration directory and codebase but
-        // changed
-        // [a0, b0, c]  = [a0, b1, d] => [a, b, c, d] =>
-        //Table -> [(update, removal), }(update, removal), (removal, update), (creation/definition, removal)]
-        // SubResource e.g events, indexes and fields
-        // -> [(no_change, no_change), }(change, change), (removal, prev_left_def), (creation/definition, removal)]
-        // -> [(Empty, Empty), }(right_def, left_def), (removal, prev_left_def), (right_def, removal)]
         let queries = self
             .get_right()
             .get_names_as_set()
@@ -1749,7 +1755,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                             acc.add_up(QueryType::Update(copy_old_to_new));
                             acc.add_up(QueryType::Remove(
-                                right.generate_remove_stmt(old_name.into(), Some(table)),
+                                right.as_remove_statement(old_name.into(), Some(table)),
                             ));
                         }
                         acc.add_space_to_up();
@@ -1776,7 +1782,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         }
 
                         acc.add_down(QueryType::Remove(
-                            right.generate_remove_stmt(new_name.into(), Some(table)),
+                            right.as_remove_statement(new_name.into(), Some(table)),
                         ));
                         acc.add_space_to_down();
 
@@ -1785,7 +1791,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                         DeltaType::Remove { left } => {
                             if field_meta_by_old_name.is_none() {
                                 acc.add_up(QueryType::Remove(
-                                    left.generate_remove_stmt(name.into(), Some(table)),
+                                    left.as_remove_statement(name.into(), Some(table)),
                                 ));
                                                         acc.add_space_to_up();
                             
@@ -2003,33 +2009,33 @@ pub struct Animal {
     pub characteristics: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub err: String,
-    pub speed: u64,
+    pub velocity: u64,
 }
 
 impl TableEvents for Animal {
     fn events_definitions() -> Vec<Raw> {
-        let animal::Schema { species, speed, .. } = Self::schema();
+        let animal::Schema { species, velocity, .. } = Self::schema();
 
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
-            .when(cond(species.eq("Homo Erectus").and(speed.gt(545))))
+            .when(cond(species.eq("Homo Erectus").and(velocity.gt(545))))
             .then(select(All).from(Crop::table_name()))
             .to_raw();
 
         let event2 = define_event("event2".to_string())
             .on_table("animal".to_string())
-            .when(cond(species.eq("Homo Sapien").and(speed.lt(10))))
+            .when(cond(species.eq("Homo Sapien").and(velocity.lt(10))))
             .then(select(All).from(AnimalEatsCrop::table_name()))
             .to_raw();
         vec![event1, event2]
     }
 
     fn indexes_definitions() -> Vec<Raw> {
-        let animal::Schema { species, speed, .. } = Self::schema();
+        let animal::Schema { species, velocity, .. } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
             .on_table(Self::table_name())
-            .fields(arr![species, speed])
+            .fields(arr![species, velocity])
             .unique()
             .to_raw();
 
@@ -2053,17 +2059,17 @@ where
         Self::define_fields()
     }
 
-    fn table_definitions() -> Raw {
+    fn table_definition() -> Raw {
         Self::define_table()
     }
 }
 
-macro_rules! create_table_defs2 {
+macro_rules! create_table_resources {
     ($($struct_table: ident),*) => {
         fn tables(&self) -> Vec<Raw> {
             ::std::vec![
                 $(
-                    ::std::vec![<$struct_table as TableEvents>::table_definitions()],
+                    ::std::vec![<$struct_table as TableEvents>::table_definition()],
                     <$struct_table as TableEvents>::fields_definitions(),
                     <$struct_table as TableEvents>::indexes_definitions(),
                     <$struct_table as TableEvents>::events_definitions(),
@@ -2075,7 +2081,7 @@ macro_rules! create_table_defs2 {
         fn tables_fields_meta(&self) -> HashMap<Table, Vec<FieldMetadata>> {
             let mut meta = HashMap::<Table, Vec<FieldMetadata>>::new();
             $(
-                meta.insert(<$struct_table as Model>::table_name(), <$struct_table as Model>::get_field_meta());
+                meta.insert(<$struct_table as ::surreal_orm::Model>::table_name(), <$struct_table as Model>::get_field_meta());
             )*
             meta
         }
@@ -2084,26 +2090,13 @@ macro_rules! create_table_defs2 {
     };
 }
 
-macro_rules! create_table_defs {
-    ($($struct_table: ident),*) => {
-        ::std::vec![
-            $(
-                ::std::vec![<$struct_table as TableEvents>::table_definitions()],
-                <$struct_table as TableEvents>::fields_definitions(),
-                <$struct_table as TableEvents>::indexes_definitions(),
-                <$struct_table as TableEvents>::events_definitions(),
-            )*
-        ].into_iter().flatten().collect::<::std::vec::Vec<::surreal_orm::Raw>>()
-    };
-}
-
-trait DbResources {
+pub trait DbResources {
     fn tables(&self) -> Vec<Raw> {
         vec![]
     }
 
     fn tables_fields_meta(&self) -> HashMap<Table, Vec<FieldMetadata>> {
-        HashMap::new()
+        HashMap::default()
     }
 
     fn analyzers(&self) -> Vec<Raw> {
@@ -2134,10 +2127,7 @@ trait DbResources {
 struct Resources;
 
 impl DbResources for Resources {
-    // fn tables(&self) -> Vec<Raw> {
-    //     create_table_defs!(Animal, Crop, AnimalEatsCrop, Student, Planet)
-    // }
-    create_table_defs2!(Animal, Crop, AnimalEatsCrop, Student, Planet);
+    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
