@@ -113,7 +113,7 @@ use std::{
 // 1. # Get all migrations names from the database
 // e.g: SELECT name FROM migrations
 //
-// 2. # Get all migrations names from the migration directory
+// 2. # Get all migrations names from the migraton directory
 //
 // 3. # Compare the two lists and get the difference
 //
@@ -1724,10 +1724,6 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     // This does not use default implementation because it also has to handle
     // field name change/rename
     fn queries(&self) -> Queries {
-        // left = [a, b, c], right = [a, b, d] => 
-        // approach 1: d_l = [c], d_r = [d] = diff_left == 1 && diff_right == 1 => Single Field Renaming
-        // Approach 2: u = [ a, b, c, d ]  = get_left + get_right = [a, b, c, d] = u - get_left = u
-        // - [a, b, d] = [c] = 1 => 
         let right = self
             .get_right()
             .get_names_as_set();
@@ -1738,15 +1734,19 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
         
         let diff_left = left.difference(&right);
         let diff_right = right.difference(&left);
-        let is_potentially_renaming_action = diff_left.count() == 1 && diff_right.count() == 1;
-        let union = right.union(&left);
-        // let field_names = if is_potentially_renaming_action {
-        //     diff_left
-        // } else {
-        //     union
-        // };
+        let union = right.union(&left).collect::<Vec<_>>();
 
-        let queries = union.into_iter()
+        let diff_left = diff_left.into_iter().collect::<Vec<_>>();
+        let diff_right = diff_right.into_iter().collect::<Vec<_>>();
+        let is_potentially_renaming_action = diff_left.len() == 1 && diff_right.len() == 1;
+        
+        let field_names = if is_potentially_renaming_action {
+            diff_right
+        } else {
+            union
+        };
+
+        let queries = field_names.into_iter()
             .fold(Queries::default(), |mut acc, name| {
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
@@ -1759,9 +1759,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                 );
 
                 if let Some(meta) = &field_meta_with_old_name {
-                    if !left.contains(&meta.clone().old_name.expect("Should exist").to_string()) {
-                       panic!("The field - {name} - on table - {table} - already renamed or never existed before. \
-                            Make sure you are using the correct case for the field name. It should be one of these :{}", 
+                    let old_name = &meta.clone().old_name.expect("Should exist").to_string();
+                    if !left.contains(old_name) {
+                       panic!("The field - {name} - on table - {table} - has an invalid old name - '{old_name}'. \
+                           It must have already been renamed previously or never existed before or wrongly spelt. \
+                            Also, make sure you are using the correct case for the field name. It should be one of these: {}", 
                        left.clone().into_iter().collect::<Vec<_>>().join(", "));
                     }
                 }
@@ -1779,17 +1781,51 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                     acc.add_up(QueryType::Define(right.clone()));
                     let new_name = name;
 
-                    // let old_name_from_single_rename_diff = has_old_name.as_ref().map_or({
-                    //     if is_potentially_renaming_action {
-                    //         diff_left.clone().peekable().peek().map(ToString::to_string)
-                    //     } else {
-                    //         None
-                    //     }
-                    // }, |meta| meta.old_name.as_ref().map(|old_name| old_name.to_string()));
-                    // let old_name = has_old_name.map(|old_name|old_name.old_name.map_or(, f));
+                    // If is_potentially_renaming_action i.e when old_name attr not used
+                        // explicitly
+
+                        let change = Change { 
+                                table: self.get_table().clone(),
+                                old_name: "old_name_placeholder".to_string(),
+                                new_name: "new name placeholder".to_string(),
+                            }; 
+                        let delete_option = SingleFieldChangeType::Delete(&change);
+                        let rename_option = SingleFieldChangeType::Rename(&change);
+                            
+                        if is_potentially_renaming_action {
+                            let confirmation = inquire::Select::new("Do you want to rename \
+                                this field or delete the old one completely without transferring the data",
+                                vec![delete_option, rename_option]
+                            )
+                            .with_help_message("Use the arrow keys to navigate. Press enter to select.")
+                            .prompt();
+
+
+                            // Conditionally migrate data from old field to new field.
+                            match confirmation.expect("Invalid conf") {
+                                SingleFieldChangeType::Rename(change) => {
+                                    let old_name = change.old_name.clone();
+                                    let copy_old_to_new = UpdateStatementRaw::from(
+                                        Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
+                                            .build(),
+                                    );
+                                    acc.add_up(QueryType::Update(copy_old_to_new));
+
+                                },
+                                SingleFieldChangeType::Delete(_) => { },
+                            };
+
+                            acc.add_up(QueryType::Remove(
+                                right.as_remove_statement(change.old_name.into(), Some(table)),
+                            ));
+
+                        }
+
+
+
                     
-                    if let Some(has_old_name) = &field_meta_with_old_name {
-                        let old_name = has_old_name.old_name.clone().unwrap();
+                    if let Some(meta) = &field_meta_with_old_name {
+                        let old_name = meta.old_name.clone().unwrap();
                         let copy_old_to_new = UpdateStatementRaw::from(
                             Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
                                 .build(),
@@ -1800,6 +1836,8 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                             right.as_remove_statement(old_name.into(), Some(table)),
                         ));
                     }
+
+                        
                     acc.add_new_line_to_up();
 
 
@@ -1824,7 +1862,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                     }
 
                     acc.add_down(QueryType::Remove(
-                        right.as_remove_statement(new_name.into(), Some(table)),
+                        right.as_remove_statement(new_name.to_string().into(), Some(table)),
                     ));
                     acc.add_new_line_to_down();
 
@@ -1833,7 +1871,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                     DeltaType::Remove { left } => {
                         if field_meta_by_old_name.is_none() {
                             acc.add_up(QueryType::Remove(
-                                left.as_remove_statement(name.into(), Some(table)),
+                                left.as_remove_statement(name.to_string().into(), Some(table)),
                             ));
                                                     acc.add_new_line_to_up();
                         
@@ -1943,14 +1981,12 @@ impl From<(Option<DefineStatementRaw>, Option<DefineStatementRaw>)> for DeltaTyp
 //         }
 
 struct Change {
-    table: String,
+    table: Table,
     old_name: String,
     new_name: String,
 }
 
 enum SingleFieldChangeType<'a> {
-    // Delete { old_name: String, new_name: String },
-    // Rename { old_name: String, new_name: String },
     Delete(&'a Change),
     Rename(&'a Change),
 }
@@ -2019,10 +2055,10 @@ impl DbInfo {
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    // #[surreal_orm(old_name = "firstName")]
     pub last_name: String,
     pub population: u64,
-    pub created: chrono::DateTime<Utc>,
+    // #[surreal_orm(old_name = "created")]
+    pub created_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
 
@@ -2035,7 +2071,6 @@ pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub school: String,
     pub age: u8,
-    #[surreal_orm(old_name = "room")]
     pub class: String,
 }
 
@@ -2048,11 +2083,9 @@ pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
     // Improve error essage for old_nmae using word similarity algo
-    #[surreal_orm(old_name = "attributes")]
+    // #[surreal_orm(old_name = "attributes")]
     pub characteristics: Vec<String>,
-    // #[surreal_orm(old_name = "createdAt")]
     pub updated_at: chrono::DateTime<Utc>,
-    // #[surreal_orm(old_name = "err")]
     pub kingdom: String,
     pub velocity: u64,
 }
