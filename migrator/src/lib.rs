@@ -1724,95 +1724,132 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     // This does not use default implementation because it also has to handle
     // field name change/rename
     fn queries(&self) -> Queries {
-        let queries = self
+        // left = [a, b, c], right = [a, b, d] => 
+        // approach 1: d_l = [c], d_r = [d] = diff_left == 1 && diff_right == 1 => Single Field Renaming
+        // Approach 2: u = [ a, b, c, d ]  = get_left + get_right = [a, b, c, d] = u - get_left = u
+        // - [a, b, d] = [c] = 1 => 
+        let right = self
             .get_right()
-            .get_names_as_set()
-            .union(&self.get_left().get_names_as_set())
-            .into_iter()
+            .get_names_as_set();
+
+        let left = self
+            .get_left()
+            .get_names_as_set();
+        
+        let diff_left = left.difference(&right);
+        let diff_right = right.difference(&left);
+        let is_potentially_renaming_action = diff_left.count() == 1 && diff_right.count() == 1;
+        let union = right.union(&left);
+        // let field_names = if is_potentially_renaming_action {
+        //     diff_left
+        // } else {
+        //     union
+        // };
+
+        let queries = union.into_iter()
             .fold(Queries::default(), |mut acc, name| {
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
                 let table = self.get_table();
 
-                let has_old_name = CodeBaseMeta::find_field_has_old_name(
+
+                let field_meta_with_old_name = CodeBaseMeta::find_field_has_old_name(
                     table,
                     By::NewName(name.to_string()),
                 );
+
+                if let Some(meta) = &field_meta_with_old_name {
+                    if !left.contains(&meta.clone().old_name.expect("Should exist").to_string()) {
+                       panic!("The field - {name} - on table - {table} - already renamed or never existed before. \
+                            Make sure you are using the correct case for the field name. It should be one of these :{}", 
+                       left.clone().into_iter().collect::<Vec<_>>().join(", "));
+                    }
+                }
 
                 let field_meta_by_old_name = CodeBaseMeta::find_field_has_old_name(
                     table,
                     By::OldName(name.to_string()),
                 );
 
-                    let delta = DeltaType::from((def_left, def_right));
-                    match delta {
-                        DeltaType::NoChange => {}
-                        DeltaType::Create { right } => {
-                        acc.add_up(QueryType::Define(right.clone()));
-                        let new_name = name;
+                let delta = DeltaType::from((def_left, def_right));
+                
+                match delta {
+                    DeltaType::NoChange => {}
+                    DeltaType::Create { right } => {
+                    acc.add_up(QueryType::Define(right.clone()));
+                    let new_name = name;
 
-                        if let Some(has_old_name) = &has_old_name {
-                            let old_name = has_old_name.old_name.clone().unwrap();
-                            let copy_old_to_new = UpdateStatementRaw::from(
-                                Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
-                                    .build(),
-                            );
+                    // let old_name_from_single_rename_diff = has_old_name.as_ref().map_or({
+                    //     if is_potentially_renaming_action {
+                    //         diff_left.clone().peekable().peek().map(ToString::to_string)
+                    //     } else {
+                    //         None
+                    //     }
+                    // }, |meta| meta.old_name.as_ref().map(|old_name| old_name.to_string()));
+                    // let old_name = has_old_name.map(|old_name|old_name.old_name.map_or(, f));
+                    
+                    if let Some(has_old_name) = &field_meta_with_old_name {
+                        let old_name = has_old_name.old_name.clone().unwrap();
+                        let copy_old_to_new = UpdateStatementRaw::from(
+                            Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
+                                .build(),
+                        );
 
-                            acc.add_up(QueryType::Update(copy_old_to_new));
-                            acc.add_up(QueryType::Remove(
-                                right.as_remove_statement(old_name.into(), Some(table)),
-                            ));
-                        }
-                        acc.add_new_line_to_up();
-
-
-                        if let Some(has_old_name) = has_old_name {
-                            let old_name = has_old_name.old_name.clone().unwrap();
-                            let left = self.get_left();
-                            let error = format!("The field - {name} - on table - {table} - already renamed or never existed before. \
-                                Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
-                            let old_field_name_def_from_migraton_state =
-                                left.get_definition(&old_name.to_string()).expect(error.as_str());
-
-                            // Do some validations here:
-                            acc.add_down(QueryType::Define(
-                                old_field_name_def_from_migraton_state.to_owned(),
-                            ));
-
-                            let copy_new_to_old = UpdateStatementRaw::from(
-                                Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
-                                    .build(),
-                            );
-                            acc.add_down(QueryType::Update(copy_new_to_old));
-                        }
-
-                        acc.add_down(QueryType::Remove(
-                            right.as_remove_statement(new_name.into(), Some(table)),
+                        acc.add_up(QueryType::Update(copy_old_to_new));
+                        acc.add_up(QueryType::Remove(
+                            right.as_remove_statement(old_name.into(), Some(table)),
                         ));
-                        acc.add_new_line_to_down();
+                    }
+                    acc.add_new_line_to_up();
 
+
+                    if let Some(has_old_name) = field_meta_with_old_name {
+                        let old_name = has_old_name.old_name.clone().unwrap();
+                        let left = self.get_left();
+                        let error = format!("The field - {name} - on table - {table} - already renamed or never existed before. \
+                            Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
+                        let old_field_name_def_from_migraton_state =
+                            left.get_definition(&old_name.to_string()).expect(error.as_str());
+
+                        // Do some validations here:
+                        acc.add_down(QueryType::Define(
+                            old_field_name_def_from_migraton_state.to_owned(),
+                        ));
+
+                        let copy_new_to_old = UpdateStatementRaw::from(
+                            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
+                                .build(),
+                        );
+                        acc.add_down(QueryType::Update(copy_new_to_old));
+                    }
+
+                    acc.add_down(QueryType::Remove(
+                        right.as_remove_statement(new_name.into(), Some(table)),
+                    ));
+                    acc.add_new_line_to_down();
+
+                    
+                    }
+                    DeltaType::Remove { left } => {
+                        if field_meta_by_old_name.is_none() {
+                            acc.add_up(QueryType::Remove(
+                                left.as_remove_statement(name.into(), Some(table)),
+                            ));
+                                                    acc.add_new_line_to_up();
                         
+                            acc.add_down(QueryType::Define(left));
+                                                    acc.add_new_line_to_down();
                         }
-                        DeltaType::Remove { left } => {
-                            if field_meta_by_old_name.is_none() {
-                                acc.add_up(QueryType::Remove(
-                                    left.as_remove_statement(name.into(), Some(table)),
-                                ));
-                                                        acc.add_new_line_to_up();
-                            
-                                acc.add_down(QueryType::Define(left));
-                                                        acc.add_new_line_to_down();
-                            }
+                    }
+                    DeltaType::Update { left, right } => {
+                        if left.trim() != right.trim() {
+                            acc.add_up(QueryType::Define(right));
+                                                    acc.add_new_line_to_up();
+                            acc.add_down(QueryType::Define(left));
+                                                    acc.add_new_line_to_down();
                         }
-                        DeltaType::Update { left, right } => {
-                            if left.trim() != right.trim() {
-                                acc.add_up(QueryType::Define(right));
-                                                        acc.add_new_line_to_up();
-                                acc.add_down(QueryType::Define(left));
-                                                        acc.add_new_line_to_down();
-                            }
 
-                        }
+                    }
                     }
 
 
@@ -1998,6 +2035,7 @@ pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub school: String,
     pub age: u8,
+    #[surreal_orm(old_name = "room")]
     pub class: String,
 }
 
@@ -2010,10 +2048,12 @@ pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
     // Improve error essage for old_nmae using word similarity algo
-    // #[surreal_orm(old_name = "attributes")]
+    #[surreal_orm(old_name = "attributes")]
     pub characteristics: Vec<String>,
-    pub created_at: chrono::DateTime<Utc>,
-    pub err: String,
+    // #[surreal_orm(old_name = "createdAt")]
+    pub updated_at: chrono::DateTime<Utc>,
+    // #[surreal_orm(old_name = "err")]
+    pub kingdom: String,
     pub velocity: u64,
 }
 
@@ -2083,8 +2123,8 @@ macro_rules! create_table_resources {
         }
 
 
-        fn tables_fields_meta(&self) -> HashMap<Table, Vec<FieldMetadata>> {
-            let mut meta = HashMap::<Table, Vec<FieldMetadata>>::new();
+        fn tables_fields_meta(&self) -> HashMap<Table, ::std::vec::Vec<FieldMetadata>> {
+            let mut meta = HashMap::<Table, ::std::vec::Vec<FieldMetadata>>::new();
             $(
                 meta.insert(<$struct_table as ::surreal_orm::Model>::table_name(), <$struct_table as Model>::get_field_meta());
             )*
