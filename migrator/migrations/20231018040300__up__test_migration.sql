@@ -1,2 +1,0 @@
-REMOVE FIELD place ON TABLE eats;
-REMOVE FIELD createdAt ON TABLE eats;
