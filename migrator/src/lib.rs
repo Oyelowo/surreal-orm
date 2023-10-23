@@ -1740,10 +1740,10 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
         let diff_right = diff_right.into_iter().collect::<Vec<_>>();
         let is_potentially_renaming_action = diff_left.len() == 1 && diff_right.len() == 1;
         
-        let field_names = if is_potentially_renaming_action {
-            diff_right
+        let (field_names, potentially_old_name) = if is_potentially_renaming_action {
+            (diff_right, diff_left.first())
         } else {
-            union
+            (union, None)
         };
 
         let queries = field_names.into_iter()
@@ -1783,16 +1783,18 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                     // If is_potentially_renaming_action i.e when old_name attr not used
                         // explicitly
-
-                        let change = Change { 
-                                table: self.get_table().clone(),
-                                old_name: "old_name_placeholder".to_string(),
-                                new_name: "new name placeholder".to_string(),
-                            }; 
-                        let delete_option = SingleFieldChangeType::Delete(&change);
-                        let rename_option = SingleFieldChangeType::Rename(&change);
                             
                         if is_potentially_renaming_action {
+                            let potentially_old_name: String = potentially_old_name.expect("Should be present. Pleease, report.").to_string().into();
+                            let field_change_meta = FieldChangeMeta {
+                                table: self.get_table().to_owned(),
+                                old_name: potentially_old_name.clone().into(),
+                                new_name: name.to_string().into(),
+                            };
+
+                            let delete_option = SingleFieldChangeType::Delete(&field_change_meta);
+                            let rename_option = SingleFieldChangeType::Rename(&field_change_meta);
+                            
                             let confirmation = inquire::Select::new("Do you want to rename \
                                 this field or delete the old one completely without transferring the data",
                                 vec![delete_option, rename_option]
@@ -1800,25 +1802,37 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                             .with_help_message("Use the arrow keys to navigate. Press enter to select.")
                             .prompt();
 
+                            // UP
+                            // DEFINE createdAt on Table planet;
+                            // REMOVE created on Table planet;
+                            // 
+                            // DOWN
+                            // DEFINE created on Table planet;
+                            // REMOVE createdAt on Table planet;
+                            // 
+                            let old_field_def_from_left = self.get_field_def_from_left(&field_change_meta);
+                            acc.add_down(QueryType::Define(old_field_def_from_left.to_owned()));
 
                             // Conditionally migrate data from old field to new field.
                             match confirmation.expect("Invalid conf") {
-                                SingleFieldChangeType::Rename(change) => {
-                                    let old_name = change.old_name.clone();
-                                    let copy_old_to_new = UpdateStatementRaw::from(
-                                        Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
-                                            .build(),
-                                    );
+                                SingleFieldChangeType::Rename(change_up) => {
+                                    let copy_old_to_new = create_update_statement(change_up);
                                     acc.add_up(QueryType::Update(copy_old_to_new));
+
+
+                                    let copy_new_to_old = create_update_statement(&field_change_meta);
+                                    acc.add_down(QueryType::Update(copy_new_to_old));
+
 
                                 },
                                 SingleFieldChangeType::Delete(_) => { },
                             };
 
                             acc.add_up(QueryType::Remove(
-                                right.as_remove_statement(change.old_name.into(), Some(table)),
+                                right.as_remove_statement(potentially_old_name.to_string().into(), Some(table)),
                             ));
 
+                            // Down Removal is handled below, so, no need to do an extra removal.
                         }
 
 
@@ -1843,11 +1857,12 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
                     if let Some(has_old_name) = field_meta_with_old_name {
                         let old_name = has_old_name.old_name.clone().unwrap();
-                        let left = self.get_left();
-                        let error = format!("The field - {name} - on table - {table} - already renamed or never existed before. \
-                            Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
-                        let old_field_name_def_from_migraton_state =
-                            left.get_definition(&old_name.to_string()).expect(error.as_str());
+                        let field_change_meta = FieldChangeMeta {
+                            table: self.get_table().to_owned(),
+                            old_name: old_name.clone(),
+                            new_name: name.to_string().into(),
+                        };
+                        let old_field_name_def_from_migraton_state = self.get_field_def_from_left(&field_change_meta);
 
                         // Do some validations here:
                         acc.add_down(QueryType::Define(
@@ -1895,6 +1910,37 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
             });
         queries
     }
+}
+
+impl<'a> ComparisonFields<'a> {
+    fn get_field_def_from_left(&self, change: &FieldChangeMeta) -> DefineStatementRaw {
+        let FieldChangeMeta { table, old_name, new_name } = change;
+        let left = self.get_left();
+        let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
+                            Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
+        let field_def =
+            left.get_definition(&old_name.to_string()).expect(error.as_str());
+        field_def.clone()
+    }
+    
+    fn get_field_def_from_right(&self, change: &FieldChangeMeta) -> DefineStatementRaw {
+        let FieldChangeMeta { table, old_name, new_name } = change;
+        let right = self.get_right();
+        let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
+                            Make sure you are using the correct case for the field name. It should be one of these :{}", right.get_names().join(","));
+        let field_def = right.get_definition(&new_name.to_string()).expect(error.as_str());
+        field_def.clone()
+    }
+}
+
+fn create_update_statement(change: &FieldChangeMeta) -> UpdateStatementRaw {
+    let FieldChangeMeta { table, old_name, new_name } = change;
+    
+    let copy_old_to_new = UpdateStatementRaw::from(
+        Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
+            .build(),
+    );
+    copy_old_to_new
 }
 
 
@@ -1980,15 +2026,15 @@ impl From<(Option<DefineStatementRaw>, Option<DefineStatementRaw>)> for DeltaTyp
 //             }
 //         }
 
-struct Change {
+struct FieldChangeMeta {
     table: Table,
-    old_name: String,
-    new_name: String,
+    old_name: Field,
+    new_name: Field,
 }
 
 enum SingleFieldChangeType<'a> {
-    Delete(&'a Change),
-    Rename(&'a Change),
+    Delete(&'a FieldChangeMeta),
+    Rename(&'a FieldChangeMeta),
 }
 
 impl<'a> Display for SingleFieldChangeType<'a> {
@@ -2057,7 +2103,6 @@ pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub last_name: String,
     pub population: u64,
-    // #[surreal_orm(old_name = "created")]
     pub created_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
