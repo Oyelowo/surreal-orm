@@ -6,7 +6,7 @@
 // been removed, therefore, still valid to be used as an annotation. The old_name attribute is
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until1, take_while1, take_while_m_n},
@@ -241,6 +241,9 @@ pub enum MigrationError {
 
     #[error(transparent)]
     InvalidRegex(#[from] regex::Error),
+
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
@@ -288,7 +291,7 @@ pub struct MigrationNameBasicInfo {
 pub enum MigrationFileName {
     Up(MigrationNameBasicInfo),
     Down(MigrationNameBasicInfo),
-    Basic(MigrationNameBasicInfo),
+    Unidirectional(MigrationNameBasicInfo),
 }
 
 impl MigrationFileName {
@@ -296,8 +299,55 @@ impl MigrationFileName {
         match self {
             MigrationFileName::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
             MigrationFileName::Down(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, .. }) => {
+                *timestamp
+            }
         }
+    }
+
+    pub fn create_file(&self, query: String) -> MigrationResult<()> {
+        let file_name = self.to_string();
+        let file_path = format!("migrations/{}", file_name);
+        let mut file = File::create(&file_path)?;
+        file.write_all(query.as_bytes())?;
+        Ok(())
+    }
+
+    pub fn create_up(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp)?;
+
+        let name = name.into();
+        // let timestamp = Utc::now().timestamp_millis();
+        Ok(Self::Up(MigrationNameBasicInfo { timestamp, name }))
+    }
+
+    pub fn create_down(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp)?;
+
+        let name = name.into();
+        Ok(Self::Down(MigrationNameBasicInfo { timestamp, name }))
+    }
+
+    pub fn create_unidirectional(
+        timestamp: DateTime<Utc>,
+        name: impl Into<String>,
+    ) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp)?;
+
+        let name = name.into();
+        Ok(Self::Unidirectional(MigrationNameBasicInfo {
+            timestamp,
+            name,
+        }))
+    }
+
+    fn format_timestamp(timestamp: DateTime<Utc>) -> Result<u64, MigrationError> {
+        let timestamp = timestamp
+            .format("%Y%m%d%H%M%S")
+            .to_string()
+            .parse::<u64>()
+            .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
+        Ok(timestamp)
     }
 }
 
@@ -356,7 +406,7 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileNa
     let m2 = match direction {
         Direction2::Up => MigrationFileName::Up(basic_info),
         Direction2::Down => MigrationFileName::Down(basic_info),
-        Direction2::None => MigrationFileName::Basic(basic_info),
+        Direction2::None => MigrationFileName::Unidirectional(basic_info),
     };
 
     Ok((input, m2))
@@ -378,7 +428,7 @@ impl Display for MigrationFileName {
             MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
                 format!("{timestamp}_{name}.down.surql")
             }
-            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
                 format!("{timestamp}_{name}.surql")
             }
         };
@@ -1033,55 +1083,29 @@ impl Migration {
     }
 
     pub fn create_migration_file(
-        migration_type: MigrationType,
         name: impl Into<String> + std::fmt::Display,
+        query_str: impl Into<String> + std::fmt::Display,
+        migration_type: MigrationType,
     ) -> MigrationResult<()> {
-        println!("Creating migration file: {}", name);
-        let timestamp = Utc::now()
-            .format("%Y%m%d%H%M%S")
-            .to_string()
-            .parse::<u64>()
-            .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
-
-        let _ = fs::create_dir_all("migrations").expect("Problem creating migrations directory");
-        let create_file = |file_name: String, query: String| {
-            let file_path = format!("migrations/{}", file_name);
-            let mut file = File::create(&file_path).unwrap();
-            file.write_all(query.as_bytes()).unwrap();
-        };
-        let mig_name = match migration_type {
-            MigrationType::OneWay(query) => {
-                println!("Creating one way migration");
-                let filename = MigrationFileName::Basic(MigrationNameBasicInfo {
-                    timestamp,
-                    name: name.to_string(),
-                });
-                create_file(filename.to_string(), query);
+        let timestamp = Utc::now();
+        let query_str = query_str.into();
+        let filename = match migration_type {
+            MigrationType::OneWay => {
+                MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
             }
-            MigrationType::TwoWay {
-                up: up_queries,
-                down: down_queries,
-            } => {
-                println!("Creating two way migration");
-                let up_path = MigrationFileName::Up(MigrationNameBasicInfo {
-                    timestamp,
-                    name: name.to_string(),
-                });
-
-                let down_path = MigrationFileName::Up(MigrationNameBasicInfo {
-                    timestamp,
-                    name: name.to_string(),
-                });
-                create_file(up_path.to_string(), up_queries);
-                create_file(down_path.to_string(), down_queries);
+            MigrationType::TwoWay => {
+                MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+                MigrationFileName::create_down(timestamp, name)?.create_file(query_str);
             }
         };
+
         Ok(())
     }
 }
+
 enum MigrationType {
-    OneWay(String),
-    TwoWay { up: String, down: String },
+    OneWay,
+    TwoWay,
 }
 
 // INFO FOR DB

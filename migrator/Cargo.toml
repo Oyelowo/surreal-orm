@@ -20,3 +20,4 @@ regex = { workspace = true }
 thiserror = { workspace = true }
 inquire = { workspace = true }
 paste = { workspace = true }
+clap = { workspace = true }
