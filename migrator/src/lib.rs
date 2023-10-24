@@ -219,8 +219,8 @@ pub enum MigrationError {
     MigrationNameDoesNotExist,
     #[error("Invalid migration name")]
     InvalidMigrationName,
-    #[error("Invalid timestamp")]
-    InvalidTimestamp,
+    #[error("Invalid timestamp: {0}")]
+    InvalidTimestamp(String),
 
     #[error("The field - {new_name} - on table - {table} - has an invalid old name - '{old_name}'. \
         It must have already been renamed previously or never existed before or wrongly spelt. \
@@ -1033,36 +1033,55 @@ impl Migration {
     }
 
     pub fn create_migration_file(
-        up_query: String,
-        down_query: Option<String>,
+        migration_type: MigrationType,
         name: impl Into<String> + std::fmt::Display,
-    ) {
-        //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
-        //   # Example: 2382320302303__up__create_planet.sql
-        //   # Example: 2382320302303__down__delete_planet.sql
-        // let timestamp = Utc::now().timestamp();
+    ) -> MigrationResult<()> {
         println!("Creating migration file: {}", name);
-        let timestamp = Utc::now().format("%Y%m%d%H%M%S").to_string();
+        let timestamp = Utc::now()
+            .format("%Y%m%d%H%M%S")
+            .to_string()
+            .parse::<u64>()
+            .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
+
         let _ = fs::create_dir_all("migrations").expect("Problem creating migrations directory");
+        let create_file = |file_name: String, query: String| {
+            let file_path = format!("migrations/{}", file_name);
+            let mut file = File::create(&file_path).unwrap();
+            file.write_all(query.as_bytes()).unwrap();
+        };
+        let mig_name = match migration_type {
+            MigrationType::OneWay(query) => {
+                println!("Creating one way migration");
+                let filename = MigrationFileName::Basic(MigrationNameBasicInfo {
+                    timestamp,
+                    name: name.to_string(),
+                });
+                create_file(filename.to_string(), query);
+            }
+            MigrationType::TwoWay {
+                up: up_queries,
+                down: down_queries,
+            } => {
+                println!("Creating two way migration");
+                let up_path = MigrationFileName::Up(MigrationNameBasicInfo {
+                    timestamp,
+                    name: name.to_string(),
+                });
 
-        let create_path =
-            |direction: Direction| format!("migrations/{}__{}__{}.sql", timestamp, direction, name);
-
-        let up_file_path = create_path(Direction::Up);
-        let mut up_file = File::create(&up_file_path).unwrap();
-        up_file.write_all(up_query.as_bytes()).unwrap();
-
-        println!("Up Migration file created at: {}", up_file_path);
-
-        if let Some(down_query) = down_query {
-            let down_file_path = create_path(Direction::Down);
-            let mut down_file = File::create(&down_file_path).unwrap();
-            down_file.write_all(down_query.as_bytes()).unwrap();
-            println!("Down Migration file created at: {}", down_file_path);
-        }
-
-        println!("Migration file created: {}", name);
+                let down_path = MigrationFileName::Up(MigrationNameBasicInfo {
+                    timestamp,
+                    name: name.to_string(),
+                });
+                create_file(up_path.to_string(), up_queries);
+                create_file(down_path.to_string(), down_queries);
+            }
+        };
+        Ok(())
     }
+}
+enum MigrationType {
+    OneWay(String),
+    TwoWay { up: String, down: String },
 }
 
 // INFO FOR DB
