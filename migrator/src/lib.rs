@@ -228,6 +228,9 @@ pub enum MigrationError {
     #[error("Invalid migration state. Migration down queries empty")]
     MigrationDownQueriesEmpty,
 
+    #[error("Invalid path")]
+    PathDoesNotExist,
+
     #[error("The field - {new_name} - on table - {table} - has an invalid old name - '{old_name}'. \
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
@@ -238,9 +241,11 @@ pub enum MigrationError {
         renamables: String,
     },
 
-    // Invalid DefineStatement: Users cannot be defined on scope
     #[error("Invalid DefineStatement: {0}")]
     InvalidDefineStatement(String),
+
+    #[error("Invalid migration file count: {0}")]
+    InvalidUpsVsDownsMigrationFileCount(String),
 
     #[error(transparent)]
     ProblemWithQuery(#[from] SurrealOrmError),
@@ -253,6 +258,9 @@ pub enum MigrationError {
 
     #[error(transparent)]
     PromptError(#[from] inquire::error::InquireError),
+
+    #[error(transparent)]
+    DbError(#[from] surrealdb::Error),
 }
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
@@ -311,6 +319,74 @@ impl MigrationFileName {
             MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, .. }) => {
                 *timestamp
             }
+        }
+    }
+
+    pub fn basename(&self) -> String {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}")
+            }
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}")
+            }
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}")
+            }
+        }
+    }
+
+    pub fn to_up(&self) -> MigrationFileName {
+        match self {
+            MigrationFileName::Up(_) => self.clone(),
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Up(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Up(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+        }
+    }
+
+    pub fn to_down(&self) -> MigrationFileName {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Down(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+            MigrationFileName::Down(_) => self.clone(),
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Down(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+        }
+    }
+
+    pub fn to_unidirectional(&self) -> MigrationFileName {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Unidirectional(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
+                MigrationFileName::Unidirectional(MigrationNameBasicInfo {
+                    timestamp: *timestamp,
+                    name: name.clone(),
+                })
+            }
+            MigrationFileName::Unidirectional(_) => self.clone(),
         }
     }
 
@@ -551,7 +627,7 @@ impl LeftDatabase {
     }
 
     pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
-        let mut all_migrations = Migration::get_all_from_migrations_dir();
+        let mut all_migrations = MigrationBidirectional::get_all_from_migrations_dir()?;
         let queries = all_migrations
             .into_iter()
             .map(|m| m.up)
@@ -569,8 +645,8 @@ impl LeftDatabase {
         Ok(())
     }
     pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
-        let migration::Schema { name, .. } = Migration::schema();
-        let migration = Migration::table_name();
+        let migration_bidirectional::Schema { name, .. } = MigrationBidirectional::schema();
+        let migration = MigrationBidirectional::table_name();
 
         // select [{ name: "Oyelowo" }]
         // select value [ "Oyelowo" ]
@@ -618,10 +694,10 @@ impl LeftDatabase {
         db: &mut Self,
         migration_name: MigrationFileName,
     ) -> MigrationResult<()> {
-        let migration = Migration::get_migrations_by_name(migration_name.clone());
+        let migration = MigrationBidirectional::get_migration_by_name(migration_name.clone())?;
         if let Some(migration) = migration {
             let down_migration = migration.down;
-            if let Some(down_migration) = down_migration {
+            if !down_migration.trim().is_empty() {
                 // Raw::new(down_migration).run(db);
                 db.execute(down_migration);
             } else {
@@ -826,9 +902,10 @@ impl Database {
         Ok(all_resources)
     }
 
-    pub async fn execute(&self, query: String) {
+    pub async fn execute(&self, query: String) -> MigrationResult<()> {
         println!("Executing query: {}", query);
-        self.db().query(query).await.unwrap();
+        self.db().query(query).await?;
+        Ok(())
     }
 
     pub async fn run_migrations(name: &String, is_unidirectional: bool) -> MigrationResult<()> {
@@ -951,8 +1028,8 @@ impl Database {
                         println!("HERE=====");
                         println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
                         println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
-                        MigrationFileName::create_up(timestamp, name)?.create_file(up);
-                        MigrationFileName::create_down(timestamp, name)?.create_file(down);
+                        MigrationFileName::create_up(timestamp, name)?.create_file(up)?;
+                        MigrationFileName::create_down(timestamp, name)?.create_file(down)?;
                     }
                     (true, false) => {
                         return Err(MigrationError::MigrationUpQueriesEmpty);
@@ -1006,15 +1083,72 @@ impl MigrationMetadata {}
 // Migratiions from migration directory
 #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration")]
-pub struct Migration {
+#[surreal_orm(table_name = "migration", relax_table_name)]
+pub struct MigrationBidirectional {
     pub id: SurrealId<Self, String>,
     pub name: String,
-    pub timestamp: String,
+    pub timestamp: u64,
     pub up: String,
-    #[surreal_orm(type_ = "option<string>")]
-    pub down: Option<String>,
+    pub down: String,
     // status: String,
+}
+
+#[derive(Node, Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "migration", relax_table_name)]
+pub struct MigrationUnidirectional {
+    pub id: SurrealId<Self, String>,
+    pub name: String,
+    pub timestamp: u64,
+    pub queries: String, // status: String,
+}
+
+impl MigrationUnidirectional {
+    pub fn get_all_from_migrations_dir(flag: MigrationFlag) -> MigrationResult<Vec<Self>> {
+        let migrations = fs::read_dir("migrations/");
+
+        if migrations.is_err() {
+            return Ok(vec![]);
+        }
+
+        let mut migrations_uni_meta = vec![];
+        let mut unidirectional_basenames = vec![];
+
+        for migration in migrations.expect("Problem reading migrations directory") {
+            let migration = migration.expect("Problem reading migration");
+            let path = migration.path();
+            let path = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
+
+            let migration_name = path.split("/").last().unwrap();
+            let migration_up_name = migration_name.to_string();
+
+            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
+            match filename {
+                MigrationFileName::Up(_) => {
+                    // Maybe return error if in strict mode
+                }
+                MigrationFileName::Down(_) => {
+                    // Maybe return error if in strict mode
+                }
+                MigrationFileName::Unidirectional(_) => {
+                    unidirectional_basenames.push(filename.basename());
+                    let content = fs::read_to_string(path).unwrap();
+
+                    let migration = MigrationUnidirectional {
+                        id: MigrationUnidirectional::create_id(migration_up_name.clone()),
+                        timestamp: filename.timestamp(),
+                        name: filename.basename(),
+                        queries: content,
+                    };
+
+                    migrations_uni_meta.push(migration);
+                }
+            };
+        }
+
+        migrations_uni_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        Ok(migrations_uni_meta)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -1033,22 +1167,25 @@ impl Display for Direction {
     }
 }
 
-impl Migration {
-    pub fn get_all_from_migrations_dir() -> Vec<Migration> {
-        // <number>__up__<name>.sql
-        let regex_up = Regex::new(r"(\d+)__up__(\w+).sql").unwrap();
-        let regex_down = Regex::new(r"(\d+)__down__(\w+).sql").unwrap();
+#[derive(Debug, Clone, Copy)]
+enum MigrationFlag {
+    TwoWay,
+    OneWay,
+}
 
-        // read migrations directory
-        // check if dir exists
+impl MigrationBidirectional {
+    pub fn get_all_from_migrations_dir() -> MigrationResult<Vec<Self>> {
         let migrations = fs::read_dir("migrations/");
+
         if migrations.is_err() {
-            return vec![];
+            return Ok(vec![]);
         }
 
-        let mut migrations_meta = vec![];
+        let mut migrations_bi_meta = vec![];
 
-        // get all migration names
+        let mut ups_basenames = vec![];
+        let mut downs_basenames = vec![];
+
         for migration in migrations.expect("Problem reading migrations directory") {
             let migration = migration.expect("Problem reading migration");
             let path = migration.path();
@@ -1057,66 +1194,68 @@ impl Migration {
             let migration_name = path.split("/").last().unwrap();
             let migration_up_name = migration_name.to_string();
 
-            if !regex_up.is_match(&migration_up_name.clone()) {
-                continue;
-            }
+            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
+            match filename {
+                MigrationFileName::Up(_) => {
+                    ups_basenames.push(filename.basename());
+                    let content_up = fs::read_to_string(path).unwrap();
+                    let content_down =
+                        fs::read_to_string(parent_dir.join(filename.to_down().to_string()))?;
 
-            let captures = regex_up.captures(&migration_up_name).unwrap();
-            // let  "20230912__up__add_name.sql";
-            let all = captures.get(0).unwrap().as_str();
-            let timestamp = captures.get(1).unwrap().as_str();
-            let name = captures.get(2).unwrap().as_str().to_string();
-            let content_up = fs::read_to_string(path).unwrap();
-            let migration_down_name = format!("{}__down__{}.sql", timestamp, name);
-            let content_down = fs::read_to_string(parent_dir.join(migration_down_name));
-            let content_down = match content_down {
-                Ok(content_down) => Some(content_down),
-                Err(_) => None,
+                    let migration = MigrationBidirectional {
+                        id: MigrationBidirectional::create_id(migration_up_name.clone()),
+                        timestamp: filename.timestamp(),
+                        name: filename.basename(),
+                        up: content_up,
+                        down: content_down,
+                    };
+
+                    migrations_bi_meta.push(migration);
+                }
+                MigrationFileName::Down(_) => {
+                    downs_basenames.push(filename.basename());
+                }
+                MigrationFileName::Unidirectional(_) => {}
             };
-
-            let migration = Migration {
-                id: Migration::create_id(migration_up_name.clone()),
-                timestamp: timestamp.to_string(),
-                name,
-                up: content_up,
-                down: content_down,
-            };
-
-            migrations_meta.push(migration);
         }
-        migrations_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-        migrations_meta
+
+        // Validate
+        // 1. Length of ups and downs should be equal
+        if ups_basenames.len() != downs_basenames.len() {
+            return Err(MigrationError::InvalidMigrationName);
+        }
+
+        let ups_basenames_as_set = ups_basenames.iter().collect::<HashSet<_>>();
+        let downs_basenames_as_set = downs_basenames.iter().collect::<HashSet<_>>();
+
+        let up_down_difference = ups_basenames_as_set
+            .symmetric_difference(&downs_basenames_as_set)
+            .cloned()
+            .collect::<Vec<_>>();
+        if !up_down_difference.is_empty() {
+            return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+                format!(
+                    "The following files do not exist for both up and down. only for either: {}",
+                    up_down_difference
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                ),
+            ));
+        }
+        migrations_bi_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        Ok(migrations_bi_meta)
     }
 
-    pub fn get_migrations_by_name(
+    pub fn get_migration_by_name(
         migration_name: impl Into<MigrationFileName>,
-    ) -> Option<Migration> {
-        //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
-        //   # Example: 2382320302303__up__create_planet.sql
-        //   # Example: 2382320302303__down__delete_planet.sql
+    ) -> MigrationResult<Option<Self>> {
         let migration_name: MigrationFileName = migration_name.into();
-        Self::get_all_from_migrations_dir()
+        Ok(Self::get_all_from_migrations_dir()?
             .into_iter()
-            .find(|m| m.name == migration_name.to_string())
+            .find(|m| m.name == migration_name.to_string()))
     }
-
-    // pub fn create_migration_file(
-    //     name: impl Into<String> + std::fmt::Display,
-    //     migration_type: MigrationType,
-    // ) -> MigrationResult<()> {
-    //     let timestamp = Utc::now();
-    //     let filename = match migration_type {
-    //         MigrationType::OneWay(query_str) => {
-    //             MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
-    //         }
-    //         MigrationType::TwoWay { up, down } => {
-    //             MigrationFileName::create_up(timestamp, name)?.create_file(up);
-    //             MigrationFileName::create_down(timestamp, name)?.create_file(down);
-    //         }
-    //     };
-    //
-    //     Ok(())
-    // }
 }
 
 enum MigrationType {
@@ -2141,7 +2280,7 @@ pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub last_name: String,
     pub population: u64,
-    #[surreal_orm(old_name = "created")]
+    // #[surreal_orm(old_name = "created")]
     pub created_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
