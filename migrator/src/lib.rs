@@ -6,30 +6,24 @@
 // been removed, therefore, still valid to be used as an annotation. The old_name attribute is
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
-use async_trait::async_trait;
 use chrono::Utc;
-use inquire::InquireError;
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_till1, take_until1, take_while1, take_while_m_n},
-    character::{
-        complete::{multispace0, multispace1, digit1},
-        is_alphabetic,
-    },
-    combinator::{opt, map_res, all_consuming, cut},
-    IResult, sequence::{preceded, tuple}, error::context,
+    bytes::complete::{tag, take_until1, take_while1, take_while_m_n},
+    combinator::{all_consuming, cut, map_res},
+    error::context,
+    sequence::tuple,
+    IResult,
 };
-use paste::paste;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
     sql::Query,
     statements::{
-        begin_transaction, create, create_only, define_event, define_index, delete, info_for,
-        remove_analyzer, remove_database, remove_event, remove_field, remove_function,
-        remove_index, remove_login, remove_namespace, remove_param, remove_scope, remove_table,
-        remove_token, remove_user, select, select_value, update, NamespaceOrDatabase,
-        UserPermissionScope,
+        begin_transaction, define_event, define_index, delete, info_for, remove_analyzer,
+        remove_database, remove_event, remove_field, remove_function, remove_index,
+        remove_namespace, remove_param, remove_scope, remove_table, remove_token, remove_user,
+        select, select_value, update, NamespaceOrDatabase, UserPermissionScope,
     },
     Edge, Node, Table, *,
 };
@@ -228,6 +222,20 @@ pub enum MigrationError {
     #[error("Invalid timestamp")]
     InvalidTimestamp,
 
+    #[error("The field - {new_name} - on table - {table} - has an invalid old name - '{old_name}'. \
+        It must have already been renamed previously or never existed before or wrongly spelt. \
+         Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
+    InvalidOldFieldName {
+        new_name: String,
+        table: String,
+        old_name: String,
+        renamables: String,
+    },
+
+    // Invalid DefineStatement: Users cannot be defined on scope
+    #[error("Invalid DefineStatement: {0}")]
+    InvalidDefineStatement(String),
+
     #[error(transparent)]
     ProblemWithQuery(#[from] SurrealOrmError),
 
@@ -278,19 +286,19 @@ pub struct MigrationNameBasicInfo {
 
 #[derive(Debug, Clone)]
 pub enum MigrationFileName {
-   Up(MigrationNameBasicInfo),
-   Down(MigrationNameBasicInfo),
-   Basic(MigrationNameBasicInfo),
+    Up(MigrationNameBasicInfo),
+    Down(MigrationNameBasicInfo),
+    Basic(MigrationNameBasicInfo),
 }
 
 impl MigrationFileName {
-   pub fn timestamp(&self) -> u64 {
-       match self {
-           MigrationFileName::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-           MigrationFileName::Down(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-           MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-       }
-   } 
+    pub fn timestamp(&self) -> u64 {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+        }
+    }
 }
 
 // parse_migration_name
@@ -299,26 +307,26 @@ impl TryFrom<String> for MigrationFileName {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let value = value.as_str();
-        let (_, migration_name) = parse_migration_name(&value).map_err(|_| MigrationError::InvalidMigrationName)?;
+        let (_, migration_name) =
+            parse_migration_name(&value).map_err(|_| MigrationError::InvalidMigrationName)?;
         Ok(migration_name)
     }
 }
-
 
 #[derive(Debug, Clone)]
 enum Direction2 {
     Up,
     Down,
-    None
+    None,
 }
 // .up.surql or .down.surql or .surql
 fn parse_direction(input: &str) -> IResult<&str, Direction2> {
     use nom::combinator::value;
-    
+
     let (input, direction) = alt((
         value(Direction2::Up, tag(".up.surql")),
         value(Direction2::Down, tag(".down.surql")),
-        value(Direction2::None, tag(".surql"))
+        value(Direction2::None, tag(".surql")),
     ))(input)?;
     Ok((input, direction))
 }
@@ -334,12 +342,17 @@ fn parse_u64(input: &str) -> Result<u64, std::num::ParseIntError> {
 // format: <timestamp>_<name>.<direction>.surql
 // 14 numbers followed by _ and then name of migration
 fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileName> {
-    let (input, timestamp) = map_res(take_while_m_n(14, 14, |c: char| c.is_digit(10)), parse_u64)(input)?;
+    let (input, timestamp) =
+        map_res(take_while_m_n(14, 14, |c: char| c.is_digit(10)), parse_u64)(input)?;
     let (input, _) = tag("_")(input)?;
-    let (input, (name, direction)) = tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
+    let (input, (name, direction)) =
+        tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
     let (input, name) = take_until1(".")(input)?;
-    let basic_info = MigrationNameBasicInfo { timestamp, name: name.to_string() };
-    
+    let basic_info = MigrationNameBasicInfo {
+        timestamp,
+        name: name.to_string(),
+    };
+
     let m2 = match direction {
         Direction2::Up => MigrationFileName::Up(basic_info),
         Direction2::Down => MigrationFileName::Down(basic_info),
@@ -350,7 +363,7 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileNa
 }
 
 fn parse_migration_name(input: &str) -> IResult<&str, MigrationFileName> {
-     all_consuming(cut(context(
+    all_consuming(cut(context(
         "Unexpected characters found after parsing",
         parse_migration_name_unconsumed,
     )))(input)
@@ -359,14 +372,19 @@ fn parse_migration_name(input: &str) -> IResult<&str, MigrationFileName> {
 impl Display for MigrationFileName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let file_name_str = match self {
-            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.up.surql"),
-            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.down.surql"),
-            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.surql"),
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.up.surql")
+            }
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.down.surql")
+            }
+            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.surql")
+            }
         };
-        write!(f, "{file_name_str}" )
+        write!(f, "{file_name_str}")
     }
 }
-
 
 #[derive(Debug, Clone, Default)]
 pub struct FullDbInfo {
@@ -460,19 +478,19 @@ impl FullDbInfo {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct LeftDatabase(Database);
 
 impl LeftDatabase {
-    pub async fn resources(&self)-> LeftFullDbInfo {
-         LeftFullDbInfo(self
-            .0
-            .get_all_resources()
-            .await
-            .expect("nothing for u on left"))
+    pub async fn resources(&self) -> LeftFullDbInfo {
+        LeftFullDbInfo(
+            self.0
+                .get_all_resources()
+                .await
+                .expect("nothing for u on left"),
+        )
     }
-    
+
     pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
         let mut all_migrations = Migration::get_all_from_migrations_dir();
         let queries = all_migrations
@@ -509,7 +527,6 @@ impl LeftDatabase {
         Ok(migration_names)
     }
 
-
     pub async fn mark_migration_as_applied(
         &self,
         migration_name: impl Into<MigrationFileName>,
@@ -530,18 +547,18 @@ impl LeftDatabase {
         Ok(migration)
     }
 
-    pub async fn unmark_migration(
-        &self,
-        migration_name: MigrationFileName,
-    ) -> MigrationResult<()> {
+    pub async fn unmark_migration(&self, migration_name: MigrationFileName) -> MigrationResult<()> {
         println!("Unmark migration: {}", migration_name);
         delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
             .run(self.db());
         println!("Migration unmarked: {}", migration_name);
         Ok(())
     }
-    
-    pub fn rollback_migration(db: &mut Self, migration_name: MigrationFileName) -> MigrationResult<()> {
+
+    pub fn rollback_migration(
+        db: &mut Self,
+        migration_name: MigrationFileName,
+    ) -> MigrationResult<()> {
         let migration = Migration::get_migrations_by_name(migration_name.clone());
         if let Some(migration) = migration {
             let down_migration = migration.down;
@@ -579,15 +596,19 @@ pub enum By {
 pub struct RightDatabase(Database);
 
 impl RightDatabase {
-    pub async fn resources(&self)-> RightFullDbInfo {
-         RightFullDbInfo(self
-            .0
-            .get_all_resources()
-            .await
-            .expect("nothing for u on left"))
+    pub async fn resources(&self) -> RightFullDbInfo {
+        RightFullDbInfo(
+            self.0
+                .get_all_resources()
+                .await
+                .expect("nothing for u on left"),
+        )
     }
-    
-    pub async fn run_codebase_schema_queries(&self, code_resources: impl DbResources) -> MigrationResult<()> {
+
+    pub async fn run_codebase_schema_queries(
+        &self,
+        code_resources: impl DbResources,
+    ) -> MigrationResult<()> {
         let queries = Self::get_codebase_schema_queries(code_resources);
         begin_transaction()
             .query(Raw::new(queries))
@@ -716,7 +737,6 @@ impl Database {
         self.db.clone()
     }
 
-    
     pub async fn get_db_info(&self) -> MigrationResult<DbInfo> {
         let info = info_for()
             .database()
@@ -754,7 +774,6 @@ impl Database {
         self.db().query(query).await.unwrap();
     }
 
-
     pub async fn run_migrations() -> MigrationResult<()> {
         println!("Running migrations");
         let mut up_queries = vec![];
@@ -786,6 +805,7 @@ impl Database {
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
 
         for resource in resources {
+            let resource = resource?;
             up_queries.extend(resource.up);
             down_queries.extend(resource.down);
         }
@@ -818,39 +838,39 @@ impl Database {
             ))
         };
         match (up_queries_str, down_queries_str) {
-        (None, None) => {
-            let confirmation = inquire::Confirm::new(
-                "Are you sure you want to generate an empty migration? (y/n)",
-            )
-            .with_default(false)
-            .with_help_message("This is good if you want to write out some queries manually")
-            .prompt();
+            (None, None) => {
+                let confirmation = inquire::Confirm::new(
+                    "Are you sure you want to generate an empty migration? (y/n)",
+                )
+                .with_default(false)
+                .with_help_message("This is good if you want to write out some queries manually")
+                .prompt();
 
-            match confirmation {
-                Ok(true) => {
-                    Migration::create_migration_file(
-                        String::new(),
-                        Some(String::new()),
-                        "test_migration".to_string(),
-                    );
-                }
-                Ok(false) => {
-                    println!("No migration created");
-                }
-                Err(e) => {
-                    println!("Error: {}", e);
-                }
-            };
+                match confirmation {
+                    Ok(true) => {
+                        Migration::create_migration_file(
+                            String::new(),
+                            Some(String::new()),
+                            "test_migration".to_string(),
+                        );
+                    }
+                    Ok(false) => {
+                        println!("No migration created");
+                    }
+                    Err(e) => {
+                        println!("Error: {}", e);
+                    }
+                };
             }
-         ( up_queries_str, down_queries_str) => {
-            println!("HERE=====");
-            println!("UP MIGRATIOM: \n {}", up_queries_str.as_ref().unwrap());
-            println!("DOWN MIGRATIOM: \n {}", down_queries_str.as_ref().unwrap());
-            // Migration::create_migration_file(
-            //     up_queries_str.unwrap_or_default(),
-            //     Some(down_queries_str.unwrap_or_default()),
-            //     "test_migration".to_string(),
-            // );
+            (up_queries_str, down_queries_str) => {
+                println!("HERE=====");
+                println!("UP MIGRATIOM: \n {}", up_queries_str.as_ref().unwrap());
+                println!("DOWN MIGRATIOM: \n {}", down_queries_str.as_ref().unwrap());
+                // Migration::create_migration_file(
+                //     up_queries_str.unwrap_or_default(),
+                //     Some(down_queries_str.unwrap_or_default()),
+                //     "test_migration".to_string(),
+                // );
             }
         };
         //
@@ -1000,7 +1020,9 @@ impl Migration {
         migrations_meta
     }
 
-    pub fn get_migrations_by_name(migration_name: impl Into<MigrationFileName>) -> Option<Migration> {
+    pub fn get_migrations_by_name(
+        migration_name: impl Into<MigrationFileName>,
+    ) -> Option<Migration> {
         //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
         //   # Example: 2382320302303__up__create_planet.sql
         //   # Example: 2382320302303__down__delete_planet.sql
@@ -1041,7 +1063,6 @@ impl Migration {
 
         println!("Migration file created: {}", name);
     }
-
 }
 
 // INFO FOR DB
@@ -1096,7 +1117,7 @@ impl<T: Into<String>> From<T> for UpdateStatementRaw {
 }
 
 #[derive(Debug, Clone)]
-struct RemoveStatementRaw(String);
+pub struct RemoveStatementRaw(String);
 impl Display for RemoveStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
@@ -1120,7 +1141,7 @@ impl<T: Into<String>> From<T> for DefineStmtName {
     }
 }
 
-struct RemoveStmtName(String);
+pub struct RemoveStmtName(String);
 
 impl<T: Into<String>> From<T> for RemoveStmtName {
     fn from(value: T) -> Self {
@@ -1143,7 +1164,7 @@ impl From<String> for RemoveStatementRaw {
     }
 }
 
-struct TableRaw(String);
+pub struct TableRaw(String);
 
 impl DefineStatementRaw {
     /// Table name is only required/necessary when generating table resources such as fields, indexes, events
@@ -1151,7 +1172,7 @@ impl DefineStatementRaw {
         &self,
         remove_stmt_name: RemoveStmtName,
         table: Option<&Table>,
-    ) -> RemoveStatementRaw {
+    ) -> MigrationResult<RemoveStatementRaw> {
         use surreal_orm::sql::{self, statements::DefineStatement, Base, Statement};
         let query = surreal_orm::sql::parse(&self.to_string()).expect("Invalid statment");
         let stmt = query[0].clone();
@@ -1252,7 +1273,12 @@ impl DefineStatementRaw {
                             Base::Ns => remove_init.on_namespace(),
                             Base::Db => remove_init.on_database(),
                             Base::Root => remove_init.on_database(),
-                            Base::Sc(sc_name) => panic!("Users cannot be defined on scope"),
+                            Base::Sc(sc_name) => {
+                                return Err(MigrationError::InvalidDefineStatement(
+                                    "Users cannot be defined on scope in Define User statement"
+                                        .into(),
+                                ))
+                            }
                         };
                         remove_stmt.to_raw().build()
                     }
@@ -1266,10 +1292,14 @@ impl DefineStatementRaw {
                     }
                 }
             }
-            _ => panic!("Not a define statement. Expected a define statement"),
+            _ => {
+                return Err(MigrationError::InvalidDefineStatement(
+                    "Not a define statement. Expected a define statement".into(),
+                ))
+            }
         };
 
-        stmt.into()
+        Ok(stmt.into())
     }
 
     pub fn trim(&self) -> &str {
@@ -1423,36 +1453,37 @@ where
     // Right is from codebase
     fn get_right(&self) -> T;
 
-    fn queries(&self) -> Queries {
-        let queries = self
-            .get_right()
-            .get_names_as_set()
-            .union(&self.get_left().get_names_as_set())
-            .into_iter()
-            .fold(Queries::default(), |mut acc, name| {
-                let def_right = self.get_right().get_definition(name).cloned();
-                let def_left = self.get_left().get_definition(name).cloned();
-                let delta = DeltaType::from((def_left, def_right));
+    fn queries(&self) -> MigrationResult<Queries> {
+        let mut queries = Queries::default();
+        let left = self.get_left().get_names_as_set();
+        let right = self.get_right().get_names_as_set();
+        let resources = right.union(&left);
 
-                match delta {
-                    DeltaType::Create { right } => {
-                        acc.add_up(QueryType::Define(right.clone()));
-                        acc.add_down(QueryType::Remove(right.as_remove_statement(name.into(), None)));
-                    }
-                    DeltaType::Remove { left } => {
-                        acc.add_up(QueryType::Remove(left.as_remove_statement(name.into(), None)));
-                        acc.add_down(QueryType::Define(left));
-                    }
-                    DeltaType::Update { left, right } => {
-                        acc.add_up(QueryType::Define(right));
-                        acc.add_down(QueryType::Define(left));
-                    }
-                    DeltaType::NoChange => {}
-                };
+        for name in resources {
+            let def_right = self.get_right().get_definition(name).cloned();
+            let def_left = self.get_left().get_definition(name).cloned();
 
-                acc
-            });
-        queries
+            match DeltaType::from((def_left, def_right)) {
+                DeltaType::Create { right } => {
+                    queries.add_up(QueryType::Define(right.clone()));
+                    queries.add_down(QueryType::Remove(
+                        right.as_remove_statement(name.into(), None)?,
+                    ));
+                }
+                DeltaType::Remove { left } => {
+                    queries.add_up(QueryType::Remove(
+                        left.as_remove_statement(name.into(), None)?,
+                    ));
+                    queries.add_down(QueryType::Define(left));
+                }
+                DeltaType::Update { left, right } => {
+                    queries.add_up(QueryType::Define(right));
+                    queries.add_down(QueryType::Define(left));
+                }
+                DeltaType::NoChange => {}
+            };
+        }
+        Ok(queries)
     }
 }
 
@@ -1469,75 +1500,77 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
         self.resources.right_resources.tables()
     }
 
-    fn queries(&self) -> Queries {
-        let queries = self
-            .get_right()
-            .get_names_as_set()
-            .union(&self.get_left().get_names_as_set())
-            .into_iter()
-            .fold(Queries::default(), |mut acc, table_name| {
-                let def_right = self.get_right().get_definition(table_name).cloned();
-                let def_left = self.get_left().get_definition(table_name).cloned();
-                
-                let events = ComparisonEvents {
-                    table: &Table::from(table_name.clone()),
-                    resources: self.resources,
-                };
-                let indexes = ComparisonIndexes {
-                    table: &Table::from(table_name.clone()),
-                    resources: self.resources,
-                };
-                let fields = ComparisonFields {
-                    table: &Table::from(table_name.clone()),
-                    resources: self.resources,
-                };
-                let delta = DeltaType::from((def_left, def_right));
+    fn queries(&self) -> MigrationResult<Queries> {
+        let left = self.get_left().get_names_as_set();
+        let right = self.get_right().get_names_as_set();
+        let tables = left.union(&right);
 
-                let extend_table_resources_up = |acc: &mut Queries| {
-                        acc.extend_up(fields.queries());
-                        acc.extend_up(indexes.queries());
-                        acc.extend_up(events.queries());
-                };
+        let mut queries = Queries::default();
+        for table_name in tables {
+            let def_right = self.get_right().get_definition(table_name).cloned();
+            let def_left = self.get_left().get_definition(table_name).cloned();
 
-                let extend_table_resources_down = |acc: &mut Queries| {
-                        acc.extend_down(fields.queries());
-                        acc.extend_down(indexes.queries());
-                        acc.extend_down(events.queries());
-                };
+            let events = ComparisonEvents {
+                table: &Table::from(table_name.clone()),
+                resources: self.resources,
+            };
 
-                match delta {
-                    DeltaType::NoChange => {
-                        extend_table_resources_up(&mut acc);
-                        extend_table_resources_down(&mut acc);
-                    }
-                    DeltaType::Update { left, right } => {
-                        acc.add_up(QueryType::Define(right));
-                        extend_table_resources_up(&mut acc);
-                        extend_table_resources_down(&mut acc);
-                    
-                        acc.add_down(QueryType::Define(left));
-                    }
-                    DeltaType::Create { right } => {
-                        acc.add_down(QueryType::Remove(
-                            right.as_remove_statement(table_name.into(), None),
-                        ));
+            let indexes = ComparisonIndexes {
+                table: &Table::from(table_name.clone()),
+                resources: self.resources,
+            };
 
-                        acc.add_up(QueryType::Define(right));
-                        extend_table_resources_up(&mut acc);
-                        
-                    }
-                    DeltaType::Remove { left } => {
-                        acc.add_up(QueryType::Remove(
-                            left.as_remove_statement(table_name.into(), None),
-                        ));
-                        acc.add_down(QueryType::Define(left));
-                        extend_table_resources_down(&mut acc);
-                    }
-                };
+            let fields = ComparisonFields {
+                table: &Table::from(table_name.clone()),
+                resources: self.resources,
+            };
 
-                acc
-            });
-        queries
+            let fields = fields.queries()?;
+            let indexes = indexes.queries()?;
+            let events = events.queries()?;
+
+            let extend_table_resources_up = |acc: &mut Queries| {
+                acc.extend_up(&fields);
+                acc.extend_up(&indexes);
+                acc.extend_up(&events);
+            };
+
+            let extend_table_resources_down = |acc: &mut Queries| {
+                acc.extend_down(&fields);
+                acc.extend_down(&indexes);
+                acc.extend_down(&events);
+            };
+
+            match DeltaType::from((def_left, def_right)) {
+                DeltaType::NoChange => {
+                    extend_table_resources_up(&mut queries);
+                    extend_table_resources_down(&mut queries);
+                }
+                DeltaType::Update { left, right } => {
+                    queries.add_up(QueryType::Define(right));
+                    extend_table_resources_up(&mut queries);
+                    extend_table_resources_down(&mut queries);
+
+                    queries.add_down(QueryType::Define(left));
+                }
+                DeltaType::Create { right } => {
+                    queries.add_down(QueryType::Remove(
+                        right.as_remove_statement(table_name.into(), None)?,
+                    ));
+
+                    queries.add_up(QueryType::Define(right));
+                    extend_table_resources_up(&mut queries);
+                }
+                DeltaType::Remove { left } => {
+                    queries.add_up(QueryType::Remove(
+                        left.as_remove_statement(table_name.into(), None)?,
+                    ));
+                    queries.add_down(QueryType::Define(left));
+                    extend_table_resources_down(&mut queries);
+                }
+            };
+        }
+        Ok(queries)
     }
 }
 
@@ -1604,54 +1637,48 @@ where
 
     fn get_table(&self) -> &Table;
 
-    fn queries(&self) -> Queries {
-        let queries = self
-            .get_right()
-            .get_names_as_set()
-            .union(&self.get_left().get_names_as_set())
-            .into_iter()
-            .fold(Queries::default(), |mut acc, name| {
-                let def_right = self.get_right().get_definition(name).cloned();
-                let def_left = self.get_left().get_definition(name).cloned();
+    fn queries(&self) -> MigrationResult<Queries> {
+        let left = self.get_left().get_names_as_set();
+        let right = self.get_right().get_names_as_set();
+        let table_resources_names = right.union(&left);
 
-                let delta = DeltaType::from((def_left, def_right));
+        let mut queries = Queries::default();
+        for name in table_resources_names {
+            let def_right = self.get_right().get_definition(name).cloned();
+            let def_left = self.get_left().get_definition(name).cloned();
 
-                match delta {
-                    DeltaType::Create {right } => {
-                        acc.add_down(QueryType::Remove(
-                            right.as_remove_statement(name.into(), Some(self.get_table())),
-                        ));
-                        acc.add_up(QueryType::Define(right));
-                    }
-                    DeltaType::Remove { left } => {
-                        acc.add_down(QueryType::Remove(
-                            left.as_remove_statement(name.into(), Some(self.get_table())),
-                        ));
-                        acc.add_up(QueryType::Define(left));
-                    }
-                    DeltaType::Update { left, right } => {
-                        acc.add_up(QueryType::Define(right));
-                        acc.add_down(QueryType::Define(left));
-                    }
-                    DeltaType::NoChange => {}
-                };
+            match DeltaType::from((def_left, def_right)) {
+                DeltaType::Create { right } => {
+                    queries.add_down(QueryType::Remove(
+                        right.as_remove_statement(name.into(), Some(self.get_table()))?,
+                    ));
+                    queries.add_up(QueryType::Define(right));
+                }
+                DeltaType::Remove { left } => {
+                    queries.add_down(QueryType::Remove(
+                        left.as_remove_statement(name.into(), Some(self.get_table()))?,
+                    ));
+                    queries.add_up(QueryType::Define(left));
+                }
+                DeltaType::Update { left, right } => {
+                    queries.add_up(QueryType::Define(right));
+                    queries.add_down(QueryType::Define(left));
+                }
+                DeltaType::NoChange => {}
+            };
+        }
 
-                acc
-            });
-        queries
+        Ok(queries)
     }
 }
-
-
 
 #[derive(Debug, Clone)]
 enum QueryType {
     Define(DefineStatementRaw),
     Remove(RemoveStatementRaw),
     Update(UpdateStatementRaw),
-    NewLine
+    NewLine,
 }
-
 
 impl Display for QueryType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1660,7 +1687,7 @@ impl Display for QueryType {
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
             // TODO: Rethink new line handling
-            QueryType::NewLine => "".to_string()
+            QueryType::NewLine => "".to_string(),
         };
         let end = if let QueryType::NewLine = self {
             ""
@@ -1694,12 +1721,12 @@ impl Queries {
         self.down.push(query);
     }
 
-    fn extend_up(&mut self, queries: Self) {
-        self.up.extend(queries.up);
+    fn extend_up(&mut self, queries: &Self) {
+        self.up.extend(queries.up.to_vec());
     }
 
-    fn extend_down(&mut self, queries: Self) {
-        self.down.extend(queries.down);
+    fn extend_down(&mut self, queries: &Self) {
+        self.down.extend(queries.down.to_vec());
     }
 }
 
@@ -1768,15 +1795,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
     // This does not use default implementation because it also has to handle
     // field name change/rename
-    fn queries(&self) -> Queries {
-        let right = self
-            .get_right()
-            .get_names_as_set();
+    fn queries(&self) -> MigrationResult<Queries> {
+        let right = self.get_right().get_names_as_set();
 
-        let left = self
-            .get_left()
-            .get_names_as_set();
-        
+        let left = self.get_left().get_names_as_set();
+
         let diff_left = left.difference(&right);
         let diff_right = right.difference(&left);
         let union = right.union(&left).collect::<Vec<_>>();
@@ -1784,149 +1807,159 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
         let diff_left = diff_left.into_iter().collect::<Vec<_>>();
         let diff_right = diff_right.into_iter().collect::<Vec<_>>();
         let is_potentially_renaming = diff_left.len() == 1 && diff_right.len() == 1;
-        
+
         let potentially_old_name = if is_potentially_renaming {
             diff_left.first()
         } else {
             None
         };
 
-        let queries = union.into_iter()
-            .fold(Queries::default(), |mut acc, name| {
-                let def_right = self.get_right().get_definition(name).cloned();
-                let def_left = self.get_left().get_definition(name).cloned();
-                let table = self.get_table();
+        let mut acc = Queries::default();
+        for name in union {
+            let def_right = self.get_right().get_definition(name).cloned();
+            let def_left = self.get_left().get_definition(name).cloned();
+            let table = self.get_table();
 
+            let field_meta_with_old_name =
+                RightDatabase::find_field_has_old_name(table, By::NewName(name.to_string()));
 
-                let field_meta_with_old_name = RightDatabase::find_field_has_old_name(
-                    table,
-                    By::NewName(name.to_string()),
-                );
-
-                if let Some(meta) = &field_meta_with_old_name {
-                    let old_name = &meta.clone().old_name.expect("Should exist").to_string();
-                    if !left.contains(old_name) {
-                       panic!("The field - {name} - on table - {table} - has an invalid old name - '{old_name}'. \
-                           It must have already been renamed previously or never existed before or wrongly spelt. \
-                            Also, make sure you are using the correct case for the field name. It should be one of these: {}", 
-                       left.clone().into_iter().collect::<Vec<_>>().join(", "));
-                    }
+            if let Some(meta) = &field_meta_with_old_name {
+                let old_name = &meta.clone().old_name.expect("Should exist").to_string();
+                if !left.contains(old_name) {
+                    return Err(MigrationError::InvalidOldFieldName {
+                        new_name: name.to_string(),
+                        table: table.to_string(),
+                        old_name: old_name.to_string(),
+                        renamables: left.clone().into_iter().collect::<Vec<_>>().join(", "),
+                    });
                 }
+            }
 
-                match DeltaType::from((def_left, def_right)) {
-                    DeltaType::NoChange => {}
-                    DeltaType::Create { right } => {
-                        acc.add_up(QueryType::Define(right.clone()));
-                            
-                        let new_name = name;
+            match DeltaType::from((def_left, def_right)) {
+                DeltaType::NoChange => {}
+                DeltaType::Create { right } => {
+                    acc.add_up(QueryType::Define(right.clone()));
 
-                            let field_meta_with_old_name = if is_potentially_renaming && field_meta_with_old_name.is_none() {
-                                self.get_field_meta_from_prompt(new_name, potentially_old_name)
-                            } else {
-                                field_meta_with_old_name.map(|f| SingleFieldChangeType::Rename(FieldChangeMeta {
+                    let new_name = name;
+
+                    let field_meta_with_old_name =
+                        if is_potentially_renaming && field_meta_with_old_name.is_none() {
+                            self.get_field_meta_from_prompt(new_name, potentially_old_name)
+                        } else {
+                            field_meta_with_old_name.map(|f| {
+                                SingleFieldChangeType::Rename(FieldChangeMeta {
                                     table: self.get_table().to_owned(),
                                     old_name: f.old_name.clone().unwrap(),
                                     new_name: new_name.to_string().into(),
-                                }))
-                            };
+                                })
+                            })
+                        };
 
-                        
-                        if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
-                            let old_name = meta.old_name.clone();
-                            let copy_old_to_new = UpdateStatementRaw::from(
-                                Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
-                                    .build(),
-                            );
+                    if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
+                        let old_name = meta.old_name.clone();
+                        let copy_old_to_new = UpdateStatementRaw::from(
+                            Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
+                                .build(),
+                        );
 
-                            acc.add_up(QueryType::Update(copy_old_to_new));
-                        }
-                            
-                        if let Some(SingleFieldChangeType::Rename(meta) | SingleFieldChangeType::Delete(meta)) = &field_meta_with_old_name {
-                            acc.add_up(QueryType::Remove(
-                                right.as_remove_statement(meta.old_name.clone().into(), Some(table)),
-                            ));
+                        acc.add_up(QueryType::Update(copy_old_to_new));
+                    }
 
-                                
-                            let old_name = meta.old_name.clone();
-                            let left = self.get_left();
-                            let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
+                    if let Some(
+                        SingleFieldChangeType::Rename(meta) | SingleFieldChangeType::Delete(meta),
+                    ) = &field_meta_with_old_name
+                    {
+                        acc.add_up(QueryType::Remove(
+                            right.as_remove_statement(meta.old_name.clone().into(), Some(table))?,
+                        ));
+
+                        let old_name = meta.old_name.clone();
+                        let left = self.get_left();
+                        let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
                             Make sure you are using the correct case for the field name. \
                             It should be one of these :{}", left.get_names().join(","));
-                                
-                            let old_field_def_from_left = left.get_definition(&old_name.to_string()).expect(error.as_str());
 
-                            // Do some validations here:
-                            acc.add_down(QueryType::Define(
-                                old_field_def_from_left.to_owned(),
-                            ));
-                        }
+                        let old_field_def_from_left = left
+                            .get_definition(&old_name.to_string())
+                            .expect(error.as_str());
 
-                        if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
-                            let old_name = meta.old_name.clone();
+                        // Do some validations here:
+                        acc.add_down(QueryType::Define(old_field_def_from_left.to_owned()));
+                    }
 
-                            let copy_new_to_old = UpdateStatementRaw::from(
-                                Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
-                                    .build(),
-                            );
-                            acc.add_down(QueryType::Update(copy_new_to_old));
-                        }
+                    if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
+                        let old_name = meta.old_name.clone();
 
-                        acc.add_down(QueryType::Remove(
-                            right.as_remove_statement(new_name.to_string().into(), Some(table)),
+                        let copy_new_to_old = UpdateStatementRaw::from(
+                            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
+                                .build(),
+                        );
+                        acc.add_down(QueryType::Update(copy_new_to_old));
+                    }
+
+                    acc.add_down(QueryType::Remove(
+                        right.as_remove_statement(new_name.to_string().into(), Some(table))?,
+                    ));
+                    acc.add_new_line_to_down();
+                }
+                DeltaType::Remove { left } => {
+                    if !is_potentially_renaming && field_meta_with_old_name.is_none() {
+                        acc.add_up(QueryType::Remove(
+                            left.as_remove_statement(name.to_string().into(), Some(table))?,
                         ));
+
+                        acc.add_new_line_to_up();
+
+                        acc.add_down(QueryType::Define(left));
+
                         acc.add_new_line_to_down();
-
-                    
                     }
-                    DeltaType::Remove { left } => {
-                        if !is_potentially_renaming && field_meta_with_old_name.is_none()  {
-                            acc.add_up(QueryType::Remove(
-                                left.as_remove_statement(name.to_string().into(), Some(table)),
-                            ));
-                            
-                            acc.add_new_line_to_up();
-                        
-                            acc.add_down(QueryType::Define(left));
-                            
-                            acc.add_new_line_to_down();
-                        }
-                    }
-                    DeltaType::Update { left, right } => {
-                        if left.trim() != right.trim() {
-                            acc.add_up(QueryType::Define(right));
-                            acc.add_new_line_to_up();
-                            
-                            acc.add_down(QueryType::Define(left));
-                            acc.add_new_line_to_down();
-                        }
+                }
+                DeltaType::Update { left, right } => {
+                    if left.trim() != right.trim() {
+                        acc.add_up(QueryType::Define(right));
+                        acc.add_new_line_to_up();
 
+                        acc.add_down(QueryType::Define(left));
+                        acc.add_new_line_to_down();
                     }
-                    }
+                }
+            }
+        }
 
-
-                acc
-            });
-        queries
+        Ok(acc)
     }
 }
 
 impl<'a> ComparisonFields<'a> {
-    fn get_field_meta_from_prompt(&self, new_name: &String, potentially_old_name: Option<&&String>) -> Option<SingleFieldChangeType> {
+    fn get_field_meta_from_prompt(
+        &self,
+        new_name: &String,
+        potentially_old_name: Option<&&String>,
+    ) -> Option<SingleFieldChangeType> {
         let field_meta_implicit = FieldMetadata {
-                    name: new_name.to_string().into(),
-                    old_name: potentially_old_name.map(|on| on.to_string().into()),
-                    definition: vec![self.get_right().get_definition(new_name).expect("should exist. bug!").clone().into()],
-                };
-                            
+            name: new_name.to_string().into(),
+            old_name: potentially_old_name.map(|on| on.to_string().into()),
+            definition: vec![self
+                .get_right()
+                .get_definition(new_name)
+                .expect("should exist. bug!")
+                .clone()
+                .into()],
+        };
+
         let field_change_meta = FieldChangeMeta {
             table: self.get_table().to_owned(),
-            old_name: potentially_old_name.cloned().map(|n|n.to_string().into()).expect("should exist"),
+            old_name: potentially_old_name
+                .cloned()
+                .map(|n| n.to_string().into())
+                .expect("should exist"),
             new_name: new_name.to_string().into(),
         };
 
         let delete_option = SingleFieldChangeType::Delete(field_change_meta.clone());
         let rename_option = SingleFieldChangeType::Rename(field_change_meta);
-                            
+
         let confirmation = inquire::Select::new("Do you want to rename \
                                 this field or delete the old one completely without transferring the data",
             vec![delete_option, rename_option]
@@ -1937,8 +1970,6 @@ impl<'a> ComparisonFields<'a> {
         Some(confirmation.expect("Invalid conf"))
     }
 }
-
-
 
 #[derive(Debug)]
 enum DeltaType {
@@ -2086,7 +2117,9 @@ pub struct Animal {
 
 impl TableEvents for Animal {
     fn events_definitions() -> Vec<Raw> {
-        let animal::Schema { species, velocity, .. } = Self::schema();
+        let animal::Schema {
+            species, velocity, ..
+        } = Self::schema();
 
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
@@ -2103,7 +2136,9 @@ impl TableEvents for Animal {
     }
 
     fn indexes_definitions() -> Vec<Raw> {
-        let animal::Schema { species, velocity, .. } = Self::schema();
+        let animal::Schema {
+            species, velocity, ..
+        } = Self::schema();
 
         let idx1 = define_index("species_speed_idx".to_string())
             .on_table(Self::table_name())

@@ -24,11 +24,7 @@ REMOVE [
 
 use std::fmt::{self, Display};
 
-use crate::{
-    Binding, BindingsList, Buildable, Erroneous, Parametric, Queryable, Scope, Token, TokenTarget,
-};
-
-use super::NamespaceOrDatabase;
+use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, Scope, Token, TokenTarget};
 
 /// Remove token statement
 ///
