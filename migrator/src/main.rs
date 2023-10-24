@@ -14,5 +14,7 @@ use surrealdb::sql::{
 
 #[tokio::main]
 async fn main() {
-    m::Database::run_migrations(&"create_new_stuff".to_string(), false).await;
+    m::Database::run_migrations(&"create_new_stuff".to_string(), false)
+        .await
+        .unwrap();
 }

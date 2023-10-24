@@ -780,11 +780,9 @@ impl ComparisonDatabase {
 
 #[derive(Debug, Clone)]
 pub struct Database {
-    // connection details here
     db: Surreal<Db>,
 }
 
-// #[async_trait]
 impl Database {
     pub async fn init() -> Self {
         let db = Surreal::new::<Mem>(()).await.unwrap();
@@ -966,28 +964,6 @@ impl Database {
             }
         }
         //
-        // For Fields
-        //  a. If there is a Field in left that is not in right,
-        //          (i) up => REMOVE FIELD
-        //          (ii) down => ADD FIELD
-        //  b. If there a Field in right that is not in left,
-        //        (i) up => ADD FIELD
-        //        (ii) down => REMOVE FIELD
-        //  c. If there a Field in left and in right,
-        //      (i) up => Use Right field definitions
-        //      (ii) down => Use Left field definitions
-        //  d. If there is a field name change,
-        //    Get old and new names. Surrealdb does not support Alter statement
-        //    (i) up =>
-        //              DEFINE FIELD new_name on TABLE table_name;
-        //              UPDATE table_name SET new_name = old_name;
-        //              REMOVE old_name on TABLE table_name; or UPDATE table_name SET old_name = none;
-        //    (ii) down =>
-        //          DEFINE FIELD old_name on TABLE table_name;
-        //          UPDATE table_name SET old_name = new_name;
-        //          REMOVE new_name on TABLE table_name; or UPDATE table_name SET new_name = none;
-        //
-        //o
         //
         // 4. Aggregate all the new up and down queries
         // 5. Run the queries as a transaction
