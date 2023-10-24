@@ -367,69 +367,6 @@ impl Display for MigrationFileName {
     }
 }
 
-struct CodeBaseMeta;
-
-pub enum By {
-    NewName(String),
-    OldName(String),
-}
-
-impl CodeBaseMeta {
-    pub fn find_field_with_oldname_attr(
-        table_name: Table,
-        field_name: Field,
-    ) -> Option<FieldMetadata> {
-        Resources
-            .tables_fields_meta()
-            .get(&table_name)
-            .unwrap_or(&vec![])
-            .clone()
-            .into_iter()
-            .find(|f| f.name.to_string() == field_name.to_string() && f.old_name.is_some())
-    }
-
-    pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
-        Resources
-            .tables_fields_meta()
-            .get(&table_name)
-            .unwrap_or(&vec![])
-            .clone()
-            .into_iter()
-            .filter(|field_meta| {
-                field_meta
-                    .old_name
-                    .clone()
-                    .is_some_and(|o| !o.to_string().is_empty())
-            })
-            .find(|f| match &by {
-                By::NewName(new_name) => f.name.to_string() == new_name.to_string(),
-                By::OldName(old_name) => f
-                    .old_name
-                    .clone()
-                    .filter(|n| n.to_string() == old_name.to_string())
-                    .is_some(),
-            })
-    }
-
-    pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
-        let queries_joined = [
-            db_resources.tokens(),
-            db_resources.scopes(),
-            db_resources.analyzers(),
-            db_resources.params(),
-            db_resources.functions(),
-            db_resources.users(),
-            db_resources.tables(),
-        ]
-        .iter()
-        .flat_map(|res_raw| res_raw.iter().map(|r| r.to_raw().build()))
-        .collect::<Vec<_>>()
-        .join(";\n");
-        // let queries_joined = format!("{};\n{}", tables, fields);
-
-        queries_joined
-    }
-}
 
 #[derive(Debug, Clone, Default)]
 pub struct FullDbInfo {
@@ -632,6 +569,12 @@ impl Deref for LeftDatabase {
         &self.0
     }
 }
+
+pub enum By {
+    NewName(String),
+    OldName(String),
+}
+
 #[derive(Debug, Clone)]
 pub struct RightDatabase(Database);
 
@@ -645,7 +588,7 @@ impl RightDatabase {
     }
     
     pub async fn run_codebase_schema_queries(&self, code_resources: impl DbResources) -> MigrationResult<()> {
-        let queries = CodeBaseMeta::get_codebase_schema_queries(code_resources);
+        let queries = Self::get_codebase_schema_queries(code_resources);
         begin_transaction()
             .query(Raw::new(queries))
             .commit_transaction()
@@ -655,6 +598,60 @@ impl RightDatabase {
         Ok(())
     }
 
+    pub fn find_field_with_oldname_attr(
+        table_name: Table,
+        field_name: Field,
+    ) -> Option<FieldMetadata> {
+        Resources
+            .tables_fields_meta()
+            .get(&table_name)
+            .unwrap_or(&vec![])
+            .clone()
+            .into_iter()
+            .find(|f| f.name.to_string() == field_name.to_string() && f.old_name.is_some())
+    }
+
+    pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
+        Resources
+            .tables_fields_meta()
+            .get(&table_name)
+            .unwrap_or(&vec![])
+            .clone()
+            .into_iter()
+            .filter(|field_meta| {
+                field_meta
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty())
+            })
+            .find(|f| match &by {
+                By::NewName(new_name) => f.name.to_string() == new_name.to_string(),
+                By::OldName(old_name) => f
+                    .old_name
+                    .clone()
+                    .filter(|n| n.to_string() == old_name.to_string())
+                    .is_some(),
+            })
+    }
+
+    pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
+        let queries_joined = [
+            db_resources.tokens(),
+            db_resources.scopes(),
+            db_resources.analyzers(),
+            db_resources.params(),
+            db_resources.functions(),
+            db_resources.users(),
+            db_resources.tables(),
+        ]
+        .iter()
+        .flat_map(|res_raw| res_raw.iter().map(|r| r.to_raw().build()))
+        .collect::<Vec<_>>()
+        .join(";\n");
+        // let queries_joined = format!("{};\n{}", tables, fields);
+
+        queries_joined
+    }
 }
 
 impl Deref for RightDatabase {
@@ -1801,7 +1798,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                 let table = self.get_table();
 
 
-                let field_meta_with_old_name = CodeBaseMeta::find_field_has_old_name(
+                let field_meta_with_old_name = RightDatabase::find_field_has_old_name(
                     table,
                     By::NewName(name.to_string()),
                 );
