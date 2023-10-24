@@ -13,11 +13,11 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_till1, take_until1, take_while1, take_while_m_n},
     character::{
-        complete::{multispace0, multispace1},
+        complete::{multispace0, multispace1, digit1},
         is_alphabetic,
     },
-    combinator::opt,
-    IResult,
+    combinator::{opt, map_res, all_consuming, cut},
+    IResult, sequence::{preceded, tuple}, error::context,
 };
 use paste::paste;
 use regex::Regex;
@@ -266,66 +266,108 @@ impl TableResources {
     }
 }
 
-// format: <timestamp>__<direction>__<name>.sql
+// format: <timestamp>_<name>.<direction>.surql
+// #[derive(Debug, Clone)]
+// pub struct MigrationName { timestamp: u64, name: String, direction: Direction }
+
 #[derive(Debug, Clone)]
-pub struct MigrationName(String);
+pub struct MigrationNameBasicInfo {
+    timestamp: u64,
+    name: String,
+}
 
-impl<T: Into<String>> From<T> for MigrationName {
-    fn from(name: T) -> Self {
-        Self(name.into())
+#[derive(Debug, Clone)]
+pub enum MigrationFileName {
+   Up(MigrationNameBasicInfo),
+   Down(MigrationNameBasicInfo),
+   Basic(MigrationNameBasicInfo),
+}
+
+impl MigrationFileName {
+   pub fn timestamp(&self) -> u64 {
+       match self {
+           MigrationFileName::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+           MigrationFileName::Down(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+           MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
+       }
+   } 
+}
+
+// parse_migration_name
+impl TryFrom<String> for MigrationFileName {
+    type Error = MigrationError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let value = value.as_str();
+        let (_, migration_name) = parse_migration_name(&value).map_err(|_| MigrationError::InvalidMigrationName)?;
+        Ok(migration_name)
     }
 }
 
-impl MigrationName {
-    pub fn extract_at_index(
-        &self,
-        regex_term: &str,
-        capture_index: usize,
-    ) -> MigrationResult<&str> {
-        let regex = Regex::new(regex_term).map_err(MigrationError::InvalidRegex)?;
-        let captures = regex
-            .captures(&self.0)
-            .ok_or(MigrationError::InvalidMigrationName)?;
-        let captured = captures
-            .get(capture_index)
-            .ok_or(MigrationError::InvalidMigrationName)?
-            .as_str();
-        Ok(captured)
-    }
 
-    pub fn timestamp_as_str(&self) -> MigrationResult<&str> {
-        self.extract_at_index(r"(\d+)__(\w+).sql", 1)
-    }
-
-    pub fn timestamp(&self) -> MigrationResult<u64> {
-        let timestamp = self.extract_at_index(r"(\d+)__(\w+).sql", 1)?;
-        timestamp
-            .parse::<u64>()
-            .map_err(|_| MigrationError::InvalidTimestamp)
-    }
-
-    pub fn direction(&self) -> MigrationResult<Direction> {
-        let direction = self.extract_at_index(r"(\d+)__(\w+).sql", 2)?;
-        match direction {
-            "up" => Ok(Direction::Up),
-            "down" => Ok(Direction::Down),
-            _ => Err(MigrationError::DirectionDoesNotExist),
-        }
-    }
-
-    pub fn name_suffix(&self) -> MigrationResult<&str> {
-        self.extract_at_index(r"(\d+)__(\w+).sql", 2)
-    }
+#[derive(Debug, Clone)]
+enum Direction2 {
+    Up,
+    Down,
+    None
+}
+// .up.surql or .down.surql or .surql
+fn parse_direction(input: &str) -> IResult<&str, Direction2> {
+    use nom::combinator::value;
+    
+    let (input, direction) = alt((
+        value(Direction2::Up, tag(".up.surql")),
+        value(Direction2::Down, tag(".down.surql")),
+        value(Direction2::None, tag(".surql"))
+    ))(input)?;
+    Ok((input, direction))
 }
 
-impl Display for MigrationName {
+fn is_valid_migration_identifier(c: char) -> bool {
+    c.is_alphanumeric() || c == '_' || c == '-'
+}
+
+fn parse_u64(input: &str) -> Result<u64, std::num::ParseIntError> {
+    input.parse()
+}
+
+// format: <timestamp>_<name>.<direction>.surql
+// 14 numbers followed by _ and then name of migration
+fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileName> {
+    let (input, timestamp) = map_res(take_while_m_n(14, 14, |c: char| c.is_digit(10)), parse_u64)(input)?;
+    let (input, _) = tag("_")(input)?;
+    let (input, (name, direction)) = tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
+    let (input, name) = take_until1(".")(input)?;
+    let basic_info = MigrationNameBasicInfo { timestamp, name: name.to_string() };
+    
+    let m2 = match direction {
+        Direction2::Up => MigrationFileName::Up(basic_info),
+        Direction2::Down => MigrationFileName::Down(basic_info),
+        Direction2::None => MigrationFileName::Basic(basic_info),
+    };
+
+    Ok((input, m2))
+}
+
+fn parse_migration_name(input: &str) -> IResult<&str, MigrationFileName> {
+     all_consuming(cut(context(
+        "Unexpected characters found after parsing",
+        parse_migration_name_unconsumed,
+    )))(input)
+}
+
+impl Display for MigrationFileName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0.clone())
+        let file_name_str = match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.up.surql"),
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.down.surql"),
+            MigrationFileName::Basic(MigrationNameBasicInfo { timestamp, name }) => format!("{timestamp}_{name}.surql"),
+        };
+        write!(f, "{file_name_str}" )
     }
 }
 
 struct CodeBaseMeta;
-type TableName = String;
 
 pub enum By {
     NewName(String),
@@ -533,15 +575,15 @@ impl LeftDatabase {
 
     pub async fn mark_migration_as_applied(
         &self,
-        migration_name: impl Into<MigrationName>,
+        migration_name: impl Into<MigrationFileName>,
     ) -> MigrationResult<MigrationMetadata> {
-        let migration_name: MigrationName = migration_name.into();
+        let migration_name: MigrationFileName = migration_name.into();
         println!("Applying migration: {}", migration_name);
 
         let migration = MigrationMetadata {
             id: MigrationMetadata::create_id(migration_name.to_string()),
             name: migration_name.to_string(),
-            timestamp: migration_name.timestamp().expect("Invalid timestamp"),
+            timestamp: migration_name.timestamp(),
         }
         .create()
         .get_one(self.db())
@@ -553,9 +595,8 @@ impl LeftDatabase {
 
     pub async fn unmark_migration(
         &self,
-        migration_name: impl Into<MigrationName>,
+        migration_name: MigrationFileName,
     ) -> MigrationResult<()> {
-        let migration_name: MigrationName = migration_name.into();
         println!("Unmark migration: {}", migration_name);
         delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
             .run(self.db());
@@ -563,7 +604,7 @@ impl LeftDatabase {
         Ok(())
     }
     
-    pub fn rollback_migration(db: &mut Self, migration_name: MigrationName) {
+    pub fn rollback_migration(db: &mut Self, migration_name: MigrationFileName) -> MigrationResult<()> {
         let migration = Migration::get_migrations_by_name(migration_name.clone());
         if let Some(migration) = migration {
             let down_migration = migration.down;
@@ -573,13 +614,14 @@ impl LeftDatabase {
             } else {
                 println!("No down migration found for migration: {}", migration_name);
             }
-            db.unmark_migration(migration.name);
+            db.unmark_migration(migration.name.try_into()?);
         } else {
             println!(
                 "Cannot rollback migration: No migration found with name: {}",
                 migration_name
             );
-        }
+        };
+        Ok(())
     }
 }
 
@@ -890,7 +932,7 @@ pub struct Migration {
     // status: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Direction {
     Up,
     Down,
@@ -961,11 +1003,11 @@ impl Migration {
         migrations_meta
     }
 
-    pub fn get_migrations_by_name(migration_name: impl Into<MigrationName>) -> Option<Migration> {
+    pub fn get_migrations_by_name(migration_name: impl Into<MigrationFileName>) -> Option<Migration> {
         //   # Migration file format would be migrations/<timestamp>-__<direction>__<name>.sql
         //   # Example: 2382320302303__up__create_planet.sql
         //   # Example: 2382320302303__down__delete_planet.sql
-        let migration_name: MigrationName = migration_name.into();
+        let migration_name: MigrationFileName = migration_name.into();
         Self::get_all_from_migrations_dir()
             .into_iter()
             .find(|m| m.name == migration_name.to_string())
