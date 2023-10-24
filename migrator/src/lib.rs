@@ -222,6 +222,12 @@ pub enum MigrationError {
     #[error("Invalid timestamp: {0}")]
     InvalidTimestamp(String),
 
+    #[error("Invalid migration state. Migration up queries empty")]
+    MigrationUpQueriesEmpty,
+
+    #[error("Invalid migration state. Migration down queries empty")]
+    MigrationDownQueriesEmpty,
+
     #[error("The field - {new_name} - on table - {table} - has an invalid old name - '{old_name}'. \
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
@@ -244,6 +250,9 @@ pub enum MigrationError {
 
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+
+    #[error(transparent)]
+    PromptError(#[from] inquire::error::InquireError),
 }
 
 pub type MigrationResult<T> = Result<T, MigrationError>;
@@ -313,10 +322,10 @@ impl MigrationFileName {
         Ok(())
     }
 
-    pub fn create_up(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
+    pub fn create_up(timestamp: DateTime<Utc>, name: &String) -> MigrationResult<Self> {
         let timestamp = Self::format_timestamp(timestamp)?;
 
-        let name = name.into();
+        let name = name.to_string().into();
         // let timestamp = Utc::now().timestamp_millis();
         Ok(Self::Up(MigrationNameBasicInfo { timestamp, name }))
     }
@@ -824,7 +833,12 @@ impl Database {
         self.db().query(query).await.unwrap();
     }
 
-    pub async fn run_migrations() -> MigrationResult<()> {
+    pub async fn run_migrations(name: &String, is_unidirectional: bool) -> MigrationResult<()> {
+        let ref name = name
+            .split_whitespace()
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join("_");
         println!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries = vec![];
@@ -861,68 +875,96 @@ impl Database {
         }
 
         // TODO: Create a warning to prompt user if they truly want to create empty migrations
-        let up_queries_str = if up_queries.is_empty() {
-            None
+        let up_queries_str = format!(
+            "{}",
+            up_queries
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join("\n")
+                .trim()
+        );
+        let down_queries_str = format!(
+            "{}",
+            down_queries
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join("\n")
+                .trim()
+        );
+        // let mig_type = MigrationType::OneWay(up_queries_str.clone().unwrap_or_default());
+        let mig_type = if is_unidirectional {
+            MigrationType::OneWay(up_queries_str.clone())
         } else {
-            Some(format!(
-                "{}",
-                up_queries
-                    .iter()
-                    .map(ToString::to_string)
-                    .collect::<Vec<_>>()
-                    .join("\n")
-                    .trim()
-            ))
+            MigrationType::TwoWay {
+                up: up_queries_str.clone(),
+                down: down_queries_str.clone(),
+            }
         };
-        let down_queries_str = if down_queries.is_empty() {
-            None
-        } else {
-            Some(format!(
-                "{}",
-                down_queries
-                    .iter()
-                    .map(ToString::to_string)
-                    .collect::<Vec<_>>()
-                    .join("\n")
-                    .trim()
-            ))
-        };
-        match (up_queries_str, down_queries_str) {
-            (None, None) => {
-                let confirmation = inquire::Confirm::new(
-                    "Are you sure you want to generate an empty migration? (y/n)",
-                )
-                .with_default(false)
-                .with_help_message("This is good if you want to write out some queries manually")
-                .prompt();
 
-                match confirmation {
-                    Ok(true) => {
-                        Migration::create_migration_file(
-                            String::new(),
-                            Some(String::new()),
-                            "test_migration".to_string(),
-                        );
+        let timestamp = Utc::now();
+
+        let prompt_empty = || {
+            let confirmation = inquire::Confirm::new(
+                "Are you sure you want to generate an empty migration? (y/n)",
+            )
+            .with_default(false)
+            .with_help_message("This is good if you want to write out some queries manually")
+            .prompt();
+            confirmation
+        };
+
+        match mig_type {
+            MigrationType::OneWay(query_str) => {
+                if query_str.trim().is_empty() {
+                    match prompt_empty() {
+                        Ok(true) => {
+                            MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+                        }
+                        Ok(false) => {
+                            println!("No migration created");
+                        }
+                        Err(e) => {
+                            return Err(MigrationError::PromptError(e));
+                        }
+                    };
+                } else {
+                    MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+                };
+            }
+            MigrationType::TwoWay { up, down } => {
+                match (up.is_empty(), down.is_empty()) {
+                    (true, true) => {
+                        match prompt_empty() {
+                            Ok(true) => {
+                                MigrationFileName::create_up(timestamp, name)?.create_file(up);
+                                MigrationFileName::create_down(timestamp, name)?.create_file(down);
+                            }
+                            Ok(false) => {
+                                println!("No migration created");
+                            }
+                            Err(e) => {
+                                return Err(MigrationError::PromptError(e));
+                            }
+                        };
                     }
-                    Ok(false) => {
-                        println!("No migration created");
+                    (false, false) => {
+                        println!("HERE=====");
+                        println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
+                        println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
+                        MigrationFileName::create_up(timestamp, name)?.create_file(up);
+                        MigrationFileName::create_down(timestamp, name)?.create_file(down);
                     }
-                    Err(e) => {
-                        println!("Error: {}", e);
+                    (true, false) => {
+                        return Err(MigrationError::MigrationUpQueriesEmpty);
+                    }
+                    (false, true) => {
+                        return Err(MigrationError::MigrationDownQueriesEmpty);
                     }
                 };
             }
-            (up_queries_str, down_queries_str) => {
-                println!("HERE=====");
-                println!("UP MIGRATIOM: \n {}", up_queries_str.as_ref().unwrap());
-                println!("DOWN MIGRATIOM: \n {}", down_queries_str.as_ref().unwrap());
-                // Migration::create_migration_file(
-                //     up_queries_str.unwrap_or_default(),
-                //     Some(down_queries_str.unwrap_or_default()),
-                //     "test_migration".to_string(),
-                // );
-            }
-        };
+        }
         //
         // For Fields
         //  a. If there is a Field in left that is not in right,
@@ -1082,30 +1124,28 @@ impl Migration {
             .find(|m| m.name == migration_name.to_string())
     }
 
-    pub fn create_migration_file(
-        name: impl Into<String> + std::fmt::Display,
-        query_str: impl Into<String> + std::fmt::Display,
-        migration_type: MigrationType,
-    ) -> MigrationResult<()> {
-        let timestamp = Utc::now();
-        let query_str = query_str.into();
-        let filename = match migration_type {
-            MigrationType::OneWay => {
-                MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
-            }
-            MigrationType::TwoWay => {
-                MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
-                MigrationFileName::create_down(timestamp, name)?.create_file(query_str);
-            }
-        };
-
-        Ok(())
-    }
+    // pub fn create_migration_file(
+    //     name: impl Into<String> + std::fmt::Display,
+    //     migration_type: MigrationType,
+    // ) -> MigrationResult<()> {
+    //     let timestamp = Utc::now();
+    //     let filename = match migration_type {
+    //         MigrationType::OneWay(query_str) => {
+    //             MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+    //         }
+    //         MigrationType::TwoWay { up, down } => {
+    //             MigrationFileName::create_up(timestamp, name)?.create_file(up);
+    //             MigrationFileName::create_down(timestamp, name)?.create_file(down);
+    //         }
+    //     };
+    //
+    //     Ok(())
+    // }
 }
 
 enum MigrationType {
-    OneWay,
-    TwoWay,
+    OneWay(String),
+    TwoWay { up: String, down: String },
 }
 
 // INFO FOR DB
