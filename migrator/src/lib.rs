@@ -805,13 +805,13 @@ impl Database {
             }
          ( up_queries_str, down_queries_str) => {
             println!("HERE=====");
-            println!("UP MIGRATIOM: \n {:#?}", up_queries_str.as_ref());
-            println!("DOWN MIGRATIOM: \n {:#?}", down_queries_str.as_ref());
-            Migration::create_migration_file(
-                up_queries_str.unwrap_or_default(),
-                Some(down_queries_str.unwrap_or_default()),
-                "test_migration".to_string(),
-            );
+            println!("UP MIGRATIOM: \n {}", up_queries_str.as_ref().unwrap());
+            println!("DOWN MIGRATIOM: \n {}", down_queries_str.as_ref().unwrap());
+            // Migration::create_migration_file(
+            //     up_queries_str.unwrap_or_default(),
+            //     Some(down_queries_str.unwrap_or_default()),
+            //     "test_migration".to_string(),
+            // );
             }
         };
         //
@@ -1026,6 +1026,12 @@ struct Info(HashMap<String, DefineStatementRaw>);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DefineStatementRaw(String);
+
+impl From<DefineStatementRaw> for Raw {
+    fn from(value: DefineStatementRaw) -> Self {
+        Self::new(value.0)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 struct UpdateStatementRaw(String);
@@ -1738,15 +1744,15 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 
         let diff_left = diff_left.into_iter().collect::<Vec<_>>();
         let diff_right = diff_right.into_iter().collect::<Vec<_>>();
-        let is_potentially_renaming_action = diff_left.len() == 1 && diff_right.len() == 1;
+        let is_potentially_renaming = diff_left.len() == 1 && diff_right.len() == 1;
         
-        let (field_names, potentially_old_name) = if is_potentially_renaming_action {
-            (diff_right, diff_left.first())
+        let potentially_old_name = if is_potentially_renaming {
+            diff_left.first()
         } else {
-            (union, None)
+            None
         };
 
-        let queries = field_names.into_iter()
+        let queries = union.into_iter()
             .fold(Queries::default(), |mut acc, name| {
                 let def_right = self.get_right().get_definition(name).cloned();
                 let def_left = self.get_left().get_definition(name).cloned();
@@ -1768,138 +1774,91 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
                     }
                 }
 
-                let field_meta_by_old_name = CodeBaseMeta::find_field_has_old_name(
-                    table,
-                    By::OldName(name.to_string()),
-                );
-
-                let delta = DeltaType::from((def_left, def_right));
-                
-                match delta {
+                match DeltaType::from((def_left, def_right)) {
                     DeltaType::NoChange => {}
                     DeltaType::Create { right } => {
-                    acc.add_up(QueryType::Define(right.clone()));
-                    let new_name = name;
-
-                    // If is_potentially_renaming_action i.e when old_name attr not used
-                        // explicitly
+                        acc.add_up(QueryType::Define(right.clone()));
                             
-                        if is_potentially_renaming_action {
-                            let potentially_old_name: String = potentially_old_name.expect("Should be present. Pleease, report.").to_string().into();
-                            let field_change_meta = FieldChangeMeta {
-                                table: self.get_table().to_owned(),
-                                old_name: potentially_old_name.clone().into(),
-                                new_name: name.to_string().into(),
+                        let new_name = name;
+
+                            let field_meta_with_old_name = if is_potentially_renaming && field_meta_with_old_name.is_none() {
+                                self.get_field_meta_from_prompt(new_name, potentially_old_name)
+                            } else {
+                                field_meta_with_old_name.map(|f| SingleFieldChangeType::Rename(FieldChangeMeta {
+                                    table: self.get_table().to_owned(),
+                                    old_name: f.old_name.clone().unwrap(),
+                                    new_name: new_name.to_string().into(),
+                                }))
                             };
-
-                            let delete_option = SingleFieldChangeType::Delete(&field_change_meta);
-                            let rename_option = SingleFieldChangeType::Rename(&field_change_meta);
-                            
-                            let confirmation = inquire::Select::new("Do you want to rename \
-                                this field or delete the old one completely without transferring the data",
-                                vec![delete_option, rename_option]
-                            )
-                            .with_help_message("Use the arrow keys to navigate. Press enter to select.")
-                            .prompt();
-
-                            // UP
-                            // DEFINE createdAt on Table planet;
-                            // REMOVE created on Table planet;
-                            // 
-                            // DOWN
-                            // DEFINE created on Table planet;
-                            // REMOVE createdAt on Table planet;
-                            // 
-                            let old_field_def_from_left = self.get_field_def_from_left(&field_change_meta);
-                            acc.add_down(QueryType::Define(old_field_def_from_left.to_owned()));
-
-                            // Conditionally migrate data from old field to new field.
-                            match confirmation.expect("Invalid conf") {
-                                SingleFieldChangeType::Rename(change_up) => {
-                                    let copy_old_to_new = create_update_statement(change_up);
-                                    acc.add_up(QueryType::Update(copy_old_to_new));
-
-
-                                    let copy_new_to_old = create_update_statement(&field_change_meta);
-                                    acc.add_down(QueryType::Update(copy_new_to_old));
-
-
-                                },
-                                SingleFieldChangeType::Delete(_) => { },
-                            };
-
-                            acc.add_up(QueryType::Remove(
-                                right.as_remove_statement(potentially_old_name.to_string().into(), Some(table)),
-                            ));
-
-                            // Down Removal is handled below, so, no need to do an extra removal.
-                        }
-
-
-
-                    
-                    if let Some(meta) = &field_meta_with_old_name {
-                        let old_name = meta.old_name.clone().unwrap();
-                        let copy_old_to_new = UpdateStatementRaw::from(
-                            Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
-                                .build(),
-                        );
-
-                        acc.add_up(QueryType::Update(copy_old_to_new));
-                        acc.add_up(QueryType::Remove(
-                            right.as_remove_statement(old_name.into(), Some(table)),
-                        ));
-                    }
 
                         
-                    acc.add_new_line_to_up();
+                        if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
+                            let old_name = meta.old_name.clone();
+                            let copy_old_to_new = UpdateStatementRaw::from(
+                                Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
+                                    .build(),
+                            );
 
+                            acc.add_up(QueryType::Update(copy_old_to_new));
+                        }
+                            
+                        if let Some(SingleFieldChangeType::Rename(meta) | SingleFieldChangeType::Delete(meta)) = &field_meta_with_old_name {
+                            acc.add_up(QueryType::Remove(
+                                right.as_remove_statement(meta.old_name.clone().into(), Some(table)),
+                            ));
 
-                    if let Some(has_old_name) = field_meta_with_old_name {
-                        let old_name = has_old_name.old_name.clone().unwrap();
-                        let field_change_meta = FieldChangeMeta {
-                            table: self.get_table().to_owned(),
-                            old_name: old_name.clone(),
-                            new_name: name.to_string().into(),
-                        };
-                        let old_field_name_def_from_migraton_state = self.get_field_def_from_left(&field_change_meta);
+                                
+                            let old_name = meta.old_name.clone();
+                            let left = self.get_left();
+                            let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
+                            Make sure you are using the correct case for the field name. \
+                            It should be one of these :{}", left.get_names().join(","));
+                                
+                            let old_field_def_from_left = left.get_definition(&old_name.to_string()).expect(error.as_str());
 
-                        // Do some validations here:
-                        acc.add_down(QueryType::Define(
-                            old_field_name_def_from_migraton_state.to_owned(),
+                            // Do some validations here:
+                            acc.add_down(QueryType::Define(
+                                old_field_def_from_left.to_owned(),
+                            ));
+                        }
+
+                        if let Some(SingleFieldChangeType::Rename(meta)) = &field_meta_with_old_name {
+                            let old_name = meta.old_name.clone();
+
+                            let copy_new_to_old = UpdateStatementRaw::from(
+                                Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
+                                    .build(),
+                            );
+                            acc.add_down(QueryType::Update(copy_new_to_old));
+                        }
+
+                        acc.add_down(QueryType::Remove(
+                            right.as_remove_statement(new_name.to_string().into(), Some(table)),
                         ));
-
-                        let copy_new_to_old = UpdateStatementRaw::from(
-                            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",))
-                                .build(),
-                        );
-                        acc.add_down(QueryType::Update(copy_new_to_old));
-                    }
-
-                    acc.add_down(QueryType::Remove(
-                        right.as_remove_statement(new_name.to_string().into(), Some(table)),
-                    ));
-                    acc.add_new_line_to_down();
+                        acc.add_new_line_to_down();
 
                     
                     }
                     DeltaType::Remove { left } => {
-                        if field_meta_by_old_name.is_none() {
+                        if !is_potentially_renaming && field_meta_with_old_name.is_none()  {
                             acc.add_up(QueryType::Remove(
                                 left.as_remove_statement(name.to_string().into(), Some(table)),
                             ));
-                                                    acc.add_new_line_to_up();
+                            
+                            acc.add_new_line_to_up();
                         
                             acc.add_down(QueryType::Define(left));
-                                                    acc.add_new_line_to_down();
+                            
+                            acc.add_new_line_to_down();
                         }
                     }
                     DeltaType::Update { left, right } => {
                         if left.trim() != right.trim() {
                             acc.add_up(QueryType::Define(right));
-                                                    acc.add_new_line_to_up();
+                            acc.add_new_line_to_up();
+                            
                             acc.add_down(QueryType::Define(left));
-                                                    acc.add_new_line_to_down();
+                            acc.add_new_line_to_down();
                         }
 
                     }
@@ -1913,35 +1872,33 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
 }
 
 impl<'a> ComparisonFields<'a> {
-    fn get_field_def_from_left(&self, change: &FieldChangeMeta) -> DefineStatementRaw {
-        let FieldChangeMeta { table, old_name, new_name } = change;
-        let left = self.get_left();
-        let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
-                            Make sure you are using the correct case for the field name. It should be one of these :{}", left.get_names().join(","));
-        let field_def =
-            left.get_definition(&old_name.to_string()).expect(error.as_str());
-        field_def.clone()
-    }
-    
-    fn get_field_def_from_right(&self, change: &FieldChangeMeta) -> DefineStatementRaw {
-        let FieldChangeMeta { table, old_name, new_name } = change;
-        let right = self.get_right();
-        let error = format!("The field - {new_name} - on table - {table} - already renamed or never existed before. \
-                            Make sure you are using the correct case for the field name. It should be one of these :{}", right.get_names().join(","));
-        let field_def = right.get_definition(&new_name.to_string()).expect(error.as_str());
-        field_def.clone()
+    fn get_field_meta_from_prompt(&self, new_name: &String, potentially_old_name: Option<&&String>) -> Option<SingleFieldChangeType> {
+        let field_meta_implicit = FieldMetadata {
+                    name: new_name.to_string().into(),
+                    old_name: potentially_old_name.map(|on| on.to_string().into()),
+                    definition: vec![self.get_right().get_definition(new_name).expect("should exist. bug!").clone().into()],
+                };
+                            
+        let field_change_meta = FieldChangeMeta {
+            table: self.get_table().to_owned(),
+            old_name: potentially_old_name.cloned().map(|n|n.to_string().into()).expect("should exist"),
+            new_name: new_name.to_string().into(),
+        };
+
+        let delete_option = SingleFieldChangeType::Delete(field_change_meta.clone());
+        let rename_option = SingleFieldChangeType::Rename(field_change_meta);
+                            
+        let confirmation = inquire::Select::new("Do you want to rename \
+                                this field or delete the old one completely without transferring the data",
+            vec![delete_option, rename_option]
+        )
+        .with_help_message("Use the arrow keys to navigate. Press enter to select.")
+        .prompt();
+
+        Some(confirmation.expect("Invalid conf"))
     }
 }
 
-fn create_update_statement(change: &FieldChangeMeta) -> UpdateStatementRaw {
-    let FieldChangeMeta { table, old_name, new_name } = change;
-    
-    let copy_old_to_new = UpdateStatementRaw::from(
-        Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}",))
-            .build(),
-    );
-    copy_old_to_new
-}
 
 
 #[derive(Debug)]
@@ -1976,68 +1933,20 @@ impl From<(Option<DefineStatementRaw>, Option<DefineStatementRaw>)> for DeltaTyp
     }
 }
 
-// fn validate_field_rename(&self) {
-//     let table = self.table.clone();
-//     let left_table_fields = self
-//         .left_resources()
-//         .get_table_field_names(table.to_string());
-//     let right_table_fields = self
-//         .right_resources()
-//         .get_table_field_names(table.to_string());
-//     for field in &right_table_fields {
-//         let field_with_old_name = CodeBaseMeta::find_field_has_old_name(
-//             table.to_string(),
-//             By::NewName(field.to_string()),
-//         );
-//
-//         if let Some(field_with_old_name) = field_with_old_name {
-//             let old_name = field_with_old_name.old_name.clone().unwrap();
-//             if self
-//                 .left_resources()
-//                 .get_field_def(table.to_string(), field.to_string())
-//                 .is_some()
-//             {
-//                 panic!("Cannot rename '{old_name}' to '{field}' on table '{table}'. '{field}' field on '{table}' table is already in use in migration/live db. \
-//                     Use a different name");
-//             }
-//             if right_table_fields.contains(&old_name.to_string()) {
-//                 panic!(
-//                     "Invalid value '{old_name}' on struct' {table}'. '{old_name}' \
-//                         is currently used as a field on the struct. Please, use a different \
-//                         value for the old_name on field '{field}'"
-//                 );
-//             }
-//
-//             if self
-//                 .left_resources()
-//                 .get_field_def(table.to_string(), old_name.to_string())
-//                 .is_none()
-//             {
-//                 panic!(
-//                     "'{old_name}' as old_name value on the '{table}' model struct/table \
-//                     is invalid. You are attempting to rename \
-//                     from {old_name} to {field} but {old_name} is not \
-//                         currently in use in migration/live database. Please, \
-//                         check that the field is not mispelled and is in the \
-//                         right case or use one of the currently available \
-//                         fields {}",
-//                     left_table_fields.join(", ")
-//                 );
-//             }
-//         }
-
+#[derive(Debug, Clone)]
 struct FieldChangeMeta {
     table: Table,
     old_name: Field,
     new_name: Field,
 }
 
-enum SingleFieldChangeType<'a> {
-    Delete(&'a FieldChangeMeta),
-    Rename(&'a FieldChangeMeta),
+#[derive(Debug, Clone)]
+enum SingleFieldChangeType {
+    Delete(FieldChangeMeta),
+    Rename(FieldChangeMeta),
 }
 
-impl<'a> Display for SingleFieldChangeType<'a> {
+impl Display for SingleFieldChangeType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SingleFieldChangeType::Delete(change) => write!(
@@ -2103,6 +2012,7 @@ pub struct Planet {
     pub id: SurrealSimpleId<Self>,
     pub last_name: String,
     pub population: u64,
+    #[surreal_orm(old_name = "created")]
     pub created_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
