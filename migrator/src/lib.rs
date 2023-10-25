@@ -664,20 +664,32 @@ impl LeftDatabase {
         migrations: Vec<MigrationBidirectional>,
     ) -> MigrationResult<()> {
         let queries = migrations
-            .into_iter()
-            .map(|m| m.up)
+            .iter()
+            .map(|m| m.up.clone())
             .collect::<Vec<_>>()
             .join("\n");
 
-        // mark_migration_as_applied
-        // let x = migrations.iter().map(|m| {
-        //     let xx = m.id
-        // })
+        let marked_up_migrations = migrations
+            .iter()
+            .map(|m| {
+                Migration {
+                    id: Migration::create_id(m.id.clone().to_string()),
+                    name: m.name.clone(),
+                    timestamp: m.timestamp,
+                }
+                .create()
+                .to_raw()
+                .build()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let all = format!("{}\n{}", queries, marked_up_migrations);
 
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {
             begin_transaction()
-                .query(Raw::new(queries))
+                .query(Raw::new(all))
                 .commit_transaction()
                 .run(db)
                 .await?;
@@ -696,16 +708,33 @@ impl LeftDatabase {
         migrations: Vec<MigrationUnidirectional>,
     ) -> MigrationResult<()> {
         let queries = migrations
-            .into_iter()
-            .map(|m| m.content)
+            .iter()
+            .map(|m| m.content.clone())
             .collect::<Vec<_>>()
             .join("\n");
         println!("Running queries: {}", queries);
 
+        let marked_up_migrations = migrations
+            .iter()
+            .map(|m| {
+                Migration {
+                    id: Migration::create_id(m.id.clone().to_string()),
+                    name: m.name.clone(),
+                    timestamp: m.timestamp,
+                }
+                .create()
+                .to_raw()
+                .to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let all = format!("{}\n{}", queries, marked_up_migrations);
+
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {
             begin_transaction()
-                .query(Raw::new(queries))
+                .query(Raw::new(all))
                 .commit_transaction()
                 .run(db)
                 .await?;
@@ -959,7 +988,6 @@ impl RightDatabase {
         .flat_map(|res_raw| res_raw.iter().map(|r| r.to_raw().build()))
         .collect::<Vec<_>>()
         .join(";\n");
-        // let queries_joined = format!("{};\n{}", tables, fields);
 
         queries_joined
     }
