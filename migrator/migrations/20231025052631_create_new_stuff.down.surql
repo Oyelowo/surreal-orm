@@ -1,0 +1,5 @@
+REMOVE TABLE student;
+REMOVE TABLE eats;
+REMOVE TABLE animal;
+REMOVE TABLE planet;
+REMOVE TABLE crop;

@@ -16,5 +16,5 @@ use surrealdb::sql::{
 async fn main() {
     m::Database::run_migrations(&"create_new_stuff".to_string(), false)
         .await
-        .unwrap();
+        .expect("Failed to run migrations");
 }
