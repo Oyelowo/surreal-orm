@@ -217,8 +217,8 @@ pub enum MigrationError {
     DirectionDoesNotExist,
     #[error("Migration name does not exist")]
     MigrationNameDoesNotExist,
-    #[error("Invalid migration name")]
-    InvalidMigrationName,
+    #[error("Invalid migration name. Error: {0}")]
+    InvalidMigrationName(String),
 
     #[error("Invalid timestamp: {0}")]
     InvalidTimestamp(String),
@@ -469,8 +469,8 @@ impl TryFrom<String> for MigrationFileName {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let value = value.as_str();
-        let (_, migration_name) =
-            parse_migration_name(&value).map_err(|_| MigrationError::InvalidMigrationName)?;
+        let (_, migration_name) = parse_migration_name(&value)
+            .map_err(|e| MigrationError::InvalidMigrationName(e.to_string()))?;
         Ok(migration_name)
     }
 }
@@ -479,7 +479,7 @@ impl TryFrom<String> for MigrationFileName {
 enum Direction2 {
     Up,
     Down,
-    None,
+    OneWay,
 }
 // .up.surql or .down.surql or .surql
 fn parse_direction(input: &str) -> IResult<&str, Direction2> {
@@ -488,7 +488,7 @@ fn parse_direction(input: &str) -> IResult<&str, Direction2> {
     let (input, direction) = alt((
         value(Direction2::Up, tag(".up.surql")),
         value(Direction2::Down, tag(".down.surql")),
-        value(Direction2::None, tag(".surql")),
+        value(Direction2::OneWay, tag(".surql")),
     ))(input)?;
     Ok((input, direction))
 }
@@ -517,7 +517,7 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileNa
     let m2 = match direction {
         Direction2::Up => MigrationFileName::Up(basic_info),
         Direction2::Down => MigrationFileName::Down(basic_info),
-        Direction2::None => MigrationFileName::Unidirectional(basic_info),
+        Direction2::OneWay => MigrationFileName::Unidirectional(basic_info),
     };
 
     Ok((input, m2))
@@ -677,7 +677,7 @@ impl LeftDatabase {
         Ok(())
     }
 
-    pub async fn run_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<()> {
+    pub async fn run_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<&Self> {
         let mut all_migrations = MigrationUnidirectional::get_all_from_migrations_dir(mode)?;
         let queries = all_migrations
             .into_iter()
@@ -693,7 +693,7 @@ impl LeftDatabase {
                 .run(self.db())
                 .await?;
         }
-        Ok(())
+        Ok(self)
     }
 
     pub async fn get_applied_bi_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
@@ -1002,7 +1002,11 @@ impl Database {
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
         let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
-        left.run_local_dir_up_migrations(Mode::Strict).await?;
+        if is_unidirectional {
+            left.run_local_dir_one_way_migrations(Mode::Strict).await?;
+        } else {
+            left.run_local_dir_up_migrations(Mode::Strict).await?;
+        };
         //
         // 2. Get all migrations from codebase synced with db - Right
         right.run_codebase_schema_queries(Resources).await?;
@@ -1305,6 +1309,8 @@ impl MigrationBidirectional {
                     downs_basenames.push(filename.basename());
                 }
                 MigrationFileName::Unidirectional(_) => {
+                    println!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
+
                     if mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
@@ -1316,9 +1322,10 @@ impl MigrationBidirectional {
 
         // Validate
         // 1. Length of ups and downs should be equal
-        println!("Opo");
         if ups_basenames.len() != downs_basenames.len() {
-            return Err(MigrationError::InvalidMigrationName);
+            return Err(MigrationError::InvalidMigrationName(
+                "Unequal number of up and down migrations.".into(),
+            ));
         }
 
         let ups_basenames_as_set = ups_basenames.iter().collect::<HashSet<_>>();
@@ -2404,11 +2411,8 @@ pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
     // Improve error essage for old_nmae using word similarity algo
-    // #[surreal_orm(old_name = "attributes")]
-    pub characteristics: Vec<String>,
+    pub attributes: Vec<String>,
     pub updated_at: chrono::DateTime<Utc>,
-    // #[surreal_orm(old_name = "country")]
-    pub nation: String,
     pub velocity: u64,
 }
 

@@ -1,0 +1,1 @@
+REMOVE FIELD nation ON TABLE animal;
