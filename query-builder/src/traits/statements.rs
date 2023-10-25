@@ -4,7 +4,7 @@ use crate::{
     ValueLike,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::{engine::local::Db, Surreal};
+use surrealdb::{engine::local::Db, Connection, Surreal};
 
 // Create, Update, Relate, Delete
 // [ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
@@ -367,7 +367,7 @@ where
     }
 
     /// Runs the statement against the database and returns the first result.
-    async fn return_first<T>(&self, db: Surreal<Db>) -> SurrealOrmResult<Option<T>>
+    async fn return_first<T, C: Connection>(&self, db: Surreal<C>) -> SurrealOrmResult<Option<T>>
     where
         T: Serialize + DeserializeOwned,
     {
