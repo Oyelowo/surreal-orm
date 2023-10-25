@@ -257,9 +257,11 @@ pub enum MigrationError {
     #[error(transparent)]
     InvalidRegex(#[from] regex::Error),
 
-    #[error(transparent)]
-    IoError(#[from] std::io::Error),
+    #[error("Invalid migration file name: {0}")]
+    IoError(String),
 
+    // #[error(transparent)]
+    // IoError(#[from] std::io::Error),
     #[error(transparent)]
     PromptError(#[from] inquire::error::InquireError),
 
@@ -397,8 +399,29 @@ impl MigrationFileName {
     pub fn create_file(&self, query: String) -> MigrationResult<()> {
         let file_name = self.to_string();
         let file_path = format!("migrations/{}", file_name);
-        let mut file = File::create(&file_path)?;
-        file.write_all(query.as_bytes())?;
+
+        // Ensure the migrations directory exists
+        if let Err(err) = fs::create_dir_all("migrations") {
+            return Err(MigrationError::IoError(format!(
+                "Failed to create migrations directory: {}",
+                err
+            )));
+        }
+
+        let mut file = File::create(&file_path).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to create file path: {}. Error: {}",
+                file_path, e
+            ))
+        })?;
+
+        file.write_all(query.as_bytes()).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to create file. Filename - {}: {}",
+                file_path, e
+            ))
+        })?;
+
         Ok(())
     }
 
@@ -619,6 +642,12 @@ impl FullDbInfo {
 
 #[derive(Debug, Clone)]
 pub struct LeftDatabase(Database);
+
+// impl std::ops::DerefMut for LeftDatabase {
+//     fn deref_mut(&mut self) -> &mut Self::Target {
+//         &mut self.0
+//     }
+// }
 
 impl LeftDatabase {
     pub async fn resources(&self) -> LeftFullDbInfo {
@@ -887,12 +916,6 @@ impl ComparisonDatabase {
         let right = RightDatabase(Database::init().await);
         Self { left, right }
     }
-
-    pub fn make_strict(mut self) -> Self {
-        self.left = self.left.make_strict();
-        self.right = self.right.make_strict();
-        self
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -979,7 +1002,7 @@ impl Database {
         // Right = codebase
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
-        let ComparisonDatabase { left, right } = ComparisonDatabase::init().await.make_strict();
+        let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
         left.run_local_dir_up_migrations(Mode::Strict).await?;
         //
         // 2. Get all migrations from codebase synced with db - Right
@@ -1262,7 +1285,10 @@ impl MigrationBidirectional {
                     ups_basenames.push(filename.basename());
                     let content_up = fs::read_to_string(path).unwrap();
                     let content_down =
-                        fs::read_to_string(parent_dir.join(filename.to_down().to_string()))?;
+                        fs::read_to_string(parent_dir.join(filename.to_down().to_string()))
+                            .map_err(|e| {
+                                MigrationError::IoError(format!("Filename: {filename}"))
+                            })?;
 
                     let migration = MigrationBidirectional {
                         id: MigrationBidirectional::create_id(migration_up_name.clone()),
