@@ -30,7 +30,7 @@ use surreal_orm::{
 use surrealdb::{
     self,
     engine::local::{Db, Mem},
-    Surreal,
+    Connection, Surreal,
 };
 use thiserror::Error;
 // #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
@@ -639,6 +639,7 @@ impl FullDbInfo {
     }
 }
 
+// For the migration directory
 #[derive(Debug, Clone)]
 pub struct LeftDatabase(Database);
 
@@ -658,9 +659,11 @@ impl LeftDatabase {
         )
     }
 
-    pub async fn run_local_dir_up_migrations(&self, mode: Mode) -> MigrationResult<()> {
-        let mut all_migrations = MigrationBidirectional::get_all_from_migrations_dir(mode)?;
-        let queries = all_migrations
+    pub async fn run_local_dir_up_migrations<C: Connection>(
+        db: Surreal<C>,
+        migrations: Vec<MigrationBidirectional>,
+    ) -> MigrationResult<()> {
+        let queries = migrations
             .into_iter()
             .map(|m| m.up)
             .collect::<Vec<_>>()
@@ -671,13 +674,40 @@ impl LeftDatabase {
             begin_transaction()
                 .query(Raw::new(queries))
                 .commit_transaction()
-                .run(self.db())
+                .run(db)
                 .await?;
         }
         Ok(())
     }
 
-    pub async fn run_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<&Self> {
+    pub async fn run_all_local_dir_up_migrations(&self, mode: Mode) -> MigrationResult<()> {
+        let mut all_migrations = MigrationBidirectional::get_all_from_migrations_dir(mode)?;
+        Self::run_local_dir_up_migrations(self.db(), all_migrations).await?;
+        Ok(())
+    }
+
+    pub async fn run_local_dir_oneway_content_migrations<C: Connection>(
+        db: Surreal<C>,
+        migrations: Vec<MigrationUnidirectional>,
+    ) -> MigrationResult<()> {
+        let queries = migrations
+            .into_iter()
+            .map(|m| m.content)
+            .collect::<Vec<_>>()
+            .join("\n");
+        println!("Running queries: {}", queries);
+
+        // Run them as a transaction against a local in-memory database
+        if !queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(db)
+                .await?;
+        }
+        Ok(())
+    }
+    pub async fn run_all_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<&Self> {
         let mut all_migrations = MigrationUnidirectional::get_all_from_migrations_dir(mode)?;
         let queries = all_migrations
             .into_iter()
@@ -777,6 +807,76 @@ impl LeftDatabase {
     }
 }
 
+pub struct Syncer<C: Connection> {
+    mode: Mode,
+    db: Surreal<C>,
+}
+
+impl<C: Connection> Syncer<C> {
+    pub fn new(mode: Mode, db: Surreal<C>) -> Self {
+        Self { mode, db }
+    }
+
+    pub fn db(&self) -> Surreal<C> {
+        self.db.clone()
+    }
+
+    pub async fn sync_migration(&self, flag: MigrationFlag) -> MigrationResult<()> {
+        let migration_metadata = MigrationMetadata::table_name();
+        let migration_metadata::Schema {
+            name, timestamp, ..
+        } = MigrationMetadata::schema();
+
+        let latest_db_migration = select(All)
+            .from(MigrationMetadata::table_name())
+            .order_by(timestamp.desc())
+            .limit(1)
+            .return_first::<MigrationMetadata>(self.db())
+            .await?;
+        match flag {
+            MigrationFlag::TwoWay => {
+                let mut all_migrations =
+                    MigrationBidirectional::get_all_from_migrations_dir(self.mode)?;
+                let migrations_to_run = latest_db_migration.map_or(all_migrations.clone(), |ldb| {
+                    all_migrations
+                        .into_iter()
+                        .filter(|m| m.timestamp > ldb.timestamp)
+                        .collect::<Vec<_>>()
+                });
+                LeftDatabase::run_local_dir_up_migrations(self.db(), migrations_to_run).await?;
+            }
+            MigrationFlag::OneWay => {
+                let mut all_migrations =
+                    MigrationUnidirectional::get_all_from_migrations_dir(self.mode)?;
+                // let queries = all_migrations
+                //     .into_iter()
+                //     .map(|m| m.content)
+                //     .collect::<Vec<_>>()
+                //     .join("\n");
+                let migrations_to_run = latest_db_migration.map_or(all_migrations.clone(), |ldb| {
+                    all_migrations
+                        .into_iter()
+                        .filter(|m| m.timestamp > ldb.timestamp)
+                        .collect::<Vec<_>>()
+                });
+
+                // println!(
+                //     "Running migrations: {}",
+                //     migrations_to_run
+                //         .iter()
+                //         .map(|m| m.content.clone())
+                //         .collect::<Vec<_>>()
+                //         .join("\n")
+                // );
+                LeftDatabase::run_local_dir_oneway_content_migrations(self.db(), migrations_to_run)
+                    .await?;
+            }
+        };
+
+        Ok(())
+    }
+}
+
 impl Deref for LeftDatabase {
     type Target = Database;
 
@@ -790,6 +890,7 @@ pub enum By {
     OldName(String),
 }
 
+// For the codebase
 #[derive(Debug, Clone)]
 pub struct RightDatabase(Database);
 
@@ -1006,9 +1107,10 @@ impl Database {
         // 1. Get all migrations from migration directory synced with db - Left
         let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
         if is_unidirectional {
-            left.run_local_dir_one_way_migrations(Mode::Strict).await?;
+            left.run_all_local_dir_one_way_migrations(Mode::Strict)
+                .await?;
         } else {
-            left.run_local_dir_up_migrations(Mode::Strict).await?;
+            left.run_all_local_dir_up_migrations(Mode::Strict).await?;
         };
         //
         // 2. Get all migrations from codebase synced with db - Right
@@ -2386,9 +2488,8 @@ impl DbInfo {
 pub struct Planet {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    pub last_name: String,
+    pub first_name: String,
     pub population: u64,
-    // #[surreal_orm(old_name = "created")]
     pub created_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
@@ -2402,7 +2503,6 @@ pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub school: String,
     pub age: u8,
-    pub class: String,
 }
 
 impl TableEvents for Student {}

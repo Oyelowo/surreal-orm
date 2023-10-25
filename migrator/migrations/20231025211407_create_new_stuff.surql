@@ -1,0 +1,2 @@
+REMOVE TABLE animal;
+REMOVE FIELD class ON TABLE student;
