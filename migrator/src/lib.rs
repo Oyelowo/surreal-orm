@@ -2078,10 +2078,10 @@ where
                     queries.add_up(QueryType::Define(right));
                 }
                 DeltaType::Remove { left } => {
-                    queries.add_down(QueryType::Remove(
+                    queries.add_up(QueryType::Remove(
                         left.as_remove_statement(name.into(), Some(self.get_table()))?,
                     ));
-                    queries.add_up(QueryType::Define(left));
+                    queries.add_down(QueryType::Define(left));
                 }
                 DeltaType::Update { left, right } => {
                     queries.add_up(QueryType::Define(right));
@@ -2516,7 +2516,7 @@ impl TableEvents for Planet {}
 #[surreal_orm(table_name = "student", schemafull)]
 pub struct Student {
     pub id: SurrealSimpleId<Self>,
-    pub school: String,
+    pub high_school: String,
     pub age: u8,
 }
 
@@ -2565,7 +2565,7 @@ impl TableEvents for Animal {
             .unique()
             .to_raw();
 
-        vec![idx1]
+        vec![]
     }
 }
 
