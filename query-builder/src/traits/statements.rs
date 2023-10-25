@@ -4,7 +4,7 @@ use crate::{
     ValueLike,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::{engine::local::Db, Connection, Surreal};
+use surrealdb::{Connection, Surreal};
 
 // Create, Update, Relate, Delete
 // [ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
@@ -84,7 +84,7 @@ where
     /// specified projections or list of fields.
     async fn return_first_projections<P>(
         self,
-        db: Surreal<Db>,
+        db: Surreal<impl Connection>,
         projections: impl Send + Into<Projections>,
     ) -> SurrealOrmResult<Option<P>>
     where
@@ -102,7 +102,7 @@ where
     /// specified projections or list of fields.
     async fn return_one_projections<P>(
         self,
-        db: Surreal<Db>,
+        db: Surreal<impl Connection>,
         projections: impl Send + Into<Projections>,
     ) -> SurrealOrmResult<Option<P>>
     where
@@ -120,7 +120,7 @@ where
     /// specified projections or list of fields.
     async fn return_many_projections<P>(
         self,
-        db: Surreal<Db>,
+        db: Surreal<impl Connection>,
         projections: impl Send + Into<Projections>,
     ) -> SurrealOrmResult<Vec<P>>
     where
@@ -260,7 +260,7 @@ where
     }
 
     /// Runs the statement against the database and returns the one result.
-    async fn return_one(&self, db: Surreal<Db>) -> SurrealOrmResult<Option<T>> {
+    async fn return_one(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<Option<T>> {
         let response = self.run(db).await?;
         get_one::<T>(response)
     }
@@ -270,7 +270,7 @@ where
     /// It does best effort to make sure all fields are selected
     /// even if you select subset, it fills up the rest to make
     /// sure you get the full record and can be properly deserialized.
-    async fn get_one(self, db: Surreal<Db>) -> SurrealOrmResult<T> {
+    async fn get_one(self, db: Surreal<impl Connection>) -> SurrealOrmResult<T> {
         let response = self.run(db).await?;
         let returned_type = self.get_return_type();
         let all = vec![ValueLike::from(Field::new("*"))];
@@ -295,25 +295,25 @@ where
     }
 
     /// Runs the statement against the database and returns the many results.
-    async fn return_many(&self, db: Surreal<Db>) -> SurrealOrmResult<Vec<T>> {
+    async fn return_many(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<Vec<T>> {
         let response = self.run(db).await?;
         get_many::<T>(response)
     }
 
     /// Runs the statement against the database and returns no result.
-    async fn return_none(&self, db: Surreal<Db>) -> SurrealOrmResult<()> {
+    async fn return_none(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<()> {
         self.run(db).await?;
         Ok(())
     }
 
     /// Runs the statement against the database and returns the first result.
-    async fn return_first(&self, db: Surreal<Db>) -> SurrealOrmResult<Option<T>> {
+    async fn return_first(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<Option<T>> {
         let response = self.run(db).await?;
         get_first::<T>(response)
     }
 
     /// Runs the statement against the database and returns the many results before the change.
-    async fn return_many_before(self, db: Surreal<Db>) -> SurrealOrmResult<Vec<T>> {
+    async fn return_many_before(self, db: Surreal<impl Connection>) -> SurrealOrmResult<Vec<T>> {
         let query = self.set_return_type(ReturnType::Before);
         query.return_many(db).await
     }
@@ -334,7 +334,10 @@ where
 {
     /// Runs the statement against the database and returns the one result with custom specified
     /// return type.
-    async fn return_one_explicit<V>(&self, db: Surreal<Db>) -> SurrealOrmResult<Option<V>>
+    async fn return_one_explicit<V>(
+        &self,
+        db: Surreal<impl Connection>,
+    ) -> SurrealOrmResult<Option<V>>
     where
         V: Serialize + DeserializeOwned,
     {
@@ -344,7 +347,10 @@ where
 
     /// Runs the statement against the database and returns the many results with custom
     /// specified.
-    async fn return_many_explicit<V>(&self, db: Surreal<Db>) -> SurrealOrmResult<Vec<V>>
+    async fn return_many_explicit<V>(
+        &self,
+        db: Surreal<impl Connection>,
+    ) -> SurrealOrmResult<Vec<V>>
     where
         V: Serialize + DeserializeOwned,
     {
@@ -361,13 +367,13 @@ where
     Self: Parametric + Buildable,
 {
     /// Runs the statement against the database and returns no result.
-    async fn return_none(&self, db: Surreal<Db>) -> SurrealOrmResult<()> {
+    async fn return_none(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<()> {
         self.run(db).await?;
         Ok(())
     }
 
     /// Runs the statement against the database and returns the first result.
-    async fn return_first<T, C: Connection>(&self, db: Surreal<C>) -> SurrealOrmResult<Option<T>>
+    async fn return_first<T>(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<Option<T>>
     where
         T: Serialize + DeserializeOwned,
     {
@@ -388,7 +394,7 @@ where
     }
 
     /// Runs the statement against the database and returns the one result with result unchecked.
-    async fn return_one_unchecked<T>(&self, db: Surreal<Db>) -> T
+    async fn return_one_unchecked<T>(&self, db: Surreal<impl Connection>) -> T
     where
         T: Serialize + DeserializeOwned,
     {
@@ -397,7 +403,7 @@ where
     }
 
     /// Runs the statement against the database and returns the many results.
-    async fn return_many<T>(&self, db: Surreal<Db>) -> SurrealOrmResult<Vec<T>>
+    async fn return_many<T>(&self, db: Surreal<impl Connection>) -> SurrealOrmResult<Vec<T>>
     where
         T: Serialize + DeserializeOwned,
     {
