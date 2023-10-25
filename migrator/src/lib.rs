@@ -219,8 +219,12 @@ pub enum MigrationError {
     MigrationNameDoesNotExist,
     #[error("Invalid migration name")]
     InvalidMigrationName,
+
     #[error("Invalid timestamp: {0}")]
     InvalidTimestamp(String),
+
+    #[error("Invalid migration file name for mode: {0}")]
+    InvalidMigrationFileNameForMode(String),
 
     #[error("Invalid migration state. Migration up queries empty")]
     MigrationUpQueriesEmpty,
@@ -626,8 +630,8 @@ impl LeftDatabase {
         )
     }
 
-    pub async fn run_local_dir_migrations(&self) -> MigrationResult<()> {
-        let mut all_migrations = MigrationBidirectional::get_all_from_migrations_dir()?;
+    pub async fn run_local_dir_up_migrations(&self, mode: Mode) -> MigrationResult<()> {
+        let mut all_migrations = MigrationBidirectional::get_all_from_migrations_dir(mode)?;
         let queries = all_migrations
             .into_iter()
             .map(|m| m.up)
@@ -644,7 +648,27 @@ impl LeftDatabase {
         }
         Ok(())
     }
-    pub async fn get_applied_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
+
+    pub async fn run_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<()> {
+        let mut all_migrations = MigrationUnidirectional::get_all_from_migrations_dir(mode)?;
+        let queries = all_migrations
+            .into_iter()
+            .map(|m| m.content)
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Run them as a transaction against a local in-memory database
+        if !queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(self.db())
+                .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn get_applied_bi_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
         let migration_bidirectional::Schema { name, .. } = MigrationBidirectional::schema();
         let migration = MigrationBidirectional::table_name();
 
@@ -655,10 +679,20 @@ impl LeftDatabase {
             .from(migration)
             .return_many::<String>(self.db())
             .await?;
-        // vec![
-        //     "20230912__up__add_name".into(),
-        //     "20230912__down__remove_name".into(),
-        // ]
+        Ok(migration_names)
+    }
+
+    pub async fn get_applied_uni_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
+        let migration_unidirectional::Schema { name, .. } = MigrationUnidirectional::schema();
+        let migration = MigrationUnidirectional::table_name();
+
+        // select [{ name: "Oyelowo" }]
+        // select value [ "Oyelowo" ]
+        // select_only. Just on object => { name: "Oyelowo" }
+        let migration_names = select_value(name)
+            .from(migration)
+            .return_many::<String>(self.db())
+            .await?;
         Ok(migration_names)
     }
 
@@ -694,7 +728,8 @@ impl LeftDatabase {
         db: &mut Self,
         migration_name: MigrationFileName,
     ) -> MigrationResult<()> {
-        let migration = MigrationBidirectional::get_migration_by_name(migration_name.clone())?;
+        let migration =
+            MigrationBidirectional::get_migration_by_name(migration_name.clone(), db.mode)?;
         if let Some(migration) = migration {
             let down_migration = migration.down;
             if !down_migration.trim().is_empty() {
@@ -852,18 +887,38 @@ impl ComparisonDatabase {
         let right = RightDatabase(Database::init().await);
         Self { left, right }
     }
+
+    pub fn make_strict(mut self) -> Self {
+        self.left = self.left.make_strict();
+        self.right = self.right.make_strict();
+        self
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Database {
     db: Surreal<Db>,
+    mode: Mode,
 }
 
 impl Database {
     pub async fn init() -> Self {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await.unwrap();
-        Self { db }
+        Self {
+            db,
+            mode: Mode::Relaxed,
+        }
+    }
+
+    pub fn make_strict(mut self) -> Self {
+        self.mode = Mode::Strict;
+        self
+    }
+
+    pub fn relax(mut self) -> Self {
+        self.mode = Mode::Relaxed;
+        self
     }
 
     pub fn db(&self) -> Surreal<Db> {
@@ -924,8 +979,8 @@ impl Database {
         // Right = codebase
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
-        let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
-        left.run_local_dir_migrations().await.expect("flops");
+        let ComparisonDatabase { left, right } = ComparisonDatabase::init().await.make_strict();
+        left.run_local_dir_up_migrations(Mode::Strict).await?;
         //
         // 2. Get all migrations from codebase synced with db - Right
         right.run_codebase_schema_queries(Resources).await?;
@@ -1100,11 +1155,11 @@ pub struct MigrationUnidirectional {
     pub id: SurrealId<Self, String>,
     pub name: String,
     pub timestamp: u64,
-    pub queries: String, // status: String,
+    pub content: String, // status: String,
 }
 
 impl MigrationUnidirectional {
-    pub fn get_all_from_migrations_dir(flag: MigrationFlag) -> MigrationResult<Vec<Self>> {
+    pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
         let migrations = fs::read_dir("migrations/");
 
         if migrations.is_err() {
@@ -1124,11 +1179,12 @@ impl MigrationUnidirectional {
 
             let filename: MigrationFileName = migration_up_name.clone().try_into()?;
             match filename {
-                MigrationFileName::Up(_) => {
-                    // Maybe return error if in strict mode
-                }
-                MigrationFileName::Down(_) => {
-                    // Maybe return error if in strict mode
+                MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
+                    if mode == Mode::Strict {
+                        return Err(MigrationError::InvalidMigrationFileNameForMode(
+                            filename.to_string(),
+                        ));
+                    }
                 }
                 MigrationFileName::Unidirectional(_) => {
                     unidirectional_basenames.push(filename.basename());
@@ -1138,7 +1194,7 @@ impl MigrationUnidirectional {
                         id: MigrationUnidirectional::create_id(migration_up_name.clone()),
                         timestamp: filename.timestamp(),
                         name: filename.basename(),
-                        queries: content,
+                        content,
                     };
 
                     migrations_uni_meta.push(migration);
@@ -1168,13 +1224,19 @@ impl Display for Direction {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum MigrationFlag {
+pub enum MigrationFlag {
     TwoWay,
     OneWay,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Mode {
+    Strict,
+    Relaxed,
+}
+
 impl MigrationBidirectional {
-    pub fn get_all_from_migrations_dir() -> MigrationResult<Vec<Self>> {
+    pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
         let migrations = fs::read_dir("migrations/");
 
         if migrations.is_err() {
@@ -1189,7 +1251,7 @@ impl MigrationBidirectional {
         for migration in migrations.expect("Problem reading migrations directory") {
             let migration = migration.expect("Problem reading migration");
             let path = migration.path();
-            let parent_dir = path.parent().unwrap();
+            let parent_dir = path.parent().ok_or(MigrationError::PathDoesNotExist)?;
             let path = path.to_str().unwrap();
             let migration_name = path.split("/").last().unwrap();
             let migration_up_name = migration_name.to_string();
@@ -1215,7 +1277,13 @@ impl MigrationBidirectional {
                 MigrationFileName::Down(_) => {
                     downs_basenames.push(filename.basename());
                 }
-                MigrationFileName::Unidirectional(_) => {}
+                MigrationFileName::Unidirectional(_) => {
+                    if mode == Mode::Strict {
+                        return Err(MigrationError::InvalidMigrationFileNameForMode(
+                            filename.to_string(),
+                        ));
+                    }
+                }
             };
         }
 
@@ -1250,9 +1318,10 @@ impl MigrationBidirectional {
 
     pub fn get_migration_by_name(
         migration_name: impl Into<MigrationFileName>,
+        mode: Mode,
     ) -> MigrationResult<Option<Self>> {
         let migration_name: MigrationFileName = migration_name.into();
-        Ok(Self::get_all_from_migrations_dir()?
+        Ok(Self::get_all_from_migrations_dir(mode)?
             .into_iter()
             .find(|m| m.name == migration_name.to_string()))
     }
