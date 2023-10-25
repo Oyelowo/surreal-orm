@@ -669,6 +669,11 @@ impl LeftDatabase {
             .collect::<Vec<_>>()
             .join("\n");
 
+        // mark_migration_as_applied
+        // let x = migrations.iter().map(|m| {
+        //     let xx = m.id
+        // })
+
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {
             begin_transaction()
@@ -726,43 +731,43 @@ impl LeftDatabase {
         Ok(self)
     }
 
-    pub async fn get_applied_bi_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
-        let migration_bidirectional::Schema { name, .. } = MigrationBidirectional::schema();
-        let migration = MigrationBidirectional::table_name();
+    pub async fn get_applied_bi_migrations_from_db(&self) -> MigrationResult<Vec<Migration>> {
+        let migration::Schema { name, .. } = Migration::schema();
+        let migration = Migration::table_name();
 
         // select [{ name: "Oyelowo" }]
         // select value [ "Oyelowo" ]
         // select_only. Just on object => { name: "Oyelowo" }
         let migration_names = select_value(name)
             .from(migration)
-            .return_many::<String>(self.db())
+            .return_many::<Migration>(self.db())
             .await?;
         Ok(migration_names)
     }
 
-    pub async fn get_applied_uni_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
-        let migration_unidirectional::Schema { name, .. } = MigrationUnidirectional::schema();
-        let migration = MigrationUnidirectional::table_name();
-
-        // select [{ name: "Oyelowo" }]
-        // select value [ "Oyelowo" ]
-        // select_only. Just on object => { name: "Oyelowo" }
-        let migration_names = select_value(name)
-            .from(migration)
-            .return_many::<String>(self.db())
-            .await?;
-        Ok(migration_names)
-    }
+    // pub async fn get_applied_uni_migrations_from_db(&self) -> MigrationResult<Vec<String>> {
+    //     let migration_unidirectional::Schema { name, .. } = MigrationUnidirectional::schema();
+    //     let migration = MigrationUnidirectional::table_name();
+    //
+    //     // select [{ name: "Oyelowo" }]
+    //     // select value [ "Oyelowo" ]
+    //     // select_only. Just on object => { name: "Oyelowo" }
+    //     let migration_names = select_value(name)
+    //         .from(migration)
+    //         .return_many::<String>(self.db())
+    //         .await?;
+    //     Ok(migration_names)
+    // }
 
     pub async fn mark_migration_as_applied(
         &self,
         migration_name: impl Into<MigrationFileName>,
-    ) -> MigrationResult<MigrationMetadata> {
+    ) -> MigrationResult<Migration> {
         let migration_name: MigrationFileName = migration_name.into();
         println!("Applying migration: {}", migration_name);
 
-        let migration = MigrationMetadata {
-            id: MigrationMetadata::create_id(migration_name.to_string()),
+        let migration = Migration {
+            id: Migration::create_id(migration_name.to_string()),
             name: migration_name.to_string(),
             timestamp: migration_name.timestamp(),
         }
@@ -776,8 +781,7 @@ impl LeftDatabase {
 
     pub async fn unmark_migration(&self, migration_name: MigrationFileName) -> MigrationResult<()> {
         println!("Unmark migration: {}", migration_name);
-        delete::<MigrationMetadata>(MigrationMetadata::create_id(migration_name.to_string()))
-            .run(self.db());
+        delete::<Migration>(Migration::create_id(migration_name.to_string())).run(self.db());
         println!("Migration unmarked: {}", migration_name);
         Ok(())
     }
@@ -822,16 +826,16 @@ impl<C: Connection> Syncer<C> {
     }
 
     pub async fn sync_migration(&self, flag: MigrationFlag) -> MigrationResult<()> {
-        let migration_metadata = MigrationMetadata::table_name();
-        let migration_metadata::Schema {
+        let migration_metadata = Migration::table_name();
+        let migration::Schema {
             name, timestamp, ..
-        } = MigrationMetadata::schema();
+        } = Migration::schema();
 
         let latest_db_migration = select(All)
-            .from(MigrationMetadata::table_name())
+            .from(Migration::table_name())
             .order_by(timestamp.desc())
             .limit(1)
-            .return_first::<MigrationMetadata>(self.db())
+            .return_first::<Migration>(self.db())
             .await?;
         match flag {
             MigrationFlag::TwoWay => {
@@ -848,11 +852,6 @@ impl<C: Connection> Syncer<C> {
             MigrationFlag::OneWay => {
                 let mut all_migrations =
                     MigrationUnidirectional::get_all_from_migrations_dir(self.mode)?;
-                // let queries = all_migrations
-                //     .into_iter()
-                //     .map(|m| m.content)
-                //     .collect::<Vec<_>>()
-                //     .join("\n");
                 let migrations_to_run = latest_db_migration.map_or(all_migrations.clone(), |ldb| {
                     all_migrations
                         .into_iter()
@@ -860,14 +859,6 @@ impl<C: Connection> Syncer<C> {
                         .collect::<Vec<_>>()
                 });
 
-                // println!(
-                //     "Running migrations: {}",
-                //     migrations_to_run
-                //         .iter()
-                //         .map(|m| m.content.clone())
-                //         .collect::<Vec<_>>()
-                //         .join("\n")
-                // );
                 LeftDatabase::run_local_dir_oneway_content_migrations(self.db(), migrations_to_run)
                     .await?;
             }
@@ -1255,8 +1246,8 @@ impl Database {
 }
 #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration_metadata")]
-pub struct MigrationMetadata {
+#[surreal_orm(table_name = "migration")]
+pub struct Migration {
     pub id: SurrealId<Self, String>,
     pub name: String,
     pub timestamp: u64,
@@ -1264,16 +1255,14 @@ pub struct MigrationMetadata {
     // status: String,
 }
 
-impl MigrationMetadata {}
+impl Migration {}
 
 // Warn when id field not included in a model
 
 // Migratiions from migration directory
-#[derive(Node, Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration", relax_table_name)]
+#[derive(Clone, Debug)]
 pub struct MigrationBidirectional {
-    pub id: SurrealId<Self, String>,
+    pub id: MigrationFileName,
     pub name: String,
     pub timestamp: u64,
     pub up: String,
@@ -1281,11 +1270,9 @@ pub struct MigrationBidirectional {
     // status: String,
 }
 
-#[derive(Node, Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration", relax_table_name)]
+#[derive(Clone, Debug)]
 pub struct MigrationUnidirectional {
-    pub id: SurrealId<Self, String>,
+    pub id: MigrationFileName,
     pub name: String,
     pub timestamp: u64,
     pub content: String, // status: String,
@@ -1324,7 +1311,7 @@ impl MigrationUnidirectional {
                     let content = fs::read_to_string(path).unwrap();
 
                     let migration = MigrationUnidirectional {
-                        id: MigrationUnidirectional::create_id(migration_up_name.clone()),
+                        id: filename.clone(),
                         timestamp: filename.timestamp(),
                         name: filename.basename(),
                         content,
@@ -1401,7 +1388,7 @@ impl MigrationBidirectional {
                             })?;
 
                     let migration = MigrationBidirectional {
-                        id: MigrationBidirectional::create_id(migration_up_name.clone()),
+                        id: filename.clone(),
                         timestamp: filename.timestamp(),
                         name: filename.basename(),
                         up: content_up,
