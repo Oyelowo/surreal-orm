@@ -509,7 +509,6 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFileNa
     let (input, _) = tag("_")(input)?;
     let (input, (name, direction)) =
         tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
-    let (input, name) = take_until1(".")(input)?;
     let basic_info = MigrationNameBasicInfo {
         timestamp,
         name: name.to_string(),
@@ -1315,6 +1314,7 @@ impl MigrationBidirectional {
 
         // Validate
         // 1. Length of ups and downs should be equal
+        println!("Opo");
         if ups_basenames.len() != downs_basenames.len() {
             return Err(MigrationError::InvalidMigrationName);
         }
@@ -2404,6 +2404,7 @@ pub struct Animal {
     // #[surreal_orm(old_name = "attributes")]
     pub characteristics: Vec<String>,
     pub updated_at: chrono::DateTime<Utc>,
+    #[surreal_orm(old_name = "kingdo")]
     pub kingdom: String,
     pub velocity: u64,
 }

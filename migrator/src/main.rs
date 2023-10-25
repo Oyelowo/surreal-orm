@@ -14,7 +14,7 @@ use surrealdb::sql::{
 
 #[tokio::main]
 async fn main() {
-    m::Database::run_migrations(&"create_new_stuff".to_string(), false)
-        .await
-        .expect("Failed to run migrations");
+    if let Err(e) = m::Database::run_migrations(&"create_new_stuff".to_string(), false).await {
+        println!("Error: {}", e);
+    }
 }
