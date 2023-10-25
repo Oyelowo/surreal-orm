@@ -1072,7 +1072,8 @@ impl Database {
                 if query_str.trim().is_empty() {
                     match prompt_empty() {
                         Ok(true) => {
-                            MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+                            MigrationFileName::create_unidirectional(timestamp, name)?
+                                .create_file(query_str);
                         }
                         Ok(false) => {
                             println!("No migration created");
@@ -1082,7 +1083,8 @@ impl Database {
                         }
                     };
                 } else {
-                    MigrationFileName::create_up(timestamp, name)?.create_file(query_str);
+                    MigrationFileName::create_unidirectional(timestamp, name)?
+                        .create_file(query_str);
                 };
             }
             MigrationType::TwoWay { up, down } => {
@@ -1863,6 +1865,7 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
                 }
             };
         }
+        queries.add_new_line_to_up();
         Ok(queries)
     }
 }
@@ -1980,7 +1983,7 @@ impl Display for QueryType {
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
             // TODO: Rethink new line handling
-            QueryType::NewLine => "".to_string(),
+            QueryType::NewLine => "\n".to_string(),
         };
         let end = if let QueryType::NewLine = self {
             ""
@@ -2404,8 +2407,8 @@ pub struct Animal {
     // #[surreal_orm(old_name = "attributes")]
     pub characteristics: Vec<String>,
     pub updated_at: chrono::DateTime<Utc>,
-    #[surreal_orm(old_name = "kingdo")]
-    pub kingdom: String,
+    // #[surreal_orm(old_name = "country")]
+    pub nation: String,
     pub velocity: u64,
 }
 
