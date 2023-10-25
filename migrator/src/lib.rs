@@ -985,7 +985,10 @@ impl Database {
         Ok(())
     }
 
-    pub async fn run_migrations(name: &String, is_unidirectional: bool) -> MigrationResult<()> {
+    pub async fn generate_migrations(
+        name: &String,
+        is_unidirectional: bool,
+    ) -> MigrationResult<()> {
         let ref name = name
             .split_whitespace()
             .into_iter()
