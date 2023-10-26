@@ -274,7 +274,7 @@ impl ToTokens for EdgeToken {
                            #( #field_definitions), *
                         ]
                     }
-        
+
                     fn get_field_meta() -> ::std::vec::Vec<#crate_name::FieldMetadata> {
                         return vec![#( #field_metadata), *]
                     }

@@ -404,7 +404,6 @@ mod tests {
             )
             .block(block! {
                 LET __nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
-                
                 select(All).from(person_table).where_(user_name.eq(__nick_name));
             });
 
