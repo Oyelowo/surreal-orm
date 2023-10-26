@@ -1,0 +1,1 @@
+REMOVE INDEX species_speed_idx ON TABLE animal;

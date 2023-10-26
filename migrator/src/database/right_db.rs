@@ -1,0 +1,108 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
+use std::ops::Deref;
+
+use surreal_orm::{statements::begin_transaction, *};
+
+use crate::*;
+
+pub enum By {
+    NewName(String),
+    OldName(String),
+}
+
+// For the codebase
+#[derive(Debug, Clone)]
+pub struct RightDatabase(pub MigratorDatabase);
+
+impl RightDatabase {
+    pub async fn resources(&self) -> RightFullDbInfo {
+        RightFullDbInfo(
+            self.0
+                .get_all_resources()
+                .await
+                .expect("nothing for u on left"),
+        )
+    }
+
+    pub async fn run_codebase_schema_queries(
+        &self,
+        code_resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let queries = Self::get_codebase_schema_queries(code_resources);
+        begin_transaction()
+            .query(Raw::new(queries))
+            .commit_transaction()
+            .run(self.db())
+            .await?;
+
+        Ok(())
+    }
+
+    pub fn find_field_with_oldname_attr(
+        table_name: Table,
+        field_name: Field,
+    ) -> Option<FieldMetadata> {
+        Resources
+            .tables_fields_meta()
+            .get(&table_name)
+            .unwrap_or(&vec![])
+            .clone()
+            .into_iter()
+            .find(|f| f.name.to_string() == field_name.to_string() && f.old_name.is_some())
+    }
+
+    pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
+        Resources
+            .tables_fields_meta()
+            .get(table_name)
+            .unwrap_or(&vec![])
+            .clone()
+            .into_iter()
+            .filter(|field_meta| {
+                field_meta
+                    .old_name
+                    .clone()
+                    .is_some_and(|o| !o.to_string().is_empty())
+            })
+            .find(|f| match &by {
+                By::NewName(new_name) => f.name.to_string() == *new_name,
+                By::OldName(old_name) => f
+                    .old_name
+                    .clone()
+                    .filter(|n| n.to_string() == *old_name)
+                    .is_some(),
+            })
+    }
+
+    pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
+        let queries_joined = [
+            db_resources.tokens(),
+            db_resources.scopes(),
+            db_resources.analyzers(),
+            db_resources.params(),
+            db_resources.functions(),
+            db_resources.users(),
+            db_resources.tables(),
+        ]
+        .iter()
+        .flat_map(|res_raw| res_raw.iter().map(|r| r.to_raw().build()))
+        .collect::<Vec<_>>()
+        .join(";\n");
+
+        queries_joined
+    }
+}
+
+impl Deref for RightDatabase {
+    type Target = MigratorDatabase;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}

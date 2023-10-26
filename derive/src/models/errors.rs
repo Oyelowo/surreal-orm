@@ -37,6 +37,7 @@ pub enum ExtractorError {
 }
 
 impl ExtractorError {
+    #[allow(dead_code)]
     pub fn write_errors(self) -> proc_macro2::TokenStream {
         match self {
             ExtractorError::Syn(err) => err.to_compile_error(),
