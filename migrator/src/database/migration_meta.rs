@@ -10,9 +10,7 @@ use std::{collections::HashSet, fmt::Display, fs};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{Node, SurrealId};
 
-use crate::error::{MigrationError, MigrationResult};
-
-use super::file_manager::MigrationFileName;
+use crate::*;
 
 #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -31,7 +29,7 @@ impl Migration {}
 
 // Migratiions from migration directory
 #[derive(Clone, Debug)]
-pub struct MigrationBidirectional {
+pub struct MigrationTwoWay {
     pub id: MigrationFileName,
     pub name: String,
     pub timestamp: u64,
@@ -41,14 +39,14 @@ pub struct MigrationBidirectional {
 }
 
 #[derive(Clone, Debug)]
-pub struct MigrationUnidirectional {
+pub struct MigrationOneway {
     pub id: MigrationFileName,
     pub name: String,
     pub timestamp: u64,
     pub content: String, // status: String,
 }
 
-impl MigrationUnidirectional {
+impl MigrationOneway {
     pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
         let migrations = fs::read_dir("migrations/");
 
@@ -80,7 +78,7 @@ impl MigrationUnidirectional {
                     unidirectional_basenames.push(filename.basename());
                     let content = fs::read_to_string(path).unwrap();
 
-                    let migration = MigrationUnidirectional {
+                    let migration = MigrationOneway {
                         id: filename.clone(),
                         timestamp: filename.timestamp(),
                         name: filename.basename(),
@@ -125,7 +123,7 @@ pub enum Mode {
     Relaxed,
 }
 
-impl MigrationBidirectional {
+impl MigrationTwoWay {
     pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
         let migrations = fs::read_dir("migrations/");
 
@@ -157,7 +155,7 @@ impl MigrationBidirectional {
                                 MigrationError::IoError(format!("Filename: {filename}"))
                             })?;
 
-                    let migration = MigrationBidirectional {
+                    let migration = MigrationTwoWay {
                         id: filename.clone(),
                         timestamp: filename.timestamp(),
                         name: filename.basename(),

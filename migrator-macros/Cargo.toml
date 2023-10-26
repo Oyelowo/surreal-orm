@@ -1,5 +1,5 @@
 [package]
-name = "migrator"
+name = "migrator-macros"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -7,6 +7,9 @@ description.workspace = true
 documentation.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
 
 [dependencies]
 surreal-orm = { workspace = true }
@@ -22,3 +25,5 @@ inquire = { workspace = true }
 paste = { workspace = true }
 clap = { workspace = true }
 quote = { workspace = true }
+proc-macro2 = { workspace = true }
+migrator = { workspace = true }
