@@ -5,6 +5,7 @@ members = [
   "orm",
   "query-builder",
   "migrator",
+  "migrator-macros",
   "derive",
   "models",
   "orm-tests",
@@ -24,6 +25,7 @@ surreal-derive = { path = "derive" }
 surreal-orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
 migrator = { path = "migrator" }
+migrator-macros = { path = "migrator-macros" }
 surreal-models = { path = "models" }
 
 surrealdb = { version = "1.0.0", features = [

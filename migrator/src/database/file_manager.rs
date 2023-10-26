@@ -21,7 +21,7 @@ use nom::{
     IResult,
 };
 
-use crate::error::{MigrationError, MigrationResult};
+use crate::*;
 
 #[derive(Debug, Clone)]
 pub struct MigrationNameBasicInfo {
