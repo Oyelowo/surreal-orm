@@ -31,6 +31,13 @@ pub enum MigrationError {
     #[error("Invalid migration file name for mode: {0}")]
     InvalidMigrationFileNameForMode(String),
 
+    #[error("No migration directories")]
+    MigrationDirectoriesNotExist,
+
+    // invalid migration directory
+    #[error("Invalid migration directory: {0}")]
+    InvalidMigrationDirectory(String),
+
     #[error("Invalid migration state. Migration up queries empty")]
     MigrationUpQueriesEmpty,
 

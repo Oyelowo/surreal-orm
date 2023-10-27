@@ -39,7 +39,7 @@ impl LeftDatabase {
 
     pub async fn run_local_dir_up_migrations<C: Connection>(
         db: Surreal<C>,
-        migrations: Vec<MigrationTwo>,
+        migrations: Vec<MigrationTwoWay>,
     ) -> MigrationResult<()> {
         let queries = migrations
             .iter()
@@ -76,14 +76,18 @@ impl LeftDatabase {
     }
 
     pub async fn run_all_local_dir_up_migrations(&self, mode: Mode) -> MigrationResult<()> {
-        let all_migrations = MigrationTwo::get_all_from_migrations_dir(mode)?;
+        let mig_data = MigrationFilesData {
+            mode,
+            custom_path: None,
+        };
+        let all_migrations = mig_data.get_two_way_migrations()?;
         Self::run_local_dir_up_migrations(self.db(), all_migrations).await?;
         Ok(())
     }
 
     pub async fn run_local_dir_oneway_content_migrations<C: Connection>(
         db: Surreal<C>,
-        migrations: Vec<MigrationOneway>,
+        migrations: Vec<MigrationOneWay>,
     ) -> MigrationResult<()> {
         let queries = migrations
             .iter()
@@ -120,7 +124,11 @@ impl LeftDatabase {
         Ok(())
     }
     pub async fn run_all_local_dir_one_way_migrations(&self, mode: Mode) -> MigrationResult<&Self> {
-        let all_migrations = MigrationOneway::get_all_from_migrations_dir(mode)?;
+        let mig_data = MigrationFilesData {
+            mode,
+            custom_path: None,
+        };
+        let all_migrations = mig_data.get_oneway_migrations()?;
         let queries = all_migrations
             .into_iter()
             .map(|m| m.content)
@@ -200,7 +208,11 @@ impl LeftDatabase {
         db: &mut Self,
         migration_name: MigrationFileName,
     ) -> MigrationResult<()> {
-        let migration = MigrationTwo::get_migration_by_name(migration_name.clone(), db.mode)?;
+        let mig_data = MigrationFilesData {
+            mode: db.mode,
+            custom_path: None,
+        };
+        let migration = mig_data.get_two_way_migration_by_name(migration_name.clone())?;
         if let Some(migration) = migration {
             let down_migration = migration.down;
             if !down_migration.trim().is_empty() {
