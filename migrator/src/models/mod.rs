@@ -22,6 +22,7 @@ pub struct Planet {
     pub first_name: String,
     pub population: u64,
     pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
     pub tags: Vec<String>,
 }
 
@@ -32,7 +33,7 @@ impl TableResources for Planet {}
 #[surreal_orm(table_name = "student", schemafull)]
 pub struct Student {
     pub id: SurrealSimpleId<Self>,
-    pub high_school: String,
+    pub university: String,
     pub age: u8,
     pub updated_at: chrono::DateTime<Utc>,
     pub created_at: chrono::DateTime<Utc>,
@@ -48,6 +49,7 @@ pub struct Animal {
     pub species: String,
     // Improve error essage for old_nmae using word similarity algo
     pub attributes: Vec<String>,
+    pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
     pub velocity: u64,
 }

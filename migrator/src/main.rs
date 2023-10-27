@@ -10,13 +10,14 @@ use migrator::{FileManager, MigrationFlag, MigratorDatabase, Resources};
 #[tokio::main]
 async fn main() {
     // GENERATE MIGRATIONS
-    let file_manager = FileManager {
-        mode: migrator::Mode::Strict,
-        // custom_path: Some("banff"),
-        //  Defaults to 'migrations'
-        custom_path: None,
-        migration_flag: MigrationFlag::OneWay,
-    };
+    // let file_manager = FileManager {
+    //     mode: migrator::Mode::Strict,
+    //     // custom_path: Some("banff"),
+    //     //  Defaults to 'migrations'
+    //     custom_path: None,
+    //     migration_flag: MigrationFlag::OneWay,
+    // };
+    let file_manager = FileManager::default();
     if let Err(e) =
         MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
             .await

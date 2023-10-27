@@ -71,8 +71,8 @@ impl Display for Direction {
 
 #[derive(Default, Debug, Clone, Copy)]
 pub enum MigrationFlag {
-    TwoWay,
     #[default]
+    TwoWay,
     OneWay,
 }
 
