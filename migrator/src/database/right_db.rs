@@ -34,7 +34,15 @@ impl RightDatabase {
         &self,
         code_resources: impl DbResources,
     ) -> MigrationResult<()> {
+        let migration_meta_table_def = Migration::define_table().to_raw();
+        let migration_meta_table_fields_def = Migration::define_fields()
+            .iter()
+            .map(|f| f.to_raw().build())
+            .collect::<Vec<_>>()
+            .join(";\n");
         let queries = Self::get_codebase_schema_queries(code_resources);
+        let queries =
+            format!("{migration_meta_table_def};\n{migration_meta_table_fields_def};\n{queries}");
         begin_transaction()
             .query(Raw::new(queries))
             .commit_transaction()

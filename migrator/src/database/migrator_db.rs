@@ -212,7 +212,6 @@ impl MigratorDatabase {
                         }
                     };
                 } else {
-                    println!("SOMETHING fishy here;");
                     MigrationFileName::create_oneway(timestamp, name)?
                         .create_file(query_str, file_manager)?;
                 };

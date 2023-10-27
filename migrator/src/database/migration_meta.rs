@@ -13,13 +13,13 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use surreal_orm::{Node, SurrealId};
+use surreal_orm::{Node, SurrealId, TableResources};
 
 use crate::*;
 
 #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration")]
+#[surreal_orm(table_name = "migration", schemafull)]
 pub struct Migration {
     pub id: SurrealId<Self, String>,
     pub name: String,
@@ -29,6 +29,8 @@ pub struct Migration {
 }
 
 impl Migration {}
+
+impl TableResources for Migration {}
 
 // Warn when id field not included in a model
 
