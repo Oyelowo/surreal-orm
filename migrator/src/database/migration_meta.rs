@@ -69,14 +69,16 @@ impl Display for Direction {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy)]
 pub enum MigrationFlag {
     TwoWay,
+    #[default]
     OneWay,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
+    #[default]
     Strict,
     Relaxed,
 }
@@ -88,10 +90,12 @@ pub enum MigrationType {
     TwoWay { up: String, down: String },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FileManager {
     // pub migration_name: String,
     pub mode: Mode,
+    /// Default path is 'migrations' ralative to the nearest project root where
+    /// cargo.toml is defined
     pub custom_path: Option<&'static str>,
     pub migration_flag: MigrationFlag,
 }

@@ -144,7 +144,7 @@
 //     );
 //
 //     quote! {
-//         diesel_migrations::EmbeddedMigrations::new(&[
+//         EmbeddedMigrations::new(&[
 //             #(#migration_code)*
 //         ])
 //     }
