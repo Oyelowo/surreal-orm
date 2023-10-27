@@ -8,7 +8,7 @@
 use std::{
     collections::HashSet,
     fmt::Display,
-    fs,
+    fs::{self, File},
     path::{Path, PathBuf},
 };
 
@@ -90,8 +90,10 @@ pub enum MigrationType {
 
 #[derive(Debug, Clone)]
 pub struct FileManager {
+    // pub migration_name: String,
     pub mode: Mode,
     pub custom_path: Option<&'static str>,
+    pub migration_flag: MigrationFlag,
 }
 
 impl FileManager {
@@ -104,9 +106,11 @@ impl FileManager {
         if path.exists() && path.is_dir() {
             Ok(path)
         } else {
-            Err(MigrationError::InvalidMigrationDirectory(
-                path.to_string_lossy().to_string(),
-            ))
+            File::create(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
+            Ok(path)
+            // Err(MigrationError::InvalidMigrationDirectory(
+            //     path.to_string_lossy().to_string(),
+            // ))
         }
     }
     pub fn get_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
@@ -132,6 +136,7 @@ impl FileManager {
             match filename {
                 MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
                     if self.mode == Mode::Strict {
+                        println!("fafd");
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));

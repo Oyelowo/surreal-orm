@@ -55,27 +55,13 @@ impl ComparisonDatabase {
 #[derive(Debug, Clone)]
 pub struct MigratorDatabase {
     pub db: Surreal<Db>,
-    pub mode: Mode,
 }
 
 impl MigratorDatabase {
     pub async fn init() -> Self {
         let db = Surreal::new::<Mem>(()).await.unwrap();
         db.use_ns("test").use_db("test").await.unwrap();
-        Self {
-            db,
-            mode: Mode::Relaxed,
-        }
-    }
-
-    pub fn make_strict(mut self) -> Self {
-        self.mode = Mode::Strict;
-        self
-    }
-
-    pub fn relax(mut self) -> Self {
-        self.mode = Mode::Relaxed;
-        self
+        Self { db }
     }
 
     pub fn db(&self) -> Surreal<Db> {
@@ -120,8 +106,16 @@ impl MigratorDatabase {
         Ok(())
     }
 
-    pub async fn generate_migrations(name: &str, is_unidirectional: bool) -> MigrationResult<()> {
-        let name = &name.split_whitespace().collect::<Vec<_>>().join("_");
+    pub async fn generate_migrations(
+        migration_name: String,
+        file_manager: &FileManager,
+        resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let name = migration_name
+            .to_string()
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join("_");
         println!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries = vec![];
@@ -133,15 +127,19 @@ impl MigratorDatabase {
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
         let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
-        if is_unidirectional {
-            left.run_all_local_dir_one_way_migrations(Mode::Strict)
-                .await?;
-        } else {
-            left.run_all_local_dir_up_migrations(Mode::Strict).await?;
+        match file_manager.migration_flag {
+            MigrationFlag::TwoWay => {
+                left.run_all_local_dir_up_migrations(&file_manager).await?;
+            }
+            MigrationFlag::OneWay => {
+                left.run_all_local_dir_one_way_migrations(&file_manager)
+                    .await?;
+            }
         };
-        //
+
         // 2. Get all migrations from codebase synced with db - Right
-        right.run_codebase_schema_queries(Resources).await?;
+        // let code_base_resources: Resources = resouces.i;
+        right.run_codebase_schema_queries(resources).await?;
         let init = ComparisonsInit {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
@@ -178,13 +176,12 @@ impl MigratorDatabase {
             .trim()
             .to_string();
         // let mig_type = MigrationType::OneWay(up_queries_str.clone().unwrap_or_default());
-        let mig_type = if is_unidirectional {
-            MigrationType::OneWay(up_queries_str.clone())
-        } else {
-            MigrationType::TwoWay {
+        let mig_type = match &file_manager.migration_flag {
+            MigrationFlag::TwoWay => MigrationType::TwoWay {
                 up: up_queries_str.clone(),
                 down: down_queries_str.clone(),
-            }
+            },
+            MigrationFlag::OneWay => MigrationType::OneWay(up_queries_str.clone()),
         };
 
         let timestamp = Utc::now();
@@ -205,7 +202,7 @@ impl MigratorDatabase {
                     match prompt_empty() {
                         Ok(true) => {
                             MigrationFileName::create_unidirectional(timestamp, name)?
-                                .create_file(query_str)?;
+                                .create_file(query_str, file_manager)?;
                         }
                         Ok(false) => {
                             println!("No migration created");
@@ -216,7 +213,7 @@ impl MigratorDatabase {
                     };
                 } else {
                     MigrationFileName::create_unidirectional(timestamp, name)?
-                        .create_file(query_str)?;
+                        .create_file(query_str, file_manager)?;
                 };
             }
             MigrationType::TwoWay { up, down } => {
@@ -224,9 +221,10 @@ impl MigratorDatabase {
                     (true, true) => {
                         match prompt_empty() {
                             Ok(true) => {
-                                MigrationFileName::create_up(timestamp, name)?.create_file(up)?;
+                                MigrationFileName::create_up(timestamp, &name)?
+                                    .create_file(up, file_manager)?;
                                 MigrationFileName::create_down(timestamp, name)?
-                                    .create_file(down)?;
+                                    .create_file(down, file_manager)?;
                             }
                             Ok(false) => {
                                 println!("No migration created");
@@ -240,8 +238,10 @@ impl MigratorDatabase {
                         println!("HERE=====");
                         println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
                         println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
-                        MigrationFileName::create_up(timestamp, name)?.create_file(up)?;
-                        MigrationFileName::create_down(timestamp, name)?.create_file(down)?;
+                        MigrationFileName::create_up(timestamp, &name)?
+                            .create_file(up, file_manager)?;
+                        MigrationFileName::create_down(timestamp, name)?
+                            .create_file(down, file_manager)?;
                     }
                     (true, false) => {
                         return Err(MigrationError::MigrationUpQueriesEmpty);

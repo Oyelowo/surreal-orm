@@ -5,12 +5,20 @@
  * Licensed under the MIT license
  */
 
-use migrator::MigratorDatabase;
+use migrator::{FileManager, MigrationFlag, MigratorDatabase, Resources};
 
 #[tokio::main]
 async fn main() {
     // GENERATE MIGRATIONS
-    if let Err(e) = MigratorDatabase::generate_migrations("create_new_stuff", true).await {
+    let file_manager = FileManager {
+        mode: migrator::Mode::Strict,
+        custom_path: Some("nana"),
+        migration_flag: MigrationFlag::OneWay,
+    };
+    if let Err(e) =
+        MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
+            .await
+    {
         println!("Error: {}", e);
     }
 

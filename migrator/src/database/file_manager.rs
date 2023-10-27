@@ -9,7 +9,6 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::Write,
-    path::{Path, PathBuf},
 };
 
 use chrono::{DateTime, Utc};
@@ -116,9 +115,10 @@ impl MigrationFileName {
         }
     }
 
-    pub fn create_file(&self, query: String) -> MigrationResult<()> {
+    pub fn create_file(&self, query: String, file_namager: &FileManager) -> MigrationResult<()> {
         let file_name = self.to_string();
-        let file_path = format!("migrations/{}", file_name);
+        let migration_dir = file_namager.resolve_migration_directory()?;
+        let file_path = migration_dir.join(file_name);
 
         // Ensure the migrations directory exists
         if let Err(err) = fs::create_dir_all("migrations") {
@@ -131,14 +131,16 @@ impl MigrationFileName {
         let mut file = File::create(&file_path).map_err(|e| {
             MigrationError::IoError(format!(
                 "Failed to create file path: {}. Error: {}",
-                file_path, e
+                file_path.to_string_lossy(),
+                e
             ))
         })?;
 
         file.write_all(query.as_bytes()).map_err(|e| {
             MigrationError::IoError(format!(
                 "Failed to create file. Filename - {}: {}",
-                file_path, e
+                file_path.to_string_lossy(),
+                e
             ))
         })?;
 
