@@ -35,6 +35,7 @@ pub struct Student {
     pub high_school: String,
     pub age: u8,
     pub updated_at: chrono::DateTime<Utc>,
+    pub created_at: chrono::DateTime<Utc>,
 }
 
 impl TableResources for Student {}
