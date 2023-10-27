@@ -106,7 +106,7 @@ impl FileManager {
         if path.exists() && path.is_dir() {
             Ok(path)
         } else {
-            File::create(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
+            fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
             Ok(path)
             // Err(MigrationError::InvalidMigrationDirectory(
             //     path.to_string_lossy().to_string(),
@@ -165,7 +165,9 @@ impl FileManager {
     pub fn get_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
         // let migrations = fs::read_dir("migrations/");
         let migration_dir_path = self.resolve_migration_directory()?;
-        let migrations = fs::read_dir(migration_dir_path);
+        println!("Migration dir path: {:?}", migration_dir_path.clone());
+        let migrations = fs::read_dir(migration_dir_path.clone());
+        println!("Migration dir path: {:?}", migration_dir_path);
 
         if migrations.is_err() {
             return Ok(vec![]);

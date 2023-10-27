@@ -176,7 +176,7 @@ impl MigratorDatabase {
             .trim()
             .to_string();
         // let mig_type = MigrationType::OneWay(up_queries_str.clone().unwrap_or_default());
-        let mig_type = match &file_manager.migration_flag {
+        let migration_type = match &file_manager.migration_flag {
             MigrationFlag::TwoWay => MigrationType::TwoWay {
                 up: up_queries_str.clone(),
                 down: down_queries_str.clone(),
@@ -196,12 +196,12 @@ impl MigratorDatabase {
             confirmation
         };
 
-        match mig_type {
+        match migration_type {
             MigrationType::OneWay(query_str) => {
                 if query_str.trim().is_empty() {
                     match prompt_empty() {
                         Ok(true) => {
-                            MigrationFileName::create_unidirectional(timestamp, name)?
+                            MigrationFileName::create_oneway(timestamp, name)?
                                 .create_file(query_str, file_manager)?;
                         }
                         Ok(false) => {
@@ -212,7 +212,8 @@ impl MigratorDatabase {
                         }
                     };
                 } else {
-                    MigrationFileName::create_unidirectional(timestamp, name)?
+                    println!("SOMETHING fishy here;");
+                    MigrationFileName::create_oneway(timestamp, name)?
                         .create_file(query_str, file_manager)?;
                 };
             }

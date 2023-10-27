@@ -34,6 +34,7 @@ pub struct Student {
     pub id: SurrealSimpleId<Self>,
     pub high_school: String,
     pub age: u8,
+    pub updated_at: chrono::DateTime<Utc>,
 }
 
 impl TableResources for Student {}
