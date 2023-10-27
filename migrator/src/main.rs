@@ -12,7 +12,7 @@ async fn main() {
     // GENERATE MIGRATIONS
     let file_manager = FileManager {
         mode: migrator::Mode::Strict,
-        custom_path: Some("nana"),
+        custom_path: Some("banff"),
         migration_flag: MigrationFlag::OneWay,
     };
     if let Err(e) =

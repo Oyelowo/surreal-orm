@@ -121,7 +121,7 @@ impl MigrationFileName {
         let file_path = migration_dir.join(file_name);
 
         // Ensure the migrations directory exists
-        if let Err(err) = fs::create_dir_all("migrations") {
+        if let Err(err) = fs::create_dir_all(migration_dir) {
             return Err(MigrationError::IoError(format!(
                 "Failed to create migrations directory: {}",
                 err
@@ -162,7 +162,7 @@ impl MigrationFileName {
         Ok(Self::Down(MigrationNameBasicInfo { timestamp, name }))
     }
 
-    pub fn create_unidirectional(
+    pub fn create_oneway(
         timestamp: DateTime<Utc>,
         name: impl Into<String>,
     ) -> MigrationResult<Self> {
