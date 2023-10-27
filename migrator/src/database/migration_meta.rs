@@ -5,7 +5,12 @@
  * Licensed under the MIT license
  */
 
-use std::{collections::HashSet, fmt::Display, fs};
+use std::{
+    collections::HashSet,
+    fmt::Display,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 use surreal_orm::{Node, SurrealId};
@@ -39,61 +44,14 @@ pub struct MigrationTwoWay {
 }
 
 #[derive(Clone, Debug)]
-pub struct MigrationOneway {
+pub struct MigrationOneWay {
     pub id: MigrationFileName,
     pub name: String,
     pub timestamp: u64,
     pub content: String, // status: String,
 }
 
-impl MigrationOneway {
-    pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
-        let migrations = fs::read_dir("migrations/");
-
-        if migrations.is_err() {
-            return Ok(vec![]);
-        }
-
-        let mut migrations_uni_meta = vec![];
-        let mut unidirectional_basenames = vec![];
-
-        for migration in migrations.expect("Problem reading migrations directory") {
-            let migration = migration.expect("Problem reading migration");
-            let path = migration.path();
-            let path = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
-
-            let migration_name = path.split('/').last().unwrap();
-            let migration_up_name = migration_name.to_string();
-
-            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
-            match filename {
-                MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
-                    if mode == Mode::Strict {
-                        return Err(MigrationError::InvalidMigrationFileNameForMode(
-                            filename.to_string(),
-                        ));
-                    }
-                }
-                MigrationFileName::Unidirectional(_) => {
-                    unidirectional_basenames.push(filename.basename());
-                    let content = fs::read_to_string(path).unwrap();
-
-                    let migration = MigrationOneway {
-                        id: filename.clone(),
-                        timestamp: filename.timestamp(),
-                        name: filename.basename(),
-                        content,
-                    };
-
-                    migrations_uni_meta.push(migration);
-                }
-            };
-        }
-
-        migrations_uni_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-        Ok(migrations_uni_meta)
-    }
-}
+impl MigrationOneWay {}
 
 #[derive(Debug, Clone)]
 pub enum Direction {
@@ -123,9 +81,86 @@ pub enum Mode {
     Relaxed,
 }
 
-impl MigrationTwoWay {
-    pub fn get_all_from_migrations_dir(mode: Mode) -> MigrationResult<Vec<Self>> {
-        let migrations = fs::read_dir("migrations/");
+impl MigrationTwoWay {}
+
+pub enum MigrationType {
+    OneWay(String),
+    TwoWay { up: String, down: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct FileManager {
+    pub mode: Mode,
+    pub custom_path: Option<&'static str>,
+}
+
+impl FileManager {
+    pub fn resolve_migration_directory(&self) -> MigrationResult<PathBuf> {
+        let default_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
+        let path = self
+            .custom_path
+            .map_or(default_path, |fp| Path::new(fp).to_owned());
+
+        if path.exists() && path.is_dir() {
+            Ok(path)
+        } else {
+            Err(MigrationError::InvalidMigrationDirectory(
+                path.to_string_lossy().to_string(),
+            ))
+        }
+    }
+    pub fn get_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+        let migration_directory = self.resolve_migration_directory()?;
+        let migrations = fs::read_dir(migration_directory);
+
+        if migrations.is_err() {
+            return Ok(vec![]);
+        }
+
+        let mut migrations_uni_meta = vec![];
+        let mut unidirectional_basenames = vec![];
+
+        for migration in migrations.expect("Problem reading migrations directory") {
+            let migration = migration.expect("Problem reading migration");
+            let path = migration.path();
+            let path = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
+
+            let migration_name = path.split('/').last().unwrap();
+            let migration_up_name = migration_name.to_string();
+
+            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
+            match filename {
+                MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
+                    if self.mode == Mode::Strict {
+                        return Err(MigrationError::InvalidMigrationFileNameForMode(
+                            filename.to_string(),
+                        ));
+                    }
+                }
+                MigrationFileName::Unidirectional(_) => {
+                    unidirectional_basenames.push(filename.basename());
+                    let content = fs::read_to_string(path).unwrap();
+
+                    let migration = MigrationOneWay {
+                        id: filename.clone(),
+                        timestamp: filename.timestamp(),
+                        name: filename.basename(),
+                        content,
+                    };
+
+                    migrations_uni_meta.push(migration);
+                }
+            };
+        }
+
+        migrations_uni_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        Ok(migrations_uni_meta)
+    }
+
+    pub fn get_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+        // let migrations = fs::read_dir("migrations/");
+        let migration_dir_path = self.resolve_migration_directory()?;
+        let migrations = fs::read_dir(migration_dir_path);
 
         if migrations.is_err() {
             return Ok(vec![]);
@@ -171,7 +206,7 @@ impl MigrationTwoWay {
                 MigrationFileName::Unidirectional(_) => {
                     println!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
 
-                    if mode == Mode::Strict {
+                    if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
@@ -211,18 +246,14 @@ impl MigrationTwoWay {
         Ok(migrations_bi_meta)
     }
 
-    pub fn get_migration_by_name(
-        migration_name: impl Into<MigrationFileName>,
-        mode: Mode,
-    ) -> MigrationResult<Option<Self>> {
+    pub fn get_two_way_migration_by_name(
+        &self,
+        migration_name: MigrationFileName,
+    ) -> MigrationResult<Option<MigrationTwoWay>> {
         let migration_name: MigrationFileName = migration_name.into();
-        Ok(Self::get_all_from_migrations_dir(mode)?
+        Ok(self
+            .get_two_way_migrations()?
             .into_iter()
             .find(|m| m.name == migration_name.to_string()))
     }
-}
-
-pub enum MigrationType {
-    OneWay(String),
-    TwoWay { up: String, down: String },
 }
