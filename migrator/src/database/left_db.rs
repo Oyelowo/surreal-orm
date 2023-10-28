@@ -8,7 +8,7 @@
 use std::ops::Deref;
 
 use surreal_orm::{
-    statements::{begin_transaction, delete, select_value},
+    statements::{begin_transaction, delete, info_for, select_value},
     *,
 };
 use surrealdb::{Connection, Surreal};
@@ -37,54 +37,7 @@ impl LeftDatabase {
         )
     }
 
-    pub async fn run_local_dir_up_migrations<C: Connection>(
-        db: Surreal<C>,
-        migrations: Vec<MigrationTwoWay>,
-    ) -> MigrationResult<()> {
-        let queries = migrations
-            .iter()
-            .map(|m| m.up.clone())
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        let marked_up_migrations = migrations
-            .iter()
-            .map(|m| {
-                Migration {
-                    id: Migration::create_id(m.id.clone().to_string()),
-                    name: m.name.clone(),
-                    timestamp: m.timestamp,
-                }
-                .create()
-                .to_raw()
-                .build()
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        let all = format!("{}\n{}", queries, marked_up_migrations);
-
-        // Run them as a transaction against a local in-memory database
-        if !queries.trim().is_empty() {
-            begin_transaction()
-                .query(Raw::new(all))
-                .commit_transaction()
-                .run(db)
-                .await?;
-        }
-        Ok(())
-    }
-
-    pub async fn run_all_local_dir_up_migrations(
-        &self,
-        file_manager: &FileManager,
-    ) -> MigrationResult<()> {
-        let all_migrations = file_manager.get_two_way_migrations()?;
-        Self::run_local_dir_up_migrations(self.db(), all_migrations).await?;
-        Ok(())
-    }
-
-    pub async fn run_local_dir_oneway_content_migrations<C: Connection>(
+    pub async fn run_against_db<C: Connection>(
         db: Surreal<C>,
         migrations: Vec<MigrationOneWay>,
     ) -> MigrationResult<()> {
@@ -116,6 +69,60 @@ impl LeftDatabase {
         if !queries.trim().is_empty() {
             begin_transaction()
                 .query(Raw::new(all))
+                .commit_transaction()
+                .run(db)
+                .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn run_local_dir_up_migrations(
+        &self,
+        // db: Surreal<impl Connection>,
+        migrations: Vec<MigrationTwoWay>,
+    ) -> MigrationResult<()> {
+        Ok(())
+    }
+
+    pub async fn run_all_local_dir_up_migrations(
+        &self,
+        file_manager: &FileManager,
+    ) -> MigrationResult<()> {
+        let all_migrations = file_manager.get_two_way_migrations()?;
+
+        let queries = all_migrations
+            .iter()
+            .map(|m| m.up.clone())
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Run them as a transaction against a local in-memory database
+        if !queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(self.db())
+                .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn run_local_dir_oneway_content_migrations<C: Connection>(
+        db: Surreal<C>,
+        migrations: Vec<MigrationOneWay>,
+    ) -> MigrationResult<()> {
+        let queries = migrations
+            .iter()
+            .map(|m| m.content.clone())
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        println!("Running queries: {}", queries);
+
+        // Run them as a transaction against a local in-memory database
+        if !queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
                 .commit_transaction()
                 .run(db)
                 .await?;

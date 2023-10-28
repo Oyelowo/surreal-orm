@@ -60,8 +60,8 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
 
         let mut queries = Queries::default();
         for table_name in tables {
-            let def_right = self.get_right().get_definition(table_name).cloned();
             let def_left = self.get_left().get_definition(table_name).cloned();
+            let def_right = self.get_right().get_definition(table_name).cloned();
 
             let events = ComparisonEvents {
                 table: &Table::from(table_name.clone()),

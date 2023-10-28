@@ -52,6 +52,7 @@ pub struct ComparisonsInit<'a> {
 
 impl<'a> ComparisonsInit<'a> {
     pub fn new_tables(&self) -> ComparisonTables {
+        // println!("comparing resources {:#?}", self.left_resources);
         ComparisonTables { resources: self }
     }
 

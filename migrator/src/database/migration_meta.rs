@@ -169,7 +169,6 @@ impl FileManager {
     }
 
     pub fn get_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
-        // let migrations = fs::read_dir("migrations/");
         let migration_dir_path = self.resolve_migration_directory()?;
         println!("Migration dir path: {:?}", migration_dir_path.clone());
         let migrations = fs::read_dir(migration_dir_path.clone());
