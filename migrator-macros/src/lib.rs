@@ -1,203 +1,203 @@
-// use migrator::{MigrationFileName, MigrationOneWay, MigrationTwoWay};
-// use proc_macro::TokenStream;
-// // use proc_macro2::TokenStream;
-// use quote::quote;
-// use std::fs;
-// use std::path::{Path, PathBuf};
-// use thiserror::Error;
-//
+use migrator::{
+    EmbeddedMigrations, FileManager, MigrationError, MigrationFileName, MigrationFlag,
+    MigrationOneWay, MigrationTwoWay, Mode,
+};
+use proc_macro::TokenStream;
+// use proc_macro2::TokenStream;
+use quote::quote;
+use std::fs;
+use std::path::{Path, PathBuf};
+use thiserror::Error;
+
 // #[derive(Error, Debug)]
 // enum MigrationError {
 //     InvalidMigrationDirectory(String),
 //     NoMigrationDirectories,
 //     NoMigrationsFound(String),
 // }
-//
-// // Step 1: Custom Path Handling
-// fn resolve_migration_directory(custom_path: Option<&str>) -> Result<PathBuf, MigrationError> {
-//     let default_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
-//     let path = custom_path.map_or(default_path, Path::new).to_owned();
-//
-//     if path.exists() && path.is_dir() {
-//         Ok(path)
-//     } else {
-//         Err(MigrationError::InvalidMigrationDirectory(
-//             path.to_string_lossy().to_string(),
-//         ))
-//     }
+
+// Step 4: Checksum Calculation
+// fn calculate_checksum(path: &Path) -> Result<String, Box<dyn Error>> {
+//     use checksums::hash_file;
+//     let checksum = hash_file(path)?;
+//     Ok(checksum)
 // }
-//
-// // Step 2: Search for Migrations
-// fn find_migration_directories(path: &Path) -> Result<Vec<PathBuf>, MigrationError> {
-//     let mut migration_directories = Vec::new();
-//     for entry in fs::read_dir(path)? {
-//         let entry = entry?;
-//         let path = entry.path();
-//         if path.is_dir() {
-//             migration_directories.push(path);
-//         }
-//     }
-//     if migration_directories.is_empty() {
-//         return Err(MigrationError::NoMigrationDirectories);
-//     } else {
-//         Ok(migration_directories)
-//     }
-// }
-//
-// enum MigrationContent {
-//     OneWay(Vec<MigrationOneWay>),
-//     TwoWay(Vec<MigrationTwoWay>),
-// }
-//
-// // Step 3: Read Migrations
-// fn read_migrations(directory: &Path) -> Result<MigrationContent, MigrationError> {
-//     let mut migrations = Vec::new();
-//     for entry in fs::read_dir(directory)? {
-//         let entry = entry?;
-//         let path = entry.path();
-//         if path.is_file() {
-//             let x: MigrationFileName = path
-//                 .file_name()
-//                 .clone()
-//                 .try_into()
-//                 .expect("Problem converting migration file name");
-//
-//             match x {
-//                 MigrationFileName::Up(meta) => {
-//                     let up = fs::read_to_string(&path)?;
-//
-//                     let content = fs::read_to_string(&path)?;
-//                     migrations.push(content);
-//                 }
-//                 MigrationFileName::Down(_) => {
-//                     let content = fs::read_to_string(&path)?;
-//                     migrations.push(content);
-//                 }
-//                 MigrationFileName::Unidirectional(_) => todo!(),
-//             };
-//             let content = fs::read_to_string(&path)?;
-//             migrations.push(content);
-//         }
-//     }
-//     if migrations.is_empty() {
-//         Err(MigrationError::NoMigrationsFound(
-//             directory.to_string_lossy().to_string(),
-//         ))
-//     } else {
-//         Ok(migrations)
-//     }
-// }
-//
-// // Step 4: Checksum Calculation
-// // fn calculate_checksum(path: &Path) -> Result<String, Box<dyn Error>> {
-// //     use checksums::hash_file;
-// //     let checksum = hash_file(path)?;
-// //     Ok(checksum)
-// // }
-//
-// enum MigrationType {
-//     OneWay,
-//     TwoWay,
-// }
-//
-// // Step 7: Generate Rust Code
-// fn generate_migration_code(
-//     migrations: Vec<FileMeta>,
-//     mig_type: MigrationType,
-// ) -> proc_macro2::TokenStream {
-//     let migration_code = migrations.iter().map(
-//         |FileMeta {
-//              file_path,
-//              file_content,
-//          }| {
-//             let migration_name: MigrationFileName = file_path
-//                 .clone()
-//                 .try_into()
-//                 .expect("Problem converting migration file name");
-//
-//             // let name_str = name.as_str();
-//             // let content_str = content.as_str();
-//             let two_way = migrator::MigrationTwoWay {
-//                 id: migration_name.to_string(),
-//                 name: migration_name.basename(),
-//                 timestamp: migration_name.timestamp(),
-//                 up: file_content.clone(),
-//                 down: "test".to_string(),
-//             };
-//
-//             let one_way = migrator::MigrationOneWay {
-//                 id: 1,
-//                 name: "test".to_string(),
-//                 timestamp: "test".to_string(),
-//                 content: todo!(),
-//             };
-//
-//             quote! {
-//                 diesel_migrations::EmbeddedMigration::new(
-//                     #content_str,
-//                     None, // Implement "down" migrations if needed
-//                     diesel_migrations::EmbeddedName::new(#name_str),
-//                     diesel_migrations::TomlMetadataWrapper::new(false), // Adjust as needed
-//                 ),
-//             }
-//         },
-//     );
-//
-//     quote! {
-//         EmbeddedMigrations::new(&[
-//             #(#migration_code)*
-//         ])
-//     }
-// }
-//
-// struct FileMeta {
-//     file_path: PathBuf,
-//     file_content: String,
-// }
-//
-// // Your procedural macro entry point
-// #[proc_macro]
-// pub fn embed_migrations(input: TokenStream) -> TokenStream {
-//     // Step 1: Resolve custom path
-//     let custom_path = input.to_string();
-//     let migration_directory = match resolve_migration_directory(Some(&custom_path)) {
-//         Ok(path) => path,
-//         Err(e) => {
-//             return e.to_compile_error().into();
-//         }
-//     };
-//
-//     // Step 2: Find migration directories
-//     let migration_directories = match find_migration_directories(&migration_directory) {
-//         Ok(directories) => directories,
-//         Err(e) => {
-//             return e.to_compile_error().into();
-//         }
-//     };
-//
-//     // Step 3: Read migrations
-//     let mut migrations = Vec::new();
-//     for directory in &migration_directories {
-//         match read_migrations(&directory) {
-//             Ok(migration_files) => {
-//                 for file_content in migration_files {
-//                     migrations.push(FileMeta {
-//                         file_path: directory.file_name().unwrap().to_string_lossy().to_string(),
-//                         file_content,
-//                     });
-//                 }
-//             }
-//             Err(e) => {
-//                 return e.to_compile_error().into();
-//             }
-//         }
-//     }
-//
-//     // Step 7: Generate Rust code
-//     let code = generate_migration_code(migrations, MigrationType::OneWay);
-//
-//     code.into()
-// }
-//
-// #[cfg(test)]
-// mod tests {}
+
+enum MigrationType {
+    OneWay,
+    TwoWay,
+}
+
+// Step 7: Generate Rust Code
+fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_macro2::TokenStream {
+    // let x = match file_manager.migration_flag {
+    //     MigrationFlag::TwoWay => {
+    //         EmbeddedMigrations::TwoWay(file_manager.get_two_way_migrations().unwrap())
+    //     }
+    //     MigrationFlag::OneWay => {
+    //         EmbeddedMigrations::OneWay(file_manager.get_oneway_migrations().unwrap())
+    //     }
+    // };
+
+    let xx = match file_manager.migration_flag {
+        MigrationFlag::OneWay => file_manager
+            .get_oneway_migrations()
+            .unwrap()
+            .iter()
+            .map(|x| {
+                let name = x.name.clone();
+                let content = x.content.clone();
+                let timestamp = x.timestamp.clone();
+                let id = x.id.clone().to_string();
+                quote!(::surreal_orm::MigrationOneWay {
+                    id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+                    name: #name.into(),
+                    timestamp: #timestamp.into(),
+                    content: #content.into(),
+                    // content: include_str!(#path),
+                })
+            })
+            .collect::<Vec<_>>(),
+        MigrationFlag::TwoWay => file_manager
+            .get_two_way_migrations()
+            .unwrap()
+            .iter()
+            .map(|x| {
+                let name = x.name.clone();
+                let up = x.up.clone();
+                let down = x.down.clone();
+                let timestamp = x.timestamp.clone();
+                let id = x.id.clone().to_string();
+                quote!(::surreal_orm::MigrationTwoWay {
+                    id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+                    name: #name.into(),
+                    timestamp: #timestamp.into(),
+                    up: #up.into(),
+                    down: #down.into(),
+                })
+            })
+            .collect::<Vec<_>>(),
+    };
+
+    let xxv = quote!(::std::vec![#(#xx),*]);
+    panic!("{}", xxv.to_string());
+    quote!(::std::vec![#(#xx),*])
+}
+
+use syn::{
+    parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Result,
+    Token,
+};
+
+struct Args {
+    args: Punctuated<Expr, Token![,]>,
+}
+
+impl Parse for Args {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let args = Punctuated::parse_terminated_with(input, Expr::parse)?;
+        Ok(Self { args })
+    }
+}
+
+fn parse_it(input: Args) -> Vec<Option<String>> {
+    use syn::{Expr, Lit};
+
+    // This is pseudo-code and may require adaptation.
+    let mut args: Vec<Option<String>> = Vec::new();
+    for arg in &input.args {
+        match arg {
+            Expr::Lit(expr_lit) => {
+                match &expr_lit.lit {
+                    Lit::Str(lit_str) => {
+                        // Remove quotes from string literals
+                        args.push(Some(lit_str.value()));
+                    }
+                    _ => {
+                        // Handle other literal types, if necessary
+                    }
+                }
+            }
+            Expr::Path(expr_path) => {
+                // Here arg is an identifier like an enum variant
+                let ident = &expr_path.path.segments.last().unwrap().ident;
+                let ident_str = ident.to_string();
+
+                if ident_str == "None" {
+                    args.push(None);
+                } else {
+                    args.push(Some(ident_str));
+                }
+            }
+            // ... Other Expr variants
+            _ => {
+                // Handle other kinds of expressions
+            }
+        }
+    }
+
+    args
+}
+
+// Your procedural macro entry point
+#[proc_macro]
+pub fn embed_migrations(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as Args);
+
+    if input.args.len() > 3 {
+        panic!("Too many arguments. Expected 3 or less");
+    }
+
+    // let mut args = input.args.iter().map(|arg| quote! {#arg}.to_string());
+    let mut args = parse_it(input).into_iter();
+    // let custom_path = args
+    //     .next()
+    //     .map_or(None, |path| if path == "None" { None } else { Some(path) });
+
+    let custom_path = args.next().flatten().clone();
+    let flag = args
+        .next()
+        .flatten()
+        .map_or(MigrationFlag::default(), |fl| {
+            fl.try_into()
+                .map_err(|e: MigrationError| e.to_string())
+                .unwrap()
+        });
+
+    let mode = args.next().flatten().map_or(Mode::default(), |md| {
+        md.try_into()
+            .map_err(|e: MigrationError| e.to_string())
+            .unwrap()
+    });
+
+    // let custom_path = match args.next() {
+    //     Some(path) if path == "None" || path.is_empty() => None,
+    //     Some(path) => {
+    //         // panic!("{}", path);
+    //         Some(path.to_string())
+    //     }
+    //     None => None,
+    // };
+    //
+    // let flag = args.next().map_or(MigrationFlag::default(), |fl| {
+    //     fl.try_into()
+    //         .map_err(|e: MigrationError| e.to_string())
+    //         .unwrap()
+    // });
+    // let mode = args.next().map_or(Mode::default(), |md| {
+    //     md.try_into()
+    //         .map_err(|e: MigrationError| e.to_string())
+    //         .unwrap()
+    // });
+
+    let file_manager = FileManager {
+        mode,
+        custom_path: custom_path.as_ref().map(|x| x.to_string()),
+        migration_flag: flag,
+    };
+
+    generate_migration_code(file_manager, custom_path.as_ref().unwrap()).into()
+}
+
+#[cfg(test)]
+mod tests {}

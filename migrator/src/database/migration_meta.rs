@@ -5,6 +5,9 @@
  * Licensed under the MIT license
  */
 
+use std::convert::TryFrom;
+use std::env;
+use std::error::Error;
 use std::{
     collections::HashSet,
     fmt::Display,
@@ -78,11 +81,73 @@ pub enum MigrationFlag {
     OneWay,
 }
 
+impl Display for MigrationFlag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let flag = match self {
+            Self::TwoWay => "two_way",
+            Self::OneWay => "one_way",
+        };
+        write!(f, "{}", flag)
+    }
+}
+
+impl MigrationFlag {
+    pub fn options() -> Vec<String> {
+        vec![Self::TwoWay.to_string(), Self::OneWay.to_string()]
+    }
+}
+
+impl TryFrom<String> for MigrationFlag {
+    type Error = MigrationError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "two_way" => Ok(Self::TwoWay),
+            "one_way" => Ok(Self::OneWay),
+            _ => Err(MigrationError::InvalidMigrationFlag(
+                value,
+                Self::options().join(", "),
+            )),
+        }
+    }
+}
+
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
     #[default]
     Strict,
     Relaxed,
+}
+
+impl Display for Mode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mode = match self {
+            Self::Strict => "strict",
+            Self::Relaxed => "relaxed",
+        };
+        write!(f, "{}", mode)
+    }
+}
+
+impl Mode {
+    pub fn options() -> Vec<String> {
+        vec![Self::Strict.to_string(), Self::Relaxed.to_string()]
+    }
+}
+
+impl TryFrom<String> for Mode {
+    type Error = MigrationError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "strict" => Ok(Self::Strict),
+            "relaxed" => Ok(Self::Relaxed),
+            _ => Err(MigrationError::InvalidMigrationMode(
+                value,
+                Self::options().join(", "),
+            )),
+        }
+    }
 }
 
 impl MigrationTwoWay {}
@@ -98,29 +163,79 @@ pub struct FileManager {
     pub mode: Mode,
     /// Default path is 'migrations' ralative to the nearest project root where
     /// cargo.toml is defined
-    pub custom_path: Option<&'static str>,
+    pub custom_path: Option<String>,
     pub migration_flag: MigrationFlag,
 }
 
 impl FileManager {
-    pub fn resolve_migration_directory(&self) -> MigrationResult<PathBuf> {
-        let default_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
-        let path = self
-            .custom_path
-            .map_or(default_path, |fp| Path::new(fp).to_owned());
+    // pub fn resolve_migration_directory(&self) -> MigrationResult<PathBuf> {
+    //     let default_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
+    //     let path = self
+    //         .custom_path
+    //         .as_ref()
+    //         .map_or(default_path, |fp| Path::new(&fp).to_owned());
+    //
+    //     if path.exists() && path.is_dir() {
+    //         Ok(path)
+    //     } else {
+    //         fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
+    //         Ok(path)
+    //         // Err(MigrationError::InvalidMigrationDirectory(
+    //         //     path.to_string_lossy().to_string(),
+    //         // ))
+    //     }
+    // }
 
-        if path.exists() && path.is_dir() {
-            Ok(path)
+    pub fn migration_directory_from_given_path(&self) -> MigrationResult<PathBuf> {
+        let cargo_toml_directory =
+            env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
+        let cargo_manifest_path = Path::new(&cargo_toml_directory);
+        let migrations_path = self.custom_path.as_ref().map(Path::new);
+        let x = Self::resolve_migrations_directory(cargo_manifest_path, migrations_path);
+        // panic!("x: {:?}", x);
+        x
+    }
+
+    fn resolve_migrations_directory(
+        cargo_manifest_dir: &Path,
+        relative_path_to_migrations: Option<&Path>,
+    ) -> MigrationResult<PathBuf> {
+        let result = match relative_path_to_migrations {
+            Some(dir) => cargo_manifest_dir.join(dir),
+            None => {
+                let src_dir = cargo_manifest_dir.join("src");
+                Self::search_for_migrations_directory(&src_dir)
+                    .ok_or(MigrationError::MigrationDirectoriesNotExist)?
+            }
+        };
+
+        if result.canonicalize().is_ok() {
+            return Ok(result);
         } else {
-            fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
-            Ok(path)
-            // Err(MigrationError::InvalidMigrationDirectory(
-            //     path.to_string_lossy().to_string(),
-            // ))
+            fs::create_dir(&result).map_err(|e| MigrationError::IoError(e.to_string()))?;
+            Ok(result)
+            // return Err(MigrationError::InvalidMigrationDirectory(
+            //     result.to_string_lossy().to_string(),
+            // ));
+        }
+        // result.canonicalize().map_err(|_| {
+        //     MigrationError::InvalidMigrationDirectory(result.to_string_lossy().to_string())
+        // })
+    }
+
+    pub fn search_for_migrations_directory(path: &Path) -> Option<PathBuf> {
+        let migration_path = path.join("migrations");
+        if migration_path.is_dir() {
+            Some(migration_path)
+        } else {
+            path.parent()
+                .and_then(Self::search_for_migrations_directory)
         }
     }
+
     pub fn get_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
-        let migration_directory = self.resolve_migration_directory()?;
+        // let migration_directory = self.resolve_migration_directory()?;
+        let migration_directory = self.migration_directory_from_given_path()?;
         let migrations = fs::read_dir(migration_directory);
 
         if migrations.is_err() {
@@ -142,7 +257,6 @@ impl FileManager {
             match filename {
                 MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
                     if self.mode == Mode::Strict {
-                        println!("fafd");
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
@@ -169,7 +283,7 @@ impl FileManager {
     }
 
     pub fn get_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let migration_dir_path = self.resolve_migration_directory()?;
+        let migration_dir_path = self.migration_directory_from_given_path()?;
         println!("Migration dir path: {:?}", migration_dir_path.clone());
         let migrations = fs::read_dir(migration_dir_path.clone());
         println!("Migration dir path: {:?}", migration_dir_path);

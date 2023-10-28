@@ -12,7 +12,7 @@ async fn main() {
     // GENERATE MIGRATIONS
     let file_manager = FileManager {
         mode: migrator::Mode::Strict,
-        custom_path: Some("another"),
+        custom_path: Some("../kaod".to_string()),
         //  Defaults to 'migrations'
         // custom_path: None,
         migration_flag: MigrationFlag::TwoWay,
