@@ -22,7 +22,7 @@ pub enum MigrationError {
     DirectionDoesNotExist,
     #[error("Migration name does not exist")]
     MigrationNameDoesNotExist,
-    #[error("Invalid migration name. Error: {0}")]
+    #[error("Invalid migration name. {0}. Make sure it's in the format - <timestamp>_<migration_name>.<up|down|>.surql if two way or <timestamp>_<migration_name.surql if one way")]
     InvalidMigrationName(String),
 
     #[error("Invalid timestamp: {0}")]
