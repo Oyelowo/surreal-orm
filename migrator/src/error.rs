@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use surreal_orm::SurrealOrmError;
+use surreal_query_builder::SurrealOrmError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

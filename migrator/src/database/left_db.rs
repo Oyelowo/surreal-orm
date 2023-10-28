@@ -7,7 +7,7 @@
 
 use std::ops::Deref;
 
-use surreal_orm::{
+use surreal_query_builder::{
     statements::{begin_transaction, delete, info_for, select_value},
     *,
 };

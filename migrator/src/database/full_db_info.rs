@@ -7,7 +7,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use surreal_orm::{Field, Table};
+use surreal_query_builder::{Field, Table};
 
 use crate::*;
 

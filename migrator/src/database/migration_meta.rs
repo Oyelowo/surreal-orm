@@ -16,7 +16,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use surreal_orm::{Node, SurrealId, TableResources};
+use surreal_query_builder::{Node, SurrealId, TableResources};
 
 use crate::*;
 

@@ -1,4 +1,4 @@
-use surreal_orm::{statements::*, *};
+use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
@@ -180,7 +180,7 @@ pub enum EmbeddedMigrations {
 
 fn ererer() {
     let x = vec!
-[MigrationOneWay
+[::surreal_orm::MigrationOneWay
 {
     id : "20231027223423_create_new_stuff.surql".to_string().try_into().unwrap(), name :
     "20231027223423_create_new_stuff".into(), timestamp :

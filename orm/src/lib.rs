@@ -206,3 +206,5 @@ pub use surreal_derive::query;
 #[doc(hidden)]
 // pub use serde;
 pub use surreal_query_builder::*;
+
+pub use migrator::*;

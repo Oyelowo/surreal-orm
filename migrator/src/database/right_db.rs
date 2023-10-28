@@ -7,7 +7,7 @@
 
 use std::ops::Deref;
 
-use surreal_orm::{statements::begin_transaction, *};
+use surreal_query_builder::{statements::begin_transaction, *};
 
 use crate::*;
 
