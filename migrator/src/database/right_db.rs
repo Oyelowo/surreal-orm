@@ -41,13 +41,15 @@ impl RightDatabase {
             .collect::<Vec<_>>()
             .join(";\n");
         let queries = Self::get_codebase_schema_queries(code_resources);
-        let queries =
-            format!("{migration_meta_table_def};\n{migration_meta_table_fields_def};\n{queries}");
-        begin_transaction()
-            .query(Raw::new(queries))
-            .commit_transaction()
-            .run(self.db())
-            .await?;
+        // let queries =
+        //     format!("{migration_meta_table_def};\n{migration_meta_table_fields_def};\n{queries}");
+        if !queries.is_empty() {
+            begin_transaction()
+                .query(Raw::new(queries))
+                .commit_transaction()
+                .run(self.db())
+                .await?;
+        }
 
         Ok(())
     }

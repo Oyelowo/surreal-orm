@@ -236,8 +236,8 @@ impl MigratorDatabase {
                     }
                     (false, false) => {
                         println!("HERE=====");
-                        println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
-                        println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
+                        // println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
+                        // println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
                         MigrationFileName::create_up(timestamp, &name)?
                             .create_file(up, file_manager)?;
                         MigrationFileName::create_down(timestamp, name)?
