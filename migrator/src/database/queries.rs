@@ -8,7 +8,7 @@
 use std::{fmt::Display, ops::Deref};
 
 use serde::{Deserialize, Serialize};
-use surreal_orm::{
+use surreal_query_builder::{
     statements::{
         remove_analyzer, remove_database, remove_event, remove_field, remove_function,
         remove_index, remove_namespace, remove_param, remove_scope, remove_table, remove_token,

@@ -15,12 +15,12 @@
 // attribute should be removed.
 mod database;
 mod error;
-mod models;
+// mod models;
 mod resources;
 
 pub use database::*;
 pub use error::*;
-pub use models::*;
+// pub use models::*;
 pub use resources::*;
 
 #[macro_export]

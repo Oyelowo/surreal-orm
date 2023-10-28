@@ -80,7 +80,7 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
     };
 
     let xxv = quote!(::std::vec![#(#xx),*]);
-    panic!("{}", xxv.to_string());
+    // panic!("{}", xxv.to_string());
     quote!(::std::vec![#(#xx),*])
 }
 
