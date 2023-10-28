@@ -117,7 +117,7 @@ impl MigrationFileName {
 
     pub fn create_file(&self, query: String, file_namager: &FileManager) -> MigrationResult<()> {
         let file_name = self.to_string();
-        let migration_dir = file_namager.resolve_migration_directory()?;
+        let migration_dir = file_namager.migration_directory_from_given_path()?;
         let file_path = migration_dir.join(file_name);
 
         // Ensure the migrations directory exists
