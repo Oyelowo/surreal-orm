@@ -399,6 +399,10 @@ pub struct FileManager {
     pub mode: Mode,
     /// Default path is 'migrations' ralative to the nearest project root where
     /// cargo.toml is defined
+    /// 
+    /// ```rust
+    /// custom_path: Some("../custom-path".to_string())
+    /// ```
     pub custom_path: Option<String>,
     pub migration_flag: MigrationFlag,
     // pub crea
