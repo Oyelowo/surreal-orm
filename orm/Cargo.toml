@@ -12,6 +12,7 @@ documentation = { workspace = true }
 surreal-derive = { workspace = true }
 surreal-query-builder = { workspace = true }
 migrator = { workspace = true }
+migrator-macros = { workspace = true }
 serde = { workspace = true }
 
 [lib]

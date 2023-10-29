@@ -1,4 +1,4 @@
-use migrator_macros::embed_migrations;
+use surreal_orm::migrator::embed_migrations;
 
 #[test]
 fn test_embed_migrations() {
@@ -10,6 +10,7 @@ fn test_embed_migrations() {
         one_way,
         strict
     );
+
     // embed_migrations!("", one_way, strict);
     // embed_migrations!(oneway, one_way, strict);
 }
