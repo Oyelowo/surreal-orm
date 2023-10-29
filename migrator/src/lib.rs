@@ -15,24 +15,12 @@
 // attribute should be removed.
 mod database;
 mod error;
-// mod models;
 mod resources;
 
 pub use database::*;
 pub use error::*;
-// pub use models::*;
 pub use resources::*;
 
-// #[macro_export]
-// macro_rules! embed_migrations {
-//     ($dir:expr) => {
-//         concat!(
-//             $(
-//                 include_str!(concat!($dir, "/", $file)),
-//             )*
-//         )
-//     };
-// }
 #[cfg(test)]
 mod tests {
 

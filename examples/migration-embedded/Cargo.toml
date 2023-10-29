@@ -12,4 +12,5 @@ documentation.workspace = true
 surreal-orm = { workspace = true }
 surreal-models = { workspace = true }
 tokio = { workspace = true }
+surrealdb = { workspace = true }
 # surreal-orm = { path = "../orm" }

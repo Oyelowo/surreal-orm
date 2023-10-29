@@ -12,7 +12,6 @@ documentation = { workspace = true }
 [dependencies]
 surreal-orm = { workspace = true }
 surreal-models = { workspace = true }
-migrator-macros = { workspace = true }
 surrealdb = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
