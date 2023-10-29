@@ -233,41 +233,61 @@ pub struct MigrationTwoWay {
 }
 
 #[derive(Clone, Debug)]
-pub struct MigrationOneWay {
+pub struct EmbeddedMigrationTwoWay {
     pub id: MigrationFileName,
     pub name: &'static str,
+    pub timestamp: u64,
+    pub up: &'static str,
+    pub down: &'static str,
+    // status: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct MigrationOneWay {
+    pub id: MigrationFileName,
+    pub name: String,
     pub timestamp: u64,
     pub content: String, // status: String,
 }
 
+#[derive(Clone, Debug)]
+pub struct EmbeddedMigrationOneWay {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub timestamp: u64,
+    pub content: &'static str, // status: String,
+}
+
 impl MigrationOneWay {}
 
-#[allow(missing_copy_implementations)]
 // pub struct EmbeddedMigrationsOneWay<const N: usize> {
+#[allow(missing_copy_implementations)]
 pub struct EmbeddedMigrationsOneWay {
     // migrations: &'static [MigrationOneWay],
-    migrations: Vec<MigrationOneWay>,
+    pub migrations: &'static [EmbeddedMigrationOneWay],
 }
 
 // impl<const N: usize> EmbeddedMigrationsOneWay<N> {
 impl EmbeddedMigrationsOneWay {
-    pub const fn new<const N: usize>(migrations: [MigrationOneWay; N]) -> Self {
-        // Self { migrations }
-        todo!()
+    // pub const fn new<const N: usize>(migrations: [EmbeddedMigrationOneWay; N]) -> Self {
+    pub const fn new(migrations: &'static [EmbeddedMigrationOneWay]) -> Self {
+        Self { migrations }
     }
     // pub fn new(migrations: &'static [MigrationOneWay]) -> Self {
     //     Self { migrations }
     // }
 }
-fn erer() {
-    let one_way = MigrationOneWay {
-        id: "sample".to_string().try_into().unwrap(),
-        name: "".into(),
-        timestamp: 0,
-        content: "".into(),
-    };
-    let xx = EmbeddedMigrationsOneWay::new([one_way]);
-}
+// fn erer() {
+//     let one_way = EmbeddedMigrationOneWay {
+//         id: "sample",
+//         name: "".into(),
+//         timestamp: 0,
+//         content: "".into(),
+//     };
+//     let migrations = &[one_way];
+//     let xx = EmbeddedMigrationsOneWay::new(migrations);
+//     // let one_way = &[one_way];
+// }
 
 #[allow(missing_copy_implementations)]
 pub struct EmbeddedMigrationsTwoWay {

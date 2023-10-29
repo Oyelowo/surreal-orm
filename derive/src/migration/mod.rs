@@ -30,15 +30,7 @@ enum MigrationType {
 
 // Step 7: Generate Rust Code
 fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_macro2::TokenStream {
-    let crate_name = get_crate_name(true);
-    // let x = match file_manager.migration_flag {
-    //     MigrationFlag::TwoWay => {
-    //         EmbeddedMigrations::TwoWay(file_manager.get_two_way_migrations().unwrap())
-    //     }
-    //     MigrationFlag::OneWay => {
-    //         EmbeddedMigrations::OneWay(file_manager.get_oneway_migrations().unwrap())
-    //     }
-    // };
+    let crate_name = get_crate_name(false);
 
     let xx = match file_manager.migration_flag {
         MigrationFlag::OneWay => file_manager
@@ -46,15 +38,16 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             .unwrap()
             .iter()
             .map(|x| {
-                let name = x.name.clone();
-                let content = x.content.clone();
-                let timestamp = x.timestamp.clone();
-                let id = x.id.clone().to_string();
-                quote!(#crate_name::migrator::MigrationOneWay {
-                    id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
-                    name: #name.into(),
-                    timestamp: #timestamp.into(),
-                    content: #content.into(),
+                let name = x.name.to_string();
+                let content = x.content.to_string();
+                let timestamp = x.timestamp;
+                let id = x.id.to_string();
+                    // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+                quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
+                    id: #id,
+                    name: #name,
+                    timestamp: #timestamp,
+                    content: #content,
                     // content: include_str!(#path),
                 })
             })
