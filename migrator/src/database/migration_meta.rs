@@ -235,12 +235,44 @@ pub struct MigrationTwoWay {
 #[derive(Clone, Debug)]
 pub struct MigrationOneWay {
     pub id: MigrationFileName,
-    pub name: String,
+    pub name: &'static str,
     pub timestamp: u64,
     pub content: String, // status: String,
 }
 
 impl MigrationOneWay {}
+
+#[allow(missing_copy_implementations)]
+// pub struct EmbeddedMigrationsOneWay<const N: usize> {
+pub struct EmbeddedMigrationsOneWay {
+    // migrations: &'static [MigrationOneWay],
+    migrations: Vec<MigrationOneWay>,
+}
+
+// impl<const N: usize> EmbeddedMigrationsOneWay<N> {
+impl EmbeddedMigrationsOneWay {
+    pub const fn new<const N: usize>(migrations: [MigrationOneWay; N]) -> Self {
+        // Self { migrations }
+        todo!()
+    }
+    // pub fn new(migrations: &'static [MigrationOneWay]) -> Self {
+    //     Self { migrations }
+    // }
+}
+fn erer() {
+    let one_way = MigrationOneWay {
+        id: "sample".to_string().try_into().unwrap(),
+        name: "".into(),
+        timestamp: 0,
+        content: "".into(),
+    };
+    let xx = EmbeddedMigrationsOneWay::new([one_way]);
+}
+
+#[allow(missing_copy_implementations)]
+pub struct EmbeddedMigrationsTwoWay {
+    migrations: &'static [MigrationTwoWay],
+}
 
 #[derive(Debug, Clone)]
 pub enum Direction {
