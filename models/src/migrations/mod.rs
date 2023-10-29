@@ -1,3 +1,9 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -6,6 +12,12 @@ use surreal_orm::{
     statements::{define_event, define_index, select},
     *,
 };
+
+pub struct Resources;
+
+impl DbResources for Resources {
+    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
+}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -81,12 +93,6 @@ impl TableResources for Animal {
 
         vec![idx1]
     }
-}
-
-pub struct Resources;
-
-impl DbResources for Resources {
-    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
 }
 
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]

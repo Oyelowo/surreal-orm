@@ -27,8 +27,13 @@ impl<C: Connection> LiveDb<C> {
         self.db.clone()
     }
 
-    pub async fn run_all_local_dir_up_migrations(&self) -> MigrationResult<()> {
-        let all_migrations = self.file_manager.get_two_way_migrations()?;
+    pub async fn run_all_local_dir_up_migrations(
+        &self,
+        create_migration_table: bool,
+    ) -> MigrationResult<()> {
+        let all_migrations = self
+            .file_manager
+            .get_two_way_migrations(create_migration_table)?;
         self.run_against_db(all_migrations).await?;
 
         Ok(())
@@ -153,7 +158,7 @@ impl<C: Connection> LiveDb<C> {
         migration_name: MigrationFileName,
         fm: FileManager,
     ) -> MigrationResult<()> {
-        let migration = fm.get_two_way_migration_by_name(migration_name.clone())?;
+        let migration = fm.get_two_way_migration_by_name(migration_name.clone(), false)?;
         if let Some(migration) = migration {
             let down_migration = migration.down;
             if !down_migration.trim().is_empty() {

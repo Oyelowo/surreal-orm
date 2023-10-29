@@ -40,12 +40,13 @@ impl LeftDatabase {
     pub async fn run_all_local_dir_up_migrations(
         &self,
         file_manager: &FileManager,
+        create_migration_table: bool,
     ) -> MigrationResult<()> {
-        let all_migrations = file_manager.get_two_way_migrations()?;
+        let all_migrations = file_manager.get_two_way_migrations(create_migration_table)?;
 
         let queries = all_migrations
             .iter()
-            .map(|m| m.up.clone())
+            .map(|m: &MigrationTwoWay| m.up.clone())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -85,8 +86,9 @@ impl LeftDatabase {
     pub async fn run_all_local_dir_one_way_migrations(
         &self,
         fm: &FileManager,
+        create_migration_table: bool,
     ) -> MigrationResult<&Self> {
-        let all_migrations = fm.get_oneway_migrations()?;
+        let all_migrations = fm.get_oneway_migrations(create_migration_table)?;
         let queries = all_migrations
             .into_iter()
             .map(|m| m.content)

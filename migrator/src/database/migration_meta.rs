@@ -234,7 +234,7 @@ pub struct MigrationTwoWay {
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
-    pub id: MigrationFileName,
+    pub id: &'static str,
     pub name: &'static str,
     pub timestamp: u64,
     pub up: &'static str,
@@ -291,7 +291,7 @@ impl EmbeddedMigrationsOneWay {
 
 #[allow(missing_copy_implementations)]
 pub struct EmbeddedMigrationsTwoWay {
-    migrations: &'static [MigrationTwoWay],
+    pub migrations: &'static [EmbeddedMigrationTwoWay],
 }
 
 #[derive(Debug, Clone)]
@@ -401,33 +401,51 @@ pub struct FileManager {
     /// cargo.toml is defined
     pub custom_path: Option<String>,
     pub migration_flag: MigrationFlag,
+    // pub crea
 }
 
 impl FileManager {
-    // pub fn resolve_migration_directory(&self) -> MigrationResult<PathBuf> {
-    //     let default_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
-    //     let path = self
-    //         .custom_path
-    //         .as_ref()
-    //         .map_or(default_path, |fp| Path::new(&fp).to_owned());
-    //
-    //     if path.exists() && path.is_dir() {
-    //         Ok(path)
-    //     } else {
-    //         fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
-    //         Ok(path)
-    //         // Err(MigrationError::InvalidMigrationDirectory(
-    //         //     path.to_string_lossy().to_string(),
-    //         // ))
-    //     }
-    // }
+    pub fn resolve_migration_directory(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<PathBuf> {
+        // let cargo_manigests_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let cargo_toml_directory =
+            env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
+        // let cargo_manigests_dir = Path::new(env::var("CARGO_MANIFEST_DIR").unwrap());
+        let cargo_manifests_dir = Path::new(&cargo_toml_directory);
+        println!("cargo_manigests_dir: {:?}", cargo_manifests_dir);
+        let default_path = cargo_manifests_dir.join("migrations");
+        let path = self.custom_path.as_ref().map_or(default_path, |fp| {
+            cargo_manifests_dir.join(Path::new(&fp).to_owned())
+        });
 
-    pub fn migration_directory_from_given_path(&self) -> MigrationResult<PathBuf> {
+        if path.exists() && path.is_dir() {
+            Ok(path)
+        } else {
+            if create_dir_if_not_exists {
+                fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
+                return Ok(path);
+            }
+            Err(MigrationError::InvalidMigrationDirectory(
+                path.to_string_lossy().to_string(),
+            ))
+        }
+    }
+
+    pub fn migration_directory_from_given_path(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<PathBuf> {
         let cargo_toml_directory =
             env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
         let cargo_manifest_path = Path::new(&cargo_toml_directory);
         let migrations_path = self.custom_path.as_ref().map(Path::new);
-        let x = Self::resolve_migrations_directory(cargo_manifest_path, migrations_path);
+        let x = Self::resolve_migrations_directory(
+            cargo_manifest_path,
+            migrations_path,
+            create_dir_if_not_exists,
+        );
         // panic!("x: {:?}", x);
         x
     }
@@ -435,6 +453,7 @@ impl FileManager {
     fn resolve_migrations_directory(
         cargo_manifest_dir: &Path,
         relative_path_to_migrations: Option<&Path>,
+        create_dir_if_not_exists: bool,
     ) -> MigrationResult<PathBuf> {
         let result = match relative_path_to_migrations {
             Some(dir) => cargo_manifest_dir.join(dir),
@@ -448,8 +467,13 @@ impl FileManager {
         if result.canonicalize().is_ok() {
             return Ok(result);
         } else {
-            fs::create_dir(&result).map_err(|e| MigrationError::IoError(e.to_string()))?;
-            Ok(result)
+            if create_dir_if_not_exists {
+                return Ok(result);
+            }
+            // fs::create_dir(&result).map_err(|e| MigrationError::IoError(e.to_string()))?;
+            return Err(MigrationError::InvalidMigrationDirectory(
+                result.to_string_lossy().to_string(),
+            ));
             // return Err(MigrationError::InvalidMigrationDirectory(
             //     result.to_string_lossy().to_string(),
             // ));
@@ -469,9 +493,14 @@ impl FileManager {
         }
     }
 
-    pub fn get_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+    pub fn get_oneway_migrations(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<Vec<MigrationOneWay>> {
         // let migration_directory = self.resolve_migration_directory()?;
-        let migration_directory = self.migration_directory_from_given_path()?;
+        // let migration_directory =
+        //     self.migration_directory_from_given_path(create_dir_if_not_exists)?;
+        let migration_directory = self.resolve_migration_directory(create_dir_if_not_exists)?;
         let migrations = fs::read_dir(migration_directory);
 
         if migrations.is_err() {
@@ -518,8 +547,13 @@ impl FileManager {
         Ok(migrations_uni_meta)
     }
 
-    pub fn get_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let migration_dir_path = self.migration_directory_from_given_path()?;
+    pub fn get_two_way_migrations(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+        // let migration_dir_path =
+        //     self.migration_directory_from_given_path(create_dir_if_not_exists)?;
+        let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         println!("Migration dir path: {:?}", migration_dir_path.clone());
         let migrations = fs::read_dir(migration_dir_path.clone());
         println!("Migration dir path: {:?}", migration_dir_path);
@@ -611,10 +645,11 @@ impl FileManager {
     pub fn get_two_way_migration_by_name(
         &self,
         migration_name: MigrationFileName,
+        create_dir_if_not_exists: bool,
     ) -> MigrationResult<Option<MigrationTwoWay>> {
         let migration_name: MigrationFileName = migration_name.into();
         Ok(self
-            .get_two_way_migrations()?
+            .get_two_way_migrations(create_dir_if_not_exists)?
             .into_iter()
             .find(|m| m.name == migration_name.to_string()))
     }

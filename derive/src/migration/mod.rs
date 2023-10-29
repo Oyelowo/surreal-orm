@@ -34,7 +34,7 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
 
     let xx = match file_manager.migration_flag {
         MigrationFlag::OneWay => file_manager
-            .get_oneway_migrations()
+            .get_oneway_migrations(false)
             .unwrap()
             .iter()
             .map(|x| {
@@ -42,7 +42,7 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
                 let content = x.content.to_string();
                 let timestamp = x.timestamp;
                 let id = x.id.to_string();
-                    // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+                // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
                 quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
                     id: #id,
                     name: #name,
@@ -53,21 +53,22 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             })
             .collect::<Vec<_>>(),
         MigrationFlag::TwoWay => file_manager
-            .get_two_way_migrations()
+            .get_two_way_migrations(false)
             .unwrap()
             .iter()
             .map(|x| {
-                let name = x.name.clone();
-                let up = x.up.clone();
-                let down = x.down.clone();
-                let timestamp = x.timestamp.clone();
+                let name = x.name.to_string();
+                let up = x.up.to_string();
+                let down = x.down.to_string();
+                let timestamp = x.timestamp;
                 let id = x.id.clone().to_string();
-                quote!(#crate_name::migrator::MigrationTwoWay {
-                    id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
-                    name: #name.into(),
-                    timestamp: #timestamp.into(),
-                    up: #up.into(),
-                    down: #down.into(),
+                // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+                quote!(#crate_name::migrator::EmbeddedMigrationTwoWay {
+                    id: #id,
+                    name: #name,
+                    timestamp: #timestamp,
+                    up: #up,
+                    down: #down,
                 })
             })
             .collect::<Vec<_>>(),
