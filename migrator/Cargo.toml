@@ -24,3 +24,4 @@ inquire = { workspace = true }
 paste = { workspace = true }
 clap = { workspace = true }
 quote = { workspace = true }
+proc-macro2 = { workspace = true }

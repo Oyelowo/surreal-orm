@@ -29,7 +29,7 @@ pub struct Planet {
     pub population: u64,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
-    pub tags: Vec<String>,
+    pub labels: Vec<String>,
 }
 
 impl TableResources for Planet {}

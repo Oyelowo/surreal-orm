@@ -59,13 +59,6 @@ impl Migration {
 
         let name_field = name;
         let timestamp_field = timestamp;
-        // let record_id = Thing {
-        //     tb: migration_table.clone().to_string(),
-        //     id: m.id.to_string().into(),
-        // };
-        // let name = m.name.clone();
-        // let timestamp = m.timestamp;
-        // let content = m.content.clone();
         let record_id = Self::create_id(id_part);
         Raw::new(format!(
             "CREATE {record_id} SET {name_field}={name}, {timestamp_field}={timestamp}"
@@ -121,107 +114,6 @@ impl Migration {}
 
 struct RenameCreator;
 
-// impl Node for Migration {
-//     type NonNullUpdater = Migration;
-//
-//     type Aliases;
-//
-//     #[doc(hidden)]
-//     type TableNameChecker;
-//
-//     fn aliases() -> Self::Aliases {
-//         todo!()
-//     }
-//
-//     fn get_table_name() -> Table {
-//         todo!()
-//     }
-//
-//     fn with(clause: impl Into<NodeClause>) -> Self::Schema {
-//         todo!()
-//     }
-//
-//     fn get_fields_relations_aliased() -> Vec<Alias> {
-//         todo!()
-//     }
-// }
-// impl Model for Migration {
-//     type Id = Thing;
-//
-//     type NonNullUpdater = Migration;
-//
-//     type StructRenamedCreator = RenameCreator;
-//
-//     fn table_name() -> surreal_query_builder::Table {
-//         todo!()
-//     }
-//
-//     fn get_id(self) -> Self::Id {
-//         todo!()
-//     }
-//
-//     fn get_id_as_thing(&self) -> surrealdb::sql::Thing {
-//         todo!()
-//     }
-//
-//     fn get_serializable_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn get_linked_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn get_link_one_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn get_link_self_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn get_link_one_and_self_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn get_link_many_fields() -> Vec<surreal_query_builder::Field> {
-//         todo!()
-//     }
-//
-//     fn define_table() -> surreal_query_builder::Raw {
-//         todo!()
-//     }
-//
-//     fn define_fields() -> Vec<surreal_query_builder::Raw> {
-//         todo!()
-//     }
-//
-//     fn get_field_meta() -> Vec<surreal_query_builder::FieldMetadata> {
-//         todo!()
-//     }
-// }
-//
-// impl TableResources for Migration {
-//     fn events_definitions() -> Vec<surreal_query_builder::Raw> {
-//         vec![]
-//     }
-//
-//     fn indexes_definitions() -> Vec<surreal_query_builder::Raw> {
-//         vec![]
-//     }
-//
-//     fn fields_definitions() -> Vec<surreal_query_builder::Raw> {
-//         Self::define_fields()
-//     }
-//
-//     fn table_definition() -> surreal_query_builder::Raw {
-//         Self::define_table()
-//     }
-// }
-
-// Warn when id field not included in a model
-
-// Migratiions from migration directory
 #[derive(Clone, Debug)]
 pub struct MigrationTwoWay {
     pub id: MigrationFileName,
@@ -233,16 +125,6 @@ pub struct MigrationTwoWay {
 }
 
 #[derive(Clone, Debug)]
-pub struct EmbeddedMigrationTwoWay {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub timestamp: u64,
-    pub up: &'static str,
-    pub down: &'static str,
-    // status: String,
-}
-
-#[derive(Clone, Debug)]
 pub struct MigrationOneWay {
     pub id: MigrationFileName,
     pub name: String,
@@ -250,49 +132,7 @@ pub struct MigrationOneWay {
     pub content: String, // status: String,
 }
 
-#[derive(Clone, Debug)]
-pub struct EmbeddedMigrationOneWay {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub timestamp: u64,
-    pub content: &'static str, // status: String,
-}
-
 impl MigrationOneWay {}
-
-// pub struct EmbeddedMigrationsOneWay<const N: usize> {
-#[allow(missing_copy_implementations)]
-pub struct EmbeddedMigrationsOneWay {
-    // migrations: &'static [MigrationOneWay],
-    pub migrations: &'static [EmbeddedMigrationOneWay],
-}
-
-// impl<const N: usize> EmbeddedMigrationsOneWay<N> {
-impl EmbeddedMigrationsOneWay {
-    // pub const fn new<const N: usize>(migrations: [EmbeddedMigrationOneWay; N]) -> Self {
-    pub const fn new(migrations: &'static [EmbeddedMigrationOneWay]) -> Self {
-        Self { migrations }
-    }
-    // pub fn new(migrations: &'static [MigrationOneWay]) -> Self {
-    //     Self { migrations }
-    // }
-}
-// fn erer() {
-//     let one_way = EmbeddedMigrationOneWay {
-//         id: "sample",
-//         name: "".into(),
-//         timestamp: 0,
-//         content: "".into(),
-//     };
-//     let migrations = &[one_way];
-//     let xx = EmbeddedMigrationsOneWay::new(migrations);
-//     // let one_way = &[one_way];
-// }
-
-#[allow(missing_copy_implementations)]
-pub struct EmbeddedMigrationsTwoWay {
-    pub migrations: &'static [EmbeddedMigrationTwoWay],
-}
 
 #[derive(Debug, Clone)]
 pub enum Direction {
@@ -399,7 +239,7 @@ pub struct FileManager {
     pub mode: Mode,
     /// Default path is 'migrations' ralative to the nearest project root where
     /// cargo.toml is defined
-    /// 
+    ///
     /// ```rust
     /// custom_path: Some("../custom-path".to_string())
     /// ```
@@ -408,17 +248,36 @@ pub struct FileManager {
     // pub crea
 }
 
+///
 impl FileManager {
-    pub fn resolve_migration_directory(
+    pub fn mode(&self, mode: Mode) -> Self {
+        Self {
+            mode,
+            ..self.clone()
+        }
+    }
+
+    pub fn custom_path(&self, custom_path: String) -> Self {
+        Self {
+            custom_path: Some(custom_path),
+            ..self.clone()
+        }
+    }
+
+    pub fn migration_flag(&self, migration_flag: MigrationFlag) -> Self {
+        Self {
+            migration_flag,
+            ..self.clone()
+        }
+    }
+
+    pub(crate) fn resolve_migration_directory(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<PathBuf> {
-        // let cargo_manigests_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
         let cargo_toml_directory =
             env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
-        // let cargo_manigests_dir = Path::new(env::var("CARGO_MANIFEST_DIR").unwrap());
         let cargo_manifests_dir = Path::new(&cargo_toml_directory);
-        println!("cargo_manigests_dir: {:?}", cargo_manifests_dir);
         let default_path = cargo_manifests_dir.join("migrations");
         let path = self.custom_path.as_ref().map_or(default_path, |fp| {
             cargo_manifests_dir.join(Path::new(&fp).to_owned())
@@ -437,73 +296,10 @@ impl FileManager {
         }
     }
 
-    pub fn migration_directory_from_given_path(
-        &self,
-        create_dir_if_not_exists: bool,
-    ) -> MigrationResult<PathBuf> {
-        let cargo_toml_directory =
-            env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
-        let cargo_manifest_path = Path::new(&cargo_toml_directory);
-        let migrations_path = self.custom_path.as_ref().map(Path::new);
-        let x = Self::resolve_migrations_directory(
-            cargo_manifest_path,
-            migrations_path,
-            create_dir_if_not_exists,
-        );
-        // panic!("x: {:?}", x);
-        x
-    }
-
-    fn resolve_migrations_directory(
-        cargo_manifest_dir: &Path,
-        relative_path_to_migrations: Option<&Path>,
-        create_dir_if_not_exists: bool,
-    ) -> MigrationResult<PathBuf> {
-        let result = match relative_path_to_migrations {
-            Some(dir) => cargo_manifest_dir.join(dir),
-            None => {
-                let src_dir = cargo_manifest_dir.join("src");
-                Self::search_for_migrations_directory(&src_dir)
-                    .ok_or(MigrationError::MigrationDirectoriesNotExist)?
-            }
-        };
-
-        if result.canonicalize().is_ok() {
-            return Ok(result);
-        } else {
-            if create_dir_if_not_exists {
-                return Ok(result);
-            }
-            // fs::create_dir(&result).map_err(|e| MigrationError::IoError(e.to_string()))?;
-            return Err(MigrationError::InvalidMigrationDirectory(
-                result.to_string_lossy().to_string(),
-            ));
-            // return Err(MigrationError::InvalidMigrationDirectory(
-            //     result.to_string_lossy().to_string(),
-            // ));
-        }
-        // result.canonicalize().map_err(|_| {
-        //     MigrationError::InvalidMigrationDirectory(result.to_string_lossy().to_string())
-        // })
-    }
-
-    pub fn search_for_migrations_directory(path: &Path) -> Option<PathBuf> {
-        let migration_path = path.join("migrations");
-        if migration_path.is_dir() {
-            Some(migration_path)
-        } else {
-            path.parent()
-                .and_then(Self::search_for_migrations_directory)
-        }
-    }
-
     pub fn get_oneway_migrations(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationOneWay>> {
-        // let migration_directory = self.resolve_migration_directory()?;
-        // let migration_directory =
-        //     self.migration_directory_from_given_path(create_dir_if_not_exists)?;
         let migration_directory = self.resolve_migration_directory(create_dir_if_not_exists)?;
         let migrations = fs::read_dir(migration_directory);
 
@@ -551,12 +347,18 @@ impl FileManager {
         Ok(migrations_uni_meta)
     }
 
+    pub fn get_all_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+        self.get_two_way_migrations(false)
+    }
+
+    pub fn get_all_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+        self.get_oneway_migrations(false)
+    }
+
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
-        // let migration_dir_path =
-        //     self.migration_directory_from_given_path(create_dir_if_not_exists)?;
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         println!("Migration dir path: {:?}", migration_dir_path.clone());
         let migrations = fs::read_dir(migration_dir_path.clone());
@@ -646,7 +448,7 @@ impl FileManager {
         Ok(migrations_bi_meta)
     }
 
-    pub fn get_two_way_migration_by_name(
+    pub(crate) fn get_two_way_migration_by_name(
         &self,
         migration_name: MigrationFileName,
         create_dir_if_not_exists: bool,

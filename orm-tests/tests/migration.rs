@@ -5,7 +5,8 @@ const MIGRATIONS: migrator::EmbeddedMigrationsOneWay =
 
 // const MIGRATIONS2: migrator::EmbeddedMigrationsTwoWay = embed_migrations!("../migrator/migrations");
 // const MIGRATIONS2: migrator::EmbeddedMigrationsTwoWay =
-const MIGRATIONS2: migrator::EmbeddedMigrationsTwoWay = embed_migrations!("../migrator/migrations");
+const MIGRATIONS2: migrator::EmbeddedMigrationsTwoWay =
+    embed_migrations!("../examples/migration-embedded/migrations");
 
 #[test]
 fn test_embed_migrations() {

@@ -1,35 +1,18 @@
 use migrator::{
-    EmbeddedMigrations, FileManager, MigrationError, MigrationFileName, MigrationFlag,
-    MigrationOneWay, MigrationTwoWay, Mode,
+    FileManager, MigrationError, MigrationFileName, MigrationFlag, MigrationOneWay,
+    MigrationTwoWay, Mode,
 };
 use proc_macro::TokenStream;
-// use proc_macro2::TokenStream;
 use quote::quote;
 use std::fs;
 use std::path::{Path, PathBuf};
+use syn::{
+    parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Result,
+    Token,
+};
 use thiserror::Error;
 
-// #[derive(Error, Debug)]
-// enum MigrationError {
-//     InvalidMigrationDirectory(String),
-//     NoMigrationDirectories,
-//     NoMigrationsFound(String),
-// }
-
-// Step 4: Checksum Calculation
-// fn calculate_checksum(path: &Path) -> Result<String, Box<dyn Error>> {
-//     use checksums::hash_file;
-//     let checksum = hash_file(path)?;
-//     Ok(checksum)
-// }
-
-enum MigrationType {
-    OneWay,
-    TwoWay,
-}
-
-// Step 7: Generate Rust Code
-fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_macro2::TokenStream {
+fn generate_migration_code(file_manager: FileManager) -> proc_macro2::TokenStream {
     let crate_name = get_crate_name(false);
 
     let xx = match file_manager.migration_flag {
@@ -37,18 +20,17 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             .get_oneway_migrations(false)
             .unwrap()
             .iter()
-            .map(|x| {
-                let name = x.name.to_string();
-                let content = x.content.to_string();
-                let timestamp = x.timestamp;
-                let id = x.id.to_string();
-                // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+            .map(|meta| {
+                let name = meta.name.to_string();
+                let content = meta.content.to_string();
+                let timestamp = meta.timestamp;
+                let id = meta.id.to_string();
+
                 quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
                     id: #id,
                     name: #name,
                     timestamp: #timestamp,
                     content: #content,
-                    // content: include_str!(#path),
                 })
             })
             .collect::<Vec<_>>(),
@@ -56,13 +38,13 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             .get_two_way_migrations(false)
             .unwrap()
             .iter()
-            .map(|x| {
-                let name = x.name.to_string();
-                let up = x.up.to_string();
-                let down = x.down.to_string();
-                let timestamp = x.timestamp;
-                let id = x.id.clone().to_string();
-                // id: #id.to_string().try_into().expect("Invalid filename as format. Must be in format <timestamp>_<name>.<up|down|<None>>.surql"),
+            .map(|meta| {
+                let name = meta.name.to_string();
+                let up = meta.up.to_string();
+                let down = meta.down.to_string();
+                let timestamp = meta.timestamp;
+                let id = meta.id.clone().to_string();
+
                 quote!(#crate_name::migrator::EmbeddedMigrationTwoWay {
                     id: #id,
                     name: #name,
@@ -74,27 +56,16 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             .collect::<Vec<_>>(),
     };
 
-    let pp = match file_manager.migration_flag {
-        // EmbeddedMigrationsTwoWay
+    let embedded_migration = match file_manager.migration_flag {
         MigrationFlag::OneWay => {
             quote!(#crate_name::migrator::EmbeddedMigrationsOneWay::new(&[#(#xx),*]))
         }
         MigrationFlag::TwoWay => quote!(
-                #crate_name::migrator::EmbeddedMigrationsTwoWay {
-                    migrations: &[#(#xx),*]
-                }
+                #crate_name::migrator::EmbeddedMigrationsTwoWay::new(&[#(#xx),*])
         ),
     };
-    // let xxv = quote!(::std::vec![#(#xx),*]);
-    // // panic!("{}", xxv.to_string());
-    // quote!(::std::vec![#(#xx),*])
-    pp
+    embedded_migration
 }
-
-use syn::{
-    parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Result,
-    Token,
-};
 
 use crate::models::get_crate_name;
 
@@ -138,7 +109,6 @@ fn parse_it(input: Args) -> Vec<Option<String>> {
                     args.push(Some(ident_str));
                 }
             }
-            // ... Other Expr variants
             _ => {
                 // Handle other kinds of expressions
             }
@@ -148,7 +118,6 @@ fn parse_it(input: Args) -> Vec<Option<String>> {
     args
 }
 
-// Your procedural macro entry point
 pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Args);
 
@@ -156,11 +125,7 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
         panic!("Too many arguments. Expected 3 or less");
     }
 
-    // let mut args = input.args.iter().map(|arg| quote! {#arg}.to_string());
     let mut args = parse_it(input).into_iter();
-    // let custom_path = args
-    //     .next()
-    //     .map_or(None, |path| if path == "None" { None } else { Some(path) });
 
     let custom_path = args.next().flatten().clone();
     let flag = args
@@ -178,33 +143,13 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
             .unwrap()
     });
 
-    // let custom_path = match args.next() {
-    //     Some(path) if path == "None" || path.is_empty() => None,
-    //     Some(path) => {
-    //         // panic!("{}", path);
-    //         Some(path.to_string())
-    //     }
-    //     None => None,
-    // };
-    //
-    // let flag = args.next().map_or(MigrationFlag::default(), |fl| {
-    //     fl.try_into()
-    //         .map_err(|e: MigrationError| e.to_string())
-    //         .unwrap()
-    // });
-    // let mode = args.next().map_or(Mode::default(), |md| {
-    //     md.try_into()
-    //         .map_err(|e: MigrationError| e.to_string())
-    //         .unwrap()
-    // });
-
     let file_manager = FileManager {
         mode,
         custom_path: custom_path.as_ref().map(|x| x.to_string()),
         migration_flag: flag,
     };
 
-    generate_migration_code(file_manager, custom_path.as_ref().unwrap()).into()
+    generate_migration_code(file_manager).into()
 }
 
 #[cfg(test)]
