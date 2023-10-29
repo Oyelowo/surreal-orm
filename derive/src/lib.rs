@@ -4,7 +4,27 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-
+#![allow(
+    clippy::map_unwrap_or,
+    clippy::match_same_arms,
+    clippy::type_complexity,
+    clippy::needless_doctest_main
+)]
+#![warn(
+    clippy::unwrap_used,
+    clippy::print_stdout,
+    clippy::mut_mut,
+    clippy::non_ascii_literal,
+    clippy::similar_names,
+    clippy::unicode_not_nfc,
+    clippy::enum_glob_use,
+    clippy::if_not_else,
+    clippy::items_after_statements,
+    clippy::used_underscore_binding,
+    missing_debug_implementations,
+    missing_copy_implementations
+)]
+#![cfg_attr(test, allow(clippy::unwrap_used))]
 extern crate proc_macro;
 
 use migration::generate_embedded_migrations;
