@@ -7,9 +7,11 @@
 
 extern crate proc_macro;
 
+use migration::generate_embedded_migrations;
 use proc_macro::TokenStream;
 use surreal_query_builder::sql;
 use syn::{parse_macro_input, LitStr};
+mod migration;
 mod models;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
@@ -43,4 +45,9 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
         }
     };
     raw_input
+}
+
+#[proc_macro]
+pub fn embed_migrations(input: TokenStream) -> TokenStream {
+    generate_embedded_migrations(input)
 }
