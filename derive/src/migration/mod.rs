@@ -80,9 +80,21 @@ fn generate_migration_code(file_manager: FileManager, path: &String) -> proc_mac
             .collect::<Vec<_>>(),
     };
 
-    let xxv = quote!(::std::vec![#(#xx),*]);
-    // panic!("{}", xxv.to_string());
-    quote!(::std::vec![#(#xx),*])
+    let pp = match file_manager.migration_flag {
+        // EmbeddedMigrationsTwoWay
+        MigrationFlag::OneWay => {
+            quote!(#crate_name::migrator::EmbeddedMigrationsOneWay::new(&[#(#xx),*]))
+        }
+        MigrationFlag::TwoWay => quote!(
+                #crate_name::migrator::EmbeddedMigrationsTwoWay {
+                    migrations: &[#(#xx),*]
+                }
+        ),
+    };
+    // let xxv = quote!(::std::vec![#(#xx),*]);
+    // // panic!("{}", xxv.to_string());
+    // quote!(::std::vec![#(#xx),*])
+    pp
 }
 
 use syn::{
