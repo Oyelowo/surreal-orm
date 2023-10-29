@@ -8,15 +8,16 @@
 use std::fmt::Display;
 
 use crate::*;
-use surreal_orm::*;
+use surreal_query_builder::*;
 
 #[derive(Debug)]
-pub(crate) struct ComparisonFields<'a> {
+pub(crate) struct ComparisonFields<'a, R: DbResources> {
     pub(crate) table: &'a Table,
     pub(crate) resources: &'a ComparisonsInit<'a>,
+    pub(crate) codebase_resources: &'a R,
 }
 
-impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
+impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> {
     fn get_left(&self) -> Fields {
         self.resources
             .left_resources
@@ -62,8 +63,11 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
             let def_left = self.get_left().get_definition(name).cloned();
             let table = self.get_table();
 
-            let field_meta_with_old_name =
-                RightDatabase::find_field_has_old_name(table, By::NewName(name.to_string()));
+            let field_meta_with_old_name = RightDatabase::find_field_has_old_name(
+                self.codebase_resources,
+                table,
+                By::NewName(name.to_string()),
+            );
 
             if let Some(meta) = &field_meta_with_old_name {
                 let old_name = &meta.clone().old_name.expect("Should exist").to_string();
@@ -173,7 +177,7 @@ impl<'a> TableResourcesMeta<Fields> for ComparisonFields<'a> {
     }
 }
 
-impl<'a> ComparisonFields<'a> {
+impl<'a, R: DbResources> ComparisonFields<'a, R> {
     fn get_field_meta_from_prompt(
         &self,
         new_name: &String,

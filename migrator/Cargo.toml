@@ -11,6 +11,7 @@ documentation.workspace = true
 [dependencies]
 # surreal-orm = { workspace = true }
 surreal-query-builder = { workspace = true }
+# surreal-models = { workspace = true }
 surrealdb = { workspace = true }
 async-trait = { workspace = true }
 serde = { workspace = true }

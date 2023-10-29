@@ -10,7 +10,7 @@ use crate::{
     table_indexes::ComparisonIndexes, *,
 };
 use serde::{Deserialize, Serialize};
-use surreal_orm::Table;
+use surreal_query_builder::{DbResources, Table};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct TableResourcesData {
@@ -40,11 +40,12 @@ impl TableResourcesData {
         self.fields.clone()
     }
 }
-pub struct ComparisonTables<'a> {
+pub struct ComparisonTables<'a, R: DbResources> {
     pub resources: &'a ComparisonsInit<'a>,
+    pub codebase_resources: &'a R,
 }
 
-impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
+impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
     fn get_left(&self) -> Tables {
         self.resources.left_resources.tables()
     }
@@ -76,6 +77,7 @@ impl DbResourcesMeta<Tables> for ComparisonTables<'_> {
             let fields = ComparisonFields {
                 table: &Table::from(table_name.clone()),
                 resources: self.resources,
+                codebase_resources: self.codebase_resources,
             };
 
             let fields = fields.queries()?;

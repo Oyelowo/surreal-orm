@@ -109,7 +109,7 @@ impl MigratorDatabase {
     pub async fn generate_migrations(
         migration_name: String,
         file_manager: &FileManager,
-        resources: impl DbResources,
+        codebase_resources: impl DbResources,
     ) -> MigrationResult<()> {
         let name = migration_name
             .to_string()
@@ -139,12 +139,15 @@ impl MigratorDatabase {
 
         // 2. Get all migrations from codebase synced with db - Right
         // let code_base_resources: Resources = resouces.i;
-        right.run_codebase_schema_queries(resources).await?;
+        right
+            .run_codebase_schema_queries(&codebase_resources)
+            .await?;
         let init = ComparisonsInit {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
+            // codebase_resources: &resources,
         };
-        let tables = init.new_tables().queries();
+        let tables = init.new_tables(&codebase_resources).queries();
         let analyzers = init.new_analyzers().queries();
         let params = init.new_params().queries();
         let functions = init.new_functions().queries();

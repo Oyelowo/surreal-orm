@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use surreal_orm::Table;
+use surreal_query_builder::Table;
 
 use crate::*;
 
