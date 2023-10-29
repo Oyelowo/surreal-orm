@@ -16,24 +16,208 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use surreal_query_builder::{Node, SurrealId, TableResources};
+use surreal_query_builder::statements::{define_field, define_table, DefineTableStatement};
+use surreal_query_builder::{FieldType, Model, Node, Raw, SurrealId, Table, TableResources, ToRaw};
+use surrealdb::sql::Thing;
 
 use crate::*;
 
-#[derive(Node, Serialize, Deserialize, Clone, Debug)]
+// #[derive(Node, Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-#[surreal_orm(table_name = "migration", schemafull)]
+// #[surreal_orm(table_name = "migration", schemafull)]
 pub struct Migration {
-    pub id: SurrealId<Self, String>,
+    // pub id: SurrealId<Self, String>,
+    id: Thing,
     pub name: String,
     pub timestamp: u64,
     // pub timestamp: Datetime<Utc>,
     // status: String,
 }
 
+pub struct MigrationSchema {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub timestamp: &'static str,
+}
+
+impl Migration {
+    pub fn create_id(id_part: MigrationFileName) -> Thing {
+        Thing {
+            tb: Migration::table_name().to_string(),
+            id: id_part.to_string().into(),
+        }
+    }
+    // pub fn create_raw(m: Self) -> Raw {
+    pub fn create_raw(id_part: MigrationFileName, name: String, timestamp: u64) -> Raw {
+        let migration_table = Migration::table_name();
+        let migration::Schema {
+            id,
+            name,
+            timestamp,
+        } = Migration::schema();
+
+        let name_field = name;
+        let timestamp_field = timestamp;
+        // let record_id = Thing {
+        //     tb: migration_table.clone().to_string(),
+        //     id: m.id.to_string().into(),
+        // };
+        // let name = m.name.clone();
+        // let timestamp = m.timestamp;
+        // let content = m.content.clone();
+        let record_id = Self::create_id(id_part);
+        Raw::new(format!(
+            "CREATE {record_id} SET {name_field}={name}, {timestamp_field}={timestamp}"
+        ))
+    }
+
+    pub fn schema() -> MigrationSchema {
+        MigrationSchema {
+            id: "id",
+            name: "name",
+            timestamp: "timestamp",
+        }
+    }
+
+    pub fn table_name() -> surreal_query_builder::Table {
+        Table::new("migration")
+    }
+
+    pub fn define_table() -> DefineTableStatement {
+        define_table(Migration::table_name()).schemafull()
+    }
+
+    pub fn define_fields() -> Vec<Raw> {
+        let migration::Schema {
+            id,
+            name,
+            timestamp,
+        } = Migration::schema();
+        let id = define_field(id)
+            .type_(FieldType::Record(vec![Migration::table_name()]))
+            .on_table(Migration::table_name())
+            .to_raw();
+
+        let name = define_field(name)
+            .type_(FieldType::String)
+            .on_table(Migration::table_name())
+            .to_raw();
+
+        let timestamp = define_field(timestamp)
+            .type_(FieldType::Int)
+            .on_table(Migration::table_name())
+            .to_raw();
+
+        vec![id, name, timestamp]
+    }
+}
+
+pub mod migration {
+    pub type Schema = super::MigrationSchema;
+}
+
 impl Migration {}
 
-impl TableResources for Migration {}
+struct RenameCreator;
+
+// impl Node for Migration {
+//     type NonNullUpdater = Migration;
+//
+//     type Aliases;
+//
+//     #[doc(hidden)]
+//     type TableNameChecker;
+//
+//     fn aliases() -> Self::Aliases {
+//         todo!()
+//     }
+//
+//     fn get_table_name() -> Table {
+//         todo!()
+//     }
+//
+//     fn with(clause: impl Into<NodeClause>) -> Self::Schema {
+//         todo!()
+//     }
+//
+//     fn get_fields_relations_aliased() -> Vec<Alias> {
+//         todo!()
+//     }
+// }
+// impl Model for Migration {
+//     type Id = Thing;
+//
+//     type NonNullUpdater = Migration;
+//
+//     type StructRenamedCreator = RenameCreator;
+//
+//     fn table_name() -> surreal_query_builder::Table {
+//         todo!()
+//     }
+//
+//     fn get_id(self) -> Self::Id {
+//         todo!()
+//     }
+//
+//     fn get_id_as_thing(&self) -> surrealdb::sql::Thing {
+//         todo!()
+//     }
+//
+//     fn get_serializable_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn get_linked_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn get_link_one_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn get_link_self_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn get_link_one_and_self_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn get_link_many_fields() -> Vec<surreal_query_builder::Field> {
+//         todo!()
+//     }
+//
+//     fn define_table() -> surreal_query_builder::Raw {
+//         todo!()
+//     }
+//
+//     fn define_fields() -> Vec<surreal_query_builder::Raw> {
+//         todo!()
+//     }
+//
+//     fn get_field_meta() -> Vec<surreal_query_builder::FieldMetadata> {
+//         todo!()
+//     }
+// }
+//
+// impl TableResources for Migration {
+//     fn events_definitions() -> Vec<surreal_query_builder::Raw> {
+//         vec![]
+//     }
+//
+//     fn indexes_definitions() -> Vec<surreal_query_builder::Raw> {
+//         vec![]
+//     }
+//
+//     fn fields_definitions() -> Vec<surreal_query_builder::Raw> {
+//         Self::define_fields()
+//     }
+//
+//     fn table_definition() -> surreal_query_builder::Raw {
+//         Self::define_table()
+//     }
+// }
 
 // Warn when id field not included in a model
 

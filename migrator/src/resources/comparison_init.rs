@@ -6,6 +6,7 @@
  */
 
 use serde::{Deserialize, Serialize};
+use surreal_query_builder::DbResources;
 
 use crate::*;
 
@@ -51,9 +52,13 @@ pub struct ComparisonsInit<'a> {
 }
 
 impl<'a> ComparisonsInit<'a> {
-    pub fn new_tables(&self) -> ComparisonTables {
+    pub fn new_tables<R: DbResources>(&self, codebase_resources: &'a R) -> ComparisonTables<R> {
         // println!("comparing resources {:#?}", self.left_resources);
-        ComparisonTables { resources: self }
+
+        ComparisonTables {
+            resources: self,
+            codebase_resources,
+        }
     }
 
     pub fn new_analyzers(&self) -> ComparisonAnalyzers {

@@ -32,7 +32,7 @@ impl RightDatabase {
 
     pub async fn run_codebase_schema_queries(
         &self,
-        code_resources: impl DbResources,
+        code_resources: &impl DbResources,
     ) -> MigrationResult<()> {
         let migration_meta_table_def = Migration::define_table().to_raw();
         let migration_meta_table_fields_def = Migration::define_fields()
@@ -58,8 +58,9 @@ impl RightDatabase {
     pub fn find_field_with_oldname_attr(
         table_name: Table,
         field_name: Field,
+        resources: impl DbResources,
     ) -> Option<FieldMetadata> {
-        Resources
+        resources
             .tables_fields_meta()
             .get(&table_name)
             .unwrap_or(&vec![])
@@ -68,8 +69,12 @@ impl RightDatabase {
             .find(|f| f.name.to_string() == field_name.to_string() && f.old_name.is_some())
     }
 
-    pub fn find_field_has_old_name(table_name: &Table, by: By) -> Option<FieldMetadata> {
-        Resources
+    pub fn find_field_has_old_name(
+        resources: &impl DbResources,
+        table_name: &Table,
+        by: By,
+    ) -> Option<FieldMetadata> {
+        resources
             .tables_fields_meta()
             .get(table_name)
             .unwrap_or(&vec![])
@@ -91,7 +96,7 @@ impl RightDatabase {
             })
     }
 
-    pub fn get_codebase_schema_queries(db_resources: impl DbResources) -> String {
+    pub fn get_codebase_schema_queries(db_resources: &impl DbResources) -> String {
         let queries_joined = [
             db_resources.tokens(),
             db_resources.scopes(),

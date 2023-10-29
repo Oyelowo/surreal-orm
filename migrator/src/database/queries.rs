@@ -162,8 +162,8 @@ impl DefineStatementRaw {
         remove_stmt_name: RemoveStmtName,
         table: Option<&Table>,
     ) -> MigrationResult<RemoveStatementRaw> {
-        use surreal_orm::sql::{statements::DefineStatement, Base, Statement};
-        let query = surreal_orm::sql::parse(&self.to_string()).expect("Invalid statment");
+        use surreal_query_builder::sql::{statements::DefineStatement, Base, Statement};
+        let query = surreal_query_builder::sql::parse(&self.to_string()).expect("Invalid statment");
         let stmt = query[0].clone();
         let get_error = |_resource_name: String| {
             // I gave this a  second thought because there is a scenario

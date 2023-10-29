@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use migrator::{FileManager, MigrationFlag, MigratorDatabase, Resources};
+use migrator::{FileManager, MigrationFlag, MigratorDatabase};
 
 #[tokio::main]
 async fn main() {
@@ -18,12 +18,12 @@ async fn main() {
         migration_flag: MigrationFlag::TwoWay,
     };
     // let file_manager = FileManager::default();
-    if let Err(e) =
-        MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
-            .await
-    {
-        println!("Error: {}", e);
-    }
+    // if let Err(e) =
+    //     MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
+    //         .await
+    // {
+    //     println!("Error: {}", e);
+    // }
 
     // RUN
     // let db = Surreal::new::<Ws>("localhost:8000")

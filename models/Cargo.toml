@@ -11,6 +11,8 @@ documentation = { workspace = true }
 
 [dependencies]
 surreal-orm = { workspace = true }
+# surreal-derive = { workspace = true }
+# surreal-query-builder = { workspace = true }
 surrealdb = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

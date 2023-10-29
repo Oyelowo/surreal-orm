@@ -5,6 +5,11 @@
  * Licensed under the MIT license
  */
 
+// pub mod surreal_orm  {
+//     pub use surreal_query_builder::*;
+//     pub use surreal_derive::*;
+// }
+
 mod migrations;
 mod models;
 pub use migrations::*;
