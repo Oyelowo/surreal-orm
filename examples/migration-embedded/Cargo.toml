@@ -1,0 +1,15 @@
+[package]
+name = "migration-embedded"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+surreal-orm = { workspace = true }
+surreal-models = { workspace = true }
+tokio = { workspace = true }
+# surreal-orm = { path = "../orm" }

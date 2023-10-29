@@ -10,6 +10,8 @@ members = [
   "models",
   "orm-tests",
   "orm-compile-tests",
+  "examples/migration-filebased",
+  "examples/migration-embedded",
 ]
 
 [workspace.package]
@@ -27,6 +29,8 @@ surreal-query-builder = { path = "query-builder" }
 migrator = { path = "migrator" }
 migrator-macros = { path = "migrator-macros" }
 surreal-models = { path = "models" }
+migration-filebased = { path = "examples/migration-filebased" }
+migration-embedded = { path = "examples/migration-embedded" }
 
 surrealdb = { version = "1.0.0", features = [
   "protocol-ws",

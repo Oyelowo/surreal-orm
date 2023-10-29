@@ -7,6 +7,7 @@
 
 use migrator::{FileManager, MigrationFlag, MigratorDatabase};
 
+
 #[tokio::main]
 async fn main() {
     // GENERATE MIGRATIONS
@@ -17,7 +18,7 @@ async fn main() {
         // custom_path: None,
         migration_flag: MigrationFlag::TwoWay,
     };
-    // let file_manager = FileManager::default();
+    let file_manager = FileManager::default();
     // if let Err(e) =
     //     MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
     //         .await
