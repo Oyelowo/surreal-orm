@@ -13,6 +13,7 @@
 // been removed, therefore, still valid to be used as an annotation. The old_name attribute is
 // meant to be used temporarily to help with migrations. Once the migration is done, the old_name
 // attribute should be removed.
+pub mod cli;
 mod database;
 mod error;
 mod resources;
