@@ -1,5 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{self, embed_migrations, MigrationConfig};
+use surreal_orm::migrator::{self, embed_migrations, MigrationConfig, RollbackStrategy};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -44,6 +44,16 @@ async fn main() {
         .generate_migrations("migration_name_example", Resources)
         .await
         .unwrap();
+
+    // two_way
+    //     .rollback_migrations(RollbackStrategy::Latest, db.clone())
+    //     // .rollback_migrations(RollbackStrategy::ByCount(4), db.clone())
+    //     // .rollback_migrations(
+    //     //     RollbackStrategy::UntilMigrationFileName("name".to_string().try_into().unwrap()),
+    //     //     db.clone(),
+    //     // )
+    //     .await
+    //     .unwrap();
 
     // Run normal non-embedded pending migrations in migration directory
     two_way.run_pending_migrations(db.clone()).await.unwrap();

@@ -13,6 +13,7 @@ use surreal_orm::{
     *,
 };
 
+#[derive(Debug, Clone)]
 pub struct Resources;
 
 impl DbResources for Resources {
