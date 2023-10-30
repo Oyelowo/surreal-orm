@@ -65,7 +65,7 @@ impl From<EmbeddedMigrationOneWay> for PendingMigration {
 
 pub enum RollbackStrategy {
     Latest,
-    ByCount(usize),
+    ByCount(u32),
     UntilMigrationFileName(MigrationFileName),
 }
 
@@ -134,8 +134,11 @@ impl MigrationRunner {
                 //     .collect::<Vec<_>>();
                 //
                 migrations.sort_unstable_by_key(|m| m.timestamp);
-                let migrations_to_rollback =
-                    migrations.iter().rev().take(count).collect::<Vec<_>>();
+                let migrations_to_rollback = migrations
+                    .iter()
+                    .rev()
+                    .take(count as usize)
+                    .collect::<Vec<_>>();
                 let rollback_queries = migrations_to_rollback
                     .iter()
                     .map(|m| m.down.clone())

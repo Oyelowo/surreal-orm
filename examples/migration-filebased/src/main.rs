@@ -1,9 +1,8 @@
-use clap::Parser;
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{self, embed_migrations, MigrationConfig, RollbackStrategy};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
+use surrealdb::{Connection, Surreal};
 
 async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
     let db = Surreal::new::<Ws>("localhost:8000")
@@ -22,7 +21,6 @@ async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
 #[tokio::main]
 async fn main() {
     let db = initialize_db().await;
-    let cli = Cli::parse();
 
     // ONE WAY MIGRATIONS
     let mut files_config = MigrationConfig::new().make_strict();
@@ -48,7 +46,6 @@ async fn main() {
         .generate_migrations("migration_name_example", Resources)
         .await
         .unwrap();
-
     // two_way
     //     .rollback_migrations(RollbackStrategy::Latest, db.clone())
     //     // .rollback_migrations(RollbackStrategy::ByCount(4), db.clone())
@@ -61,127 +58,4 @@ async fn main() {
 
     // Run normal non-embedded pending migrations in migration directory
     two_way.run_pending_migrations(db.clone()).await.unwrap();
-}
-
-/// Surreal ORM CLI
-#[derive(Parser, Debug)]
-#[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
-struct Cli {
-    /// Subcommand: generate, run, rollback
-    #[clap(subcommand)]
-    subcmd: SubCommand,
-}
-
-/// Subcommands
-#[derive(Parser, Debug)]
-enum SubCommand {
-    /// Generate migrations
-    Generate(Generate),
-    /// Run migrations
-    Run(Run),
-    /// Rollback migrations
-    Rollback(Rollback),
-}
-
-/// Generate migrations
-#[derive(Parser, Debug)]
-struct Generate {
-    /// Name of the migration
-    #[clap(long, default_value = "migration_name_example")]
-    name: String,
-    /// Optional custom migration path
-    #[clap(long)]
-    optional_custom_path: Option<String>,
-    /// Two way migration
-    #[clap(short, long)]
-    reversible: bool,
-}
-
-/// Run migrations
-#[derive(Parser, Debug)]
-struct Run {
-    /// Optional custom migration path
-    #[clap(long)]
-    optional_custom_path: Option<String>,
-    /// Enable two way migration
-    #[clap(short, long)]
-    reversible: bool,
-}
-
-/// Rollback migrations
-#[derive(Parser, Debug)]
-struct Rollback {
-    /// Rollback to the latest migration
-    #[clap(long)]
-    latest: bool,
-    /// Rollback by count
-    #[clap(long)]
-    by_count: Option<u32>,
-    /// Rollback till a specific migration ID
-    #[clap(long)]
-    till: Option<String>,
-    /// Optional custom migration path
-    #[clap(long)]
-    optional_custom_path: Option<String>,
-}
-
-#[tokio::main]
-async fn mainx() {
-    let db = initialize_db().await;
-    let cli = Cli::parse();
-
-    match cli.subcmd {
-        SubCommand::Generate(generate) => {
-            let mut files_config = MigrationConfig::new().make_strict();
-            let migration_type = if generate.reversible {
-                "migrations-twoway"
-            } else {
-                "migrations-oneway"
-            };
-            let generate_path = generate
-                .optional_custom_path
-                .unwrap_or_else(|| migration_type.to_string());
-
-            let generator = files_config.custom_path(&generate_path);
-            generator
-                .generate_migrations(&generate.name, Resources)
-                .await
-                .unwrap();
-        }
-        SubCommand::Run(run) => {
-            let mut files_config = MigrationConfig::new().make_strict();
-            let migration_type = if run.reversible {
-                "migrations-twoway"
-            } else {
-                "migrations-oneway"
-            };
-            let run_path = run
-                .optional_custom_path
-                .unwrap_or_else(|| migration_type.to_string());
-
-            let runner = files_config.custom_path(&run_path);
-            runner.run_pending_migrations(db.clone()).await.unwrap();
-        }
-        SubCommand::Rollback(rollback) => {
-            let mut files_config = MigrationConfig::new().make_strict();
-            let migration_type = if rollback.reversible {
-                "migrations-twoway"
-            } else {
-                "migrations-oneway"
-            };
-            let rollback_path = rollback
-                .optional_custom_path
-                .unwrap_or_else(|| migration_type.to_string());
-
-            let rollbacker = files_config.custom_path(&rollback_path);
-
-            if rollback.latest {
-                // Implement logic to rollback to the latest migration
-            } else if let Some(count) = rollback.by_count {
-                // Implement logic to rollback by count
-            } else if let Some(migration_id) = rollback.till {
-                // Implement logic to rollback till a specific migration ID
-            }
-        }
-    }
 }
