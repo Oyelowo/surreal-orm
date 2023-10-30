@@ -1,5 +1,5 @@
 [package]
-name = "migration-filebased"
+name = "migration-cli"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -13,4 +13,5 @@ surreal-orm = { workspace = true }
 surreal-models = { workspace = true }
 surrealdb = { workspace = true }
 tokio = { workspace = true }
+clap = { workspace = true }
 # surreal-orm = { path = "../orm" }
