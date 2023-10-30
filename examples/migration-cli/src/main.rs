@@ -22,5 +22,6 @@ async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
 #[tokio::main]
 async fn main() {
     let db = initialize_db().await;
+    // include example usage as rust doc
     cli::migration_cli(db, Resources).await;
 }
