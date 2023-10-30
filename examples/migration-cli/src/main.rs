@@ -1,14 +1,23 @@
 use clap::Parser;
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{cli, MigrationConfig, RollbackStrategy};
+use surrealdb::engine::any::{connect, Any};
+use surrealdb::engine::local::Db;
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::{Connection, Surreal};
 
-async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
-    let db = Surreal::new::<Ws>("localhost:8000")
-        .await
-        .expect("Failed to connect to db");
+// async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
+async fn initialize_db() -> Surreal<Any> {
+    // let db = Surreal::new::<Ws>("localhost:8000")
+    //     .await
+    //     .expect("Failed to connect to db");
+
+    let db = connect("http://localhost:8000").await.unwrap();
+    // let db = Surreal::new::<Ws>("localhost:8000")
+    //     .await
+    //     .expect("Failed to connect to db");
+    // db.connect(address)
     db.signin(Root {
         username: "root",
         password: "root",
@@ -19,9 +28,12 @@ async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
     db
 }
 
+// static DB: Lazy<Surreal<Db>> = Lazy::new(Surreal::init);
+// static DB: Lazy<Surreal<Client>> = Lazy::new(Surreal::init);
+// Can be one of memory, file:<path>, tikv:<addr>, file://<path>, tikv://<addr>
 #[tokio::main]
 async fn main() {
     let db = initialize_db().await;
     // include example usage as rust doc
-    cli::migration_cli(db, Resources).await;
+    cli::migration_cli(Some(db), Resources).await;
 }

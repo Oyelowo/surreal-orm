@@ -23,6 +23,7 @@ impl From<MigrationTwoWay> for MigrationOneWay {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PendingMigration {
     id: MigrationFileName,
     name: String,
@@ -295,7 +296,18 @@ impl MigrationRunner {
             .collect::<Vec<_>>()
             .join("\n");
 
-        println!("Running queries: {}", migration_queries);
+        println!(
+            "Running {} queries and",
+            migration_queries.split(";").count()
+        );
+        println!(
+            "Marking {} query(ies) as registered",
+            mark_queries_registered_queries
+                .trim()
+                .split(";")
+                .filter(|q| q.trim().is_empty())
+                .count()
+        );
 
         // Join migrations with mark queries
         let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
