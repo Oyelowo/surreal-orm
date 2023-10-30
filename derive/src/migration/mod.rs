@@ -1,6 +1,6 @@
 use migrator::{
-    FileManager, MigrationError, MigrationFileName, MigrationFlag, MigrationOneWay,
-    MigrationTwoWay, Mode,
+    FileManager, MigrationConfig, MigrationError, MigrationFileName, MigrationFlag,
+    MigrationOneWay, MigrationTwoWay, Mode,
 };
 use proc_macro::TokenStream;
 use quote::quote;
@@ -10,14 +10,22 @@ use syn::{
     parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Result,
     Token,
 };
-use thiserror::Error;
 
-fn generate_migration_code(file_manager: FileManager) -> proc_macro2::TokenStream {
+fn generate_migration_code(
+    flag: MigrationFlag,
+    custom_path: Option<String>,
+    mode: Mode,
+) -> proc_macro2::TokenStream {
+    let mut files_config = MigrationConfig::new().mode(mode);
+    if let Some(custom_path) = custom_path {
+        files_config = files_config.custom_path(custom_path);
+    }
+
     let crate_name = get_crate_name(false);
-
-    let xx = match file_manager.migration_flag {
-        MigrationFlag::OneWay => file_manager
-            .get_oneway_migrations(false)
+    let xx = match flag {
+        MigrationFlag::OneWay => files_config
+            .one_way()
+            .get_migrations()
             .unwrap()
             .iter()
             .map(|meta| {
@@ -34,8 +42,9 @@ fn generate_migration_code(file_manager: FileManager) -> proc_macro2::TokenStrea
                 })
             })
             .collect::<Vec<_>>(),
-        MigrationFlag::TwoWay => file_manager
-            .get_two_way_migrations(false)
+        MigrationFlag::TwoWay => files_config
+            .two_way()
+            .get_migrations()
             .unwrap()
             .iter()
             .map(|meta| {
@@ -56,7 +65,7 @@ fn generate_migration_code(file_manager: FileManager) -> proc_macro2::TokenStrea
             .collect::<Vec<_>>(),
     };
 
-    let embedded_migration = match file_manager.migration_flag {
+    let embedded_migration = match flag {
         MigrationFlag::OneWay => {
             quote!(#crate_name::migrator::EmbeddedMigrationsOneWay::new(&[#(#xx),*]))
         }
@@ -83,7 +92,6 @@ impl Parse for Args {
 fn parse_it(input: Args) -> Vec<Option<String>> {
     use syn::{Expr, Lit};
 
-    // This is pseudo-code and may require adaptation.
     let mut args: Vec<Option<String>> = Vec::new();
     for arg in &input.args {
         match arg {
@@ -143,13 +151,7 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
             .unwrap()
     });
 
-    let file_manager = FileManager {
-        mode,
-        custom_path: custom_path.as_ref().map(|x| x.to_string()),
-        migration_flag: flag,
-    };
-
-    generate_migration_code(file_manager).into()
+    generate_migration_code(flag, custom_path, mode).into()
 }
 
 #[cfg(test)]

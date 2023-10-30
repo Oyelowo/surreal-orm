@@ -1,6 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{self, embed_migrations};
-use surreal_orm::migrator::{FileManager, MigrationFlag, MigratorDatabase, Mode};
+use surreal_orm::migrator::{self, embed_migrations, MigrationConfig};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -9,65 +8,52 @@ use surrealdb::Surreal;
 const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
     embed_migrations!("migrations-oneway", one_way, strict);
 
-// const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay = embed_migrations!("migrations");
-const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay = embed_migrations!();
+const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
+    embed_migrations!("migrations-twoway");
 
-async fn generate_one_way_migrations() {
-    let file_manager = FileManager {
-        mode: Mode::Strict,
-        // custom_path: None,
-        custom_path: Some("migrations-oneway".to_string()),
-        //  Defaults to 'migrations'
-        // custom_path: None,
-        migration_flag: MigrationFlag::OneWay,
-    };
-
-    if let Err(e) =
-        MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
-            .await
-    {
-        println!("Error: {}", e);
-    }
-}
-
-async fn generate_two_way_migrations() {
-    let file_manager = FileManager {
-        mode: Mode::Strict,
-        //  Defaults to 'migrations'
-        custom_path: None,
-        // custom_path: Some("migrations-twoway".to_string()),
-        migration_flag: MigrationFlag::TwoWay,
-    };
-
-    if let Err(e) =
-        MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
-            .await
-    {
-        println!("Error: {}", e);
-    }
-}
-
-async fn generate_default_migrations() {
-    let file_manager = FileManager::default();
-    MigratorDatabase::generate_migrations("create_new_stuff".into(), &file_manager, Resources)
-        .await
-        .expect("Failed to generate migrations");
-}
 #[tokio::main]
 async fn main() {
+    let db = initialize_db().await;
+
+    // ONE WAY MIGRATIONS
+    let mut files_config = MigrationConfig::new().make_strict();
+
+    let one_way = files_config.custom_path("migrations-oneway").one_way();
+    // Comment out this line to generate oneway migrations
+    // To be used from cli
+    one_way
+        .generate_migrations("migration_name_example", Resources)
+        .await
+        .unwrap();
+
+    // Run normal non-embedded pending migrations in migration directory
+    one_way.run_pending_migrations(db.clone()).await.unwrap();
+
+    one_way
+        .run_embedded_pending_migrations(MIGRATIONS_ONE_WAY, db.clone())
+        .await
+        .unwrap();
+
+    // TWO WAY MIGRATIONS
+    let two_way = files_config.custom_path("migrations-twoway").two_way();
+
     // GENERATE MIGRATIONS
-    // Comment out one of the following to generate migrations
-    // generate_two_way_migrations().await;
-    // generate_one_way_migrations().await;
+    // comment out this line to generate twoway migrations
+    // To be used from cli
+    two_way
+        .generate_migrations("migration_name_example", Resources)
+        .await
+        .unwrap();
 
-    // RUN MIGRATIONS
-    println!("Running migrations");
-    println!("Embedded migrations: one way {:#?}", MIGRATIONS_ONE_WAY);
-    println!("Embedded migrations: two way {:#?}", MIGRATIONS_TWO_WAY);
+    // Run normal non-embedded pending migrations in migration directory
+    two_way.run_pending_migrations(db.clone()).await.unwrap();
+    two_way
+        .run_embedded_pending_migrations(MIGRATIONS_TWO_WAY, db.clone())
+        .await
+        .unwrap();
+}
 
-    // MIGRATIONS_ONE_WAY.run(&Resources).await.unwrap();
-
-    // RUN
+async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
     let db = Surreal::new::<Ws>("localhost:8000")
         .await
         .expect("Failed to connect to db");
@@ -78,14 +64,5 @@ async fn main() {
     .await
     .expect("Failed to signin");
     db.use_ns("test").use_db("test").await.unwrap();
-    // let db = Surreal::new::<Mem>(()).await.unwrap();
-    // if let Err(e) = Syncer::new(Mode::Strict, db.clone())
-    //     .sync_migration(MigrationFlag::OneWay)
-    //     .await
-    // {
-    //     println!("Error: {}", e);
-    // }
-    // let binding = info_for().database();
-    // let x = binding.get_data::<DbInfo>(db.clone()).await.unwrap();
-    // println!("Done : {:?}", x);
+    db
 }
