@@ -79,12 +79,25 @@ impl MigrationRunner {
         println!("Rolling back migration");
 
         let all_migrations = fm.get_two_way_migrations(false)?;
-        let queries_to_run = match rollback_strategy {
+        let (queries_to_run, file_paths) = match rollback_strategy {
             RollbackStrategy::Latest => {
                 let latest_migration = all_migrations
                     .iter()
                     .max_by_key(|m| m.timestamp)
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
+                // If we were to start with the db. Potentially delete later
+                // let latest_migration_in_db = select(All)
+                //     .from(Migration::table_name())
+                //     .order_by(Migration::schema().timestamp.desc())
+                //     .limit(1)
+                //     .return_one::<Migration>(db.clone())
+                //     .await?
+                //     .ok_or(MigrationError::MigrationDoesNotExist)?;
+                //
+                // let latest_migration = all_migrations
+                //     .iter()
+                //     .find(|m| m.id.to_string() == latest_migration_in_db.name)
+                //     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
                 let migration_name = latest_migration.name.clone();
                 let rollback_query = latest_migration.down.clone();
@@ -94,10 +107,32 @@ impl MigrationRunner {
                     "{}\n{}",
                     rollback_query, rollbacked_migration_deletion_query
                 );
-                all
+                let file_paths = vec![latest_migration
+                    .directory
+                    .clone()
+                    .map(|d| d.join(latest_migration.id.to_down().to_string()))
+                    .ok_or(MigrationError::MigrationPathNotFound)?];
+                (all, file_paths)
             }
             RollbackStrategy::ByCount(count) => {
                 let mut migrations = all_migrations.clone();
+                // If we were to start with the db
+                // let migrations_from_db = select(All)
+                //     .from(Migration::table_name())
+                //     .order_by(Migration::schema().timestamp.desc())
+                //     .limit(count)
+                //     .return_many::<Migration>(db.clone())
+                //     .await?;
+                //
+                // let migrations_to_rollback = migrations
+                //     .iter()
+                //     .filter(|m| {
+                //         migrations_from_db
+                //             .iter()
+                //             .any(|m_from_db| m_from_db.name == m.id.to_string())
+                //     })
+                //     .collect::<Vec<_>>();
+                //
                 migrations.sort_unstable_by_key(|m| m.timestamp);
                 let migrations_to_rollback =
                     migrations.iter().rev().take(count).collect::<Vec<_>>();
@@ -118,7 +153,17 @@ impl MigrationRunner {
                     rollback_queries, rollbacked_migration_deletion_queries
                 );
 
-                all
+                let file_paths = migrations_to_rollback
+                    .iter()
+                    .map(|m| {
+                        m.directory
+                            .clone()
+                            .map(|d| d.join(m.id.to_down().to_string()))
+                            .ok_or(MigrationError::MigrationPathNotFound)
+                    })
+                    .collect::<MigrationResult<Vec<_>>>()?;
+
+                (all, file_paths)
             }
             RollbackStrategy::UntilMigrationFileName(id_name) => {
                 let mut migrations = all_migrations.clone();
@@ -145,7 +190,18 @@ impl MigrationRunner {
                     "{}\n{}",
                     rollback_queries, rollbacked_migration_deletion_queries
                 );
-                all
+
+                let file_paths = migrations_to_rollback
+                    .iter()
+                    .map(|m| {
+                        m.directory
+                            .clone()
+                            .map(|d| d.join(m.id.to_down().to_string()))
+                            .ok_or(MigrationError::MigrationPathNotFound)
+                    })
+                    .collect::<MigrationResult<Vec<_>>>()?;
+
+                (all, file_paths)
             }
         };
 
@@ -154,6 +210,16 @@ impl MigrationRunner {
             .commit_transaction()
             .run(db)
             .await?;
+
+        for file_path in &file_paths {
+            println!("Deleting file: {:?}", file_path.to_str());
+            std::fs::remove_file(file_path).map_err(|e| {
+                MigrationError::IoError(format!(
+                    "Failed to delete migration file: {:?}. Error: {}",
+                    file_path, e
+                ))
+            });
+        }
 
         println!("Migration rolled back");
 

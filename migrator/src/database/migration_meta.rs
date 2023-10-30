@@ -31,7 +31,7 @@ use crate::*;
 // #[surreal_orm(table_name = "migration", schemafull)]
 pub struct Migration {
     // pub id: SurrealId<Self, String>,
-    id: Thing,
+    pub id: Thing,
     pub name: String,
     pub timestamp: u64,
     // pub timestamp: Datetime<Utc>,
@@ -131,6 +131,7 @@ pub struct MigrationTwoWay {
     pub timestamp: u64,
     pub up: String,
     pub down: String,
+    pub directory: Option<PathBuf>,
     // status: String,
 }
 
@@ -560,6 +561,7 @@ impl FileManager {
                         name: filename.basename(),
                         up: content_up,
                         down: content_down,
+                        directory: Some(parent_dir.to_path_buf()),
                     };
 
                     migrations_bi_meta.push(migration);

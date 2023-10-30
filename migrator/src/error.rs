@@ -25,6 +25,9 @@ pub enum MigrationError {
     #[error("Invalid migration name. {0}. Make sure it's in the format - <timestamp>_<migration_name>.<up|down|>.surql if two way or <timestamp>_<migration_name.surql if one way")]
     InvalidMigrationName(String),
 
+    #[error("Migration path not found")]
+    MigrationPathNotFound,
+
     #[error("Invalid migration mode: {0}. It must be one of {1}")]
     InvalidMigrationMode(String, String),
 
