@@ -48,6 +48,7 @@ impl EmbeddedMigrationsTwoWay {
                     timestamp,
                     up,
                     down,
+                    directory: None,
                 }
             })
             .collect::<Vec<_>>();

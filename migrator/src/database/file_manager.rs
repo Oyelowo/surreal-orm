@@ -37,6 +37,20 @@ pub enum MigrationFileName {
 }
 
 impl MigrationFileName {
+    pub fn filename(&self) -> String {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.up.surql")
+            }
+            MigrationFileName::Down(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.down.surql")
+            }
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+                format!("{timestamp}_{name}.surql")
+            }
+        }
+    }
+
     pub fn timestamp(&self) -> u64 {
         match self {
             MigrationFileName::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
