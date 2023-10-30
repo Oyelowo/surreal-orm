@@ -107,11 +107,16 @@ impl MigrationRunner {
                     "{}\n{}",
                     rollback_query, rollbacked_migration_deletion_query
                 );
-                let file_paths = vec![latest_migration
+                let file_paths = latest_migration
                     .directory
                     .clone()
-                    .map(|d| d.join(latest_migration.id.to_down().to_string()))
-                    .ok_or(MigrationError::MigrationPathNotFound)?];
+                    .map(|d| {
+                        vec![
+                            d.join(latest_migration.id.to_up().to_string()),
+                            d.join(latest_migration.id.to_down().to_string()),
+                        ]
+                    })
+                    .ok_or(MigrationError::MigrationPathNotFound)?;
                 (all, file_paths)
             }
             RollbackStrategy::ByCount(count) => {
@@ -161,12 +166,20 @@ impl MigrationRunner {
                     .map(|m| {
                         m.directory
                             .clone()
-                            .map(|d| d.join(m.id.to_down().to_string()))
+                            .map(|d| {
+                                vec![
+                                    d.join(m.id.to_up().to_string()),
+                                    d.join(m.id.to_down().to_string()),
+                                ]
+                            })
                             .ok_or(MigrationError::MigrationPathNotFound)
                     })
                     .collect::<MigrationResult<Vec<_>>>()?;
 
-                (all, file_paths)
+                (
+                    all,
+                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+                )
             }
             RollbackStrategy::UntilMigrationFileName(id_name) => {
                 let mut migrations = all_migrations.clone();
@@ -199,12 +212,20 @@ impl MigrationRunner {
                     .map(|m| {
                         m.directory
                             .clone()
-                            .map(|d| d.join(m.id.to_down().to_string()))
+                            .map(|d| {
+                                vec![
+                                    d.join(m.id.to_up().to_string()),
+                                    d.join(m.id.to_down().to_string()),
+                                ]
+                            })
                             .ok_or(MigrationError::MigrationPathNotFound)
                     })
                     .collect::<MigrationResult<Vec<_>>>()?;
 
-                (all, file_paths)
+                (
+                    all,
+                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+                )
             }
         };
 
