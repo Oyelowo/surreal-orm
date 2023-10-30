@@ -77,6 +77,35 @@ struct Rollback {
     path: Option<String>,
 }
 
+/// Run migration cli
+/// # Example
+/// ```rust
+/// use surreal_models::migrations::Resources;
+/// use surreal_orm::migrator::{cli, MigrationConfig, RollbackStrategy};
+/// use surrealdb::engine::remote::ws::Ws;
+/// use surrealdb::opt::auth::Root;
+/// use surrealdb::{Connection, Surreal};
+///
+/// async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
+///    let db = Surreal::new::<Ws>("localhost:8000")
+///    .await
+///    .expect("Failed to connect to db");
+///    db.signin(Root {
+///         username: "root",
+///         password: "root",
+/// })
+///    .await
+///    .expect("Failed to signin");
+///    db.use_ns("test").use_db("test").await.unwrap();
+///    db
+/// }
+///    #[tokio::main]
+/// async fn main() {
+///         let db = initialize_db().await;
+///    // include example usage as rust doc
+///         cli::migration_cli(db, Resources).await;
+/// }
+/// ```
 pub async fn migration_cli(db: Surreal<impl Connection>, codebase_resources: impl DbResources) {
     // let db = initialize_db().await;
     let cli = Cli::parse();
