@@ -5,7 +5,9 @@
  * Licensed under the MIT license
  */
 
-use migrator::{FileManager, MigrationFlag, MigrationRunner, MigratorDatabase, Mode};
+use migrator::{
+    FileManager, MigrationConfig, MigrationFlag, MigrationRunner, MigratorDatabase, Mode,
+};
 use surrealdb::{
     engine::remote::ws::{Client, Ws},
     opt::auth::Root,
@@ -20,16 +22,22 @@ async fn main() {
     // One way migrations
     // Make sure migrations directory exists or anyone you set in the config
     // before running this
-    let oneway_migrations = FileManager::default().get_all_oneway_migrations().unwrap();
-    MigrationRunner::run_pending_migrations(oneway_migrations, db.clone())
-        .await
-        .unwrap();
+    let mut files_config = MigrationConfig::new();
+
+    MigrationRunner::run_pending_migrations(
+        files_config.one_way().get_migrations().unwrap(),
+        db.clone(),
+    )
+    .await
+    .unwrap();
 
     // Two way migrations
-    let twoway_migrations = FileManager::default().get_all_two_way_migrations().unwrap();
-    MigrationRunner::run_pending_migrations(twoway_migrations, db.clone())
-        .await
-        .unwrap();
+    MigrationRunner::run_pending_migrations(
+        files_config.two_way().get_migrations().unwrap(),
+        db.clone(),
+    )
+    .await
+    .unwrap();
 }
 
 async fn initialize_db() -> Surreal<Client> {

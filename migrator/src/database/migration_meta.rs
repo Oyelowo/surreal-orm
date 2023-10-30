@@ -17,8 +17,11 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{define_field, define_table, DefineTableStatement};
-use surreal_query_builder::{FieldType, Model, Node, Raw, SurrealId, Table, TableResources, ToRaw};
+use surreal_query_builder::{
+    DbResources, FieldType, Model, Node, Raw, SurrealId, Table, TableResources, ToRaw,
+};
 use surrealdb::sql::Thing;
+use surrealdb::{Connection, Surreal};
 
 use crate::*;
 
@@ -61,7 +64,7 @@ impl Migration {
         let timestamp_field = timestamp;
         let record_id = Self::create_id(id_part);
         Raw::new(format!(
-            "CREATE {record_id} SET {name_field}={name}, {timestamp_field}={timestamp}"
+            "CREATE {record_id} SET {name_field}={name}, {timestamp_field}={timestamp};"
         ))
     }
 
@@ -244,8 +247,146 @@ pub struct FileManager {
     /// custom_path: Some("../custom-path".to_string())
     /// ```
     pub custom_path: Option<String>,
-    pub migration_flag: MigrationFlag,
+    pub(crate) migration_flag: MigrationFlag,
     // pub crea
+}
+
+#[derive(Debug, Clone)]
+pub struct MigrationConfig(FileManager);
+
+impl MigrationConfig {
+    pub fn new() -> Self {
+        Self(FileManager::default())
+    }
+
+    pub fn mode(&self, mode: Mode) -> Self {
+        Self(self.0.mode(mode))
+    }
+
+    pub fn make_strict(&self) -> Self {
+        Self(self.0.mode(Mode::Strict))
+    }
+
+    pub fn make_relaxed(&self) -> Self {
+        Self(self.0.mode(Mode::Relaxed))
+    }
+
+    /// Default path is 'migrations' ralative to the nearest project root where
+    pub fn custom_path(&self, custom_path: impl Into<String>) -> Self {
+        let custom_path = custom_path.into();
+        Self(self.0.custom_path(custom_path))
+    }
+
+    pub fn one_way(&mut self) -> OneWayGetter {
+        self.0.migration_flag = MigrationFlag::OneWay;
+        OneWayGetter::new(self.0.clone())
+    }
+
+    pub fn two_way(&mut self) -> TwoWayGetter {
+        self.0.migration_flag = MigrationFlag::TwoWay;
+        TwoWayGetter::new(self.0.clone())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct OneWayGetter(FileManager);
+
+impl OneWayGetter {
+    pub(crate) fn new(file_manager: FileManager) -> Self {
+        Self(file_manager)
+    }
+
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+        self.0.get_oneway_migrations(false)
+    }
+
+    /// Generate migration directory if it does not exist
+    pub async fn generate_migrations(
+        &self,
+        migration_name: impl Into<String>,
+        codebase_resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let migration_name = migration_name.into();
+        let file_manager = self.0.clone();
+
+        MigratorDatabase::generate_migrations(migration_name, &file_manager, codebase_resources)
+            .await
+            .expect("Failed to generate migrations");
+        Ok(())
+    }
+
+    /// Runs migrations at runtime against a database
+    /// Make sure the migration directory exists when running migrations
+    pub async fn run_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let migrations = self.get_migrations()?;
+        MigrationRunner::run_pending_migrations(migrations, db).await?;
+
+        Ok(())
+    }
+
+    pub async fn run_embedded_pending_migrations(
+        &self,
+        one_way_embedded_migrations: EmbeddedMigrationsOneWay,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let migrations = one_way_embedded_migrations.to_migrations_one_way()?;
+        MigrationRunner::run_pending_migrations(migrations, db).await?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TwoWayGetter(FileManager);
+
+impl TwoWayGetter {
+    pub(crate) fn new(file_manager: FileManager) -> Self {
+        Self(file_manager)
+    }
+
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+        self.0.get_two_way_migrations(false)
+    }
+
+    /// Generate migration directory if it does not exist
+    pub async fn generate_migrations(
+        &self,
+        migration_name: impl Into<String>,
+        codebase_resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let migration_name = migration_name.into();
+        let file_manager = self.0.clone();
+        MigratorDatabase::generate_migrations(migration_name, &file_manager, codebase_resources)
+            .await
+            .expect("Failed to generate migrations");
+        Ok(())
+    }
+
+    /// Make sure the migration directory exists when running migrations
+    pub async fn run_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let migrations = self.get_migrations()?;
+        MigrationRunner::run_pending_migrations(migrations, db).await?;
+
+        Ok(())
+    }
+
+    /// For running embedded migrations
+    pub async fn run_embedded_pending_migrations(
+        &self,
+        two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
+        MigrationRunner::run_pending_migrations(migrations, db).await?;
+
+        Ok(())
+    }
 }
 
 ///
@@ -269,6 +410,16 @@ impl FileManager {
             migration_flag,
             ..self.clone()
         }
+    }
+
+    pub fn one_way(&mut self) -> OneWayGetter {
+        self.migration_flag = MigrationFlag::OneWay;
+        OneWayGetter::new(self.clone())
+    }
+
+    pub fn two_way(&mut self) -> TwoWayGetter {
+        self.migration_flag = MigrationFlag::TwoWay;
+        TwoWayGetter::new(self.clone())
     }
 
     pub(crate) fn resolve_migration_directory(
@@ -345,14 +496,6 @@ impl FileManager {
 
         migrations_uni_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
         Ok(migrations_uni_meta)
-    }
-
-    pub fn get_all_two_way_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
-        self.get_two_way_migrations(false)
-    }
-
-    pub fn get_all_oneway_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
-        self.get_oneway_migrations(false)
     }
 
     pub fn get_two_way_migrations(
