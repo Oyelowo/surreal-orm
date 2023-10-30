@@ -2,8 +2,8 @@ use surreal_query_builder::{statements::*, *};
 use surrealdb::{sql::Thing, Connection, Surreal};
 
 use crate::{
-    migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationFileName, MigrationOneWay,
-    MigrationResult, MigrationTwoWay,
+    migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError, MigrationFileName,
+    MigrationOneWay, MigrationResult, MigrationTwoWay,
 };
 
 // pub struct MigrationRunner<C: Connection> {
@@ -63,173 +63,102 @@ impl From<EmbeddedMigrationOneWay> for PendingMigration {
     }
 }
 
-trait xxMigrationRunner {
-    // pub async fn rollback_migration(
-    //     &self,
-    //     migration_name: MigrationFileName,
-    //     fm: FileManager,
-    // ) -> MigrationResult<()>;
-    //
-    // pub async fn run_pending_migrations(
-    //     &self,
-    //     all_migrations: Vec<impl Into<MigrationOneWay>>,
-    // ) -> MigrationResult<()> {
-    //     let migration::Schema {
-    //         name, timestamp, ..
-    //     } = &Migration::schema();
-    //     let migration_table = Migration::table_name();
-    //
-    //     // Get the latest migration
-    //     let latest_migration = select(All)
-    //         .from(migration_table.clone())
-    //         .order_by(timestamp.desc())
-    //         .limit(1)
-    //         .return_one::<Migration>(self.db())
-    //         .await?;
-    //
-    //     // Get migrations that are not yet applied
-    //         .into_iter()
-    //     let migrations_to_run = all_migrations
-    //         .map(|m| {
-    //             let m: MigrationOneWay = m.into();
-    //             m
-    //         })
-    //         .filter(|m| {
-    //             latest_migration.as_ref().map_or(true, |latest_migration| {
-    //                 m.timestamp > latest_migration.timestamp
-    //             })
-    //         })
-    //         .collect::<Vec<_>>();
-    //
-    //     // Get queries to run
-    //     let migration_queries = migrations_to_run
-    //         .iter()
-    //         .map(|m| m.content.clone())
-    //         .collect::<Vec<_>>()
-    //         .join("\n");
-    //
-    //     // Create queries to mark migrations as applied
-    //     let mark_queries_registered_queries = migrations_to_run
-    //         .iter()
-    //         .map(|m| Migration::create_raw(m.id.clone(), m.name.clone(), m.timestamp).build())
-    //         .collect::<Vec<_>>()
-    //         .join("\n");
-    //
-    //     println!("Running queries: {}", migration_queries);
-    //
-    //     // Join migrations with mark queries
-    //     let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
-    //
-    //     // Run them as a transaction against a local in-memory database
-    //     if !all.trim().is_empty() {
-    //         begin_transaction()
-    //             .query(Raw::new(all))
-    //             .commit_transaction()
-    //             .run(self.db())
-    //             .await?;
-    //     }
-    //
-    //     Ok(())
-    // }
-    //
+pub enum RollbackStrategy {
+    Latest,
+    ByCount(usize),
+    UntilMigrationFileName(MigrationFileName),
 }
 
-// impl<C: Connection> MigrationRunner<C> {
 impl MigrationRunner {
-    // pub fn new(db: Surreal<C>) -> Self {
-    //     Self { db }
-    // }
-    //
-    // pub fn db(&self) -> Surreal<C> {
-    //     self.db.clone()
-    // }
+    /// Only two way migrations support rollback
+    pub async fn rollback_migrations(
+        fm: &FileManager,
+        rollback_strategy: RollbackStrategy,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        println!("Rolling back migration");
 
-    // pub async fn run_all_local_dir_up_migrations(
-    //     &self,
-    //     create_migration_table: bool,
-    // ) -> MigrationResult<()> {
-    //     let all_migrations = self
-    //         .file_manager
-    //         .get_two_way_migrations(create_migration_table)?;
-    //     self.run_against_db(all_migrations).await?;
-    //
-    //     Ok(())
-    // }
+        let all_migrations = fm.get_two_way_migrations(false)?;
+        let queries_to_run = match rollback_strategy {
+            RollbackStrategy::Latest => {
+                let latest_migration = all_migrations
+                    .iter()
+                    .max_by_key(|m| m.timestamp)
+                    .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-    // pub async fn run_pending_embedded_migrations(
-    //     &self,
-    //     embedded_migrations: Vec<impl Into<PendingMigration>>,
-    // ) -> MigrationResult<()> {
-    //     let all_up_migrations = embedded_migrations
-    //         .into_iter()
-    //         .map(|m| {
-    //             let m: PendingMigration = m.into();
-    //             m
-    //         })
-    //         .collect::<Vec<_>>();
-    //     self.run_pending_migrations(all_up_migrations).await?;
-    //
-    //     Ok(())
-    // }
+                let migration_name = latest_migration.name.clone();
+                let rollback_query = latest_migration.down.clone();
+                let rollbacked_migration_deletion_query =
+                    Migration::delete_raw(latest_migration.id.clone()).build();
+                let all = format!(
+                    "{}\n{}",
+                    rollback_query, rollbacked_migration_deletion_query
+                );
+                all
+            }
+            RollbackStrategy::ByCount(count) => {
+                let mut migrations = all_migrations.clone();
+                migrations.sort_unstable_by_key(|m| m.timestamp);
+                let migrations_to_rollback =
+                    migrations.iter().rev().take(count).collect::<Vec<_>>();
+                let rollback_queries = migrations_to_rollback
+                    .iter()
+                    .map(|m| m.down.clone())
+                    .collect::<Vec<_>>()
+                    .join("\n");
 
-    // async fn get_all_migrations(&self) -> MigrationResult<Vec<PendingMigration>> {
-    //     let all_up_migrations = match self.file_manager.migration_flag {
-    //         crate::MigrationFlag::TwoWay => {
-    //             let all_migrations = self.file_manager.get_two_way_migrations(false).unwrap();
-    //             let all_migrations = all_migrations
-    //                 .into_iter()
-    //                 .map(|m| {
-    //                     let m: PendingMigration = m.into();
-    //                     m
-    //                 })
-    //                 .collect::<Vec<_>>();
-    //             all_migrations
-    //         }
-    //         crate::MigrationFlag::OneWay => {
-    //             let all_migrations = self.file_manager.get_oneway_migrations(false).unwrap();
-    //             let all_migrations = all_migrations
-    //                 .into_iter()
-    //                 .map(|m| {
-    //                     let m: PendingMigration = m.into();
-    //                     m
-    //                 })
-    //                 .collect::<Vec<_>>();
-    //             all_migrations
-    //         }
-    //     };
-    //
-    //     Ok(all_up_migrations)
-    // }
+                let rollbacked_migration_deletion_queries = migrations_to_rollback
+                    .iter()
+                    .map(|m| Migration::delete_raw(m.id.clone()).build())
+                    .collect::<Vec<_>>()
+                    .join("\n");
 
-    // async fn run_pending_migrations(&self) -> MigrationResult<()> {
-    //     let all_up_migrations = match self.file_manager.migration_flag {
-    //         crate::MigrationFlag::TwoWay => {
-    //             let all_migrations = self.file_manager.get_two_way_migrations(false).unwrap();
-    //             let all_migrations = all_migrations
-    //                 .into_iter()
-    //                 .map(|m| {
-    //                     let m: PendingMigration = m.into();
-    //                     m
-    //                 })
-    //                 .collect::<Vec<_>>();
-    //             all_migrations
-    //         }
-    //         crate::MigrationFlag::OneWay => {
-    //             let all_migrations = self.file_manager.get_oneway_migrations(false).unwrap();
-    //             let all_migrations = all_migrations
-    //                 .into_iter()
-    //                 .map(|m| {
-    //                     let m: PendingMigration = m.into();
-    //                     m
-    //                 })
-    //                 .collect::<Vec<_>>();
-    //             all_migrations
-    //         }
-    //     };
-    //     self.run_against_db(all_up_migrations).await?;
-    //
-    //     Ok(())
-    // }
+                let all = format!(
+                    "{}\n{}",
+                    rollback_queries, rollbacked_migration_deletion_queries
+                );
+
+                all
+            }
+            RollbackStrategy::UntilMigrationFileName(id_name) => {
+                let mut migrations = all_migrations.clone();
+                migrations.sort_by_key(|m| m.timestamp);
+                let migrations_to_rollback = migrations
+                    .iter()
+                    .rev()
+                    .take_while(|m| m.name != id_name.to_string())
+                    .collect::<Vec<_>>();
+
+                let rollback_queries = migrations_to_rollback
+                    .iter()
+                    .map(|m| m.down.clone())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let rollbacked_migration_deletion_queries = migrations_to_rollback
+                    .iter()
+                    .map(|m| Migration::delete_raw(m.id.clone()).build())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let all = format!(
+                    "{}\n{}",
+                    rollback_queries, rollbacked_migration_deletion_queries
+                );
+                all
+            }
+        };
+
+        begin_transaction()
+            .query(Raw::new(queries_to_run))
+            .commit_transaction()
+            .run(db)
+            .await?;
+
+        println!("Migration rolled back");
+
+        Ok(())
+    }
 
     pub async fn run_pending_migrations(
         all_migrations: Vec<impl Into<PendingMigration>>,

@@ -68,6 +68,13 @@ impl Migration {
         ))
     }
 
+    pub fn delete_raw(id_part: MigrationFileName) -> Raw {
+        let migration_table = Migration::table_name();
+        let migration::Schema { id, .. } = Migration::schema();
+        let record_id = Self::create_id(id_part);
+        Raw::new(format!("DELETE {record_id};"))
+    }
+
     pub fn schema() -> MigrationSchema {
         MigrationSchema {
             id: "id",
@@ -384,6 +391,18 @@ impl TwoWayGetter {
     ) -> MigrationResult<()> {
         let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
         MigrationRunner::run_pending_migrations(migrations, db).await?;
+
+        Ok(())
+    }
+
+    /// Rollback migration using various strategies
+    pub async fn rollback_migrations(
+        &self,
+        rollback_strategy: RollbackStrategy,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let migrations = self.get_migrations()?;
+        MigrationRunner::rollback_migrations(&self.0, rollback_strategy, db).await?;
 
         Ok(())
     }
