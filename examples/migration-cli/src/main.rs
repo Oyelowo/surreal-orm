@@ -1,11 +1,9 @@
-use clap::Parser;
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{cli, MigrationConfig, RollbackStrategy};
+use surreal_orm::migrator::cli;
 use surrealdb::engine::any::{connect, Any};
-use surrealdb::engine::local::Db;
-use surrealdb::engine::remote::ws::Ws;
+
 use surrealdb::opt::auth::Root;
-use surrealdb::{Connection, Surreal};
+use surrealdb::Surreal;
 
 // async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
 async fn initialize_db() -> Surreal<Any> {
