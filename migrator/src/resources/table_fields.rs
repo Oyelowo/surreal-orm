@@ -213,7 +213,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         .with_help_message("Use the arrow keys to navigate. Press enter to select.")
         .prompt();
 
-        Some(confirmation.expect("Invalid conf"))
+        Some(confirmation.expect("Invalid confirmation"))
     }
 }
 

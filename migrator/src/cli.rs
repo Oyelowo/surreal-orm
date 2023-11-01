@@ -68,7 +68,6 @@ impl FromStr for Path {
     // Can be one of memory, file:<path>, tikv:<addr>, file://<path>, tikv://<addr>
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.trim().to_lowercase();
-        println!("xxxxxxx {}", s.clone());
         if s == "memory" {
             Ok(Path::Memory)
         } else {
@@ -305,12 +304,12 @@ async fn init_db(shared: &SharedRunAndRollBack, db: Surreal<Any>) -> Surreal<Any
         (None, Some(_)) => panic!("User not provided"),
         _ => {
             println!("User and password not provided, using root default");
-            db.signin(Root {
-                username: "root",
-                password: "root",
-            })
-            .await
-            .expect("Failed to signin");
+            // db.signin(Root {
+            //     username: "root",
+            //     password: "root",
+            // })
+            // .await
+            // .expect("Failed to signin");
         }
     };
 

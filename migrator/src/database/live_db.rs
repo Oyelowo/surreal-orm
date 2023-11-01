@@ -309,7 +309,6 @@ impl MigrationRunner {
 
         // Join migrations with mark queries
         let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
-        println!("{}", all);
 
         // Run them as a transaction against a local in-memory database
         if !all.trim().is_empty() {
