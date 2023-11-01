@@ -162,13 +162,11 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     }
                 }
                 DeltaType::Update { left, right } => {
-                    if left.trim() != right.trim() {
-                        acc.add_up(QueryType::Define(right));
-                        acc.add_new_line_to_up();
+                    acc.add_up(QueryType::Define(right));
+                    acc.add_new_line_to_up();
 
-                        acc.add_down(QueryType::Define(left));
-                        acc.add_new_line_to_down();
-                    }
+                    acc.add_down(QueryType::Define(left));
+                    acc.add_new_line_to_down();
                 }
             }
         }
