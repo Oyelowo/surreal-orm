@@ -1,13 +1,9 @@
-use migrator::{
-    FileManager, MigrationConfig, MigrationError, MigrationFileName, MigrationFlag,
-    MigrationOneWay, MigrationTwoWay, Mode,
-};
+use migrator::{MigrationConfig, MigrationError, MigrationFlag, Mode};
 use proc_macro::TokenStream;
 use quote::quote;
-use std::fs;
-use std::path::{Path, PathBuf};
+
 use syn::{
-    parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Result,
+    parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Lit, Result,
     Token,
 };
 
@@ -26,7 +22,7 @@ fn generate_migration_code(
         MigrationFlag::OneWay => files_config
             .one_way()
             .get_migrations()
-            .unwrap()
+            .expect("Failed to get migrations")
             .iter()
             .map(|meta| {
                 let name = meta.name.to_string();
@@ -45,7 +41,7 @@ fn generate_migration_code(
         MigrationFlag::TwoWay => files_config
             .two_way()
             .get_migrations()
-            .unwrap()
+            .expect("Failed to get migrations")
             .iter()
             .map(|meta| {
                 let name = meta.name.to_string();
@@ -65,15 +61,14 @@ fn generate_migration_code(
             .collect::<Vec<_>>(),
     };
 
-    let embedded_migration = match flag {
+    match flag {
         MigrationFlag::OneWay => {
             quote!(#crate_name::migrator::EmbeddedMigrationsOneWay::new(&[#(#xx),*]))
         }
         MigrationFlag::TwoWay => quote!(
                 #crate_name::migrator::EmbeddedMigrationsTwoWay::new(&[#(#xx),*])
         ),
-    };
-    embedded_migration
+    }
 }
 
 use crate::models::get_crate_name;
@@ -90,8 +85,6 @@ impl Parse for Args {
 }
 
 fn parse_it(input: Args) -> Vec<Option<String>> {
-    use syn::{Expr, Lit};
-
     let mut args: Vec<Option<String>> = Vec::new();
     for arg in &input.args {
         match arg {
@@ -108,7 +101,12 @@ fn parse_it(input: Args) -> Vec<Option<String>> {
             }
             Expr::Path(expr_path) => {
                 // Here arg is an identifier like an enum variant
-                let ident = &expr_path.path.segments.last().unwrap().ident;
+                let ident = &expr_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Custom path must be path or None if you want to use the default.")
+                    .ident;
                 let ident_str = ident.to_string();
 
                 if ident_str == "None" {
@@ -142,13 +140,13 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
         .map_or(MigrationFlag::default(), |fl| {
             fl.try_into()
                 .map_err(|e: MigrationError| e.to_string())
-                .unwrap()
+                .expect("Invalid flag")
         });
 
     let mode = args.next().flatten().map_or(Mode::default(), |md| {
         md.try_into()
             .map_err(|e: MigrationError| e.to_string())
-            .unwrap()
+            .expect("Invalid mode")
     });
 
     generate_migration_code(flag, custom_path, mode).into()

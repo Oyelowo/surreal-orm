@@ -1,5 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{self, embed_migrations, MigrationConfig, RollbackStrategy};
+use surreal_orm::migrator::{self, embed_migrations, MigrationConfig};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -16,7 +16,7 @@ async fn main() {
     let db = initialize_db().await;
 
     // ONE WAY MIGRATIONS
-    let mut files_config = MigrationConfig::new().make_strict();
+    let files_config = MigrationConfig::new().make_strict();
 
     let one_way = files_config.custom_path("migrations-oneway").one_way();
     // Comment out this line to generate oneway migrations

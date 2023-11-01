@@ -360,7 +360,10 @@ impl SchemaFieldsProperties {
         {
             let crate_name = get_crate_name(false);
             let field_type = &field_receiver.ty;
-            let field_name_original = field_receiver.ident.as_ref().unwrap();
+            let field_name_original = field_receiver
+                .ident
+                .as_ref()
+                .expect("field identifier does not exist");
             let old_field_name = match field_receiver.old_name.as_ref() {
                 Some(old_name) if !old_name.is_empty() => quote!(Some(#old_name.into())),
                 _ => quote!(::std::option::Option::None),
@@ -914,7 +917,13 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> TokenStream {
         let crate_name = get_crate_name(false);
-        let relation_model = &format_ident!("{}", relation.model.as_ref().unwrap());
+        let relation_model = &format_ident!(
+            "{}",
+            relation
+                .model
+                .as_ref()
+                .expect("relation model does not exist")
+        );
         let relation_attributes = RelateAttribute::from(relation);
         let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
         let foreign_node_table_name = &TokenStream::from(&relation_attributes.node_table_name);
@@ -978,7 +987,13 @@ impl NodeEdgeMetadataStore {
         field_type: &syn::Type,
     ) -> &Self {
         let crate_name = get_crate_name(false);
-        let relation_model = &format_ident!("{}", relation.model.as_ref().unwrap());
+        let relation_model = &format_ident!(
+            "{}",
+            relation
+                .model
+                .as_ref()
+                .expect("relation model does not exist")
+        );
         let relation_attributes = RelateAttribute::from(relation);
         let edge_table_name = &TokenStream::from(&relation_attributes.edge_table_name);
 

@@ -5,10 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{
-    FileManager, MigrationError, MigrationFlag, MigrationOneWay, MigrationResult, MigrationTwoWay,
-};
-use quote::{format_ident, quote};
+use crate::{MigrationOneWay, MigrationResult, MigrationTwoWay};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {

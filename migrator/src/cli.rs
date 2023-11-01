@@ -1,11 +1,12 @@
 use clap::Parser;
-use surreal_query_builder::DbResources;
+use surreal_query_builder::statements::info_for;
+use surreal_query_builder::{DbResources, Runnable};
 use surrealdb::engine::any::{connect, Any};
-use surrealdb::engine::remote::ws::{self, Ws};
-use surrealdb::opt::auth::Root;
-use surrealdb::{Connection, Surreal};
 
-use crate::{MigrationConfig, RollbackStrategy};
+use surrealdb::opt::auth::Root;
+use surrealdb::Surreal;
+
+use crate::{DbInfo, MigrationConfig, RollbackStrategy};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
@@ -61,57 +62,16 @@ impl Display for Path {
     }
 }
 
-// type X = RocksDb;
-// type X = surrealdb::engine::local::;
-/// // Connect to a local endpoint
-/// let db = connect("ws://localhost:8000").await?;
-///
-/// // Connect to a remote endpoint
-/// let db = connect("wss://cloud.surrealdb.com").await?;
-///
-/// // Connect using HTTP
-/// let db = connect("http://localhost:8000").await?;
-///
-/// // Connect using HTTPS
-/// let db = connect("https://cloud.surrealdb.com").await?;
-///
-/// // Instantiate an in-memory instance
-/// let db = connect("mem://").await?;
-///
-/// // Instantiate an file-backed instance
-/// let db = connect("file://temp.db").await?;
-///
-/// // Instantiate an IndxDB-backed instance
-/// let db = connect("indxdb://MyDatabase").await?;
-///
-/// // Instantiate a TiKV-backed instance
-/// let db = connect("tikv://localhost:2379").await?;
-///
-/// // Instantiate a FoundationDB-backed instance
-/// let db = connect("fdb://fdb.cluster").await?;
-/// # Ok(())
-/// #
 impl FromStr for Path {
     type Err = String;
 
     // Can be one of memory, file:<path>, tikv:<addr>, file://<path>, tikv://<addr>
-    // let s = s.trim().to_lowercase();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.trim().to_lowercase();
         println!("xxxxxxx {}", s.clone());
         if s == "memory" {
             Ok(Path::Memory)
-        }
-        // else if s.starts_with("file://") {
-        //     Ok(Path::Others(s.replace("file://", "")))
-        // } else if s.starts_with("tikv://") {
-        //     Ok(Path::Others(s.replace("tikv://", "")))
-        // } else if s.starts_with("indxdb://") {
-        //     Ok(Path::Others(s.replace("indxdb://", "")))
-        // } else if s.starts_with("fdb://") {
-        //     Ok(Path::Others(s.replace("fdb://", "")))
-        // }
-        else {
+        } else {
             Ok(Path::Others(s))
             // Err("Invalid path".to_string())
         }
@@ -131,7 +91,35 @@ struct SharedAll {
 
 #[derive(Parser, Debug)]
 struct SharedRunAndRollBack {
-    #[clap(long)]
+    /// URL to connect to a database instance.
+    ///
+    /// Examples:
+    /// - Local WebSocket: `ws://localhost:8000`
+    /// - Remote WebSocket: `wss://cloud.surrealdb.com`
+    /// - HTTP: `http://localhost:8000`
+    /// - HTTPS: `https://cloud.surrealdb.com`
+    /// - In-Memory: `mem://`
+    /// - File-Backed: `file://temp.db`
+    /// - IndxDB-Backed: `indxdb://MyDatabase`
+    /// - TiKV-Backed: `tikv://localhost:2379`
+    /// - FoundationDB-Backed: `fdb://fdb.cluster`
+    #[clap(
+        long,
+        // short,
+        value_name = "URL",
+        // required = true,
+        // about = "URL or path to connect to a database. Supports various backends.",
+        help = "Example:\n\
+                - ws://localhost:8000\n\
+                - wss://cloud.surrealdb.com\n\
+                - http://localhost:8000\n\
+                - https://cloud.surrealdb.com\n\
+                - mem://\n\
+                - file://temp.db\n\
+                - indxdb://MyDatabase\n\
+                - tikv://localhost:2379\n\
+                - fdb://fdb.cluster"
+    )]
     path: Option<Path>,
 
     #[clap(short, long)]
@@ -173,45 +161,6 @@ struct Rollback {
 use std::fmt::Display;
 use std::str::FromStr;
 
-// Define the database types and associated values as an enum
-// #[derive(ArgEnum, Debug)]
-enum DbType {
-    Mem,
-    RocksDb(String),
-    SpeeDb(String),
-    FDb(String),
-    TiKv(String),
-    IndxDb(String),
-}
-
-// #[tokio::main] // Or any other runtime you are using
-// async fn ain() -> Result<(), Box<dyn std::error::Error>> {
-// let opts: Opts = Opts::parse();
-//
-// match opts.db {
-//     DbType::Mem => connect_to_db("Mem", (), "DefaultDB", "DefaultNS").await?,
-//     DbType::RocksDb(path) | DbType::SpeeDb(path) | DbType::FDb(path) => {
-//         let db_name = opts
-//             .database_name
-//             .unwrap_or_else(|| String::from("DefaultDB"));
-//         let ns_name = opts.namespace.unwrap_or_else(|| String::from("DefaultNS"));
-//         connect_to_db("RocksDb", path, &db_name, &ns_name).await?;
-//     }
-//     DbType::TiKv(url) => {
-//         let db_name = opts
-//             .database_name
-//             .unwrap_or_else(|| String::from("DefaultDB"));
-//         let ns_name = opts.namespace.unwrap_or_else(|| String::from("DefaultNS"));
-//         connect_to_db("TiKv", url, &db_name, &ns_name).await?;
-//     }
-//     DbType::IndxDb(name) => {
-//         let ns_name = opts.namespace.unwrap_or_else(|| String::from("DefaultNS"));
-//         connect_to_db("IndxDb", name, "DefaultDB", &ns_name).await?;
-//     }
-// }
-// Ok(())
-// }
-
 /// Run migration cli
 /// # Example
 /// ```rust
@@ -242,19 +191,9 @@ enum DbType {
 /// }
 /// ```
 pub async fn migration_cli(
-    // db: Option<Surreal<impl Connection>>,
     user_provided_db: Option<Surreal<Any>>,
     codebase_resources: impl DbResources,
 ) {
-    // todl:
-    // for generate,  we dont meed db
-    // for run, we need db.
-    // for rollback, we need db.
-    // user, can provide their own db instance or pass db_url as an rgument to the cli e.g
-    // localhost:8000?username=root&password=root&ns=test&db=test
-    // if neither is provided, we use panic if running or rolling back, but not for generate
-    // we do not need db for generate so we dont panic if db is not provided
-    // let db = initialize_db().await;
     let cli = Cli::parse();
 
     let mut files_config = MigrationConfig::new().make_strict();
@@ -270,13 +209,13 @@ pub async fn migration_cli(
                     .two_way()
                     .generate_migrations(migration_name, codebase_resources)
                     .await
-                    .unwrap();
+                    .expect("Failed to generate migrations");
             } else {
                 files_config
                     .one_way()
                     .generate_migrations(migration_name, codebase_resources)
                     .await
-                    .unwrap();
+                    .expect("Failed to generate migrations");
             };
         }
         SubCommand::Run(run) => {
@@ -286,18 +225,27 @@ pub async fn migration_cli(
                 files_config = files_config.custom_path(path)
             };
             if run.shared_all.reversible {
+                println!("Running two way migrations");
                 files_config
                     .two_way()
                     .run_pending_migrations(db.clone())
                     .await
-                    .unwrap();
+                    .expect("Failed to run migrations");
             } else {
+                println!("Running one way migrations");
                 files_config
                     .one_way()
                     .run_pending_migrations(db.clone())
                     .await
-                    .unwrap();
-            };
+                    .expect("Failed to run migrations");
+            }
+            // define_table("nawa").run(db.clone()).await.unwrap();
+            let info = info_for()
+                .database()
+                .get_data::<DbInfo>(db.clone())
+                .await
+                .expect("Failed to get db info");
+            println!("Database: {:?}", info);
         }
         SubCommand::Rollback(rollback) => {
             let db = setup_db(&user_provided_db, &rollback.shared_run_and_rollback).await;
@@ -319,7 +267,7 @@ pub async fn migration_cli(
                 .two_way()
                 .rollback_migrations(rollback_strategy, db.clone())
                 .await
-                .unwrap();
+                .expect("Failed to rollback migrations");
         }
     }
 }
@@ -329,18 +277,18 @@ async fn setup_db(
     shared_run_and_rollback: &SharedRunAndRollBack,
 ) -> Surreal<Any> {
     let db_url = shared_run_and_rollback.path.clone();
-    let db = match (user_provided_db, &db_url) {
+
+    match (user_provided_db, &db_url) {
         (Some(user_db), None) => {
             let db = user_db;
-            init_db(&shared_run_and_rollback, db.clone()).await
+            init_db(shared_run_and_rollback, db.clone()).await
         }
         (_, Some(cli_db_url)) => {
             let db = connect(&cli_db_url.to_string()).await.unwrap();
-            init_db(&shared_run_and_rollback, db.clone()).await
+            init_db(shared_run_and_rollback, db.clone()).await
         }
         (None, None) => panic!("No db provided"),
-    };
-    db
+    }
 }
 
 async fn init_db(shared: &SharedRunAndRollBack, db: Surreal<Any>) -> Surreal<Any> {
@@ -367,11 +315,12 @@ async fn init_db(shared: &SharedRunAndRollBack, db: Surreal<Any>) -> Surreal<Any
     };
 
     if let Some(db_name) = &shared.db {
-        db.use_db("test").await.unwrap();
+        println!("Using db {}", db_name);
+        db.use_db(db_name).await.expect("Failed to use db");
     }
 
     if let Some(ns_name) = &shared.ns {
-        db.use_ns("test").await.unwrap();
+        db.use_ns(ns_name).await.expect("Failed to use ns");
     }
     db
 }

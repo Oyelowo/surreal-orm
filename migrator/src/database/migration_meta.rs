@@ -7,19 +7,17 @@
 
 use std::convert::TryFrom;
 use std::env;
-use std::error::Error;
+
 use std::{
     collections::HashSet,
     fmt::Display,
-    fs::{self, File},
+    fs::{self},
     path::{Path, PathBuf},
 };
 
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{define_field, define_table, DefineTableStatement};
-use surreal_query_builder::{
-    DbResources, FieldType, Model, Node, Raw, SurrealId, Table, TableResources, ToRaw,
-};
+use surreal_query_builder::{DbResources, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
 use surrealdb::{Connection, Surreal};
 
@@ -53,24 +51,21 @@ impl Migration {
     }
     // pub fn create_raw(m: Self) -> Raw {
     pub fn create_raw(id_part: MigrationFileName, name: String, timestamp: u64) -> Raw {
-        let migration_table = Migration::table_name();
         let migration::Schema {
-            id,
-            name,
-            timestamp,
+            id: _id_field,
+            name: name_field,
+            timestamp: timestamp_field,
         } = Migration::schema();
 
-        let name_field = name;
-        let timestamp_field = timestamp;
         let record_id = Self::create_id(id_part);
         Raw::new(format!(
-            "CREATE {record_id} SET {name_field}={name}, {timestamp_field}={timestamp};"
+            "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp};"
         ))
     }
 
     pub fn delete_raw(id_part: MigrationFileName) -> Raw {
-        let migration_table = Migration::table_name();
-        let migration::Schema { id, .. } = Migration::schema();
+        let _migration_table = Migration::table_name();
+        let migration::Schema { .. } = Migration::schema();
         let record_id = Self::create_id(id_part);
         Raw::new(format!("DELETE {record_id};"))
     }
@@ -121,8 +116,6 @@ pub mod migration {
 }
 
 impl Migration {}
-
-struct RenameCreator;
 
 #[derive(Clone, Debug)]
 pub struct MigrationTwoWay {
@@ -262,6 +255,12 @@ pub struct FileManager {
 #[derive(Debug, Clone)]
 pub struct MigrationConfig(FileManager);
 
+impl Default for MigrationConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MigrationConfig {
     pub fn new() -> Self {
         Self(FileManager::default())
@@ -379,7 +378,7 @@ impl TwoWayGetter {
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(migrations, db).await?;
+        MigrationRunner::run_pending_migrations(migrations, db.clone()).await?;
 
         Ok(())
     }
@@ -402,7 +401,7 @@ impl TwoWayGetter {
         rollback_strategy: RollbackStrategy,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
-        let migrations = self.get_migrations()?;
+        let _migrations = self.get_migrations()?;
         MigrationRunner::rollback_migrations(&self.0, rollback_strategy, db).await?;
 
         Ok(())
@@ -450,9 +449,10 @@ impl FileManager {
             env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
         let cargo_manifests_dir = Path::new(&cargo_toml_directory);
         let default_path = cargo_manifests_dir.join("migrations");
-        let path = self.custom_path.as_ref().map_or(default_path, |fp| {
-            cargo_manifests_dir.join(Path::new(&fp).to_owned())
-        });
+        let path = self
+            .custom_path
+            .as_ref()
+            .map_or(default_path, |fp| cargo_manifests_dir.join(Path::new(&fp)));
 
         if path.exists() && path.is_dir() {
             Ok(path)
@@ -610,17 +610,5 @@ impl FileManager {
         }
         migrations_bi_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
         Ok(migrations_bi_meta)
-    }
-
-    pub(crate) fn get_two_way_migration_by_name(
-        &self,
-        migration_name: MigrationFileName,
-        create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Option<MigrationTwoWay>> {
-        let migration_name: MigrationFileName = migration_name.into();
-        Ok(self
-            .get_two_way_migrations(create_dir_if_not_exists)?
-            .into_iter()
-            .find(|m| m.name == migration_name.to_string()))
     }
 }

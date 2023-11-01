@@ -1,5 +1,5 @@
 use surreal_query_builder::{statements::*, *};
-use surrealdb::{sql::Thing, Connection, Surreal};
+use surrealdb::{Connection, Surreal};
 
 use crate::{
     migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError, MigrationFileName,
@@ -100,7 +100,7 @@ impl MigrationRunner {
                 //     .find(|m| m.id.to_string() == latest_migration_in_db.name)
                 //     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-                let migration_name = latest_migration.name.clone();
+                let _migration_name = latest_migration.name.clone();
                 let rollback_query = latest_migration.down.clone();
                 let rollbacked_migration_deletion_query =
                     Migration::delete_raw(latest_migration.id.clone()).build();
@@ -243,7 +243,7 @@ impl MigrationRunner {
                     "Failed to delete migration file: {:?}. Error: {}",
                     file_path, e
                 ))
-            });
+            })?;
         }
 
         println!("Migration rolled back");
@@ -255,9 +255,7 @@ impl MigrationRunner {
         all_migrations: Vec<impl Into<PendingMigration>>,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
-        let migration::Schema {
-            name, timestamp, ..
-        } = &Migration::schema();
+        let migration::Schema { timestamp, .. } = &Migration::schema();
         let migration_table = Migration::table_name();
 
         // Get the latest migration
@@ -297,20 +295,21 @@ impl MigrationRunner {
             .join("\n");
 
         println!(
-            "Running {} queries and",
-            migration_queries.split(";").count()
+            "Running {} migrations and",
+            migration_queries.split(';').count()
         );
         println!(
             "Marking {} query(ies) as registered",
             mark_queries_registered_queries
                 .trim()
-                .split(";")
+                .split(';')
                 .filter(|q| q.trim().is_empty())
                 .count()
         );
 
         // Join migrations with mark queries
         let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
+        println!("{}", all);
 
         // Run them as a transaction against a local in-memory database
         if !all.trim().is_empty() {
@@ -323,87 +322,4 @@ impl MigrationRunner {
 
         Ok(())
     }
-
-    // pub async fn get_applied_twoway_migrations(&self) -> MigrationResult<Vec<Migration>> {
-    //     // let name = Migration::schema().name;
-    //     let migration::Schema { name, .. } = Migration::schema();
-    //     let migration = Migration::table_name();
-    //
-    //     // select [{ name: "Oyelowo" }]
-    //     // select value [ "Oyelowo" ]
-    //     // select_only. Just on object => { name: "Oyelowo" }
-    //     let migration_names = select_value(name)
-    //         .from(migration)
-    //         .return_many::<Migration>(self.db())
-    //         .await?;
-    //     Ok(migration_names)
-    // }
-
-    // pub async fn mark_migration_as_applied(
-    //     &self,
-    //     migration_name: impl Into<MigrationFileName>,
-    //     db: Surreal<impl Connection>,
-    // ) -> MigrationResult<Migration> {
-    //     let migration_name: MigrationFileName = migration_name.into();
-    //     println!("Applying migration: {}", migration_name.clone());
-    //
-    //     // let migration = Migration {
-    //     //     id: Migration::create_id(migration_name.to_string()),
-    //     //     name: migration_name.to_string(),
-    //     //     timestamp: migration_name.timestamp(),
-    //     // }
-    //     // .create()
-    //     // .get_one(self.db())
-    //     let migration = Migration::create_raw(
-    //         migration_name.clone(),
-    //         migration_name.to_string(),
-    //         migration_name.timestamp(),
-    //     )
-    //     .get_data::<Migration>(db.clone())
-    //     .await?;
-    //     println!("Migration applied: {}", migration_name);
-    //
-    //     Ok(migration.expect("Migration should be applied"))
-    // }
-    //
-    // pub async fn unmark_migration(
-    //     &self,
-    //     migration_name: MigrationFileName,
-    //     db: Surreal<impl Connection>,
-    // ) -> MigrationResult<()> {
-    //     println!("Unmark migration: {}", migration_name);
-    //     db.clone()
-    //         .delete::<Option<Migration>>(Migration::create_id(migration_name.clone()))
-    //         .await?;
-    //     // delete::<Migration>(Migration::create_id(migration_name.to_string()))
-    //     //     .run(self.db())
-    //     //     .await?;
-    //     println!("Migration unmarked: {}", migration_name);
-    //     Ok(())
-    // }
-    //
-    // pub async fn rollback_migration(
-    //     &self,
-    //     migration_name: MigrationFileName,
-    //     fm: FileManager,
-    //     db: Surreal<impl Connection>,
-    // ) -> MigrationResult<()> {
-    //     let migration = fm.get_two_way_migration_by_name(migration_name.clone(), false)?;
-    //     if let Some(migration) = migration {
-    //         let down_migration = migration.down;
-    //         if !down_migration.trim().is_empty() {
-    //             // Raw::new(down_migration).run(self.db());
-    //             db.clone().query(down_migration).await?;
-    //         } else {
-    //             println!("No down migration found for migration: {}", migration_name);
-    //         }
-    //         self.unmark_migration(migration.name.try_into()?).await?;
-    //     } else {
-    //         println!(
-    //             "Cannot rollback migration: No migration found with name: {}",
-    //             migration_name
-    //         );
-    //     };
-    //     Ok(())
-    // }
 }

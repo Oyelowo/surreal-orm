@@ -7,10 +7,7 @@
 
 use std::ops::Deref;
 
-use surreal_query_builder::{
-    statements::{begin_transaction, delete, info_for, select_value},
-    *,
-};
+use surreal_query_builder::{statements::begin_transaction, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::*;

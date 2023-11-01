@@ -205,7 +205,7 @@ impl TryFrom<String> for MigrationFileName {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let (_, migration_name) = parse_migration_name(value.clone().as_str())
-            .map_err(|e| MigrationError::InvalidMigrationName(value))?;
+            .map_err(|_e| MigrationError::InvalidMigrationName(value))?;
         Ok(migration_name)
     }
 }

@@ -783,7 +783,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                     if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
                     {
@@ -803,7 +807,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                     if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
                     {
@@ -823,7 +831,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
                     if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
                     {
@@ -843,7 +855,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(type_path) => {
-                let last_segment = type_path.path.segments.last().unwrap();
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 last_segment.ident.to_string().to_lowercase() == "datetime"
             }
             _ => false,
@@ -854,7 +870,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(type_path) => {
-                let last_segment = type_path.path.segments.last().unwrap();
+                let last_segment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 last_segment.ident == "Duration"
             }
             _ => false,
@@ -865,7 +885,11 @@ impl MyFieldReceiver {
         let ty = &self.ty;
         match ty {
             syn::Type::Path(path) => {
-                let last_seg = path.path.segments.last().unwrap();
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
                 last_seg.ident == "Geometry"
                     || last_seg.ident == "Point"
                     || last_seg.ident == "LineString"
@@ -968,7 +992,11 @@ impl MyFieldReceiver {
 fn get_vector_item_type(ty: &Type) -> Option<Type> {
     let item_ty = match ty {
         syn::Type::Path(type_path) => {
-            let last_segment = type_path.path.segments.last().unwrap();
+            let last_segment = type_path
+                .path
+                .segments
+                .last()
+                .expect("Must have at least one segment");
             if last_segment.ident != "Vec" {
                 return None;
             }
@@ -1003,7 +1031,8 @@ impl Permissions {
                 quote!(.permissions_none())
             }
             Self::FnName(permissions) => {
-                let permissions = parse_lit_to_tokenstream(permissions).unwrap();
+                let permissions =
+                    parse_lit_to_tokenstream(permissions).expect("Unable to parse permissions");
                 quote!(.permissions(#permissions.to_raw()))
             }
         }
@@ -1222,7 +1251,7 @@ impl ReferencedNodeMeta {
                 define: Some(define),
                 ..
             } => {
-                let define = parse_lit_to_tokenstream(define).unwrap();
+                let define = parse_lit_to_tokenstream(define).expect("Unable to parse define");
                 if define.to_token_stream().to_string().chars().count() < 3 {
                     // If empty, we get only the `()` of the function, so we can assume that it is empty
                     // if there are less than 3 characters.
@@ -1269,7 +1298,8 @@ impl ReferencedNodeMeta {
                 item_assert: Some(item_assert),
                 ..
             } => {
-                let item_assert = parse_lit_to_tokenstream(item_assert).unwrap();
+                let item_assert =
+                    parse_lit_to_tokenstream(item_assert).expect("Unable to parse item_assert");
                 define_array_field_item_methods.push(quote!(.assert(#item_assert)));
             }
             MyFieldReceiver {
@@ -1298,7 +1328,7 @@ impl ReferencedNodeMeta {
                 type_: Some(type_),
                 ..
             } => {
-                let value = parse_lit_to_tokenstream(value).unwrap();
+                let value = parse_lit_to_tokenstream(value).expect("unable to parse value");
                 let field_type = type_.deref();
                 let static_assertion = match field_type {
                     FieldType::Duration => quote!(#crate_name::sql::Duration::from(#value)),
@@ -1390,7 +1420,7 @@ impl ReferencedNodeMeta {
                 assert: Some(assert),
                 ..
             } => {
-                let assert = parse_lit_to_tokenstream(assert).unwrap();
+                let assert = parse_lit_to_tokenstream(assert).expect("unable to parse assert");
                 define_field_methods.push(quote!(.assert(#assert)));
             }
             MyFieldReceiver {
@@ -1668,7 +1698,10 @@ impl NormalisedField {
         field_receiver: &MyFieldReceiver,
         struct_level_casing: Option<CaseString>,
     ) -> Self {
-        let field_ident = field_receiver.ident.as_ref().unwrap();
+        let field_ident = field_receiver
+            .ident
+            .as_ref()
+            .expect("Field ident is required");
 
         let field_ident_cased = FieldIdentCased::from(FieldIdentUnCased {
             uncased_field_name: field_ident.to_string(),
@@ -1827,7 +1860,7 @@ impl TableDeriveAttributes {
 
         match (define, define_fn){
             (Some(define), None) => {
-                let define = parse_lit_to_tokenstream(define).unwrap();
+                let define = parse_lit_to_tokenstream(define).expect("Unable to parse define attribute");
                 define_table = Some(quote!(#define.to_raw()));
             },
             (None, Some(define_fn)) => {
@@ -1847,7 +1880,7 @@ impl TableDeriveAttributes {
 
         match (as_, as_fn){
             (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).unwrap();
+                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as' attribute");
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {
