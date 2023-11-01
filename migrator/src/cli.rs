@@ -32,7 +32,7 @@ enum SubCommand {
 #[derive(Parser, Debug)]
 struct Generate {
     /// Name of the migration
-    #[clap(long, default_value = "migration_name_example")]
+    #[clap(long, help = "Name of the migration")]
     name: String,
     #[clap(flatten)]
     shared_all: SharedAll,
@@ -81,11 +81,11 @@ impl FromStr for Path {
 #[derive(Parser, Debug)]
 struct SharedAll {
     /// Two way migration
-    #[clap(short, long)]
+    #[clap(short, long, help = "Two-way up & down migration")]
     reversible: bool,
 
     /// Optional custom migrations dir
-    #[clap(short, long)]
+    #[clap(short, long, help = "Optional custom migrations dir")]
     migrations_dir: Option<String>,
 }
 
@@ -122,20 +122,20 @@ struct SharedRunAndRollBack {
     )]
     path: Option<Path>,
 
-    #[clap(short, long)]
+    #[clap(short, long, help = "Database name")]
     db: Option<String>,
 
-    #[clap(short, long)]
+    #[clap(short, long, help = "Namespace name")]
     ns: Option<String>,
 
     /// users scope
-    #[clap(short, long)]
+    #[clap(short, long, help = "Scope")]
     sc: Option<String>,
 
-    #[clap(short, long)]
+    #[clap(short, long, help = "User name")]
     user: Option<String>,
 
-    #[clap(short, long)]
+    #[clap(short, long, help = "Password")]
     pass: Option<String>,
 }
 
@@ -143,13 +143,13 @@ struct SharedRunAndRollBack {
 #[derive(Parser, Debug)]
 struct Rollback {
     /// Rollback to the latest migration
-    #[clap(long)]
+    #[clap(long, help = "Rollback to the latest migration")]
     latest: bool,
     /// Rollback by count
-    #[clap(long)]
+    #[clap(long, help = "Rollback by count")]
     by_count: Option<u32>,
     /// Rollback till a specific migration ID
-    #[clap(long)]
+    #[clap(long, help = "Rollback till a specific migration ID")]
     till: Option<String>,
 
     #[clap(flatten)]
@@ -191,8 +191,8 @@ use std::str::FromStr;
 /// }
 /// ```
 pub async fn migration_cli(
-    user_provided_db: Option<Surreal<Any>>,
     codebase_resources: impl DbResources,
+    user_provided_db: Option<Surreal<Any>>,
 ) {
     let cli = Cli::parse();
 
