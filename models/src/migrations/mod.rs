@@ -20,8 +20,20 @@ pub struct Resources;
 pub struct ResourcesV2;
 
 impl DbResources for ResourcesV2 {
-    create_table_resources!(AnimalV2, Crop, AnimalEatsCropV2, Student, PlanetV2);
+    create_table_resources!(AnimalV2, Crop, AnimalEatsCropV2, PlanetV2, NewStuff);
 }
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "new_stuff", schemafull)]
+pub struct NewStuff {
+    // Test renaming tomorrow
+    pub id: SurrealSimpleId<Self>,
+    pub first_name: String,
+    pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
+}
+
+impl TableResources for NewStuff {}
 
 impl DbResources for Resources {
     create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
@@ -133,10 +145,7 @@ pub struct AnimalV2 {
 impl TableResources for AnimalV2 {
     fn events_definitions() -> Vec<Raw> {
         let animal_v_2::Schema {
-            species,
-            characteristics,
-            velocity,
-            ..
+            species, velocity, ..
         } = Self::schema();
 
         let event1 = define_event("event1".to_string())
@@ -194,6 +203,7 @@ pub struct EatsV2<In: Node, Out: Node> {
 }
 
 pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
+impl TableResources for AnimalEatsCropV2 {}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
