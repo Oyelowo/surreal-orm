@@ -1,6 +1,5 @@
 ---
 source: examples/migration-cli/tests/embedded.rs
-assertion_line: 267
 expression: up_mig
 ---
 [

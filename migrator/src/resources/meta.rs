@@ -6,7 +6,7 @@
  */
 
 use crate::*;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 

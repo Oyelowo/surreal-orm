@@ -367,12 +367,12 @@ impl MigrationRunner {
                 migrations
             }
             Status::Applied => {
-                let migrations = select(All)
+                
+                select(All)
                     .from(Migration::table_name())
                     .order_by(Migration::schema().timestamp.asc())
                     .return_many::<Migration>(db.clone())
-                    .await?;
-                migrations
+                    .await?
             }
         };
         Ok(migrations)

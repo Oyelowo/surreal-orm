@@ -1,5 +1,5 @@
 ---
-source: examples/migration-cli/tests/embedded.rs
+source: migrator-tests/tests/generate.rs
 expression: "table_defs.join(\"\\n\")"
 ---
 DEFINE TABLE animal SCHEMAFULL;

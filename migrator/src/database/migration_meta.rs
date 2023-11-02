@@ -531,7 +531,6 @@ impl FileManager {
             let path = migration.path();
             let path_str = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
 
-            // let migration_name = path_str.split('/').last().unwrap();
             let migration_name = path.file_name().expect("Problem reading migration name");
             let migration_up_name = migration_name.to_string_lossy().to_string();
 

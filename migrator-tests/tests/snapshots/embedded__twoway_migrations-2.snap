@@ -1,6 +1,6 @@
 ---
 source: examples/migration-cli/tests/embedded.rs
-expression: db_info().await.unwrap()
+expression: get_db_info().await.unwrap()
 ---
 DbInfo {
     analyzers: Analyzers(
@@ -38,11 +38,11 @@ DbInfo {
                 "migration": DefineStatementRaw(
                     "DEFINE TABLE migration SCHEMAFULL",
                 ),
+                "new_stuff": DefineStatementRaw(
+                    "DEFINE TABLE new_stuff SCHEMAFULL",
+                ),
                 "planet": DefineStatementRaw(
                     "DEFINE TABLE planet SCHEMAFULL",
-                ),
-                "student": DefineStatementRaw(
-                    "DEFINE TABLE student SCHEMAFULL",
                 ),
             },
         ),

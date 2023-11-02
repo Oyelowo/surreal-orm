@@ -5,6 +5,7 @@ members = [
   "orm",
   "query-builder",
   "migrator",
+  "migrator-tests",
   "derive",
   "models",
   "orm-tests",
@@ -27,6 +28,7 @@ surreal-derive = { path = "derive" }
 surreal-orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
 migrator = { path = "migrator" }
+migrator-tests = { path = "migrator-tests" }
 surreal-models = { path = "models" }
 migration-filebased = { path = "examples/migration-filebased" }
 migration-embedded = { path = "examples/migration-embedded" }
