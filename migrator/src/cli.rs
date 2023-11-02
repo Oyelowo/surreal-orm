@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::{DbResources, Runnable};
 use surrealdb::engine::any::{connect, Any};
@@ -28,6 +28,31 @@ enum SubCommand {
     Rollback(Rollback),
     /// List migrations
     List(List),
+}
+
+impl SubCommand {
+    pub fn get_verbosity(&self) -> u8 {
+        match self {
+            SubCommand::Generate(generate) => generate.shared_all.verbose,
+            SubCommand::Run(run) => run.shared_all.verbose,
+            SubCommand::Rollback(rollback) => rollback.shared_all.verbose,
+            SubCommand::List(list) => list.shared_all.verbose,
+        }
+    }
+
+    pub fn setup_logging(&self) {
+        let verbosity = self.get_verbosity();
+        let log_level = match verbosity {
+            0 => "error",
+            1 => "warn",
+            2 => "info",
+            3 => "debug",
+            _ => "trace",
+        };
+
+        std::env::set_var("RUST_LOG", log_level);
+        pretty_env_logger::init();
+    }
 }
 
 /// Generate migrations
@@ -90,16 +115,6 @@ struct List {
     runtime_config: RuntimeConfig,
 }
 
-impl List {
-    fn new(status: Option<Status>, shared_all: SharedAll, runtime_config: RuntimeConfig) -> Self {
-        Self {
-            status,
-            shared_all,
-            runtime_config,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 enum Path {
     Memory,
@@ -139,6 +154,10 @@ struct SharedAll {
     /// Optional custom migrations dir
     #[clap(short, long, help = "Optional custom migrations dir")]
     migrations_dir: Option<String>,
+
+    /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
+    #[clap(short, long, action = ArgAction::Count)]
+    verbose: u8,
 }
 
 #[derive(Parser, Debug)]
@@ -174,14 +193,14 @@ struct RuntimeConfig {
     )]
     path: Option<Path>,
 
-    #[clap(short, long, help = "Database name")]
+    #[clap(long, help = "Database name")]
     db: Option<String>,
 
-    #[clap(short, long, help = "Namespace name")]
+    #[clap(long, help = "Namespace name")]
     ns: Option<String>,
 
     /// users scope
-    #[clap(short, long, help = "Scope")]
+    #[clap(long, help = "Scope")]
     sc: Option<String>,
 
     #[clap(short, long, help = "User name")]
@@ -189,10 +208,6 @@ struct RuntimeConfig {
 
     #[clap(short, long, help = "Password")]
     pass: Option<String>,
-
-    /// Sets the level of verbosity
-    #[clap(short, long, parse(from_occurrences))]
-    verbose: usize,
 }
 
 /// Rollback migrations
@@ -251,7 +266,7 @@ pub async fn migration_cli(
     user_provided_db: Option<Surreal<Any>>,
 ) {
     let cli = Cli::parse();
-    pretty_env_logger::init();
+    cli.subcmd.setup_logging();
 
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
@@ -282,14 +297,14 @@ pub async fn migration_cli(
                 files_config = files_config.custom_path(path)
             };
             if run.shared_all.reversible {
-                println!("Running two way migrations");
+                log::info!("Running two way migrations");
                 files_config
                     .two_way()
                     .run_pending_migrations(db.clone())
                     .await
                     .expect("Failed to run migrations");
             } else {
-                println!("Running one way migrations");
+                log::info!("Running one way migrations");
                 files_config
                     .one_way()
                     .run_pending_migrations(db.clone())
@@ -302,7 +317,7 @@ pub async fn migration_cli(
                 .get_data::<DbInfo>(db.clone())
                 .await
                 .expect("Failed to get db info");
-            println!("Database: {:?}", info);
+            log::info!("Database: {:?}", info);
         }
         SubCommand::Rollback(rollback) => {
             let db = setup_db(&user_provided_db, &rollback.shared_run_and_rollback).await;
@@ -333,8 +348,7 @@ pub async fn migration_cli(
                 files_config = files_config.custom_path(path)
             };
             if options.shared_all.reversible {
-                println!("Listing two way migrations");
-                log::info!("isting two way migrations");
+                log::info!("Listing two way migrations");
                 let migrations = files_config
                     .two_way()
                     .list_migrations(db.clone(), options.status.unwrap_or_default())
@@ -342,7 +356,7 @@ pub async fn migration_cli(
                     .expect("Failed to get migrations");
                 log::info!("Migrations: {:?}", migrations);
             } else {
-                println!("Listing one way migrations");
+                log::info!("Listing one way migrations");
                 let migrations = files_config
                     .one_way()
                     .list_migrations(db.clone(), options.status.unwrap_or_default())
@@ -386,7 +400,7 @@ async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
         (Some(_), None) => panic!("Password not provided"),
         (None, Some(_)) => panic!("User not provided"),
         _ => {
-            println!("User and password not provided, using root default");
+            log::info!("User and password not provided, using root default");
             // db.signin(Root {
             //     username: "root",
             //     password: "root",
@@ -397,7 +411,7 @@ async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
     };
 
     if let Some(db_name) = &shared.db {
-        println!("Using db {}", db_name);
+        log::info!("Using db {}", db_name);
         db.use_db(db_name).await.expect("Failed to use db");
     }
 
