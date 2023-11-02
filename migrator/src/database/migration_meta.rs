@@ -529,10 +529,11 @@ impl FileManager {
         for migration in migrations.expect("Problem reading migrations directory") {
             let migration = migration.expect("Problem reading migration");
             let path = migration.path();
-            let path = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
+            let path_str = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
 
-            let migration_name = path.split('/').last().unwrap();
-            let migration_up_name = migration_name.to_string();
+            // let migration_name = path_str.split('/').last().unwrap();
+            let migration_name = path.file_name().expect("Problem reading migration name");
+            let migration_up_name = migration_name.to_string_lossy().to_string();
 
             let filename: MigrationFileName = migration_up_name.clone().try_into()?;
             match filename {
@@ -545,7 +546,7 @@ impl FileManager {
                 }
                 MigrationFileName::Unidirectional(_) => {
                     unidirectional_basenames.push(filename.basename());
-                    let content = fs::read_to_string(path).unwrap();
+                    let content = fs::read_to_string(path_str).unwrap();
 
                     let migration = MigrationOneWay {
                         id: filename.clone(),
