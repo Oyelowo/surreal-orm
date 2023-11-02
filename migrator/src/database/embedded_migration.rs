@@ -24,11 +24,15 @@ pub struct EmbeddedMigrationsTwoWay {
 }
 
 impl EmbeddedMigrationsTwoWay {
+    pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationTwoWay] {
+        self.migrations
+    }
+
     pub const fn new(migrations: &'static [EmbeddedMigrationTwoWay]) -> Self {
         Self { migrations }
     }
 
-    pub(crate) fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+    pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
         let migs = self
             .migrations
             .iter()
@@ -56,10 +60,14 @@ impl EmbeddedMigrationsTwoWay {
 #[allow(missing_copy_implementations)]
 #[derive(Debug, Clone)]
 pub struct EmbeddedMigrationsOneWay {
-    pub migrations: &'static [EmbeddedMigrationOneWay],
+    migrations: &'static [EmbeddedMigrationOneWay],
 }
 
 impl EmbeddedMigrationsOneWay {
+    pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationOneWay] {
+        self.migrations
+    }
+
     pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationOneWay>> {
         let migs = self
             .migrations
