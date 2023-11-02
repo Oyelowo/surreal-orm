@@ -21,6 +21,7 @@ use surreal_query_builder::{DbResources, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
 use surrealdb::{Connection, Surreal};
 
+use crate::cli::Status;
 use crate::*;
 
 // #[derive(Node, Serialize, Deserialize, Clone, Debug)]
@@ -128,6 +129,16 @@ pub struct MigrationTwoWay {
     // status: String,
 }
 
+impl From<MigrationTwoWay> for Migration {
+    fn from(migration: MigrationTwoWay) -> Self {
+        Self {
+            id: Migration::create_id(migration.id),
+            name: migration.name,
+            timestamp: migration.timestamp,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct MigrationOneWay {
     pub id: MigrationFileName,
@@ -137,6 +148,16 @@ pub struct MigrationOneWay {
 }
 
 impl MigrationOneWay {}
+
+impl From<MigrationOneWay> for Migration {
+    fn from(migration: MigrationOneWay) -> Self {
+        Self {
+            id: Migration::create_id(migration.id),
+            name: migration.name,
+            timestamp: migration.timestamp,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum Direction {
@@ -344,6 +365,18 @@ impl OneWayGetter {
 
         Ok(())
     }
+
+    /// List all migrations
+    pub async fn list_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        status: Status,
+    ) -> MigrationResult<Vec<Migration>> {
+        let migrations = self.get_migrations()?;
+        let migrations = MigrationRunner::list_migrations(migrations, db.clone(), status).await?;
+
+        Ok(migrations)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -405,6 +438,18 @@ impl TwoWayGetter {
         MigrationRunner::rollback_migrations(&self.0, rollback_strategy, db).await?;
 
         Ok(())
+    }
+
+    /// List all migrations
+    pub async fn list_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        status: Status,
+    ) -> MigrationResult<Vec<Migration>> {
+        let migrations = self.get_migrations()?;
+        let migrations = MigrationRunner::list_migrations(migrations, db.clone(), status).await?;
+
+        Ok(migrations)
     }
 }
 

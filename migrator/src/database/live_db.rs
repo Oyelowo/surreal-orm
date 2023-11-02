@@ -2,8 +2,8 @@ use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
-    migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError, MigrationFileName,
-    MigrationOneWay, MigrationResult, MigrationTwoWay,
+    cli::Status, migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError,
+    MigrationFileName, MigrationOneWay, MigrationResult, MigrationTwoWay,
 };
 
 // pub struct MigrationRunner<C: Connection> {
@@ -320,5 +320,60 @@ impl MigrationRunner {
         }
 
         Ok(())
+    }
+
+    pub(crate) async fn list_migrations(
+        migrations_local_dir: Vec<impl Into<Migration>>,
+        db: Surreal<impl Connection>,
+        status: Status,
+    ) -> MigrationResult<Vec<Migration>> {
+        let migrations = match status {
+            Status::All => {
+                let mut migrations = migrations_local_dir
+                    .into_iter()
+                    .map(|m| {
+                        let m: Migration = m.into();
+                        m
+                    })
+                    .collect::<Vec<_>>();
+                let x = migrations.first().unwrap().timestamp;
+                migrations.sort_by_key(|m| m.timestamp);
+                migrations
+            }
+            Status::Pending => {
+                let latest_applied_migration = select(All)
+                    .from(Migration::table_name())
+                    .order_by(Migration::schema().timestamp.desc())
+                    .limit(1)
+                    .return_one::<Migration>(db.clone())
+                    .await?;
+
+                let mut migrations = migrations_local_dir
+                    .into_iter()
+                    .map(|m| {
+                        let m: Migration = m.into();
+                        m
+                    })
+                    .filter(|m| {
+                        latest_applied_migration
+                            .as_ref()
+                            .map_or(true, |latest_migration| {
+                                m.timestamp > latest_migration.timestamp
+                            })
+                    })
+                    .collect::<Vec<_>>();
+                migrations.sort_by_key(|m| m.timestamp);
+                migrations
+            }
+            Status::Applied => {
+                let migrations = select(All)
+                    .from(Migration::table_name())
+                    .order_by(Migration::schema().timestamp.asc())
+                    .return_many::<Migration>(db.clone())
+                    .await?;
+                migrations
+            }
+        };
+        Ok(migrations)
     }
 }

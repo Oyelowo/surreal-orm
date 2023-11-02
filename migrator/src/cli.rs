@@ -26,6 +26,8 @@ enum SubCommand {
     Run(Run),
     /// Rollback migrations
     Rollback(Rollback),
+    /// List migrations
+    List(List),
 }
 
 /// Generate migrations
@@ -44,7 +46,58 @@ struct Run {
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
-    shared_run_and_rollback: SharedRunAndRollBack,
+    shared_run_and_rollback: RuntimeConfig,
+}
+
+#[derive(Clone, Debug, Default)]
+pub enum Status {
+    #[default]
+    Applied,
+    Pending,
+    All,
+}
+
+impl FromStr for Status {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim().to_lowercase();
+        if s == "pending" {
+            Ok(Status::Pending)
+        } else if s == "applied" {
+            Ok(Status::Applied)
+        } else if s == "all" {
+            Ok(Status::All)
+        } else {
+            Err("Invalid status".to_string())
+        }
+    }
+}
+
+/// Run migrations
+#[derive(Parser, Debug)]
+struct List {
+    /// Status of migrations to list
+    #[clap(
+        long,
+        help = "Status of migrations to list. Can be 'applied', 'pending' or 'all'",
+        default_value = "applied"
+    )]
+    status: Option<Status>,
+    #[clap(flatten)]
+    shared_all: SharedAll,
+    #[clap(flatten)]
+    runtime_config: RuntimeConfig,
+}
+
+impl List {
+    fn new(status: Option<Status>, shared_all: SharedAll, runtime_config: RuntimeConfig) -> Self {
+        Self {
+            status,
+            shared_all,
+            runtime_config,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -89,7 +142,7 @@ struct SharedAll {
 }
 
 #[derive(Parser, Debug)]
-struct SharedRunAndRollBack {
+struct RuntimeConfig {
     /// URL to connect to a database instance.
     ///
     /// Examples:
@@ -136,6 +189,10 @@ struct SharedRunAndRollBack {
 
     #[clap(short, long, help = "Password")]
     pass: Option<String>,
+
+    /// Sets the level of verbosity
+    #[clap(short, long, parse(from_occurrences))]
+    verbose: usize,
 }
 
 /// Rollback migrations
@@ -154,7 +211,7 @@ struct Rollback {
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
-    shared_run_and_rollback: SharedRunAndRollBack,
+    shared_run_and_rollback: RuntimeConfig,
 }
 
 use std::fmt::Display;
@@ -194,6 +251,7 @@ pub async fn migration_cli(
     user_provided_db: Option<Surreal<Any>>,
 ) {
     let cli = Cli::parse();
+    pretty_env_logger::init();
 
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
@@ -268,12 +326,37 @@ pub async fn migration_cli(
                 .await
                 .expect("Failed to rollback migrations");
         }
+        SubCommand::List(options) => {
+            let db = setup_db(&user_provided_db, &options.runtime_config).await;
+
+            if let Some(path) = options.shared_all.migrations_dir {
+                files_config = files_config.custom_path(path)
+            };
+            if options.shared_all.reversible {
+                println!("Listing two way migrations");
+                log::info!("isting two way migrations");
+                let migrations = files_config
+                    .two_way()
+                    .list_migrations(db.clone(), options.status.unwrap_or_default())
+                    .await
+                    .expect("Failed to get migrations");
+                log::info!("Migrations: {:?}", migrations);
+            } else {
+                println!("Listing one way migrations");
+                let migrations = files_config
+                    .one_way()
+                    .list_migrations(db.clone(), options.status.unwrap_or_default())
+                    .await
+                    .expect("Failed to get migrations");
+                log::info!("Migrations: {:?}", migrations);
+            }
+        }
     }
 }
 
 async fn setup_db(
     user_provided_db: &Option<Surreal<Any>>,
-    shared_run_and_rollback: &SharedRunAndRollBack,
+    shared_run_and_rollback: &RuntimeConfig,
 ) -> Surreal<Any> {
     let db_url = shared_run_and_rollback.path.clone();
 
@@ -290,7 +373,7 @@ async fn setup_db(
     }
 }
 
-async fn init_db(shared: &SharedRunAndRollBack, db: Surreal<Any>) -> Surreal<Any> {
+async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
     match (&shared.user, &shared.pass) {
         (Some(u), Some(p)) => {
             db.signin(Root {
