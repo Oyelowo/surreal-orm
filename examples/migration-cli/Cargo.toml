@@ -14,4 +14,5 @@ surreal-models = { workspace = true }
 surrealdb = { workspace = true }
 tokio = { workspace = true }
 clap = { workspace = true }
+tempfile = { workspace = true }
 # surreal-orm = { path = "../orm" }
