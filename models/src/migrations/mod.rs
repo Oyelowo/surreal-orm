@@ -16,6 +16,13 @@ use surreal_orm::{
 #[derive(Debug, Clone)]
 pub struct Resources;
 
+#[derive(Debug, Clone)]
+pub struct ResourcesV2;
+
+impl DbResources for ResourcesV2 {
+    create_table_resources!(AnimalV2, Crop, AnimalEatsCropV2, Student, PlanetV2);
+}
+
 impl DbResources for Resources {
     create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
 }
@@ -34,6 +41,22 @@ pub struct Planet {
 }
 
 impl TableResources for Planet {}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "planet", schemafull, relax_table_name)]
+pub struct PlanetV2 {
+    // Test renaming tomorrow
+    pub id: SurrealSimpleId<Self>,
+    #[surreal_orm(old_name = "firstName")]
+    pub new_name: String,
+    pub population: u64,
+    pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
+    pub labels: Vec<String>,
+}
+
+impl TableResources for PlanetV2 {}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -96,6 +119,52 @@ impl TableResources for Animal {
     }
 }
 
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "animal", schemafull, relax_table_name)]
+pub struct AnimalV2 {
+    pub id: SurrealSimpleId<Self>,
+    pub species: String,
+    #[surreal_orm(old_name = "attributes")]
+    pub characteristics: Vec<String>,
+    pub velocity: u64,
+}
+
+impl TableResources for AnimalV2 {
+    fn events_definitions() -> Vec<Raw> {
+        let animal_v_2::Schema {
+            species,
+            characteristics,
+            velocity,
+            ..
+        } = Self::schema();
+
+        let event1 = define_event("event1".to_string())
+            .on_table("animal".to_string())
+            .when(cond(species.eq("Homo Habillis").and(velocity.gt(545))))
+            .then(select(All).from(Crop::table_name()))
+            .to_raw();
+
+        vec![event1]
+    }
+
+    fn indexes_definitions() -> Vec<Raw> {
+        let animal_v_2::Schema {
+            characteristics,
+            velocity,
+            ..
+        } = Self::schema();
+
+        let idx1 = define_index("species_speed_idx".to_string())
+            .on_table(Self::table_name())
+            .fields(arr![velocity, characteristics])
+            .unique()
+            .to_raw();
+
+        vec![idx1]
+    }
+}
+
 #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "eats", schemafull)]
@@ -110,6 +179,21 @@ pub struct Eats<In: Node, Out: Node> {
 
 pub type AnimalEatsCrop = Eats<Animal, Crop>;
 impl TableResources for AnimalEatsCrop {}
+
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "eats", schemafull, relax_table_name)]
+pub struct EatsV2<In: Node, Out: Node> {
+    pub id: SurrealSimpleId<Self>,
+    #[serde(rename = "in")]
+    pub in_: In,
+    pub out: Out,
+    pub location: String,
+    pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
+}
+
+pub type AnimalEatsCropV2 = EatsV2<AnimalV2, Crop>;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
