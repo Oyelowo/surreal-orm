@@ -336,7 +336,6 @@ impl MigrationRunner {
                         m
                     })
                     .collect::<Vec<_>>();
-                let x = migrations.first().unwrap().timestamp;
                 migrations.sort_by_key(|m| m.timestamp);
                 migrations
             }
