@@ -101,7 +101,7 @@ impl MigratorDatabase {
     }
 
     pub async fn execute(&self, query: String) -> MigrationResult<()> {
-        println!("Executing query: {}", query);
+        log::info!("Executing query: {}", query);
         self.db().query(query).await?;
         Ok(())
     }
@@ -116,7 +116,7 @@ impl MigratorDatabase {
             .split_whitespace()
             .collect::<Vec<_>>()
             .join("_");
-        println!("Running migrations");
+        log::info!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         //  DIFFING
@@ -209,7 +209,7 @@ impl MigratorDatabase {
                                 .create_file(query_str, file_manager)?;
                         }
                         Ok(false) => {
-                            println!("No migration created");
+                            log::info!("No migration created");
                         }
                         Err(e) => {
                             return Err(MigrationError::PromptError(e));
@@ -231,7 +231,7 @@ impl MigratorDatabase {
                                     .create_file(down, file_manager)?;
                             }
                             Ok(false) => {
-                                println!("No migration created");
+                                log::info!("No migration created");
                             }
                             Err(e) => {
                                 return Err(MigrationError::PromptError(e));
@@ -239,9 +239,9 @@ impl MigratorDatabase {
                         };
                     }
                     (false, false) => {
-                        println!("HERE=====");
-                        // println!("UP MIGRATIOM: \n {}", up_queries_str.clone());
-                        // println!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
+                        log::info!("HERE=====");
+                        // log::info!("UP MIGRATIOM: \n {}", up_queries_str.clone());
+                        // log::info!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
                         MigrationFileName::create_up(timestamp, &name)?
                             .create_file(up, file_manager)?;
                         MigrationFileName::create_down(timestamp, name)?

@@ -19,6 +19,6 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
 
-    println!("two: {:?}", cli.two);
-    println!("one: {:?}", cli.one);
+    log::info!("two: {:?}", cli.two);
+    log::info!("one: {:?}", cli.one);
 }
