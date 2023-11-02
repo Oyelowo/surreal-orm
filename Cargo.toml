@@ -77,6 +77,9 @@ typed-builder = "0.18.0"
 rand = "0.8.5"
 clap = { version = "4.4.7", features = ["derive"] }
 tempfile = "3.8.1"
+log = "0.4"
+pretty_env_logger = "0.5.0"
+
 # [dev-dependencies]
 inquire = "0.6.2"
 geo = { version = "0.26.0", features = ["use-serde"] }

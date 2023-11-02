@@ -15,4 +15,6 @@ surrealdb = { workspace = true }
 tokio = { workspace = true }
 clap = { workspace = true }
 tempfile = { workspace = true }
+pretty_env_logger = { workspace = true }
+
 # surreal-orm = { path = "../orm" }

@@ -1,3 +1,4 @@
+use pretty_env_logger;
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::cli;
 use surrealdb::engine::any::{connect, Any};
@@ -19,6 +20,7 @@ async fn initialize_db() -> Surreal<Any> {
 
 #[tokio::main]
 async fn main() {
+    // pretty_env_logger::init();
     let _db = initialize_db().await;
     // cli::migration_cli(Resources, Some(db)).await;
     cli::migration_cli(Resources, None).await;
