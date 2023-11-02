@@ -77,7 +77,7 @@ impl MigrationRunner {
         rollback_strategy: RollbackStrategy,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
-        println!("Rolling back migration");
+        log::info!("Rolling back migration");
 
         let all_migrations = fm.get_two_way_migrations(false)?;
         let (queries_to_run, file_paths) = match rollback_strategy {
@@ -237,7 +237,7 @@ impl MigrationRunner {
             .await?;
 
         for file_path in &file_paths {
-            println!("Deleting file: {:?}", file_path.to_str());
+            log::info!("Deleting file: {:?}", file_path.to_str());
             std::fs::remove_file(file_path).map_err(|e| {
                 MigrationError::IoError(format!(
                     "Failed to delete migration file: {:?}. Error: {}",
@@ -246,7 +246,7 @@ impl MigrationRunner {
             })?;
         }
 
-        println!("Migration rolled back");
+        log::info!("Migration rolled back");
 
         Ok(())
     }
@@ -294,11 +294,11 @@ impl MigrationRunner {
             .collect::<Vec<_>>()
             .join("\n");
 
-        println!(
+        log::info!(
             "Running {} migrations and",
             migration_queries.split(';').count()
         );
-        println!(
+        log::info!(
             "Marking {} query(ies) as registered",
             mark_queries_registered_queries
                 .trim()

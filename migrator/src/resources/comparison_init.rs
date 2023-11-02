@@ -53,7 +53,7 @@ pub struct ComparisonsInit<'a> {
 
 impl<'a> ComparisonsInit<'a> {
     pub fn new_tables<R: DbResources>(&self, codebase_resources: &'a R) -> ComparisonTables<R> {
-        // println!("comparing resources {:#?}", self.left_resources);
+        // log::info!("comparing resources {:#?}", self.left_resources);
 
         ComparisonTables {
             resources: self,

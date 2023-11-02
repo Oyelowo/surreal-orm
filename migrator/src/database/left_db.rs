@@ -68,7 +68,7 @@ impl LeftDatabase {
             .collect::<Vec<_>>()
             .join("\n");
 
-        println!("Running queries: {}", queries);
+        log::info!("Running queries: {}", queries);
 
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {

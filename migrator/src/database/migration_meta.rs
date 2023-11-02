@@ -568,9 +568,9 @@ impl FileManager {
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
-        println!("Migration dir path: {:?}", migration_dir_path.clone());
+        log::info!("Migration dir path: {:?}", migration_dir_path.clone());
         let migrations = fs::read_dir(migration_dir_path.clone());
-        println!("Migration dir path: {:?}", migration_dir_path);
+        log::info!("Migration dir path: {:?}", migration_dir_path);
 
         if migrations.is_err() {
             return Ok(vec![]);
@@ -615,7 +615,7 @@ impl FileManager {
                     downs_basenames.push(filename.basename());
                 }
                 MigrationFileName::Unidirectional(_) => {
-                    println!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
+                    log::info!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
 
                     if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(

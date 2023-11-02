@@ -400,7 +400,7 @@ async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
         (Some(_), None) => panic!("Password not provided"),
         (None, Some(_)) => panic!("User not provided"),
         _ => {
-            log::info!("User and password not provided, using root default");
+            log::warn!("User and password not provided, using root default");
             // db.signin(Root {
             //     username: "root",
             //     password: "root",
