@@ -6,7 +6,7 @@
  */
 
 use crate::*;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use serde::{Deserialize, Serialize};
 
@@ -54,7 +54,7 @@ where
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
-struct Info(HashMap<String, DefineStatementRaw>);
+struct Info(BTreeMap<String, DefineStatementRaw>);
 
 use std::collections::HashSet;
 
