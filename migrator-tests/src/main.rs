@@ -7,7 +7,8 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 async fn initialize_db() -> Surreal<Any> {
-    let db = connect("http://localhost:8000").await.unwrap();
+    // let db = connect("http://localhost:8000").await.unwrap();
+    let db = connect("mem://").await.unwrap();
     db.signin(Root {
         username: "root",
         password: "root",

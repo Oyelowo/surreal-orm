@@ -33,6 +33,7 @@ use surreal_query_builder::sql;
 use syn::{parse_macro_input, LitStr};
 mod migration;
 mod models;
+mod query;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
@@ -65,6 +66,11 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
         }
     };
     raw_input
+}
+
+#[proc_macro]
+pub fn surql(raw_input: TokenStream) -> TokenStream {
+    query::query(raw_input.into()).into()
 }
 
 /// embed_migrations!() is a macro that embeds migrations in the binary at compile time.
