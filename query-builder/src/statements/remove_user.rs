@@ -38,14 +38,12 @@ use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable, User};
 /// # Example
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::remove_User};
-/// let User = User::new("oyelowo");
-/// let statement = remove_user(user).on_namespace();
-/// assert_eq!(statement.build(), "REMOVE USER User ON NAMESPACE;");
+/// use surreal_orm::{*, statements::remove_user};
+/// let statement = remove_user("oyelowo").on_namespace();
+/// assert_eq!(statement.build(), "REMOVE USER oyelowo ON NAMESPACE;");
 ///
-/// let User = User::new("oyelowo");
-/// let statement = remove_user(user).on_database();
-/// assert_eq!(statement.build(), "REMOVE User User ON DATABASE;");
+/// let statement = remove_user("oyelowo").on_database();
+/// assert_eq!(statement.to_raw().build(), "REMOVE USER oyelowo ON DATABASE;");
 /// ```
 pub fn remove_user(user: impl Into<User>) -> RemoveUserStatementInit {
     RemoveUserStatementInit {
@@ -152,13 +150,13 @@ mod test {
     fn remove_user_on_namespace() {
         let login = User::new("login");
         let statement = remove_user(login).on_namespace();
-        assert_eq!(statement.build(), "REMOVE User login ON NAMESPACE;");
+        assert_eq!(statement.build(), "REMOVE USER login ON NAMESPACE;");
     }
 
     #[test]
     fn remove_user_on_database() {
         let login = User::new("login");
         let statement = remove_user(login).on_database();
-        assert_eq!(statement.build(), "REMOVE User login ON DATABASE;");
+        assert_eq!(statement.build(), "REMOVE USER login ON DATABASE;");
     }
 }
