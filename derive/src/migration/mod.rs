@@ -84,7 +84,7 @@ impl Parse for Args {
     }
 }
 
-fn parse_it(input: Args) -> Vec<Option<String>> {
+fn parse_args(input: Args) -> Vec<Option<String>> {
     let mut args: Vec<Option<String>> = Vec::new();
     for arg in &input.args {
         match arg {
@@ -131,7 +131,7 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
         panic!("Too many arguments. Expected 3 or less");
     }
 
-    let mut args = parse_it(input).into_iter();
+    let mut args = parse_args(input).into_iter();
 
     let custom_path = args.next().flatten().clone();
     let flag = args
