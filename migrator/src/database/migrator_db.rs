@@ -119,9 +119,6 @@ impl MigratorDatabase {
         log::info!("Running migrations");
         let mut up_queries = vec![];
         let mut down_queries = vec![];
-        //  DIFFING
-        //  LEFT
-        //
         // Left = migration directory
         // Right = codebase
         // ### TABLES
@@ -139,14 +136,12 @@ impl MigratorDatabase {
         };
 
         // 2. Get all migrations from codebase synced with db - Right
-        // let code_base_resources: Resources = resouces.i;
         right
             .run_codebase_schema_queries(&codebase_resources)
             .await?;
         let init = ComparisonsInit {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
-            // codebase_resources: &resources,
         };
         let tables = init.new_tables(&codebase_resources).queries();
         let analyzers = init.new_analyzers().queries();
@@ -164,7 +159,6 @@ impl MigratorDatabase {
             down_queries.extend(resource.down);
         }
 
-        // TODO: Create a warning to prompt user if they truly want to create empty migrations
         let up_queries_str = up_queries
             .iter()
             .map(ToString::to_string)
@@ -179,7 +173,7 @@ impl MigratorDatabase {
             .join("\n")
             .trim()
             .to_string();
-        // let mig_type = MigrationType::OneWay(up_queries_str.clone().unwrap_or_default());
+
         let migration_type = match &file_manager.migration_flag {
             MigrationFlag::TwoWay => MigrationType::TwoWay {
                 up: up_queries_str.clone(),
@@ -239,9 +233,6 @@ impl MigratorDatabase {
                         };
                     }
                     (false, false) => {
-                        log::info!("HERE=====");
-                        // log::info!("UP MIGRATIOM: \n {}", up_queries_str.clone());
-                        // log::info!("DOWN MIGRATIOM: \n {}", down_queries_str.clone());
                         MigrationFileName::create_up(timestamp, &name)?
                             .create_file(up, file_manager)?;
                         MigrationFileName::create_down(timestamp, name)?
@@ -256,28 +247,6 @@ impl MigratorDatabase {
                 };
             }
         }
-        //
-        //
-        // 4. Aggregate all the new up and down queries
-        // 5. Run the queries as a transaction
-        // 6. Update the migration directory with the new migrations queries i.e m::create_migration_file(up, down, name);
-        // 7. Mark the queries as registered i.e mark_migration_as_applied
-
-        // Run the diff
-        // 5. Update the migration directory
-        //
-
-        // Old rough implementation
-        // let applied_migrations = db.get_applied_migrations_from_db();
-        // let all_migrations = Self::get_all_from_migrations_dir();
-        //
-        // let applied_migrations = applied_migrations.await?;
-        // for migration in all_migrations {
-        //     if !applied_migrations.contains(&migration.name) {
-        //         db.execute(migration.up);
-        //         db.mark_migration_as_applied(migration.name);
-        //     }
-        // }
         Ok(())
     }
 }

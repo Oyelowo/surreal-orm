@@ -238,14 +238,13 @@ impl MigrationRunner {
 
         for file_path in &file_paths {
             log::info!("Deleting file: {:?}", file_path.to_str());
-            println!("Deleting file: {:?}", file_path.to_str());
             std::fs::remove_file(file_path).map_err(|e| {
                 MigrationError::IoError(format!(
                     "Failed to delete migration file: {:?}. Error: {}",
                     file_path, e
                 ))
             })?;
-            println!("Deleted file: {:?}", file_path.to_str());
+            log::info!("Deleted file: {:?}", file_path.to_str());
         }
 
         log::info!("Migration rolled back");
@@ -367,7 +366,6 @@ impl MigrationRunner {
                 migrations
             }
             Status::Applied => {
-                
                 select(All)
                     .from(Migration::table_name())
                     .order_by(Migration::schema().timestamp.asc())
