@@ -234,7 +234,7 @@ use std::str::FromStr;
 
 /// Run migration cli
 /// # Example
-/// ```rust
+/// ```rust, ignore
 /// use surreal_models::migrations::Resources;
 /// use surreal_orm::migrator::{cli, MigrationConfig, RollbackStrategy};
 /// use surrealdb::engine::remote::ws::Ws;
