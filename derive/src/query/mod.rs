@@ -226,3 +226,69 @@ pub fn query(args: TokenStream) -> TokenStream {
 
     output
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_parse_args_without_placeholders() {
+        let input = quote! {
+            my_db, "SELECT * FROM users"
+        };
+
+        let expected_db_conn: Expr = parse_quote! { my_db };
+        let expected_query = "SELECT * FROM users".to_string();
+        let expected_bindings: Vec<Binding> = vec![];
+
+        let (db_conn, query, bindings) = parse_args(input.into()).unwrap();
+
+        assert_eq!(
+            db_conn.to_token_stream().to_string(),
+            expected_db_conn.to_token_stream().to_string()
+        );
+        assert_eq!(query, expected_query);
+        assert_eq!(bindings.len(), expected_bindings.len());
+    }
+
+    #[test]
+    fn test_parse_args_with_placeholders() {
+        let input = quote! {
+            my_db, "SELECT * FROM users WHERE id = $id", {
+                id: 1
+            }
+        };
+
+        let expected_db_conn: Expr = parse_quote! { my_db };
+        let expected_query = "SELECT * FROM users WHERE id = $id".to_string();
+        let expected_bindings = vec![Binding {
+            key: parse_quote! { id },
+            value: parse_quote! { 1 },
+        }];
+
+        let (db_conn, query, bindings) = parse_args(input.into()).unwrap();
+
+        assert_eq!(
+            db_conn.to_token_stream().to_string(),
+            expected_db_conn.to_token_stream().to_string()
+        );
+        assert_eq!(query, expected_query);
+        assert_eq!(bindings.len(), expected_bindings.len());
+        assert_eq!(bindings[0].key, expected_bindings[0].key);
+        assert_eq!(
+            bindings[0].value.to_token_stream().to_string(),
+            expected_bindings[0].value.to_token_stream().to_string()
+        );
+    }
+
+    #[test]
+    fn test_parse_args_unexpected_tokens() {
+        let input = quote! {
+            my_db, "SELECT * FROM users", {} something_else
+        };
+
+        assert!(parse_args(input.into()).is_err());
+    }
+}
