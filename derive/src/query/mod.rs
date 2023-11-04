@@ -107,6 +107,37 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
         }
     }
 
+    // Ensure that every placeholder in the query has a binding
+    let mut placeholders = query.match_indices("$").peekable();
+
+    // Verify that each `$` in the query corresponds to a binding.
+    let mut last_index = 0;
+    while let Some(start) = query[last_index..].find('$').map(|i| last_index + i) {
+        let end = query[start + 1..]
+            .find(|c: char| !c.is_alphanumeric() && c != '_')
+            .map(|i| start + i + 1) // `+1` to include the character at the end position.
+            .unwrap_or_else(|| query.len());
+
+        // Ensure that `start` is less than `end` before slicing to prevent panic.
+        if start >= end {
+            return Err(syn::Error::new(
+                Span::call_site(),
+                "Placeholder parsing error: end index is not greater than start index",
+            ));
+        }
+
+        let placeholder_name = &query[start + 1..end];
+        if !bindings.iter().any(|b| b.key == placeholder_name) {
+            return Err(syn::Error::new(
+                Span::call_site(),
+                format!("No binding found for placeholder '${}'", placeholder_name),
+            ));
+        }
+
+        // Update `last_index` to continue searching the rest of the string.
+        last_index = end;
+    }
+
     Ok(query.to_owned())
 }
 
