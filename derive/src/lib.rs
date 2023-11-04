@@ -51,7 +51,7 @@ pub fn surreal_object_trait_derive(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn query(raw_input: TokenStream) -> TokenStream {
+pub fn query_raw(raw_input: TokenStream) -> TokenStream {
     let r_input = raw_input.clone();
     let input = parse_macro_input!(r_input as LitStr);
     let input = input.value();
@@ -69,7 +69,7 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn surql(raw_input: TokenStream) -> TokenStream {
+pub fn query(raw_input: TokenStream) -> TokenStream {
     query::query(raw_input.into()).into()
 }
 
