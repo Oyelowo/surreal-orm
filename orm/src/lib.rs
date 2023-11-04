@@ -203,8 +203,8 @@ pub use surreal_derive::Object;
 /// #[doc = include_str!("docs/query_description.md")]
 pub use surreal_derive::query;
 
-/// #[doc = include_str!("docs/surql_description.md")]
-pub use surreal_derive::surql;
+/// #[doc = include_str!("docs/query_raw_description.md")]
+pub use surreal_derive::query_raw;
 
 #[doc(hidden)]
 // pub use serde;

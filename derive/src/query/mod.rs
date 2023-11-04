@@ -102,9 +102,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
         let Bindings { pairs } = parse2(bindings_tokens)?;
         bindings = pairs.into_iter().collect::<Vec<_>>();
 
-        // let bindings_tokens = iter.collect::<TokenStream>();
-        // let Bindings { pairs } = parse2(bindings_tokens)?;
-        // let bindings = pairs.into_iter().collect::<Vec<_>>();
         // After parsing the bindings, there should be no more tokens.
         if iter.next().is_some() {
             return Err(syn::Error::new(
@@ -153,11 +150,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
 }
 
 fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Result<String> {
-    let has_placeholders = query.contains('$');
-    if !has_placeholders {
-        return Ok(query.to_owned());
-    }
-
     for binding in bindings {
         let placeholder = format!("${}", binding.key.to_string());
         if !query.contains(&placeholder) {
@@ -174,32 +166,24 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
     // Ensure that every placeholder in the query has a binding
     let mut placeholders = query.match_indices("$").peekable();
 
-    // Verify that each `$` in the query corresponds to a binding.
-    let mut last_index = 0;
-    while let Some(start) = query[last_index..].find('$').map(|i| last_index + i) {
+    while let Some((start, _)) = placeholders.peek().cloned() {
+        // Peek the next placeholder without advancing the iterator to check if it's consecutive.
+        placeholders.next(); // Consume the current placeholder since we've now processed it.
+
+        // Find the end of the placeholder name by looking for the next non-alphanumeric character.
         let end = query[start + 1..]
             .find(|c: char| !c.is_alphanumeric() && c != '_')
-            .map(|i| start + i + 1) // `+1` to include the character at the end position.
-            .unwrap_or_else(|| query.len());
-
-        // Ensure that `start` is less than `end` before slicing to prevent panic.
-        if start >= end {
-            return Err(syn::Error::new(
-                Span::call_site(),
-                "Placeholder parsing error: end index is not greater than start index",
-            ));
-        }
+            .map_or(query.len(), |i| start + i + 1);
 
         let placeholder_name = &query[start + 1..end];
+
+        // Check if there's a corresponding binding for the placeholder.
         if !bindings.iter().any(|b| b.key == placeholder_name) {
             return Err(syn::Error::new(
                 Span::call_site(),
                 format!("No binding found for placeholder '${}'", placeholder_name),
             ));
         }
-
-        // Update `last_index` to continue searching the rest of the string.
-        last_index = end;
     }
 
     Ok(query.to_owned())
