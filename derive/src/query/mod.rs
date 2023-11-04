@@ -71,29 +71,93 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
         Err(value) => return Err(syn::Error::new_spanned(input, value)),
     };
 
-    // Check if there is a comma after the SQL query string literal
-    if let Some(token) = iter.next() {
-        if token.to_string() != "," {
+    let has_placeholders = query.contains('$');
+    let mut bindings = Vec::new();
+
+    if has_placeholders {
+        // Expect a comma after the SQL query string literal
+        match iter.next() {
+            Some(TokenTree::Punct(ref punct)) if punct.as_char() == ',' => {}
+            _ => {
+                return Err(syn::Error::new(
+                    Span::call_site(),
+                    "Expected a comma after the SQL query string literal",
+                ))
+            }
+        }
+
+        // Expect curly braces for bindings
+        let bindings_tokens = match iter.next() {
+            Some(TokenTree::Group(group)) if group.delimiter() == proc_macro2::Delimiter::Brace => {
+                group.into_token_stream()
+            }
+            _ => {
+                return Err(syn::Error::new(
+                    Span::call_site(),
+                    "Expected curly braces for bindings",
+                ))
+            }
+        };
+
+        let Bindings { pairs } = parse2(bindings_tokens)?;
+        bindings = pairs.into_iter().collect::<Vec<_>>();
+
+        // let bindings_tokens = iter.collect::<TokenStream>();
+        // let Bindings { pairs } = parse2(bindings_tokens)?;
+        // let bindings = pairs.into_iter().collect::<Vec<_>>();
+        // After parsing the bindings, there should be no more tokens.
+        if iter.next().is_some() {
             return Err(syn::Error::new(
                 Span::call_site(),
-                "Expected a comma after the SQL query string literal",
+                "Unexpected tokens after bindings block",
             ));
         }
     } else {
-        return Err(syn::Error::new(
-            Span::call_site(),
-            "Expected arguments after the SQL query string literal",
-        ));
+        // If there are no placeholders, bindings are optional.
+        // Check for an optional comma and bindings block.
+        if let Some(TokenTree::Punct(ref punct)) = iter.next() {
+            if punct.as_char() == ',' {
+                let bindings_tokens = match iter.next() {
+                    Some(TokenTree::Group(group))
+                        if group.delimiter() == proc_macro2::Delimiter::Brace =>
+                    {
+                        group.into_token_stream()
+                    }
+                    _ => {
+                        return Err(syn::Error::new(
+                            Span::call_site(),
+                            "Expected curly braces for bindings",
+                        ))
+                    }
+                };
+
+                let Bindings { pairs } = parse2(bindings_tokens)?;
+                bindings = pairs.into_iter().collect::<Vec<_>>();
+
+                // After parsing the bindings, there should be no more tokens.
+                if iter.next().is_some() {
+                    return Err(syn::Error::new(
+                        Span::call_site(),
+                        "Unexpected tokens after bindings block",
+                    ));
+                }
+            } else {
+                return Err(syn::Error::new(
+                    Span::call_site(),
+                    "Expected a comma after the SQL query string literal",
+                ));
+            }
+        }
     }
-
-    let bindings_tokens = iter.collect::<TokenStream>();
-    let Bindings { pairs } = parse2(bindings_tokens)?;
-    let bindings = pairs.into_iter().collect::<Vec<_>>();
-
     Ok((database_connection, query, bindings))
 }
 
 fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Result<String> {
+    let has_placeholders = query.contains('$');
+    if !has_placeholders {
+        return Ok(query.to_owned());
+    }
+
     for binding in bindings {
         let placeholder = format!("${}", binding.key.to_string());
         if !query.contains(&placeholder) {
