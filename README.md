@@ -249,6 +249,63 @@ initial balances. We then increment the balance of the first account and
 decrement the balance of the second account by the same amount. Finally, we
 commit the transaction and then verify that the balances were updated correctly.
 
+## `query!` Macro
+
+The `query!` macro allows for writing SQL queries directly in Rust, providing
+automatic handling of placeholders and bindings, ensuring type safety, and
+reducing repetitive boilerplate code.
+
+### Usage
+
+With the `query!` macro, you can easily construct and execute SQL queries:
+
+- **Basic Query**:
+
+  ```rust
+  let query = query!(db, "SELECT * FROM users").await;
+  let query = query!(db, "SELECT * FROM users", {}).await;
+  ```
+
+- **With Placeholders**:
+
+  ```rust
+  let username = "Oyelowo";
+  let query = query!(db, "SELECT name, age FROM users WHERE age > $age AND name = $ame", {
+      age : 102,
+      ame : username
+  })
+  .await;
+  ```
+
+- **Multiple Queries**:
+  ```rust
+  let queries = query!(
+      db,
+      [
+          "SELECT * FROM users WHERE score = $score",
+          "CREATE user:oyelowo SET name = $name, company = $company_name, skills = $skills"
+      ],
+      {
+          score: 100,
+          name: "Oyelowo",
+          skills: vec!["Rust", "python", "typescript"],
+          company_name: "Codebreather"
+      }
+  )
+  .await;
+  ```
+
+### Benefits
+
+The `query!` macro offers several benefits, including:
+
+- **Developer Efficiency**: Reduce the time spent writing and debugging SQL
+  queries.
+- **Code Clarity**: Achieve clearer and more maintainable code with direct SQL
+  queries in Rust.
+- **Error Reduction**: Minimize the potential for runtime errors and SQL
+  injection vulnerabilities.
+
 ## Conclusion
 
 This concludes the basic usage and features of the Surreal ORM library. You can

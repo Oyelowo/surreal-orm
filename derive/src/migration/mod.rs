@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use migrator::{MigrationConfig, MigrationError, MigrationFlag, Mode};
 use proc_macro::TokenStream;
 use quote::quote;
