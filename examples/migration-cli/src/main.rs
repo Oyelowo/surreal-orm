@@ -58,7 +58,7 @@ fn _generate() {
 
 fn _run() {
     // RUN AGAINST DB
-    let db_url = format!("http://localhost:8000");
+    let db_url = "http://localhost:8000";
 
     let cmd = Command::new("cargo")
         .arg("run")
@@ -71,7 +71,7 @@ fn _run() {
         .arg("--ns")
         .arg("test")
         .arg("--path")
-        .arg(&db_url)
+        .arg(db_url)
         .arg("-r")
         .spawn()
         .expect("Failed to run command");
@@ -82,7 +82,7 @@ fn _run() {
 }
 
 fn _rollback() {
-    let db_url = format!("http://localhost:8000");
+    let db_url = "http://localhost:8000";
     // Rollback
     let cmd = Command::new("cargo")
         .arg("run")
@@ -95,7 +95,7 @@ fn _rollback() {
         .arg("--ns")
         .arg("test")
         .arg("--path")
-        .arg(&db_url)
+        .arg(db_url)
         .arg("-r")
         .stdin(Stdio::piped())
         .spawn()

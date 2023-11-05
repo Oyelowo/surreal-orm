@@ -50,7 +50,7 @@ impl Parse for Queries {
 }
 
 fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
-    let input2: TokenStream = input.clone().into();
+    let input2: TokenStream = input.clone();
     let mut iter = input2.into_iter();
 
     let database_connection = iter
@@ -88,13 +88,11 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
         }
     };
 
-    // Validate each query
     for query in &queries {
         let sql = sql::parse(query.trim());
         match sql {
             Ok(value) => value,
             Err(value) => {
-                println!("Error: {:?}", value);
                 return Err(syn::Error::new_spanned(input.clone(), value));
             }
         };
@@ -104,7 +102,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
     let mut bindings = Vec::new();
 
     if has_placeholders {
-        // Expect a comma after the SQL query string literal
         match iter.next() {
             Some(TokenTree::Punct(ref punct)) if punct.as_char() == ',' => {}
             _ => {
@@ -115,7 +112,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
             }
         }
 
-        // Expect curly braces for bindings
         let bindings_tokens = match iter.next() {
             Some(TokenTree::Group(group)) if group.delimiter() == proc_macro2::Delimiter::Brace => {
                 group.into_token_stream()
@@ -131,7 +127,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
         let Bindings { pairs } = parse2(bindings_tokens)?;
         bindings = pairs.into_iter().collect::<Vec<_>>();
 
-        // After parsing the bindings, there should be no more tokens.
         if iter.next().is_some() {
             return Err(syn::Error::new(
                 Span::call_site(),
@@ -140,7 +135,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
         }
     } else {
         // If there are no placeholders, bindings are optional.
-        // Check for an optional comma and bindings block.
         if let Some(TokenTree::Punct(ref punct)) = iter.next() {
             if punct.as_char() == ',' {
                 let bindings_tokens = match iter.next() {
@@ -160,7 +154,6 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
                 let Bindings { pairs } = parse2(bindings_tokens)?;
                 bindings = pairs.into_iter().collect::<Vec<_>>();
 
-                // After parsing the bindings, there should be no more tokens.
                 if iter.next().is_some() {
                     return Err(syn::Error::new(
                         Span::call_site(),
@@ -180,20 +173,20 @@ fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
 
 fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Result<String> {
     for binding in bindings {
-        let placeholder = format!("${}", binding.key.to_string());
+        let placeholder = format!("${}", binding.key);
         if !query.contains(&placeholder) {
             return Err(syn::Error::new(
                 Span::call_site(),
                 format!(
                     "No placeholder found in SQL query for binding '{}'",
-                    binding.key.to_string()
+                    binding.key
                 ),
             ));
         }
     }
 
     // Ensure that every placeholder in the query has a binding
-    let mut placeholders = query.match_indices("$").peekable();
+    let mut placeholders = query.match_indices('$').peekable();
 
     while let Some((start, _)) = placeholders.peek().cloned() {
         // Peek the next placeholder without advancing the iterator to check if it's consecutive.
@@ -206,7 +199,6 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
 
         let placeholder_name = &query[start + 1..end];
 
-        // Check if there's a corresponding binding for the placeholder.
         if !bindings.iter().any(|b| b.key == placeholder_name) {
             return Err(syn::Error::new(
                 Span::call_site(),
@@ -220,12 +212,8 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
 
 pub fn query(args: TokenStream) -> TokenStream {
     let (db_con, query_strs, bindings) = parse_args(args).expect("Failed to parse arguments");
-
-    // let sql_query =
-    //     validate_and_parse_sql_query(&query_str, &bindings).expect("Failed to validate SQL query");
     let mut output = TokenStream::new();
 
-    // Iterate over multiple queries
     let _sql_queries = validate_and_parse_sql_query(&query_strs.join(";"), &bindings)
         .expect("Failed to validate SQL query");
 
@@ -241,10 +229,6 @@ pub fn query(args: TokenStream) -> TokenStream {
             });
         }
     }
-
-    // output.extend(quote::quote! {
-    //     #db_con.query(#sql_query)
-    // });
 
     for Binding { key, value } in bindings {
         let key = key.to_string();
@@ -272,7 +256,7 @@ mod tests {
         let expected_query = "SELECT * FROM users".to_string();
         let expected_bindings: Vec<Binding> = vec![];
 
-        let (db_conn, query, bindings) = parse_args(input.into()).unwrap();
+        let (db_conn, query, bindings) = parse_args(input).unwrap();
 
         assert_eq!(
             db_conn.to_token_stream().to_string(),
@@ -297,7 +281,7 @@ mod tests {
             value: parse_quote! { 1 },
         }];
 
-        let (db_conn, query, bindings) = parse_args(input.into()).unwrap();
+        let (db_conn, query, bindings) = parse_args(input).unwrap();
 
         assert_eq!(
             db_conn.to_token_stream().to_string(),
@@ -318,7 +302,7 @@ mod tests {
             my_db, "SELECT * FROM users", {} something_else
         };
 
-        assert!(parse_args(input.into()).is_err());
+        assert!(parse_args(input).is_err());
     }
 
     #[test]
@@ -343,8 +327,7 @@ mod tests {
             value: parse2(quote! { 1 }).unwrap(),
         }];
 
-        let (db_conn, queries, bindings) =
-            parse_args(input.into()).expect("Failed to parse arguments");
+        let (db_conn, queries, bindings) = parse_args(input).expect("Failed to parse arguments");
 
         assert_eq!(
             quote! { #db_conn }.to_string(),
