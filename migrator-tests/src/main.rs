@@ -6,9 +6,8 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
-async fn initialize_db() -> Surreal<Any> {
-    // let db = connect("http://localhost:8000").await.unwrap();
-    let db = connect("mem://").await.unwrap();
+async fn _initialize_db() -> Surreal<Any> {
+    let db = connect("http://localhost:8000").await.unwrap();
     db.signin(Root {
         username: "root",
         password: "root",
@@ -21,8 +20,8 @@ async fn initialize_db() -> Surreal<Any> {
 
 #[tokio::main]
 async fn main() {
-    // pretty_env_logger::init();
-    let _db = initialize_db().await;
+    // Comment out the below to use your own db setup from within the code
+    // let _db = _initialize_db().await;
     // cli::migration_cli(Resources, Some(db)).await;
     cli::migration_cli(Resources, None).await;
 }
