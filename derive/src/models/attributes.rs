@@ -910,6 +910,12 @@ impl MyFieldReceiver {
         get_vector_item_type(ty).map(|t| t.into_token_stream())
     }
 
+    pub fn get_option_item_type(&self) -> Option<TokenStream> {
+        let ty = &self.ty;
+
+        get_option_item_type(ty).map(|t| t.into_token_stream())
+    }
+
     pub fn get_fallback_array_item_concrete_type(&self) -> Result<TokenStream, &str> {
         let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
 
@@ -938,7 +944,7 @@ impl MyFieldReceiver {
                 quote!(#crate_name::sql::Value)
             }
             FieldType::Option(_) => {
-                quote!(#crate_name::sql::Value)
+                quote!(::std::option::Option<#crate_name::sql::Value>)
             }
             FieldType::String => {
                 quote!(::std::string::String)
@@ -998,6 +1004,31 @@ fn get_vector_item_type(ty: &Type) -> Option<Type> {
                 .last()
                 .expect("Must have at least one segment");
             if last_segment.ident != "Vec" {
+                return None;
+            }
+            let item_ty = match last_segment.arguments {
+                syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
+                _ => None,
+            };
+            match item_ty {
+                Some(syn::GenericArgument::Type(ty)) => ty,
+                _ => return None,
+            }
+        }
+        _ => return None,
+    };
+    Some(item_ty.clone())
+}
+
+fn get_option_item_type(ty: &Type) -> Option<Type> {
+    let item_ty = match ty {
+        syn::Type::Path(type_path) => {
+            let last_segment = type_path
+                .path
+                .segments
+                .last()
+                .expect("Must have at least one segment");
+            if last_segment.ident != "Option" {
                 return None;
             }
             let item_ty = match last_segment.arguments {
@@ -1880,7 +1911,7 @@ impl TableDeriveAttributes {
 
         match (as_, as_fn){
             (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as' attribute");
+                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as attribute");
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {
