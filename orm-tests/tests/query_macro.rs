@@ -19,7 +19,26 @@ async fn test_query_macro_with_bindigns() {
     // db.query("SELECT name, age, * FROM users WHERE id = $id AND name = $name")
     //     .bind(("id", 1))
     //     .bind(("name", "Oyelowo"));
-    // assert_eq!(query, "SELECT * FROM users");
+}
+
+#[tokio::test]
+async fn test_complex_multiple_queries() {
+    let db = Surreal::new::<Mem>(()).await.unwrap();
+    db.use_ns("test").use_db("test").await.unwrap();
+
+    let _queries = query!(
+        db,
+        [
+            "SELECT * FROM users WHERE id = $id",
+            "CREATE user:oyelowo SET name = $name, company = 'Codebreather', skills = $skills"
+        ],
+        {
+            id: 1,
+            name: "Oyelowo",
+            skills: vec!["Rust", "python", "typescript"]
+        }
+    )
+    .await;
 }
 
 #[test]
