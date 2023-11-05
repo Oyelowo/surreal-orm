@@ -34,7 +34,22 @@ impl Parse for Bindings {
     }
 }
 
-fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
+struct Queries {
+    query_strings: Vec<LitStr>,
+}
+
+impl Parse for Queries {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let content;
+        let _bracket_token: syn::token::Bracket = syn::bracketed!(content in input);
+        let query_strings = Punctuated::<LitStr, Comma>::parse_terminated(&content)?
+            .into_iter()
+            .collect();
+        Ok(Queries { query_strings })
+    }
+}
+
+fn parse_args(input: TokenStream) -> Result<(Expr, Vec<String>, Vec<Binding>)> {
     let input2: TokenStream = input.clone().into();
     let mut iter = input2.into_iter();
 
@@ -53,8 +68,18 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
         }
     }
 
-    let query = match iter.next() {
-        Some(proc_macro2::TokenTree::Literal(lit)) => syn::parse2::<LitStr>(lit.to_token_stream())?,
+    let queries = match iter.next() {
+        Some(proc_macro2::TokenTree::Literal(lit)) => {
+            vec![syn::parse2::<LitStr>(lit.to_token_stream())?.value()]
+        }
+        Some(TokenTree::Group(group)) if group.delimiter() == proc_macro2::Delimiter::Bracket => {
+            let queries_tokens = group.into_token_stream();
+            parse2::<Queries>(queries_tokens)?
+                .query_strings
+                .into_iter()
+                .map(|lit_str| lit_str.value())
+                .collect()
+        }
         _ => {
             return Err(syn::Error::new(
                 Span::call_site(),
@@ -63,15 +88,19 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
         }
     };
 
-    let query = query.value();
-    let sql = sql::parse(query.as_str());
+    // Validate each query
+    for query in &queries {
+        let sql = sql::parse(query.trim());
+        match sql {
+            Ok(value) => value,
+            Err(value) => {
+                println!("Error: {:?}", value);
+                return Err(syn::Error::new_spanned(input.clone(), value));
+            }
+        };
+    }
 
-    match sql {
-        Ok(value) => value,
-        Err(value) => return Err(syn::Error::new_spanned(input, value)),
-    };
-
-    let has_placeholders = query.contains('$');
+    let has_placeholders = queries.join(";").contains('$');
     let mut bindings = Vec::new();
 
     if has_placeholders {
@@ -146,7 +175,7 @@ fn parse_args(input: TokenStream) -> Result<(Expr, String, Vec<Binding>)> {
             }
         }
     }
-    Ok((database_connection, query, bindings))
+    Ok((database_connection, queries, bindings))
 }
 
 fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Result<String> {
@@ -190,16 +219,32 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
 }
 
 pub fn query(args: TokenStream) -> TokenStream {
-    let (db_con, query_str, bindings) = parse_args(args).expect("Failed to parse arguments");
+    let (db_con, query_strs, bindings) = parse_args(args).expect("Failed to parse arguments");
 
-    let sql_query =
-        validate_and_parse_sql_query(&query_str, &bindings).expect("Failed to validate SQL query");
-
+    // let sql_query =
+    //     validate_and_parse_sql_query(&query_str, &bindings).expect("Failed to validate SQL query");
     let mut output = TokenStream::new();
 
-    output.extend(quote::quote! {
-        #db_con.query(#sql_query)
-    });
+    // Iterate over multiple queries
+    let _sql_queries = validate_and_parse_sql_query(&query_strs.join(";"), &bindings)
+        .expect("Failed to validate SQL query");
+
+    for (i, query_str) in query_strs.iter().enumerate() {
+        let is_first = i == 0;
+        if is_first {
+            output.extend(quote::quote! {
+                #db_con.query(#query_str)
+            });
+        } else {
+            output.extend(quote::quote! {
+                .query(#query_str)
+            });
+        }
+    }
+
+    // output.extend(quote::quote! {
+    //     #db_con.query(#sql_query)
+    // });
 
     for Binding { key, value } in bindings {
         let key = key.to_string();
@@ -233,7 +278,7 @@ mod tests {
             db_conn.to_token_stream().to_string(),
             expected_db_conn.to_token_stream().to_string()
         );
-        assert_eq!(query, expected_query);
+        assert_eq!(query, vec![expected_query]);
         assert_eq!(bindings.len(), expected_bindings.len());
     }
 
@@ -258,7 +303,7 @@ mod tests {
             db_conn.to_token_stream().to_string(),
             expected_db_conn.to_token_stream().to_string()
         );
-        assert_eq!(query, expected_query);
+        assert_eq!(query, vec![expected_query]);
         assert_eq!(bindings.len(), expected_bindings.len());
         assert_eq!(bindings[0].key, expected_bindings[0].key);
         assert_eq!(
@@ -274,5 +319,61 @@ mod tests {
         };
 
         assert!(parse_args(input.into()).is_err());
+    }
+
+    #[test]
+    fn test_parse_args_multiple_queries() {
+        let input = quote! {
+            my_db,
+            [
+                "SELECT * FROM users WHERE id = $id",
+                "CREATE user:oyelowo SET name = 'Oyelowo', company = 'Codebreather', skills = ['Rust', 'python', 'typescript']"
+            ], {
+                id: 1
+            }
+        };
+
+        let expected_db_conn: Expr = parse2(quote! { my_db }).unwrap();
+        let expected_queries = vec![
+            "SELECT * FROM users WHERE id = $id".to_string(),
+            "CREATE user:oyelowo SET name = 'Oyelowo', company = 'Codebreather', skills = ['Rust', 'python', 'typescript']".to_string()
+        ];
+        let expected_bindings = vec![Binding {
+            key: parse2(quote! { id }).unwrap(),
+            value: parse2(quote! { 1 }).unwrap(),
+        }];
+
+        let (db_conn, queries, bindings) =
+            parse_args(input.into()).expect("Failed to parse arguments");
+
+        assert_eq!(
+            quote! { #db_conn }.to_string(),
+            quote! { #expected_db_conn }.to_string(),
+            "Database connection parsing failed or mismatched."
+        );
+
+        assert_eq!(
+            queries, expected_queries,
+            "Queries parsing failed or mismatched."
+        );
+        assert_eq!(
+            bindings.len(),
+            expected_bindings.len(),
+            "Number of bindings parsed does not match expected."
+        );
+
+        for (binding, expected_binding) in bindings.iter().zip(expected_bindings.iter()) {
+            let binding_key = binding.key.to_string();
+            let binding_value = binding.value.to_token_stream().to_string();
+
+            let expected_binding_key = expected_binding.key.to_string();
+            let expected_binding_value = expected_binding.value.to_token_stream().to_string();
+
+            assert_eq!(binding_key, expected_binding_key, "Binding key mismatch.");
+            assert_eq!(
+                binding_value, expected_binding_value,
+                "Binding value mismatch."
+            );
+        }
     }
 }
