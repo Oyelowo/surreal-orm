@@ -573,9 +573,9 @@ impl SchemaFieldsProperties {
                 };
 
                 // Only works for vectors
-                let array_trait = if field_receiver.is_list() {
+                let array_trait = if field_receiver.rust_type().is_list() {
                     array_element
-                        .or_else(||field_receiver.get_array_item_type())
+                        .or_else(||field_receiver.rust_type().get_array_item_type())
                         .or_else(|| {
                                 Some(field_receiver.get_fallback_array_item_concrete_type().map_err(|e| {
                                     // errors.push("Could not infer the type of the array. Please specify the type of the array. e.g: Vec<String> or Vec<Email>");
@@ -824,7 +824,7 @@ impl SchemaFieldsProperties {
                         quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     );
 
-                    let ref_node_meta = if field_receiver.is_list() {
+                    let ref_node_meta = if field_receiver.rust_type().is_list() {
                         ReferencedNodeMeta::from_simple_array(field_ident_normalised)
                     } else {
                         ReferencedNodeMeta::default()

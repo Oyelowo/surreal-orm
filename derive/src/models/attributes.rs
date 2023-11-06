@@ -15,6 +15,7 @@ use std::{
 use super::{
     casing::{CaseString, FieldIdentCased, FieldIdentUnCased},
     errors::ExtractorResult,
+    field_rust_type::{Attributes, FieldRustType},
     get_crate_name, parse_lit_to_tokenstream,
     parser::DataType,
     relations::NodeTypeName,
@@ -196,8 +197,18 @@ pub struct MyFieldReceiver {
 }
 
 pub struct FieldTypeDerived {
-    field_type: TokenStream,
-    static_assertion: TokenStream,
+    pub(crate) field_type: TokenStream,
+    pub(crate) static_assertion: TokenStream,
+}
+
+impl Default for FieldTypeDerived {
+    fn default() -> Self {
+        let crate_name = get_crate_name(false);
+        Self {
+            field_type: quote!(#crate_name::FieldType::Any),
+            static_assertion: Default::default(),
+        }
+    }
 }
 
 impl MyFieldReceiver {
@@ -209,6 +220,8 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<Option<FieldTypeDerived>> {
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
+
+        let rust_type = FieldRustType::new(self.ty.clone(), Default::default());
 
         if let Some(type_) = &self.type_ {
             let field_type = type_.deref();
@@ -332,7 +345,10 @@ impl MyFieldReceiver {
                         }
                     } else if let FieldType::Array(item_type, _) = field_type {
                         // TODO: see if we can allow this
-                        if item_type.is_any() && !self.type_is_inferrable(field_name_normalized) {
+                        let rust_type = FieldRustType::new(self.ty.clone(), Default::default());
+                        if item_type.is_any()
+                            && !rust_type.type_is_inferrable(field_name_normalized)
+                        {
                             let err = format!(
                                 "Not able to infer array content type. Content type must 
                     be provided when type is array and the compiler cannot infer the type. 
@@ -495,461 +511,22 @@ impl MyFieldReceiver {
                 static_assertion: quote!( # ( #static_assertions ) *),
                 // #( # define_array_field_item_methods) *
             }))
-        } else if self.type_is_inferrable(&field_name_normalized.to_string()) {
+        } else if self
+            .rust_type()
+            .type_is_inferrable(&field_name_normalized.to_string())
+        {
+            // rust_type.infer_surreal_type_heuristically(field_name_normalized)
             Ok(Some(
-                self.infer_surreal_type_heuristically(field_name_normalized),
+                self.rust_type()
+                    .infer_surreal_type_heuristically(field_name_normalized),
             ))
         } else {
-            Ok(None)
+            panic!(
+                "Type must be provided for field - {}",
+                field_name_normalized
+            );
+            // Ok(None)
         }
-    }
-
-    pub fn infer_surreal_type_heuristically(
-        &self,
-        // struct_name_ident_str: &String,
-        field_name_normalized: &str,
-    ) -> FieldTypeDerived {
-        let crate_name = get_crate_name(false);
-        let ty = &self.ty;
-
-        if self.raw_type_is_bool() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Bool),
-                // field_item_type: None,
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
-            }
-        } else if self.raw_type_is_float() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Float),
-                // field_item_type: None,
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
-            }
-        } else if self.raw_type_is_integer() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Int),
-                // field_item_type: None,
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
-            }
-        } else if self.raw_type_is_string() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::String),
-                // field_item_type: None,
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
-            }
-        } else if self.raw_type_is_optional() || self.type_.is_some() {
-            let option_type = self.type_.as_ref().map(|ct| {
-                let ct = ct.to_string();
-                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            });
-            FieldTypeDerived {
-                field_type: option_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#crate_name::FieldType::Any)))),
-                // field_item_type: None,
-                static_assertion: quote!(#crate_name::validators::assert_option::<#ty>();),
-            }
-        } else if self.raw_type_is_list() || self.type_.is_some() {
-            // let array_item_type = match self.type_.as_ref() {
-            //     Some(FieldTypeWrapper(type_)) => type_.to_string(),
-            //     None => "Any".to_string(),
-            // };
-            let array_type = self.type_.as_ref().map(|ct| {
-                let ct = ct.to_string();
-                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            });
-
-            // let item_type = self.item_type.as_ref().map(|ct| {
-            //     let ct = ct.to_string();
-            //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            // });
-            FieldTypeDerived {
-                field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None))),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
-                // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
-            }
-        } else if self.raw_type_is_hash_set() || self.type_.is_some() {
-            let array_type = self.type_.as_ref().map(|ct| {
-                let ct = ct.to_string();
-                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            });
-
-            FieldTypeDerived {
-                field_type: array_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None))),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
-            }
-        } else if self.raw_type_is_object() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Object),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Object>);),
-            }
-        } else if self.raw_type_is_duration() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Duration),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Duration>);),
-            }
-        } else if self.raw_type_is_datetime() {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Datetime),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Datetime>);),
-            }
-        } else if self.raw_type_is_geometry() {
-            FieldTypeDerived {
-                // TODO: check if to auto-infer more speicific geometry type?
-                field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
-            }
-        } else if let MyFieldReceiver {
-            type_: None,
-            link_one,
-            link_self,
-            link_many,
-            nest_array,
-            nest_object,
-            ..
-        } = self
-        {
-            if field_name_normalized == "id" {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
-                    static_assertion: quote!(),
-                }
-                // TODO: Only do this for Edge
-            } else if field_name_normalized == "out" || field_name_normalized == "in" {
-                // An edge might be shared by multiple In/Out nodes. So, default to any type of
-                // record for edge in and out
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
-                let ref_node_type = format_ident!("{ref_node_type}");
-
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![#ref_node_type::table_name()])),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(ref_node_type) = link_many {
-                let ref_struct_name = format_ident!("{ref_node_type}");
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_struct_name::table_name()])),
-                        ::std::option::Option::None
-                    )),
-                    // field_item_type: Some(
-                    //     quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
-                    // ),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = nest_object {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Object),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = nest_array {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
-                        ::std::option::Option::None
-                    )),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = link_one {
-                FieldTypeDerived {
-                    // #crate_name::SurrealId<#foreign_node>
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
-                    static_assertion: quote!(),
-                }
-            } else if let Some(_ref_node_type) = link_self {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Record(::std::vec![_ref_node_type::table_name()])),
-                    static_assertion: quote!(),
-                }
-            } else {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Any),
-                    static_assertion: quote!(),
-                }
-            }
-        } else {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Any),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
-            }
-        }
-    }
-
-    pub fn type_is_inferrable(&self, field_name_normalized_str: &String) -> bool {
-        self.link_one.is_some()
-            || self.link_self.is_some()
-            || self.link_many.is_some()
-            || self.nest_object.is_some()
-            || self.nest_array.is_some()
-            || field_name_normalized_str == "id"
-            || field_name_normalized_str == "in"
-            || field_name_normalized_str == "out"
-            || self.raw_type_is_float()
-            || self.raw_type_is_integer()
-            || self.raw_type_is_string()
-            || self.raw_type_is_bool()
-            || self.raw_type_is_list()
-            || self.raw_type_is_hash_set()
-            || self.raw_type_is_object()
-            || self.raw_type_is_optional()
-            || self.raw_type_is_duration()
-            || self.raw_type_is_datetime()
-            || self.raw_type_is_geometry()
-    }
-
-    pub fn is_numeric(&self) -> bool {
-        let ty = &self.ty;
-        let surreal_field_type = match &self.type_ {
-            Some(ft) => ft.deref(),
-            None => &FieldType::Any,
-        };
-
-        let type_is_numeric = match ty {
-            syn::Type::Path(ref p) => {
-                let path = &p.path;
-                path.leading_colon.is_none() && path.segments.len() == 1 && {
-                    let ident = &path.segments[0].ident.to_string();
-                    [
-                        "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
-                        "i128", "isize", "f32", "f64",
-                    ]
-                    .iter()
-                    .any(|&x| x == ident)
-                }
-            }
-            _ => false,
-        };
-
-        type_is_numeric
-            || matches!(
-                surreal_field_type,
-                FieldType::Int | FieldType::Number | FieldType::Float
-            )
-    }
-
-    pub fn raw_type_is_float(&self) -> bool {
-        match self.ty {
-            syn::Type::Path(ref p) => {
-                let path = &p.path;
-                path.leading_colon.is_none() && path.segments.len() == 1 && {
-                    let ident = &path.segments[0].ident.to_string();
-                    ["f32", "f64"].iter().any(|&x| x == ident)
-                }
-            }
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_integer(&self) -> bool {
-        match self.ty {
-            syn::Type::Path(ref p) => {
-                let path = &p.path;
-                path.leading_colon.is_none() && path.segments.len() == 1 && {
-                    let ident = &path.segments[0].ident.to_string();
-                    [
-                        "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64",
-                        "i128", "isize",
-                    ]
-                    .iter()
-                    .any(|&x| x == ident)
-                }
-            }
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_string(&self) -> bool {
-        match self.ty {
-            syn::Type::Path(ref p) => {
-                let path = &p.path;
-                path.leading_colon.is_none() && path.segments.len() == 1 && {
-                    let ident = &path.segments[0].ident.to_string();
-                    ["String"].iter().any(|&x| x == ident)
-                }
-            }
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_bool(&self) -> bool {
-        match self.ty {
-            syn::Type::Path(ref p) => {
-                let path = &p.path;
-                path.leading_colon.is_none() && path.segments.len() == 1 && {
-                    let ident = &path.segments[0].ident.to_string();
-                    ["bool"].iter().any(|&x| x == ident)
-                }
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_list(&self) -> bool {
-        self.raw_type_is_list()
-            || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
-            || self.link_many.is_some()
-    }
-
-    pub fn raw_type_is_list(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
-                    {
-                        return false;
-                    }
-                    last_seg.ident == "Vec"
-                } else {
-                    false
-                }
-            }
-            syn::Type::Array(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_optional(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
-                    {
-                        return false;
-                    }
-                    last_seg.ident == "Option"
-                } else {
-                    false
-                }
-            }
-            syn::Type::Array(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_hash_set(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
-                    {
-                        return false;
-                    }
-                    last_seg.ident == "HashSet"
-                } else {
-                    false
-                }
-            }
-            syn::Type::Array(_) => false,
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_object(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
-                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
-                    {
-                        return false;
-                    }
-                    last_seg.ident == "HashMap" || last_seg.ident == "BTreeMap"
-                } else {
-                    false
-                }
-            }
-            syn::Type::Array(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_datetime(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(type_path) => {
-                let last_segment = type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                last_segment.ident.to_string().to_lowercase() == "datetime"
-            }
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_duration(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(type_path) => {
-                let last_segment = type_path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                last_segment.ident == "Duration"
-            }
-            _ => false,
-        }
-    }
-
-    pub fn raw_type_is_geometry(&self) -> bool {
-        let ty = &self.ty;
-        match ty {
-            syn::Type::Path(path) => {
-                let last_seg = path
-                    .path
-                    .segments
-                    .last()
-                    .expect("Must have at least one segment");
-                last_seg.ident == "Geometry"
-                    || last_seg.ident == "Point"
-                    || last_seg.ident == "LineString"
-                    || last_seg.ident == "Polygon"
-                    || last_seg.ident == "MultiPoint"
-                    || last_seg.ident == "MultiLineString"
-                    || last_seg.ident == "MultiPolygon"
-                    || last_seg.ident == "GeometryCollection"
-            }
-            syn::Type::Array(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn get_array_item_type(&self) -> Option<TokenStream> {
-        let ty = &self.ty;
-
-        get_vector_item_type(ty).map(|t| t.into_token_stream())
-    }
-
-    pub fn get_option_item_type(&self) -> Option<TokenStream> {
-        let ty = &self.ty;
-
-        get_option_item_type(ty).map(|t| t.into_token_stream())
     }
 
     pub fn get_fallback_array_item_concrete_type(&self) -> Result<TokenStream, &str> {
@@ -1029,56 +606,27 @@ impl MyFieldReceiver {
         };
         Ok(value)
     }
-}
 
-fn get_vector_item_type(ty: &Type) -> Option<Type> {
-    let item_ty = match ty {
-        syn::Type::Path(type_path) => {
-            let last_segment = type_path
-                .path
-                .segments
-                .last()
-                .expect("Must have at least one segment");
-            if last_segment.ident != "Vec" {
-                return None;
-            }
-            let item_ty = match last_segment.arguments {
-                syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
-                _ => None,
-            };
-            match item_ty {
-                Some(syn::GenericArgument::Type(ty)) => ty,
-                _ => return None,
-            }
-        }
-        _ => return None,
-    };
-    Some(item_ty.clone())
-}
+    pub fn is_numeric(&self) -> bool {
+        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+        let explicit_ty_is_numeric = match field_type {
+            FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number => true,
+            _ => false,
+        };
+        explicit_ty_is_numeric || self.rust_type().is_numeric()
+    }
 
-fn get_option_item_type(ty: &Type) -> Option<Type> {
-    let item_ty = match ty {
-        syn::Type::Path(type_path) => {
-            let last_segment = type_path
-                .path
-                .segments
-                .last()
-                .expect("Must have at least one segment");
-            if last_segment.ident != "Option" {
-                return None;
-            }
-            let item_ty = match last_segment.arguments {
-                syn::PathArguments::AngleBracketed(ref args) => args.args.first(),
-                _ => None,
-            };
-            match item_ty {
-                Some(syn::GenericArgument::Type(ty)) => ty,
-                _ => return None,
-            }
-        }
-        _ => return None,
-    };
-    Some(item_ty.clone())
+    pub fn rust_type(&self) -> FieldRustType {
+        let attrs = Attributes {
+            link_one: self.link_one.as_ref(),
+            link_self: self.link_self.as_ref(),
+            link_many: self.link_many.as_ref(),
+            nest_array: self.nest_array.as_ref(),
+            nest_object: self.nest_object.as_ref(),
+        };
+        let rust_type = FieldRustType::new(self.ty.clone(), attrs);
+        rust_type
+    }
 }
 
 #[derive(Debug, Clone)]

@@ -9,6 +9,7 @@ pub(crate) mod attributes;
 pub(crate) mod casing;
 pub(crate) mod edge;
 pub(crate) mod errors;
+pub(crate) mod field_rust_type;
 pub(crate) mod node;
 pub(crate) mod object;
 pub(crate) mod parser;
