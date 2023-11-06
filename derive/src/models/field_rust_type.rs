@@ -403,7 +403,10 @@ impl<'a> FieldRustType<'a> {
             let inner_static_assertion = inner_item.static_assertion;
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
-                static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
+                static_assertion: quote!(
+                            #crate_name::validators::assert_is_vec::<#ty>();
+                            #inner_static_assertion
+                ),
                 // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
         // } else if self.raw_type_is_hash_set() || self.type_.is_some() {
