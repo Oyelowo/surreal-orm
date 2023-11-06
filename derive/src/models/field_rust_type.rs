@@ -1,6 +1,6 @@
-use proc_macro2::TokenStream;
 use quote::ToTokens;
 use quote::{format_ident, quote};
+use surreal_query_builder::FieldType;
 use syn::{self, Type};
 
 use super::attributes::MyFieldReceiver;
@@ -441,15 +441,16 @@ impl<'a> FieldRustType<'a> {
                 field_type: quote!(#crate_name::FieldType::Geometry(::std::vec![])),
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Geometry>);),
             }
-        } else if let Attributes {
-            link_one,
-            link_self,
-            link_many,
-            nest_array,
-            nest_object,
-            ..
-        } = self.attributes
-        {
+        } else {
+            let Attributes {
+                link_one,
+                link_self,
+                link_many,
+                nest_array,
+                nest_object,
+                ..
+            } = self.attributes;
+
             if field_name_normalized == "id" {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
@@ -509,13 +510,9 @@ impl<'a> FieldRustType<'a> {
             } else {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Any),
-                    static_assertion: quote!(),
+                    // static_assertion: quote!(),
+                    static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
                 }
-            }
-        } else {
-            FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Any),
-                static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
             }
         }
     }

@@ -573,7 +573,7 @@ impl SchemaFieldsProperties {
                 };
 
                 // Only works for vectors
-                let array_trait = if field_receiver.rust_type().is_list() {
+                let array_trait = if field_receiver.is_list() {
                     array_element
                         .or_else(||field_receiver.rust_type().get_array_inner_type().map(|inner| inner.into_token_stream()))
                         .or_else(|| {
