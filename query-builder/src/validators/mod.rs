@@ -99,6 +99,15 @@ pub fn assert_option<T: IsOption>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
+/// Check if a type is an array
+pub trait IsArray {}
+
+impl<T> IsArray for Vec<T> {}
+
+/// Validate that type is an Vec at compile time
+pub fn assert_vec<T: IsArray>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
 /// Checks that all idents are unique.
 #[macro_export]
 macro_rules! check_unique_idents {
