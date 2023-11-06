@@ -598,6 +598,18 @@ impl MyFieldReceiver {
         explicit_ty_is_numeric || self.rust_type().is_numeric()
     }
 
+    pub fn is_list(&self) -> bool {
+        let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
+        let explicit_ty_is_list = match field_type {
+            FieldType::Array(_, _) | FieldType::Set(_, _) => true,
+            _ => false,
+        };
+        explicit_ty_is_list
+            || self.rust_type().is_list()
+            || self.type_.as_ref().map_or(false, |t| t.deref().is_array())
+            || self.link_many.is_some()
+    }
+
     pub fn rust_type(&self) -> FieldRustType {
         let attrs = Attributes {
             link_one: self.link_one.as_ref(),

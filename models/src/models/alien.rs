@@ -28,10 +28,7 @@ pub struct Alien {
     pub weapon: LinkOne<Weapon>,
 
     // Again, we dont have to provide the type attribute, it can auto detect
-    #[surreal_orm(
-        link_many = "SpaceShip",
-        // type_ = "array",
-    )]
+    #[surreal_orm(link_many = "SpaceShip")]
     pub space_ships: LinkMany<SpaceShip>,
 
     // This is a read only field
