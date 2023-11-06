@@ -108,7 +108,24 @@ struct TestMultipolygon {
 #[surreal_orm(table_name = "test_geometrycollection")]
 struct TestGeometrycollection {
     id: SurrealId<Self, i32>,
-    home_geometrycollection: Vec<geo::Geometry>,
+    home_geometrycollection: Vec<GeometryCollection>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct GeometryCollection(geo::Geometry);
+
+impl From<GeometryCollection> for surrealdb::sql::Geometry {
+    fn from(value: GeometryCollection) -> Self {
+        match value.0 {
+            geo::Geometry::Point(p) => p.into(),
+            geo::Geometry::LineString(ls) => ls.into(),
+            geo::Geometry::Polygon(p) => p.into(),
+            geo::Geometry::MultiPoint(mp) => mp.into(),
+            geo::Geometry::MultiLineString(mls) => mls.into(),
+            geo::Geometry::MultiPolygon(mp) => mp.into(),
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
@@ -314,8 +331,8 @@ async fn geom_collection() -> surrealdb::Result<()> {
     let point = Point(Coord { x: 0.0, y: 0.0 });
     let linestring = LineString(vec![Coord { x: 1.0, y: 1.0 }, Coord { x: 2.0, y: 2.0 }]);
     let geometry_collection = vec![
-        geo::Geometry::Point(point),
-        geo::Geometry::LineString(linestring),
+        GeometryCollection(geo::Geometry::Point(point)),
+        GeometryCollection(geo::Geometry::LineString(linestring)),
     ];
 
     create_test_data_assertion!(TestGeometrycollection {
