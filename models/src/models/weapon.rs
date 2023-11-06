@@ -75,9 +75,9 @@ pub struct TestStuff {
     pub id: SurrealSimpleId<Self>,
     #[surreal_orm(type_ = "option<string>")]
     pub amt: Option<Strength>,
-    #[surreal_orm(type_ = "option<geometry<polygon>>")]
+    // #[surreal_orm(type_ = "option<geometry<polygon>>")]
     pub amt2: Option<i32>,
-    #[surreal_orm(type_ = "int")]
-    pub amt3: Strength,
+    // #[surreal_orm(type_ = "int")]
+    // pub amt3: Strength,
+    pub amt3: Vec<u64>,
 }
-// DEFINE FIELD amt TYPE option<int> on TABLE test_stuff;
