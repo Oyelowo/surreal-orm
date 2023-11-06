@@ -536,6 +536,16 @@ impl MyFieldReceiver {
                 // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
+        } else if self.raw_type_is_optional() || self.type_.is_some() {
+            let option_type = self.type_.as_ref().map(|ct| {
+                let ct = ct.to_string();
+                quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
+            });
+            FieldTypeDerived {
+                field_type: option_type.unwrap_or_else(|| quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#crate_name::FieldType::Any)))),
+                // field_item_type: None,
+                static_assertion: quote!(#crate_name::validators::assert_option::<#ty>();),
+            }
         } else if self.raw_type_is_list() || self.type_.is_some() {
             // let array_item_type = match self.type_.as_ref() {
             //     Some(FieldTypeWrapper(type_)) => type_.to_string(),
@@ -682,6 +692,7 @@ impl MyFieldReceiver {
             || self.raw_type_is_list()
             || self.raw_type_is_hash_set()
             || self.raw_type_is_object()
+            || self.raw_type_is_optional()
             || self.raw_type_is_duration()
             || self.raw_type_is_datetime()
             || self.raw_type_is_geometry()
