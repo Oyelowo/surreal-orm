@@ -686,6 +686,7 @@ impl MyFieldReceiver {
             || self.raw_type_is_datetime()
             || self.raw_type_is_geometry()
     }
+
     pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
         let surreal_field_type = match &self.type_ {
@@ -803,6 +804,30 @@ impl MyFieldReceiver {
         }
     }
 
+    pub fn raw_type_is_optional(&self) -> bool {
+        let ty = &self.ty;
+        match ty {
+            syn::Type::Path(path) => {
+                let last_seg = path
+                    .path
+                    .segments
+                    .last()
+                    .expect("Must have at least one segment");
+                if let syn::PathArguments::AngleBracketed(args) = &last_seg.arguments {
+                    if let Some(syn::GenericArgument::Type(syn::Type::Infer(_))) = args.args.first()
+                    {
+                        return false;
+                    }
+                    last_seg.ident == "Option"
+                } else {
+                    false
+                }
+            }
+            syn::Type::Array(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn raw_type_is_hash_set(&self) -> bool {
         let ty = &self.ty;
         match ty {
@@ -822,7 +847,7 @@ impl MyFieldReceiver {
                     false
                 }
             }
-            syn::Type::Array(_) => true,
+            syn::Type::Array(_) => false,
             _ => false,
         }
     }
@@ -1911,7 +1936,7 @@ impl TableDeriveAttributes {
 
         match (as_, as_fn){
             (Some(as_), None) => {
-                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as attribute");
+                let as_ = parse_lit_to_tokenstream(as_).expect("Unable to parse 'as' attribute");
                 define_table_methods.push(quote!(.as_(#as_)))
             },
             (None, Some(as_fn)) => {

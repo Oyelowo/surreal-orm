@@ -444,13 +444,13 @@ impl SchemaFieldsProperties {
                     quote!(
                         impl #crate_name::SetterNumeric<#field_type> for self::#field_name_as_camel  {}
 
-                        impl From<self::#field_name_as_camel> for #crate_name::NumberLike {
+                        impl ::std::convert::From<self::#field_name_as_camel> for #crate_name::NumberLike {
                             fn from(val: self::#field_name_as_camel) -> Self {
                                 val.0.into()
                             }
                         }
 
-                        impl From<&self::#field_name_as_camel> for #crate_name::NumberLike {
+                        impl ::std::convert::From<&self::#field_name_as_camel> for #crate_name::NumberLike {
                             fn from(val: &self::#field_name_as_camel) -> Self {
                                 val.clone().0.into()
                             }
@@ -604,39 +604,39 @@ impl SchemaFieldsProperties {
                             #[derive(Debug, Clone)]
                             pub struct #field_name_as_camel(pub #crate_name::Field);
 
-                            impl From<&str> for #field_name_as_camel {
+                            impl ::std::convert::From<&str> for #field_name_as_camel {
                                 fn from(field_name: &str) -> Self {
                                     Self(#crate_name::Field::new(field_name))
                                 }
                             }
 
-                            impl From<#crate_name::Field> for #field_name_as_camel {
+                            impl ::std::convert::From<#crate_name::Field> for #field_name_as_camel {
                                 fn from(field_name: #crate_name::Field) -> Self {
                                     Self(field_name)
                                 }
                             }
 
-                            impl From<&#field_name_as_camel> for #crate_name::ValueLike {
+                            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::ValueLike {
                                 fn from(value: &#field_name_as_camel) -> Self {
                                     let field: #crate_name::Field = value.into();
                                     field.into()
                                 }
                             }
 
-                            impl From<#field_name_as_camel> for #crate_name::ValueLike {
+                            impl ::std::convert::From<#field_name_as_camel> for #crate_name::ValueLike {
                                 fn from(value: #field_name_as_camel) -> Self {
                                     let field: #crate_name::Field = value.into();
                                     field.into()
                                 }
                             }
 
-                            impl From<&#field_name_as_camel> for #crate_name::Field {
+                            impl ::std::convert::From<&#field_name_as_camel> for #crate_name::Field {
                                 fn from(field_name:& #field_name_as_camel) -> Self {
                                     field_name.0.clone()
                                 }
                             }
 
-                            impl From<#field_name_as_camel> for #crate_name::Field {
+                            impl ::std::convert::From<#field_name_as_camel> for #crate_name::Field {
                                 fn from(field_name: #field_name_as_camel) -> Self {
                                     field_name.0
                                 }
@@ -656,13 +656,13 @@ impl SchemaFieldsProperties {
                                 }
                             }
 
-                            impl<T: #crate_name::serde::Serialize> From<self::#field_name_as_camel> for #crate_name::SetterArg<T> {
+                            impl<T: #crate_name::serde::Serialize> ::std::convert::From<self::#field_name_as_camel> for #crate_name::SetterArg<T> {
                                 fn from(value: self::#field_name_as_camel) -> Self {
                                     Self::Field(value.into())
                                 }
                             }
 
-                            impl<T: #crate_name::serde::Serialize> From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
+                            impl<T: #crate_name::serde::Serialize> ::std::convert::From<&self::#field_name_as_camel> for #crate_name::SetterArg<T> {
                                 fn from(value: &self::#field_name_as_camel) -> Self {
                                     Self::Field(value.into())
                                 }
@@ -1176,7 +1176,7 @@ impl NodeEdgeMetadataStore {
                     pub struct #edge_name_as_struct_with_direction_ident(#edge_name_as_struct_original_ident);
 
 
-                    impl From<#edge_name_as_struct_original_ident> for #edge_name_as_struct_with_direction_ident {
+                    impl ::std::convert::From<#edge_name_as_struct_original_ident> for #edge_name_as_struct_with_direction_ident {
                         fn from(value: #edge_name_as_struct_original_ident) -> Self {
                             Self(value)
                         }
