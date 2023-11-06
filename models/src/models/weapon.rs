@@ -64,5 +64,15 @@ pub struct Account {
 #[surreal_orm(table_name = "balance")]
 pub struct Balance {
     pub id: SurrealId<Self, String>,
+    #[surreal_orm(type_ = "option<string>")]
     pub amount: f64,
+}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "test_stuff")]
+pub struct TestStuff {
+    pub id: SurrealSimpleId<Self>,
+    // #[surreal_orm(type_ = "option<int>")]
+    pub amt: Option<u64>,
 }

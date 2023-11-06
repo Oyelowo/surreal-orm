@@ -89,12 +89,13 @@ pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T
     println!("Both arrays have the same length of {}", N);
 }
 
-trait IsOption {}
+/// check if a type is an Option
+pub trait IsOption {}
 
-// Implement the trait for all `Option<T>`.
 impl<T> IsOption for Option<T> {}
 
-fn assert_option<T: IsOption>() {
+/// Validate that type is an Option at compile time
+pub fn assert_option<T: IsOption>() {
     // This function doesn't need to do anything; it's just here to enforce the type constraint.
 }
 
