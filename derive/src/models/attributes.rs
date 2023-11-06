@@ -343,25 +343,6 @@ impl MyFieldReceiver {
                                 .into());
                             }
                         }
-                    } else if let FieldType::Array(item_type, _) = field_type {
-                        // TODO: see if we can allow this
-                        let rust_type = FieldRustType::new(self.ty.clone(), Default::default());
-                        if item_type.is_any()
-                            && !rust_type.type_is_inferrable(field_name_normalized)
-                        {
-                            let err = format!(
-                                "Not able to infer array content type. Content type must 
-                    be provided when type is array and the compiler cannot infer the type. 
-                    Please, provide `item_type` for the field - {}. 
-                    e.g `#[surreal_orm(type=array, item_type=\"int\")]`",
-                                &field_name_normalized
-                            );
-                            return Err(syn::Error::new_spanned(
-                                field_name_normalized,
-                                err.as_str(),
-                            )
-                            .into());
-                        }
                     }
                 }
                 _ => {}
@@ -515,14 +496,15 @@ impl MyFieldReceiver {
             .rust_type()
             .type_is_inferrable(&field_name_normalized.to_string())
         {
-            // rust_type.infer_surreal_type_heuristically(field_name_normalized)
             Ok(Some(
                 self.rust_type()
                     .infer_surreal_type_heuristically(field_name_normalized),
             ))
         } else {
+            // TODO: consider a syn::Error here
             panic!(
-                "Type must be provided for field - {}",
+                r#"Unable to infer database type for the field. Type must be provided for field - {}.\
+            e.g use the annotation #[surreal_orm(type_="int")] to provide the type explicitly."#,
                 field_name_normalized
             );
             // Ok(None)

@@ -267,10 +267,8 @@ impl<'a> FieldRustType<'a> {
         }
     }
 
-    pub fn get_array_item_type(&self) -> Option<TokenStream> {
+    pub fn get_array_inner_type(&self) -> Option<Type> {
         let ty = &self.ty;
-
-        // get_vector_item_type(ty).map(|t| t.into_token_stream())
 
         let item_ty = match ty {
             syn::Type::Path(type_path) => {
@@ -293,7 +291,7 @@ impl<'a> FieldRustType<'a> {
             }
             _ => return None,
         };
-        Some(item_ty.clone().into_token_stream())
+        Some(item_ty.clone())
     }
 
     pub fn get_option_item_type(&self) -> Option<Type> {
@@ -356,13 +354,7 @@ impl<'a> FieldRustType<'a> {
                 // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
-        // } else if self.raw_type_is_optional() || self.type_.is_some() {
         } else if self.raw_type_is_optional() {
-            // let option_type = self.type_.as_ref().map(|ct| {
-            //     let ct = ct.to_string();
-            //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            // });
-
             let get_option_item_type = self.get_option_item_type();
             let item = get_option_item_type
                 .clone()
@@ -375,17 +367,15 @@ impl<'a> FieldRustType<'a> {
                     };
                     let item = item.infer_surreal_type_heuristically("");
 
-                    // let ct = ct.to_string();
-                    // quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
                     item
                 })
                 .unwrap_or_default();
 
-            let item_surreal_type = item.field_type;
+            let inner_type = item.field_type;
             let item_static_assertion = item.static_assertion;
 
             FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#item_surreal_type))),
+                field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
                 // field_item_type: None,
                 static_assertion: quote!(
                     #crate_name::validators::assert_option::<#ty>();
@@ -393,21 +383,26 @@ impl<'a> FieldRustType<'a> {
                 ),
             }
         } else if self.raw_type_is_list() {
-            // let array_item_type = match self.type_.as_ref() {
-            //     Some(FieldTypeWrapper(type_)) => type_.to_string(),
-            //     None => "Any".to_string(),
-            // };
-            // let array_type = self.type_.as_ref().map(|ct| {
-            //     let ct = ct.to_string();
-            //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            // });
+            let inner_type = self.get_array_inner_type();
+            let inner_item = inner_type
+                .clone()
+                .as_ref()
+                .map(|ct| {
+                    let ty = ct.clone();
+                    let item = Self {
+                        ty,
+                        attributes: Default::default(),
+                    };
+                    let item = item.infer_surreal_type_heuristically("");
 
-            // let item_type = self.item_type.as_ref().map(|ct| {
-            //     let ct = ct.to_string();
-            //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            // });
+                    item
+                })
+                .unwrap_or_default();
+
+            let inner_type = inner_item.field_type;
+            let inner_static_assertion = inner_item.static_assertion;
             FieldTypeDerived {
-                field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
+                field_type: quote!(#crate_name::FieldType::Array(::std::boxed::Box::new(#inner_type), ::std::option::Option::None)),
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
                 // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
