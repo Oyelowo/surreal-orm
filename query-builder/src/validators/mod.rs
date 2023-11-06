@@ -89,6 +89,15 @@ pub fn assert_same_length_arrays<T, const N: usize>(_array1: [T; N], _array2: [T
     println!("Both arrays have the same length of {}", N);
 }
 
+trait IsOption {}
+
+// Implement the trait for all `Option<T>`.
+impl<T> IsOption for Option<T> {}
+
+fn assert_option<T: IsOption>() {
+    // This function doesn't need to do anything; it's just here to enforce the type constraint.
+}
+
 /// Checks that all idents are unique.
 #[macro_export]
 macro_rules! check_unique_idents {
