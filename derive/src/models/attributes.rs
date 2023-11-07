@@ -474,21 +474,9 @@ impl MyFieldReceiver {
             // let content
             let ft_string = field_type.to_string();
             Ok(Some(FieldTypeDerived {
-                // TODO: Remove commented out codde
-                // field_type: quote!(#type_.parse::<#crate_name::FieldType>()
-                //                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
                 field_type: quote!(#ft_string.parse::<#crate_name::FieldType>()
                                                             .expect("Must have been checked at compile time. If not, this is a bug. Please report")),
-                // TODO: Fix me
-                // field_type: quote!(#type_.into_inner()),
-
-                // field_item_type: self.item_type.as_ref().map(|item_type| {
-                //     let item_type = &item_type.0;
-                //     quote!(#item_type.parse::<#crate_name::FieldType>()
-                //         .expect("Must have been checked at compile time. If not, this is a bug. Please report"))
-                // }),
                 static_assertion: quote!( # ( #static_assertions ) *),
-                // #( # define_array_field_item_methods) *
             }))
         } else if self
             .rust_type()
@@ -499,13 +487,11 @@ impl MyFieldReceiver {
                 model_type,
             )))
         } else {
-            // TODO: consider a syn::Error here
-            panic!(
+            return Err(syn::Error::new_spanned(field_name_normalized, format!(
                 r#"Unable to infer database type for the field. Type must be provided for field - {}.\
             e.g use the annotation #[surreal_orm(type_="int")] to provide the type explicitly."#,
                 field_name_normalized
-            );
-            // Ok(None)
+            ).as_str()).into());
         }
     }
 

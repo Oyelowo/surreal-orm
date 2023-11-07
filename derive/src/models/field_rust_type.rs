@@ -356,7 +356,7 @@ impl<'a> FieldRustType<'a> {
                         attributes: Default::default(),
                     };
 
-                    item.infer_surreal_type_heuristically("", model_type)
+                    item.infer_surreal_type_heuristically(field_name_normalized, model_type)
                 })
                 .unwrap_or_default();
 
@@ -382,7 +382,7 @@ impl<'a> FieldRustType<'a> {
                         attributes: Default::default(),
                     };
 
-                    item.infer_surreal_type_heuristically("", model_type)
+                    item.infer_surreal_type_heuristically(field_name_normalized, model_type)
                 })
                 .unwrap_or_default();
 
@@ -485,10 +485,14 @@ impl<'a> FieldRustType<'a> {
                     static_assertion: quote!(),
                 }
             } else {
-                FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Any),
-                    static_assertion: quote!(),
-                }
+                // FieldTypeDerived {
+                //     field_type: quote!(#crate_name::FieldType::Any),
+                //     static_assertion: quote!(),
+                // }
+                panic!(
+                    "Could not infer type for the field {}",
+                    field_name_normalized
+                );
             }
         }
     }
