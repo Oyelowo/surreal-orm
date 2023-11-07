@@ -255,7 +255,7 @@ mod tests {
         use CrudType::*;
         let name = Field::new("name");
 
-        let for_res = for_permission(&[Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
+        let for_res = for_permission([Create, Delete, Select, Update]).where_(name.is("Oyedayo"));
         assert_eq!(
             for_res.fine_tune_params(),
             "FOR create, delete, select, update\n\tWHERE name IS $_param_00000001"
