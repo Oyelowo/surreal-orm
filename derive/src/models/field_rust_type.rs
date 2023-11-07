@@ -1,9 +1,6 @@
-use quote::ToTokens;
 use quote::{format_ident, quote};
-use surreal_query_builder::FieldType;
 use syn::{self, Type};
 
-use super::attributes::MyFieldReceiver;
 use super::{attributes::FieldTypeDerived, get_crate_name};
 
 #[derive(Debug, Default)]
@@ -27,11 +24,6 @@ impl<'a> FieldRustType<'a> {
 
     pub fn is_numeric(&self) -> bool {
         let ty = &self.ty;
-        // let surreal_field_type = match &self.type_ {
-        //     Some(ft) => ft.deref(),
-        //     None => &FieldType::Any,
-        // };
-
         let type_is_numeric = match ty {
             syn::Type::Path(ref p) => {
                 let path = &p.path;
@@ -49,10 +41,6 @@ impl<'a> FieldRustType<'a> {
         };
 
         type_is_numeric
-        // || matches!(
-        //     surreal_field_type,
-        //     FieldType::Int | FieldType::Number | FieldType::Float
-        // )
     }
 
     pub fn raw_type_is_float(&self) -> bool {
@@ -365,9 +353,9 @@ impl<'a> FieldRustType<'a> {
                         ty,
                         attributes: Default::default(),
                     };
-                    let item = item.infer_surreal_type_heuristically("");
+                    
 
-                    item
+                    item.infer_surreal_type_heuristically("")
                 })
                 .unwrap_or_default();
 
@@ -393,9 +381,9 @@ impl<'a> FieldRustType<'a> {
                         ty,
                         attributes: Default::default(),
                     };
-                    let item = item.infer_surreal_type_heuristically("");
+                    
 
-                    item
+                    item.infer_surreal_type_heuristically("")
                 })
                 .unwrap_or_default();
 
@@ -464,7 +452,7 @@ impl<'a> FieldRustType<'a> {
                     field_type: quote!(#crate_name::FieldType::Record(::std::vec![])),
                     static_assertion: quote!(),
                 }
-            } else if let Some(ref_node_type) = link_one.clone().or(link_self.clone()) {
+            } else if let Some(ref_node_type) = link_one.or(link_self) {
                 let ref_node_type = format_ident!("{ref_node_type}");
 
                 FieldTypeDerived {
@@ -478,9 +466,6 @@ impl<'a> FieldRustType<'a> {
                         ::std::boxed::Box::new(#crate_name::FieldType::Record(::std::vec![#ref_struct_name::table_name()])),
                         ::std::option::Option::None
                     )),
-                    // field_item_type: Some(
-                    //     quote!(#crate_name::FieldType::Record(#ref_struct_name::table_name())),
-                    // ),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = nest_object {
@@ -511,7 +496,6 @@ impl<'a> FieldRustType<'a> {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Any),
                     static_assertion: quote!(),
-                    // static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
                 }
             }
         }
