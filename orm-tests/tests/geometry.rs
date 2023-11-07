@@ -119,13 +119,13 @@ struct TestMultipolygon {
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "test_geometrycollection")]
-struct TestGeometrycollection {
+pub struct TestGeometrycollection {
     id: SurrealId<Self, i32>,
     home_geometrycollection: Vec<GeometryCollection>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct GeometryCollection(geo::Geometry);
+pub struct GeometryCollection(geo::Geometry);
 
 impl From<GeometryCollection> for surrealdb::sql::Geometry {
     fn from(value: GeometryCollection) -> Self {
