@@ -17,6 +17,7 @@ use geo::polygon;
 use serde::Deserialize;
 use serde::Serialize;
 use std::time::Duration;
+use surreal_orm::Buildable;
 use surreal_orm::{
     statements::{insert, select},
     All, Model, Node, Object, Operatable, ReturnableSelect, ReturnableStandard, SchemaGetter,
@@ -39,10 +40,17 @@ struct Company {
     id: SurrealId<Self, i32>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
+
     #[surreal_orm(nest_array = "Person")]
     founders: Vec<Person>,
+
+    // #[surreal_orm(nest_array = "Person", type_ = "array<array<object>>")]
     #[surreal_orm(nest_array = "Person")]
     founders_multiple_nesting: Vec<Vec<Person>>,
+
+    #[surreal_orm(nest_array = "Person")]
+    founders_10: Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Vec<Person>>>>>>>>>>,
+
     tags: Vec<String>,
     home: geo::Point,
 }
@@ -386,6 +394,7 @@ async fn insert_many() -> surrealdb::Result<()> {
                     },
                 ],
             ],
+            founders_10: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (45.3, 78.1).into(),
         },
@@ -408,6 +417,7 @@ async fn insert_many() -> surrealdb::Result<()> {
                 },
             ],
             founders_multiple_nesting: vec![],
+            founders_10: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (63.0, 21.0).into(),
         },
@@ -444,6 +454,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                 },
             ],
             founders_multiple_nesting: vec![],
+            founders_10: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (45.3, 78.1).into(),
         },
@@ -466,6 +477,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                 },
             ],
             founders_multiple_nesting: vec![],
+            founders_10: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (63.0, 21.0).into(),
         },
@@ -507,4 +519,15 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
     let results: Vec<GenZCompany> = insert(select_query).return_many(db.clone()).await.unwrap();
     insta::assert_debug_snapshot!(results);
     Ok(())
+}
+
+#[test]
+fn test_company_field_definitions() {
+    let company_defs = Company::define_fields()
+        .iter()
+        .map(|f| f.build())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    insta::assert_snapshot!(company_defs);
 }
