@@ -75,9 +75,11 @@ pub struct TestStuff {
     pub id: SurrealSimpleId<Self>,
     #[surreal_orm(type_ = "option<string>")]
     pub amt: Option<Strength>,
-    // #[surreal_orm(type_ = "option<geometry<polygon>>")]
-    pub amt2: Option<i32>,
-    // #[surreal_orm(type_ = "int")]
-    // pub amt3: Strength,
+    pub amt9: Option<Strength>,
+    // Would be autoinferred
+    pub amt2: Option<u64>,
+    #[surreal_orm(type_ = "array<int>")]
     pub amt3: Vec<u64>,
+    // #[surreal_orm(type_ = "int")]
+    pub count: u64,
 }
