@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use quote::{format_ident, quote};
 use syn::{self, Type};
 
@@ -311,8 +318,6 @@ impl<'a> FieldRustType<'a> {
 
     pub fn infer_surreal_type_heuristically(
         &self,
-        // ty: &Type,
-        // struct_name_ident_str: &String,
         field_name_normalized: &str,
     ) -> FieldTypeDerived {
         let crate_name = get_crate_name(false);
@@ -321,25 +326,21 @@ impl<'a> FieldRustType<'a> {
         if self.raw_type_is_bool() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Bool),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<::std::primitive::bool>);),
             }
         } else if self.raw_type_is_float() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Float),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_integer() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Int),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Number>);),
             }
         } else if self.raw_type_is_string() {
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::String),
-                // field_item_type: None,
                 static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Strand>);),
             }
         } else if self.raw_type_is_optional() {
@@ -353,7 +354,6 @@ impl<'a> FieldRustType<'a> {
                         ty,
                         attributes: Default::default(),
                     };
-                    
 
                     item.infer_surreal_type_heuristically("")
                 })
@@ -364,7 +364,6 @@ impl<'a> FieldRustType<'a> {
 
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Option(::std::boxed::Box::new(#inner_type))),
-                // field_item_type: None,
                 static_assertion: quote!(
                     #crate_name::validators::assert_option::<#ty>();
                     #item_static_assertion
@@ -381,7 +380,6 @@ impl<'a> FieldRustType<'a> {
                         ty,
                         attributes: Default::default(),
                     };
-                    
 
                     item.infer_surreal_type_heuristically("")
                 })
@@ -395,15 +393,8 @@ impl<'a> FieldRustType<'a> {
                             #crate_name::validators::assert_is_vec::<#ty>();
                             #inner_static_assertion
                 ),
-                // quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Array>);),
             }
-        // } else if self.raw_type_is_hash_set() || self.type_.is_some() {
         } else if self.raw_type_is_hash_set() {
-            // let array_type = self.type_.as_ref().map(|ct| {
-            //     let ct = ct.to_string();
-            //     quote!(#ct.to_string().parse::<#crate_name::FieldType>().expect("Invalid db type"))
-            // });
-
             FieldTypeDerived {
                 field_type: quote!(#crate_name::FieldType::Set(::std::boxed::Box::new(#crate_name::FieldType::Any), ::std::option::Option::None)),
                 static_assertion: quote!(#crate_name::validators::assert_is_vec::<#ty>();),
@@ -436,7 +427,6 @@ impl<'a> FieldRustType<'a> {
                 link_many,
                 nest_array,
                 nest_object,
-                ..
             } = self.attributes;
 
             if field_name_normalized == "id" {
