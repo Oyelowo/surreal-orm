@@ -37,7 +37,7 @@ DEFINE FIELD lifeExpectancy ON TABLE alien TYPE duration;
 DEFINE FIELD linePolygon ON TABLE alien TYPE geometry;
 DEFINE FIELD territoryArea ON TABLE alien TYPE geometry;
 DEFINE FIELD home ON TABLE alien TYPE geometry;
-DEFINE FIELD tags ON TABLE alien TYPE array<any>;
+DEFINE FIELD tags ON TABLE alien TYPE array<string>;
 DEFINE FIELD ally ON TABLE alien TYPE record<alien>;
 DEFINE FIELD weapon ON TABLE alien TYPE record<weapon>;
 DEFINE FIELD spaceShips ON TABLE alien TYPE array<record<space_ship>>;"

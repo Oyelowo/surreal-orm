@@ -38,7 +38,7 @@ DEFINE FIELD lifeExpectancy ON TABLE visits TYPE duration;
 DEFINE FIELD linePolygon ON TABLE visits TYPE geometry;
 DEFINE FIELD territoryArea ON TABLE visits TYPE geometry;
 DEFINE FIELD home ON TABLE visits TYPE geometry;
-DEFINE FIELD tags ON TABLE visits TYPE array<any>;
+DEFINE FIELD tags ON TABLE visits TYPE array<string>;
 DEFINE FIELD weapon ON TABLE visits TYPE record<weapon>;
 DEFINE FIELD spaceShips ON TABLE visits TYPE array<record<space_ship>>;"
     );

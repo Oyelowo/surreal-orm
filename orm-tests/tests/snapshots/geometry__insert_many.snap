@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/geometry.rs
+source: orm-tests/tests/geometry.rs
 expression: results
 ---
 [
@@ -23,6 +23,24 @@ expression: results
             Person {
                 name: "Jane Doe",
             },
+        ],
+        founders_multiple_nesting: [
+            [
+                Person {
+                    name: "John Doe",
+                },
+                Person {
+                    name: "Jane Doe",
+                },
+            ],
+            [
+                Person {
+                    name: "John Doe",
+                },
+                Person {
+                    name: "Jane Doe",
+                },
+            ],
         ],
         tags: [
             "foo",
@@ -56,6 +74,7 @@ expression: results
                 name: "Jane Doe",
             },
         ],
+        founders_multiple_nesting: [],
         tags: [
             "foo",
             "bar",

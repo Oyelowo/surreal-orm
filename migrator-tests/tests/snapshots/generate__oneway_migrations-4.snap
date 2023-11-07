@@ -8,7 +8,7 @@ expression: fields_info.unwrap()
         "event2": "DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats)",
     },
     "fields": {
-        "attributes": "DEFINE FIELD attributes ON animal TYPE array",
+        "attributes": "DEFINE FIELD attributes ON animal TYPE array<string>",
         "createdAt": "DEFINE FIELD createdAt ON animal TYPE datetime",
         "id": "DEFINE FIELD id ON animal TYPE record<animal>",
         "species": "DEFINE FIELD species ON animal TYPE string",
