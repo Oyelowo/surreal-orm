@@ -1,6 +1,6 @@
 /*utils_chain
  * Author: Oyelowo Oyedayo
- * Email: oyelowooyedayo@gmail.com
+ * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
