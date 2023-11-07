@@ -379,7 +379,11 @@ impl<'a> FieldRustType<'a> {
                     let ty = ct.clone();
                     let item = Self {
                         ty,
-                        attributes: Default::default(),
+                        attributes: Attributes {
+                            nest_array: self.attributes.nest_array,
+                            nest_object: self.attributes.nest_object,
+                            ..Default::default()
+                        },
                     };
 
                     item.infer_surreal_type_heuristically(field_name_normalized, model_type)
@@ -467,10 +471,12 @@ impl<'a> FieldRustType<'a> {
                 }
             } else if let Some(_ref_node_type) = nest_array {
                 FieldTypeDerived {
-                    field_type: quote!(#crate_name::FieldType::Array(
-                        ::std::boxed::Box::new(#crate_name::FieldType::Any),
-                        ::std::option::Option::None
-                    )),
+                    // provide the inner type for when the array part start recursing
+                    field_type: quote!(#crate_name::FieldType::Object),
+                    // field_type: quote!(#crate_name::FieldType::Array(
+                    //     ::std::boxed::Box::new(#crate_name::FieldType::Object),
+                    //     ::std::option::Option::None
+                    // )),
                     static_assertion: quote!(),
                 }
             } else if let Some(_ref_node_type) = link_one {
