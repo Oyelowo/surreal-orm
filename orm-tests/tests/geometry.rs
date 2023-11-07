@@ -41,6 +41,8 @@ struct Company {
     founded: chrono::DateTime<chrono::Utc>,
     #[surreal_orm(nest_array = "Person")]
     founders: Vec<Person>,
+    #[surreal_orm(nest_array = "Person")]
+    founders_multiple_nesting: Vec<Vec<Person>>,
     tags: Vec<String>,
     home: geo::Point,
 }
@@ -366,6 +368,24 @@ async fn insert_many() -> surrealdb::Result<()> {
                     name: "Jane Doe".to_string(),
                 },
             ],
+            founders_multiple_nesting: vec![
+                vec![
+                    Person {
+                        name: "John Doe".to_string(),
+                    },
+                    Person {
+                        name: "Jane Doe".to_string(),
+                    },
+                ],
+                vec![
+                    Person {
+                        name: "John Doe".to_string(),
+                    },
+                    Person {
+                        name: "Jane Doe".to_string(),
+                    },
+                ],
+            ],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (45.3, 78.1).into(),
         },
@@ -387,6 +407,7 @@ async fn insert_many() -> surrealdb::Result<()> {
                     name: "Jane Doe".to_string(),
                 },
             ],
+            founders_multiple_nesting: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (63.0, 21.0).into(),
         },
@@ -422,6 +443,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                     name: "Jane Doe".to_string(),
                 },
             ],
+            founders_multiple_nesting: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (45.3, 78.1).into(),
         },
@@ -443,6 +465,7 @@ async fn insert_from_select_query() -> surrealdb::Result<()> {
                     name: "Jane Doe".to_string(),
                 },
             ],
+            founders_multiple_nesting: vec![],
             tags: vec!["foo".to_string(), "bar".to_string()],
             home: (63.0, 21.0).into(),
         },
