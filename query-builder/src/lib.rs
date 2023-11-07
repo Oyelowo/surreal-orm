@@ -2,7 +2,7 @@
 // #![feature(rustdoc_missing_doc_code_examples)]
 /*
  * Author: Oyelowo Oyedayo
- * Email: oyelowooyedayo@gmail.com
+ * Email: oyelowo.oss@gmail.com
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
