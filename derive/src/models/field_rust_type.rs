@@ -510,8 +510,8 @@ impl<'a> FieldRustType<'a> {
             } else {
                 FieldTypeDerived {
                     field_type: quote!(#crate_name::FieldType::Any),
-                    // static_assertion: quote!(),
-                    static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
+                    static_assertion: quote!(),
+                    // static_assertion: quote!(#crate_name::validators::assert_impl_one!(#ty: ::std::convert::Into<#crate_name::sql::Value>);),
                 }
             }
         }
