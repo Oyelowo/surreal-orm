@@ -25,7 +25,7 @@ use darling::{ast::Data, util, FromDeriveInput, FromField, FromMeta, ToTokens};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use surreal_query_builder::FieldType;
-use syn::{Ident, Lit, LitStr, Path, Type};
+use syn::{Ident, Lit, LitStr, Path};
 
 #[derive(Debug, Clone)]
 pub struct Rename {
@@ -220,8 +220,6 @@ impl MyFieldReceiver {
     ) -> ExtractorResult<Option<FieldTypeDerived>> {
         let mut static_assertions = vec![];
         let crate_name = get_crate_name(false);
-
-        let rust_type = FieldRustType::new(self.ty.clone(), Default::default());
 
         if let Some(type_) = &self.type_ {
             let field_type = type_.deref();
@@ -591,19 +589,17 @@ impl MyFieldReceiver {
 
     pub fn is_numeric(&self) -> bool {
         let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
-        let explicit_ty_is_numeric = match field_type {
-            FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number => true,
-            _ => false,
-        };
+        let explicit_ty_is_numeric = matches!(
+            field_type,
+            FieldType::Int | FieldType::Float | FieldType::Decimal | FieldType::Number
+        );
         explicit_ty_is_numeric || self.rust_type().is_numeric()
     }
 
     pub fn is_list(&self) -> bool {
         let field_type = self.type_.clone().map_or(FieldType::Any, |t| t.0);
-        let explicit_ty_is_list = match field_type {
-            FieldType::Array(_, _) | FieldType::Set(_, _) => true,
-            _ => false,
-        };
+        let explicit_ty_is_list =
+            matches!(field_type, FieldType::Array(_, _) | FieldType::Set(_, _));
         explicit_ty_is_list
             || self.rust_type().is_list()
             || self.type_.as_ref().map_or(false, |t| t.deref().is_array())

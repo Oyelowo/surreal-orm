@@ -813,14 +813,12 @@ impl SchemaFieldsProperties {
                         quote!(pub #field_ident_normalised: ::std::option::Option<#field_type>, ),
                     );
 
-                    let nesting_level = count_vec_nesting(&field_type);
+                    let nesting_level = count_vec_nesting(field_type);
                     let nested_vec_type = generate_nested_vec_type(&foreign_node, nesting_level);
 
                     store.static_assertions.push(quote! {
                         #crate_name::validators::assert_type_eq_all!(#field_type, #nested_vec_type);
                     });
-
-                    // store.static_assertions.push(quote!(#crate_name::validators::assert_type_eq_all!(#field_type, ::std::vec::Vec<#foreign_node>);));
 
                     update_field_names_fields_types_kv(Some(quote!(#foreign_node)));
                     get_nested_meta_with_defs(&node_object, true)
@@ -889,15 +887,7 @@ impl SchemaFieldsProperties {
                 .push(field_ident_normalised_as_str.to_owned());
         }
 
-        // let fields = data
-        //     .as_ref()
-        //     .take_struct()
-        //     .expect("Should never be enum")
-        //     .fields
-        //     .into_iter()
-        //     .fold(Self::default(), |mut store, field_receiver| {});
         Ok(store)
-        // Ok(fields)
     }
 }
 
