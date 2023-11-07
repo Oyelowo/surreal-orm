@@ -73,8 +73,9 @@ pub struct Balance {
 #[surreal_orm(table_name = "test_stuff")]
 pub struct TestStuff {
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(type_ = "option<string>")]
+    #[surreal_orm(type_ = "option<int>")]
     pub amt: Option<Strength>,
+    #[surreal_orm(type_ = "option<int>")]
     pub amt9: Option<Strength>,
     // Would be autoinferred
     pub amt2: Option<u64>,
