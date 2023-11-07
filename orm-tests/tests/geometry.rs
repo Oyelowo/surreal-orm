@@ -31,6 +31,7 @@ use geo::Coord;
 pub struct Person {
     name: String,
 }
+
 #[derive(Node, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "company")]
@@ -38,6 +39,7 @@ struct Company {
     id: SurrealId<Self, i32>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
+    #[surreal_orm(nest_array = "Person")]
     founders: Vec<Person>,
     tags: Vec<String>,
     home: geo::Point,
@@ -50,6 +52,7 @@ struct GenZCompany {
     id: SurrealSimpleId<Self>,
     name: String,
     founded: chrono::DateTime<chrono::Utc>,
+    #[surreal_orm(nest_array = "Person")]
     founders: Vec<Person>,
     tags: Vec<String>,
     home: geo::Point,
