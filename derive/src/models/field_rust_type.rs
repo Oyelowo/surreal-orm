@@ -8,7 +8,7 @@
 use quote::{format_ident, quote};
 use syn::{self, Type};
 
-use super::{attributes::FieldTypeDerived, get_crate_name};
+use super::{attributes::FieldTypeDerived, get_crate_name, parser::DataType};
 
 #[derive(Debug, Default)]
 pub struct Attributes<'a> {
@@ -319,6 +319,7 @@ impl<'a> FieldRustType<'a> {
     pub fn infer_surreal_type_heuristically(
         &self,
         field_name_normalized: &str,
+        model_type: &DataType,
     ) -> FieldTypeDerived {
         let crate_name = get_crate_name(false);
         let ty = &self.ty;
@@ -355,7 +356,7 @@ impl<'a> FieldRustType<'a> {
                         attributes: Default::default(),
                     };
 
-                    item.infer_surreal_type_heuristically("")
+                    item.infer_surreal_type_heuristically("", model_type)
                 })
                 .unwrap_or_default();
 
@@ -381,7 +382,7 @@ impl<'a> FieldRustType<'a> {
                         attributes: Default::default(),
                     };
 
-                    item.infer_surreal_type_heuristically("")
+                    item.infer_surreal_type_heuristically("", model_type)
                 })
                 .unwrap_or_default();
 
@@ -434,8 +435,9 @@ impl<'a> FieldRustType<'a> {
                     field_type: quote!(#crate_name::FieldType::Record(::std::vec![Self::table_name()])),
                     static_assertion: quote!(),
                 }
-                // TODO: Only do this for Edge
-            } else if field_name_normalized == "out" || field_name_normalized == "in" {
+            } else if (field_name_normalized == "out" || field_name_normalized == "in")
+                && matches!(model_type, DataType::Edge)
+            {
                 // An edge might be shared by multiple In/Out nodes. So, default to any type of
                 // record for edge in and out
                 FieldTypeDerived {

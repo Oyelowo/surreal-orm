@@ -494,10 +494,10 @@ impl MyFieldReceiver {
             .rust_type()
             .type_is_inferrable(&field_name_normalized.to_string())
         {
-            Ok(Some(
-                self.rust_type()
-                    .infer_surreal_type_heuristically(field_name_normalized),
-            ))
+            Ok(Some(self.rust_type().infer_surreal_type_heuristically(
+                field_name_normalized,
+                model_type,
+            )))
         } else {
             // TODO: consider a syn::Error here
             panic!(
