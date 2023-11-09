@@ -44,6 +44,10 @@ pub struct Table(sql::Table);
 #[derive(Debug, Clone)]
 pub struct Event(sql::Idiom);
 
+/// Surreal ml model
+#[derive(Debug, Clone)]
+pub struct MlModel(sql::Idiom);
+
 /// Surreal table index
 #[derive(Debug, Clone)]
 pub struct TableIndex(sql::Idiom);
@@ -138,7 +142,7 @@ macro_rules! impl_new_for_all {
     };
 }
 
-impl_new_for_all!(Namespace, Database, Login, Token, User, Scope, Event, TableIndex);
+impl_new_for_all!(Namespace, Database, Login, Token, User, Scope, Event, TableIndex, MlModel);
 
 macro_rules! impl_display_for_all {
     ($($types_:ty),*) => {
@@ -175,7 +179,9 @@ macro_rules! impl_display_for_all {
     )*
     };
 }
-impl_display_for_all!(Namespace, Database, Login, Token, User, Scope, Table, Event, TableIndex);
+impl_display_for_all!(
+    Namespace, Database, Login, Token, User, Scope, Table, Event, TableIndex, MlModel
+);
 
 /// Wrapper around Surreal idiom. X suffix stands for extra.
 pub struct Idiomx(sql::Idiom);
