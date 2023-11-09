@@ -1,0 +1,6 @@
+---
+source: query-builder/src/statements/define_model.rs
+assertion_line: 237
+expression: statement.fine_tune_params()
+---
+DEFINE MODEL ml::recommendation;
