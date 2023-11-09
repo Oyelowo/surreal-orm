@@ -1,6 +1,6 @@
 ---
 source: query-builder/src/statements/define_model.rs
-assertion_line: 238
+assertion_line: 251
 expression: statement.fine_tune_params()
 ---
-DEFINE MODEL ml::$_param_00000001;
+DEFINE MODEL ml::$_param_00000001<v1.2.3>;

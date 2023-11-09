@@ -568,3 +568,120 @@ impl From<Vec<ValueLike>> for ArgsList {
         })
     }
 }
+
+//
+//
+//
+#[derive(Debug, Clone)]
+pub struct LiteralLike(ValueLike);
+
+impl From<LiteralLike> for ValueLike {
+    fn from(val: LiteralLike) -> Self {
+        val.0
+    }
+}
+
+impl Parametric for LiteralLike {
+    fn get_bindings(&self) -> BindingsList {
+        self.0
+            .bindings
+            .to_vec()
+            .into_iter()
+            .map(|b| b.as_raw())
+            .collect()
+    }
+}
+
+impl Erroneous for LiteralLike {
+    fn get_errors(&self) -> ErrorList {
+        self.0.get_errors()
+    }
+}
+
+impl Buildable for LiteralLike {
+    fn build(&self) -> String {
+        self.0.build()
+    }
+}
+
+impl From<String> for LiteralLike {
+    fn from(value: String) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<&str> for LiteralLike {
+    fn from(value: &str) -> Self {
+        // let value: sql::Value = value.into();
+        Self(value.into())
+    }
+}
+
+impl From<Field> for LiteralLike {
+    fn from(val: Field) -> Self {
+        LiteralLike(val.into())
+    }
+}
+
+impl From<Param> for LiteralLike {
+    fn from(val: Param) -> Self {
+        LiteralLike(val.into())
+    }
+}
+
+impl From<&Field> for LiteralLike {
+    fn from(val: &Field) -> Self {
+        LiteralLike(val.clone().into())
+    }
+}
+
+impl<T> From<CreateStatement<T>> for LiteralLike
+where
+    T: Node + Serialize + DeserializeOwned,
+{
+    fn from(statement: CreateStatement<T>) -> Self {
+        LiteralLike(statement.into())
+    }
+}
+
+impl<T> From<UpdateStatement<T>> for LiteralLike
+where
+    T: Model + Serialize + DeserializeOwned,
+{
+    fn from(statement: UpdateStatement<T>) -> Self {
+        LiteralLike(statement.into())
+    }
+}
+
+impl<T> From<DeleteStatement<T>> for LiteralLike
+where
+    T: Model + Serialize + DeserializeOwned,
+{
+    fn from(statement: DeleteStatement<T>) -> Self {
+        LiteralLike(statement.into())
+    }
+}
+
+impl<T> From<RelateStatement<T>> for LiteralLike
+where
+    T: Edge + Serialize + DeserializeOwned,
+{
+    fn from(statement: RelateStatement<T>) -> Self {
+        LiteralLike(statement.into())
+    }
+}
+
+impl<T> From<InsertStatement<T>> for LiteralLike
+where
+    T: Node + Serialize + DeserializeOwned,
+{
+    fn from(statement: InsertStatement<T>) -> Self {
+        LiteralLike(statement.into())
+    }
+}
+
+impl From<IfElseStatement> for LiteralLike {
+    fn from(statement: IfElseStatement) -> Self {
+        LiteralLike(statement.into())
+    }
+}
