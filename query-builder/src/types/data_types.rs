@@ -569,9 +569,11 @@ impl From<Vec<ValueLike>> for ArgsList {
     }
 }
 
-//
-//
-//
+/// Represents the string literal representation of a value
+/// without the surrounding quotes. For example, the string
+/// literal representation of the string "Hello" is Hello
+/// without the quotes. Also allows for the use of parameters
+/// and fields.
 #[derive(Debug, Clone)]
 pub struct LiteralLike(ValueLike);
 
@@ -585,8 +587,8 @@ impl Parametric for LiteralLike {
     fn get_bindings(&self) -> BindingsList {
         self.0
             .bindings
-            .to_vec()
-            .into_iter()
+            .iter()
+            .cloned()
             .map(|b| b.as_raw())
             .collect()
     }
@@ -612,7 +614,6 @@ impl From<String> for LiteralLike {
 
 impl From<&str> for LiteralLike {
     fn from(value: &str) -> Self {
-        // let value: sql::Value = value.into();
         Self(value.into())
     }
 }
