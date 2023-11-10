@@ -1,6 +1,6 @@
 use crate::{
-    statements::Permissions, Binding, BindingsList, Buildable, Erroneous, Field, LiteralLike,
-    NumberLike, Parametric, Queryable, TableLike,
+    statements::Permissions, BindingsList, Buildable, Erroneous, LiteralLike, Parametric,
+    Queryable, TableLike,
 };
 use std::fmt::{self, Display};
 
@@ -25,8 +25,7 @@ pub struct DefineModelStatement {
     bindings: BindingsList,
 }
 
-type Name = TableLike;
-type Version = TableLike;
+pub type ModelName = TableLike;
 
 /// Define a new ML model.
 /// The DEFINE MODEL statement allows you to define a machine learning model in the database.
@@ -51,8 +50,8 @@ type Version = TableLike;
 ///
 /// assert!(!statement.build().is_empty());
 /// ```
-pub fn define_model(name: impl Into<Name>) -> DefineModelStatement {
-    let name: Name = name.into();
+pub fn define_model(name: impl Into<ModelName>) -> DefineModelStatement {
+    let name: ModelName = name.into();
 
     DefineModelStatement {
         model_name: name.build(),
@@ -228,29 +227,29 @@ mod tests {
         assert_eq!(statement.get_bindings().len(), 6);
     }
 
-    // #[test]
-    // fn test_define_model_statement_simple() {
-    //     let model_name = "recommendation";
-    //     let statement = define_model(model_name);
-    //
-    //     assert_eq!(
-    //         statement.to_raw().build(),
-    //         "DEFINE MODEL ml::recommendation;"
-    //     );
-    //     insta::assert_display_snapshot!(statement.fine_tune_params());
-    //     assert_eq!(statement.get_bindings().len(), 0);
-    // }
-    //
-    // #[test]
-    // fn test_define_model_statement_version() {
-    //     let model_name = "recommendation";
-    //     let statement = define_model(model_name).version("v1.2.3");
-    //
-    //     assert_eq!(
-    //         statement.to_raw().build(),
-    //         "DEFINE MODEL ml::recommendation<v1.2.3>;"
-    //     );
-    //     insta::assert_display_snapshot!(statement.fine_tune_params());
-    //     assert_eq!(statement.get_bindings().len(), 0);
-    // }
+    #[test]
+    fn test_define_model_statement_simple() {
+        let model_name = "recommendation";
+        let statement = define_model(model_name);
+
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE MODEL ml::recommendation;"
+        );
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 1);
+    }
+
+    #[test]
+    fn test_define_model_statement_version() {
+        let model_name = "recommendation";
+        let statement = define_model(model_name).version("v1.2.3");
+
+        assert_eq!(
+            statement.to_raw().build(),
+            "DEFINE MODEL ml::recommendation<v1.2.3>;"
+        );
+        insta::assert_display_snapshot!(statement.fine_tune_params());
+        assert_eq!(statement.get_bindings().len(), 2);
+    }
 }
