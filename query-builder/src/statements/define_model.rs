@@ -72,7 +72,6 @@ impl DefineModelStatement {
         let version: MlVersion = version.into();
         self.version = version.build();
         self.bindings.extend(version.get_bindings());
-        println!("Self : {:#?}", self);
         self
     }
 
