@@ -1,0 +1,14 @@
+---
+source: query-builder/src/statements/define_model.rs
+expression: statement.fine_tune_params()
+---
+DEFINE MODEL ml::$_param_00000001<$_param_00000002>
+PERMISSIONS
+FOR select
+	WHERE age >= $_param_00000003
+FOR create, update
+	WHERE name IS $_param_00000004
+FOR create, delete
+	WHERE name IS $_param_00000005
+FOR update
+	WHERE age <= $_param_00000006;
