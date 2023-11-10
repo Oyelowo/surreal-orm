@@ -1,6 +1,6 @@
 use crate::{
-    statements::Permissions, BindingsList, Buildable, Erroneous, Field, NumberLike, Parametric,
-    Queryable, TableLike,
+    statements::Permissions, Binding, BindingsList, Buildable, Erroneous, Field, LiteralLike,
+    NumberLike, Parametric, Queryable, TableLike,
 };
 use std::fmt::{self, Display};
 
@@ -64,12 +64,15 @@ pub fn define_model(name: impl Into<Name>) -> DefineModelStatement {
     }
 }
 
+pub type MlVersion = LiteralLike;
+
 impl DefineModelStatement {
     /// Set the version of the model.
-    pub fn version(mut self, version: impl Into<Field>) -> Self {
-        let version: Field = version.into();
+    pub fn version(mut self, version: impl Into<MlVersion>) -> Self {
+        let version: MlVersion = version.into();
         self.version = version.build();
         self.bindings.extend(version.get_bindings());
+        println!("Self : {:#?}", self);
         self
     }
 
@@ -215,7 +218,7 @@ mod tests {
 
         assert_eq!(
             statement.to_raw().build(),
-            "DEFINE MODEL ml::recommendation<v1.2.3>\n\
+            "DEFINE MODEL ml::recommendation<1.2.3>\n\
                 PERMISSIONS\n\
                 FOR select\n\tWHERE age >= 18\n\
                 FOR create, update\n\tWHERE name IS 'Oyedayo'\n\
@@ -223,7 +226,7 @@ mod tests {
                 FOR update\n\tWHERE age <= 130;"
         );
         insta::assert_display_snapshot!(statement.fine_tune_params());
-        assert_eq!(statement.get_bindings().len(), 4);
+        assert_eq!(statement.get_bindings().len(), 6);
     }
 
     // #[test]
