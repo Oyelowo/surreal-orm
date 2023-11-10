@@ -12,7 +12,7 @@ use std::fmt::{self, Display};
 /// You must select your namespace and database before you can use the DEFINE MODEL statement.
 /// Statement syntax
 /// DEFINE MODEL ml::@name<@version>
-/// 	[ PERMISSIONS @permissions ]
+/// [ PERMISSIONS @permissions ]
 
 /// A statement for defining a ML model.
 #[derive(Clone, Debug)]
@@ -38,7 +38,7 @@ pub type ModelName = TableLike;
 /// # let age = Field::new("age");
 ///
 /// let statement = define_model("recommendation")
-///     .version("v1.2.3")
+///     .version("1.2.3")
 ///     // Additional permission chaining accumulates
 ///     .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
 ///     .permissions(for_permission([Create, Update]).where_(name.is("Oyedayo"))) // Multiple
