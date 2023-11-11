@@ -34,9 +34,10 @@ pub type ModelName = TableLike;
 ///
 /// ```rust
 /// # use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::define_model};
+/// use surreal_orm::{*, statements::{define_model, for_permission}};
+/// use CrudType::*;
 ///
-/// # let name = Field::new("name");
+///# let name = Field::new("name");
 /// # let age = Field::new("age");
 ///
 /// let statement = define_model("recommendation")
