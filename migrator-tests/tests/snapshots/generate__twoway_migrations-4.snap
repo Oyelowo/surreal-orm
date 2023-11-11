@@ -76,9 +76,9 @@ DEFINE INDEX species_speed_idx ON animal FIELDS velocity, characteristics UNIQUE
 DEFINE TABLE new_stuff SCHEMAFULL;
 REMOVE EVENT event2 ON TABLE animal;
 REMOVE FIELD attributes ON TABLE animal;
+REMOVE FIELD attributes ON TABLE animal;
 REMOVE FIELD createdAt ON TABLE animal;
-REMOVE FIELD must_fail ON TABLE animal;
-REMOVE FIELD must_fail ON TABLE planet;
+REMOVE FIELD firstName ON TABLE planet;
 REMOVE FIELD place ON TABLE eats;
 REMOVE FIELD updatedAt ON TABLE animal;
 REMOVE TABLE student;

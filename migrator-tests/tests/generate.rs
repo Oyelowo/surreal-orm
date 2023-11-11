@@ -76,7 +76,10 @@ async fn test_oneway_migrations() {
 
     // Files would now be created
     let files = fs::read_dir(temp_test_migration_dir).unwrap();
-    assert_eq!(files.count(), 1, "Migration not created");
+    let (files, contents) = get_files_meta(files);
+    assert_eq!(files.len(), 1, "Migration not created");
+    insta::assert_snapshot!(files.join("\n"));
+    insta::assert_snapshot!(contents);
 
     assert_eq!(
         db_info().await.unwrap().tables().get_names(),

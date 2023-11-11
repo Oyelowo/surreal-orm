@@ -5,9 +5,11 @@ expression: fields_info.unwrap()
 {
     "events": {},
     "fields": {
-        "id": "DEFINE FIELD id ON migration TYPE record<migration>",
-        "name": "DEFINE FIELD name ON migration TYPE string",
-        "timestamp": "DEFINE FIELD timestamp ON migration TYPE int",
+        "createdAt": "DEFINE FIELD createdAt ON eats TYPE datetime",
+        "id": "DEFINE FIELD id ON eats TYPE record<eats>",
+        "in": "DEFINE FIELD in ON eats TYPE record",
+        "out": "DEFINE FIELD out ON eats TYPE record",
+        "place": "DEFINE FIELD place ON eats TYPE string",
     },
     "indexes": {},
     "lives": {},
