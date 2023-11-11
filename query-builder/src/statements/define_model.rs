@@ -33,7 +33,7 @@ pub type ModelName = TableLike;
 /// The DEFINE MODEL statement allows you to define a machine learning model in the database.
 ///
 /// ```rust
-/// # use su`rreal_query_builder as surreal_orm;
+/// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, statements::define_model};
 ///
 /// # let name = Field::new("name");
@@ -204,6 +204,7 @@ mod tests {
     use super::*;
     use crate::{statements::for_permission, CrudType::*};
     use crate::{Field, Operatable, ToRaw};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_define_model_statement_full() {

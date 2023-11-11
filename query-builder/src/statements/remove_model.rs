@@ -88,6 +88,7 @@ impl fmt::Display for RemoveModelStatement {
 mod tests {
     use super::*;
     use crate::{traits::Buildable, Field, Param, ToRaw};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_remove_model_build() {
