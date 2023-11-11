@@ -1,0 +1,8 @@
+---
+source: migrator-tests/tests/generate.rs
+expression: "files.join(\"\\n\")"
+---
+test_migration.down.surql
+test_migration.up.surql
+test_migration_v2.down.surql
+test_migration_v2.up.surql

@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 
 use surreal_query_builder::{Field, Table};
 
@@ -14,7 +14,7 @@ use crate::*;
 #[derive(Debug, Clone, Default)]
 pub struct FullDbInfo {
     pub all_resources: DbInfo,
-    pub table_resources: HashMap<Table, TableResourcesData>,
+    pub table_resources: BTreeMap<Table, TableResourcesData>,
 }
 
 impl FullDbInfo {

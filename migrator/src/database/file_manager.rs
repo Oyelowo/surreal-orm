@@ -61,6 +61,23 @@ impl MigrationFileName {
         }
     }
 
+    /// just the file name without extension nor timestamp
+    pub fn simple_name(&self) -> String {
+        match self {
+            MigrationFileName::Up(MigrationNameBasicInfo { name, .. }) => name.clone(),
+            MigrationFileName::Down(MigrationNameBasicInfo { name, .. }) => name.clone(),
+            MigrationFileName::Unidirectional(MigrationNameBasicInfo { name, .. }) => name.clone(),
+        }
+    }
+
+    pub fn extension(&self) -> String {
+        match self {
+            MigrationFileName::Up(_) => "up.surql".to_string(),
+            MigrationFileName::Down(_) => "down.surql".to_string(),
+            MigrationFileName::Unidirectional(_) => "surql".to_string(),
+        }
+    }
+
     pub fn basename(&self) -> String {
         match self {
             MigrationFileName::Up(MigrationNameBasicInfo { timestamp, name }) => {

@@ -118,7 +118,9 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                         acc.add_up(QueryType::Remove(
                             right
                                 // .with_override_resource_name(meta.old_name.clone().into())
-                                .as_remove_statement()?,
+                                .as_remove_statement_with_name_override(Some(
+                                    "must_fail".to_string(),
+                                ))?,
                         ));
 
                         let old_name = meta.old_name.clone();

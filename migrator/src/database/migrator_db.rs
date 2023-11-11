@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::{collections::HashMap, ops::Deref};
+use std::{collections::BTreeMap, ops::Deref};
 
 use chrono::Utc;
 use surreal_query_builder::{statements::info_for, *};
@@ -88,7 +88,7 @@ impl MigratorDatabase {
 
     pub async fn get_all_resources(&self) -> MigrationResult<FullDbInfo> {
         let top_level_resources = self.get_db_info().await?;
-        let mut fields_by_table = HashMap::new();
+        let mut fields_by_table = BTreeMap::new();
         for table_name in top_level_resources.tables().get_names() {
             let table_info = self.get_table_info(table_name.clone()).await?;
             fields_by_table.insert(table_name.into(), table_info);

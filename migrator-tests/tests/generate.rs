@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
-use std::fs;
+use std::fs::{self, ReadDir};
+use std::io;
+use std::path::PathBuf;
 
 use surreal_models::migrations::{Resources, ResourcesV2};
-use surreal_orm::migrator::{DbInfo, Informational, Migration, MigrationConfig};
+use surreal_orm::migrator::{DbInfo, Informational, Migration, MigrationConfig, MigrationFileName};
 use surreal_orm::statements::{info_for, select};
 use surreal_orm::{All, ReturnableSelect, Runnable};
 use surrealdb::engine::local::Db;
@@ -124,6 +126,47 @@ async fn test_oneway_migrations() {
     fields_info("student".to_string()).await;
 }
 
+fn get_files_meta(files: ReadDir) -> (Vec<String>, String) {
+    let mut file_paths: Vec<PathBuf> = files
+        .map(|entry| entry.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()
+        .unwrap();
+
+    file_paths.sort_by_key(|path| path.file_name().unwrap().to_str().unwrap().to_lowercase());
+
+    let mut file_names = Vec::new();
+    let mut contents = Vec::new();
+
+    for path in file_paths {
+        let content = fs::read_to_string(&path).unwrap();
+        let mut content_parts = content
+            .split(';')
+            .map(|part| part.trim())
+            .collect::<Vec<_>>();
+
+        content_parts.sort();
+
+        let sorted_content = content_parts.join(";\n");
+
+        let name: MigrationFileName = path
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
+            .try_into()
+            .unwrap();
+        let simple_name = format!("{}.{}", name.simple_name(), name.extension());
+
+        file_names.push(simple_name);
+        contents.push(sorted_content);
+    }
+
+    contents.sort();
+
+    (file_names, contents.join("\n"))
+}
+
 #[tokio::test]
 async fn test_twoway_migrations() {
     let db = initialize_db().await;
@@ -175,7 +218,12 @@ async fn test_twoway_migrations() {
 
     // BEFORE GENERATING SECOND MIGRATION
     let files = fs::read_dir(temp_test_migration_dir).unwrap();
-    assert_eq!(files.count(), 2, "New migrations not created");
+
+    let (files, contents) = get_files_meta(files);
+
+    assert_eq!(files.len(), 2, "New migrations not created");
+    insta::assert_snapshot!(files.join("\n\n"));
+    insta::assert_snapshot!(contents);
 
     // SECOND MIGRATION GENERATION
     two_way
@@ -183,7 +231,12 @@ async fn test_twoway_migrations() {
         .await
         .unwrap();
     let files = fs::read_dir(temp_test_migration_dir).unwrap();
-    assert_eq!(files.count(), 4, "Migration not created");
+
+    let (files, contents) = get_files_meta(files);
+
+    assert_eq!(files.len(), 4, "Migration not created");
+    insta::assert_snapshot!(files.join("\n"));
+    insta::assert_snapshot!(contents);
 
     assert_eq!(
         get_db_info().await.as_ref().unwrap().tables().get_names(),

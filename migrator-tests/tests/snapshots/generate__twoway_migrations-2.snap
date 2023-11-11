@@ -1,0 +1,48 @@
+---
+source: migrator-tests/tests/generate.rs
+expression: contents
+---
+;
+DEFINE EVENT event1 ON animal WHEN species = 'Homo Erectus' AND velocity > 545 THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+DEFINE FIELD age ON student TYPE int;
+DEFINE FIELD attributes ON animal TYPE array<string>;
+DEFINE FIELD color ON crop TYPE string;
+DEFINE FIELD createdAt ON animal TYPE datetime;
+DEFINE FIELD createdAt ON eats TYPE datetime;
+DEFINE FIELD createdAt ON planet TYPE datetime;
+DEFINE FIELD createdAt ON student TYPE datetime;
+DEFINE FIELD firstName ON planet TYPE string;
+DEFINE FIELD id ON animal TYPE record<animal>;
+DEFINE FIELD id ON crop TYPE record<crop>;
+DEFINE FIELD id ON eats TYPE record<eats>;
+DEFINE FIELD id ON migration TYPE record<migration>;
+DEFINE FIELD id ON planet TYPE record<planet>;
+DEFINE FIELD id ON student TYPE record<student>;
+DEFINE FIELD in ON eats TYPE record;
+DEFINE FIELD labels ON planet TYPE array<string>;
+DEFINE FIELD name ON migration TYPE string;
+DEFINE FIELD out ON eats TYPE record;
+DEFINE FIELD place ON eats TYPE string;
+DEFINE FIELD population ON planet TYPE int;
+DEFINE FIELD species ON animal TYPE string;
+DEFINE FIELD timestamp ON migration TYPE int;
+DEFINE FIELD university ON student TYPE string;
+DEFINE FIELD updatedAt ON animal TYPE datetime;
+DEFINE FIELD updatedAt ON planet TYPE datetime;
+DEFINE FIELD updatedAt ON student TYPE datetime;
+DEFINE FIELD velocity ON animal TYPE int;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE TABLE animal SCHEMAFULL;
+DEFINE TABLE crop SCHEMAFULL;
+DEFINE TABLE eats SCHEMAFULL;
+DEFINE TABLE migration SCHEMAFULL;
+DEFINE TABLE planet SCHEMAFULL;
+DEFINE TABLE student SCHEMAFULL
+;
+REMOVE TABLE animal;
+REMOVE TABLE crop;
+REMOVE TABLE eats;
+REMOVE TABLE migration;
+REMOVE TABLE planet;
+REMOVE TABLE student
