@@ -1,23 +1,60 @@
 ---
 source: migrator-tests/tests/generate.rs
-expression: fields_info.unwrap()
+expression: db_info().await.unwrap()
 ---
-{
-    "events": {
-        "event1": "DEFINE EVENT event1 ON animal WHEN species = 'Homo Erectus' AND velocity > 545 THEN (SELECT * FROM crop)",
-        "event2": "DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats)",
-    },
-    "fields": {
-        "attributes": "DEFINE FIELD attributes ON animal TYPE array<string>",
-        "createdAt": "DEFINE FIELD createdAt ON animal TYPE datetime",
-        "id": "DEFINE FIELD id ON animal TYPE record<animal>",
-        "species": "DEFINE FIELD species ON animal TYPE string",
-        "updatedAt": "DEFINE FIELD updatedAt ON animal TYPE datetime",
-        "velocity": "DEFINE FIELD velocity ON animal TYPE int",
-    },
-    "indexes": {
-        "species_speed_idx": "DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE",
-    },
-    "lives": {},
-    "tables": {},
+DbInfo {
+    analyzers: Analyzers(
+        Info(
+            {},
+        ),
+    ),
+    functions: Functions(
+        Info(
+            {},
+        ),
+    ),
+    params: Params(
+        Info(
+            {},
+        ),
+    ),
+    scopes: Scopes(
+        Info(
+            {},
+        ),
+    ),
+    tables: Tables(
+        Info(
+            {
+                "animal": DefineStatementRaw(
+                    "DEFINE TABLE animal SCHEMAFULL",
+                ),
+                "crop": DefineStatementRaw(
+                    "DEFINE TABLE crop SCHEMAFULL",
+                ),
+                "eats": DefineStatementRaw(
+                    "DEFINE TABLE eats SCHEMAFULL",
+                ),
+                "migration": DefineStatementRaw(
+                    "DEFINE TABLE migration SCHEMAFULL",
+                ),
+                "planet": DefineStatementRaw(
+                    "DEFINE TABLE planet SCHEMAFULL",
+                ),
+                "student": DefineStatementRaw(
+                    "DEFINE TABLE student SCHEMAFULL",
+                ),
+            },
+        ),
+    ),
+    tokens: Tokens(
+        Info(
+            {},
+        ),
+    ),
+    users: Users(
+        Info(
+            {},
+        ),
+    ),
 }

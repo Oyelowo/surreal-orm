@@ -1,9 +1,10 @@
 ---
 source: migrator-tests/tests/generate.rs
-expression: "fields_info.as_ref().unwrap().values().map(|v|\n                v.keys().map(|k|\n                                k.to_string()).collect::<Vec<_>>().join(\", \")).collect::<Vec<_>>().join(\"\\n\")"
+expression: "table_defs.join(\"\\n\")"
 ---
-event1, event2
-attributes, createdAt, id, species, updatedAt, velocity
-species_speed_idx
-
-
+DEFINE TABLE animal SCHEMAFULL;
+DEFINE TABLE crop SCHEMAFULL;
+DEFINE TABLE eats SCHEMAFULL;
+DEFINE TABLE migration SCHEMAFULL;
+DEFINE TABLE planet SCHEMAFULL;
+DEFINE TABLE student SCHEMAFULL;

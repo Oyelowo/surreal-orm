@@ -5,12 +5,9 @@ expression: fields_info.unwrap()
 {
     "events": {},
     "fields": {
-        "createdAt": "DEFINE FIELD createdAt ON planet TYPE datetime",
-        "firstName": "DEFINE FIELD firstName ON planet TYPE string",
-        "id": "DEFINE FIELD id ON planet TYPE record<planet>",
-        "labels": "DEFINE FIELD labels ON planet TYPE array<string>",
-        "population": "DEFINE FIELD population ON planet TYPE int",
-        "updatedAt": "DEFINE FIELD updatedAt ON planet TYPE datetime",
+        "id": "DEFINE FIELD id ON migration TYPE record<migration>",
+        "name": "DEFINE FIELD name ON migration TYPE string",
+        "timestamp": "DEFINE FIELD timestamp ON migration TYPE int",
     },
     "indexes": {},
     "lives": {},

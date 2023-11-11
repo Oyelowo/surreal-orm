@@ -5,11 +5,12 @@ expression: fields_info.unwrap()
 {
     "events": {},
     "fields": {
-        "age": "DEFINE FIELD age ON student TYPE int",
-        "createdAt": "DEFINE FIELD createdAt ON student TYPE datetime",
-        "id": "DEFINE FIELD id ON student TYPE record<student>",
-        "university": "DEFINE FIELD university ON student TYPE string",
-        "updatedAt": "DEFINE FIELD updatedAt ON student TYPE datetime",
+        "createdAt": "DEFINE FIELD createdAt ON planet TYPE datetime",
+        "firstName": "DEFINE FIELD firstName ON planet TYPE string",
+        "id": "DEFINE FIELD id ON planet TYPE record<planet>",
+        "labels": "DEFINE FIELD labels ON planet TYPE array<string>",
+        "population": "DEFINE FIELD population ON planet TYPE int",
+        "updatedAt": "DEFINE FIELD updatedAt ON planet TYPE datetime",
     },
     "indexes": {},
     "lives": {},
