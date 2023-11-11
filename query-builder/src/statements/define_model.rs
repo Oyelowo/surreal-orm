@@ -1,6 +1,6 @@
 use crate::{
     statements::Permissions, BindingsList, Buildable, Erroneous, LiteralLike, Parametric,
-    Queryable, TableLike,
+    Queryable, StrandLike, TableLike,
 };
 use std::fmt::{self, Display};
 
@@ -19,12 +19,14 @@ use std::fmt::{self, Display};
 pub struct DefineModelStatement {
     model_name: String,
     version: String,
+    comment: Option<String>,
     permissions_none: Option<bool>,
     permissions_full: Option<bool>,
     permissions_for: Vec<String>,
     bindings: BindingsList,
 }
 
+/// A model name.
 pub type ModelName = TableLike;
 
 /// Define a new ML model.
@@ -56,6 +58,7 @@ pub fn define_model(name: impl Into<ModelName>) -> DefineModelStatement {
     DefineModelStatement {
         model_name: name.build(),
         version: String::new(),
+        comment: None,
         permissions_none: None,
         permissions_full: None,
         permissions_for: vec![],
@@ -63,14 +66,23 @@ pub fn define_model(name: impl Into<ModelName>) -> DefineModelStatement {
     }
 }
 
-pub type MlVersion = LiteralLike;
+/// A model version.
+pub type ModelVersion = LiteralLike;
 
 impl DefineModelStatement {
     /// Set the version of the model.
-    pub fn version(mut self, version: impl Into<MlVersion>) -> Self {
-        let version: MlVersion = version.into();
+    pub fn version(mut self, version: impl Into<ModelVersion>) -> Self {
+        let version: ModelVersion = version.into();
         self.version = version.build();
         self.bindings.extend(version.get_bindings());
+        self
+    }
+
+    /// Set a comment for the model.
+    pub fn comment(mut self, comment: impl Into<StrandLike>) -> Self {
+        let comment: StrandLike = comment.into();
+        self.comment = Some(comment.build());
+        self.bindings.extend(comment.get_bindings());
         self
     }
 
@@ -164,6 +176,10 @@ impl Buildable for DefineModelStatement {
             query = format!("{query}<{version}>", version = self.version);
         }
 
+        if let Some(comment) = &self.comment {
+            query = format!("{query}\nCOMMENT {comment}");
+        }
+
         if let Some(true) = self.permissions_none {
             query = format!("{query} PERMISSIONS NONE");
         } else if let Some(true) = self.permissions_full {
@@ -197,6 +213,7 @@ mod tests {
 
         let statement = define_model(model_name)
             .version("1.2.3")
+            .comment("My ultimate goal in life is to die empty. Share all my ideas, experiences, and values with the world. And leave nothing left inside of me. I want to die empty.")
             .permissions(for_permission(Select).where_(age.greater_than_or_equal(18))) // Single works
             .permissions(for_permission([Create, Update]).where_(name.is("Oyedayo"))) //Multiple
             .permissions([
