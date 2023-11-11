@@ -37,8 +37,14 @@ pub struct User(sql::Idiom);
 pub struct Scope(sql::Idiom);
 
 /// Surreal table
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd)]
 pub struct Table(sql::Table);
+
+impl Ord for Table {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.to_string().cmp(&other.to_string())
+    }
+}
 
 /// Surreal event
 #[derive(Debug, Clone)]
