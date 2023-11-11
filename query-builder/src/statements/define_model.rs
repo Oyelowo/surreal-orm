@@ -224,16 +224,18 @@ mod tests {
         assert_eq!(
             statement.fine_tune_params(),
             "DEFINE MODEL ml::$_param_00000001<$_param_00000002>\n\
+                COMMENT $_param_00000003\n\
                 PERMISSIONS\n\
-                FOR select\n\tWHERE age >= $_param_00000003\n\
-                FOR create, update\n\tWHERE name IS $_param_00000004\n\
-                FOR create, delete\n\tWHERE name IS $_param_00000005\n\
-                FOR update\n\tWHERE age <= $_param_00000006;"
+                FOR select\n\tWHERE age >= $_param_00000004\n\
+                FOR create, update\n\tWHERE name IS $_param_00000005\n\
+                FOR create, delete\n\tWHERE name IS $_param_00000006\n\
+                FOR update\n\tWHERE age <= $_param_00000007;"
         );
 
         assert_eq!(
             statement.to_raw().build(),
             "DEFINE MODEL ml::recommendation<1.2.3>\n\
+                COMMENT 'My ultimate goal in life is to die empty. Share all my ideas, experiences, and values with the world. And leave nothing left inside of me. I want to die empty.'\n\
                 PERMISSIONS\n\
                 FOR select\n\tWHERE age >= 18\n\
                 FOR create, update\n\tWHERE name IS 'Oyedayo'\n\
@@ -241,7 +243,7 @@ mod tests {
                 FOR update\n\tWHERE age <= 130;"
         );
         insta::assert_display_snapshot!(statement.fine_tune_params());
-        assert_eq!(statement.get_bindings().len(), 6);
+        assert_eq!(statement.get_bindings().len(), 7);
     }
 
     #[test]
