@@ -83,7 +83,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
 
             match DeltaType::from((def_left, def_right)) {
                 DeltaType::NoChange => {}
-                DeltaType::Create { right } => {
+                DeltaType::Create { mut right } => {
                     acc.add_up(QueryType::Define(right.clone()));
 
                     let new_name = name;
@@ -116,7 +116,9 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     ) = &field_meta_with_old_name
                     {
                         acc.add_up(QueryType::Remove(
-                            right.as_remove_statement(meta.old_name.clone().into(), Some(table))?,
+                            right
+                                .with_override_resource_name(meta.old_name.clone().into())
+                                .as_remove_statement()?,
                         ));
 
                         let old_name = meta.old_name.clone();
@@ -144,14 +146,18 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     }
 
                     acc.add_down(QueryType::Remove(
-                        right.as_remove_statement(new_name.to_string().into(), Some(table))?,
+                        right
+                            // .with_override_resource_name(new_name.to_string().into())
+                            .as_remove_statement()?,
                     ));
                     acc.add_new_line_to_down();
                 }
                 DeltaType::Remove { left } => {
                     if !is_potentially_renaming && field_meta_with_old_name.is_none() {
                         acc.add_up(QueryType::Remove(
-                            left.as_remove_statement(name.to_string().into(), Some(table))?,
+                            left
+                                // .with_override_resource_name(name.to_string().into())
+                                .as_remove_statement()?,
                         ));
 
                         acc.add_new_line_to_up();

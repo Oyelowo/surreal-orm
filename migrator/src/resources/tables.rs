@@ -109,17 +109,13 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                     queries.add_down(QueryType::Define(left));
                 }
                 DeltaType::Create { right } => {
-                    queries.add_down(QueryType::Remove(
-                        right.as_remove_statement(table_name.into(), None)?,
-                    ));
+                    queries.add_down(QueryType::Remove(right.as_remove_statement()?));
 
                     queries.add_up(QueryType::Define(right));
                     extend_table_resources_up(&mut queries);
                 }
                 DeltaType::Remove { left } => {
-                    queries.add_up(QueryType::Remove(
-                        left.as_remove_statement(table_name.into(), None)?,
-                    ));
+                    queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                     extend_table_resources_down(&mut queries);
                 }
@@ -153,15 +149,11 @@ where
 
             match DeltaType::from((def_left, def_right)) {
                 DeltaType::Create { right } => {
-                    queries.add_down(QueryType::Remove(
-                        right.as_remove_statement(name.into(), Some(self.get_table()))?,
-                    ));
+                    queries.add_down(QueryType::Remove(right.as_remove_statement()?));
                     queries.add_up(QueryType::Define(right));
                 }
                 DeltaType::Remove { left } => {
-                    queries.add_up(QueryType::Remove(
-                        left.as_remove_statement(name.into(), Some(self.get_table()))?,
-                    ));
+                    queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                 }
                 DeltaType::Update { left, right } => {

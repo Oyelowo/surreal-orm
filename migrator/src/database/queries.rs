@@ -78,15 +78,6 @@ impl Queries {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DefineStatementRaw(String);
-
-impl From<DefineStatementRaw> for Raw {
-    fn from(value: DefineStatementRaw) -> Self {
-        Self::new(value.0)
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct UpdateStatementRaw(String);
 
 impl Deref for UpdateStatementRaw {
@@ -155,60 +146,51 @@ impl From<String> for RemoveStatementRaw {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DefineStatementRaw {
+    statement: String,
+    fallback_resource_name: Option<String>,
+}
+
+impl From<DefineStatementRaw> for Raw {
+    fn from(value: DefineStatementRaw) -> Self {
+        Self::new(value.statement)
+    }
+}
+
 impl DefineStatementRaw {
     /// Table name is only required/necessary when generating table resources such as fields, indexes, events
-    pub fn as_remove_statement(
-        &self,
-        remove_stmt_name: RemoveStmtName,
-        table: Option<&Table>,
-    ) -> MigrationResult<RemoveStatementRaw> {
+    pub fn as_remove_statement(&self) -> MigrationResult<RemoveStatementRaw> {
         use surreal_query_builder::sql::{statements::DefineStatement, Base, Statement};
 
         let query = surreal_query_builder::sql::parse(&self.to_string()).expect("Invalid statment");
         let stmt = query[0].clone();
-        let get_error = |_resource_name: String| {
-            // I gave this a  second thought because there is a scenario
-            // whereby we could use a different Define statement to generaate
-            // a remove statement for another field. The first and only example
-            // in mind for now is a rename field case. We could use a new
-            // field name define statement to want to create a remove statement for
-            // the old field. And since this validation is not totally
-            // necessary, I am commenting it out for now.
-            // if resource_name != define_statement_name.to_string() {
-            //     panic!("Resource name - {} - in define statement does not match name - {} - in removal statement", resource_name, define_statement_name);
-            // }
-        };
+        let get_resource_name = |name: String| self.fallback_resource_name.clone().unwrap_or(name);
 
         let stmt = match stmt {
             Statement::Define(define_stmt) => match define_stmt {
                 DefineStatement::Namespace(ns) => {
-                    get_error(ns.name.to_raw());
-                    remove_namespace(remove_stmt_name.to_string())
+                    remove_namespace(get_resource_name(ns.name.to_string()))
                         .to_raw()
                         .build()
                 }
                 DefineStatement::Database(db) => {
-                    get_error(db.name.to_raw());
-                    remove_database(remove_stmt_name.to_string())
+                    remove_database(get_resource_name(db.name.to_string()))
                         .to_raw()
                         .build()
                 }
                 DefineStatement::Function(fn_) => {
-                    get_error(fn_.name.to_raw());
-                    remove_function(remove_stmt_name.to_string())
+                    remove_function(get_resource_name(fn_.name.to_raw()))
                         .to_raw()
                         .build()
                 }
                 DefineStatement::Analyzer(analyzer) => {
-                    get_error(analyzer.name.to_raw());
-                    remove_analyzer(remove_stmt_name.to_string())
+                    remove_analyzer(get_resource_name(analyzer.name.to_raw()))
                         .to_raw()
                         .build()
                 }
                 DefineStatement::Token(tk) => {
-                    get_error(tk.name.to_raw());
-
-                    let remove_init = remove_token(remove_stmt_name.to_string());
+                    let remove_init = remove_token(get_resource_name(tk.name.to_raw()));
                     let remove_stmt = match tk.base {
                         Base::Ns => remove_init.on_namespace(),
                         Base::Db => remove_init.on_database(),
@@ -217,42 +199,37 @@ impl DefineStatementRaw {
                     };
                     remove_stmt.to_raw().build()
                 }
-                DefineStatement::Scope(sc) => {
-                    get_error(sc.name.to_raw());
-                    remove_scope(remove_stmt_name.to_string()).to_raw().build()
-                }
-                DefineStatement::Param(_) => {
-                    get_error(remove_stmt_name.to_string());
-                    remove_param(remove_stmt_name.to_string()).to_raw().build()
-                }
-                DefineStatement::Table(table) => {
-                    get_error(table.name.to_raw());
-                    remove_table(remove_stmt_name.to_string()).to_raw().build()
-                }
-                DefineStatement::Event(ev) => {
-                    get_error(ev.name.to_raw());
-                    remove_event(remove_stmt_name.to_string())
-                        .on_table(table.expect("Invalid event. Event must be attached to a table."))
+                DefineStatement::Scope(sc) => remove_scope(get_resource_name(sc.name.to_raw()))
+                    .to_raw()
+                    .build(),
+                DefineStatement::Param(param) => {
+                    remove_param(get_resource_name(param.name.to_raw()))
                         .to_raw()
                         .build()
                 }
+                DefineStatement::Table(table) => {
+                    remove_table(get_resource_name(table.name.to_raw()))
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Event(ev) => remove_event(get_resource_name(ev.name.to_raw()))
+                    .on_table(ev.what.to_raw())
+                    .to_raw()
+                    .build(),
                 DefineStatement::Field(field) => {
-                    get_error(field.name.to_string());
-                    remove_field(remove_stmt_name.to_string())
-                        .on_table(table.expect("Invalid field. Field must be attached to a table."))
+                    remove_field(get_resource_name(field.name.to_string()))
+                        .on_table(field.what.to_raw())
                         .to_raw()
                         .build()
                 }
                 DefineStatement::Index(index) => {
-                    get_error(index.name.to_string());
-                    remove_index(remove_stmt_name.to_string())
-                        .on_table(table.expect("Invalid index. Index must be attached to a table."))
+                    remove_index(get_resource_name(index.name.to_string()))
+                        .on_table(index.what.to_raw())
                         .to_raw()
                         .build()
                 }
                 DefineStatement::User(user) => {
-                    get_error(user.name.to_raw());
-                    let remove_init = remove_user(remove_stmt_name.to_string());
+                    let remove_init = remove_user(get_resource_name(user.name.to_raw()));
                     let remove_stmt = match user.base {
                         Base::Ns => remove_init.on_namespace(),
                         Base::Db => remove_init.on_database(),
@@ -265,7 +242,7 @@ impl DefineStatementRaw {
                     };
                     remove_stmt.to_raw().build()
                 }
-                DefineStatement::MlModel(ml) => remove_model(remove_stmt_name.to_string())
+                DefineStatement::MlModel(ml) => remove_model(get_resource_name(ml.name.to_raw()))
                     .version(ml.version)
                     .to_raw()
                     .build(),
@@ -280,13 +257,18 @@ impl DefineStatementRaw {
         Ok(stmt.into())
     }
 
+    pub fn with_override_resource_name(&mut self, name: String) -> &mut Self {
+        self.fallback_resource_name = Some(name);
+        self
+    }
+
     pub fn trim(&self) -> &str {
-        self.0.trim()
+        self.statement.trim()
     }
 }
 
 impl Display for DefineStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{};", self.0)
+        write!(f, "{};", self.statement)
     }
 }
