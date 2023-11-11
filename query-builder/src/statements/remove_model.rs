@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use std::fmt::{self, Display};
+use std::fmt;
 
 use crate::{BindingsList, Buildable, Erroneous, Parametric, Queryable};
 
@@ -64,13 +64,17 @@ impl Parametric for RemoveModelStatement {
 
 impl Buildable for RemoveModelStatement {
     fn build(&self) -> String {
-        let query = format!("REMOVE MODEL ml::{};", self.name);
+        let query = format!("REMOVE MODEL ml::{}", self.name);
 
-        if let Some(version) = &self.version {
+        let query = if let Some(version) = &self.version {
             format!("{query}<{version}>")
         } else {
             query
-        }
+        };
+
+        let query = format!("{query};");
+
+        query
     }
 }
 
@@ -104,12 +108,9 @@ mod tests {
         let field = Field::new("field");
         let statement = remove_model(field);
 
-        assert_eq!(statement.to_raw().build(), "REMOVE MODEL field;");
-        assert_eq!(
-            statement.fine_tune_params(),
-            "REMOVE MODEL $_param_00000001;"
-        );
-        assert_eq!(statement.get_bindings().len(), 1);
+        assert_eq!(statement.to_raw().build(), "REMOVE MODEL ml::field;");
+        assert_eq!(statement.fine_tune_params(), "REMOVE MODEL ml::field;");
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 
     #[test]
@@ -119,12 +120,12 @@ mod tests {
 
         assert_eq!(
             statement.to_raw().build(),
-            "REMOVE MODEL $param_model_to_remove;"
+            "REMOVE MODEL ml::$param_model_to_remove;"
         );
         assert_eq!(
             statement.fine_tune_params(),
-            "REMOVE MODEL $_param_00000001;"
+            "REMOVE MODEL ml::$param_model_to_remove;"
         );
-        assert_eq!(statement.get_bindings().len(), 1);
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 }

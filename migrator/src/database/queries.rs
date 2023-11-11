@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 use surreal_query_builder::{
     statements::{
         remove_analyzer, remove_database, remove_event, remove_field, remove_function,
-        remove_index, remove_namespace, remove_param, remove_scope, remove_table, remove_token,
-        remove_user,
+        remove_index, remove_model, remove_namespace, remove_param, remove_scope, remove_table,
+        remove_token, remove_user,
     },
     *,
 };
@@ -163,6 +163,7 @@ impl DefineStatementRaw {
         table: Option<&Table>,
     ) -> MigrationResult<RemoveStatementRaw> {
         use surreal_query_builder::sql::{statements::DefineStatement, Base, Statement};
+
         let query = surreal_query_builder::sql::parse(&self.to_string()).expect("Invalid statment");
         let stmt = query[0].clone();
         let get_error = |_resource_name: String| {
@@ -177,110 +178,98 @@ impl DefineStatementRaw {
             //     panic!("Resource name - {} - in define statement does not match name - {} - in removal statement", resource_name, define_statement_name);
             // }
         };
-        let stmt = match stmt {
-            Statement::Define(define_stmt) => {
-                match define_stmt {
-                    DefineStatement::Namespace(ns) => {
-                        get_error(ns.name.to_raw());
-                        remove_namespace(remove_stmt_name.to_string())
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Database(db) => {
-                        get_error(db.name.to_raw());
-                        remove_database(remove_stmt_name.to_string())
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Function(fn_) => {
-                        get_error(fn_.name.to_raw());
-                        remove_function(remove_stmt_name.to_string())
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Analyzer(analyzer) => {
-                        get_error(analyzer.name.to_raw());
-                        remove_analyzer(remove_stmt_name.to_string())
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Token(tk) => {
-                        get_error(tk.name.to_raw());
 
-                        let remove_init = remove_token(remove_stmt_name.to_string());
-                        let remove_stmt = match tk.base {
-                            Base::Ns => remove_init.on_namespace(),
-                            Base::Db => remove_init.on_database(),
-                            Base::Root => remove_init.on_database(),
-                            Base::Sc(sc_name) => remove_init.on_scope(sc_name.to_raw()),
-                        };
-                        remove_stmt.to_raw().build()
-                    }
-                    DefineStatement::Scope(sc) => {
-                        get_error(sc.name.to_raw());
-                        remove_scope(remove_stmt_name.to_string()).to_raw().build()
-                    }
-                    DefineStatement::Param(_) => {
-                        get_error(remove_stmt_name.to_string());
-                        remove_param(remove_stmt_name.to_string()).to_raw().build()
-                    }
-                    DefineStatement::Table(table) => {
-                        get_error(table.name.to_raw());
-                        remove_table(remove_stmt_name.to_string()).to_raw().build()
-                    }
-                    DefineStatement::Event(ev) => {
-                        get_error(ev.name.to_raw());
-                        remove_event(remove_stmt_name.to_string())
-                            .on_table(
-                                table.expect("Invalid event. Event must be attached to a table."),
-                            )
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Field(field) => {
-                        get_error(field.name.to_string());
-                        remove_field(remove_stmt_name.to_string())
-                            .on_table(
-                                table.expect("Invalid field. Field must be attached to a table."),
-                            )
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::Index(index) => {
-                        get_error(index.name.to_string());
-                        remove_index(remove_stmt_name.to_string())
-                            .on_table(
-                                table.expect("Invalid index. Index must be attached to a table."),
-                            )
-                            .to_raw()
-                            .build()
-                    }
-                    DefineStatement::User(user) => {
-                        get_error(user.name.to_raw());
-                        let remove_init = remove_user(remove_stmt_name.to_string());
-                        let remove_stmt = match user.base {
-                            Base::Ns => remove_init.on_namespace(),
-                            Base::Db => remove_init.on_database(),
-                            Base::Root => remove_init.on_database(),
-                            Base::Sc(_sc_name) => {
-                                return Err(MigrationError::InvalidDefineStatement(
-                                    "Users cannot be defined on scope in Define User statement"
-                                        .into(),
-                                ))
-                            }
-                        };
-                        remove_stmt.to_raw().build()
-                    }
-                    DefineStatement::MlModel(_ml) => {
-                        // 	TODO: Implement define ml model statmement
-                        // 	write!(f, "DEFINE MODEL ml::{}<{}>", self.name, self.version)?;
-                        // 		write!(f, "PERMISSIONS {}", self.permissions)?;
-                        // get_error(ml.name.to_raw());
-                        // remove_ml_model(name.to_string()).to_raw().build()
-                        todo!()
-                    }
+        let stmt = match stmt {
+            Statement::Define(define_stmt) => match define_stmt {
+                DefineStatement::Namespace(ns) => {
+                    get_error(ns.name.to_raw());
+                    remove_namespace(remove_stmt_name.to_string())
+                        .to_raw()
+                        .build()
                 }
-            }
+                DefineStatement::Database(db) => {
+                    get_error(db.name.to_raw());
+                    remove_database(remove_stmt_name.to_string())
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Function(fn_) => {
+                    get_error(fn_.name.to_raw());
+                    remove_function(remove_stmt_name.to_string())
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Analyzer(analyzer) => {
+                    get_error(analyzer.name.to_raw());
+                    remove_analyzer(remove_stmt_name.to_string())
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Token(tk) => {
+                    get_error(tk.name.to_raw());
+
+                    let remove_init = remove_token(remove_stmt_name.to_string());
+                    let remove_stmt = match tk.base {
+                        Base::Ns => remove_init.on_namespace(),
+                        Base::Db => remove_init.on_database(),
+                        Base::Root => remove_init.on_database(),
+                        Base::Sc(sc_name) => remove_init.on_scope(sc_name.to_raw()),
+                    };
+                    remove_stmt.to_raw().build()
+                }
+                DefineStatement::Scope(sc) => {
+                    get_error(sc.name.to_raw());
+                    remove_scope(remove_stmt_name.to_string()).to_raw().build()
+                }
+                DefineStatement::Param(_) => {
+                    get_error(remove_stmt_name.to_string());
+                    remove_param(remove_stmt_name.to_string()).to_raw().build()
+                }
+                DefineStatement::Table(table) => {
+                    get_error(table.name.to_raw());
+                    remove_table(remove_stmt_name.to_string()).to_raw().build()
+                }
+                DefineStatement::Event(ev) => {
+                    get_error(ev.name.to_raw());
+                    remove_event(remove_stmt_name.to_string())
+                        .on_table(table.expect("Invalid event. Event must be attached to a table."))
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Field(field) => {
+                    get_error(field.name.to_string());
+                    remove_field(remove_stmt_name.to_string())
+                        .on_table(table.expect("Invalid field. Field must be attached to a table."))
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::Index(index) => {
+                    get_error(index.name.to_string());
+                    remove_index(remove_stmt_name.to_string())
+                        .on_table(table.expect("Invalid index. Index must be attached to a table."))
+                        .to_raw()
+                        .build()
+                }
+                DefineStatement::User(user) => {
+                    get_error(user.name.to_raw());
+                    let remove_init = remove_user(remove_stmt_name.to_string());
+                    let remove_stmt = match user.base {
+                        Base::Ns => remove_init.on_namespace(),
+                        Base::Db => remove_init.on_database(),
+                        Base::Root => remove_init.on_database(),
+                        Base::Sc(_sc_name) => {
+                            return Err(MigrationError::InvalidDefineStatement(
+                                "Users cannot be defined on scope in Define User statement".into(),
+                            ))
+                        }
+                    };
+                    remove_stmt.to_raw().build()
+                }
+                DefineStatement::MlModel(ml) => remove_model(remove_stmt_name.to_string())
+                    .version(ml.version)
+                    .to_raw()
+                    .build(),
+            },
             _ => {
                 return Err(MigrationError::InvalidDefineStatement(
                     "Not a define statement. Expected a define statement".into(),
