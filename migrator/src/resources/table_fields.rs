@@ -83,7 +83,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
 
             match DeltaType::from((def_left, def_right)) {
                 DeltaType::NoChange => {}
-                DeltaType::Create { mut right } => {
+                DeltaType::Create { right } => {
                     acc.add_up(QueryType::Define(right.clone()));
 
                     let new_name = name;
@@ -117,7 +117,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     {
                         acc.add_up(QueryType::Remove(
                             right
-                                .with_override_resource_name(meta.old_name.clone().into())
+                                // .with_override_resource_name(meta.old_name.clone().into())
                                 .as_remove_statement()?,
                         ));
 

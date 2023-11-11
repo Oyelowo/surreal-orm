@@ -147,25 +147,28 @@ impl From<String> for RemoveStatementRaw {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DefineStatementRaw {
-    statement: String,
-    fallback_resource_name: Option<String>,
-}
+pub struct DefineStatementRaw(String);
 
 impl From<DefineStatementRaw> for Raw {
     fn from(value: DefineStatementRaw) -> Self {
-        Self::new(value.statement)
+        Self::new(value.0)
     }
 }
 
 impl DefineStatementRaw {
-    /// Table name is only required/necessary when generating table resources such as fields, indexes, events
     pub fn as_remove_statement(&self) -> MigrationResult<RemoveStatementRaw> {
+        self.as_remove_statement_with_name_override(None)
+    }
+
+    pub fn as_remove_statement_with_name_override(
+        &self,
+        override_name: Option<String>,
+    ) -> MigrationResult<RemoveStatementRaw> {
         use surreal_query_builder::sql::{statements::DefineStatement, Base, Statement};
 
         let query = surreal_query_builder::sql::parse(&self.to_string()).expect("Invalid statment");
         let stmt = query[0].clone();
-        let get_resource_name = |name: String| self.fallback_resource_name.clone().unwrap_or(name);
+        let get_resource_name = |name: String| override_name.clone().unwrap_or(name);
 
         let stmt = match stmt {
             Statement::Define(define_stmt) => match define_stmt {
@@ -257,18 +260,13 @@ impl DefineStatementRaw {
         Ok(stmt.into())
     }
 
-    pub fn with_override_resource_name(&mut self, name: String) -> &mut Self {
-        self.fallback_resource_name = Some(name);
-        self
-    }
-
     pub fn trim(&self) -> &str {
-        self.statement.trim()
+        self.0.trim()
     }
 }
 
 impl Display for DefineStatementRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{};", self.statement)
+        write!(f, "{};", self.0)
     }
 }
