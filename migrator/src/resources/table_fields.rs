@@ -116,11 +116,13 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     ) = &field_meta_with_old_name
                     {
                         acc.add_up(QueryType::Remove(
-                            right
-                                // .with_override_resource_name(meta.old_name.clone().into())
-                                .as_remove_statement_with_name_override(Some(
-                                    "must_fail".to_string(),
-                                ))?,
+                            // We are using the define statement for new name but to generate
+                            // remove statement for old name, that's why we're passing the old
+                            // field name here to override the new field name when generating
+                            // the remove statement
+                            right.as_remove_statement_with_name_override(Some(
+                                meta.old_name.clone().into(),
+                            ))?,
                         ));
 
                         let old_name = meta.old_name.clone();
@@ -147,20 +149,12 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                         acc.add_down(QueryType::Update(copy_new_to_old));
                     }
 
-                    acc.add_down(QueryType::Remove(
-                        right
-                            // .with_override_resource_name(new_name.to_string().into())
-                            .as_remove_statement()?,
-                    ));
+                    acc.add_down(QueryType::Remove(right.as_remove_statement()?));
                     acc.add_new_line_to_down();
                 }
                 DeltaType::Remove { left } => {
                     if !is_potentially_renaming && field_meta_with_old_name.is_none() {
-                        acc.add_up(QueryType::Remove(
-                            left
-                                // .with_override_resource_name(name.to_string().into())
-                                .as_remove_statement()?,
-                        ));
+                        acc.add_up(QueryType::Remove(left.as_remove_statement()?));
 
                         acc.add_new_line_to_up();
 
