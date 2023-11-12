@@ -60,6 +60,23 @@ impl<T: Into<NumberLike>> Sub<T> for &LetStatement {
     }
 }
 
+impl<T: Into<NumberLike>> Mul<T> for LetStatement {
+    type Output = Operation;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let mut rhs: NumberLike = rhs.into();
+        Operation {
+            query_string: format!(
+                "{} * {}",
+                self.get_param().build(),
+                rhs.bracket_if_operation().build()
+            ),
+            bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+            errors: vec![],
+        }
+    }
+}
+
 impl<T: Into<NumberLike>> Mul<T> for &LetStatement {
     type Output = Operation;
 
@@ -68,6 +85,23 @@ impl<T: Into<NumberLike>> Mul<T> for &LetStatement {
         Operation {
             query_string: format!(
                 "{} * {}",
+                self.get_param().build(),
+                rhs.bracket_if_operation().build()
+            ),
+            bindings: [self.get_bindings(), rhs.get_bindings()].concat(),
+            errors: vec![],
+        }
+    }
+}
+
+impl<T: Into<NumberLike>> Div<T> for LetStatement {
+    type Output = Operation;
+
+    fn div(self, rhs: T) -> Self::Output {
+        let mut rhs: NumberLike = rhs.into();
+        Operation {
+            query_string: format!(
+                "{} / {}",
                 self.get_param().build(),
                 rhs.bracket_if_operation().build()
             ),
