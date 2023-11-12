@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 
 use surreal_query_builder::{Field, Table};
 
@@ -91,7 +91,7 @@ impl FullDbInfo {
             .get_names()
     }
 
-    pub fn get_table_field_names_as_set(&self, table_name: &Table) -> HashSet<String> {
+    pub fn get_table_field_names_as_set(&self, table_name: &Table) -> BTreeSet<String> {
         self.table_resources
             .get(table_name)
             .map(|t| t.fields().clone())

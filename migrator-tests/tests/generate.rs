@@ -137,35 +137,24 @@ fn get_files_meta(files: ReadDir) -> (Vec<String>, String) {
 
     file_paths.sort_by_key(|path| path.file_name().unwrap().to_str().unwrap().to_lowercase());
 
-    let mut file_names = Vec::new();
-    let mut contents = Vec::new();
+    let (file_names, contents) = file_paths
+        .into_iter()
+        .map(|path| {
+            let content = fs::read_to_string(&path).unwrap();
 
-    for path in file_paths {
-        let content = fs::read_to_string(&path).unwrap();
-        let mut content_parts = content
-            .split(';')
-            .map(|part| part.trim())
-            .collect::<Vec<_>>();
+            let name: MigrationFileName = path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
+                .try_into()
+                .unwrap();
+            let simple_name = format!("{}.{}", name.simple_name(), name.extension());
 
-        content_parts.sort();
-
-        let sorted_content = content_parts.join(";\n");
-
-        let name: MigrationFileName = path
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string()
-            .try_into()
-            .unwrap();
-        let simple_name = format!("{}.{}", name.simple_name(), name.extension());
-
-        file_names.push(simple_name);
-        contents.push(sorted_content);
-    }
-
-    contents.sort();
+            (simple_name, content)
+        })
+        .unzip::<_, _, Vec<_>, Vec<_>>();
 
     (file_names, contents.join("\n"))
 }

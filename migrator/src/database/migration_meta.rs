@@ -9,7 +9,7 @@ use std::convert::TryFrom;
 use std::env;
 
 use std::{
-    collections::HashSet,
+    collections::BTreeSet,
     fmt::Display,
     fs::{self},
     path::{Path, PathBuf},
@@ -630,8 +630,8 @@ impl FileManager {
             ));
         }
 
-        let ups_basenames_as_set = ups_basenames.iter().collect::<HashSet<_>>();
-        let downs_basenames_as_set = downs_basenames.iter().collect::<HashSet<_>>();
+        let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
+        let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
 
         let up_down_difference = ups_basenames_as_set
             .symmetric_difference(&downs_basenames_as_set)

@@ -52,13 +52,13 @@ where
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 struct Info(BTreeMap<String, DefineStatementRaw>);
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 pub trait Informational {
     // skills[*] is a valid field name in this context
     fn get_names(&self) -> Vec<String>;
 
-    fn get_names_as_set(&self) -> HashSet<String>;
+    fn get_names_as_set(&self) -> BTreeSet<String>;
 
     fn get_all_definitions(&self) -> Vec<DefineStatementRaw>;
 
@@ -75,8 +75,8 @@ impl Informational for Info {
         self.0.keys().cloned().collect()
     }
 
-    fn get_names_as_set(&self) -> HashSet<String> {
-        HashSet::from_iter(self.get_names())
+    fn get_names_as_set(&self) -> BTreeSet<String> {
+        BTreeSet::from_iter(self.get_names())
     }
 
     fn get_all_definitions(&self) -> Vec<DefineStatementRaw> {
@@ -113,8 +113,8 @@ macro_rules! define_object_info {
                     self.0.0.keys().cloned().collect()
                 }
 
-                fn get_names_as_set(&self) -> HashSet<String> {
-                    HashSet::from_iter(self.get_names())
+                fn get_names_as_set(&self) -> BTreeSet<String> {
+                    BTreeSet::from_iter(self.get_names())
                 }
 
                 fn get_all_definitions(&self) -> Vec<DefineStatementRaw> {
