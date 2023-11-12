@@ -206,6 +206,8 @@ pub use surreal_derive::query;
 /// #[doc = include_str!("docs/query_raw_description.md")]
 pub use surreal_derive::query_raw;
 
+pub use surreal_derive::block;
+
 pub use surreal_derive::query_turbo;
 
 #[doc(hidden)]

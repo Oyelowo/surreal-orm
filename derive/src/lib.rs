@@ -76,7 +76,12 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn query_turbo(input: TokenStream) -> TokenStream {
-    query_builder::block(input.into()).into()
+    query_builder::query_turbo(input.into()).into()
+}
+
+#[proc_macro]
+pub fn block(input: TokenStream) -> TokenStream {
+    query_builder::query_block(input.into()).into()
 }
 
 /// embed_migrations!() is a macro that embeds migrations in the binary at compile time.

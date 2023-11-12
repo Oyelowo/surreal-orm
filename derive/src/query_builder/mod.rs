@@ -52,7 +52,7 @@ impl Parse for QueriesInput {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut statements = Vec::new();
 
-        while !input.is_empty() {
+        while !input.is_empty() && !input.peek(Token![return]) {
             statements.push(input.parse()?);
         }
 
@@ -124,7 +124,7 @@ impl Parse for Block {
 }
 
 // ends with a return statement;
-pub fn block(input: TokenStream) -> TokenStream {
+pub fn query_block(input: TokenStream) -> TokenStream {
     let Block {
         statements,
         return_expr,
@@ -164,7 +164,7 @@ pub fn block(input: TokenStream) -> TokenStream {
 
     let has_only_return = statements.len() == 0;
     let whole_stmts = if has_only_return {
-        quote!(#crate_name::statements::return_(#return_expr))
+        quote!(#crate_name::statements::return_(#return_expr).as_block())
     } else {
         quote!(
                 #( #query_chain )*
