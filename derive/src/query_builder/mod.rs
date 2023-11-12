@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, Expr, Ident, Result as SynResult, Token,
+    parse_macro_input, Expr, Ident, Lit, Result as SynResult, Token,
 };
 
 use crate::models::get_crate_name;
@@ -177,6 +177,125 @@ pub fn query_block(input: TokenStream) -> TokenStream {
             #( #generated_code )*
 
             #whole_stmts
+        }
+    }
+    .into()
+}
+
+enum TransactionEnding {
+    Commit,
+    Cancel,
+}
+
+impl Parse for TransactionEnding {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let ident = input.parse::<Ident>()?;
+        let trans_type = if ident.to_string().to_lowercase() == "commit" {
+            Ok(TransactionEnding::Commit)
+        } else {
+            Ok(TransactionEnding::Cancel)
+        };
+        let transaction_ident = input.parse::<Ident>()?;
+        if transaction_ident.to_string().to_lowercase() != "transaction" {
+            return Err(syn::Error::new_spanned(
+                transaction_ident,
+                "expected transaction statement",
+            ));
+        }
+
+        trans_type
+    }
+}
+
+struct Transaction {
+    begin_statement: bool,
+    statements: Vec<Query>,
+    transaction_ending: TransactionEnding,
+}
+
+impl Parse for Transaction {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let begin_statement = input.parse::<Ident>()?;
+        if begin_statement.to_string().to_lowercase() != "begin" {
+            return Err(syn::Error::new_spanned(
+                begin_statement,
+                "expected begin statement",
+            ));
+        }
+        let statement_ident = input.parse::<Ident>()?;
+        if statement_ident.to_string().to_lowercase() != "transaction" {
+            return Err(syn::Error::new_spanned(
+                statement_ident,
+                "expected transaction statement",
+            ));
+        }
+
+        let mut queries_input = input.parse::<QueriesInput>()?;
+        let transaction_ending = input.parse::<TransactionEnding>()?;
+
+        Ok(Transaction {
+            begin_statement: true,
+            statements: queries_input.statements,
+            transaction_ending,
+        })
+    }
+}
+
+pub fn query_transaction(input: TokenStream) -> TokenStream {
+    let Transaction {
+        begin_statement,
+        statements,
+        transaction_ending,
+    } = parse_macro_input!(input as Transaction);
+
+    let crate_name = get_crate_name(false);
+
+    let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
+        Query::Statement(var_statement) => {
+            let LetStatement { ident, expr, .. } = var_statement;
+            quote! {
+                let #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
+            }
+        }
+        Query::Expr(expr) => quote! {
+            #expr;
+        },
+    });
+
+    let query_chain = statements
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            let is_first = i == 0;
+            let to_chain = match s {
+                Query::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                Query::Expr(expr) => quote!(#expr),
+            };
+
+            if is_first {
+                quote!(#crate_name::chain(#to_chain))
+            } else {
+                quote!(.chain(#to_chain))
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let ending = match transaction_ending {
+        TransactionEnding::Commit => quote!(.commit_transaction()),
+        TransactionEnding::Cancel => quote!(.cancel_transaction()),
+    };
+    let transaction = quote! {
+        #crate_name::statements::begin_transaction()
+        .query(#( #query_chain) *)
+        #ending
+    };
+
+    quote! {
+        {
+            #( #generated_code )*
+
+            #transaction
+
         }
     }
     .into()
