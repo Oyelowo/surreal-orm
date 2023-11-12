@@ -73,7 +73,7 @@ pub fn begin_transaction() -> QueryTransaction {
 
 /// Creates a Transaction statement starting
 #[macro_export]
-macro_rules! transaction {
+macro_rules! transaction_deprecated {
     (BEGIN TRANSACTION; $($query:expr;)* COMMIT TRANSACTION;) => {
         {
             $crate::statements::begin_transaction().
@@ -115,7 +115,7 @@ macro_rules! transaction {
         }
     };
 }
-pub use transaction;
+pub use transaction_deprecated;
 
 pub struct QueryTransaction {
     data: TransactionData,

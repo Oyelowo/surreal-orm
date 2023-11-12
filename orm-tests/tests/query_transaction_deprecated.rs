@@ -30,7 +30,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
 
     let amount_to_transfer = 300.00;
     let transaction_query = begin_transaction()
-        .query(query_turbo!(
+        .query(block_deprecated!(
             let balance = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
@@ -99,37 +99,37 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let db = Surreal::new::<Mem>(()).await.unwrap();
     db.use_ns("test").use_db("test").await.unwrap();
 
-    let id1 = &Account::create_id("one".to_string());
-    let id2 = &Account::create_id("two".to_string());
+    let id1 = &Account::create_id("one".into());
+    let id2 = &Account::create_id("two".into());
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
 
-    transaction! {
-        begin transaction;
+    block_deprecated! {
+        BEGIN TRANSACTION;
 
-        let balance = create().content(Balance {
+        LET balance = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
             });
 
-        let acc1 = create().content(Account {
+        LET acc1 = create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        let acc2 = create().content(Account {
+        LET acc2 = create().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         });
 
         // You can reference the balance object by using the $balance variable and pass the amount
         // as a parameter to the decrement_by function. i.e $balance.amount
-        let updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
+        LET updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
 
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
-        let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+        LET update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 
-        commit transaction;
+        COMMIT TRANSACTION;
     }
     .run(db.clone())
     .await?;

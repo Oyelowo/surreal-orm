@@ -112,7 +112,7 @@ pub use show::{show_changes_for_table, ShowChangesStatement};
 pub use sleep::{sleep, SleepStatement};
 pub use subquery::Subquery;
 pub use throw::{throw, ThrowStatement};
-pub use transaction::{begin_transaction, transaction, BeginTransactionStatement};
+pub use transaction::{begin_transaction, transaction_deprecated, BeginTransactionStatement};
 pub use update::{update, update_only, UpdateStatement};
 pub use use_::{use_, UseStatement};
 
