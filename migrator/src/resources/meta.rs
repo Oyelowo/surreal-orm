@@ -32,14 +32,10 @@ where
             match DeltaType::from((def_left, def_right)) {
                 DeltaType::Create { right } => {
                     queries.add_up(QueryType::Define(right.clone()));
-                    queries.add_down(QueryType::Remove(
-                        right.as_remove_statement()?,
-                    ));
+                    queries.add_down(QueryType::Remove(right.as_remove_statement()?));
                 }
                 DeltaType::Remove { left } => {
-                    queries.add_up(QueryType::Remove(
-                        left.as_remove_statement()?,
-                    ));
+                    queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                 }
                 DeltaType::Update { left, right } => {
