@@ -19,7 +19,7 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 /// # let metrics = Table::new("metrics");
 /// # let strength = Field::new("strength");
 ///
-/// let code_block = block! {
+/// let code_block_deprecated = block_deprecated! {
 ///     let strengths = select_value(strength).from(alien);
 ///     let total = math::sum!(strengths);
 ///     let count = count!(strengths);
@@ -28,7 +28,7 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 /// ```
 /// ```rust, ignore
 /// // Example passing as a value in a statement.
-///     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block! {
+///     let created_stats_statement = create::<WeaponStats>(averageStrength.equal_to(block_deprecated! {
 ///     let strengths = select_value(strength).from(weapon);
 ///     let total = math::sum!(strengths);
 ///     let count = count!(strengths);
@@ -44,7 +44,7 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 ///
 /// let amount_to_transfer = 300.00;
 /// let transaction_query = begin_transaction()
-///     .query(block!(
+///     .query(block_deprecated!(
 ///         let balance = create(Balance {
 ///             id: Balance::create_id("balance".into()),
 ///             balance: amount_to_transfer,
@@ -74,7 +74,7 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 /// let amount_to_transfer = 300.00;
 /// let acc = Account::schema();
 ///
-/// let transaction = block! {
+/// let transaction = block_deprecated! {
 ///     BEGIN TRANSACTION;
 ///
 ///     let acc1 = create(Account {
@@ -92,7 +92,7 @@ use crate::{Buildable, Erroneous, Parametric, QueryChain, Queryable, ValueLike};
 ///     COMMIT TRANSACTION;
 /// };
 /// ```
-macro_rules! code_block {
+macro_rules! code_block_deprecated {
     ($(let $var:ident = $value:expr;)* return $expr:expr;) => {
         {
             $(
@@ -143,17 +143,17 @@ macro_rules! code_block {
             let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
 
             let if_condition = $crate::statements::if_($condition);
-            let if_block = $crate::block! { $($then_body;)+ };
+            let if_block = $crate::block_deprecated! { $($then_body;)+ };
             __statements.push(if_condition.then(if_block).into());
 
             $(
                 let elif_condition = $crate::statements::if_($elif_condition);
-                let elif_block = $crate::block! { $($elif_body;)+ };
+                let elif_block = $crate::block_deprecated! { $($elif_body;)+ };
                 __statements.push(elif_condition.else_if(elif_block).into());
             )*
 
             $(
-                let else_block = $crate::block! { $($else_body;)+ };
+                let else_block = $crate::block_deprecated! { $($else_body;)+ };
                 __statements.push(else_block.into());
             )?
 
@@ -165,17 +165,17 @@ macro_rules! code_block {
             let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
 
             let if_condition = $crate::statements::if_($condition);
-            let if_block = $crate::block! { $($then_body;)+ };
+            let if_block = $crate::block_deprecated! { $($then_body;)+ };
             __statements.push(if_condition.then(if_block).into());
 
             $(
                 let elif_condition = $crate::statements::if_($elif_condition);
-                let elif_block = $crate::block! { $($elif_body;)+ };
+                let elif_block = $crate::block_deprecated! { $($elif_body;)+ };
                 __statements.push(elif_condition.else_if(elif_block).into());
             )*
 
             $(
-                let else_block = $crate::block! { $($else_body;)+ };
+                let else_block = $crate::block_deprecated! { $($else_body;)+ };
                 __statements.push(else_block.into());
             )?
 
@@ -185,13 +185,13 @@ macro_rules! code_block {
     (FOR ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {
         {
             let ref $param = $crate::Param::new(stringify!($param));
-            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block_deprecated! { $($stmt;)+ });
 
             let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
             __statements.push(for_loop.into());
 
             {
-                $crate::block_inner!( __statements; $($rest)*);
+                $crate::block_deprecated_inner!( __statements; $($rest)*);
             }
 
             $crate::statements::utils::QueryChain::from(__statements)
@@ -200,13 +200,13 @@ macro_rules! code_block {
     (for ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {
         {
             let ref $param = $crate::Param::new(stringify!($param));
-            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block_deprecated! { $($stmt;)+ });
 
             let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
             __statements.push(for_loop.into());
 
             {
-                $crate::block_inner!( __statements; $($rest)*);
+                $crate::block_deprecated_inner!( __statements; $($rest)*);
             }
 
             $crate::statements::utils::QueryChain::from(__statements)
@@ -380,14 +380,14 @@ macro_rules! code_block {
     ($($rest:tt)*) => {{
         let mut __statements: ::std::vec::Vec<$crate::statements::utils::Chainable> = ::std::vec::Vec::new();
         {
-            $crate::block_inner!( __statements; $($rest)*);
+            $crate::block_deprecated_inner!( __statements; $($rest)*);
         }
         $crate::statements::utils::QueryChain::from(__statements)
     }};
 
     // () => {};
 }
-pub use code_block as block;
+pub use code_block_deprecated as block_deprecated;
 
 ///  helper function for block macro
 #[macro_export]
@@ -395,28 +395,28 @@ macro_rules! block_inner {
     ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
         let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         $statements.push($var.clone().into());
-        $crate::block_inner!($statements; $($rest)*);
+        $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
     ($statements:expr; LET $var:ident = $value:expr; $($rest:tt)*) => {{
         let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         $statements.push($var.clone().into());
-        $crate::block_inner!($statements; $($rest)*);
+        $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
 
     ($statements:expr; FOR ($param:ident IN $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {{
             let ref $param = $crate::Param::new(stringify!($param));
-            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block_deprecated! { $($stmt;)+ });
 
             $statements.push(for_loop.into());
-            $crate::block_inner!($statements; $($rest)*);
+            $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
 
     ($statements:expr; for ($param:ident in $iterable:expr) { $($stmt:expr;)+ }; $($rest:tt)*) => {{
             let ref $param = $crate::Param::new(stringify!($param));
-            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block! { $($stmt;)+ });
+            let for_loop = $crate::statements::for_($param).in_($iterable).block($crate::block_deprecated! { $($stmt;)+ });
 
             $statements.push(for_loop.clone().into());
-            $crate::block_inner!($statements; $($rest)*);
+            $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
 
 
@@ -424,16 +424,16 @@ macro_rules! block_inner {
     ($statements:expr; return $value:expr; $($rest:tt)*) => {{
         let __private_stmt = $crate::statements::return_($value);
         $statements.push(__private_stmt.into());
-        $crate::block_inner!($statements; $($rest)*);
+        $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
     ($statements:expr; RETURN $value:expr; $($rest:tt)*) => {{
         let __private_stmt = $crate::statements::return_($value);
         $statements.push(__private_stmt.into());
-        $crate::block_inner!($statements; $($rest)*);
+        $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
     ($statements:expr; $expr:expr; $($rest:tt)*) => {{
         $statements.push($expr.into());
-        $crate::block_inner!($statements; $($rest)*);
+        $crate::block_deprecated_inner!($statements; $($rest)*);
     }};
     ($statements:expr;) => {};
 }
@@ -454,9 +454,9 @@ macro_rules! block_inner {
 /// let ref count = let_("count").equal_to(count!(sales));
 ///
 /// let returned = return_(bracket(total.divide(count)));
-/// let code_block = block(chain(sales).chain(total).chain(count).chain(returned));
+/// let code_block_deprecated = block(chain(sales).chain(total).chain(count).chain(returned));
 ///
-/// let def = define_field(average_sales).on_table(metrics).value(code_block);
+/// let def = define_field(average_sales).on_table(metrics).value(code_block_deprecated);
 ///
 /// assert_eq!(
 ///     def.to_raw().build(),
