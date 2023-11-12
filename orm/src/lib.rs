@@ -210,6 +210,8 @@ pub use surreal_derive::block;
 
 pub use surreal_derive::query_turbo;
 
+pub use surreal_derive::transaction;
+
 #[doc(hidden)]
 // pub use serde;
 pub use surreal_query_builder::*;

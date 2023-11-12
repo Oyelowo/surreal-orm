@@ -1,4 +1,3 @@
-
 /*
  * Author: Oyelowo Oyedayo
  * Email: oyelowo.oss@gmail.com
@@ -38,10 +37,10 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
     let created_stats_statement = create::<WeaponStats>().set(object_partial!(WeaponStats {
         // id: WeaponStats::create_simple_id(),
         averageStrength: block! {
-            LET strengths = select_value(strength).from(weapon);
-            LET total = math::sum!(strengths);
-            LET count = count!(strengths);
-            RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+            let strengths = select_value(strength).from(weapon);
+            let total = math::sum!(strengths);
+            let count = count!(strengths);
+            return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
         }
     }));
 
