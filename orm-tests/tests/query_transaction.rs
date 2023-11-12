@@ -106,7 +106,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let acc = Account::schema();
 
     transaction! {
-        begin transaction;
+        BEGIN TRANSACTION;
 
         let balance = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
@@ -129,7 +129,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
         let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 
-        commit transaction;
+        COMMIT TRANSACTION;
     }
     .run(db.clone())
     .await?;

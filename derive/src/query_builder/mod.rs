@@ -1,8 +1,11 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse::{Parse, ParseStream},
-    parse_macro_input, Expr, Ident, Lit, Result as SynResult, Token,
+    ext::IdentExt,
+    parse::{Parse, ParseBuffer, ParseStream},
+    parse_macro_input,
+    token::Abstract,
+    Expr, Ident, Lit, LitStr, Result as SynResult, Token,
 };
 
 use crate::models::get_crate_name;
@@ -52,10 +55,47 @@ impl Parse for QueriesInput {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut statements = Vec::new();
 
-        while !input.is_empty() && !input.peek(Token![return]) {
+        // this closure rather than direct assignment is necessary so we dont get stale result
+        let is_transaction = |input: &ParseBuffer<'_>| {
+            let input_str = input
+                .to_string()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join(" ")
+                .to_lowercase();
+
+            (input.peek(Ident) && input.peek2(Ident) && input.peek3(Token![;]))
+                && (input_str.starts_with("begin transaction")
+                    || input_str.starts_with("commit transaction")
+                    || input_str.starts_with("cancel transaction"))
+        };
+        let is_last_return = |input: &ParseBuffer<'_>| input.peek(Token![return]);
+
+        while !input.is_empty() && !is_last_return(input) && !is_transaction(input) {
             statements.push(input.parse()?);
         }
 
+        // while !input.is_empty() {
+        //     // Peek the next token, if it's an identifier, check if it's the specific keyword we're looking for
+        //     if input.peek(Ident) {
+        //         let ident: Ident = input.parse()?;
+        //         if ident == "begin" {
+        //             // Handle the 'begin' keyword
+        //             // You can add your logic here for what should happen when 'begin' is encountered
+        //             // ...
+        //             break;
+        //         } else if ident == "return" {
+        //             // Handle the 'return' keyword or break the loop, as per your requirement
+        //             break;
+        //         } else {
+        //             // If it's not 'begin' or 'return', parse other parts of the input normally
+        //             statements.push(input.parse()?);
+        //         }
+        //     } else {
+        //         // If the next token is not an identifier, parse the next part of the input normally
+        //         statements.push(input.parse()?);
+        //     }
+        // }
         Ok(QueriesInput { statements })
     }
 }
@@ -68,7 +108,7 @@ pub fn query_turbo(input: TokenStream) -> TokenStream {
         Query::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
-                let #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
+                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
         Query::Expr(expr) => quote! {
@@ -136,7 +176,7 @@ pub fn query_block(input: TokenStream) -> TokenStream {
         Query::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
-                let #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
+                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
         Query::Expr(expr) => quote! {
@@ -190,20 +230,28 @@ enum TransactionEnding {
 impl Parse for TransactionEnding {
     fn parse(input: ParseStream) -> SynResult<Self> {
         let ident = input.parse::<Ident>()?;
-        let trans_type = if ident.to_string().to_lowercase() == "commit" {
+        let transaction_type = if ident.to_string().to_lowercase() == "commit" {
             Ok(TransactionEnding::Commit)
-        } else {
+        } else if ident.to_string().to_lowercase() == "cancel" {
             Ok(TransactionEnding::Cancel)
+        } else {
+            Err(syn::Error::new_spanned(
+                ident,
+                "expected 'commit' or 'cancel' in lower or upper case",
+            ))
         };
+
         let transaction_ident = input.parse::<Ident>()?;
         if transaction_ident.to_string().to_lowercase() != "transaction" {
             return Err(syn::Error::new_spanned(
                 transaction_ident,
-                "expected transaction statement",
+                "expected 'transaction' or 'TRANSACTION'",
             ));
         }
 
-        trans_type
+        input.parse::<Token![;]>()?;
+
+        transaction_type
     }
 }
 
@@ -219,16 +267,18 @@ impl Parse for Transaction {
         if begin_statement.to_string().to_lowercase() != "begin" {
             return Err(syn::Error::new_spanned(
                 begin_statement,
-                "expected begin statement",
+                "expected 'begin' or 'BEGIN'",
             ));
         }
+        // input.parse::<Abstract>()?;
         let statement_ident = input.parse::<Ident>()?;
         if statement_ident.to_string().to_lowercase() != "transaction" {
             return Err(syn::Error::new_spanned(
                 statement_ident,
-                "expected transaction statement",
+                "expected 'transaction' or 'TRANSACTION'",
             ));
         }
+        input.parse::<Token![;]>()?;
 
         let mut queries_input = input.parse::<QueriesInput>()?;
         let transaction_ending = input.parse::<TransactionEnding>()?;
@@ -254,7 +304,7 @@ pub fn query_transaction(input: TokenStream) -> TokenStream {
         Query::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
-                let #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
+                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
         Query::Expr(expr) => quote! {
