@@ -34,6 +34,7 @@ use syn::{parse_macro_input, LitStr};
 mod migration;
 mod models;
 mod query;
+mod query_builder;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]
 pub fn surreal_node_trait_derive(input: TokenStream) -> TokenStream {
@@ -71,6 +72,11 @@ pub fn query_raw(raw_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn query(raw_input: TokenStream) -> TokenStream {
     query::query(raw_input.into()).into()
+}
+
+#[proc_macro]
+pub fn query_turbo(input: TokenStream) -> TokenStream {
+    query_builder::block(input.into()).into()
 }
 
 /// embed_migrations!() is a macro that embeds migrations in the binary at compile time.
