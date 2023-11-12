@@ -96,10 +96,10 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
     insert(generated_weapons).return_many(db.clone()).await?;
 
     let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
-        LET strengths = select_value(strength).from(weapon);
-        LET total = math::sum!(strengths);
-        LET count = count!(strengths);
-        RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = count!(strengths);
+        return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
     }));
 
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
