@@ -1,4 +1,5 @@
 pub(crate) mod block;
+pub(crate) mod for_loop;
 pub(crate) mod query_chain;
 pub(crate) mod query_turbo;
 pub(crate) mod return_statment;
@@ -6,6 +7,7 @@ pub(crate) mod statement_or_expr;
 pub(crate) mod transaction;
 
 pub use block::query_block;
+pub use for_loop::for_loop;
 pub use query_turbo::query_turbo;
 pub use transaction::query_transaction;
 

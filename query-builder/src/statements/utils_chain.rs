@@ -42,6 +42,7 @@ pub fn chain(query: impl Queryable + Parametric + Buildable) -> QueryChain {
         queries: vec![query.build()],
         bindings: query.get_bindings(),
         errors: query.get_errors(),
+        paranthesized: false,
     }
 }
 
@@ -54,6 +55,7 @@ pub struct QueryChain {
     queries: Vec<String>,
     bindings: BindingsList,
     errors: ErrorList,
+    paranthesized: bool,
 }
 
 /// A chainable query.
@@ -112,6 +114,11 @@ impl QueryChain {
         self
     }
 
+    pub fn paranthesized(mut self) -> Self {
+        self.paranthesized = true;
+        self
+    }
+
     /// Surrounds the query chain with a curly brace.
     pub fn as_block(self) -> Block {
         self.into()
@@ -133,7 +140,12 @@ impl Erroneous for QueryChain {
 
 impl Buildable for QueryChain {
     fn build(&self) -> String {
-        self.queries.join("\n\n")
+        let queries = self.queries.join("\n\n");
+        if self.paranthesized {
+            format!("({})", queries)
+        } else {
+            queries
+        }
     }
 }
 
@@ -159,6 +171,7 @@ impl From<Vec<ValueLike>> for QueryChain {
             queries,
             bindings,
             errors,
+            paranthesized: false,
         }
     }
 }
@@ -179,6 +192,7 @@ impl From<Vec<Chainable>> for QueryChain {
             queries,
             bindings,
             errors,
+            paranthesized: false,
         }
     }
 }
