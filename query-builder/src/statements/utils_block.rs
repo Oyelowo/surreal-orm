@@ -391,7 +391,7 @@ pub use code_block_deprecated as block_deprecated;
 
 ///  helper function for block macro
 #[macro_export]
-macro_rules! block_inner {
+macro_rules! block_deprecated_inner {
     ($statements:expr; let $var:ident = $value:expr; $($rest:tt)*) => {{
         let ref $var = $crate::statements::let_(stringify!($var)).equal_to($value);
         $statements.push($var.clone().into());
