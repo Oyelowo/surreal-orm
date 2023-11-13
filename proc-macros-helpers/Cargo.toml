@@ -1,0 +1,20 @@
+[package]
+name = "proc-macros-helpers"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+proc-macro2 = { workspace = true }
+proc-macro-crate = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+
+
+[lib]
+# proc-macro = true
+# doctest = false

@@ -10,6 +10,8 @@ documentation = { workspace = true }
 
 [dependencies]
 surreal-derive = { workspace = true }
+query-builder-macros = { workspace = true }
+migrator-macros = { workspace = true }
 surreal-query-builder = { workspace = true }
 migrator = { workspace = true }
 serde = { workspace = true }

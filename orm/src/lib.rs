@@ -201,16 +201,18 @@ pub use surreal_derive::Node;
 pub use surreal_derive::Object;
 
 /// #[doc = include_str!("docs/query_description.md")]
-pub use surreal_derive::query;
+pub use query_builder_macros::query;
 
 /// #[doc = include_str!("docs/query_raw_description.md")]
-pub use surreal_derive::query_raw;
+pub use query_builder_macros::query_raw;
 
-pub use surreal_derive::block;
+pub use query_builder_macros::block;
 
-pub use surreal_derive::query_turbo;
+pub use query_builder_macros::query_turbo;
 
-pub use surreal_derive::transaction;
+pub use query_builder_macros::transaction;
+
+pub use query_builder_macros::for_;
 
 #[doc(hidden)]
 // pub use serde;
@@ -219,5 +221,5 @@ pub use surreal_query_builder::*;
 ///
 pub mod migrator {
     pub use migrator::*;
-    pub use surreal_derive::embed_migrations;
+    pub use migrator_macros::embed_migrations;
 }
