@@ -7,7 +7,7 @@
 
 use proc_macro2::{Ident, Span, TokenStream, TokenTree};
 use quote::ToTokens;
-use surreal_query_builder::sql;
+use surrealdb::sql;
 use syn::parse::{Parse, ParseStream};
 use syn::parse2;
 use syn::punctuated::Punctuated;
