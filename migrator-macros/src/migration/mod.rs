@@ -9,6 +9,7 @@ use migrator::{MigrationConfig, MigrationError, MigrationFlag, Mode};
 use proc_macro::TokenStream;
 use quote::quote;
 
+use proc_macros_helpers::get_crate_name;
 use syn::{
     parse::Parse, parse::ParseStream, parse_macro_input, punctuated::Punctuated, Expr, Lit, Result,
     Token,

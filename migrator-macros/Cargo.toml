@@ -1,10 +1,10 @@
 [package]
-name = "surreal-derive"
-version = { workspace = true }
-edition = { workspace = true }
-authors = { workspace = true }
-description = { workspace = true }
-documentation = { workspace = true }
+name = "migrator-macros"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,15 +13,10 @@ proc-macro2 = { workspace = true }
 proc-macro-crate = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }
-darling = { workspace = true }
-convert_case = { workspace = true }
-strum = { workspace = true }
-strum_macros = { workspace = true }
-thiserror = { workspace = true }
-
-
 serde = { workspace = true }
+
 surreal-query-builder = { workspace = true }
+migrator = { workspace = true }
 
 [lib]
 proc-macro = true
