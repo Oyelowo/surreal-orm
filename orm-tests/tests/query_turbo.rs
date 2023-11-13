@@ -25,6 +25,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let acc = Account::schema();
 
     let query_chain = query_turbo! {
+
          let balance1 = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,

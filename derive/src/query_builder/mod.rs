@@ -1,11 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    ext::IdentExt,
     parse::{Parse, ParseBuffer, ParseStream},
-    parse_macro_input,
-    token::Abstract,
-    Expr, Ident, Lit, LitStr, Result as SynResult, Token,
+    parse_macro_input, Expr, Ident, Result as SynResult, Token,
 };
 
 use crate::models::get_crate_name;
@@ -92,28 +89,15 @@ enum QueryTypeInner {
 }
 
 struct QueriesTurbo {
-    // statements: Vec<StmtOrExpr>,
-    // query_type: QueryType,
     inner: QueryTypeInner,
 }
 
 impl Parse for QueriesTurbo {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        let is_likely_transaction_stmt = |input: &ParseBuffer<'_>| {
-            let input_str = input
-                .to_string()
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join(" ")
-                .to_lowercase();
+        let is_likely_transaction_stmt =
+            input.peek(Ident) && input.peek2(Ident) && input.peek3(Token![;]);
 
-            (input.peek(Ident) && input.peek2(Ident) && input.peek3(Token![;]))
-                && (input_str.starts_with("begin transaction"))
-                && (input_str.starts_with("commit transaction"))
-                && (input_str.starts_with("cancel transaction"))
-        };
-
-        if is_likely_transaction_stmt(input) {
+        if is_likely_transaction_stmt {
             input.parse::<BeginTransactionStatement>()?;
         }
 
@@ -129,11 +113,11 @@ impl Parse for QueriesTurbo {
                     return_expr: return_stmt.expr,
                 }),
             });
-        } else if is_likely_transaction_stmt(input) {
+        } else if is_likely_transaction_stmt {
             let ending = input.parse::<TransactionEnding>()?;
+
             return Ok(QueriesTurbo {
                 inner: QueryTypeInner::Transaction(Transaction {
-                    begin_statement: true,
                     statements: queries_chain.statements,
                     transaction_ending: ending,
                 }),
@@ -154,24 +138,7 @@ pub fn query_turbo(input: TokenStream) -> TokenStream {
         QueryTypeInner::Chain(chain) => {
             let statements = chain.statements;
             let generated_code = generate_query_chain_code(&statements);
-
-            let query_chain = statements
-                .iter()
-                .enumerate()
-                .map(|(i, s)| {
-                    let is_first = i == 0;
-                    let to_chain = match s {
-                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                        StmtOrExpr::Expr(expr) => quote!(#expr),
-                    };
-
-                    if is_first {
-                        quote!(#crate_name::chain(#to_chain))
-                    } else {
-                        quote!(.chain(#to_chain))
-                    }
-                })
-                .collect::<Vec<_>>();
+            let query_chain = generated_bound_query_chain(&statements);
 
             quote! {
                 {
@@ -184,24 +151,7 @@ pub fn query_turbo(input: TokenStream) -> TokenStream {
         QueryTypeInner::Block(block) => {
             let statements = block.statements;
             let generated_code = generate_query_chain_code(&statements);
-
-            let query_chain = statements
-                .iter()
-                .enumerate()
-                .map(|(i, s)| {
-                    let is_first = i == 0;
-                    let to_chain = match s {
-                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                        StmtOrExpr::Expr(expr) => quote!(#expr),
-                    };
-
-                    if is_first {
-                        quote!(#crate_name::chain(#to_chain))
-                    } else {
-                        quote!(.chain(#to_chain))
-                    }
-                })
-                .collect::<Vec<_>>();
+            let query_chain = generated_bound_query_chain(&statements);
 
             let has_only_return = statements.len() == 0;
             let return_expr = block.return_expr;
@@ -227,24 +177,7 @@ pub fn query_turbo(input: TokenStream) -> TokenStream {
         QueryTypeInner::Transaction(transaction) => {
             let statements = transaction.statements;
             let generated_code = generate_query_chain_code(&statements);
-
-            let query_chain = statements
-                .iter()
-                .enumerate()
-                .map(|(i, s)| {
-                    let is_first = i == 0;
-                    let to_chain = match s {
-                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                        StmtOrExpr::Expr(expr) => quote!(#expr),
-                    };
-
-                    if is_first {
-                        quote!(#crate_name::chain(#to_chain))
-                    } else {
-                        quote!(.chain(#to_chain))
-                    }
-                })
-                .collect::<Vec<_>>();
+            let query_chain = generated_bound_query_chain(&statements);
 
             let ending = match transaction.transaction_ending {
                 TransactionEnding::Commit => quote!(.commit_transaction()),
@@ -316,7 +249,7 @@ struct Block {
 
 impl Parse for Block {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        let mut queries_input = input.parse::<QueriesChain>()?;
+        let queries_input = input.parse::<QueriesChain>()?;
         let return_stmt = input.parse::<ReturnStatement>()?;
 
         Ok(Block {
@@ -335,35 +268,8 @@ pub fn query_block(input: TokenStream) -> TokenStream {
 
     let crate_name = get_crate_name(false);
 
-    let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        StmtOrExpr::Statement(var_statement) => {
-            let LetStatement { ident, expr, .. } = var_statement;
-            quote! {
-                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
-            }
-        }
-        StmtOrExpr::Expr(expr) => quote! {
-            #expr;
-        },
-    });
-
-    let query_chain = statements
-        .iter()
-        .enumerate()
-        .map(|(i, s)| {
-            let is_first = i == 0;
-            let to_chain = match s {
-                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                StmtOrExpr::Expr(expr) => quote!(#expr),
-            };
-
-            if is_first {
-                quote!(#crate_name::chain(#to_chain))
-            } else {
-                quote!(.chain(#to_chain))
-            }
-        })
-        .collect::<Vec<_>>();
+    let generated_code = generate_query_chain_code(&statements);
+    let query_chain = generated_bound_query_chain(&statements);
 
     let has_only_return = statements.len() == 0;
     let whole_stmts = if has_only_return {
@@ -419,7 +325,6 @@ impl Parse for TransactionEnding {
 }
 
 struct Transaction {
-    begin_statement: bool,
     statements: Vec<StmtOrExpr>,
     transaction_ending: TransactionEnding,
 }
@@ -435,7 +340,7 @@ impl Parse for BeginTransactionStatement {
                 "expected 'begin' or 'BEGIN'",
             ));
         }
-        // input.parse::<Abstract>()?;
+
         let statement_ident = input.parse::<Ident>()?;
         if statement_ident.to_string().to_lowercase() != "transaction" {
             return Err(syn::Error::new_spanned(
@@ -451,11 +356,10 @@ impl Parse for BeginTransactionStatement {
 impl Parse for Transaction {
     fn parse(input: ParseStream) -> SynResult<Self> {
         input.parse::<BeginTransactionStatement>()?;
-        let mut queries_input = input.parse::<QueriesChain>()?;
+        let queries_input = input.parse::<QueriesChain>()?;
         let transaction_ending = input.parse::<TransactionEnding>()?;
 
         Ok(Transaction {
-            begin_statement: true,
             statements: queries_input.statements,
             transaction_ending,
         })
@@ -464,42 +368,15 @@ impl Parse for Transaction {
 
 pub fn query_transaction(input: TokenStream) -> TokenStream {
     let Transaction {
-        begin_statement,
         statements,
         transaction_ending,
     } = parse_macro_input!(input as Transaction);
 
     let crate_name = get_crate_name(false);
 
-    let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        StmtOrExpr::Statement(var_statement) => {
-            let LetStatement { ident, expr, .. } = var_statement;
-            quote! {
-                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
-            }
-        }
-        StmtOrExpr::Expr(expr) => quote! {
-            #expr;
-        },
-    });
+    let generated_code = generate_query_chain_code(&statements);
 
-    let query_chain = statements
-        .iter()
-        .enumerate()
-        .map(|(i, s)| {
-            let is_first = i == 0;
-            let to_chain = match s {
-                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                StmtOrExpr::Expr(expr) => quote!(#expr),
-            };
-
-            if is_first {
-                quote!(#crate_name::chain(#to_chain))
-            } else {
-                quote!(.chain(#to_chain))
-            }
-        })
-        .collect::<Vec<_>>();
+    let query_chain = generated_bound_query_chain(&statements);
 
     let ending = match transaction_ending {
         TransactionEnding::Commit => quote!(.commit_transaction()),
@@ -520,4 +397,27 @@ pub fn query_transaction(input: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+fn generated_bound_query_chain(statements: &Vec<StmtOrExpr>) -> Vec<proc_macro2::TokenStream> {
+    let crate_name = get_crate_name(false);
+
+    let query_chain = statements
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            let is_first = i == 0;
+            let to_chain = match s {
+                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                StmtOrExpr::Expr(expr) => quote!(#expr),
+            };
+
+            if is_first {
+                quote!(#crate_name::chain(#to_chain))
+            } else {
+                quote!(.chain(#to_chain))
+            }
+        })
+        .collect::<Vec<_>>();
+    query_chain
 }
