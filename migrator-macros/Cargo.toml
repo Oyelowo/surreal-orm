@@ -17,6 +17,7 @@ serde = { workspace = true }
 
 surreal-query-builder = { workspace = true }
 migrator = { workspace = true }
+proc-macros-helpers = { workspace = true }
 
 [lib]
 proc-macro = true

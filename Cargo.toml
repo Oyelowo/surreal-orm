@@ -8,7 +8,7 @@ members = [
   "migrator",
   "migrator-macros",
   "migrator-tests",
-  "proc-macro-helpers",
+  "proc-macros-helpers",
   "derive",
   "models",
   "orm-tests",
@@ -30,7 +30,7 @@ documentation = "https://codebreather.com/oyelowo"
 surreal-derive = { path = "derive" }
 surreal-orm = { path = "orm" }
 surreal-query-builder = { path = "query-builder" }
-proc-macro-helpers = { path = "proc-macro-helpers" }
+proc-macros-helpers = { path = "proc-macros-helpers" }
 query-builder-macros = { path = "query-builder-macros" }
 migrator = { path = "migrator" }
 migrator-macros = { path = "migrator-macros" }

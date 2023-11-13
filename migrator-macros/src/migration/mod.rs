@@ -79,8 +79,6 @@ fn generate_migration_code(
     }
 }
 
-use crate::models::get_crate_name;
-
 struct Args {
     args: Punctuated<Expr, Token![,]>,
 }
