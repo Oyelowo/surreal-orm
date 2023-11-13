@@ -29,29 +29,29 @@ impl Parse for LetStatement {
     }
 }
 
-enum Query {
+enum StmtOrExpr {
     Statement(LetStatement),
     Expr(Expr),
 }
 
-impl Parse for Query {
+impl Parse for StmtOrExpr {
     fn parse(input: ParseStream) -> SynResult<Self> {
         if input.peek(Token![let]) {
             let var_statement = input.parse::<LetStatement>()?;
-            Ok(Query::Statement(var_statement))
+            Ok(StmtOrExpr::Statement(var_statement))
         } else {
             let expr = input.parse::<Expr>()?;
             let _end: Token![;] = input.parse()?;
-            Ok(Query::Expr(expr))
+            Ok(StmtOrExpr::Expr(expr))
         }
     }
 }
 
-struct QueriesInput {
-    statements: Vec<Query>,
+struct QueriesChain {
+    statements: Vec<StmtOrExpr>,
 }
 
-impl Parse for QueriesInput {
+impl Parse for QueriesChain {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut statements = Vec::new();
 
@@ -75,90 +75,253 @@ impl Parse for QueriesInput {
             statements.push(input.parse()?);
         }
 
-        // while !input.is_empty() {
-        //     // Peek the next token, if it's an identifier, check if it's the specific keyword we're looking for
-        //     if input.peek(Ident) {
-        //         let ident: Ident = input.parse()?;
-        //         if ident == "begin" {
-        //             // Handle the 'begin' keyword
-        //             // You can add your logic here for what should happen when 'begin' is encountered
-        //             // ...
-        //             break;
-        //         } else if ident == "return" {
-        //             // Handle the 'return' keyword or break the loop, as per your requirement
-        //             break;
-        //         } else {
-        //             // If it's not 'begin' or 'return', parse other parts of the input normally
-        //             statements.push(input.parse()?);
-        //         }
-        //     } else {
-        //         // If the next token is not an identifier, parse the next part of the input normally
-        //         statements.push(input.parse()?);
-        //     }
-        // }
-        Ok(QueriesInput { statements })
+        Ok(QueriesChain { statements })
+    }
+}
+
+enum QueryType {
+    Chain,
+    Block,
+    Transaction,
+}
+
+enum QueryTypeInner {
+    Chain(QueriesChain),
+    Block(Block),
+    Transaction(Transaction),
+}
+
+struct QueriesTurbo {
+    // statements: Vec<StmtOrExpr>,
+    // query_type: QueryType,
+    inner: QueryTypeInner,
+}
+
+impl Parse for QueriesTurbo {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let is_likely_transaction_stmt = |input: &ParseBuffer<'_>| {
+            let input_str = input
+                .to_string()
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join(" ")
+                .to_lowercase();
+
+            (input.peek(Ident) && input.peek2(Ident) && input.peek3(Token![;]))
+                && (input_str.starts_with("begin transaction"))
+                && (input_str.starts_with("commit transaction"))
+                && (input_str.starts_with("cancel transaction"))
+        };
+
+        if is_likely_transaction_stmt(input) {
+            input.parse::<BeginTransactionStatement>()?;
+        }
+
+        let queries_chain = input.parse::<QueriesChain>()?;
+
+        let is_likely_block = |input: &ParseBuffer<'_>| input.peek(Token![return]);
+
+        if is_likely_block(input) {
+            let return_stmt = input.parse::<ReturnStatement>()?;
+            return Ok(QueriesTurbo {
+                inner: QueryTypeInner::Block(Block {
+                    statements: queries_chain.statements,
+                    return_expr: return_stmt.expr,
+                }),
+            });
+        } else if is_likely_transaction_stmt(input) {
+            let ending = input.parse::<TransactionEnding>()?;
+            return Ok(QueriesTurbo {
+                inner: QueryTypeInner::Transaction(Transaction {
+                    begin_statement: true,
+                    statements: queries_chain.statements,
+                    transaction_ending: ending,
+                }),
+            });
+        }
+
+        Ok(QueriesTurbo {
+            inner: QueryTypeInner::Chain(queries_chain),
+        })
     }
 }
 
 pub fn query_turbo(input: TokenStream) -> TokenStream {
-    let QueriesInput { statements } = parse_macro_input!(input as QueriesInput);
+    let QueriesTurbo { inner } = parse_macro_input!(input as QueriesTurbo);
+    let crate_name = get_crate_name(false);
+
+    let bound_queries = match inner {
+        QueryTypeInner::Chain(chain) => {
+            let statements = chain.statements;
+            let generated_code = generate_query_chain_code(&statements);
+
+            let query_chain = statements
+                .iter()
+                .enumerate()
+                .map(|(i, s)| {
+                    let is_first = i == 0;
+                    let to_chain = match s {
+                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                        StmtOrExpr::Expr(expr) => quote!(#expr),
+                    };
+
+                    if is_first {
+                        quote!(#crate_name::chain(#to_chain))
+                    } else {
+                        quote!(.chain(#to_chain))
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            quote! {
+                {
+                #( #generated_code )*
+
+                #( #query_chain )*
+                }
+            }
+        }
+        QueryTypeInner::Block(block) => {
+            let statements = block.statements;
+            let generated_code = generate_query_chain_code(&statements);
+
+            let query_chain = statements
+                .iter()
+                .enumerate()
+                .map(|(i, s)| {
+                    let is_first = i == 0;
+                    let to_chain = match s {
+                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                        StmtOrExpr::Expr(expr) => quote!(#expr),
+                    };
+
+                    if is_first {
+                        quote!(#crate_name::chain(#to_chain))
+                    } else {
+                        quote!(.chain(#to_chain))
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            let has_only_return = statements.len() == 0;
+            let return_expr = block.return_expr;
+
+            let chained_bound_stmts = if has_only_return {
+                quote!(#crate_name::statements::return_(#return_expr).as_block())
+            } else {
+                quote!(
+                        #( #query_chain )*
+                        .chain(#crate_name::statements::return_(#return_expr)).as_block()
+                )
+            };
+
+            quote! {
+                {
+                    #( #generated_code )*
+
+                    #chained_bound_stmts
+                }
+            }
+            .into()
+        }
+        QueryTypeInner::Transaction(transaction) => {
+            let statements = transaction.statements;
+            let generated_code = generate_query_chain_code(&statements);
+
+            let query_chain = statements
+                .iter()
+                .enumerate()
+                .map(|(i, s)| {
+                    let is_first = i == 0;
+                    let to_chain = match s {
+                        StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                        StmtOrExpr::Expr(expr) => quote!(#expr),
+                    };
+
+                    if is_first {
+                        quote!(#crate_name::chain(#to_chain))
+                    } else {
+                        quote!(.chain(#to_chain))
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            let ending = match transaction.transaction_ending {
+                TransactionEnding::Commit => quote!(.commit_transaction()),
+                TransactionEnding::Cancel => quote!(.cancel_transaction()),
+            };
+            let transaction = quote! {
+                #crate_name::statements::begin_transaction()
+                .query(#( #query_chain) *)
+                #ending
+            };
+
+            quote! {
+                {
+                    #( #generated_code )*
+
+                    #transaction
+
+                }
+            }
+            .into()
+        }
+    };
+
+    bound_queries.into()
+}
+
+fn generate_query_chain_code(statements: &Vec<StmtOrExpr>) -> Vec<proc_macro2::TokenStream> {
     let crate_name = get_crate_name(false);
 
     let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        Query::Statement(var_statement) => {
+        StmtOrExpr::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
                 let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
-        Query::Expr(expr) => quote! {
+        StmtOrExpr::Expr(expr) => quote! {
             #expr;
         },
-    });
+    }).collect::<Vec<_>>();
 
-    let query_chain = statements
-        .iter()
-        .enumerate()
-        .map(|(i, s)| {
-            let is_first = i == 0;
-            let to_chain = match s {
-                Query::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                Query::Expr(expr) => quote!(#expr),
-            };
+    generated_code
+}
 
-            if is_first {
-                quote!(#crate_name::chain(#to_chain))
-            } else {
-                quote!(.chain(#to_chain))
-            }
+struct ReturnStatement {
+    _return: Token![return],
+    expr: Expr,
+    _ending: Token![;],
+}
+
+impl Parse for ReturnStatement {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let _return: Token![return] = input.parse()?;
+        let expr = input.parse::<Expr>()?;
+        let _ending: Token![;] = input.parse()?;
+
+        Ok(ReturnStatement {
+            _return,
+            expr,
+            _ending,
         })
-        .collect::<Vec<_>>();
-
-    quote! {
-        {
-        #( #generated_code )*
-
-        #( #query_chain )*
-        }
     }
-    .into()
 }
 
 struct Block {
-    statements: Vec<Query>,
+    statements: Vec<StmtOrExpr>,
     return_expr: Expr,
 }
 
 impl Parse for Block {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        let mut queries_input = input.parse::<QueriesInput>()?;
-        let return_token: Token![return] = input.parse()?;
-        let return_expr = input.parse::<Expr>()?;
-        let _ending_colon = input.parse::<Token![;]>();
+        let mut queries_input = input.parse::<QueriesChain>()?;
+        let return_stmt = input.parse::<ReturnStatement>()?;
 
         Ok(Block {
             statements: queries_input.statements,
-            return_expr,
+            return_expr: return_stmt.expr,
         })
     }
 }
@@ -173,13 +336,13 @@ pub fn query_block(input: TokenStream) -> TokenStream {
     let crate_name = get_crate_name(false);
 
     let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        Query::Statement(var_statement) => {
+        StmtOrExpr::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
                 let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
-        Query::Expr(expr) => quote! {
+        StmtOrExpr::Expr(expr) => quote! {
             #expr;
         },
     });
@@ -190,8 +353,8 @@ pub fn query_block(input: TokenStream) -> TokenStream {
         .map(|(i, s)| {
             let is_first = i == 0;
             let to_chain = match s {
-                Query::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                Query::Expr(expr) => quote!(#expr),
+                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                StmtOrExpr::Expr(expr) => quote!(#expr),
             };
 
             if is_first {
@@ -257,11 +420,13 @@ impl Parse for TransactionEnding {
 
 struct Transaction {
     begin_statement: bool,
-    statements: Vec<Query>,
+    statements: Vec<StmtOrExpr>,
     transaction_ending: TransactionEnding,
 }
 
-impl Parse for Transaction {
+struct BeginTransactionStatement;
+
+impl Parse for BeginTransactionStatement {
     fn parse(input: ParseStream) -> SynResult<Self> {
         let begin_statement = input.parse::<Ident>()?;
         if begin_statement.to_string().to_lowercase() != "begin" {
@@ -279,8 +444,14 @@ impl Parse for Transaction {
             ));
         }
         input.parse::<Token![;]>()?;
+        Ok(Self)
+    }
+}
 
-        let mut queries_input = input.parse::<QueriesInput>()?;
+impl Parse for Transaction {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        input.parse::<BeginTransactionStatement>()?;
+        let mut queries_input = input.parse::<QueriesChain>()?;
         let transaction_ending = input.parse::<TransactionEnding>()?;
 
         Ok(Transaction {
@@ -301,13 +472,13 @@ pub fn query_transaction(input: TokenStream) -> TokenStream {
     let crate_name = get_crate_name(false);
 
     let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        Query::Statement(var_statement) => {
+        StmtOrExpr::Statement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
                 let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
-        Query::Expr(expr) => quote! {
+        StmtOrExpr::Expr(expr) => quote! {
             #expr;
         },
     });
@@ -318,8 +489,8 @@ pub fn query_transaction(input: TokenStream) -> TokenStream {
         .map(|(i, s)| {
             let is_first = i == 0;
             let to_chain = match s {
-                Query::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                Query::Expr(expr) => quote!(#expr),
+                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                StmtOrExpr::Expr(expr) => quote!(#expr),
             };
 
             if is_first {
