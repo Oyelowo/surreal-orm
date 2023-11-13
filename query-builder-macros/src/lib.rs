@@ -1,3 +1,7 @@
+use proc_macro::TokenStream;
+use surrealdb::sql;
+use syn::{parse_macro_input, LitStr};
+
 mod query;
 mod query_builder;
 
@@ -57,19 +61,30 @@ pub fn transaction(input: TokenStream) -> TokenStream {
 ///    });
 /// });
 /// ```
-#[macro_export]
-macro_rules! for_loop {
-    (($param:ident in $iterable:expr) { $($stmt:expr;)+ }) => {{
-        let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::block! {
-            $($stmt;)+
-        })
-    }};
-    (($param:ident IN $iterable:expr) { $($stmt:expr;)+ }) => {{
-        let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::block! {
-            $($stmt;)+
-        })
-    }};
-}
-pub use for_loop as for_;
+fn placeholder() {}
+// #[macro_use]
+// macro_rules! for_loop {
+//     (($param:ident in $iterable:expr) { $($stmt:expr;)+ }) => {{
+//         let ref $param = $crate::Param::new(stringify!($param));
+//         $crate::statements::for_($param).in_($iterable).block($crate::block! {
+//             $($stmt;)+
+//         })
+//     }};
+//     (($param:ident IN $iterable:expr) { $($stmt:expr;)+ }) => {{
+//         let ref $param = $crate::Param::new(stringify!($param));
+//             $crate::statements::for_($param).in_($iterable).block($crate::block! {
+//                 $($stmt;)+
+//         })
+//     }};
+// }
+//
+// //
+// // // pub use for_loop as for_;
+// #[proc_macro]
+// pub fn for_(input: TokenStream) -> TokenStream {
+//     for_fn(input.into()).into()
+// }
+//
+// fn for_fn(input: TokenStream) -> TokenStream {
+//     for_loop!(#input).into()
+// }
