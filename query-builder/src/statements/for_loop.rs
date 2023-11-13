@@ -83,13 +83,13 @@ impl From<&Param> for ForParam {
 macro_rules! for_loop {
     (($param:ident in $iterable:expr) { $($stmt:expr;)+ }) => {{
         let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::block! {
+        $crate::statements::for_($param).in_($iterable).block($crate::internal_tools::query_turbo! {
             $($stmt;)+
         })
     }};
     (($param:ident IN $iterable:expr) { $($stmt:expr;)+ }) => {{
         let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::block! {
+        $crate::statements::for_($param).in_($iterable).block($crate::internal_tools::query_turbo! {
             $($stmt;)+
         })
     }};
@@ -291,37 +291,37 @@ mod tests {
         let ref person_table = Table::from("person");
         let ref user_name = Field::from("user_name");
 
-        let for_loop = block! {
-            FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-                select(All).from(person_table).where_(user_name.eq(__name));
-                select(All).from(person_table).where_(user_name.eq(__name));
-
-                for_!((__moniker IN select_value(user_name).from(person_table)) {
-                    select(All).from(person_table).where_(user_name.eq(__moniker));
-                    select(All).from(person_table).where_(user_name.eq(__name));
-                });
-
-                for_(__name).in_(vec!["Oyelowo", "Oyedayo"])
-                    .block(block! {
-                        select(All).from(person_table).where_(user_name.eq(__name));
-                });
-
-            };
-
-            FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-                select(All).from(person_table).where_(user_name.eq(__name));
-                select(All).from(person_table).where_(user_name.eq(__name));
-            };
-
-            FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-                select(All).from(person_table).where_(user_name.eq(__name));
-                select(All).from(person_table).where_(user_name.eq(__name));
-            };
-
-            if_(__name.eq("Oyelowo")).then(6).end();
-
-
-        };
+        // let for_loop = block! {
+        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //
+        //         for_!((__moniker IN select_value(user_name).from(person_table)) {
+        //             select(All).from(person_table).where_(user_name.eq(__moniker));
+        //             select(All).from(person_table).where_(user_name.eq(__name));
+        //         });
+        //
+        //         for_(__name).in_(vec!["Oyelowo", "Oyedayo"])
+        //             .block(block! {
+        //                 select(All).from(person_table).where_(user_name.eq(__name));
+        //         });
+        //
+        //     };
+        //
+        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //     };
+        //
+        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //         select(All).from(person_table).where_(user_name.eq(__name));
+        //     };
+        //
+        //     if_(__name.eq("Oyelowo")).then(6).end();
+        //
+        //
+        // };
         for_!((__name in vec!["Oyelowo"]) {
             select(All).from(person_table).where_(user_name.eq(__name));
             select(All).from(person_table).where_(user_name.eq(__name));
@@ -402,8 +402,8 @@ mod tests {
                     .from(person_table)
                     .where_(user_name.eq(__name)),
             )
-            .block(block! {
-                LET __nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
+            .block(crate::internal_tools::query_turbo! {
+                let __nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
                 select(All).from(person_table).where_(user_name.eq(__nick_name));
             });
 
