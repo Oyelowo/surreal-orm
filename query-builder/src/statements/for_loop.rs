@@ -61,41 +61,6 @@ impl From<&Param> for ForParam {
     }
 }
 
-/// A helper function to create a for loop
-/// ```
-/// use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::{for_, select, select_value}};
-///
-/// let ref person_table = Table::from("person");
-/// let ref user_name = Field::from("user_name");
-///
-/// for_!((name in vec!["Oyelowo", "Oyedayo"]) {
-///    select(All).from(person_table).where_(user_name.eq(name));
-///    select(All).from(person_table).where_(user_name.eq(name));
-///
-///    for_!((name in select_value(user_name).from_only(person_table)) {
-///         select(All).from(person_table).where_(user_name.eq(name));
-///         select(All).from(person_table).where_(user_name.eq(name));
-///    });
-/// });
-/// ```
-#[macro_export]
-macro_rules! for_loop {
-    (($param:ident in $iterable:expr) { $($stmt:expr;)+ }) => {{
-        let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::internal_tools::query_turbo! {
-            $($stmt;)+
-        })
-    }};
-    (($param:ident IN $iterable:expr) { $($stmt:expr;)+ }) => {{
-        let ref $param = $crate::Param::new(stringify!($param));
-        $crate::statements::for_($param).in_($iterable).block($crate::internal_tools::query_turbo! {
-            $($stmt;)+
-        })
-    }};
-}
-pub use for_loop as for_;
-
 // #[macro_export]
 // macro_rules! for_ {
 //     ($param:ident in $iterable:expr; $block:block) => {{
@@ -241,7 +206,7 @@ impl fmt::Display for ForLoopStatement {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::for_;
     use crate::{
         statements::{
             if_,
@@ -249,103 +214,6 @@ mod tests {
         },
         *,
     };
-
-    #[test]
-    fn test_for_macro() {
-        let ref person_table = Table::from("person");
-        let ref user_name = Field::from("user_name");
-
-        let for_loop = for_!((name in vec!["Oyelowo", "Oyedayo"]) {
-            select(All).from(person_table).where_(user_name.eq(name));
-        });
-
-        assert_eq!(
-            for_loop.fine_tune_params(),
-            "FOR $name IN $_param_00000001 {\nSELECT * FROM person WHERE user_name = $name;\n};"
-        );
-        assert_eq!(
-            for_loop.to_raw().build(),
-            "FOR $name IN ['Oyelowo', 'Oyedayo'] {\nSELECT * FROM person WHERE user_name = $name;\n};"
-        );
-    }
-
-    #[test]
-    fn test_for_macro_nested() {
-        let ref __name = Param::new("name");
-        let ref person_table = Table::from("person");
-        let ref user_name = Field::from("user_name");
-
-        let for_loop = for_!((__name in vec!["Oyelowo", "Oyedayo"]) {
-            select(All).from(person_table).where_(user_name.eq(__name));
-            for_!((__name in vec!["Oyelowo", "Oyedayo"]) {
-                select(All).from(person_table).where_(user_name.eq(__name));
-            });
-        });
-
-        insta::assert_snapshot!(for_loop.fine_tune_params());
-        insta::assert_snapshot!(for_loop.to_raw().build());
-    }
-
-    #[test]
-    fn test_for_macro_and_block_macro() {
-        let ref person_table = Table::from("person");
-        let ref user_name = Field::from("user_name");
-
-        // let for_loop = block! {
-        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //
-        //         for_!((__moniker IN select_value(user_name).from(person_table)) {
-        //             select(All).from(person_table).where_(user_name.eq(__moniker));
-        //             select(All).from(person_table).where_(user_name.eq(__name));
-        //         });
-        //
-        //         for_(__name).in_(vec!["Oyelowo", "Oyedayo"])
-        //             .block(block! {
-        //                 select(All).from(person_table).where_(user_name.eq(__name));
-        //         });
-        //
-        //     };
-        //
-        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //     };
-        //
-        //     FOR (__name IN vec!["Oyelowo", "Oyedayo"]) {
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //         select(All).from(person_table).where_(user_name.eq(__name));
-        //     };
-        //
-        //     if_(__name.eq("Oyelowo")).then(6).end();
-        //
-        //
-        // };
-        for_!((__name in vec!["Oyelowo"]) {
-            select(All).from(person_table).where_(user_name.eq(__name));
-            select(All).from(person_table).where_(user_name.eq(__name));
-
-            for_!((__name in vec!["Oyelowo"]) {
-                select(All).from(person_table).where_(user_name.eq(__name));
-                select(All).from(person_table).where_(user_name.eq(__name));
-
-                for_!((__name in vec!["Oyelowo"]) {
-                    select(All).from(person_table).where_(user_name.eq(__name));
-                    select(All).from(person_table).where_(user_name.eq(__name));
-                });
-
-                for_!((__name in vec!["Oyelowo"]) {
-                    select(All).from(person_table).where_(user_name.eq(__name));
-                    select(All).from(person_table).where_(user_name.eq(__name));
-                });
-
-            });
-        });
-
-        insta::assert_snapshot!(for_loop.fine_tune_params());
-        insta::assert_snapshot!(for_loop.to_raw().build());
-    }
 
     #[test]
     fn test_for_in_block() {

@@ -26,7 +26,5 @@ insta = { workspace = true }
 nom = { workspace = true }
 pretty_assertions = { workspace = true }
 
-query-builder-macros = { workspace = true }
-
 [lib]
 doctest = true
