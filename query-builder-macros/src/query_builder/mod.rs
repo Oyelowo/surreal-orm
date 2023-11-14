@@ -6,6 +6,8 @@ pub(crate) mod return_statment;
 pub(crate) mod statement_or_expr;
 pub(crate) mod transaction;
 
+use std::ops::Deref;
+
 pub use block::query_block;
 pub use for_loop::for_loop;
 pub use query_turbo::query_turbo;
@@ -22,7 +24,7 @@ use proc_macros_helpers::get_crate_name;
 
 use crate::query_builder::statement_or_expr::LetStatement;
 
-use self::statement_or_expr::StmtOrExpr;
+use self::{for_loop::tokenize_for_loop, statement_or_expr::StmtOrExpr};
 
 pub(crate) fn generate_query_chain_code(
     statements: &Vec<StmtOrExpr>,
@@ -38,6 +40,9 @@ pub(crate) fn generate_query_chain_code(
         }
         StmtOrExpr::Expr(expr) => quote! {
             #expr;
+        },
+        StmtOrExpr::ForLoop(for_loop_content) => { 
+            tokenize_for_loop(for_loop_content.deref()).query_chain.into() 
         },
     }).collect::<Vec<_>>();
 
@@ -57,6 +62,7 @@ pub(crate) fn generated_bound_query_chain(
             let to_chain = match s {
                 StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
                 StmtOrExpr::Expr(expr) => quote!(#expr),
+                StmtOrExpr::ForLoop(for_loop_content) => tokenize_for_loop(for_loop_content.deref()).query_chain.into(),
             };
 
             if is_first {

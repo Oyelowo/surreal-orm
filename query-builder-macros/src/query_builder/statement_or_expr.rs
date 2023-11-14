@@ -7,6 +7,8 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
+use super::for_loop::ForLoopSemiRaw;
+
 pub(crate) struct LetStatement {
     pub ident: Ident,
     pub _eq: Token![=],
@@ -29,6 +31,7 @@ impl Parse for LetStatement {
 pub(crate) enum StmtOrExpr {
     Statement(LetStatement),
     Expr(Expr),
+    ForLoop(ForLoopSemiRaw),
 }
 
 impl Parse for StmtOrExpr {
@@ -36,6 +39,9 @@ impl Parse for StmtOrExpr {
         if input.peek(Token![let]) {
             let var_statement = input.parse::<LetStatement>()?;
             Ok(StmtOrExpr::Statement(var_statement))
+        } else if input.peek(Token![for]) {
+            let for_loop = input.parse::<ForLoopSemiRaw>()?;
+            Ok(StmtOrExpr::ForLoop(for_loop))
         } else {
             let expr = input.parse::<Expr>()?;
             let _end: Token![;] = input.parse()?;

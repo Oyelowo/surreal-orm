@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use surrealdb::sql;
+use surreal_query_builder::sql;
 use syn::{parse_macro_input, LitStr};
 
 mod query;
