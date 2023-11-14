@@ -9,7 +9,7 @@ use syn::{
 
 use super::query_chain::QueriesChain;
 
-struct ForLoop {
+pub struct ForLoop {
     iteration_param: Ident,
     iterable: Expr,
     body: QueriesChain,
@@ -21,58 +21,115 @@ impl Parse for ForLoop {
         let iter_content = if input.peek(token::Paren) {
             let iter_content;
             let _paranthesized_iter_content_token = syn::parenthesized!(iter_content in input);
-            &iter_content
+            let iteration_param = iter_content.parse()?;
+
+            iter_content.parse::<syn::Token![in]>()?;
+
+            let iterable = iter_content.parse()?;
+            // The body
+            let content;
+            let _brace_token: Brace = syn::braced!(content in input);
+
+            let body = content.parse()?;
+
+            input.parse::<syn::Token![;]>()?;
+
+            return Ok(ForLoop {
+                iteration_param,
+                iterable,
+                body,
+            });
         } else {
-            input
+            let iteration_param = input.parse()?;
+
+            input.parse::<syn::Token![in]>()?;
+
+            let iterable = input.parse()?;
+            // The body
+            let content;
+            let _brace_token: Brace = syn::braced!(content in input);
+
+            let body = content.parse()?;
+
+            input.parse::<syn::Token![;]>()?;
+
+            return Ok(ForLoop {
+                iteration_param,
+                iterable,
+                body,
+            });
         };
-
-        let iteration_param = iter_content.parse()?;
-
-        iter_content.parse::<syn::Token![in]>()?;
-
-        let iterable = iter_content.parse()?;
-        // The body
-        let content;
-        let _brace_token: Brace = syn::braced!(content in input);
-
-        let body = content.parse()?;
-
-        input.parse::<syn::Token![;]>()?;
-
-        Ok(ForLoop {
-            iteration_param,
-            iterable,
-            body,
-        })
     }
 }
 
-pub fn for_loop(input: TokenStream) -> TokenStream {
+pub struct ForLoopSemiRaw(ForLoop);
+
+impl std::ops::Deref for ForLoopSemiRaw {
+    type Target = ForLoop;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+// impl ForLoopSemiRaw {
+//     pub fn into_inner(&self) -> &ForLoop {
+//         &self.0
+//     }
+// }
+
+impl Parse for ForLoopSemiRaw {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        input.parse::<syn::Token![for]>()?;
+        let for_loop = input.parse::<ForLoop>()?;
+        Ok(ForLoopSemiRaw(for_loop))
+    }
+}
+
+pub struct TokenizedForLoop {
+    pub code_to_render: TokenStream,
+    pub query_chain: TokenStream,
+}
+
+pub fn tokenize_for_loop(for_loop_content: &ForLoop) -> TokenizedForLoop {
     let ForLoop {
         iteration_param,
         iterable,
         body,
-    } = syn::parse_macro_input!(input as ForLoop);
+    } = for_loop_content;
 
     let generated_code = super::generate_query_chain_code(&body.statements);
     let query_chain = super::generated_bound_query_chain(&body.statements);
 
     let crate_name = super::get_crate_name(false);
 
+    let iteration_param = iteration_param.to_string();
     let whole_stmts = quote!(#crate_name::statements::for_(#iteration_param).in_(#iterable)
     .block(
         #( #query_chain )*
         .parenthesized()
     ));
 
-    quote! {
+    let to_render = quote! {
         {
             #( #generated_code )*
 
             #whole_stmts
         }
     }
-    .into()
+    .into();
+    let to_chain = quote!(#whole_stmts);
+
+    TokenizedForLoop {
+        code_to_render: to_render,
+        query_chain: to_chain.into(),
+    }
+}
+
+pub fn for_loop(input: TokenStream) -> TokenStream {
+    let for_loop_content = syn::parse_macro_input!(input as ForLoop);
+
+    tokenize_for_loop(&for_loop_content).code_to_render
 }
 ///
 /// A helper function to create a for loop

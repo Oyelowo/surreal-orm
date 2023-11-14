@@ -36,6 +36,11 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 amount: amount_to_transfer,
             });
 
+        for name in vec!["Oyelowo", "Oyedayo"] {
+            select(All).from(acc).where_(acc.user_name.eq(name));
+            select(All).from(acc).where_(acc.user_name.eq(name));
+        };
+
          let  balance3 = create().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
