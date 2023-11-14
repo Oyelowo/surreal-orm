@@ -3,8 +3,8 @@ use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token::Brace,
-    Expr, Ident,
+    token::{self, Brace},
+    Expr, Ident, Token,
 };
 
 use super::query_chain::QueriesChain;
@@ -18,15 +18,19 @@ struct ForLoop {
 impl Parse for ForLoop {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         // The iteration parameter and the iterable in the start of the for loop
-        let iter_content;
-        let _paranthesized_iter_content_token = syn::parenthesized!(iter_content in input);
+        let iter_content = if input.peek(token::Paren) {
+            let iter_content;
+            let _paranthesized_iter_content_token = syn::parenthesized!(iter_content in input);
+            &iter_content
+        } else {
+            input
+        };
 
         let iteration_param = iter_content.parse()?;
 
         iter_content.parse::<syn::Token![in]>()?;
 
         let iterable = iter_content.parse()?;
-
         // The body
         let content;
         let _brace_token: Brace = syn::braced!(content in input);
@@ -79,7 +83,7 @@ pub fn for_loop(input: TokenStream) -> TokenStream {
 /// let ref person_table = Table::from("person");
 /// let ref user_name = Field::from("user_name");
 ///
-/// for_!((name in vec!["Oyelowo", "Oyedayo"]) {
+/// for_!(name in vec!["Oyelowo", "Oyedayo"] {
 ///    select(All).from(person_table).where_(user_name.eq(name));
 ///    select(All).from(person_table).where_(user_name.eq(name));
 ///
