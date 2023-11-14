@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
@@ -9,13 +9,13 @@ use syn::{
 
 use super::query_chain::QueriesChain;
 
-pub struct ForLoop {
+pub struct ForLoopMeta {
     iteration_param: Ident,
     iterable: Expr,
     body: QueriesChain,
 }
 
-impl Parse for ForLoop {
+impl Parse for ForLoopMeta {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         // The iteration parameter and the iterable in the start of the for loop
         let iter_content = if input.peek(token::Paren) {
@@ -34,7 +34,7 @@ impl Parse for ForLoop {
 
             input.parse::<syn::Token![;]>()?;
 
-            return Ok(ForLoop {
+            return Ok(ForLoopMeta {
                 iteration_param,
                 iterable,
                 body,
@@ -53,7 +53,7 @@ impl Parse for ForLoop {
 
             input.parse::<syn::Token![;]>()?;
 
-            return Ok(ForLoop {
+            return Ok(ForLoopMeta {
                 iteration_param,
                 iterable,
                 body,
@@ -62,27 +62,21 @@ impl Parse for ForLoop {
     }
 }
 
-pub struct ForLoopSemiRaw(ForLoop);
+pub struct ForLoop(ForLoopMeta);
 
-impl std::ops::Deref for ForLoopSemiRaw {
-    type Target = ForLoop;
+impl std::ops::Deref for ForLoop {
+    type Target = ForLoopMeta;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-// impl ForLoopSemiRaw {
-//     pub fn into_inner(&self) -> &ForLoop {
-//         &self.0
-//     }
-// }
-
-impl Parse for ForLoopSemiRaw {
+impl Parse for ForLoop {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<syn::Token![for]>()?;
-        let for_loop = input.parse::<ForLoop>()?;
-        Ok(ForLoopSemiRaw(for_loop))
+        let for_loop = input.parse::<ForLoopMeta>()?;
+        Ok(ForLoop(for_loop))
     }
 }
 
@@ -91,8 +85,35 @@ pub struct TokenizedForLoop {
     pub query_chain: TokenStream,
 }
 
-pub fn tokenize_for_loop(for_loop_content: &ForLoop) -> TokenizedForLoop {
-    let ForLoop {
+// fn unique_ident2(name: &str) -> Ident {
+//     // Using `Span::call_site` for macro hygiene
+//     let unique_suffix = proc_macro2::Span::call_site();
+//     Ident::new(
+//         &format!("{}_{}", name, unique_suffix),
+//         proc_macro2::Span::call_site(),
+//     )
+// }
+// fn unique_ident(name: &str) -> Ident {
+//     let unique_suffix = proc_macro2::Span::mixed_site().unwrap();
+//     Ident::new(
+//         &format!("{}_{}", name, unique_suffix),
+//         proc_macro2::Span::call_site(),
+//     )
+// }
+
+pub fn generate_variable_name() -> Ident {
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+    let crate_name = super::get_crate_name(false);
+    let mut param =
+        format_ident!("_{crate_name}__private__internal_variable_prefix__{sanitized_uuid}");
+
+    // param.truncate(15);
+
+    param
+}
+
+pub fn tokenize_for_loop(for_loop_content: &ForLoopMeta) -> TokenizedForLoop {
+    let ForLoopMeta {
         iteration_param,
         iterable,
         body,
@@ -103,12 +124,18 @@ pub fn tokenize_for_loop(for_loop_content: &ForLoop) -> TokenizedForLoop {
 
     let crate_name = super::get_crate_name(false);
 
-    let iteration_param = iteration_param.to_string();
-    let whole_stmts = quote!(#crate_name::statements::for_(#iteration_param).in_(#iterable)
-    .block(
-        #( #query_chain )*
-        .parenthesized()
-    ));
+    let whole_stmts = quote!(
+    {
+        let #iteration_param = #crate_name::Param::new(stringify!(#iteration_param));
+
+        #( #generated_code )*
+
+        #crate_name::statements::for_(#iteration_param).in_(#iterable)
+        .block(
+            #( #query_chain )*
+            .parenthesized()
+        )
+    });
 
     let to_render = quote! {
         {
@@ -127,9 +154,19 @@ pub fn tokenize_for_loop(for_loop_content: &ForLoop) -> TokenizedForLoop {
 }
 
 pub fn for_loop(input: TokenStream) -> TokenStream {
-    let for_loop_content = syn::parse_macro_input!(input as ForLoop);
+    let for_loop_content = syn::parse_macro_input!(input as ForLoopMeta);
 
-    tokenize_for_loop(&for_loop_content).code_to_render
+    let z = tokenize_for_loop(&for_loop_content);
+    let to_render: proc_macro2::TokenStream = z.code_to_render.into();
+    let to_chain: proc_macro2::TokenStream = z.query_chain.into();
+
+    quote!(
+        #to_render
+
+        #to_chain
+
+    )
+    .into()
 }
 ///
 /// A helper function to create a for loop

@@ -38,11 +38,17 @@ pub(crate) fn generate_query_chain_code(
                 let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
             }
         }
-        StmtOrExpr::Expr(expr) => quote! {
-            #expr;
+        StmtOrExpr::Expr {expr, generated_ident} => quote! {
+            let #generated_ident = #expr;
         },
-        StmtOrExpr::ForLoop(for_loop_content) => { 
-            tokenize_for_loop(for_loop_content.deref()).query_chain.into() 
+        StmtOrExpr::ForLoop {for_loop: for_loop_content, generated_ident} => { 
+            let tokenized = tokenize_for_loop(for_loop_content.deref());
+            let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
+            let to_render: proc_macro2::TokenStream = tokenized.code_to_render.into();
+            quote!(
+
+            let #generated_ident = #query_chain;
+        )
         },
     }).collect::<Vec<_>>();
 
@@ -61,8 +67,8 @@ pub(crate) fn generated_bound_query_chain(
             let is_first = i == 0;
             let to_chain = match s {
                 StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
-                StmtOrExpr::Expr(expr) => quote!(#expr),
-                StmtOrExpr::ForLoop(for_loop_content) => tokenize_for_loop(for_loop_content.deref()).query_chain.into(),
+                StmtOrExpr::Expr{generated_ident, ..} => quote!(#generated_ident),
+                StmtOrExpr::ForLoop{generated_ident, ..} => quote!(#generated_ident),
             };
 
             if is_first {
