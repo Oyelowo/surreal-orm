@@ -114,7 +114,8 @@ impl QueryChain {
         self
     }
 
-    pub fn paranthesized(mut self) -> Self {
+    /// Surrounds the query chain with a parenthesis.
+    pub fn parenthesized(mut self) -> Self {
         self.paranthesized = true;
         self
     }
