@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{
@@ -83,33 +84,6 @@ impl Parse for ForLoop {
 pub struct TokenizedForLoop {
     pub code_to_render: TokenStream,
     pub query_chain: TokenStream,
-}
-
-// fn unique_ident2(name: &str) -> Ident {
-//     // Using `Span::call_site` for macro hygiene
-//     let unique_suffix = proc_macro2::Span::call_site();
-//     Ident::new(
-//         &format!("{}_{}", name, unique_suffix),
-//         proc_macro2::Span::call_site(),
-//     )
-// }
-// fn unique_ident(name: &str) -> Ident {
-//     let unique_suffix = proc_macro2::Span::mixed_site().unwrap();
-//     Ident::new(
-//         &format!("{}_{}", name, unique_suffix),
-//         proc_macro2::Span::call_site(),
-//     )
-// }
-
-pub fn generate_variable_name() -> Ident {
-    let sanitized_uuid = uuid::Uuid::new_v4().simple();
-    let crate_name = super::get_crate_name(false);
-    let mut param =
-        format_ident!("_{crate_name}__private__internal_variable_prefix__{sanitized_uuid}");
-
-    // param.truncate(15);
-
-    param
 }
 
 pub fn tokenize_for_loop(for_loop_content: &ForLoopMeta) -> TokenizedForLoop {

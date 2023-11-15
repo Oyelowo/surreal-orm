@@ -7,7 +7,7 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
-use super::for_loop::{generate_variable_name, ForLoop};
+use super::{for_loop::ForLoop, generate_variable_name};
 
 pub(crate) struct LetStatement {
     pub ident: Ident,
