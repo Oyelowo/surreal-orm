@@ -7,7 +7,7 @@ pub fn generate_variable_name() -> Ident {
     let sanitized_uuid = uuid::Uuid::new_v4().simple();
     let crate_name = get_crate_name(false);
     let name = format!("_{crate_name}__private__internal_variable_prefix__{sanitized_uuid}")
-        .to_case(Case::Camel);
+        .to_case(Case::Snake);
     let mut param = format_ident!("{name}");
 
     // param.truncate(15);

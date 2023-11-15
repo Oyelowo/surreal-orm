@@ -104,6 +104,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
+    // let zxx = {};
 
     transaction! {
         BEGIN TRANSACTION;
@@ -113,7 +114,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 amount: amount_to_transfer,
             });
 
-        let acc1 = create().content(Account {
+         create().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         });

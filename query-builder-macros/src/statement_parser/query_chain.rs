@@ -134,6 +134,7 @@ impl QueriesChainParser {
     let query_chain = query_chain
         .iter()
         .enumerate()
+        .filter(|(_, var_ident)| !var_ident.is_empty())
         .map(|(i, var_ident)| {
             let is_first = i == 0;
 
