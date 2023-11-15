@@ -7,33 +7,29 @@ use syn::{
     parse_macro_input, Expr, Ident, Result as SynResult, Token,
 };
 
+use crate::query_builder::generate_variable_name;
 use proc_macros_helpers::get_crate_name;
 
 use super::{
-    for_loop::ForLoop,
-    generate_variable_name,
-    statement_parser::{
-        BeginTransactionStatement, CancelTransactionStatement, CommitTransactionStatement,
-        LetStatement, ReturnStatement,
+    for_::ForLoopStatementParser,
+    let_::LetStatementParser,
+    return_::ReturnStatementParser,
+    transaction::{
+        BeginTransactionStatementParser, CancelTransactionStatementParser,
+        CommitTransactionStatementParser,
     },
 };
 
-pub(crate) enum Query {
-    LetStatement(LetStatement),
-    ForLoop {
-        generated_ident: Ident,
-        for_loop: ForLoop,
-    },
+pub(crate) enum QueryParser {
+    LetStatement(LetStatementParser),
+    ForLoop(ForLoopStatementParser),
     BeginTransaction,
     CommitTransaction,
     CancelTransaction,
-    ReturnStatement(ReturnStatement),
+    ReturnStatement(ReturnStatementParser),
     BreakStatement,
     ContinueStatement,
-    Expr {
-        generated_ident: Ident,
-        expr: Expr,
-    },
+    Expr { generated_ident: Ident, expr: Expr },
 }
 
 #[derive(Debug, PartialEq)]
@@ -150,19 +146,19 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
     }
 }
 
-impl Parse for Query {
+impl Parse for QueryParser {
     fn parse(input: ParseStream) -> SynResult<Self> {
         let statement_type = StatementType::from(input);
 
         match statement_type {
             StatementType::Let => {
-                let let_statement = input.parse::<LetStatement>()?;
-                Ok(Query::LetStatement(let_statement))
+                let let_statement = input.parse::<LetStatementParser>()?;
+                Ok(QueryParser::LetStatement(let_statement))
             }
             StatementType::Expr => {
                 let expr = input.parse::<Expr>()?;
                 let _end: Token![;] = input.parse()?;
-                Ok(Query::Expr {
+                Ok(QueryParser::Expr {
                     generated_ident: generate_variable_name(),
                     expr,
                 })
@@ -171,7 +167,7 @@ impl Parse for Query {
                 let _return: Token![return] = input.parse()?;
                 let expr = input.parse::<Expr>()?;
                 let _end: Token![;] = input.parse()?;
-                Ok(Query::Expr {
+                Ok(QueryParser::Expr {
                     generated_ident: generate_variable_name(),
                     expr,
                 })
@@ -179,20 +175,20 @@ impl Parse for Query {
             StatementType::Break => {
                 let _break: Token![break] = input.parse()?;
                 let _end: Token![;] = input.parse()?;
-                Ok(Query::BreakStatement)
+                Ok(QueryParser::BreakStatement)
             }
             StatementType::Continue => todo!(),
             StatementType::BeginTransaction => {
-                let begin_trans = input.parse::<BeginTransactionStatement>()?;
-                Ok(Query::BeginTransaction)
+                let begin_trans = input.parse::<BeginTransactionStatementParser>()?;
+                Ok(QueryParser::BeginTransaction)
             }
             StatementType::CommitTransaction => {
-                let commit_transaction = input.parse::<CommitTransactionStatement>()?;
-                Ok(Query::CommitTransaction)
+                let commit_transaction = input.parse::<CommitTransactionStatementParser>()?;
+                Ok(QueryParser::CommitTransaction)
             }
             StatementType::CancelTransaction => {
-                let cancel_transaction = input.parse::<CancelTransactionStatement>()?;
-                Ok(Query::CancelTransaction)
+                let cancel_transaction = input.parse::<CancelTransactionStatementParser>()?;
+                Ok(QueryParser::CancelTransaction)
             }
         }
     }

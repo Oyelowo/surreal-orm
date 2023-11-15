@@ -9,7 +9,7 @@ use proc_macros_helpers::get_crate_name;
 
 use super::{
     generate_query_chain_code, generated_bound_query_chain, query_chain::QueriesChain,
-    statement_or_expr::StmtOrExpr,
+    statement_or_expr::Query,
 };
 
 pub enum TransactionEnding {
@@ -46,7 +46,7 @@ impl Parse for TransactionEnding {
 }
 
 pub(crate) struct Transaction {
-    pub statements: Vec<StmtOrExpr>,
+    pub statements: Vec<Query>,
     pub transaction_ending: TransactionEnding,
 }
 
