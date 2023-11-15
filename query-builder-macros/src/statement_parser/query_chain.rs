@@ -91,7 +91,19 @@ impl QueriesChainParser {
                     quote!(#generated_ident)
                 )
             },
-            QueryParser::IfEsle(_) => todo!(),
+            QueryParser::IfEsle(if_else_meta) => {
+                let tokenized = if_else_meta.tokenize();
+                let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
+                let to_render: proc_macro2::TokenStream = tokenized.code_to_render.into();
+                let generated_ident = &if_else_meta.generated_ident;
+                (
+                quote!(
+                    let #generated_ident = #query_chain;
+                ),
+                    quote!(#generated_ident)
+                )
+                
+            },
             QueryParser::BeginTransaction => {
                 (quote!(), quote!())
             },
