@@ -83,5 +83,6 @@ macro_rules! for_loop {
 // // pub use for_loop as for_;
 #[proc_macro]
 pub fn for_(input: TokenStream) -> TokenStream {
-    query_builder::for_loop(input.into()).into()
+    // query_builder::for_loop(input.into()).into()
+    todo!()
 }

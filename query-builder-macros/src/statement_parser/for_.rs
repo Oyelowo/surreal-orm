@@ -9,16 +9,16 @@ use syn::{
     Expr, Ident, Token,
 };
 
-use crate::query_builder::{
-    generate_query_chain_code, generate_variable_name, generated_bound_query_chain,
+use super::{
+    helpers::generate_variable_name,
+    query::QueryParser,
+    query_chain::{GeneratedCode, QueriesChainParser},
 };
-
-use super::query::QueryParser;
 
 pub struct ForLoopMetaParser {
     pub iteration_param: Ident,
     pub iterable: Expr,
-    pub body: QueryParser,
+    pub body: QueriesChainParser,
     pub generated_ident: Ident,
 }
 
@@ -108,8 +108,12 @@ pub fn tokenize_for_loop(for_loop_content: &ForLoopMetaParser) -> TokenizedForLo
         generated_ident,
     } = for_loop_content;
 
-    let generated_code = generate_query_chain_code(&body.statements);
-    let query_chain = generated_bound_query_chain(&body.statements);
+    let GeneratedCode {
+        rendered,
+        query_chain,
+    } = body.generate_code();
+    // let generated_code = generate_query_chain_code(&body.statements);
+    // let query_chain = generated_bound_query_chain(&body.statements);
 
     let crate_name = get_crate_name(false);
 
@@ -117,7 +121,7 @@ pub fn tokenize_for_loop(for_loop_content: &ForLoopMetaParser) -> TokenizedForLo
     {
         let #iteration_param = #crate_name::Param::new(stringify!(#iteration_param));
 
-        #( #generated_code )*
+        #( #rendered )*
 
         #crate_name::statements::for_(#iteration_param).in_(#iterable)
         .block(
@@ -128,7 +132,7 @@ pub fn tokenize_for_loop(for_loop_content: &ForLoopMetaParser) -> TokenizedForLo
 
     let to_render = quote! {
         {
-            #( #generated_code )*
+            #( #rendered )*
 
             #whole_stmts
         }
