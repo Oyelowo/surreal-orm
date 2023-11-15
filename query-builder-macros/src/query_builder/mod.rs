@@ -5,6 +5,7 @@ pub(crate) mod query_turbo;
 pub(crate) mod return_statment;
 pub(crate) mod statement_or_expr;
 pub(crate) mod transaction;
+pub(crate) mod statement_parser;
 
 use std::ops::Deref;
 
@@ -23,7 +24,6 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
-use crate::query_builder::statement_or_expr::LetStatement;
 
 use self::{for_loop::tokenize_for_loop, statement_or_expr::StmtOrExpr};
 
@@ -33,7 +33,7 @@ pub(crate) fn generate_query_chain_code(
     let crate_name = get_crate_name(false);
 
     let generated_code = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
-        StmtOrExpr::Statement(var_statement) => {
+        StmtOrExpr::LetStatement(var_statement) => {
             let LetStatement { ident, expr, .. } = var_statement;
             quote! {
                 let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
@@ -67,7 +67,7 @@ pub(crate) fn generated_bound_query_chain(
         .map(|(i, s)| {
             let is_first = i == 0;
             let to_chain = match s {
-                StmtOrExpr::Statement(LetStatement { ident, .. }) => quote!(#ident),
+                StmtOrExpr::LetStatement(LetStatement { ident, .. }) => quote!(#ident),
                 StmtOrExpr::Expr{generated_ident, ..} => quote!(#generated_ident),
                 StmtOrExpr::ForLoop{generated_ident, ..} => quote!(#generated_ident),
             };

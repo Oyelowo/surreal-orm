@@ -50,30 +50,6 @@ pub(crate) struct Transaction {
     pub transaction_ending: TransactionEnding,
 }
 
-pub struct BeginTransactionStatement;
-
-impl Parse for BeginTransactionStatement {
-    fn parse(input: ParseStream) -> SynResult<Self> {
-        let begin_statement = input.parse::<Ident>()?;
-        if begin_statement.to_string().to_lowercase() != "begin" {
-            return Err(syn::Error::new_spanned(
-                begin_statement,
-                "expected 'begin' or 'BEGIN'",
-            ));
-        }
-
-        let statement_ident = input.parse::<Ident>()?;
-        if statement_ident.to_string().to_lowercase() != "transaction" {
-            return Err(syn::Error::new_spanned(
-                statement_ident,
-                "expected 'transaction' or 'TRANSACTION'",
-            ));
-        }
-        input.parse::<Token![;]>()?;
-        Ok(Self)
-    }
-}
-
 impl Parse for Transaction {
     fn parse(input: ParseStream) -> SynResult<Self> {
         input.parse::<BeginTransactionStatement>()?;

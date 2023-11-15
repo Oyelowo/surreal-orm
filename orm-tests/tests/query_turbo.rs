@@ -36,7 +36,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 amount: amount_to_transfer,
             });
 
-        for name in vec!["Oyelowo", "Oyedayo"] {
+        for (name in vec!["Oyelowo", "Oyedayo"]) {
             let first = "Oyelowo";
 
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
