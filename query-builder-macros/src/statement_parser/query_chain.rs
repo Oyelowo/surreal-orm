@@ -7,22 +7,63 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
-use super::{query::QueryParser, let_::LetStatementParser, helpers::generate_variable_name, return_::ReturnStatementParser, for_::tokenize_for_loop};
+use crate::query_builder::tokenizer::QueryTypeToken;
 
-// use super::statement_or_expr::Query;
+use super::{query::QueryParser, let_::LetStatementParser, helpers::generate_variable_name, return_::ReturnStatementParser};
 
-pub(crate) struct QueriesChainParser {
+
+pub struct QueriesChainParser {
     pub statements: Vec<QueryParser>,
 }
 
+impl QueriesChainParser {
+    pub fn to_tokenstream(&self) -> proc_macro2::TokenStream {
+        let crate_name = get_crate_name(false);
+        let tokenizer: QueryTypeToken = self.into();
+        tokenizer.get_tokenstream()
+    }
+    
+    pub fn is_valid_transaction_statement(&self) -> bool {
+        let mut stmts = self.statements.iter().filter(|stmt| stmt.is_transaction_stmt());
+
+        // If transaction, it should start with begin transaction
+        // and end with commit or cancel transaction
+        let begin_stmt = stmts.next();
+        let commit_or_cancel_stmt = stmts.next();
+        let ending = stmts.next();
+        
+        // There should be only begin and commit/cancel statements.
+        if ending.is_some() {
+            return false;
+        }
+
+        match (begin_stmt, commit_or_cancel_stmt) {
+            (Some(QueryParser::BeginTransaction), Some(QueryParser::CommitTransaction)) => true,
+            (Some(QueryParser::BeginTransaction), Some(QueryParser::CancelTransaction)) => true,
+            _ => false
+        }
+    }
+
+    pub fn is_definitely_query_block(&self) -> bool {
+        let mut last_stmt = self.statements.last();
+
+        last_stmt.map_or(false, |s|s.is_return_statement())
+    }
+
+    pub fn is_likely_query_block(&self) -> bool {
+         self.statements.iter().any(|s| s.is_return_statement())
+    }
+    
+}
+
 pub struct GeneratedCode {
-    rendered: Vec<proc_macro2::TokenStream>,
-    query_chain: Vec<proc_macro2::TokenStream>
+    pub to_render: Vec<proc_macro2::TokenStream>,
+    pub query_chain: Vec<proc_macro2::TokenStream>
 }
 
 impl QueriesChainParser {
-    pub fn generate_code(self) -> GeneratedCode {
-        let statements = self.statements;
+    pub fn generate_code(&self) -> GeneratedCode {
+        let statements = &self.statements;
         let crate_name = get_crate_name(false);
         
 
@@ -41,8 +82,7 @@ impl QueriesChainParser {
             let for_loop_content = &for_loop_parser.meta_content;
             let generated_ident = &for_loop_parser.generated_ident;
                 
-            // let tokenized = tokenize_for_loop(for_loop_content.deref());
-            let tokenized = tokenize_for_loop(for_loop_content);
+            let tokenized = for_loop_content.tokenize();
             let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
             let to_render: proc_macro2::TokenStream = tokenized.code_to_render.into();
                 (
@@ -53,29 +93,13 @@ impl QueriesChainParser {
                 )
             },
             QueryParser::BeginTransaction => {
-                let generated_ident = generate_variable_name();
-                (
-                quote! {
-                    let ref #generated_ident = #crate_name::statements::begin_transaction();
-                },
-                    quote!(#generated_ident)
-                )
+                (quote!(), quote!())
             },
             QueryParser::CommitTransaction => {
-                (
-                quote! {
-                    .commit_transaction();
-                },
-                    quote!()
-                )
+                (quote!(), quote!())
             },
             QueryParser::CancelTransaction => {
-                (
-                quote! {
-                    .cancel_transaction();
-                },
-                    quote!()
-                )
+                (quote!(), quote!())
             },
             QueryParser::ReturnStatement(r_stmt) => {
                 let ReturnStatementParser { expr, generated_ident, _return, _end} = r_stmt;
@@ -122,7 +146,7 @@ impl QueriesChainParser {
         .collect::<Vec<_>>();
 
         GeneratedCode {
-            rendered,
+            to_render: rendered,
             query_chain
         }
     }
