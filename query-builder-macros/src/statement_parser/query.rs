@@ -12,6 +12,7 @@ use proc_macros_helpers::get_crate_name;
 use super::{
     for_::ForLoopStatementParser,
     helpers::generate_variable_name,
+    if_else::IfElseMetaParser,
     let_::LetStatementParser,
     return_::ReturnStatementParser,
     transaction::{
@@ -23,6 +24,7 @@ use super::{
 pub(crate) enum QueryParser {
     LetStatement(LetStatementParser),
     ForLoop(ForLoopStatementParser),
+    IfEsle(IfElseMetaParser),
     BeginTransaction,
     CommitTransaction,
     CancelTransaction,
@@ -120,6 +122,7 @@ enum StatementType {
     Let,
     Expr,
     Return,
+    IfElse,
     ForLoop,
     Break,
     Continue,
@@ -143,6 +146,8 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
             StatementType::Return
         } else if value.peek(Token![for]) {
             StatementType::ForLoop
+        } else if value.peek(Token![if]) {
+            StatementType::IfElse
         } else if value.peek(Token![break]) {
             StatementType::Break
         } else if value.peek(Token![continue]) {
@@ -224,6 +229,10 @@ impl Parse for QueryParser {
             StatementType::ForLoop => {
                 let for_loop = input.parse::<ForLoopStatementParser>()?;
                 Ok(QueryParser::ForLoop(for_loop))
+            }
+            StatementType::IfElse => {
+                let if_else = input.parse::<IfElseMetaParser>()?;
+                Ok(QueryParser::IfEsle(if_else))
             }
         }
     }
