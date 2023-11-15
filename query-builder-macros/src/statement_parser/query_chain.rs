@@ -53,7 +53,6 @@ impl QueriesChainParser {
     pub fn is_likely_query_block(&self) -> bool {
          self.statements.iter().any(|s| s.is_return_statement())
     }
-    
 }
 
 pub struct GeneratedCode {
