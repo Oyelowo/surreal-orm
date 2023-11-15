@@ -9,11 +9,11 @@ use proc_macros_helpers::get_crate_name;
 
 use super::{
     generate_query_chain_code, generated_bound_query_chain, query_chain::QueriesChain,
-    return_statment::ReturnStatement, statement_or_expr::StmtOrExpr,
+    return_statment::ReturnStatement, statement_or_expr::Query,
 };
 
 pub(crate) struct Block {
-    pub statements: Vec<StmtOrExpr>,
+    pub statements: Vec<Query>,
     pub return_expr: Expr,
 }
 

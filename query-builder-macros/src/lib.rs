@@ -4,6 +4,7 @@ use syn::{parse_macro_input, LitStr};
 
 mod query;
 mod query_builder;
+mod statement_parser;
 
 #[proc_macro]
 pub fn query_raw(raw_input: TokenStream) -> TokenStream {
