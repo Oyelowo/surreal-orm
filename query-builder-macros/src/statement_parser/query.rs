@@ -136,7 +136,7 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
             .join(" ")
             .to_lowercase();
 
-        if value.peek(Token![let]) {
+        if value.peek(Token![let]) && value.peek2(Ident) && value.peek3(Token![=]) {
             StatementType::Let
         } else if value.peek(Token![return]) {
             StatementType::Return
@@ -189,10 +189,12 @@ impl Parse for QueryParser {
                 let _return: Token![return] = input.parse()?;
                 let expr = input.parse::<Expr>()?;
                 let _end: Token![;] = input.parse()?;
-                Ok(QueryParser::Expr {
-                    generated_ident: generate_variable_name(),
+                Ok(QueryParser::ReturnStatement(ReturnStatementParser {
+                    _return,
                     expr,
-                })
+                    _end,
+                    generated_ident: generate_variable_name(),
+                }))
             }
             StatementType::Break => {
                 let _break: Token![break] = input.parse()?;
