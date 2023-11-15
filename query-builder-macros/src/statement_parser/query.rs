@@ -120,6 +120,7 @@ enum StatementType {
     Let,
     Expr,
     Return,
+    ForLoop,
     Break,
     Continue,
     BeginTransaction,
@@ -140,6 +141,8 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
             StatementType::Let
         } else if value.peek(Token![return]) {
             StatementType::Return
+        } else if value.peek(Token![for]) {
+            StatementType::ForLoop
         } else if value.peek(Token![break]) {
             StatementType::Break
         } else if value.peek(Token![continue]) {
@@ -217,6 +220,10 @@ impl Parse for QueryParser {
             StatementType::CancelTransaction => {
                 let cancel_transaction = input.parse::<CancelTransactionStatementParser>()?;
                 Ok(QueryParser::CancelTransaction)
+            }
+            StatementType::ForLoop => {
+                let for_loop = input.parse::<ForLoopStatementParser>()?;
+                Ok(QueryParser::ForLoop(for_loop))
             }
         }
     }

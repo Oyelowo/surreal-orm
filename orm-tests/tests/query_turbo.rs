@@ -25,7 +25,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let acc = Account::schema();
 
     let query_chain = query_turbo! {
-
          let balance1 = create().content(Balance {
                 id: Balance::create_id("balance1".to_string()),
                 amount: amount_to_transfer,
@@ -36,9 +35,10 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 amount: amount_to_transfer,
             });
 
-        for (name in vec!["Oyelowo", "Oyedayo"]) {
+        // You can also use parenthesis for the iteration if you want
+        // for (name in vec!["Oyelowo", "Oyedayo"]) {
+        for name in vec!["Oyelowo", "Oyedayo"] {
             let first = "Oyelowo";
-
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
 
             let good_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(64));
@@ -48,8 +48,9 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             for age in vec![23, 98] {
               let score = 100;
               let first_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-                let second_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(25));
-                select(All).from(Account::table_name()).where_(acc.balance.eq(923));
+
+              let second_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(25));
+              select(All).from(Account::table_name()).where_(acc.balance.eq(923));
 
             };
         };

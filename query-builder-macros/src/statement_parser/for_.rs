@@ -27,7 +27,7 @@ impl Parse for ForLoopMetaParser {
         let generated_ident = generate_variable_name();
 
         // The iteration parameter and the iterable in the start of the for loop
-        let iter_content = if input.peek(token::Paren) {
+        if input.peek(token::Paren) {
             let iter_content;
             let _paranthesized_iter_content_token = syn::parenthesized!(iter_content in input);
             let iteration_param = iter_content.parse()?;
