@@ -104,7 +104,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
-    // let zxx = {};
 
     transaction! {
         BEGIN TRANSACTION;
