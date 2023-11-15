@@ -91,6 +91,7 @@ impl QueriesChainParser {
                     quote!(#generated_ident)
                 )
             },
+            QueryParser::IfEsle(_) => todo!(),
             QueryParser::BeginTransaction => {
                 (quote!(), quote!())
             },
