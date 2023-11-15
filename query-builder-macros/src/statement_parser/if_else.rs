@@ -15,10 +15,112 @@ use super::{
     query_chain::{GeneratedCode, QueriesChainParser},
 };
 
-pub struct IfElseMetaParser {
-    pub iteration_param: Ident,
-    pub iterable: Expr,
+// if (condition -> expression) {
+//  body -> query chain
+// } else if  (condition -> expression) {
+// body -> query chain
+// } else {
+// body -> query chain
+// }
+
+pub struct CondMeta {
+    pub condition: Expr,
     pub body: QueriesChainParser,
+}
+pub struct IfMeta(CondMeta);
+
+impl std::ops::Deref for IfMeta {
+    type Target = CondMeta;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Parse for IfMeta {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let if_meta = if input.peek(token::Paren) {
+            let condition_content;
+            let _paranthesized_iter_content_token = syn::parenthesized!(condition_content in input);
+            let condition = condition_content.parse()?;
+
+            let body_content;
+            let _ = syn::braced!(body_content in input);
+            let body = body_content.parse()?;
+
+            CondMeta { condition, body }
+        } else {
+            let condition = input.parse()?;
+
+            let body_content;
+            let _ = syn::braced!(body_content in input);
+            let body = body_content.parse()?;
+
+            CondMeta { condition, body }
+        };
+        Ok(IfMeta(if_meta))
+    }
+}
+
+pub struct ElseIfMeta(CondMeta);
+
+impl std::ops::Deref for ElseIfMeta {
+    type Target = CondMeta;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Parse for ElseIfMeta {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let _ = input.parse::<syn::Token![else]>()?;
+        let _ = input.parse::<syn::Token![if]>()?;
+
+        let cond_meta = if input.peek(token::Paren) {
+            let condition_content;
+            let _paranthesized_iter_content_token = syn::parenthesized!(condition_content in input);
+            let condition = condition_content.parse()?;
+
+            let body_content;
+            let _ = syn::braced!(body_content in input);
+            let body = body_content.parse()?;
+
+            CondMeta { condition, body }
+        } else {
+            let condition = input.parse()?;
+
+            let body_content;
+            let _ = syn::braced!(body_content in input);
+            let body = body_content.parse()?;
+
+            CondMeta { condition, body }
+        };
+
+        Ok(ElseIfMeta(cond_meta))
+    }
+}
+
+pub struct Else {
+    pub body: QueriesChainParser,
+}
+
+impl Parse for Else {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let _ = input.parse::<syn::Token![else]>()?;
+
+        let body_content;
+        let _ = syn::braced!(body_content in input);
+        let body = body_content.parse()?;
+
+        Ok(Else { body })
+    }
+}
+
+pub struct IfElseMetaParser {
+    pub if_meta: IfMeta,
+    pub else_if_meta: Vec<ElseIfMeta>,
+    pub else_meta: Option<Else>,
     pub generated_ident: Ident,
 }
 
@@ -27,49 +129,29 @@ impl Parse for IfElseMetaParser {
         let generated_ident = generate_variable_name();
 
         // The iteration parameter and the iterable in the start of the for loop
-        if input.peek(token::Paren) {
-            let iter_content;
-            let _paranthesized_iter_content_token = syn::parenthesized!(iter_content in input);
-            let iteration_param = iter_content.parse()?;
+        let if_meta = input.parse::<IfMeta>()?;
 
-            iter_content.parse::<syn::Token![in]>()?;
+        let mut else_if_meta = vec![];
+        while input.peek(Token![else]) && input.peek2(Token![if]) {
+            let else_if = input.parse::<ElseIfMeta>()?;
+            else_if_meta.push(else_if);
+        }
 
-            let iterable = iter_content.parse()?;
-            // The body
-            let content;
-            let _brace_token: Brace = syn::braced!(content in input);
-
-            let body = content.parse()?;
-
-            input.parse::<syn::Token![;]>()?;
-
-            return Ok(IfElseMetaParser {
-                iteration_param,
-                iterable,
-                body,
-                generated_ident,
-            });
+        let else_meta = if input.peek(Token![else]) {
+            let else_meta = input.parse::<Else>()?;
+            Some(else_meta)
         } else {
-            let iteration_param = input.parse()?;
-
-            input.parse::<syn::Token![in]>()?;
-
-            let iterable = input.parse()?;
-            // The body
-            let content;
-            let _brace_token: Brace = syn::braced!(content in input);
-
-            let body = content.parse()?;
-
-            input.parse::<syn::Token![;]>()?;
-
-            return Ok(IfElseMetaParser {
-                iteration_param,
-                iterable,
-                body,
-                generated_ident,
-            });
+            None
         };
+
+        let _ = input.parse::<Token![;]>()?;
+
+        Ok(Self {
+            if_meta,
+            else_if_meta,
+            else_meta,
+            generated_ident,
+        })
     }
 }
 
@@ -95,52 +177,76 @@ impl Parse for IfElseStatementParser {
     }
 }
 
-pub struct TokenizedForLoop {
+pub struct TokenizedIfElseStmt {
     pub code_to_render: TokenStream,
     pub query_chain: TokenStream,
 }
 
 impl IfElseMetaParser {
-    pub fn tokenize(&self) -> TokenizedForLoop {
+    pub fn tokenize(&self) -> TokenizedIfElseStmt {
         let IfElseMetaParser {
-            iteration_param,
-            iterable,
-            body,
+            if_meta,
+            else_if_meta,
+            else_meta,
             generated_ident,
         } = self;
-
-        let GeneratedCode {
-            query_chain,
-            to_render,
-        } = body.generate_code();
-
         let crate_name = get_crate_name(false);
 
-        let whole_stmts = quote!(
-        {
-            let #iteration_param = #crate_name::Param::new(stringify!(#iteration_param));
+        // let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        //     .then(statement1)
+        //     .else_if(name.like("Oyelowo Oyedayo"))
+        //     .then(statement2)
+        //     .else_if(cond(country.is("Canada")).or(country.is("Norway")))
+        //     .then("Cold")
+        //     .else_("Hot")
+        //     .end();
 
-            #( #to_render )*
+        let ref if_cond_expr = if_meta.condition;
+        let if_body = &if_meta.body.generate_code();
+        let if_body_to_render = &if_body.to_render;
 
-            #crate_name::statements::for_(#iteration_param).in_(#iterable)
-            .block(
-                #( #query_chain )*
-                .parenthesized()
-            )
-        });
+        let if_code: proc_macro2::TokenStream = quote!(
+                #crate_name::statements::if_(#if_cond_expr)
+                .then(#(#if_body_to_render)*)
+        );
 
-        let to_render = quote! {
-            {
-                #( #to_render )*
+        let else_if: proc_macro2::TokenStream = else_if_meta
+            .iter()
+            .map(|else_if_meta| {
+                let cond_expr = &else_if_meta.condition;
+                let body = &else_if_meta.body.generate_code();
+                let body_to_render = &body.to_render;
 
-                #whole_stmts
-            }
-        }
+                quote!(
+                    .else_if(#cond_expr)
+                    .then(#(#body_to_render)*)
+                )
+            })
+            .collect();
+
+        let else_code: proc_macro2::TokenStream =
+            else_meta.as_ref().map_or(quote!(), |else_meta| {
+                let body = &else_meta.body.generate_code();
+                let body_to_render = &body.to_render;
+
+                quote!(
+                    .else_(#(#body_to_render)*)
+                )
+            });
+
+        let to_render: proc_macro2::TokenStream = quote!(
+            let #generated_ident = #if_code
+            #else_if
+            #else_code
+            .end();
+        )
         .into();
-        let to_chain = quote!(#whole_stmts);
 
-        TokenizedForLoop {
-            code_to_render: to_render,
+        // let to_chain = if_body.query_chain.clone();
+        let to_chain: proc_macro2::TokenStream = to_render.clone();
+
+        TokenizedIfElseStmt {
+            code_to_render: to_render.into(),
             query_chain: to_chain.into(),
         }
     }
