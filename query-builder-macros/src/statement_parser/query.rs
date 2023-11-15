@@ -7,11 +7,11 @@ use syn::{
     parse_macro_input, Expr, Ident, Result as SynResult, Token,
 };
 
-use crate::query_builder::generate_variable_name;
 use proc_macros_helpers::get_crate_name;
 
 use super::{
     for_::ForLoopStatementParser,
+    helpers::generate_variable_name,
     let_::LetStatementParser,
     return_::ReturnStatementParser,
     transaction::{
@@ -30,6 +30,24 @@ pub(crate) enum QueryParser {
     BreakStatement,
     ContinueStatement,
     Expr { generated_ident: Ident, expr: Expr },
+}
+
+impl QueryParser {
+    pub fn is_begin_transaction(&self) -> bool {
+        matches!(self, QueryParser::BeginTransaction)
+    }
+
+    pub fn is_commit_transaction(&self) -> bool {
+        matches!(self, QueryParser::CommitTransaction)
+    }
+
+    pub fn is_cancel_transaction(&self) -> bool {
+        matches!(self, QueryParser::CancelTransaction)
+    }
+
+    pub fn is_return_statement(&self) -> bool {
+        matches!(self, QueryParser::ReturnStatement(_))
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -177,7 +195,11 @@ impl Parse for QueryParser {
                 let _end: Token![;] = input.parse()?;
                 Ok(QueryParser::BreakStatement)
             }
-            StatementType::Continue => todo!(),
+            StatementType::Continue => {
+                let _continue: Token![continue] = input.parse()?;
+                let _end: Token![;] = input.parse()?;
+                Ok(QueryParser::ContinueStatement)
+            }
             StatementType::BeginTransaction => {
                 let begin_trans = input.parse::<BeginTransactionStatementParser>()?;
                 Ok(QueryParser::BeginTransaction)

@@ -9,7 +9,7 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
-use crate::query_builder::generate_variable_name;
+use super::helpers::generate_variable_name;
 
 pub struct ReturnStatementParser {
     pub _return: Token![return],
