@@ -33,6 +33,10 @@ pub(crate) enum QueryParser {
 }
 
 impl QueryParser {
+    pub fn is_transaction_stmt(&self) -> bool {
+        self.is_begin_transaction() || self.is_commit_transaction() || self.is_cancel_transaction()
+    }
+
     pub fn is_begin_transaction(&self) -> bool {
         matches!(self, QueryParser::BeginTransaction)
     }

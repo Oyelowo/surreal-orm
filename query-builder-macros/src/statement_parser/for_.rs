@@ -100,58 +100,58 @@ pub struct TokenizedForLoop {
     pub query_chain: TokenStream,
 }
 
-pub fn tokenize_for_loop(for_loop_content: &ForLoopMetaParser) -> TokenizedForLoop {
-    let ForLoopMetaParser {
-        iteration_param,
-        iterable,
-        body,
-        generated_ident,
-    } = for_loop_content;
+impl ForLoopMetaParser {
+    pub fn tokenize(&self) -> TokenizedForLoop {
+        let ForLoopMetaParser {
+            iteration_param,
+            iterable,
+            body,
+            generated_ident,
+        } = self;
 
-    let GeneratedCode {
-        rendered,
-        query_chain,
-    } = body.generate_code();
-    // let generated_code = generate_query_chain_code(&body.statements);
-    // let query_chain = generated_bound_query_chain(&body.statements);
+        let GeneratedCode {
+            query_chain,
+            to_render,
+        } = body.generate_code();
 
-    let crate_name = get_crate_name(false);
+        let crate_name = get_crate_name(false);
 
-    let whole_stmts = quote!(
-    {
-        let #iteration_param = #crate_name::Param::new(stringify!(#iteration_param));
-
-        #( #rendered )*
-
-        #crate_name::statements::for_(#iteration_param).in_(#iterable)
-        .block(
-            #( #query_chain )*
-            .parenthesized()
-        )
-    });
-
-    let to_render = quote! {
+        let whole_stmts = quote!(
         {
-            #( #rendered )*
+            let #iteration_param = #crate_name::Param::new(stringify!(#iteration_param));
 
-            #whole_stmts
+            #( #to_render )*
+
+            #crate_name::statements::for_(#iteration_param).in_(#iterable)
+            .block(
+                #( #query_chain )*
+                .parenthesized()
+            )
+        });
+
+        let to_render = quote! {
+            {
+                #( #to_render )*
+
+                #whole_stmts
+            }
         }
-    }
-    .into();
-    let to_chain = quote!(#whole_stmts);
+        .into();
+        let to_chain = quote!(#whole_stmts);
 
-    TokenizedForLoop {
-        code_to_render: to_render,
-        query_chain: to_chain.into(),
+        TokenizedForLoop {
+            code_to_render: to_render,
+            query_chain: to_chain.into(),
+        }
     }
 }
 
 pub fn for_loop(input: TokenStream) -> TokenStream {
     let for_loop_content = syn::parse_macro_input!(input as ForLoopMetaParser);
 
-    let z = tokenize_for_loop(&for_loop_content);
-    let to_render: proc_macro2::TokenStream = z.code_to_render.into();
-    let to_chain: proc_macro2::TokenStream = z.query_chain.into();
+    let z = &for_loop_content.tokenize();
+    let to_render: proc_macro2::TokenStream = z.code_to_render.clone().into();
+    let to_chain: proc_macro2::TokenStream = z.query_chain.clone().into();
 
     quote!(
         #to_render
