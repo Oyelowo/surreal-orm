@@ -15,6 +15,7 @@ syn = { workspace = true }
 quote = { workspace = true }
 serde = { workspace = true }
 uuid = { workspace = true }
+convert_case = { workspace = true }
 
 surreal-query-builder = { workspace = true }
 proc-macros-helpers = { workspace = true }

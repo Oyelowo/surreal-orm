@@ -9,12 +9,13 @@ pub(crate) mod transaction;
 use std::ops::Deref;
 
 pub use block::query_block;
+use convert_case::{Casing, Case};
 pub use for_loop::for_loop;
 pub use query_turbo::query_turbo;
 pub use transaction::query_transaction;
 
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{quote, format_ident};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
     parse_macro_input, Expr, Ident, Result as SynResult, Token,
@@ -80,3 +81,17 @@ pub(crate) fn generated_bound_query_chain(
         .collect::<Vec<_>>();
     query_chain
 }
+
+
+pub fn generate_variable_name() -> Ident {
+    let sanitized_uuid = uuid::Uuid::new_v4().simple();
+    let crate_name = get_crate_name(false);
+    let name = format!("_{crate_name}__private__internal_variable_prefix__{sanitized_uuid}")
+        .to_case(Case::Camel);
+    let mut param = format_ident!("{name}");
+
+    // param.truncate(15);
+
+    param
+}
+
