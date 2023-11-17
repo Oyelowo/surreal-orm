@@ -252,8 +252,8 @@ impl IfElseMetaParser {
         .into();
 
         TokenizedIfElseStmt {
-            code_to_render: to_render.into(),
-            query_chain: quote!().into(),
+            code_to_render: to_render.clone().into(),
+            query_chain: to_render.into(),
         }
     }
 }
