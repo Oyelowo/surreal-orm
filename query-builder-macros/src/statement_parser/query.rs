@@ -148,9 +148,9 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
             StatementType::ForLoop
         } else if value.peek(Token![if]) {
             StatementType::IfElse
-        } else if value.peek(Token![break]) {
+        } else if value.peek(Token![break]) && value.peek2(Token![;]) {
             StatementType::Break
-        } else if value.peek(Token![continue]) {
+        } else if value.peek(Token![continue]) && value.peek2(Token![;]) {
             StatementType::Continue
         }
         // else if TransactionType::is_begin_transaction(value) {
