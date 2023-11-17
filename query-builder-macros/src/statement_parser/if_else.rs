@@ -23,9 +23,46 @@ use super::{
 // body -> query chain
 // }
 
+pub struct Body(QueriesChainParser);
+
+impl std::ops::Deref for Body {
+    type Target = QueriesChainParser;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Parse for Body {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let body_content;
+        let _ = syn::braced!(body_content in input);
+        Ok(Self(body_content.parse()?))
+    }
+}
+
 pub struct CondMeta {
     pub condition: Expr,
-    pub body: QueriesChainParser,
+    pub body: Body,
+}
+
+impl Parse for CondMeta {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        if input.peek(token::Paren) {
+            let condition_content;
+            let _paranthesized_iter_content_token = syn::parenthesized!(condition_content in input);
+            let condition = condition_content.parse()?;
+
+            let body = input.parse()?;
+
+            Ok(CondMeta { condition, body })
+        } else {
+            let condition = input.parse()?;
+            let body = input.parse()?;
+
+            Ok(CondMeta { condition, body })
+        }
+    }
 }
 pub struct IfMeta(CondMeta);
 
@@ -39,26 +76,7 @@ impl std::ops::Deref for IfMeta {
 
 impl Parse for IfMeta {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let if_meta = if input.peek(token::Paren) {
-            let condition_content;
-            let _paranthesized_iter_content_token = syn::parenthesized!(condition_content in input);
-            let condition = condition_content.parse()?;
-
-            let body_content;
-            let _ = syn::braced!(body_content in input);
-            let body = body_content.parse()?;
-
-            CondMeta { condition, body }
-        } else {
-            let condition = input.parse()?;
-
-            let body_content;
-            let _ = syn::braced!(body_content in input);
-            let body = body_content.parse()?;
-
-            CondMeta { condition, body }
-        };
-        Ok(IfMeta(if_meta))
+        Ok(Self(input.parse()?))
     }
 }
 
@@ -77,42 +95,19 @@ impl Parse for ElseIfMeta {
         let _ = input.parse::<syn::Token![else]>()?;
         let _ = input.parse::<syn::Token![if]>()?;
 
-        let cond_meta = if input.peek(token::Paren) {
-            let condition_content;
-            let _paranthesized_iter_content_token = syn::parenthesized!(condition_content in input);
-            let condition = condition_content.parse()?;
-
-            let body_content;
-            let _ = syn::braced!(body_content in input);
-            let body = body_content.parse()?;
-
-            CondMeta { condition, body }
-        } else {
-            let condition = input.parse()?;
-
-            let body_content;
-            let _ = syn::braced!(body_content in input);
-            let body = body_content.parse()?;
-
-            CondMeta { condition, body }
-        };
-
-        Ok(ElseIfMeta(cond_meta))
+        Ok(Self(input.parse()?))
     }
 }
 
 pub struct Else {
-    pub body: QueriesChainParser,
+    pub body: Body,
 }
 
 impl Parse for Else {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let _ = input.parse::<syn::Token![else]>()?;
 
-        let body_content;
-        let _ = syn::braced!(body_content in input);
-        let body = body_content.parse()?;
-
+        let body = input.parse()?;
         Ok(Else { body })
     }
 }
