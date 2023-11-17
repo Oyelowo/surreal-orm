@@ -14,13 +14,16 @@
 // 	@expression ]
 // END
 
-use std::fmt::{self, Display};
+use std::{
+    borrow::BorrowMut,
+    fmt::{self, Display},
+};
 
 use crate::{
     expression::Expression,
     traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
     types::Filter,
-    Block, QueryChain,
+    QueryChain,
 };
 
 /// Creates an IF ELSE statement with compile-time valid transition.
@@ -133,11 +136,11 @@ impl ThenExpression {
         }
     }
 
-    pub fn else_(mut self, bod: impl Into<Body>) -> ElseStatement {
-        let body: Body = bod.into();
+    pub fn else_(mut self, body: impl Into<Body>) -> ElseStatement {
+        let body: Body = body.into();
 
-        self.flow_data.else_data = Some(body);
         self.bindings.extend(body.get_bindings());
+        self.flow_data.else_data = Some(body);
 
         ElseStatement {
             flow_data: self.flow_data,
@@ -192,9 +195,22 @@ impl ExpressionContent {
 #[derive(Debug, Clone)]
 struct Body(QueryChain);
 
+impl std::ops::DerefMut for Body {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T: Into<QueryChain>> From<T> for Body {
+    fn from(value: T) -> Self {
+        let query_chain = value.into();
+        Self(query_chain)
+    }
+}
+
 impl Buildable for Body {
     fn build(&self) -> String {
-        self.build()
+        self.0.build()
     }
 }
 
@@ -295,7 +311,6 @@ impl IfStatement {
         let body: Body = body.into();
         let bindings = [if_condition.get_bindings(), body.get_bindings()].concat();
 
-        self.condition = if_condition;
         let if_cond_meta = CondMeta {
             condition: if_condition,
             body: Some(body),
@@ -327,29 +342,29 @@ impl Buildable for IfElseStatement {
     fn build(&self) -> String {
         let mut output = String::new();
         output.push_str(&format!(
-            "IF {} \n\t",
+            "IF {} \n\t{{ {} }}",
             self.flow_data.if_data.condition,
             self.flow_data
                 .if_data
                 .body
+                .as_ref()
                 .expect("if body must be provided")
-                .parenthesized()
                 .build()
         ));
 
-        for cond in self.flow_data.else_if_data {
+        for cond in &self.flow_data.else_if_data {
             output.push_str(&format!(
-                "\nELSE IF {} THEN\n\t",
+                "\nELSE IF {} THEN\n\t{{ {} }}",
                 cond.condition.build(),
                 cond.body
+                    .as_ref()
                     .expect("else if must have a body. Please report this bug")
-                    .parenthesized()
                     .build()
             ));
         }
 
         if let Some(else_body) = &self.flow_data.else_data {
-            output.push_str(&format!("\nELSE\n\t", else_body.parenthesized().build()));
+            output.push_str(&format!("\nELSE\n\t{{ {} }}", else_body.build()));
         }
 
         output
@@ -379,9 +394,11 @@ mod tests {
     #[test]
     fn test_if_statement1() {
         let age = Field::new("age");
+        let user_table = Table::new("user");
 
         let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then("Valid".to_string())
+            .then(chain(select(All).from(user_table)))
+            // .then("Valid".to_string())
             .end();
 
         assert_eq!(if_statement1.get_bindings().len(), 3);
@@ -402,9 +419,12 @@ mod tests {
     #[test]
     fn test_if_statement2() {
         let age = Field::new("age");
+        let user_table = Table::new("user");
+        let book_table = Table::new("book");
+
         let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then("Valid")
-            .else_("Invalid")
+            .then(chain(select(All).from(user_table)))
+            .else_(chain(select(All).from(book_table)))
             .end();
         assert_eq!(if_statement2.get_bindings().len(), 4);
 
@@ -426,11 +446,13 @@ mod tests {
     fn test_if_statement3() {
         let name = Field::new("name");
         let age = Field::new("age");
+        let user_table = Table::new("user");
+        let book_table = Table::new("book");
 
         let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then("Valid")
+            .then(chain(select(All).from(user_table)))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then("The Alien!")
+            .then(chain(select(All).from(book_table)))
             .end();
 
         assert_eq!(if_statement.get_bindings().len(), 5);
@@ -451,11 +473,15 @@ mod tests {
         let name = Field::new("name");
         let age = Field::new("age");
 
+        let user_table = Table::new("user");
+        let book_table = Table::new("book");
+        let fruit_table = Table::new("fruit");
+
         let if_statement4 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then("Valid")
+            .then(chain(select(All).from(user_table)))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then("The Apple!")
-            .else_("The Mango!")
+            .then(chain(select(All).from(book_table)))
+            .else_(chain(select(All).from(fruit_table)))
             .end();
         assert_eq!(if_statement4.get_bindings().len(), 6);
 
@@ -487,13 +513,17 @@ mod tests {
         let age = Field::new("age");
         let country = Field::new("country");
 
+        let user_table = Table::new("user");
+        let book_table = Table::new("book");
+        let fruit_table = Table::new("fruit");
+
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then("Valid")
+            .then(chain(select(All).from(user_table.clone())))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then("The Alien!")
+            .then(chain(select(All).from(book_table)))
             .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-            .then("Cold")
-            .else_("Hot")
+            .then(chain(select(All).from(fruit_table)))
+            .else_(chain(select(All).from(user_table)))
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 9);
@@ -550,13 +580,16 @@ mod tests {
             .limit(20)
             .start(5);
 
+        let book_table = Table::new("book");
+        let fruit_table = Table::new("fruit");
+
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(statement1)
+            .then(chain(statement1))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then(statement2)
+            .then(chain(statement2))
             .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-            .then("Cold")
-            .else_("Hot")
+            .then(chain(select(All).from(fruit_table)))
+            .else_(chain(select(All).from(book_table)))
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 9);
