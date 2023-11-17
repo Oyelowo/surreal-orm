@@ -204,10 +204,15 @@ impl IfElseMetaParser {
         let ref if_cond_expr = if_meta.condition;
         let if_body = &if_meta.body.generate_code();
         let if_body_to_render = &if_body.to_render;
+        let query_chain = &if_body.query_chain;
 
         let if_code: proc_macro2::TokenStream = quote!(
-                #crate_name::statements::if_(#if_cond_expr)
-                .then(#(#if_body_to_render)*)
+            #crate_name::statements::if_(#if_cond_expr)
+            .then({
+                #(#if_body_to_render)*
+
+                #(#query_chain)*
+            })
         );
 
         let else_if: proc_macro2::TokenStream = else_if_meta
@@ -216,10 +221,15 @@ impl IfElseMetaParser {
                 let cond_expr = &else_if_meta.condition;
                 let body = &else_if_meta.body.generate_code();
                 let body_to_render = &body.to_render;
+                let query_chain = &body.query_chain;
 
                 quote!(
-                    .else_if(#cond_expr)
-                    .then(#(#body_to_render)*)
+                        .else_if(#cond_expr)
+                        .then({
+                            #(#body_to_render)*
+
+                            #(#query_chain)*
+                        })
                 )
             })
             .collect();
@@ -228,26 +238,27 @@ impl IfElseMetaParser {
             else_meta.as_ref().map_or(quote!(), |else_meta| {
                 let body = &else_meta.body.generate_code();
                 let body_to_render = &body.to_render;
+                let query_chain = &body.query_chain;
 
                 quote!(
-                    .else_(#(#body_to_render)*)
+                    .else_({
+                        #(#body_to_render)*
+                        #(#query_chain)*
+                    })
                 )
             });
 
         let to_render: proc_macro2::TokenStream = quote!(
-            let #generated_ident = #if_code
+            #if_code
             #else_if
             #else_code
-            .end();
+            .end()
         )
         .into();
 
-        // let to_chain = if_body.query_chain.clone();
-        let to_chain: proc_macro2::TokenStream = to_render.clone();
-
         TokenizedIfElseStmt {
             code_to_render: to_render.into(),
-            query_chain: to_chain.into(),
+            query_chain: quote!().into(),
         }
     }
 }
