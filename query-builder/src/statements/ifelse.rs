@@ -20,6 +20,7 @@ use crate::{
     expression::Expression,
     traits::{BindingsList, Buildable, Conditional, Erroneous, Parametric, Queryable},
     types::Filter,
+    Block, QueryChain,
 };
 
 /// Creates an IF ELSE statement with compile-time valid transition.
@@ -120,7 +121,11 @@ impl ThenExpression {
     pub fn else_if(mut self, condition: impl Conditional) -> ElseIfStatement {
         let condition = Filter::new(condition);
         self.bindings.extend(condition.get_bindings());
-        self.flow_data.else_if_data.conditions.push(condition);
+
+        // since condition has to come first, we need to initialize the last element
+        // with it.
+        let new_cond_meta = CondMeta::new(condition);
+        self.flow_data.else_if_data.push(new_cond_meta);
 
         ElseIfStatement {
             flow_data: self.flow_data,
@@ -128,10 +133,11 @@ impl ThenExpression {
         }
     }
 
-    pub fn else_(mut self, expression: impl Into<Expression>) -> ElseStatement {
-        let expression: IfElseExpression = expression.into().into();
-        self.flow_data.else_data = ExpressionContent::new(expression.build());
-        self.bindings.extend(expression.get_bindings());
+    pub fn else_(mut self, bod: impl Into<Body>) -> ElseStatement {
+        let body: Body = bod.into();
+
+        self.flow_data.else_data = Some(body);
+        self.bindings.extend(body.get_bindings());
 
         ElseStatement {
             flow_data: self.flow_data,
@@ -145,11 +151,6 @@ impl ThenExpression {
             bindings: self.bindings,
         }
     }
-}
-
-pub struct ElseIfStatement {
-    flow_data: FlowStatementData,
-    bindings: BindingsList,
 }
 
 impl ElseStatement {
@@ -188,23 +189,58 @@ impl ExpressionContent {
     }
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
+struct Body(QueryChain);
+
+impl Buildable for Body {
+    fn build(&self) -> String {
+        self.build()
+    }
+}
+
+impl std::ops::Deref for Body {
+    type Target = QueryChain;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone)]
 struct FlowStatementData {
-    if_data: Flow,
-    else_if_data: Flows,
-    else_data: ExpressionContent,
+    if_data: CondMeta,
+    else_if_data: Vec<CondMeta>,
+    else_data: Option<Body>,
 }
 
-#[derive(Default, Debug, Clone)]
-struct Flows {
-    conditions: Vec<Filter>,
-    expressions: Vec<IfElseExpression>,
+impl FlowStatementData {
+    fn new(if_data: CondMeta) -> Self {
+        Self {
+            if_data,
+            else_if_data: vec![],
+            else_data: None,
+        }
+    }
 }
 
-#[derive(Default, Debug, Clone)]
-struct Flow {
-    condition: Option<Filter>,
-    expression: Option<ExpressionContent>,
+#[derive(Debug, Clone)]
+struct CondMeta {
+    condition: Filter,
+    body: Option<Body>,
+}
+
+impl CondMeta {
+    fn new(condition: Filter) -> CondMeta {
+        Self {
+            condition,
+            body: None,
+        }
+    }
+
+    pub fn body(mut self, body: Body) -> CondMeta {
+        self.body = Some(body);
+        self
+    }
 }
 
 pub struct ElseStatement {
@@ -212,11 +248,25 @@ pub struct ElseStatement {
     bindings: BindingsList,
 }
 
+pub struct ElseIfStatement {
+    flow_data: FlowStatementData,
+    bindings: BindingsList,
+}
+
 impl ElseIfStatement {
-    pub fn then(mut self, expression: impl Into<Expression>) -> ThenExpression {
-        let expression: IfElseExpression = expression.into().into();
-        self.bindings.extend(expression.get_bindings());
-        self.flow_data.else_if_data.expressions.push(expression);
+    pub fn then(mut self, body: impl Into<Body>) -> ThenExpression {
+        let body: Body = body.into();
+        // self.bindings.extend(body.get_bindings());
+        // let cond_meta = CondMeta {
+        //     condition: self.flow_data.else_if_data.last()
+        //         .expect("cond must have been added earlier in cond block. This is a bug. Please report/open an issue!").condition,
+        //     body: body.into(),
+        // };
+        // self.flow_data.else_if_data.push(cond_meta);
+
+        if let Some(latest_else_if_cond_meta) = self.flow_data.else_if_data.last_mut() {
+            latest_else_if_cond_meta.body = Some(body);
+        }
 
         ThenExpression {
             flow_data: self.flow_data,
@@ -239,19 +289,22 @@ impl IfStatement {
     }
 
     /// Can be a select statment or any other valid surrealdb Value
-    pub fn then(self, expression: impl Into<Expression>) -> ThenExpression {
+    pub fn then(mut self, body: impl Into<Body>) -> ThenExpression {
         let if_condition = self.condition;
 
-        let expression: IfElseExpression = expression.into().into();
-        let bindings = [if_condition.get_bindings(), expression.get_bindings()].concat();
+        let body: Body = body.into();
+        let bindings = [if_condition.get_bindings(), body.get_bindings()].concat();
 
-        let mut flow_data = FlowStatementData::default();
-        flow_data.if_data.condition = Some(if_condition);
-        flow_data.if_data.expression = Some(ExpressionContent(expression.build()));
+        self.condition = if_condition;
+        let if_cond_meta = CondMeta {
+            condition: if_condition,
+            body: Some(body),
+        };
 
+        let flow_data_init = FlowStatementData::new(if_cond_meta);
         ThenExpression {
-            flow_data,
             bindings,
+            flow_data: flow_data_init,
         }
     }
 }
@@ -274,32 +327,30 @@ impl Buildable for IfElseStatement {
     fn build(&self) -> String {
         let mut output = String::new();
         output.push_str(&format!(
-            "IF {} THEN\n\t{}",
+            "IF {} \n\t",
+            self.flow_data.if_data.condition,
             self.flow_data
                 .if_data
-                .condition
-                .as_ref()
-                .expect("condition must be provided"),
-            self.flow_data
-                .if_data
-                .expression
-                .as_ref()
-                .expect("expression must be provided")
+                .body
+                .expect("if body must be provided")
+                .parenthesized()
+                .build()
         ));
 
-        for i in 0..self.flow_data.else_if_data.conditions.len() {
+        for cond in self.flow_data.else_if_data {
             output.push_str(&format!(
-                "\nELSE IF {} THEN\n\t{}",
-                self.flow_data.else_if_data.conditions[i].build(),
-                self.flow_data.else_if_data.expressions[i].build()
+                "\nELSE IF {} THEN\n\t",
+                cond.condition.build(),
+                cond.body
+                    .expect("else if must have a body. Please report this bug")
+                    .parenthesized()
+                    .build()
             ));
         }
 
-        if !&self.flow_data.else_data.is_empty() {
-            output.push_str(&format!("\nELSE\n\t{}", self.flow_data.else_data.build()));
+        if let Some(else_body) = &self.flow_data.else_data {
+            output.push_str(&format!("\nELSE\n\t", else_body.parenthesized().build()));
         }
-
-        output.push_str("\nEND");
 
         output
     }
