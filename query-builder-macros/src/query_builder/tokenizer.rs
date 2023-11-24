@@ -10,10 +10,9 @@ pub enum QueryTypeToken {
 
 impl QueryTypeToken {
     pub fn get_tokenstream(self) -> proc_macro2::TokenStream {
+        use QueryTypeToken::*;
         match self {
-            QueryTypeToken::Chain(t) => t,
-            QueryTypeToken::Block(t) => t,
-            QueryTypeToken::Transaction(t) => t,
+            Block(t) | Chain(t) | Transaction(t) => t,
         }
     }
 }
