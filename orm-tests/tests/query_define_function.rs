@@ -9,7 +9,7 @@
 use pretty_assertions::assert_eq;
 use surreal_models::SpaceShip;
 use surreal_orm::{
-    cond, index,
+    cond, index, query_turbo,
     statements::{create, define_function, if_, select},
     All, Buildable, Model, Operatable, SchemaGetter, SetterAssignable, ToRaw, NONE,
 };
@@ -24,14 +24,16 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
         );
 
     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-                .then(person.with_path::<SpaceShip>(index(0)))
+                .then(query_turbo!( person; ))
             .else_(
-                create::<SpaceShip>().set(
-                    vec![
-                        SpaceShip::schema().id.equal_to(&first_arg),
-                        SpaceShip::schema().name.equal_to(&last_arg),
-                        SpaceShip::schema().created.equal_to(&birthday_arg),
-                    ]
+                query_turbo!(
+                    create::<SpaceShip>().set(
+                        vec![
+                            SpaceShip::schema().id.equal_to(&first_arg),
+                            SpaceShip::schema().name.equal_to(&last_arg),
+                            SpaceShip::schema().created.equal_to(&birthday_arg),
+                        ]
+                    );
                 )
             ).end();
 });

@@ -26,20 +26,13 @@ impl QueriesChainParser {
     pub fn is_valid_transaction_statement(&self) -> bool {
         let mut stmts = self.statements.iter().filter(|stmt| stmt.is_transaction_stmt());
 
-        // If transaction, it should start with begin transaction
-        // and end with commit or cancel transaction
         let begin_stmt = stmts.next();
         let commit_or_cancel_stmt = stmts.next();
         let ending = stmts.next();
         
-        // There should be only begin and commit/cancel statements.
-        if ending.is_some() {
-            return false;
-        }
-
-        match (begin_stmt, commit_or_cancel_stmt) {
-            (Some(QueryParser::BeginTransaction), Some(QueryParser::CommitTransaction)) => true,
-            (Some(QueryParser::BeginTransaction), Some(QueryParser::CancelTransaction)) => true,
+        match (begin_stmt, commit_or_cancel_stmt, ending) {
+            (Some(QueryParser::BeginTransaction), Some(QueryParser::CommitTransaction), None) => true,
+            (Some(QueryParser::BeginTransaction), Some(QueryParser::CancelTransaction), None) => true,
             _ => false
         }
     }
