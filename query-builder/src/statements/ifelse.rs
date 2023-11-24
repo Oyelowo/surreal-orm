@@ -14,10 +14,7 @@
 // 	@expression ]
 // END
 
-use std::{
-    borrow::BorrowMut,
-    fmt::{self, Display},
-};
+use std::fmt;
 
 use crate::{
     expression::Expression,
@@ -127,7 +124,10 @@ impl ThenExpression {
 
         // since condition has to come first, we need to initialize the last element
         // with it.
-        let new_cond_meta = CondMeta::new(condition);
+        let new_cond_meta = CondMeta {
+            condition,
+            body: None,
+        };
         self.flow_data.else_if_data.push(new_cond_meta);
 
         ElseIfStatement {
@@ -165,35 +165,8 @@ impl ElseStatement {
     }
 }
 
-#[derive(Default, Debug, Clone)]
-struct ExpressionContent(String);
-
-impl ExpressionContent {
-    pub fn new(expr: impl Into<String>) -> Self {
-        Self(expr.into())
-    }
-}
-
-impl Buildable for ExpressionContent {
-    fn build(&self) -> String {
-        self.0.to_string()
-    }
-}
-
-impl Display for ExpressionContent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.build())
-    }
-}
-
-impl ExpressionContent {
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
 #[derive(Debug, Clone)]
-struct Body(QueryChain);
+pub struct Body(QueryChain);
 
 impl std::ops::DerefMut for Body {
     fn deref_mut(&mut self) -> &mut Self::Target {
@@ -245,20 +218,6 @@ struct CondMeta {
     body: Option<Body>,
 }
 
-impl CondMeta {
-    fn new(condition: Filter) -> CondMeta {
-        Self {
-            condition,
-            body: None,
-        }
-    }
-
-    pub fn body(mut self, body: Body) -> CondMeta {
-        self.body = Some(body);
-        self
-    }
-}
-
 pub struct ElseStatement {
     flow_data: FlowStatementData,
     bindings: BindingsList,
@@ -305,7 +264,7 @@ impl IfStatement {
     }
 
     /// Can be a select statment or any other valid surrealdb Value
-    pub fn then(mut self, body: impl Into<Body>) -> ThenExpression {
+    pub fn then(self, body: impl Into<Body>) -> ThenExpression {
         let if_condition = self.condition;
 
         let body: Body = body.into();

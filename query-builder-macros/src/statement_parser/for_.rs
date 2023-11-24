@@ -1,17 +1,14 @@
-use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    punctuated::Punctuated,
     token::{self, Brace},
-    Expr, Ident, Token,
+    Expr, Ident,
 };
 
 use super::{
     helpers::generate_variable_name,
-    query::QueryParser,
     query_chain::{GeneratedCode, QueriesChainParser},
 };
 
@@ -106,7 +103,7 @@ impl ForLoopMetaParser {
             iteration_param,
             iterable,
             body,
-            generated_ident,
+            generated_ident: _,
         } = self;
 
         let GeneratedCode {

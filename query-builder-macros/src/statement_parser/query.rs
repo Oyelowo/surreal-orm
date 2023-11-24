@@ -1,18 +1,14 @@
 use std::fmt::Display;
 
-use proc_macro::TokenStream;
-use quote::quote;
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
-    parse_macro_input, Expr, Ident, Result as SynResult, Token,
+    Expr, Ident, Result as SynResult, Token,
 };
-
-use proc_macros_helpers::get_crate_name;
 
 use super::{
     for_::ForLoopStatementParser,
     helpers::generate_variable_name,
-    if_else::{IfElseMetaParser, IfElseStatementParser},
+    if_else::IfElseStatementParser,
     let_::LetStatementParser,
     return_::ReturnStatementParser,
     transaction::{
@@ -80,7 +76,7 @@ impl Display for TransactionType {
 }
 
 impl TransactionType {
-    pub fn is_transaction(input: ParseBuffer<'_>) -> TransactionType {
+    pub fn is_transaction(input: &ParseBuffer<'_>) -> TransactionType {
         let input_str = input
             .to_string()
             .split_whitespace()
@@ -105,16 +101,16 @@ impl TransactionType {
         }
     }
 
-    pub fn is_begin_transaction(input: ParseBuffer<'_>) -> bool {
-        TransactionType::is_transaction(input) == TransactionType::Begin
+    pub fn is_begin_transaction(input: &ParseBuffer<'_>) -> bool {
+        Self::is_transaction(input) == Self::Begin
     }
 
-    pub fn is_commit_transaction(input: ParseBuffer<'_>) -> bool {
-        TransactionType::is_transaction(input) == TransactionType::Commit
+    pub fn is_commit_transaction(input: &ParseBuffer<'_>) -> bool {
+        Self::is_transaction(input) == Self::Commit
     }
 
-    pub fn is_cancel_transaction(input: ParseBuffer<'_>) -> bool {
-        TransactionType::is_transaction(input) == TransactionType::Cancel
+    pub fn is_cancel_transaction(input: &ParseBuffer<'_>) -> bool {
+        Self::is_transaction(input) == Self::Cancel
     }
 }
 
@@ -133,13 +129,6 @@ enum StatementType {
 
 impl<'a> From<&ParseBuffer<'a>> for StatementType {
     fn from(value: &ParseBuffer<'a>) -> Self {
-        let input_str = value
-            .to_string()
-            .split_whitespace()
-            .collect::<Vec<_>>()
-            .join(" ")
-            .to_lowercase();
-
         if value.peek(Token![let]) && value.peek2(Ident) && value.peek3(Token![=]) {
             StatementType::Let
         } else if value.peek(Token![return]) {
@@ -152,24 +141,12 @@ impl<'a> From<&ParseBuffer<'a>> for StatementType {
             StatementType::Break
         } else if value.peek(Token![continue]) && value.peek2(Token![;]) {
             StatementType::Continue
-        }
-        // else if TransactionType::is_begin_transaction(value) {
-        //     StatementType::BeginTransaction
-        // } else if TransactionType::is_commit_transaction(value) {
-        //     StatementType::CommitTransaction
-        // } else if TransactionType::is_cancel_transaction(value) {
-        //     StatementType::CancelTransaction
-        // }
-        else if value.peek(Ident) && value.peek2(Ident) && value.peek3(Token![;]) {
-            if input_str.starts_with("begin transaction") {
-                StatementType::BeginTransaction
-            } else if input_str.starts_with("commit transaction") {
-                StatementType::CommitTransaction
-            } else if input_str.starts_with("cancel transaction") {
-                StatementType::CancelTransaction
-            } else {
-                StatementType::Expr
-            }
+        } else if TransactionType::is_begin_transaction(value) {
+            StatementType::BeginTransaction
+        } else if TransactionType::is_commit_transaction(value) {
+            StatementType::CommitTransaction
+        } else if TransactionType::is_cancel_transaction(value) {
+            StatementType::CancelTransaction
         } else {
             StatementType::Expr
         }
@@ -215,15 +192,15 @@ impl Parse for QueryParser {
                 Ok(QueryParser::ContinueStatement)
             }
             StatementType::BeginTransaction => {
-                let begin_trans = input.parse::<BeginTransactionStatementParser>()?;
+                input.parse::<BeginTransactionStatementParser>()?;
                 Ok(QueryParser::BeginTransaction)
             }
             StatementType::CommitTransaction => {
-                let commit_transaction = input.parse::<CommitTransactionStatementParser>()?;
+                input.parse::<CommitTransactionStatementParser>()?;
                 Ok(QueryParser::CommitTransaction)
             }
             StatementType::CancelTransaction => {
-                let cancel_transaction = input.parse::<CancelTransactionStatementParser>()?;
+                input.parse::<CancelTransactionStatementParser>()?;
                 Ok(QueryParser::CancelTransaction)
             }
             StatementType::ForLoop => {
