@@ -6,7 +6,7 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{Account, Balance};
+use surreal_models::{account, Account, Balance};
 use surreal_orm::{
     statements::{begin_transaction, create, select, update},
     *,
@@ -23,6 +23,34 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let amount_to_transfer = 300.00;
 
     let acc = Account::schema();
+    let account::Schema { balance, .. } = Account::schema();
+
+    let query_chain = query_turbo! {
+        begin transaction;
+        if balance.greater_than(100) {
+            let first_name = "Oyelowo";
+        } else if balance.less_than(100) {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        } else if (balance.gte(100)) {
+           let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        } else {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        };
+        let score = 100;
+
+        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+
+        if (balance.greater_than(100)) {
+            let first_name = "Oyelowo";
+        };
+        commit transaction;
+    };
 
     let query_chain = query_turbo! {
          let balance1 = create().content(Balance {
@@ -34,6 +62,24 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
                 id: Balance::create_id("balance1".to_string()),
                 amount: amount_to_transfer,
             });
+
+        if balance.greater_than(100) {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        } else if balance.less_than(100) {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        } else if balance.gte(100) {
+           let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        } else {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        };
 
         // You can also use parenthesis for the iteration if you want
         // for (name in vec!["Oyelowo", "Oyedayo"]) {
