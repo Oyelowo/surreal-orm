@@ -1,10 +1,11 @@
 use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{
+    ext::IdentExt,
     parse::{Parse, ParseStream},
     token::{self, Brace},
-    Expr, Ident,
+    Expr, Ident, Token,
 };
 
 use super::{
@@ -12,9 +13,38 @@ use super::{
     query_chain::{GeneratedCode, QueriesChainParser},
 };
 
+pub enum Iterable {
+    Expr(Expr),
+    Ident(Ident),
+}
+
+impl ToTokens for Iterable {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            Iterable::Expr(expr) => expr.to_tokens(tokens),
+            Iterable::Ident(ident) => ident.to_tokens(tokens),
+        }
+    }
+}
+
+impl Parse for Iterable {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let fork = input.fork();
+        fork.parse::<Ident>()?;
+
+        if (fork.is_empty()) || (fork.peek(token::Brace)) {
+            let ident = input.parse()?;
+            Ok(Iterable::Ident(ident))
+        } else {
+            let expr = input.parse()?;
+            Ok(Iterable::Expr(expr))
+        }
+    }
+}
+
 pub struct ForLoopMetaParser {
     pub iteration_param: Ident,
-    pub iterable: Expr,
+    pub iterable: Iterable,
     pub body: QueriesChainParser,
     pub generated_ident: Ident,
 }
@@ -106,6 +136,13 @@ impl ForLoopMetaParser {
             generated_ident: _,
         } = self;
 
+        // let iterable = match iterable {
+        //     Iterable::Expr(expr) => quote!(expr),
+        //     Iterable::Ident(ident) => {
+        //         let crate_name = get_crate_name(false);
+        //         quote!(#crate_name::iterable::Iterable::from(#ident))
+        //     }
+        // };
         let GeneratedCode {
             query_chain,
             to_render,
@@ -178,7 +215,7 @@ pub fn for_loop(input: TokenStream) -> TokenStream {
 /// });
 /// ```
 // #[macro_export]
-macro_rules! for_loop {
+macro_rules! _for_loop {
     (($param:ident in $iterable:expr) { $($stmt:expr;)+ }) => {{
         // let ref $param = $crate::Param::new(stringify!($param));
         // $crate::statements::for_($param).in_($iterable).block($crate::internal_tools::query_turbo! {
@@ -192,7 +229,7 @@ macro_rules! for_loop {
         // })
     }};
 }
-// pub use for_loop as for_;
+// pub use _for_loop as for_;
 
 #[cfg(test)]
 mod tests {

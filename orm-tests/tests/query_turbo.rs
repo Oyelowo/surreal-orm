@@ -25,18 +25,50 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let acc = Account::schema();
     let account::Schema { balance, .. } = Account::schema();
 
+    let names = || vec!["Oyelowo", "Oyedayo"];
+    let xx = query_turbo! {
+        // for (name in  vec!["Oyelowo", "Oyedayo"]) {
+        // for name in  vec!["Oyelowo", "Oyedayo"] {
+        for name in  names() {
+            let first = "Oyelowo";
+            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+        };
+    };
+
+    let outside_turbo_cond = balance.greater_than(100);
     let query_chain = query_turbo! {
         begin transaction;
-        if balance.greater_than(100) {
+
+        let within_turbo_cond = balance.equal(33);
+        if  within_turbo_cond {
             let first_name = "Oyelowo";
+            if balance.equal(33) {
+                let username = "Oyelowo";
+                if balance.equal(33) {
+                    let username = "Oyelowo";
+                    if within_turbo_cond {
+                        let username = "Oyelowo";
+                    };
+
+                    for name in vec!["Oyelowo", "Oyedayo"] {
+                        let first = "Oyelowo";
+                        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+                    };
+
+                };
+            } else {
+                let score = 100;
+                select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+            };
         } else if balance.less_than(100) {
             let first_name = "Oyelowo";
             let score = 100;
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+
         } else if (balance.gte(100)) {
            let first_name = "Oyelowo";
             let score = 100;
-            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+            return select(All).from(Account::table_name()).where_(acc.balance.eq(5));
         } else {
             let first_name = "Oyelowo";
             let score = 100;
@@ -52,6 +84,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         commit transaction;
     };
 
+    let names_j = vec!["Oyelowo", "Oyedayo"];
     let query_chain = query_turbo! {
          let balance1 = create().content(Balance {
                 id: Balance::create_id("balance1".to_string()),
@@ -83,6 +116,8 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
         // You can also use parenthesis for the iteration if you want
         // for (name in vec!["Oyelowo", "Oyedayo"]) {
+        // let names = vec!["Oyelowo", "Oyedayo"];
+        // for name in  names {
         for name in vec!["Oyelowo", "Oyedayo"] {
             let first = "Oyelowo";
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
@@ -139,5 +174,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     // assert_eq!(accounts[0].id.to_string(), "account:one");
     // assert_eq!(accounts[1].id.to_string(), "account:two");
     //
+    assert_eq!("test", "test");
     Ok(())
 }

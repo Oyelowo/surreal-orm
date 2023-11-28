@@ -1,7 +1,7 @@
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
@@ -41,8 +41,37 @@ impl Parse for Body {
     }
 }
 
+pub enum Expression {
+    Expr(Expr),
+    Ident(Ident),
+}
+
+impl ToTokens for Expression {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            Expression::Expr(expr) => expr.to_tokens(tokens),
+            Expression::Ident(ident) => ident.to_tokens(tokens),
+        }
+    }
+}
+
+impl Parse for Expression {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let fork = input.fork();
+        fork.parse::<Ident>()?;
+
+        if (fork.is_empty()) || (fork.peek(token::Brace)) {
+            let ident = input.parse()?;
+            Ok(Expression::Ident(ident))
+        } else {
+            let expr = input.parse()?;
+            Ok(Expression::Expr(expr))
+        }
+    }
+}
+
 pub struct CondMeta {
-    pub condition: Expr,
+    pub condition: Expression,
     pub body: Body,
 }
 
