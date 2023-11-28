@@ -10,7 +10,7 @@ use std::fmt::Display;
 use crate::{
     traits::{BindingsList, Buildable, Erroneous, Parametric, Queryable},
     types::expression::Expression,
-    Clause, Operatable, Operation, Param, SchemaGetter, ValueLike,
+    Clause, Conditional, Operatable, Operation, Param, SchemaGetter, ValueLike,
 };
 
 /// Builds LET statement.
@@ -185,6 +185,18 @@ impl Queryable for LetStatement {}
 impl Queryable for &LetStatement {}
 impl Erroneous for LetStatement {}
 impl Erroneous for &LetStatement {}
+
+impl Conditional for &LetStatement {
+    fn get_condition_query_string(&self) -> String {
+        self.get_param().build()
+    }
+}
+
+impl Conditional for LetStatement {
+    fn get_condition_query_string(&self) -> String {
+        self.get_param().build()
+    }
+}
 
 #[cfg(test)]
 mod tests {
