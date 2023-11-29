@@ -124,6 +124,10 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
             let good_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(64));
 
+            if balance.gt(50) {
+                let first_name = "Oyelowo";
+            };
+
             select(All).from(Account::table_name()).where_(acc.balance.eq(34));
 
             for age in vec![23, 98] {

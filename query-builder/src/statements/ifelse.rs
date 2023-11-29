@@ -313,7 +313,7 @@ impl Buildable for IfElseStatement {
 
         for cond in &self.flow_data.else_if_data {
             output.push_str(&format!(
-                "\nELSE IF {} THEN\n\t{{ {} }}",
+                "\nELSE IF {} \n\t{{ {} }}",
                 cond.condition.build(),
                 cond.body
                     .as_ref()
@@ -363,15 +363,13 @@ mod tests {
         assert_eq!(if_statement1.get_bindings().len(), 3);
         assert_eq!(
             if_statement1.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
-                $_param_00000003\n\
-                END"
+            "IF age >= $_param_00000001 <= $_param_00000002\n\t\
+                $_param_00000003\n"
         );
         assert_eq!(
             if_statement1.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t\
-                'Valid'\n\
-                END"
+            "IF age >= 18 <= 120\n\t\
+                'Valid'\n"
         );
     }
 
@@ -389,15 +387,14 @@ mod tests {
 
         assert_eq!(
             if_statement2.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+            "IF age >= $_param_00000001 <= $_param_00000002\n\t\
                 $_param_00000003\n\
-                ELSE\n\t$_param_00000004\n\
-                END"
+                ELSE\n\t$_param_00000004\n"
         );
 
         assert_eq!(
             if_statement2.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE\n\t'Invalid'\nEND"
+            "IF age >= 18 <= 120\n\t'Valid'\nELSE\n\t'Invalid'\n"
         );
     }
 
@@ -418,12 +415,12 @@ mod tests {
 
         assert_eq!(
         if_statement.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t$_param_00000003\nELSE IF name ~ $_param_00000004 THEN\n\t$_param_00000005\nEND"
+            "IF age >= $_param_00000001 <= $_param_00000002\n\t$_param_00000003\nELSE IF name ~ $_param_00000004\n\t$_param_00000005\n"
         );
 
         assert_eq!(
-        if_statement.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t'Valid'\nELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t'The Alien!'\nEND"
+            if_statement.to_raw().build(),
+            "IF age >= 18 <= 120\n\t'Valid'\nELSE IF name ~ 'Oyelowo Oyedayo'\n\t'The Alien!'\n"
         );
     }
 
@@ -446,23 +443,21 @@ mod tests {
 
         assert_eq!(
             if_statement4.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+            "IF age >= $_param_00000001 <= $_param_00000002\n\t\
                 $_param_00000003\n\
-                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                ELSE IF name ~ $_param_00000004\n\t\
                 $_param_00000005\n\
-                ELSE\n\t$_param_00000006\n\
-                END"
+                ELSE\n\t$_param_00000006\n"
         );
 
         assert_eq!(
             if_statement4.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t\
+            "IF age >= 18 <= 120\n\t\
                 'Valid'\n\
-                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                ELSE IF name ~ 'Oyelowo Oyedayo'\n\t\
                 'The Apple!'\n\
                 ELSE\n\t\
-                'The Mango!'\n\
-                END"
+                'The Mango!'\n"
         );
     }
 
@@ -489,25 +484,24 @@ mod tests {
 
         assert_eq!(
             if_statement5.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\t\
+            "IF age >= $_param_00000001 <= $_param_00000002\n\t\
                 $_param_00000003\n\
-                ELSE IF name ~ $_param_00000004 THEN\n\t\
+                ELSE IF name ~ $_param_00000004\n\t\
                 $_param_00000005\n\
-                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) THEN\n\t\
-                $_param_00000008\nELSE\n\t$_param_00000009\nEND"
+                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007)\n\t\
+                $_param_00000008\nELSE\n\t$_param_00000009\n"
         );
 
         assert_eq!(
             if_statement5.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\t\
+            "IF age >= 18 <= 120\n\t\
                 'Valid'\n\
-                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\t\
+                ELSE IF name ~ 'Oyelowo Oyedayo'\n\t\
                 'The Alien!'\n\
-                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\t\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway')\n\t\
                 'Cold'\n\
                 ELSE\n\t\
-                'Hot'\n\
-                END"
+                'Hot'\n"
         );
     }
 
@@ -556,28 +550,27 @@ mod tests {
         assert_display_snapshot!(if_statement5.to_raw().build());
         assert_eq!(
             if_statement5.fine_tune_params(),
-            "IF age >= $_param_00000001 <= $_param_00000002 THEN\n\
+            "IF age >= $_param_00000001 <= $_param_00000002\n\
                 \t$_param_00000003\n\
-                ELSE IF name ~ $_param_00000004 THEN\n\
+                ELSE IF name ~ $_param_00000004\n\
                 \t$_param_00000005\n\
-                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) THEN\n\
-                \t$_param_00000008\nELSE\n\t$_param_00000009\nEND"
+                ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007)\n\
+                \t$_param_00000008\nELSE\n\t$_param_00000009\n"
         );
 
         assert_eq!(
             if_statement5.to_raw().build(),
-            "IF age >= 18 <= 120 THEN\n\
+            "IF age >= 18 <= 120\n\
                 \t(SELECT * FROM user:oyelowo \
                 WHERE (city = 'Prince Edward Island') AND (city = 'NewFoundland') OR (city ~ 'Toronto') \
                 ORDER BY age NUMERIC LIMIT 153 START 10 PARALLEL)\n\
-                ELSE IF name ~ 'Oyelowo Oyedayo' THEN\n\
+                ELSE IF name ~ 'Oyelowo Oyedayo'\n\
                 \t(SELECT * FROM user:oyedayo WHERE country = 'INDONESIA' \
                 ORDER BY age NUMERIC LIMIT 20 START 5)\n\
-                ELSE IF (country IS 'Canada') OR (country IS 'Norway') THEN\n\
+                ELSE IF (country IS 'Canada') OR (country IS 'Norway')\n\
                 \t'Cold'\n\
                 ELSE\n\
-                \t'Hot'\n\
-                END"
+                \t'Hot'\n"
         );
     }
 }

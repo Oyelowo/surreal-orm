@@ -287,10 +287,10 @@ impl IfElseMetaParser {
     }
 }
 
-pub fn for_loop(input: TokenStream) -> TokenStream {
-    let for_loop_content = syn::parse_macro_input!(input as IfElseMetaParser);
+pub fn if_else(input: TokenStream) -> TokenStream {
+    let if_else = syn::parse_macro_input!(input as IfElseMetaParser);
 
-    let z = &for_loop_content.tokenize();
+    let z = &if_else.tokenize();
     let to_render: proc_macro2::TokenStream = z.code_to_render.clone().into();
     let to_chain: proc_macro2::TokenStream = z.query_chain.clone().into();
 
