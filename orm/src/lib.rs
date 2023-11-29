@@ -212,7 +212,9 @@ pub use query_builder_macros::query_turbo;
 
 pub use query_builder_macros::transaction;
 
-// pub use query_builder_macros::for_;
+pub use query_builder_macros::define_function;
+
+pub use query_builder_macros::for_;
 
 #[doc(hidden)]
 // pub use serde;

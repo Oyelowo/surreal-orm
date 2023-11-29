@@ -9,8 +9,8 @@
 use pretty_assertions::assert_eq;
 use surreal_models::SpaceShip;
 use surreal_orm::{
-    cond, index, query_turbo,
-    statements::{create, define_function, if_, select},
+    cond, define_function, index,
+    statements::{create, if_, select},
     All, Buildable, Model, Operatable, SchemaGetter, SetterAssignable, ToRaw, NONE,
 };
 
@@ -24,23 +24,21 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
         );
 
     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-                .then(query_turbo!( person; ))
+                .then(person)
             .else_(
-                query_turbo!(
-                    create::<SpaceShip>().set(
-                        vec![
-                            SpaceShip::schema().id.equal_to(&first_arg),
-                            SpaceShip::schema().name.equal_to(&last_arg),
-                            SpaceShip::schema().created.equal_to(&birthday_arg),
-                        ]
-                    );
+                create::<SpaceShip>().set(
+                    vec![
+                        SpaceShip::schema().id.equal_to(&first_arg),
+                        SpaceShip::schema().name.equal_to(&last_arg),
+                        SpaceShip::schema().created.equal_to(&birthday_arg),
+                    ]
                 )
             ).end();
 });
 
 #[test]
 fn test_function_definition() {
-    let person = get_person("Oyelowo", "Oyedayo", "2022-09-21");
+    let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
     insta::assert_display_snapshot!(person.to_raw().build());
     insta::assert_display_snapshot!(person.fine_tune_params());
     assert_eq!(
@@ -76,3 +74,41 @@ fn test_function_definition() {
             };"
     );
 }
+
+//
+// use super::*;
+// use crate::*;
+//
+// define_function!(get_it(first: bool, last: string, birthday: string) {
+//     let person = "43";
+//     return person;
+// });
+//
+// #[test]
+// fn test_define_function() {
+//     let fn_statement = get_it_statement();
+//
+//     insta::assert_display_snapshot!(fn_statement.to_raw().build());
+//     insta::assert_display_snapshot!(fn_statement.fine_tune_params());
+//     assert_eq!(
+//         fn_statement.to_raw().build(),
+//         "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
+//             LET $person = '43';\n\n\
+//             RETURN $person;\n\
+//             };"
+//     );
+//     assert_eq!(
+//         fn_statement.fine_tune_params(),
+//         "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
+//         LET $person = $_param_00000001;\n\n\
+//         RETURN $person;\n\
+//         };"
+//     );
+//     let get_it_function = get_it(false, "3".to_string(), "3".to_string());
+//     assert_eq!(get_it_function.to_raw().build(), "get_it(false, '3', '3')");
+//     assert_eq!(
+//         get_it_function.fine_tune_params(),
+//         "get_it($_param_00000001, $_param_00000002, $_param_00000003)"
+//     );
+// }
+//
