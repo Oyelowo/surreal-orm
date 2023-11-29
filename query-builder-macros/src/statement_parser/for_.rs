@@ -180,7 +180,7 @@ impl ForLoopMetaParser {
     }
 }
 
-pub fn for_loop(input: TokenStream) -> TokenStream {
+pub fn for_loop_without_for_keyword(input: TokenStream) -> TokenStream {
     let for_loop_content = syn::parse_macro_input!(input as ForLoopMetaParser);
 
     let z = &for_loop_content.tokenize();
