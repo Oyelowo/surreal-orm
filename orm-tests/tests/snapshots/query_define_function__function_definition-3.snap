@@ -1,9 +1,9 @@
 ---
-source: surreal-orm-tests/tests/query_define_function.rs
+source: orm-tests/tests/query_define_function.rs
 expression: person_statement.to_raw().build()
 ---
 DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {
 LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND (created = $birthday_arg));
 
-RETURN IF $person[0].id != NONE THEN $person[0] ELSE (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) END;
+RETURN IF $person[0].id != NONE { LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND (created = $birthday_arg)); } ELSE { CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg; };
 };

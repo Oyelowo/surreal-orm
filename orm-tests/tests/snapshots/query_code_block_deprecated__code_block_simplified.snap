@@ -1,0 +1,13 @@
+---
+source: orm-tests/tests/query_code_block_deprecated.rs
+expression: created_stats_statement.to_raw()
+---
+CREATE weapon_stats SET averageStrength = {
+LET $strengths = (SELECT VALUE strength FROM weapon);
+
+LET $total = math::sum($strengths);
+
+LET $count = count($strengths);
+
+RETURN ($total / $count);
+};
