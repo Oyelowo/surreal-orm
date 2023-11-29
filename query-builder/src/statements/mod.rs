@@ -70,7 +70,7 @@ pub use define_analyzer::{
 pub use define_database::{define_database, DefineDatabaseStatement};
 pub use define_event::{define_event, DefineEventStatement};
 pub use define_field::{define_field, DefineFieldStatement};
-pub use define_function::{define_function, DefineFunctionStatement};
+pub use define_function::{define_function, DefineFunctionStatement, FunctionArgument};
 pub use define_index::{define_index, search_analyzer, DefineIndexStatement, Scoring};
 pub use define_login::{define_login, DefineLoginStatement};
 pub use define_model::{define_model, DefineModelStatement, ModelName, ModelVersion};

@@ -484,6 +484,9 @@ impl From<Vec<ValueLike>> for ArrayLike {
     }
 }
 
+/// Represents the surrealdb Set value, or field, param which can all be used
+pub type SetLike = ArrayLike;
+
 /// Used to represent a list of arguments to a function
 pub struct ArgsList(ValueLike);
 impl ArgsList {
