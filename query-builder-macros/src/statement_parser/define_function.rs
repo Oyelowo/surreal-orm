@@ -1,124 +1,33 @@
 use std::fmt::Display;
 
+use nom::{
+    bytes::complete::{tag, take_while1},
+    character::complete::multispace0,
+    multi::separated_list0,
+    sequence::{delimited, tuple},
+    IResult,
+};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
-use surreal_query_builder::FieldType;
-use syn::{self, parse::Parse, Ident, Token};
+use surreal_query_builder::{parse_field_type, parse_top_level_field_type, FieldType};
+use syn::{
+    self,
+    parse::{discouraged::Speculative, Parse, ParseStream},
+    Ident, Token,
+};
 
 use super::{helpers::generate_variable_name, if_else::Body};
 
-// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
-//     let person = select(All)
-//         .from(SpaceShip::table_name())
-//         .where_(
-//             cond(SpaceShip::schema().id.equal(&first_arg))
-//                 .and(SpaceShip::schema().name.equal(&last_arg))
-//                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
-//         );
-//
-//     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-//                 .then(person)
-//             .else_(
-//                 create::<SpaceShip>().set(
-//                     vec![
-//                         SpaceShip::schema().id.equal_to(&first_arg),
-//                         SpaceShip::schema().name.equal_to(&last_arg),
-//                         SpaceShip::schema().created.equal_to(&birthday_arg),
-//                     ]
-//                 )
-//             ).end();
-// });
-//
-// #[test]
-// fn test_function_definition() {
-//     let person = get_person("Oyelowo", "Oyedayo", "2022-09-21");
-//     insta::assert_display_snapshot!(person.to_raw().build());
-//     insta::assert_display_snapshot!(person.fine_tune_params());
-//     assert_eq!(
-//         person.to_raw().build(),
-//         "get_person('Oyelowo', 'Oyedayo', '2022-09-21')"
-//     );
-//     assert_eq!(
-//         person.fine_tune_params(),
-//         "get_person($_param_00000001, $_param_00000002, $_param_00000003)"
-//     );
-//
-//     let person_statement = get_person_statement();
-//     insta::assert_display_snapshot!(person_statement.to_raw().build());
-//     insta::assert_display_snapshot!(person_statement.fine_tune_params());
-//
-//     assert_eq!(
-//         person_statement.to_raw().build(),
-//         "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
-//             LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND \
-//             (created = $birthday_arg));\n\n\
-//             RETURN IF $person[0].id != NONE THEN \
-//             $person[0] \
-//             ELSE \
-//             (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) \
-//             END;\n\
-//             };"
-//     );
-//
-//     assert_eq!(person_statement.fine_tune_params(),
-//     "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
-//             LET $person = $_param_00000001;\n\n\
-//             RETURN $_param_00000002;\n\
-//             };"
-//     );
-// }
-//
-//
-
-// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
-//     let person = select(All)
-//         .from(SpaceShip::table_name())
-//         .where_(
-//             cond(SpaceShip::schema().id.equal(&first_arg))
-//                 .and(SpaceShip::schema().name.equal(&last_arg))
-//                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
-//         );
-//
-//     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-//                 .then(person)
-//             .else_(
-//                 create::<SpaceShip>().set(
-//                     vec![
-//                         SpaceShip::schema().id.equal_to(&first_arg),
-//                         SpaceShip::schema().name.equal_to(&last_arg),
-//                         SpaceShip::schema().created.equal_to(&birthday_arg),
-//                     ]
-//                 )
-//             ).end();
-// });
-//
-//
-// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
-//     let person = select(All)
-//         .from(SpaceShip::table_name())
-//         .where_(
-//             cond(SpaceShip::schema().id.equal(&first_arg))
-//                 .and(SpaceShip::schema().name.equal(&last_arg))
-//                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
-//         );
-//
-//     if person.with_path::<SpaceShip>(index(0)).id.is_not(NONE) {
-//         return person;
-//     } else {
-//         return create::<SpaceShip>().set(
-//             vec![
-//                 SpaceShip::schema().id.equal_to(&first_arg),
-//                 SpaceShip::schema().name.equal_to(&last_arg),
-//                 SpaceShip::schema().created.equal_to(&birthday_arg),
-//             ]
-//         );
-//     };
-// });
-// //
-
+#[derive(Debug)]
 struct FieldTypeParser(FieldType);
+
+impl From<FieldType> for FieldTypeParser {
+    fn from(value: FieldType) -> Self {
+        Self(value)
+    }
+}
 
 impl FieldTypeParser {
     pub fn to_lib_type(&self) -> proc_macro2::TokenStream {
@@ -165,21 +74,133 @@ impl ToTokens for FieldTypeParser {
     }
 }
 
+// (first: string, sec: option<array<int, 5>>, third: array<string, 5>)
+// impl Parse for FieldTypeParser {
+//     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+//         input.parse::<Ident>();
+//         let type_ = input.to_string().trim().parse::<FieldType>();
+//         match type_ {
+//             Ok(type_) => Ok(Self(type_)),
+//             Err(_) => Err(syn::Error::new(
+//                 Span::call_site(),
+//                 "expected a valid field type",
+//             )),
+//         }
+//     }
+// }
+
+// A parser for an identifier.
+fn parse_identifier(input: &str) -> IResult<&str, &str> {
+    let (input, ident) = take_while1(|c: char| c.is_alphanumeric() || c == '_')(input)?;
+    Ok((input, ident))
+}
+
+#[derive(Debug)]
+struct Argument2 {
+    name: Ident,
+    type_: FieldTypeParser,
+}
+// fn parse_function_argument(input: &str) -> IResult<&str, (&str, FieldType)> {
+fn parse_function_argument(i: &str) -> IResult<&str, Argument2> {
+    let (i, _) = multispace0(i)?;
+    let (i, name) = parse_identifier(i)?;
+    let (i, _) = multispace0(i)?;
+    let (i, _) = tag(":")(i)?;
+    let (i, _) = multispace0(i)?;
+    // let (i, type_) = parse_field_type(i)?;
+    let (i, type_) = parse_top_level_field_type(i)?;
+    let (i, _) = multispace0(i)?;
+
+    // let (input, (_, name, _, _, _, type_, _)) = tuple((
+    //     multispace0,      // Handles optional spaces.
+    //     parse_identifier, // Parses the argument name.
+    //     multispace0,      // Handles optional spaces.
+    //     tag(":"),         // Starting delimiter for the type.
+    //     multispace0,      // Handles optional spaces.
+    //     parse_field_type, // Parses the FieldType.
+    //     multispace0,      // Handles optional trailing spaces.
+    // ))(i)?;
+    // let (input, (name, _, type_)) = tuple((
+    //     parse_identifier, // Parses the argument name.
+    //     multispace0,      // Handles optional spaces.
+    //     delimited(
+    //         tag(":"),         // Starting delimiter for the type.
+    //         parse_field_type, // Parses the FieldType.
+    //         multispace0,      // Handles optional trailing spaces.
+    //     ),
+    // ))(input)?;
+
+    // Ok((input, (name, type_str)))
+    Ok((
+        i,
+        Argument2 {
+            name: format_ident!("{name}"),
+            type_: type_.into(),
+        },
+    ))
+}
+
+fn parse_function_arguments(input: &str) -> IResult<&str, Vec<Argument2>> {
+    let (input, _) = multispace0(input)?;
+    let res = separated_list0(tag(","), parse_function_argument)(input);
+    let (input, _) = multispace0(input)?;
+
+    Ok((input, res.unwrap().1))
+}
+
+// Example usage within a function signature parser.
+// fn parse_function_signature(input: &str) -> IResult<&str, Vec<(&str, FieldType)>> {
+//     delimited(char('('), parse_function_arguments, char(')'))(input)
+// }
+
 impl Parse for FieldTypeParser {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let type_ = input.to_string().trim().parse::<FieldType>();
-        match type_ {
-            Ok(type_) => Ok(Self(type_)),
-            Err(_) => Err(syn::Error::new(
-                Span::call_site(),
-                "expected a valid field type",
-            )),
-        }
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        // // let _arg_name: Ident = input.parse()?;
+        // // input.parse::<Token![:]>()?; // Parsing the colon
+        //
+        // let mut type_str = String::new();
+        // let mut successful_parse = false;
+        //
+        // while !input.is_empty() {
+        //     let lookahead = input.fork();
+        //     let chunk: proc_macro2::TokenTree = lookahead.parse()?;
+        //     // panic!("chunkala. debug-{:?}...print-{}", chunk, chunk.to_string());
+        //     type_str.push_str(&chunk.to_string());
+        //
+        //     if let Ok(ft) = type_str.parse::<FieldType>() {
+        //         successful_parse = true;
+        //         input.advance_to(&lookahead);
+        //         break;
+        //     }
+        //
+        //     // Consume the chunk including the comma if present
+        //     if input.peek(Token![,]) {
+        //         type_str.push(',');
+        //         input.parse::<Token![,]>()?;
+        //     } else {
+        //         input.advance_to(&lookahead);
+        //     }
+        // }
+        //
+        // panic!("type_str: {}", type_str);
+        // if successful_parse {
+        //     Ok(FieldTypeParser(
+        //         type_str.parse::<FieldType>().expect("problem"),
+        //     ))
+        // } else {
+        //     Err(syn::Error::new(
+        //         Span::call_site(),
+        //         "Unable to parse field type",
+        //     ))
+        // }
+
+        todo!()
     }
 }
 
 struct Argument {
     name: Ident,
+    separator: Token![:],
     type_: FieldTypeParser,
 }
 
@@ -187,15 +208,19 @@ impl Parse for Argument {
     // e.g first_arg: string
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let name = input.parse::<Ident>()?;
-        let _ = input.parse::<Token![:]>()?;
+        let sep = input.parse::<Token![:]>()?;
         let type_ = input.parse::<FieldTypeParser>()?;
-        Ok(Self { name, type_ })
+        Ok(Self {
+            name,
+            separator: sep,
+            type_,
+        })
     }
 }
 
 struct DefineFunctionStatementParser {
     function_name: Ident,
-    params: Vec<Argument>,
+    args: Vec<Argument2>,
     body: Body,
     generated_ident: Ident,
 }
@@ -206,14 +231,29 @@ impl Parse for DefineFunctionStatementParser {
 
         let args_content;
         let _ = syn::parenthesized!(args_content in input);
-        let params =
-            syn::punctuated::Punctuated::<Argument, Token![,]>::parse_terminated(&args_content)?;
+        let args_content = args_content.to_string();
+        // panic!("args_content: {}", args_content);
+        let parsed_args =
+            // parse_function_arguments("first_arg: option<array<int, 5>> | int | set<string, 53>")
+            // parse_function_arguments("first_arg: string, second: int, third: set<string, 53>, fourth: option<array<int, 5>>")
+            parse_function_arguments(&args_content)
+                .expect("Invalid argument...")
+                .1;
 
+        panic!(
+            "parsed_args: {:?}",
+            parsed_args
+                .into_iter()
+                .map(|arg| arg.type_)
+                .collect::<Vec<_>>()
+        );
         let body = input.parse::<Body>()?;
 
         Ok(Self {
             function_name,
-            params: params.into_iter().collect(),
+            // args: params.into_iter().collect(),
+            args: parsed_args,
+            // args: xx,
             body,
             generated_ident: generate_variable_name(),
         })
@@ -224,7 +264,7 @@ impl DefineFunctionStatementParser {
     pub fn tokenize(&self) -> TokenStream {
         let Self {
             function_name,
-            params: args,
+            args,
             body,
             generated_ident,
         } = self;
