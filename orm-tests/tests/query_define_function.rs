@@ -6,6 +6,7 @@
  */
 // -- Define a global function which can be used in any query
 
+use chrono::TimeZone;
 use pretty_assertions::assert_eq;
 use surreal_models::SpaceShip;
 use surreal_orm::{
@@ -21,6 +22,8 @@ use surreal_orm::{
 // first: int, two: array<option<string | int | null> | number, 65>  | set<option<number>|float|null, 10>  | duration | option<datetime>, third: float) {
 // define_function!(get_person(very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>) {
 
+// define function with if else and for loop
+
 define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: datetime ) {
     let person = select(All)
         .from(SpaceShip::table_name())
@@ -30,10 +33,10 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
         );
 
-    if person.with_path::<SpaceShip>(index(0)).id.is_not(NONE) {
+    if person.with_path::<SpaceShip>([0]).id.is_not(NONE) {
         return person;
     } else {
-        create::<SpaceShip>().set(
+        return create::<SpaceShip>().set(
                     vec![
                         SpaceShip::schema().id.equal_to(&first_arg),
                         SpaceShip::schema().name.equal_to(&last_arg),
@@ -41,10 +44,9 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
                     ]
                 );
     };
-    return 5;
 });
 
-// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
+// define_function!(get_person2(first_arg: string, last_arg: string, birthday_arg: string) {
 //     let person = select(All)
 //         .from(SpaceShip::table_name())
 //         .where_(
@@ -54,7 +56,7 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
 //         );
 //
 //     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-//                 .then(person)
+//                 .then(person.get_param())
 //             .else_(
 //                 create::<SpaceShip>().set(
 //                     vec![
@@ -68,55 +70,65 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
 
 #[test]
 fn test_function_definition() {
-    // let person = get_person!("Oyelowo", "Oyedayo", 345);
-    // let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
-    let person = get_person!("Oyelowo", "Oyedayo", chrono::Utc::now());
-    let person = get_person!("Oyelowo", "Oyedayo", Param::new("birthday"));
-    let person = get_person!("Oyelowo", "Oyedayo", Field::new("birthday"));
-    let p1 = "Oyelowo";
-    let p2 = "Oyedayo";
-    let p3 = Param::new("birthday");
+    let dt = chrono::Utc.timestamp_opt(61, 0).unwrap();
+    let person = get_person_fn("Oyelowo", "Oyedayo", dt);
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
 
-    // let params: Vec<Box<ValueLike>> = vec![Box::new(p1), Box::new(p2), Box::new(p3)];
-
-    // let person = get_person_fn("Oyelowo", "Oyedayo", "2022-09-21");
-    let person = get_person_fn("Oyelowo", "Oyedayo", chrono::Utc::now());
     let person = get_person_fn("Oyelowo", "Oyedayo", Param::new("birthday"));
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
+
     let person = get_person_fn("Oyelowo", "Oyedayo", Field::new("birthday"));
     insta::assert_display_snapshot!(person.to_raw().build());
     insta::assert_display_snapshot!(person.fine_tune_params());
+
+    // let person = get_person!("Oyelowo", "Oyedayo", 345);
+    // let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
+    let person = get_person!("Oyelowo", "Oyedayo", dt);
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
+
+    let person = get_person!(Field::new("first_name"), "Oyedayo", Param::new("birthday"));
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
+
+    let person = get_person!("Oyelowo", Param::new("last_name"), Field::new("birthday"));
+    insta::assert_display_snapshot!(person.to_raw().build());
+    insta::assert_display_snapshot!(person.fine_tune_params());
+
     assert_eq!(
         person.to_raw().build(),
-        "get_person('Oyelowo', 'Oyedayo', '2022-09-21')"
+        "get_person('Oyelowo', $last_name, birthday)" // "get_person('Oyelowo', 'Oyedayo', '2022-09-21')"
     );
     assert_eq!(
         person.fine_tune_params(),
-        "get_person($_param_00000001, $_param_00000002, $_param_00000003)"
+        "get_person($_param_00000001, $last_name, birthday)"
     );
 
     let person_statement = get_person_statement();
     insta::assert_display_snapshot!(person_statement.to_raw().build());
     insta::assert_display_snapshot!(person_statement.fine_tune_params());
 
-    assert_eq!(
-        person_statement.to_raw().build(),
-        "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
-            LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND \
-            (created = $birthday_arg));\n\n\
-            RETURN IF $person[0].id != NONE THEN \
-            $person[0] \
-            ELSE \
-            (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) \
-            END;\n\
-            };"
-    );
+    // assert_eq!(
+    //     person_statement.to_raw().build(),
+    //     "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
+    //         LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND \
+    //         (created = $birthday_arg));\n\n\
+    //         RETURN IF $person[0].id != NONE THEN \
+    //         $person[0] \
+    //         ELSE \
+    //         (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) \
+    //         END;\n\
+    //         };"
+    // );
 
-    assert_eq!(person_statement.fine_tune_params(),
-    "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
-            LET $person = $_param_00000001;\n\n\
-            RETURN $_param_00000002;\n\
-            };"
-    );
+    // assert_eq!(person_statement.fine_tune_params(),
+    // "DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {\n\
+    //         LET $person = $_param_00000001;\n\n\
+    //         RETURN $_param_00000002;\n\
+    //         };"
+    // );
 }
 
 /*
