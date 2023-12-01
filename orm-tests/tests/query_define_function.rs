@@ -28,9 +28,9 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
     let person = select(All)
         .from(SpaceShip::table_name())
         .where_(
-            cond(SpaceShip::schema().id.equal(&first_arg))
-                .and(SpaceShip::schema().name.equal(&last_arg))
-                .and(SpaceShip::schema().created.equal(&birthday_arg)),
+            cond(SpaceShip::schema().id.equal(first_arg))
+                .and(SpaceShip::schema().name.equal(last_arg))
+                .and(SpaceShip::schema().created.equal(birthday_arg)),
         );
 
     if person.with_path::<SpaceShip>([0]).id.is_not(NONE) {
@@ -38,9 +38,9 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: d
     } else {
         return create::<SpaceShip>().set(
                     vec![
-                        SpaceShip::schema().id.equal_to(&first_arg),
-                        SpaceShip::schema().name.equal_to(&last_arg),
-                        SpaceShip::schema().created.equal_to(&birthday_arg),
+                        SpaceShip::schema().id.equal_to(first_arg),
+                        SpaceShip::schema().name.equal_to(last_arg),
+                        SpaceShip::schema().created.equal_to(birthday_arg),
                     ]
                 );
     };

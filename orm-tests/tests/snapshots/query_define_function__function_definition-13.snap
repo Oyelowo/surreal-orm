@@ -1,6 +1,5 @@
 ---
 source: orm-tests/tests/query_define_function.rs
-assertion_line: 110
 expression: person_statement.to_raw().build()
 ---
 DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: datetime) {

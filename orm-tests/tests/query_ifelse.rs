@@ -47,27 +47,26 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         ..
     } = Weapon::schema();
 
-    let queries_1 = block! {
-            let val = 7;
-            let oye_name = "Oyelowo";
-            // You can even assign a statement
-            let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
+    let queries_1 = query_turbo! {
+        let val = 7;
+        let oye_name = "Oyelowo";
+        // You can even assign a statement
+        let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
 
-            let query_result = if_(val.greater_than(5))
-                .then(query_turbo!(
-            select_space_ship;
-            ))
-                .else_if(oye_name.equal("Oyelowo"))
-                .then(
-            query_turbo!(                select(All)
-                        .from(weapon)
-                        .order_by(order(strength).desc());
-    )
-                )
-                .else_(query_turbo!(let x = 2505;))
-                .end();
-            return query_result;
+        if val.greater_than(5) {
+            return select_space_ship;
+        } else if oye_name.equal("Oyelowo") {
+            return select(All)
+                    .from(weapon)
+                    .order_by(order(strength).desc());
+        } else {
+            let x = 2505;
+            return x;
         };
+
+        return 55;
+    };
+
     insta::assert_display_snapshot!(queries_1.to_raw().build());
     insta::assert_display_snapshot!(queries_1.fine_tune_params());
 

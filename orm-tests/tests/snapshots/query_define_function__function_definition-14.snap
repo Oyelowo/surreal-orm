@@ -1,0 +1,12 @@
+---
+source: orm-tests/tests/query_define_function.rs
+expression: person_statement.fine_tune_params()
+---
+DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: datetime) {
+LET $person = $_param_00000001;
+
+IF $person[$_param_00000002].id IS NOT NONE 
+	{ RETURN $person; }
+ELSE
+	{ RETURN $_param_00000003; }
+};
