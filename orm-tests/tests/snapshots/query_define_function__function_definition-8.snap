@@ -2,4 +2,4 @@
 source: orm-tests/tests/query_define_function.rs
 expression: person.fine_tune_params()
 ---
-get_person($_param_00000001, $_param_00000002, $birthday)
+get_person($_param_00000001, $_param_00000002, $_param_00000003)
