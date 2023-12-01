@@ -50,7 +50,8 @@ impl DefineFunctionStatement {
     }
 
     /// Sets the body of the function
-    pub fn body(mut self, body: Block) -> Self {
+    pub fn body(mut self, body: impl Into<Block>) -> Self {
+        let body = body.into();
         self.bindings.extend(body.get_bindings());
         self.errors.extend(body.get_errors());
         self.body = Some(body);
