@@ -175,7 +175,7 @@ impl DefineFunctionStatementParser {
         let params_rendered = args.iter().map(|param| {
             let name = &param.name;
             quote!(
-                let #name = #crate_name::Param::new(stringify!(#name));
+                let #name = &#crate_name::Param::new(stringify!(#name));
             )
         });
 
@@ -206,7 +206,7 @@ impl DefineFunctionStatementParser {
             let name = &param.name;
             let type_ = &param.type_.to_lib_type();
             quote!(
-                #name: impl Into<#type_>
+                #name: impl ::std::convert::Into<#type_>
             )
         });
 
@@ -219,8 +219,6 @@ impl DefineFunctionStatementParser {
                 __private_args.push(#name.build());
             )
         });
-
-        let bindings_and_build_clone = bindings_and_build.clone();
 
         let exported_function_name = format_ident!("{function_name}_fn");
         let generated_function_def = quote!(
