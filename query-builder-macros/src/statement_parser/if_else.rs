@@ -25,6 +25,13 @@ use super::{
 
 pub struct Body(QueriesChainParser);
 
+impl ToTokens for Body {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let Body(queries_chain_parser) = self;
+        queries_chain_parser.to_tokenstream().to_tokens(tokens);
+    }
+}
+
 impl std::ops::Deref for Body {
     type Target = QueriesChainParser;
 

@@ -14,7 +14,12 @@ use surreal_orm::{
     All, Buildable, Model, Operatable, SchemaGetter, SetterAssignable, ToRaw, NONE,
 };
 
-define_function!(get_person(first_arg: option<array<bytes, 6>> , last_arg: string, birthday_arg: string) {
+// define_function!(get_person(very_complex_type: string | int , two: option<array<option<int | string >>> ) {
+// define_function!(get_person(first: int , very_complex_type: int | option<float> | array<option<string|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>, 34>>) {
+// define_function!(get_person(one: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>,
+// first: int, two: array<option<string | int | null> | number, 65>  | set<option<number>|float|null, 10>  | duration | option<datetime>, third: float) {
+// define_function!(get_person(very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>) {
+define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
     let person = select(All)
         .from(SpaceShip::table_name())
         .where_(
@@ -23,18 +28,41 @@ define_function!(get_person(first_arg: option<array<bytes, 6>> , last_arg: strin
                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
         );
 
-    return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
-                .then(person)
-            .else_(
-                create::<SpaceShip>().set(
+    if person.with_path::<SpaceShip>(index(0)).id.is_not(NONE) {
+        return person;
+    } else {
+        create::<SpaceShip>().set(
                     vec![
                         SpaceShip::schema().id.equal_to(&first_arg),
                         SpaceShip::schema().name.equal_to(&last_arg),
                         SpaceShip::schema().created.equal_to(&birthday_arg),
                     ]
-                )
-            ).end();
+                );
+    };
+    return 5;
 });
+
+// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
+//     let person = select(All)
+//         .from(SpaceShip::table_name())
+//         .where_(
+//             cond(SpaceShip::schema().id.equal(&first_arg))
+//                 .and(SpaceShip::schema().name.equal(&last_arg))
+//                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
+//         );
+//
+//     return if_(person.with_path::<SpaceShip>(index(0)).id.is_not(NONE))
+//                 .then(person)
+//             .else_(
+//                 create::<SpaceShip>().set(
+//                     vec![
+//                         SpaceShip::schema().id.equal_to(&first_arg),
+//                         SpaceShip::schema().name.equal_to(&last_arg),
+//                         SpaceShip::schema().created.equal_to(&birthday_arg),
+//                     ]
+//                 )
+//             ).end();
+// });
 
 #[test]
 fn test_function_definition() {

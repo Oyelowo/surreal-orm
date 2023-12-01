@@ -19,7 +19,7 @@ pub struct FunctionArgument {
 #[derive(Debug, Clone)]
 pub struct DefineFunctionStatement {
     name: String,
-    params: Vec<FunctionArgument>,
+    args: Vec<FunctionArgument>,
     body: Option<Block>,
     bindings: BindingsList,
     errors: ErrorList,
@@ -33,16 +33,16 @@ impl DefineFunctionStatement {
     pub fn new(name: String) -> Self {
         Self {
             name,
-            params: vec![],
+            args: vec![],
             body: None,
             bindings: vec![],
             errors: vec![],
         }
     }
 
-    /// Sets the parameters for the function
-    pub fn arguments(mut self, params: Vec<FunctionArgument>) -> Self {
-        self.params = params;
+    /// Sets the arguments for the function
+    pub fn arguments(mut self, args: Vec<FunctionArgument>) -> Self {
+        self.args = args;
         self
     }
 
@@ -59,7 +59,7 @@ impl DefineFunctionStatement {
 pub fn define_function(name: impl Into<String>) -> DefineFunctionStatement {
     DefineFunctionStatement {
         name: name.into(),
-        params: vec![],
+        args: vec![],
         body: None,
         bindings: vec![],
         errors: vec![],
@@ -85,7 +85,7 @@ impl Buildable for DefineFunctionStatement {
         let mut build = format!("DEFINE FUNCTION {}(", self.name);
         build.push_str(
             &self
-                .params
+                .args
                 .iter()
                 .map(|FunctionArgument { name, type_ }| format!("{}: {}", name.build(), type_))
                 .collect::<Vec<String>>()
