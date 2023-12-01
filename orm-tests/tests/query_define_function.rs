@@ -11,7 +11,8 @@ use surreal_models::SpaceShip;
 use surreal_orm::{
     cond, define_function, index,
     statements::{create, if_, select},
-    All, Buildable, Model, Operatable, SchemaGetter, SetterAssignable, ToRaw, NONE,
+    All, Buildable, Field, Model, Operatable, Param, SchemaGetter, SetterAssignable, ToRaw,
+    ValueLike, NONE,
 };
 
 // define_function!(get_person(very_complex_type: string | int , two: option<array<option<int | string >>> ) {
@@ -19,7 +20,8 @@ use surreal_orm::{
 // define_function!(get_person(one: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>,
 // first: int, two: array<option<string | int | null> | number, 65>  | set<option<number>|float|null, 10>  | duration | option<datetime>, third: float) {
 // define_function!(get_person(very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>) {
-define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
+
+define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: datetime ) {
     let person = select(All)
         .from(SpaceShip::table_name())
         .where_(
@@ -66,7 +68,21 @@ define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: s
 
 #[test]
 fn test_function_definition() {
-    let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
+    // let person = get_person!("Oyelowo", "Oyedayo", 345);
+    // let person = get_person!("Oyelowo", "Oyedayo", "2022-09-21");
+    let person = get_person!("Oyelowo", "Oyedayo", chrono::Utc::now());
+    let person = get_person!("Oyelowo", "Oyedayo", Param::new("birthday"));
+    let person = get_person!("Oyelowo", "Oyedayo", Field::new("birthday"));
+    let p1 = "Oyelowo";
+    let p2 = "Oyedayo";
+    let p3 = Param::new("birthday");
+
+    // let params: Vec<Box<ValueLike>> = vec![Box::new(p1), Box::new(p2), Box::new(p3)];
+
+    // let person = get_person_fn("Oyelowo", "Oyedayo", "2022-09-21");
+    let person = get_person_fn("Oyelowo", "Oyedayo", chrono::Utc::now());
+    let person = get_person_fn("Oyelowo", "Oyedayo", Param::new("birthday"));
+    let person = get_person_fn("Oyelowo", "Oyedayo", Field::new("birthday"));
     insta::assert_display_snapshot!(person.to_raw().build());
     insta::assert_display_snapshot!(person.fine_tune_params());
     assert_eq!(
