@@ -433,7 +433,7 @@ pub fn parse_field_type(input: &str) -> IResult<&str, FieldType> {
     )))(input)
 }
 
-pub fn parse_top_level_field_type(input: &str) -> IResult<&str, FieldType> {
+fn parse_top_level_field_type(input: &str) -> IResult<&str, FieldType> {
     alt((parse_union_type, parse_option_field_type))(input)
 }
 

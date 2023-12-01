@@ -3,15 +3,17 @@ use std::fmt::Display;
 use nom::{
     bytes::complete::{tag, take_while1},
     character::complete::multispace0,
+    combinator::{all_consuming, cut},
+    error::context,
     multi::separated_list0,
     sequence::{delimited, tuple},
     IResult,
 };
 use proc_macro::TokenStream;
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenTree};
 use proc_macros_helpers::get_crate_name;
 use quote::{format_ident, quote, ToTokens};
-use surreal_query_builder::{parse_field_type, parse_top_level_field_type, FieldType};
+use surreal_query_builder::FieldType;
 use syn::{
     self,
     parse::{discouraged::Speculative, Parse, ParseStream},
@@ -20,8 +22,46 @@ use syn::{
 
 use super::{helpers::generate_variable_name, if_else::Body};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct FieldTypeParser(FieldType);
+
+impl Parse for FieldTypeParser {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let type_string = parse_until_top_level_comma(input)?;
+        let type_ = type_string
+            .parse::<FieldType>()
+            .map_err(|_| syn::Error::new(Span::call_site(), "Invalid field type"))?;
+
+        Ok(FieldTypeParser(type_))
+    }
+}
+
+fn parse_until_top_level_comma(input: ParseStream) -> syn::Result<String> {
+    let mut depth = 0;
+    let mut type_string = String::new();
+
+    while !input.is_empty() {
+        if input.peek(Token![<]) {
+            depth += 1;
+            type_string.push('<');
+            input.parse::<Token![<]>()?;
+        } else if input.peek(Token![>]) && depth > 0 {
+            depth -= 1;
+            type_string.push('>');
+            input.parse::<Token![>]>()?;
+        } else if depth == 0 && input.peek(Token![,]) {
+            break;
+        } else {
+            // Consume and append any other character
+            let lookahead = input.fork();
+            let ch: TokenTree = lookahead.parse()?;
+            type_string.push_str(&ch.to_string());
+            input.advance_to(&lookahead);
+        }
+    }
+
+    Ok(type_string)
+}
 
 impl From<FieldType> for FieldTypeParser {
     fn from(value: FieldType) -> Self {
@@ -74,145 +114,20 @@ impl ToTokens for FieldTypeParser {
     }
 }
 
-// (first: string, sec: option<array<int, 5>>, third: array<string, 5>)
-// impl Parse for FieldTypeParser {
-//     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-//         input.parse::<Ident>();
-//         let type_ = input.to_string().trim().parse::<FieldType>();
-//         match type_ {
-//             Ok(type_) => Ok(Self(type_)),
-//             Err(_) => Err(syn::Error::new(
-//                 Span::call_site(),
-//                 "expected a valid field type",
-//             )),
-//         }
-//     }
-// }
-
-// A parser for an identifier.
-fn parse_identifier(input: &str) -> IResult<&str, &str> {
-    let (input, ident) = take_while1(|c: char| c.is_alphanumeric() || c == '_')(input)?;
-    Ok((input, ident))
-}
-
-#[derive(Debug)]
-struct Argument2 {
-    name: Ident,
-    type_: FieldTypeParser,
-}
-// fn parse_function_argument(input: &str) -> IResult<&str, (&str, FieldType)> {
-fn parse_function_argument(i: &str) -> IResult<&str, Argument2> {
-    let (i, _) = multispace0(i)?;
-    let (i, name) = parse_identifier(i)?;
-    let (i, _) = multispace0(i)?;
-    let (i, _) = tag(":")(i)?;
-    let (i, _) = multispace0(i)?;
-    // let (i, type_) = parse_field_type(i)?;
-    let (i, type_) = parse_top_level_field_type(i)?;
-    let (i, _) = multispace0(i)?;
-
-    // let (input, (_, name, _, _, _, type_, _)) = tuple((
-    //     multispace0,      // Handles optional spaces.
-    //     parse_identifier, // Parses the argument name.
-    //     multispace0,      // Handles optional spaces.
-    //     tag(":"),         // Starting delimiter for the type.
-    //     multispace0,      // Handles optional spaces.
-    //     parse_field_type, // Parses the FieldType.
-    //     multispace0,      // Handles optional trailing spaces.
-    // ))(i)?;
-    // let (input, (name, _, type_)) = tuple((
-    //     parse_identifier, // Parses the argument name.
-    //     multispace0,      // Handles optional spaces.
-    //     delimited(
-    //         tag(":"),         // Starting delimiter for the type.
-    //         parse_field_type, // Parses the FieldType.
-    //         multispace0,      // Handles optional trailing spaces.
-    //     ),
-    // ))(input)?;
-
-    // Ok((input, (name, type_str)))
-    Ok((
-        i,
-        Argument2 {
-            name: format_ident!("{name}"),
-            type_: type_.into(),
-        },
-    ))
-}
-
-fn parse_function_arguments(input: &str) -> IResult<&str, Vec<Argument2>> {
-    let (input, _) = multispace0(input)?;
-    let res = separated_list0(tag(","), parse_function_argument)(input);
-    let (input, _) = multispace0(input)?;
-
-    Ok((input, res.unwrap().1))
-}
-
-// Example usage within a function signature parser.
-// fn parse_function_signature(input: &str) -> IResult<&str, Vec<(&str, FieldType)>> {
-//     delimited(char('('), parse_function_arguments, char(')'))(input)
-// }
-
-impl Parse for FieldTypeParser {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        // // let _arg_name: Ident = input.parse()?;
-        // // input.parse::<Token![:]>()?; // Parsing the colon
-        //
-        // let mut type_str = String::new();
-        // let mut successful_parse = false;
-        //
-        // while !input.is_empty() {
-        //     let lookahead = input.fork();
-        //     let chunk: proc_macro2::TokenTree = lookahead.parse()?;
-        //     // panic!("chunkala. debug-{:?}...print-{}", chunk, chunk.to_string());
-        //     type_str.push_str(&chunk.to_string());
-        //
-        //     if let Ok(ft) = type_str.parse::<FieldType>() {
-        //         successful_parse = true;
-        //         input.advance_to(&lookahead);
-        //         break;
-        //     }
-        //
-        //     // Consume the chunk including the comma if present
-        //     if input.peek(Token![,]) {
-        //         type_str.push(',');
-        //         input.parse::<Token![,]>()?;
-        //     } else {
-        //         input.advance_to(&lookahead);
-        //     }
-        // }
-        //
-        // panic!("type_str: {}", type_str);
-        // if successful_parse {
-        //     Ok(FieldTypeParser(
-        //         type_str.parse::<FieldType>().expect("problem"),
-        //     ))
-        // } else {
-        //     Err(syn::Error::new(
-        //         Span::call_site(),
-        //         "Unable to parse field type",
-        //     ))
-        // }
-
-        todo!()
-    }
-}
-
+#[derive(Clone, Debug)]
 struct Argument {
     name: Ident,
-    separator: Token![:],
     type_: FieldTypeParser,
 }
 
 impl Parse for Argument {
-    // e.g first_arg: string
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let name = input.parse::<Ident>()?;
-        let sep = input.parse::<Token![:]>()?;
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let _arg_name: Ident = input.parse()?;
+        let _ = input.parse::<Token![:]>()?; // Parsing the colon
         let type_ = input.parse::<FieldTypeParser>()?;
+
         Ok(Self {
-            name,
-            separator: sep,
+            name: _arg_name,
             type_,
         })
     }
@@ -220,7 +135,7 @@ impl Parse for Argument {
 
 struct DefineFunctionStatementParser {
     function_name: Ident,
-    args: Vec<Argument2>,
+    args: Vec<Argument>,
     body: Body,
     generated_ident: Ident,
 }
@@ -231,29 +146,13 @@ impl Parse for DefineFunctionStatementParser {
 
         let args_content;
         let _ = syn::parenthesized!(args_content in input);
-        let args_content = args_content.to_string();
-        // panic!("args_content: {}", args_content);
-        let parsed_args =
-            // parse_function_arguments("first_arg: option<array<int, 5>> | int | set<string, 53>")
-            // parse_function_arguments("first_arg: string, second: int, third: set<string, 53>, fourth: option<array<int, 5>>")
-            parse_function_arguments(&args_content)
-                .expect("Invalid argument...")
-                .1;
+        let parsed_args = args_content.parse_terminated(Argument::parse, Token![,])?;
 
-        panic!(
-            "parsed_args: {:?}",
-            parsed_args
-                .into_iter()
-                .map(|arg| arg.type_)
-                .collect::<Vec<_>>()
-        );
         let body = input.parse::<Body>()?;
 
         Ok(Self {
             function_name,
-            // args: params.into_iter().collect(),
-            args: parsed_args,
-            // args: xx,
+            args: parsed_args.into_iter().collect::<Vec<_>>().into(),
             body,
             generated_ident: generate_variable_name(),
         })
@@ -281,7 +180,7 @@ impl DefineFunctionStatementParser {
             let name = &param.name.to_string();
             let type_ = &param.type_.to_string();
             quote!(
-                #crate_name::FunctionArgument {
+                #crate_name::statements::FunctionArgument {
                      name: #name.into(),
                      type_: #type_.parse::<#crate_name::FieldType>().expect("Invalid field type.")
                 }
@@ -294,15 +193,11 @@ impl DefineFunctionStatementParser {
             pub fn #function_stmt_name() -> #crate_name::statements::DefineFunctionStatement{
                 #( #params_rendered )*
 
-                #crate_name::statements::define_function(stringify!($function_name))
+                #crate_name::statements::define_function(stringify!(#function_name))
                 .arguments(::std::vec![#(#args_used),*])
-                .body(body)
+                .body(#body)
             }
         );
-
-        // get_user(count: Number);
-        // get_user(56);
-        // X get_user("wrong input");
 
         let function_params = args.iter().map(|param| {
             let name = &param.name;
@@ -389,8 +284,8 @@ impl DefineFunctionStatementParser {
 
         quote!(
             #define_function_statement
-            #generated_function_def
-            #generated_func_macro
+            // #generated_function_def
+            // #generated_func_macro
         )
         .into()
     }
