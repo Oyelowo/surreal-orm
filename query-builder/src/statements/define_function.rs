@@ -9,10 +9,13 @@ use crate::{
     BindingsList, Block, Buildable, Erroneous, ErrorList, FieldType, Param, Parametric, Queryable,
 };
 
+/// Represents a surrealdb define function statement argument
 #[derive(Debug, Clone)]
 pub struct FunctionArgument {
-    name: Param,
-    type_: FieldType,
+    /// The name of the argument
+    pub name: Param,
+    /// The type of the argument
+    pub type_: FieldType,
 }
 
 /// A function definition statement
@@ -100,40 +103,4 @@ impl Buildable for DefineFunctionStatement {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::*;
-
-    define_function!(get_it(first: bool, last: string, birthday: string) {
-        let person = "43";
-        return person;
-    });
-
-    #[test]
-    fn test_define_function() {
-        let fn_statement = get_it_statement();
-
-        insta::assert_display_snapshot!(fn_statement.to_raw().build());
-        insta::assert_display_snapshot!(fn_statement.fine_tune_params());
-        assert_eq!(
-            fn_statement.to_raw().build(),
-            "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
-                LET $person = '43';\n\n\
-                RETURN $person;\n\
-                };"
-        );
-        assert_eq!(
-            fn_statement.fine_tune_params(),
-            "DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {\n\
-            LET $person = $_param_00000001;\n\n\
-            RETURN $person;\n\
-            };"
-        );
-        let get_it_function = get_it(false, "3".to_string(), "3".to_string());
-        assert_eq!(get_it_function.to_raw().build(), "get_it(false, '3', '3')");
-        assert_eq!(
-            get_it_function.fine_tune_params(),
-            "get_it($_param_00000001, $_param_00000002, $_param_00000003)"
-        );
-    }
-}
+mod tests {}

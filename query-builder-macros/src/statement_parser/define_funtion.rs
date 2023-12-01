@@ -126,20 +126,14 @@ macro_rules! define_function_ {
                         __private_bindings.extend($param.get_bindings());
                         __private_args.push($param.build());
                     )*
-                let build = format!("{}({})", stringify!($function_name), __private_args.join(", "));
+
+                let build = format!("{}({})", stringify!(#function_name), __private_args.join(", "));
                 $crate::Function::new()
                     .with_args_string(build)
                     .with_bindings(__private_bindings)
                 }
 
             }
-
-            // https://github.com/rust-lang/rust/issues/35853
-            // macro_rules! $function_name {
-            //     (@inner $($xx:expr),*) => {
-            //         // [<$function_name _statement>]().body.unwrap().build()
-            //     };
-            // }
         }
     };
 }

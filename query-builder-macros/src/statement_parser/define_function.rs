@@ -28,9 +28,10 @@ struct FieldTypeParser(FieldType);
 impl Parse for FieldTypeParser {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let type_string = parse_until_top_level_comma(input)?;
+        let err_msg = format!("Invalid field type: {}", type_string);
         let type_ = type_string
             .parse::<FieldType>()
-            .map_err(|_| syn::Error::new(Span::call_site(), "Invalid field type"))?;
+            .map_err(|_| syn::Error::new(Span::call_site(), err_msg))?;
 
         Ok(FieldTypeParser(type_))
     }
@@ -53,10 +54,12 @@ fn parse_until_top_level_comma(input: ParseStream) -> syn::Result<String> {
             break;
         } else {
             // Consume and append any other character
-            let lookahead = input.fork();
-            let ch: TokenTree = lookahead.parse()?;
+            // let lookahead = input.fork();
+            // let ch: TokenTree = lookahead.parse()?;
+            // type_string.push_str(&ch.to_string());
+            // input.advance_to(&lookahead);
+            let ch = input.parse::<TokenTree>()?;
             type_string.push_str(&ch.to_string());
-            input.advance_to(&lookahead);
         }
     }
 
@@ -182,7 +185,7 @@ impl DefineFunctionStatementParser {
             quote!(
                 #crate_name::statements::FunctionArgument {
                      name: #name.into(),
-                     type_: #type_.parse::<#crate_name::FieldType>().expect("Invalid field type.")
+                     type_: #type_.parse::<#crate_name::FieldType>().expect(format!("Field-{} has an invalid type: {}", #name, #type_).as_str()).into(),
                 }
             )
         }).collect::<Vec<_>>();
@@ -203,7 +206,7 @@ impl DefineFunctionStatementParser {
             let name = &param.name;
             let type_ = &param.type_.to_lib_type();
             quote!(
-                $name: impl Into<#type_>
+                #name: impl Into<#type_>
             )
         });
 
@@ -211,16 +214,17 @@ impl DefineFunctionStatementParser {
             let name = &param.name;
             let type_ = &param.type_.to_lib_type();
             quote!(
-                let $name: #type_ = $name.into();
-                __private_bindings.extend($name.get_bindings());
-                __private_args.push($name.build());
+                let #name: #type_ = #name.into();
+                __private_bindings.extend(#name.get_bindings());
+                __private_args.push(#name.build());
             )
         });
 
         let bindings_and_build_clone = bindings_and_build.clone();
 
+        let exported_function_name = format_ident!("{function_name}_fn");
         let generated_function_def = quote!(
-            pub fn #function_name(#( #function_params ), *) -> #crate_name::Function {
+            pub fn #exported_function_name(#( #function_params ), *) -> #crate_name::Function {
                 use #crate_name::Buildable as _;
                 use #crate_name::Parametric as _;
                 {
@@ -230,7 +234,7 @@ impl DefineFunctionStatementParser {
                     #( #bindings_and_build )*
 
         // TODO: Confirm if a custom function has to be prefixed with 'fn::'
-                let build = format!("{}({})", stringify!($function_name), __private_args.join(", "));
+                let build = format!("{}({})", stringify!(#function_name), __private_args.join(", "));
                 #crate_name::Function::new()
                     .with_args_string(build)
                     .with_bindings(__private_bindings)
@@ -241,51 +245,27 @@ impl DefineFunctionStatementParser {
 
         let mapped_field_types = args
             .iter()
-            .map(|param| {
-                let type_ = &param.type_.to_lib_type();
+            .map(|arg| {
+                let type_ = &arg.type_.to_lib_type();
                 quote!(#type_)
             })
             .collect::<Vec<_>>();
-        let generated_func_macro = quote!(
-                    // get_user!(56, 76, "username", "password");
 
+        let generated_func_macro = quote!(
                 #[macro_use]
                 macro_rules! #function_name {
-                    ($($arg:expr),*) => {
+                    ($($param:expr),*) => {
                         {
-                            use #crate_name::Buildable as _;
-                            use #crate_name::Parametric as _;
-                            {
-                                let mut __private_bindings = vec![];
-                                let mut __private_args = vec![];
-
-                                #( #bindings_and_build_clone )*
-
-                                let args = vec![$( $arg ),*];
-
-                                for (index, arg) in args.iter().enumerate() {
-                                    let type_ = &mapped_field_types[index];
-                                    let $arg: $type_ = arg.into();
-                                    __private_bindings.extend($arg.get_bindings());
-                                    __private_args.push($arg.build());
-                                }
-
-                    // TODO: Confirm if a custom function has to be prefixed with 'fn::'
-                            let build = format!("{}({})", stringify!($function_name), __private_args.join(", "));
-                            #crate_name::Function::new()
-                                .with_args_string(build)
-                                .with_bindings(__private_bindings)
-                            }
-
+                            #generated_function_def
+                            #exported_function_name($($param),*)
                         }
                     }
                  }
         );
-
         quote!(
             #define_function_statement
-            // #generated_function_def
-            // #generated_func_macro
+            #generated_function_def
+            #generated_func_macro
         )
         .into()
     }
