@@ -1,5 +1,5 @@
 ---
-source: surreal-orm-tests/tests/query_ifelse.rs
+source: orm-tests/tests/query_ifelse.rs
 expression: queries_1.fine_tune_params()
 ---
 {
@@ -9,7 +9,14 @@ LET $oye_name = $_param_00000002;
 
 LET $select_space_ship = $_param_00000003;
 
-LET $query_result = $_param_00000004;
+IF $val > $_param_00000004 
+	{ RETURN $select_space_ship; }
+ELSE IF $oye_name = $_param_00000005 
+	{ RETURN $_param_00000006; }
+ELSE
+	{ LET $x = $_param_00000007;
 
-RETURN $query_result;
+RETURN $x; }
+
+RETURN $_param_00000008;
 }
