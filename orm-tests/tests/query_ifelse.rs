@@ -11,8 +11,8 @@ use surreal_models::{weapon, SpaceShip, Weapon};
 use surreal_orm::{
     block, chain, query_turbo,
     statements::{if_, insert, let_, order, select, update, LetStatement},
-    All, Buildable, Model, Operatable, ReturnableSelect, Runnable, SchemaGetter, SetterAssignable,
-    SurrealOrmResult, ToRaw,
+    All, Buildable, Model, Operatable, Parametric, ReturnableSelect, Runnable, SchemaGetter,
+    SetterAssignable, SurrealOrmResult, ToRaw,
 };
 use surrealdb::{engine::local::Mem, Surreal};
 
@@ -47,6 +47,32 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         ..
     } = Weapon::schema();
 
+    //     let xx = {
+    //         let ref val = surreal_orm::statements::let_("val").equal_to(7);
+    //         let ref oye_name = surreal_orm::statements::let_("oye_name").equal_to("Oyelowo");
+    //         let ref select_space_ship = surreal_orm::statements::let_("select_space_ship")
+    //             .equal_to(select(All).from(space_ship).order_by(order(name).desc()));
+    //
+    //         let surreal_orm_private_internal_variable_prefix_5_cde_0_e_9_b_58_df_49_ee_9_e_25_a_66_f_21_d_64_a_78 = surreal_orm::statements::if_
+    //             (val.greater_than(5)).then(
+    //                 {
+    //   let surreal_orm_private_internal_variable_prefix_0_c_44_b_9_b_2_eca_34784_bafa_4744632_c_8751 = surreal_orm::statements::return_(
+    //                         select_space_ship);
+    //   surreal_orm::chain(surreal_orm_private_internal_variable_prefix_0_c_44_b_9_b_2_eca_34784_bafa_4744632_c_8751)
+    // }).else_if(oye_name.equal("Oyelowo")).then(
+    //                 {
+    //   let surreal_orm_private_internal_variable_prefix_a_1_d_94_f_1_a_8_f_9246238_a_29879_a_9_a_289_e_82 = surreal_orm::statements::return_(select(All).from(weapon).order_by(order(strength).desc()));
+    //   surreal_orm::chain(surreal_orm_private_internal_variable_prefix_a_1_d_94_f_1_a_8_f_9246238_a_29879_a_9_a_289_e_82)
+    // }).else_({
+    //   let ref x = surreal_orm::statements::let_("x").equal_to(2505);
+    //   let surreal_orm_private_internal_variable_prefix_f_544_ad_4_a_8_aa_34_bb_38_faa_31_f_853866_a_16 = surreal_orm::statements::return_(x);
+    //   surreal_orm::chain(x).chain(surreal_orm_private_internal_variable_prefix_f_544_ad_4_a_8_aa_34_bb_38_faa_31_f_853866_a_16)
+    // }).end();
+    //         let surreal_orm_private_internal_variable_prefix_7_b_955_bc_6_a_7_ac_46668963_cd_1021751636 =
+    //             surreal_orm::statements::return_(55);
+    //         surreal_orm::chain(val).chain(oye_name).chain(select_space_ship).chain(surreal_orm_private_internal_variable_prefix_5_cde_0_e_9_b_58_df_49_ee_9_e_25_a_66_f_21_d_64_a_78).chain(surreal_orm_private_internal_variable_prefix_7_b_955_bc_6_a_7_ac_46668963_cd_1021751636).as_block()
+    //     };
+
     let queries_1 = query_turbo! {
         let val = 7;
         let oye_name = "Oyelowo";
@@ -63,29 +89,10 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
             let x = 2505;
             return x;
         };
-
-        return 55;
     };
 
     insta::assert_display_snapshot!(queries_1.to_raw().build());
     insta::assert_display_snapshot!(queries_1.fine_tune_params());
-
-    assert_eq!(
-        queries_1.to_raw().build(),
-        "{\n\
-            LET $val = 7;\n\n\
-            LET $oye_name = 'Oyelowo';\n\n\
-            LET $select_space_ship = (SELECT * FROM space_ship ORDER BY name DESC);\n\n\
-            LET $query_result = IF $val > 5 THEN \
-            $select_space_ship \
-            ELSE IF $oye_name = 'Oyelowo' THEN \
-            (SELECT * FROM weapon ORDER BY strength DESC) \
-            ELSE \
-            2505 \
-            END;\n\n\
-            RETURN $query_result;\n\
-            }"
-    );
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]

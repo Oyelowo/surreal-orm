@@ -240,6 +240,7 @@ impl ElseIfStatement {
         // self.flow_data.else_if_data.push(cond_meta);
 
         if let Some(latest_else_if_cond_meta) = self.flow_data.else_if_data.last_mut() {
+            self.bindings.extend(body.get_bindings());
             latest_else_if_cond_meta.body = Some(body);
         }
 
