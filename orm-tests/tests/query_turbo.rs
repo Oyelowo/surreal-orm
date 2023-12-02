@@ -26,12 +26,18 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let account::Schema { balance, .. } = Account::schema();
 
     let names = || vec!["Oyelowo", "Oyedayo"];
+    let colors = vec!["red", "blue"];
     let xx = query_turbo! {
         // for (name in  vec!["Oyelowo", "Oyedayo"]) {
         // for name in  vec!["Oyelowo", "Oyedayo"] {
         for name in  names() {
             let first = "Oyelowo";
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+
+            for color in colors {
+                let something_else = "testing_tested";
+                select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+            };
         };
     };
 
@@ -84,7 +90,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         commit transaction;
     };
 
-    let names_j = vec!["Oyelowo", "Oyedayo"];
     let query_chain = query_turbo! {
          let balance1 = create().content(Balance {
                 id: Balance::create_id("balance1".to_string()),
@@ -130,7 +135,9 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
             select(All).from(Account::table_name()).where_(acc.balance.eq(34));
 
-            for age in vec![23, 98] {
+            let numbers = vec![23, 98];
+
+            for age in numbers {
               let score = 100;
               let first_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
 
