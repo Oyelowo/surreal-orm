@@ -48,7 +48,13 @@ impl QueryParser {
     }
 
     pub fn is_return_statement(&self) -> bool {
-        matches!(self, QueryParser::ReturnStatement(_))
+        match self {
+            QueryParser::ReturnStatement(_) => true,
+            QueryParser::IfEsle(s) => s.has_return_statement(),
+            QueryParser::ForLoop(s) => s.has_return_statement(),
+            _ => false,
+            
+        }
     }
 }
 

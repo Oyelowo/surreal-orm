@@ -49,6 +49,12 @@ pub struct ForLoopMetaParser {
     pub generated_ident: Ident,
 }
 
+impl ForLoopMetaParser {
+    pub fn has_return_statement(&self) -> bool {
+        self.body.is_likely_query_block()
+    }
+}
+
 impl Parse for ForLoopMetaParser {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let generated_ident = generate_variable_name();
