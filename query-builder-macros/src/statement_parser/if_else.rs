@@ -25,6 +25,12 @@ use super::{
 
 pub struct Body(QueriesChainParser);
 
+impl Body {
+    pub fn has_return_statement(&self) -> bool {
+        self.0.is_likely_query_block()
+    }
+}
+
 impl ToTokens for Body {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let Body(queries_chain_parser) = self;
@@ -153,6 +159,20 @@ pub struct IfElseMetaParser {
     pub else_if_meta: Vec<ElseIfMeta>,
     pub else_meta: Option<Else>,
     pub generated_ident: Ident,
+}
+
+impl IfElseMetaParser {
+    pub fn has_return_statement(&self) -> bool {
+        self.if_meta.body.has_return_statement()
+            || self
+                .else_if_meta
+                .iter()
+                .any(|else_if_meta| else_if_meta.body.has_return_statement())
+            || self
+                .else_meta
+                .as_ref()
+                .map_or(false, |else_meta| else_meta.body.has_return_statement())
+    }
 }
 
 impl Parse for IfElseMetaParser {
