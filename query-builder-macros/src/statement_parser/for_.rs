@@ -13,6 +13,7 @@ use super::{
     query_chain::{GeneratedCode, QueriesChainParser},
 };
 
+#[derive(Debug, Clone)]
 pub enum Iterable {
     Expr(Expr),
     Ident(Ident),
@@ -42,6 +43,7 @@ impl Parse for Iterable {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ForLoopMetaParser {
     pub iteration_param: Ident,
     pub iterable: Iterable,
@@ -106,6 +108,7 @@ impl Parse for ForLoopMetaParser {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ForLoopStatementParser {
     pub meta_content: Box<ForLoopMetaParser>,
 }

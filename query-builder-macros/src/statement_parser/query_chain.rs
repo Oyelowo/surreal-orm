@@ -12,6 +12,7 @@ use crate::query_builder::tokenizer::QueryTypeToken;
 use super::{query::QueryParser, let_::LetStatementParser, helpers::generate_variable_name, return_::ReturnStatementParser};
 
 
+#[derive(Debug, Clone)]
 pub struct QueriesChainParser {
     pub statements: Vec<QueryParser>,
 }
