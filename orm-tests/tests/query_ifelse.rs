@@ -50,13 +50,13 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
     //     let z = {
     // };
 
-    let queries_1 = query_turbo! {
+    let queries_1 = block! {
         let val = 7;
         let oye_name = "Oyelowo";
         // You can even assign a statement
         let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
 
-        return if val.greater_than(5) {
+        let cond = if val.greater_than(5) {
             return select_space_ship;
         } else if oye_name.equal("Oyelowo") {
             return select(All)
@@ -66,6 +66,8 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
             let x = 2505;
             return x;
         };
+
+        return cond;
     };
 
     insta::assert_display_snapshot!(queries_1.to_raw().build());
