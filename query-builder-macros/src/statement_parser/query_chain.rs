@@ -108,7 +108,7 @@ impl QueriesChainParser {
                 (quote!(), quote!())
             },
             QueryParser::ReturnStatement(r_stmt) => {
-                let ReturnStatementParser { expr, generated_ident, _return, _end} = r_stmt;
+                let ReturnStatementParser { expr, generated_ident, _return, } = r_stmt;
                 
                 (
                 quote! {
