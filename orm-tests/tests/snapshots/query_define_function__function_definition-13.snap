@@ -8,5 +8,5 @@ LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $las
 IF $person[0].id IS NOT NONE 
 	{ RETURN $person; }
 ELSE
-	{ RETURN (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg); }
+	{ RETURN (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg); };
 };

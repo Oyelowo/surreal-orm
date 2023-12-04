@@ -1,0 +1,65 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query_chain.fine_tune_params()
+---
+LET $balance1 = $_param_00000001;
+
+CREATE balance CONTENT $_param_00000002;
+
+IF balance > $_param_00000003 
+	{ LET $first_name = $_param_00000004;
+
+LET $score = $_param_00000005;
+
+SELECT * FROM account WHERE balance = $_param_00000006; }
+ELSE IF balance < $_param_00000007 
+	{ LET $first_name = $_param_00000008;
+
+LET $score = $_param_00000009;
+
+SELECT * FROM account WHERE balance = $_param_00000010; }
+ELSE IF balance >= $_param_00000011 
+	{ LET $first_name = $_param_00000012;
+
+LET $score = $_param_00000013;
+
+SELECT * FROM account WHERE balance = $_param_00000014; }
+ELSE
+	{ LET $first_name = $_param_00000015;
+
+LET $score = $_param_00000016;
+
+SELECT * FROM account WHERE balance = $_param_00000017; };
+
+FOR $name IN $_param_00000018 {
+LET $first = $_param_00000019;
+
+SELECT * FROM account WHERE balance = $_param_00000020;
+
+LET $good_stmt = $_param_00000021;
+
+IF balance > $_param_00000022 
+	{ LET $first_name = $_param_00000023; };
+
+SELECT * FROM account WHERE balance = $_param_00000024;
+
+LET $numbers = $_param_00000025;
+
+FOR $age IN $numbers {
+LET $score = $_param_00000026;
+
+LET $first_stmt = $_param_00000027;
+
+LET $second_stmt = $_param_00000028;
+
+SELECT * FROM account WHERE balance = $_param_00000029;
+};
+};
+
+LET $balance3 = $_param_00000030;
+
+LET $accounts = $_param_00000031;
+
+LET $updated1 = $_param_00000032;
+
+LET $update2 = $_param_00000033;

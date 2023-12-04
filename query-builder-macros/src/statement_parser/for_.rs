@@ -168,7 +168,6 @@ impl ForLoopMetaParser {
             #crate_name::statements::for_(#iteration_param).in_(#iterable)
             .block(
                 #( #query_chain )*
-                .parenthesized()
             )
         });
 
