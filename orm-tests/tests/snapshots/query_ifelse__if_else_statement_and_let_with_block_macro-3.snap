@@ -1,8 +1,8 @@
 ---
 source: orm-tests/tests/query_ifelse.rs
-expression: queries_1.to_raw().build()
+expression: query_result_1.to_raw().build()
 ---
-{
+SELECT * FROM {
 LET $val = 7;
 
 LET $oye_name = 'Oyelowo';
@@ -15,4 +15,4 @@ RETURN $x;
 };
 
 RETURN $cond;
-}
+};
