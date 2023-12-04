@@ -103,7 +103,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         }
     };
 
-    // If declared outside of a block
+    // f declared outside of a block
     // let_!(val = 4);
     // let_!(oye_name = "Oyelowo");
     let queries_2 = block! {
@@ -127,22 +127,18 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         let val = 4;
         let oye_name = "Not Oyelowo";
 
-        return if_(val.greater_than(5))
-            .then(
-        query_turbo!(                select(All)
-                    .from(space_ship)
-                    .order_by(order(name).desc());)
-            )
-            .else_if(oye_name.equal("Oyelowo"))
-            .then(
-        query_turbo!(
-                        select(All)
+        return if (val.greater_than(5)) {
+            select(All)
+                .from(space_ship)
+                .order_by(order(name).desc());
+            }
+            else if(oye_name.equal("Oyelowo")) {
+                select(All)
                     .from(weapon)
                     .order_by(order(strength).desc());
-        )
-            )
-            .else_(query_turbo!(let x = 2505;))
-            .end();
+            } else {
+                let x = 2505;
+        };
     };
 
     let query_result_3 = select(All)
@@ -210,7 +206,7 @@ async fn test_if_else_statement_and_let_macro() -> SurrealOrmResult<()> {
     //     "\
     // LET $val = $_param_00000001;\n\n\
     // LET $name = $_param_00000002;\n\n\
-    // IF $val > $_param_00000003 THEN\n\
+    // F $val > $_param_00000003 THEN\n\
     // \t$_param_00000004\n\
     // ELSE IF $name = $_param_00000005 THEN\n\
     // \t$_param_00000006\n\
