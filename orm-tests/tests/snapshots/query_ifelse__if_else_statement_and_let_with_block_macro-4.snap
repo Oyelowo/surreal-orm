@@ -1,8 +1,8 @@
 ---
 source: orm-tests/tests/query_ifelse.rs
-expression: queries_1.fine_tune_params()
+expression: query_result_1.fine_tune_params()
 ---
-{
+SELECT * FROM {
 LET $val = $_param_00000001;
 
 LET $oye_name = $_param_00000002;
@@ -12,4 +12,4 @@ LET $select_space_ship = $_param_00000003;
 LET $cond = $_param_00000004;
 
 RETURN $cond;
-}
+};

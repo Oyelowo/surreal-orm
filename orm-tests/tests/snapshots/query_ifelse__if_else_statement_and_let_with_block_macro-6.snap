@@ -1,0 +1,13 @@
+---
+source: orm-tests/tests/query_ifelse.rs
+expression: queries_2.fine_tune_params()
+---
+{
+LET $val = $_param_00000001;
+
+LET $oye_name = $_param_00000002;
+
+RETURN {
+RETURN $_param_00000003;
+};
+}

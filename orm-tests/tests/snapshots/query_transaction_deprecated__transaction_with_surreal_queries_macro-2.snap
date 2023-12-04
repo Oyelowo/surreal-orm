@@ -1,0 +1,18 @@
+---
+source: orm-tests/tests/query_transaction_deprecated.rs
+expression: transaction_query.to_raw().build()
+---
+BEGIN TRANSACTION;
+
+LET $balance = (CREATE balance CONTENT { amount: 300f, id: balance:balance1 });
+
+CREATE account CONTENT { balance: 135605.16f, id: account:one };
+
+CREATE account CONTENT { balance: 91031.31f, id: account:two };
+
+UPDATE account:one SET balance += $balance.amount;
+
+UPDATE account:two SET balance -= 300f;
+
+COMMIT TRANSACTION;
+	

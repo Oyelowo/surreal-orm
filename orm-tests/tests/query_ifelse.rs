@@ -80,8 +80,12 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         SpaceShip(SpaceShip),
         Number(u32),
     }
-    let query_result_1 = select(All)
-        .from(queries_1)
+    let query_result_1 = select(All).from(queries_1);
+
+    insta::assert_display_snapshot!(query_result_1.to_raw().build());
+    insta::assert_display_snapshot!(query_result_1.fine_tune_params());
+
+    let query_result_1 = query_result_1
         .return_many::<SpaceShipOrWeapon>(db.clone())
         .await?;
 
@@ -92,12 +96,15 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
 
     // A good way to share a query across multiple blocks
     let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
+        // if you use return keyword in any of the if blocks, you have to
+        // // to use in other blocks also if you want the statement be returned.
+        // // but if you dont use in any, it will implicitly return all last statements.
         query_turbo! {
             return if (val.greater_than(5)) {
                 select(All).from(space_ship).order_by(order(name).desc());
                 return 6;
             } else if (oye_name.equal("Oyelowo")){
-               select(All).from(weapon).order_by(order(strength).desc());
+               return select(All).from(weapon).order_by(order(strength).desc());
             } else {
                 let x = 2505;
                 return 5;
@@ -105,6 +112,13 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         }
     };
 
+    let x = {
+        let ref val = surreal_orm::statements::let_("val").equal_to(4);
+        let ref oye_name = surreal_orm::statements::let_("oye_name").equal_to("Oyelowo");
+        let surreal_orm_private_internal_variable_prefix_dbfc_66719903464_d_919_ad_55_ee_068_a_629 =
+            surreal_orm::statements::return_(if_else_external(val, oye_name));
+        surreal_orm::chain(val).chain(oye_name).chain(surreal_orm_private_internal_variable_prefix_dbfc_66719903464_d_919_ad_55_ee_068_a_629).as_block()
+    };
     // f declared outside of a block
     // let_!(val = 4);
     // let_!(oye_name = "Oyelowo");
@@ -113,6 +127,9 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         let oye_name = "Oyelowo";
         return if_else_external(val, oye_name);
     };
+
+    insta::assert_display_snapshot!(queries_2.to_raw().build());
+    insta::assert_display_snapshot!(queries_2.fine_tune_params());
 
     let query_result_2: Vec<SpaceShipOrWeapon> =
         select(All).from(queries_2).return_many(db.clone()).await?;
