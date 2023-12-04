@@ -23,6 +23,7 @@ use super::{
 // body -> query chain
 // }
 
+#[derive(Debug, Clone)]
 pub struct Body(QueriesChainParser);
 
 impl Body {
@@ -54,6 +55,7 @@ impl Parse for Body {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Expression {
     Expr(Expr),
     Ident(Ident),
@@ -83,6 +85,7 @@ impl Parse for Expression {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct CondMeta {
     pub condition: Expression,
     pub body: Body,
@@ -106,6 +109,7 @@ impl Parse for CondMeta {
         }
     }
 }
+#[derive(Debug, Clone)]
 pub struct IfMeta(CondMeta);
 
 impl std::ops::Deref for IfMeta {
@@ -122,6 +126,7 @@ impl Parse for IfMeta {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ElseIfMeta(CondMeta);
 
 impl std::ops::Deref for ElseIfMeta {
@@ -141,6 +146,7 @@ impl Parse for ElseIfMeta {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Else {
     pub body: Body,
 }
@@ -154,6 +160,7 @@ impl Parse for Else {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct IfElseMetaParser {
     pub if_meta: IfMeta,
     pub else_if_meta: Vec<ElseIfMeta>,
@@ -206,6 +213,7 @@ impl Parse for IfElseMetaParser {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct IfElseStatementParser {
     pub meta_content: Box<IfElseMetaParser>,
 }

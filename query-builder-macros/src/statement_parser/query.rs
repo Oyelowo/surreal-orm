@@ -17,6 +17,14 @@ use super::{
     },
 };
 
+#[derive(Debug, Clone)]
+enum Expression {
+    Expr(Expr),
+    Ident(Ident),
+    IfElse(IfElseStatementParser),
+}
+
+#[derive(Debug, Clone)]
 pub(crate) enum QueryParser {
     LetStatement(LetStatementParser),
     ForLoop(ForLoopStatementParser),
@@ -50,10 +58,13 @@ impl QueryParser {
     pub fn is_return_statement(&self) -> bool {
         match self {
             QueryParser::ReturnStatement(_) => true,
-            QueryParser::IfEsle(s) => s.has_return_statement(),
-            QueryParser::ForLoop(s) => s.has_return_statement(),
+            // TODO: Consider removing IfElse and ForLoop from here.
+            // We shouldn't use the following because the return statement from within
+            // them do not blow up to the outer scope. They only return for the specific if else or
+            // for loop block/context.
+            // QueryParser::IfEsle(s) => s.has_return_statement(),
+            // QueryParser::ForLoop(s) => s.has_return_statement(),
             _ => false,
-            
         }
     }
 }

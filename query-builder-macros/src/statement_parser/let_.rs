@@ -9,6 +9,7 @@ use syn::{
 
 use proc_macros_helpers::get_crate_name;
 
+#[derive(Debug, Clone)]
 pub(crate) struct LetStatementParser {
     pub ident: Ident,
     pub _eq: Token![=],

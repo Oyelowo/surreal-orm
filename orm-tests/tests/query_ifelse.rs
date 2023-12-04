@@ -47,32 +47,6 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         ..
     } = Weapon::schema();
 
-    //     let xx = {
-    //         let ref val = surreal_orm::statements::let_("val").equal_to(7);
-    //         let ref oye_name = surreal_orm::statements::let_("oye_name").equal_to("Oyelowo");
-    //         let ref select_space_ship = surreal_orm::statements::let_("select_space_ship")
-    //             .equal_to(select(All).from(space_ship).order_by(order(name).desc()));
-    //
-    //         let surreal_orm_private_internal_variable_prefix_5_cde_0_e_9_b_58_df_49_ee_9_e_25_a_66_f_21_d_64_a_78 = surreal_orm::statements::if_
-    //             (val.greater_than(5)).then(
-    //                 {
-    //   let surreal_orm_private_internal_variable_prefix_0_c_44_b_9_b_2_eca_34784_bafa_4744632_c_8751 = surreal_orm::statements::return_(
-    //                         select_space_ship);
-    //   surreal_orm::chain(surreal_orm_private_internal_variable_prefix_0_c_44_b_9_b_2_eca_34784_bafa_4744632_c_8751)
-    // }).else_if(oye_name.equal("Oyelowo")).then(
-    //                 {
-    //   let surreal_orm_private_internal_variable_prefix_a_1_d_94_f_1_a_8_f_9246238_a_29879_a_9_a_289_e_82 = surreal_orm::statements::return_(select(All).from(weapon).order_by(order(strength).desc()));
-    //   surreal_orm::chain(surreal_orm_private_internal_variable_prefix_a_1_d_94_f_1_a_8_f_9246238_a_29879_a_9_a_289_e_82)
-    // }).else_({
-    //   let ref x = surreal_orm::statements::let_("x").equal_to(2505);
-    //   let surreal_orm_private_internal_variable_prefix_f_544_ad_4_a_8_aa_34_bb_38_faa_31_f_853866_a_16 = surreal_orm::statements::return_(x);
-    //   surreal_orm::chain(x).chain(surreal_orm_private_internal_variable_prefix_f_544_ad_4_a_8_aa_34_bb_38_faa_31_f_853866_a_16)
-    // }).end();
-    //         let surreal_orm_private_internal_variable_prefix_7_b_955_bc_6_a_7_ac_46668963_cd_1021751636 =
-    //             surreal_orm::statements::return_(55);
-    //         surreal_orm::chain(val).chain(oye_name).chain(select_space_ship).chain(surreal_orm_private_internal_variable_prefix_5_cde_0_e_9_b_58_df_49_ee_9_e_25_a_66_f_21_d_64_a_78).chain(surreal_orm_private_internal_variable_prefix_7_b_955_bc_6_a_7_ac_46668963_cd_1021751636).as_block()
-    //     };
-
     let queries_1 = query_turbo! {
         let val = 7;
         let oye_name = "Oyelowo";
@@ -111,7 +85,38 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
     };
 
+    let oye_name = let_("oye_name").equal_to("Oyelowo");
+    let xxx = {
+        let surreal_orm_private_internal_variable_prefix_d_9139062_ced_04_e_758082_fc_1_a_85068047 = surreal_orm::statements::if_(val.greater_than(5)).then({
+  let surreal_orm_private_internal_variable_prefix_e_1_fc_7976_b_2_cd_4_a_4_f_92_b_30_bbdc_8_f_1_ddad = select(All).from(space_ship).order_by(order(name).desc());
+  let surreal_orm_private_internal_variable_prefix_b_35226_c_75_fac_4_edead_89_f_68_c_7036540_c = surreal_orm::statements::return_(6);
+  surreal_orm::chain(surreal_orm_private_internal_variable_prefix_e_1_fc_7976_b_2_cd_4_a_4_f_92_b_30_bbdc_8_f_1_ddad).chain(surreal_orm_private_internal_variable_prefix_b_35226_c_75_fac_4_edead_89_f_68_c_7036540_c)
+}).else_if(oye_name.equal("Oyelowo")).then({
+  let surreal_orm_private_internal_variable_prefix_cc_0_b_1_d_58_ed_5048_c_3_a_2_c_90371_ba_4_aad_5_f = select(All).from(weapon).order_by(order(strength).desc());
+  surreal_orm::chain(surreal_orm_private_internal_variable_prefix_cc_0_b_1_d_58_ed_5048_c_3_a_2_c_90371_ba_4_aad_5_f)
+}).else_({
+  let ref x = surreal_orm::statements::let_("x").equal_to(2505);
+  surreal_orm::chain(x)
+}).end();
+        surreal_orm::chain(
+            surreal_orm_private_internal_variable_prefix_d_9139062_ced_04_e_758082_fc_1_a_85068047,
+        )
+    };
+
     // A good way to share a query across multiple blocks
+    let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
+        let x = query_turbo! {
+            if (val.greater_than(5)) {
+                select(All).from(space_ship).order_by(order(name).desc());
+                return 6;
+            }
+            else if (oye_name.equal("Oyelowo")){
+               select(All).from(weapon).order_by(order(strength).desc());
+            } else {
+                let x = 2505;
+            };
+        };
+    };
     let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
         if_(val.greater_than(5))
             .then(query_turbo!(select(All)

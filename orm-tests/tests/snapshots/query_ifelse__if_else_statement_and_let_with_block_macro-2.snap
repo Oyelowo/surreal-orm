@@ -17,6 +17,4 @@ ELSE
 	{ LET $x = $_param_00000007;
 
 RETURN $x; }
-
-RETURN $_param_00000008;
 }

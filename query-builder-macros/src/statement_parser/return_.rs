@@ -11,6 +11,7 @@ use proc_macros_helpers::get_crate_name;
 
 use super::helpers::generate_variable_name;
 
+#[derive(Debug, Clone)]
 pub struct ReturnStatementParser {
     pub _return: Token![return],
     pub expr: Expr,
