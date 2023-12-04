@@ -47,13 +47,16 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         ..
     } = Weapon::schema();
 
+    //     let z = {
+    // };
+
     let queries_1 = query_turbo! {
         let val = 7;
         let oye_name = "Oyelowo";
         // You can even assign a statement
         let select_space_ship = select(All).from(space_ship).order_by(order(name).desc());
 
-        if val.greater_than(5) {
+        return if val.greater_than(5) {
             return select_space_ship;
         } else if oye_name.equal("Oyelowo") {
             return select(All)
@@ -85,48 +88,21 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         assert_eq!(s.id.to_string(), "space_ship:⟨num-6⟩");
     };
 
-    let oye_name = let_("oye_name").equal_to("Oyelowo");
-    let xxx = {
-        let surreal_orm_private_internal_variable_prefix_d_9139062_ced_04_e_758082_fc_1_a_85068047 = surreal_orm::statements::if_(val.greater_than(5)).then({
-  let surreal_orm_private_internal_variable_prefix_e_1_fc_7976_b_2_cd_4_a_4_f_92_b_30_bbdc_8_f_1_ddad = select(All).from(space_ship).order_by(order(name).desc());
-  let surreal_orm_private_internal_variable_prefix_b_35226_c_75_fac_4_edead_89_f_68_c_7036540_c = surreal_orm::statements::return_(6);
-  surreal_orm::chain(surreal_orm_private_internal_variable_prefix_e_1_fc_7976_b_2_cd_4_a_4_f_92_b_30_bbdc_8_f_1_ddad).chain(surreal_orm_private_internal_variable_prefix_b_35226_c_75_fac_4_edead_89_f_68_c_7036540_c)
-}).else_if(oye_name.equal("Oyelowo")).then({
-  let surreal_orm_private_internal_variable_prefix_cc_0_b_1_d_58_ed_5048_c_3_a_2_c_90371_ba_4_aad_5_f = select(All).from(weapon).order_by(order(strength).desc());
-  surreal_orm::chain(surreal_orm_private_internal_variable_prefix_cc_0_b_1_d_58_ed_5048_c_3_a_2_c_90371_ba_4_aad_5_f)
-}).else_({
-  let ref x = surreal_orm::statements::let_("x").equal_to(2505);
-  surreal_orm::chain(x)
-}).end();
-        surreal_orm::chain(
-            surreal_orm_private_internal_variable_prefix_d_9139062_ced_04_e_758082_fc_1_a_85068047,
-        )
-    };
-
     // A good way to share a query across multiple blocks
     let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
-        let x = query_turbo! {
-            if (val.greater_than(5)) {
+        query_turbo! {
+            return if (val.greater_than(5)) {
                 select(All).from(space_ship).order_by(order(name).desc());
                 return 6;
-            }
-            else if (oye_name.equal("Oyelowo")){
+            } else if (oye_name.equal("Oyelowo")){
                select(All).from(weapon).order_by(order(strength).desc());
             } else {
                 let x = 2505;
+                return 5;
             };
-        };
+        }
     };
-    let if_else_external = |val: &LetStatement, oye_name: &LetStatement| {
-        if_(val.greater_than(5))
-            .then(query_turbo!(select(All)
-                .from(space_ship)
-                .order_by(order(name).desc());))
-            .else_if(oye_name.equal("Oyelowo"))
-            .then(query_turbo!(select(All).from(weapon).order_by(order(strength).desc());))
-            .else_(query_turbo!(let x = 2505;))
-            .end()
-    };
+
     // If declared outside of a block
     // let_!(val = 4);
     // let_!(oye_name = "Oyelowo");

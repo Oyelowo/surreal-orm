@@ -56,38 +56,38 @@ impl Parse for Body {
 }
 
 #[derive(Debug, Clone)]
-pub enum Expression {
+pub enum IfElseCondExpression {
     Expr(Expr),
     Ident(Ident),
 }
 
-impl ToTokens for Expression {
+impl ToTokens for IfElseCondExpression {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Expression::Expr(expr) => expr.to_tokens(tokens),
-            Expression::Ident(ident) => ident.to_tokens(tokens),
+            IfElseCondExpression::Expr(expr) => expr.to_tokens(tokens),
+            IfElseCondExpression::Ident(ident) => ident.to_tokens(tokens),
         }
     }
 }
 
-impl Parse for Expression {
+impl Parse for IfElseCondExpression {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let fork = input.fork();
         fork.parse::<Ident>()?;
 
         if (fork.is_empty()) || (fork.peek(token::Brace)) {
             let ident = input.parse()?;
-            Ok(Expression::Ident(ident))
+            Ok(IfElseCondExpression::Ident(ident))
         } else {
             let expr = input.parse()?;
-            Ok(Expression::Expr(expr))
+            Ok(IfElseCondExpression::Expr(expr))
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct CondMeta {
-    pub condition: Expression,
+    pub condition: IfElseCondExpression,
     pub body: Body,
 }
 
@@ -214,11 +214,18 @@ impl Parse for IfElseMetaParser {
 }
 
 #[derive(Debug, Clone)]
-pub struct IfElseStatementParser {
+pub struct IfElseStatementAst {
     pub meta_content: Box<IfElseMetaParser>,
 }
 
-impl std::ops::Deref for IfElseStatementParser {
+impl ToTokens for IfElseStatementAst {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let if_else: proc_macro2::TokenStream = self.to_tokens_custom().into();
+        if_else.into_token_stream().to_tokens(tokens)
+    }
+}
+
+impl std::ops::Deref for IfElseStatementAst {
     type Target = IfElseMetaParser;
 
     fn deref(&self) -> &Self::Target {
@@ -226,11 +233,11 @@ impl std::ops::Deref for IfElseStatementParser {
     }
 }
 
-impl Parse for IfElseStatementParser {
+impl Parse for IfElseStatementAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<syn::Token![if]>()?;
         let for_loop = input.parse::<IfElseMetaParser>()?;
-        Ok(IfElseStatementParser {
+        Ok(IfElseStatementAst {
             meta_content: Box::new(for_loop),
         })
     }
@@ -320,20 +327,23 @@ impl IfElseMetaParser {
             query_chain: to_render.into(),
         }
     }
+
+    pub fn to_tokens_custom(&self) -> TokenStream {
+        let z = &self.tokenize();
+        let to_render: proc_macro2::TokenStream = z.code_to_render.clone().into();
+        let to_chain: proc_macro2::TokenStream = z.query_chain.clone().into();
+
+        quote!(
+
+            #to_chain
+
+        )
+        .into()
+    }
 }
 
 pub fn if_else(input: TokenStream) -> TokenStream {
     let if_else = syn::parse_macro_input!(input as IfElseMetaParser);
 
-    let z = &if_else.tokenize();
-    let to_render: proc_macro2::TokenStream = z.code_to_render.clone().into();
-    let to_chain: proc_macro2::TokenStream = z.query_chain.clone().into();
-
-    quote!(
-        #to_render
-
-        #to_chain
-
-    )
-    .into()
+    if_else.to_tokens_custom()
 }

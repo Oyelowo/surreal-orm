@@ -8,9 +8,9 @@ use syn::{
 use super::{
     for_::ForLoopStatementParser,
     helpers::generate_variable_name,
-    if_else::IfElseStatementParser,
+    if_else::IfElseStatementAst,
     let_::LetStatementParser,
-    return_::ReturnStatementParser,
+    return_::{ReturnExpr, ReturnStatementParser},
     transaction::{
         BeginTransactionStatementParser, CancelTransactionStatementParser,
         CommitTransactionStatementParser,
@@ -21,14 +21,14 @@ use super::{
 enum Expression {
     Expr(Expr),
     Ident(Ident),
-    IfElse(IfElseStatementParser),
+    IfElse(IfElseStatementAst),
 }
 
 #[derive(Debug, Clone)]
 pub(crate) enum QueryParser {
     LetStatement(LetStatementParser),
     ForLoop(ForLoopStatementParser),
-    IfEsle(IfElseStatementParser),
+    IfEsle(IfElseStatementAst),
     BeginTransaction,
     CommitTransaction,
     CancelTransaction,
@@ -189,12 +189,14 @@ impl Parse for QueryParser {
             }
             StatementType::Return => {
                 let _return: Token![return] = input.parse()?;
-                let expr = input.parse::<Expr>()?;
-                let _end: Token![;] = input.parse()?;
+                let expr = input.parse::<ReturnExpr>()?;
+                if input.peek(Token![;]) {
+                    let _end: Token![;] = input.parse()?;
+                }
                 Ok(QueryParser::ReturnStatement(ReturnStatementParser {
                     _return,
                     expr,
-                    _end,
+                    // _end,
                     generated_ident: generate_variable_name(),
                 }))
             }
@@ -225,7 +227,7 @@ impl Parse for QueryParser {
                 Ok(QueryParser::ForLoop(for_loop))
             }
             StatementType::IfElse => {
-                let if_else = input.parse::<IfElseStatementParser>()?;
+                let if_else = input.parse::<IfElseStatementAst>()?;
                 Ok(QueryParser::IfEsle(if_else))
             }
         }
