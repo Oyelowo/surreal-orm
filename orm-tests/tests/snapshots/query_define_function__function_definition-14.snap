@@ -8,5 +8,5 @@ LET $person = $_param_00000001;
 IF $person[$_param_00000002].id IS NOT NONE 
 	{ RETURN $person; }
 ELSE
-	{ RETURN $_param_00000003; }
+	{ RETURN $_param_00000003; };
 };

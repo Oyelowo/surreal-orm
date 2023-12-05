@@ -1,0 +1,10 @@
+---
+source: query-builder/src/statements/ifelse.rs
+expression: if_statement4.to_raw().build()
+---
+IF age >= 18 <= 120 
+	{ SELECT * FROM user; }
+ELSE IF name ~ 'Oyelowo Oyedayo' 
+	{ SELECT * FROM book; }
+ELSE
+	{ SELECT * FROM fruit; };
