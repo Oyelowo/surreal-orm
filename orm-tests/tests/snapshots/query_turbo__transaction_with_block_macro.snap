@@ -2,6 +2,8 @@
 source: orm-tests/tests/query_turbo.rs
 expression: query_chain.to_raw().build()
 ---
+BEGIN TRANSACTION;
+
 LET $balance1 = (CREATE balance CONTENT { amount: 300f, id: balance:balance1 });
 
 CREATE balance CONTENT { amount: 300f, id: balance:balance1 };
@@ -63,3 +65,6 @@ LET $accounts = (SELECT * FROM account:one..=two);
 LET $updated1 = (UPDATE account:one SET balance += $balance1.amount);
 
 LET $update2 = (UPDATE account:two SET balance -= 300f);
+
+COMMIT TRANSACTION;
+	

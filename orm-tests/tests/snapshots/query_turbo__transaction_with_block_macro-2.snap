@@ -2,6 +2,8 @@
 source: orm-tests/tests/query_turbo.rs
 expression: query_chain.fine_tune_params()
 ---
+BEGIN TRANSACTION;
+
 LET $balance1 = $_param_00000001;
 
 CREATE balance CONTENT $_param_00000002;
@@ -63,3 +65,6 @@ LET $accounts = $_param_00000031;
 LET $updated1 = $_param_00000032;
 
 LET $update2 = $_param_00000033;
+
+COMMIT TRANSACTION;
+	
