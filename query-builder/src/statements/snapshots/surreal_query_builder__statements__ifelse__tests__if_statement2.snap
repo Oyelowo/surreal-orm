@@ -1,0 +1,8 @@
+---
+source: query-builder/src/statements/ifelse.rs
+expression: if_statement2.fine_tune_params()
+---
+IF age >= $_param_00000001 <= $_param_00000002 
+	{ SELECT * FROM user WHERE age > $_param_00000003; }
+ELSE
+	{ SELECT * FROM book; };
