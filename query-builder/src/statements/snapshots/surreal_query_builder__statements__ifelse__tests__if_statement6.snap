@@ -3,10 +3,10 @@ source: query-builder/src/statements/ifelse.rs
 expression: if_statement5.fine_tune_params()
 ---
 IF age >= $_param_00000001 <= $_param_00000002 
-	{ SELECT * FROM $_param_00000003 WHERE (city IS $_param_00000004) AND (city IS $_param_00000005) OR (city ~ $_param_00000006) ORDER BY age NUMERIC LIMIT $_param_00000007 START AT $_param_00000008 PARALLEL; }
-ELSE IF name ~ $_param_00000009 
-	{ SELECT * FROM $_param_00000010 WHERE country IS $_param_00000011 ORDER BY age NUMERIC LIMIT $_param_00000012 START AT $_param_00000013; }
-ELSE IF (country IS $_param_00000014) OR (country IS $_param_00000015) 
-	{ SELECT * FROM fruit; }
+	{ $_param_00000003 }
+ELSE IF name ~ $_param_00000004 
+	{ $_param_00000005 }
+ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) 
+	{ $_param_00000008 }
 ELSE
-	{ SELECT * FROM book; };
+	{ $_param_00000009 };

@@ -117,7 +117,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             });
 
          create().content(Balance {
-                id: Balance::create_id("balance1".to_string()),
+                id: Balance::create_id("balance2".to_string()),
                 amount: amount_to_transfer,
             });
 
@@ -168,7 +168,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         };
 
          let  balance3 = create().content(Balance {
-                id: Balance::create_id("balance1".into()),
+                id: Balance::create_id("balance3".into()),
                 amount: amount_to_transfer,
             });
 
@@ -191,24 +191,22 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     // TODO: Update db engine and also figure out why this is not being executed.
     // Got this error:
     // called `Result::unwrap()` on an `Err` value: Db(QueryNotExecuted)
-    // let result = query_chain
-    //     .run(db.clone())
-    //     .await?
-    //     .take::<Vec<Account>>(0)
+    let result = query_chain.run(db.clone()).await?;
+    //     .take::<Vec<Account>>(5)
     //     .unwrap();
     //
-    // // assert_eq!(result.len(), 3);
-    // // assert_eq!(result[0].balance, 35_605.16);
-    // // assert_eq!(result[1].balance, 90_731.31);
+    // assert_eq!(result.len(), 3);
+    // assert_eq!(result[0].balance, 35_605.16);
+    // assert_eq!(result[1].balance, 90_731.31);
     // //
-    // let accounts = select(All)
-    //     .from(id1..=id2)
-    //     .return_many::<Account>(db.clone())
-    //     .await?;
+    let accounts = select(All)
+        .from(id1..=id2)
+        .return_many::<Account>(db.clone())
+        .await?;
     //
-    // assert_eq!(accounts.len(), 2);
-    // assert_eq!(accounts[0].balance, 135_605.16);
-    // assert_eq!(accounts[1].balance, 90_731.31);
+    assert_eq!(accounts.len(), 2);
+    assert_eq!(accounts[0].balance, 135_605.16);
+    assert_eq!(accounts[1].balance, 90_731.31);
     // assert_eq!(accounts[0].id.to_string(), "account:one");
     // assert_eq!(accounts[1].id.to_string(), "account:two");
     Ok(())

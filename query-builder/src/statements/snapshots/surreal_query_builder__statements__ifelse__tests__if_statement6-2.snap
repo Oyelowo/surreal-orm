@@ -3,10 +3,10 @@ source: query-builder/src/statements/ifelse.rs
 expression: if_statement5.to_raw().build()
 ---
 IF age >= 18 <= 120 
-	{ SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC LIMIT 153 START AT 10 PARALLEL; }
+	{ (SELECT * FROM user:oyelowo WHERE (city = 'Prince Edward Island') AND (city = 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC LIMIT 153 START 10 PARALLEL) }
 ELSE IF name ~ 'Oyelowo Oyedayo' 
-	{ SELECT * FROM user:oyedayo WHERE country IS 'INDONESIA' ORDER BY age NUMERIC LIMIT 20 START AT 5; }
+	{ (SELECT * FROM user:oyedayo WHERE country = 'INDONESIA' ORDER BY age NUMERIC LIMIT 20 START 5) }
 ELSE IF (country IS 'Canada') OR (country IS 'Norway') 
-	{ SELECT * FROM fruit; }
+	{ (SELECT * FROM fruit) }
 ELSE
-	{ SELECT * FROM book; };
+	{ (SELECT * FROM book) };
