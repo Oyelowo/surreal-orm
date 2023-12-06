@@ -1,0 +1,23 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.fine_tune_params()
+---
+FOR $name IN $_param_00000001 {
+LET $new_bal = $_param_00000002;
+
+SELECT * FROM account WHERE balance = $new_bal;
+
+LET $names = $_param_00000003;
+
+FOR $name IN $names {
+LET $amount_to_use = $_param_00000004;
+
+CREATE ONLY balance SET id = $_param_00000005, amount = $amount_to_use;
+};
+};
+
+FOR $name IN $_param_00000006 {
+LET $new_bal = $_param_00000007;
+
+SELECT * FROM account WHERE balance = $new_bal;
+};

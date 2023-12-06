@@ -13,10 +13,61 @@ use surreal_orm::{
 };
 use surrealdb::{engine::local::Mem, Surreal};
 
-// with simple standalone for loop
+#[tokio::test]
+async fn test_simple_standalone_for_loop() -> SurrealOrmResult<()> {
+    let account::Schema { balance, .. } = Account::schema();
+    let account_table = Account::table_name();
+
+    let query = query_turbo! {
+        for name in vec!["Oyelowo", "Oyedayo"] {
+            let new_bal = 5;
+            select(All).from(account_table).where_(balance.eq(new_bal));
+        };
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+
+    Ok(())
+}
+
+// with multiple for loops
+#[tokio::test]
+async fn test_multiple_for_loops() -> SurrealOrmResult<()> {
+    let account::Schema { balance, .. } = Account::schema();
+    let account_table = &Account::table_name();
+
+    let names_closure = || vec!["Oyelowo", "Oyedayo"];
+
+    let query = query_turbo! {
+        for name in vec!["Oyelowo", "Oyedayo"] {
+            let new_bal = 5;
+            select(All).from(account_table).where_(balance.eq(new_bal));
+
+            let names = vec!["Oyelowo", "Oyedayo"];
+            for name in names {
+                let amount_to_use = 999;
+                create_only::<Balance>().set(object!(Balance {
+                    id: Balance::create_id("balance1".to_string()),
+                    amount: amount_to_use,
+                }));
+            };
+        };
+
+        for name in  names_closure() {
+            let new_bal = 5;
+            select(All).from(account_table).where_(balance.eq(new_bal));
+        };
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+
+    Ok(())
+}
+
 // with simple standalone if else statement
 //
-// with multiple for loops
 // with multiple if else statements
 //
 // with for loop inside if else statement

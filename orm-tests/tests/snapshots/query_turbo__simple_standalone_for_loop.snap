@@ -1,0 +1,9 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.to_raw().build()
+---
+FOR $name IN ['Oyelowo', 'Oyedayo'] {
+LET $new_bal = 5;
+
+SELECT * FROM account WHERE balance = $new_bal;
+};
