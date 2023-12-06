@@ -61,27 +61,6 @@ impl From<&Param> for ForParam {
     }
 }
 
-// #[macro_export]
-// macro_rules! for_ {
-//     ($param:ident in $iterable:expr; $block:block) => {{
-//         let ref $param = $crate::Param::new(stringify!($param));
-//         $crate::statements::for_($param).in_($iterable).block($crate::block! { $block })
-//     }};
-// }
-/// A helper function to create a for loop
-/// ```
-/// use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::{select, for_}};
-///
-/// let ref __name = Param::new("name");
-/// let ref person_table = Table::from("person");
-/// let ref user_name = Field::from("user_name");
-/// let for_loop = for_(__name).in_(vec!["Oyelowo", "Oyedayo"]).block(block! {
-///    LET nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
-///    select(All).from(person_table).where_(user_name.eq(nick_name));
-/// });
-/// println!("{}", for_loop);
-/// ```
 pub fn for_(params: impl Into<ForParam>) -> ForIterable {
     ForIterable(ForStatementData {
         item_params: params.into().into(),

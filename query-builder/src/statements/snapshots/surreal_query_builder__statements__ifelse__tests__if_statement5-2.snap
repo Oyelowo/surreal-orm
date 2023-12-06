@@ -3,10 +3,10 @@ source: query-builder/src/statements/ifelse.rs
 expression: if_statement5.to_raw().build()
 ---
 IF age >= 18 <= 120 
-	{ SELECT * FROM user; }
+	{ (SELECT * FROM user) }
 ELSE IF name ~ 'Oyelowo Oyedayo' 
-	{ SELECT * FROM book; }
+	{ (SELECT * FROM book) }
 ELSE IF (country IS 'Canada') OR (country IS 'Norway') 
-	{ SELECT * FROM fruit; }
+	{ (SELECT * FROM fruit) }
 ELSE
-	{ SELECT * FROM user; };
+	{ (SELECT * FROM user) };

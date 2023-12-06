@@ -3,4 +3,4 @@ source: query-builder/src/statements/ifelse.rs
 expression: if_statement1.to_raw().build()
 ---
 IF age >= 18 <= 120 
-	{ SELECT * FROM user; };
+	{ (SELECT * FROM user) };

@@ -339,7 +339,7 @@ mod tests {
             .else_("Invalid".to_string())
             .end();
 
-        assert_eq!(if_statement.get_bindings().len(), 2);
+        assert_eq!(if_statement.get_bindings().len(), 4);
         insta::assert_display_snapshot!(if_statement.fine_tune_params());
         insta::assert_display_snapshot!(if_statement.to_raw().build());
     }
@@ -353,7 +353,7 @@ mod tests {
             .then(select(All).from(user_table))
             .end();
 
-        assert_eq!(if_statement1.get_bindings().len(), 2);
+        assert_eq!(if_statement1.get_bindings().len(), 3);
         insta::assert_display_snapshot!(if_statement1.fine_tune_params());
         insta::assert_display_snapshot!(if_statement1.to_raw().build());
     }
@@ -364,11 +364,11 @@ mod tests {
         let user_table = Table::new("user");
         let book_table = Table::new("book");
 
-        let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        let if_statement2 = if_(cond(age.gte(18)).and(age.lte(120)))
             .then(select(All).from(user_table).where_(age.gt(34)))
             .else_(select(All).from(book_table))
             .end();
-        assert_eq!(if_statement2.get_bindings().len(), 3);
+        assert_eq!(if_statement2.get_bindings().len(), 4);
 
         insta::assert_display_snapshot!(if_statement2.fine_tune_params());
         insta::assert_display_snapshot!(if_statement2.to_raw().build());
@@ -381,13 +381,13 @@ mod tests {
         let user_table = Table::new("user");
         let book_table = Table::new("book");
 
-        let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
+        let if_statement = if_(cond(age.gte(18)).and(age.lte(120)))
             .then(select(All).from(user_table))
             .else_if(name.like("Oyelowo Oyedayo"))
             .then(select(All).from(book_table))
             .end();
 
-        assert_eq!(if_statement.get_bindings().len(), 3);
+        assert_eq!(if_statement.get_bindings().len(), 5);
         assert_display_snapshot!(if_statement.fine_tune_params());
         assert_display_snapshot!(if_statement.to_raw().build());
     }
@@ -408,7 +408,7 @@ mod tests {
             .else_(select(All).from(fruit_table))
             .end();
 
-        assert_eq!(if_statement4.get_bindings().len(), 3);
+        assert_eq!(if_statement4.get_bindings().len(), 6);
         assert_display_snapshot!(if_statement4.fine_tune_params());
         assert_display_snapshot!(if_statement4.to_raw().build());
     }
@@ -432,7 +432,7 @@ mod tests {
             .else_(select(All).from(user_table))
             .end();
 
-        assert_eq!(if_statement5.get_bindings().len(), 5);
+        assert_eq!(if_statement5.get_bindings().len(), 9);
         assert_display_snapshot!(if_statement5.fine_tune_params());
         assert_display_snapshot!(if_statement5.to_raw().build());
     }
@@ -477,7 +477,7 @@ mod tests {
             .else_(select(All).from(book_table))
             .end();
 
-        assert_eq!(if_statement5.get_bindings().len(), 15);
+        assert_eq!(if_statement5.get_bindings().len(), 9);
         assert_display_snapshot!(if_statement5.fine_tune_params());
         assert_display_snapshot!(if_statement5.to_raw().build());
     }

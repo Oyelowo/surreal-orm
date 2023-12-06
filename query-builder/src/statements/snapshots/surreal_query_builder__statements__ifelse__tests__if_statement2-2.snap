@@ -2,7 +2,7 @@
 source: query-builder/src/statements/ifelse.rs
 expression: if_statement2.to_raw().build()
 ---
-IF age >= 18 <= 120 
-	{ SELECT * FROM user WHERE age > 34; }
+IF (age >= 18) AND (age <= 120) 
+	{ (SELECT * FROM user WHERE age > 34) }
 ELSE
-	{ SELECT * FROM book; };
+	{ (SELECT * FROM book) };

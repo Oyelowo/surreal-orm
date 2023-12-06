@@ -3,10 +3,10 @@ source: query-builder/src/statements/ifelse.rs
 expression: if_statement5.fine_tune_params()
 ---
 IF age >= $_param_00000001 <= $_param_00000002 
-	{ SELECT * FROM user; }
-ELSE IF name ~ $_param_00000003 
-	{ SELECT * FROM book; }
-ELSE IF (country IS $_param_00000004) OR (country IS $_param_00000005) 
-	{ SELECT * FROM fruit; }
+	{ $_param_00000003 }
+ELSE IF name ~ $_param_00000004 
+	{ $_param_00000005 }
+ELSE IF (country IS $_param_00000006) OR (country IS $_param_00000007) 
+	{ $_param_00000008 }
 ELSE
-	{ SELECT * FROM user; };
+	{ $_param_00000009 };
