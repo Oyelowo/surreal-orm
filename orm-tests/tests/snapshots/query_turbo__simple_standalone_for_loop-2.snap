@@ -1,0 +1,9 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.fine_tune_params()
+---
+FOR $name IN $_param_00000001 {
+LET $new_bal = $_param_00000002;
+
+SELECT * FROM account WHERE balance = $new_bal;
+};
