@@ -92,6 +92,48 @@ pub fn if_(condition: impl Conditional) -> IfStatement {
 }
 
 #[derive(Debug, Clone)]
+pub enum Bodyyy {
+    Expression(Expression),
+    Body(QueryChain),
+}
+
+// impl From<Expression> for IfElseExpressionNew {
+//     fn from(value: Expression) -> Self {
+//         Self::Expression(value)
+//     }
+// }
+
+impl<T: Into<Expression>> From<T> for Bodyyy {
+    fn from(value: T) -> Self {
+        Self::Expression(value.into())
+    }
+}
+
+impl From<QueryChain> for Bodyyy {
+    fn from(value: QueryChain) -> Self {
+        Self::Body(value)
+    }
+}
+
+impl Buildable for Bodyyy {
+    fn build(&self) -> String {
+        match self {
+            Self::Expression(expr) => expr.build(),
+            Self::Body(body) => body.build(),
+        }
+    }
+}
+
+impl Parametric for Bodyyy {
+    fn get_bindings(&self) -> BindingsList {
+        match self {
+            Self::Expression(expr) => expr.get_bindings(),
+            Self::Body(body) => body.get_bindings(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 struct IfElseExpression(Expression);
 
 impl From<Expression> for IfElseExpression {
@@ -136,8 +178,8 @@ impl ThenExpression {
         }
     }
 
-    pub fn else_(mut self, body: impl Into<Body>) -> ElseStatement {
-        let body: Body = body.into();
+    pub fn else_(mut self, body: impl Into<Bodyyy>) -> ElseStatement {
+        let body: Bodyyy = body.into();
 
         self.bindings.extend(body.get_bindings());
         self.flow_data.else_data = Some(body);
@@ -199,7 +241,7 @@ impl std::ops::Deref for Body {
 struct FlowStatementData {
     if_data: CondMeta,
     else_if_data: Vec<CondMeta>,
-    else_data: Option<Body>,
+    else_data: Option<Bodyyy>,
 }
 
 impl FlowStatementData {
@@ -215,7 +257,7 @@ impl FlowStatementData {
 #[derive(Debug, Clone)]
 struct CondMeta {
     condition: Filter,
-    body: Option<Body>,
+    body: Option<Bodyyy>,
 }
 
 pub struct ElseStatement {
@@ -229,8 +271,8 @@ pub struct ElseIfStatement {
 }
 
 impl ElseIfStatement {
-    pub fn then(mut self, body: impl Into<Body>) -> ThenExpression {
-        let body: Body = body.into();
+    pub fn then(mut self, body: impl Into<Bodyyy>) -> ThenExpression {
+        let body: Bodyyy = body.into();
         // self.bindings.extend(body.get_bindings());
         // let cond_meta = CondMeta {
         //     condition: self.flow_data.else_if_data.last()
@@ -265,10 +307,10 @@ impl IfStatement {
     }
 
     /// Can be a select statment or any other valid surrealdb Value
-    pub fn then(self, body: impl Into<Body>) -> ThenExpression {
+    pub fn then(self, body: impl Into<Bodyyy>) -> ThenExpression {
         let if_condition = self.condition;
 
-        let body: Body = body.into();
+        let body: Bodyyy = body.into();
         let bindings = [if_condition.get_bindings(), body.get_bindings()].concat();
 
         let if_cond_meta = CondMeta {
@@ -353,13 +395,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_if_statement_primitive() {
+        let age = Field::new("age");
+
+        let if_statement = if_(cond(age.gte(18)).and(age.lte(120)))
+            .then("Valid".to_string())
+            .else_("Invalid".to_string())
+            .end();
+
+        assert_eq!(if_statement.get_bindings().len(), 2);
+        insta::assert_display_snapshot!(if_statement.fine_tune_params());
+        insta::assert_display_snapshot!(if_statement.to_raw().build());
+    }
+
+    #[test]
     fn test_if_statement1() {
         let age = Field::new("age");
         let user_table = Table::new("user");
 
         let if_statement1 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(select(All).from(user_table)))
-            // .then("Valid".to_string())
+            .then(select(All).from(user_table))
             .end();
 
         assert_eq!(if_statement1.get_bindings().len(), 2);
@@ -374,8 +429,8 @@ mod tests {
         let book_table = Table::new("book");
 
         let if_statement2 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(select(All).from(user_table).where_(age.gt(34))))
-            .else_(chain(select(All).from(book_table)))
+            .then(select(All).from(user_table).where_(age.gt(34)))
+            .else_(select(All).from(book_table))
             .end();
         assert_eq!(if_statement2.get_bindings().len(), 3);
 
@@ -391,9 +446,9 @@ mod tests {
         let book_table = Table::new("book");
 
         let if_statement = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(select(All).from(user_table)))
+            .then(select(All).from(user_table))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then(chain(select(All).from(book_table)))
+            .then(select(All).from(book_table))
             .end();
 
         assert_eq!(if_statement.get_bindings().len(), 3);
@@ -411,10 +466,10 @@ mod tests {
         let fruit_table = Table::new("fruit");
 
         let if_statement4 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(select(All).from(user_table)))
+            .then(select(All).from(user_table))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then(chain(select(All).from(book_table)))
-            .else_(chain(select(All).from(fruit_table)))
+            .then(select(All).from(book_table))
+            .else_(select(All).from(fruit_table))
             .end();
 
         assert_eq!(if_statement4.get_bindings().len(), 3);
@@ -433,12 +488,12 @@ mod tests {
         let fruit_table = Table::new("fruit");
 
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(select(All).from(user_table.clone())))
+            .then(select(All).from(user_table.clone()))
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then(chain(select(All).from(book_table)))
+            .then(select(All).from(book_table))
             .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-            .then(chain(select(All).from(fruit_table)))
-            .else_(chain(select(All).from(user_table)))
+            .then(select(All).from(fruit_table))
+            .else_(select(All).from(user_table))
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 5);
@@ -478,12 +533,12 @@ mod tests {
         let fruit_table = Table::new("fruit");
 
         let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-            .then(chain(statement1))
+            .then(statement1)
             .else_if(name.like("Oyelowo Oyedayo"))
-            .then(chain(statement2))
+            .then(statement2)
             .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-            .then(chain(select(All).from(fruit_table)))
-            .else_(chain(select(All).from(book_table)))
+            .then(select(All).from(fruit_table))
+            .else_(select(All).from(book_table))
             .end();
 
         assert_eq!(if_statement5.get_bindings().len(), 15);
