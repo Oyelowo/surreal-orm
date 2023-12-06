@@ -304,11 +304,13 @@ where
 {
     fn build(&self) -> String {
         let statement = &self.0;
-        let mut query = format!("CREATE {}", statement.target);
+        let mut query = "CREATE".to_string();
 
         if statement.is_only {
             query = format!("{query} ONLY");
         }
+
+        let mut query = format!("{query} {}", statement.target);
 
         if !statement.content.is_empty() {
             query = format!("{query} CONTENT {content}", content = statement.content);
