@@ -92,65 +92,38 @@ pub fn if_(condition: impl Conditional) -> IfStatement {
 }
 
 #[derive(Debug, Clone)]
-pub enum Bodyyy {
+pub enum Body {
     Expression(Expression),
-    Body(QueryChain),
+    QueryChain(QueryChain),
 }
 
-// impl From<Expression> for IfElseExpressionNew {
-//     fn from(value: Expression) -> Self {
-//         Self::Expression(value)
-//     }
-// }
-
-impl<T: Into<Expression>> From<T> for Bodyyy {
+impl<T: Into<Expression>> From<T> for Body {
     fn from(value: T) -> Self {
         Self::Expression(value.into())
     }
 }
 
-impl From<QueryChain> for Bodyyy {
+impl From<QueryChain> for Body {
     fn from(value: QueryChain) -> Self {
-        Self::Body(value)
+        Self::QueryChain(value)
     }
 }
 
-impl Buildable for Bodyyy {
+impl Buildable for Body {
     fn build(&self) -> String {
         match self {
             Self::Expression(expr) => expr.build(),
-            Self::Body(body) => body.build(),
+            Self::QueryChain(body) => body.build(),
         }
     }
 }
 
-impl Parametric for Bodyyy {
+impl Parametric for Body {
     fn get_bindings(&self) -> BindingsList {
         match self {
             Self::Expression(expr) => expr.get_bindings(),
-            Self::Body(body) => body.get_bindings(),
+            Self::QueryChain(body) => body.get_bindings(),
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct IfElseExpression(Expression);
-
-impl From<Expression> for IfElseExpression {
-    fn from(value: Expression) -> Self {
-        Self(value)
-    }
-}
-
-impl Buildable for IfElseExpression {
-    fn build(&self) -> String {
-        self.0.build()
-    }
-}
-
-impl Parametric for IfElseExpression {
-    fn get_bindings(&self) -> BindingsList {
-        self.0.get_bindings()
     }
 }
 
@@ -178,8 +151,8 @@ impl ThenExpression {
         }
     }
 
-    pub fn else_(mut self, body: impl Into<Bodyyy>) -> ElseStatement {
-        let body: Bodyyy = body.into();
+    pub fn else_(mut self, body: impl Into<Body>) -> ElseStatement {
+        let body: Body = body.into();
 
         self.bindings.extend(body.get_bindings());
         self.flow_data.else_data = Some(body);
@@ -208,40 +181,10 @@ impl ElseStatement {
 }
 
 #[derive(Debug, Clone)]
-pub struct Body(QueryChain);
-
-impl std::ops::DerefMut for Body {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<T: Into<QueryChain>> From<T> for Body {
-    fn from(value: T) -> Self {
-        let query_chain = value.into();
-        Self(query_chain)
-    }
-}
-
-impl Buildable for Body {
-    fn build(&self) -> String {
-        self.0.build()
-    }
-}
-
-impl std::ops::Deref for Body {
-    type Target = QueryChain;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone)]
 struct FlowStatementData {
     if_data: CondMeta,
     else_if_data: Vec<CondMeta>,
-    else_data: Option<Bodyyy>,
+    else_data: Option<Body>,
 }
 
 impl FlowStatementData {
@@ -257,7 +200,7 @@ impl FlowStatementData {
 #[derive(Debug, Clone)]
 struct CondMeta {
     condition: Filter,
-    body: Option<Bodyyy>,
+    body: Option<Body>,
 }
 
 pub struct ElseStatement {
@@ -271,15 +214,8 @@ pub struct ElseIfStatement {
 }
 
 impl ElseIfStatement {
-    pub fn then(mut self, body: impl Into<Bodyyy>) -> ThenExpression {
-        let body: Bodyyy = body.into();
-        // self.bindings.extend(body.get_bindings());
-        // let cond_meta = CondMeta {
-        //     condition: self.flow_data.else_if_data.last()
-        //         .expect("cond must have been added earlier in cond block. This is a bug. Please report/open an issue!").condition,
-        //     body: body.into(),
-        // };
-        // self.flow_data.else_if_data.push(cond_meta);
+    pub fn then(mut self, body: impl Into<Body>) -> ThenExpression {
+        let body: Body = body.into();
 
         if let Some(latest_else_if_cond_meta) = self.flow_data.else_if_data.last_mut() {
             self.bindings.extend(body.get_bindings());
@@ -307,10 +243,10 @@ impl IfStatement {
     }
 
     /// Can be a select statment or any other valid surrealdb Value
-    pub fn then(self, body: impl Into<Bodyyy>) -> ThenExpression {
+    pub fn then(self, body: impl Into<Body>) -> ThenExpression {
         let if_condition = self.condition;
 
-        let body: Bodyyy = body.into();
+        let body: Body = body.into();
         let bindings = [if_condition.get_bindings(), body.get_bindings()].concat();
 
         let if_cond_meta = CondMeta {
