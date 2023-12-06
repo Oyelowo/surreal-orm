@@ -6,7 +6,7 @@ BEGIN TRANSACTION;
 
 LET $balance1 = $_param_00000001;
 
-CREATE balance CONTENT $_param_00000002;
+CREATE ONLY balance CONTENT $_param_00000002;
 
 IF balance > $_param_00000003 
 	{ LET $first_name = $_param_00000004;
@@ -64,7 +64,13 @@ LET $accounts = $_param_00000031;
 
 LET $updated1 = $_param_00000032;
 
-LET $update2 = $_param_00000033;
+UPDATE $_param_00000033 SET balance += $balance1.amount;
+
+UPDATE $_param_00000034 SET balance += $_param_00000035;
+
+LET $update2 = $_param_00000036;
+
+LET $update3 = $_param_00000037;
 
 COMMIT TRANSACTION;
 	
