@@ -8,7 +8,7 @@
 use pretty_assertions::assert_eq;
 use surreal_models::{account, Account, Balance};
 use surreal_orm::{
-    statements::{begin_transaction, create, select, update},
+    statements::{begin_transaction, create, create_only, let_, select, update},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};
@@ -111,12 +111,12 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
     let query_chain = query_turbo! {
         begin transaction;
-         let balance1 = create().content(Balance {
+         let balance1 = create_only().content(Balance {
                 id: Balance::create_id("balance1".to_string()),
                 amount: amount_to_transfer,
             });
 
-         create().content(Balance {
+         create_only().content(Balance {
                 id: Balance::create_id("balance2".to_string()),
                 amount: amount_to_transfer,
             });
@@ -130,7 +130,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             let score = 100;
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
         } else if balance.gte(100) {
-           let first_name = "Oyelowo";
+            let first_name = "Oyelowo";
             let score = 100;
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
         } else {
@@ -179,35 +179,36 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         // You can reference the balance object by using the $balance variable and pass the amount
         // as a parameter to the decrement_by function. i.e $balance.amount
         let updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
+        update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
+        update::<Account>(id1).set(acc.balance.increment_by(45.3));
 
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
         let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+        // FIX: Scenario where the same variable is used twice, only the latest let statement value
+        // is duplicated because we are using the bound variable name in the chaining rather than
+        // the value itself. So, either probably consider suffixing the variable name with a random
+        // id or using the values directly in the binding.
+        // Or probably doing the chaining immediately after declaration and aggregating that after
+        // the entire chained queries.
+        let update3 = update::<Account>(id2).set(acc.balance.decrement_by(50));
+
         commit transaction;
     };
 
     insta::assert_display_snapshot!(query_chain.to_raw().build());
     insta::assert_display_snapshot!(query_chain.fine_tune_params());
 
-    // TODO: Update db engine and also figure out why this is not being executed.
-    // Got this error:
-    // called `Result::unwrap()` on an `Err` value: Db(QueryNotExecuted)
     let result = query_chain.run(db.clone()).await?;
-    //     .take::<Vec<Account>>(5)
-    //     .unwrap();
-    //
-    // assert_eq!(result.len(), 3);
-    // assert_eq!(result[0].balance, 35_605.16);
-    // assert_eq!(result[1].balance, 90_731.31);
-    // //
+
     let accounts = select(All)
         .from(id1..=id2)
         .return_many::<Account>(db.clone())
         .await?;
-    //
+
     assert_eq!(accounts.len(), 2);
-    assert_eq!(accounts[0].balance, 135_605.16);
-    assert_eq!(accounts[1].balance, 90_731.31);
-    // assert_eq!(accounts[0].id.to_string(), "account:one");
-    // assert_eq!(accounts[1].id.to_string(), "account:two");
+    assert_eq!(accounts[0].balance, 645.3);
+    assert_eq!(accounts[1].balance, -350.0);
+    assert_eq!(accounts[0].id.to_string(), "account:one");
+    assert_eq!(accounts[1].id.to_string(), "account:two");
     Ok(())
 }
