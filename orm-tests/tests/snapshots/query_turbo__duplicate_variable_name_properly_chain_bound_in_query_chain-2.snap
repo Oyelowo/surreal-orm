@@ -1,0 +1,11 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.fine_tune_params()
+---
+LET $var_name = $_param_00000001;
+
+LET $var_name = $_param_00000002;
+
+LET $var_name = $_param_00000003;
+
+SELECT * FROM account;

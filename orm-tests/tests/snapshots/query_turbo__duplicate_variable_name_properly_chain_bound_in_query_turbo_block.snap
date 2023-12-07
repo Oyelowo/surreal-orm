@@ -1,0 +1,15 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.to_raw().build()
+---
+{
+LET $var_name = 'Oyelowo';
+
+LET $var_name = (SELECT * FROM account);
+
+LET $var_name = 'Oyedayo';
+
+SELECT * FROM account;
+
+RETURN $var_name;
+}

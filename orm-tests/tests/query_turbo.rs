@@ -54,8 +54,8 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_block() {
     let ref account_table = Account::table_name();
 
     let query = query_turbo! {
-        let var_name = select(All).from(account_table);
         let var_name = "Oyelowo";
+        let var_name = select(All).from(account_table);
         let var_name = "Oyedayo";
         select(All).from(account_table);
 
@@ -65,6 +65,45 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_block() {
     insta::assert_display_snapshot!(query.to_raw().build());
     insta::assert_display_snapshot!(query.fine_tune_params());
 }
+
+#[test]
+fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_transaction() {
+    let account::Schema { balance, .. } = Account::schema();
+    let ref account_table = Account::table_name();
+
+    let query = transaction! {
+        BEGIN TRANSACTION;
+
+        let var_name = "Oyelowo";
+        let var_name = "Oyedayo";
+        let var_name = select(All).from(account_table);
+        select(All).from(account_table);
+
+        COMMIT TRANSACTION;
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+}
+
+#[test]
+fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_block() {
+    let account::Schema { balance, .. } = Account::schema();
+    let ref account_table = Account::table_name();
+
+    let query = block! {
+        let var_name = select(All).from(account_table);
+        let var_name = "Oyedayo";
+        let var_name = "Oyelowo";
+        select(All).from(account_table);
+
+        return var_name;
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+}
+
 #[tokio::test]
 async fn test_simple_standalone_for_loop() -> SurrealOrmResult<()> {
     let account::Schema { balance, .. } = Account::schema();

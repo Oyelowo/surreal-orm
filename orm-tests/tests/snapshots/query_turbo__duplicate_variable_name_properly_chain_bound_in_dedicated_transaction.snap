@@ -1,0 +1,16 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.to_raw().build()
+---
+BEGIN TRANSACTION;
+
+LET $var_name = 'Oyelowo';
+
+LET $var_name = 'Oyedayo';
+
+LET $var_name = (SELECT * FROM account);
+
+SELECT * FROM account;
+
+COMMIT TRANSACTION;
+	
