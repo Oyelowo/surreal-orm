@@ -1,0 +1,5 @@
+---
+source: orm-tests/tests/query_define_function.rs
+expression: spaceship.fine_tune_params()
+---
+get_or_create_spaceship(first_name, $_param_00000001, $birthday, $_param_00000002)

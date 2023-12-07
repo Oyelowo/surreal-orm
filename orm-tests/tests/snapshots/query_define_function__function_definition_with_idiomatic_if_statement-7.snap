@@ -1,0 +1,5 @@
+---
+source: orm-tests/tests/query_define_function.rs
+expression: spaceship.to_raw().build()
+---
+get_or_create_spaceship('Oyelowo', 'Oyedayo', '1970-01-01T00:01:01Z', 5)
