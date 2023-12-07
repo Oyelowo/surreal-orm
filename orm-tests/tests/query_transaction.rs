@@ -8,7 +8,7 @@
 use pretty_assertions::assert_eq;
 use surreal_models::{Account, Balance};
 use surreal_orm::{
-    statements::{begin_transaction, create, select, update},
+    statements::{begin_transaction, create_only, select, update},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};
@@ -31,17 +31,17 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
     let amount_to_transfer = 300.00;
     let transaction_query = begin_transaction()
         .query(query_turbo!(
-            let balance = create().content(Balance {
+            let balance = create_only().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
             });
 
-            create().content(Account {
+            create_only().content(Account {
                 id: id1.clone(),
                 balance: 135_605.16,
             });
 
-            create().content(Account {
+            create_only().content(Account {
                 id: id2.clone(),
                 balance: 91_031.31,
             });
@@ -64,9 +64,9 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
     assert_eq!(
         transaction_query.to_raw().build(),
         "BEGIN TRANSACTION;\n\n\
-            LET $balance = (CREATE balance CONTENT { amount: 300f, id: balance:balance1 });\n\n\
-            CREATE account CONTENT { balance: 135605.16f, id: account:one };\n\n\
-            CREATE account CONTENT { balance: 91031.31f, id: account:two };\n\n\
+            LET $balance = (CREATE ONLY balance CONTENT { amount: 300f, id: balance:balance1 });\n\n\
+            CREATE ONLY account CONTENT { balance: 135605.16f, id: account:one };\n\n\
+            CREATE ONLY account CONTENT { balance: 91031.31f, id: account:two };\n\n\
             UPDATE account:one SET balance += $balance.amount;\n\n\
             UPDATE account:two SET balance -= 300f;\n\n\
             COMMIT TRANSACTION;\n\t"
@@ -76,8 +76,8 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
         transaction_query.fine_tune_params(),
         "BEGIN TRANSACTION;\n\n\
             LET $balance = $_param_00000001;\n\n\
-            CREATE account CONTENT $_param_00000002;\n\n\
-            CREATE account CONTENT $_param_00000003;\n\n\
+            CREATE ONLY account CONTENT $_param_00000002;\n\n\
+            CREATE ONLY account CONTENT $_param_00000003;\n\n\
             UPDATE $_param_00000004 SET balance += $balance.amount;\n\n\
             UPDATE $_param_00000005 SET balance -= $_param_00000006;\n\n\
             COMMIT TRANSACTION;\n\t"
@@ -87,7 +87,7 @@ async fn test_transaction_with_surreal_queries_macro() -> SurrealOrmResult<()> {
     insta::assert_display_snapshot!(transaction_query.to_raw().build());
 
     assert_eq!(accounts.len(), 2);
-    assert_eq!(accounts[0].balance, 135_605.16);
+    assert_eq!(accounts[0].balance, 135_905.16);
     assert_eq!(accounts[1].balance, 90_731.31);
     assert_eq!(accounts[0].id.to_string(), "account:one");
     assert_eq!(accounts[1].id.to_string(), "account:two");
@@ -108,16 +108,16 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     transaction! {
         BEGIN TRANSACTION;
 
-        let balance = create().content(Balance {
+        let balance = create_only().content(Balance {
                 id: Balance::create_id("balance1".into()),
                 amount: amount_to_transfer,
             });
 
-         create().content(Account {
+         create_only().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        let acc2 = create().content(Account {
+        let acc2 = create_only().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         });
@@ -140,7 +140,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         .await?;
 
     assert_eq!(accounts.len(), 2);
-    assert_eq!(accounts[0].balance, 135_605.16);
+    assert_eq!(accounts[0].balance, 135_905.16);
     assert_eq!(accounts[1].balance, 90_731.31);
     assert_eq!(accounts[0].id.to_string(), "account:one");
     assert_eq!(accounts[1].id.to_string(), "account:two");
@@ -160,11 +160,11 @@ async fn test_transaction_commit_increment_and_decrement_update() -> SurrealOrmR
     let acc = Account::schema();
 
     begin_transaction()
-        .query(create().content(Account {
+        .query(create_only().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         }))
-        .query(create().content(Account {
+        .query(create_only().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         }))
@@ -199,11 +199,11 @@ async fn test_transaction_cancellation_increment_and_decrement_update() -> Surre
     let acc = Account::schema();
 
     begin_transaction()
-        .query(create().content(Account {
+        .query(create_only().content(Account {
             id: id1.clone(),
             balance: 135_605.16,
         }))
-        .query(create().content(Account {
+        .query(create_only().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         }))

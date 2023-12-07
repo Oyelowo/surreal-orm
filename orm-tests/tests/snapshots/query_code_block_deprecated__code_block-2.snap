@@ -7,7 +7,7 @@ LET $strengths = $_param_00000001;
 
 LET $total = math::sum($strengths);
 
-LET $count = count($strengths);
+LET $count = array::len($strengths);
 
 RETURN ($total / $count);
 };

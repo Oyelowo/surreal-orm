@@ -7,7 +7,7 @@ LET $strengths = (SELECT VALUE strength FROM weapon);
 
 LET $total = math::sum($strengths);
 
-LET $count = count($strengths);
+LET $count = array::len($strengths);
 
 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + 4)) * 100);
 };

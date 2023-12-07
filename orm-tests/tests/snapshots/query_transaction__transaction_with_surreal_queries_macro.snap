@@ -1,14 +1,14 @@
 ---
-source: surreal-orm-tests/tests/query_transaction.rs
+source: orm-tests/tests/query_transaction.rs
 expression: transaction_query.fine_tune_params()
 ---
 BEGIN TRANSACTION;
 
 LET $balance = $_param_00000001;
 
-CREATE account CONTENT $_param_00000002;
+CREATE ONLY account CONTENT $_param_00000002;
 
-CREATE account CONTENT $_param_00000003;
+CREATE ONLY account CONTENT $_param_00000003;
 
 UPDATE $_param_00000004 SET balance += $balance.amount;
 
