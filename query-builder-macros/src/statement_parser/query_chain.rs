@@ -1,9 +1,5 @@
-use proc_macro::TokenStream;
 use quote::quote;
-use syn::{
-    parse::{Parse, ParseBuffer, ParseStream},
-    parse_macro_input, Expr, Ident, Result as SynResult, Token,
-};
+use syn::parse::{Parse,  ParseStream};
 
 use proc_macros_helpers::get_crate_name;
 
@@ -19,7 +15,6 @@ pub struct QueriesChainParser {
 
 impl QueriesChainParser {
     pub fn to_tokenstream(&self) -> proc_macro2::TokenStream {
-        let crate_name = get_crate_name(false);
         let tokenizer: QueryTypeToken = self.into();
         tokenizer.get_tokenstream()
     }
@@ -38,8 +33,8 @@ impl QueriesChainParser {
         }
     }
 
-    pub fn is_definitely_query_block(&self) -> bool {
-        let mut last_stmt = self.statements.last();
+    pub fn _is_definitely_query_block(&self) -> bool {
+        let last_stmt = self.statements.last();
 
         last_stmt.map_or(false, |s|s.is_return_statement())
     }
@@ -77,7 +72,6 @@ impl QueriesChainParser {
                 
             let tokenized = for_loop_content.tokenize();
             let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
-            let to_render: proc_macro2::TokenStream = tokenized.code_to_render.into();
                 (
                 quote!(
                     let #generated_ident = #query_chain;
@@ -86,10 +80,9 @@ impl QueriesChainParser {
                 )
             },
             QueryParser::IfEsle(if_else_meta) => {
-                let tokenized = if_else_meta.tokenize();
+                let tokenized = if_else_meta.meta_content.tokenize();
                 let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
-                let to_render: proc_macro2::TokenStream = tokenized.code_to_render.into();
-                let generated_ident = &if_else_meta.generated_ident;
+                let generated_ident = &if_else_meta.meta_content.generated_ident;
                 (
                 quote!(
                     let #generated_ident = #query_chain;

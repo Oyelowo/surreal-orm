@@ -18,13 +18,6 @@ use super::{
 };
 
 #[derive(Debug, Clone)]
-enum Expression {
-    Expr(Expr),
-    Ident(Ident),
-    IfElse(IfElseStatementAst),
-}
-
-#[derive(Debug, Clone)]
 pub(crate) enum QueryParser {
     LetStatement(LetStatementParser),
     ForLoop(ForLoopStatementParser),

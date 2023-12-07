@@ -1,13 +1,8 @@
-use std::fmt::Display;
-
-use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
-    parse::{Parse, ParseBuffer, ParseStream},
-    parse_macro_input, Expr, Ident, Result as SynResult, Token,
+    parse::{Parse, ParseStream},
+    Expr, Ident, Result as SynResult, Token,
 };
-
-use proc_macros_helpers::get_crate_name;
 
 use super::{helpers::generate_variable_name, if_else::IfElseStatementAst};
 

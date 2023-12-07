@@ -2,10 +2,9 @@ use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
 use quote::{quote, ToTokens};
 use syn::{
-    ext::IdentExt,
     parse::{Parse, ParseStream},
     token::{self, Brace},
-    Expr, Ident, Token,
+    Expr, Ident,
 };
 
 use super::{
@@ -49,12 +48,6 @@ pub struct ForLoopMetaParser {
     pub iterable: Iterable,
     pub body: QueriesChainParser,
     pub generated_ident: Ident,
-}
-
-impl ForLoopMetaParser {
-    pub fn has_return_statement(&self) -> bool {
-        self.body.is_likely_query_block()
-    }
 }
 
 impl Parse for ForLoopMetaParser {

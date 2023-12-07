@@ -1,27 +1,12 @@
-use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use proc_macros_helpers::get_crate_name;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    token::{self, Brace},
-    Expr, Ident, Token,
+    token, Expr, Ident, Token,
 };
 
-use super::{
-    helpers::generate_variable_name,
-    query::QueryParser,
-    query_chain::{GeneratedCode, QueriesChainParser},
-};
-
-// if (condition -> expression) {
-//  body -> query chain
-// } else if  (condition -> expression) {
-// body -> query chain
-// } else {
-// body -> query chain
-// }
+use super::{helpers::generate_variable_name, query_chain::QueriesChainParser};
 
 #[derive(Debug, Clone)]
 pub struct Body(QueriesChainParser);
@@ -161,14 +146,15 @@ impl Parse for Else {
 }
 
 #[derive(Debug, Clone)]
-pub struct IfElseMetaParser {
+pub struct IfElseWithoutIfKeywordMetaAst {
     pub if_meta: IfMeta,
     pub else_if_meta: Vec<ElseIfMeta>,
     pub else_meta: Option<Else>,
     pub generated_ident: Ident,
 }
 
-impl IfElseMetaParser {
+impl IfElseWithoutIfKeywordMetaAst {
+    #[allow(dead_code)]
     pub fn has_return_statement(&self) -> bool {
         self.if_meta.body.has_return_statement()
             || self
@@ -182,7 +168,21 @@ impl IfElseMetaParser {
     }
 }
 
-impl Parse for IfElseMetaParser {
+impl ToTokens for IfElseWithoutIfKeywordMetaAst {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let tokenized_if_else_content: proc_macro2::TokenStream =
+            self.tokenize().query_chain.into();
+
+        let if_else: proc_macro2::TokenStream = quote!(
+            #tokenized_if_else_content
+        )
+        .into();
+
+        if_else.into_token_stream().to_tokens(tokens)
+    }
+}
+
+impl Parse for IfElseWithoutIfKeywordMetaAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let generated_ident = generate_variable_name();
 
@@ -215,28 +215,27 @@ impl Parse for IfElseMetaParser {
 
 #[derive(Debug, Clone)]
 pub struct IfElseStatementAst {
-    pub meta_content: Box<IfElseMetaParser>,
+    pub meta_content: Box<IfElseWithoutIfKeywordMetaAst>,
 }
 
 impl ToTokens for IfElseStatementAst {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let if_else: proc_macro2::TokenStream = self.to_tokens_custom().into();
-        if_else.into_token_stream().to_tokens(tokens)
-    }
-}
+        // let tokenized_if_else_content: proc_macro2::TokenStream =
+        //     self.meta_content.tokenize().query_chain.into();
+        //
+        // let if_else: proc_macro2::TokenStream = quote!(
+        //     #tokenized_if_else_content
+        // )
+        // .into();
 
-impl std::ops::Deref for IfElseStatementAst {
-    type Target = IfElseMetaParser;
-
-    fn deref(&self) -> &Self::Target {
-        &self.meta_content
+        self.meta_content.to_tokens(tokens)
     }
 }
 
 impl Parse for IfElseStatementAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<syn::Token![if]>()?;
-        let for_loop = input.parse::<IfElseMetaParser>()?;
+        let for_loop = input.parse::<IfElseWithoutIfKeywordMetaAst>()?;
         Ok(IfElseStatementAst {
             meta_content: Box::new(for_loop),
         })
@@ -248,24 +247,15 @@ pub struct TokenizedIfElseStmt {
     pub query_chain: TokenStream,
 }
 
-impl IfElseMetaParser {
+impl IfElseWithoutIfKeywordMetaAst {
     pub fn tokenize(&self) -> TokenizedIfElseStmt {
-        let IfElseMetaParser {
+        let IfElseWithoutIfKeywordMetaAst {
             if_meta,
             else_if_meta,
             else_meta,
-            generated_ident,
+            generated_ident: _,
         } = self;
         let crate_name = get_crate_name(false);
-
-        // let if_statement5 = if_(age.greater_than_or_equal(18).less_than_or_equal(120))
-        //     .then(statement1)
-        //     .else_if(name.like("Oyelowo Oyedayo"))
-        //     .then(statement2)
-        //     .else_if(cond(country.is("Canada")).or(country.is("Norway")))
-        //     .then("Cold")
-        //     .else_("Hot")
-        //     .end();
 
         let ref if_cond_expr = if_meta.condition;
         let if_body = &if_meta.body.generate_code();
@@ -327,23 +317,12 @@ impl IfElseMetaParser {
             query_chain: to_render.into(),
         }
     }
-
-    pub fn to_tokens_custom(&self) -> TokenStream {
-        let z = &self.tokenize();
-        let to_render: proc_macro2::TokenStream = z.code_to_render.clone().into();
-        let to_chain: proc_macro2::TokenStream = z.query_chain.clone().into();
-
-        quote!(
-
-            #to_chain
-
-        )
-        .into()
-    }
 }
 
+// TOOD:: complete the standalone top level if else statement parser implementation
+#[allow(dead_code)]
 pub fn if_else(input: TokenStream) -> TokenStream {
-    let if_else = syn::parse_macro_input!(input as IfElseMetaParser);
+    let if_else = syn::parse_macro_input!(input as IfElseWithoutIfKeywordMetaAst);
 
-    if_else.to_tokens_custom()
+    quote!(#if_else).into()
 }
