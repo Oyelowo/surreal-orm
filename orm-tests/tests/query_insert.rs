@@ -1130,7 +1130,7 @@ async fn test_insert_multiple_nodes_return_non_null_links() -> SurrealOrmResult<
 pub struct StrongWeapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    pub strength: u64,
+    pub strength: f64,
     pub created: DateTime<Utc>,
 }
 
@@ -1195,5 +1195,5 @@ async fn test_insert_from_another_table() {
         .unwrap();
 
     assert_eq!(strong_weapons_count.len(), 150);
-    assert_eq!(strong_weapons_count[0].strength, 949);
+    assert_eq!(strong_weapons_count[0].strength, 949.0);
 }
