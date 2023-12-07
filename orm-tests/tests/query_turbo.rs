@@ -103,18 +103,64 @@ async fn test_simple_standalone_if_else() -> SurrealOrmResult<()> {
 }
 
 // with multiple if else statements
-//
-// with for loop inside if else statement
-//
-// with if else statement inside for loop
-//
-// with if else statement inside if else statement
-//
-// with nested for loop inside if else statement
-// with nested if else statement inside for loop
-//
-// with mixed for loop and if else statement
-// with mixed multiple various statements
+#[tokio::test]
+async fn test_multiple_if_else() -> SurrealOrmResult<()> {
+    // let acc = Account::schema();
+    let account::Schema { balance, .. } = Account::schema();
+    let account_table = &Account::table_name();
+
+    let query = query_turbo! {
+        let within_turbo_cond = balance.equal(33);
+        let cond_username = if  within_turbo_cond {
+            let first_name = "Oyelowo";
+            if balance.equal(33) {
+                let username = "oye";
+                if balance.equal(92) {
+                    let username = "Oyedayo";
+                    if within_turbo_cond {
+                        let username = "codebreather";
+                    };
+
+                    for name in vec!["Oyelowo", "Oyedayo"] {
+                        let first = "Oyelowo";
+                        select(All).from(Account::table_name()).where_(balance.eq(5));
+                    };
+
+                };
+            } else {
+                let score = 100;
+                select(All).from(Account::table_name()).where_(balance.eq(5));
+            };
+        } else if balance.less_than(100) {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(balance.eq(5));
+
+        } else if (balance.gte(100)) {
+           let first_name = "Oyelowo";
+            let score = 100;
+            return select(All).from(Account::table_name()).where_(balance.eq(5));
+        } else {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(Account::table_name()).where_(balance.eq(5));
+        };
+        let score = 100;
+
+        select(All).from(Account::table_name()).where_(balance.eq(5));
+
+        if (balance.greater_than(100)) {
+            let first_name = "Oyelowo";
+        };
+
+        return cond_username;
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+
+    Ok(())
+}
 
 #[tokio::test]
 async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
@@ -128,70 +174,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     let acc = Account::schema();
     let account::Schema { balance, .. } = Account::schema();
 
-    let names = || vec!["Oyelowo", "Oyedayo"];
-    let colors = vec!["red", "blue"];
-    let xx = query_turbo! {
-        // for (name in  vec!["Oyelowo", "Oyedayo"]) {
-        // for name in  vec!["Oyelowo", "Oyedayo"] {
-        for name in  names() {
-            let first = "Oyelowo";
-            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-
-            for color in colors {
-                let something_else = "testing_tested";
-                select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-            };
-        };
-    };
-
     let outside_turbo_cond = balance.greater_than(100);
-    let query_chain = query_turbo! {
-        begin transaction;
-
-        let within_turbo_cond = balance.equal(33);
-        if  within_turbo_cond {
-            let first_name = "Oyelowo";
-            if balance.equal(33) {
-                let username = "Oyelowo";
-                if balance.equal(33) {
-                    let username = "Oyelowo";
-                    if within_turbo_cond {
-                        let username = "Oyelowo";
-                    };
-
-                    for name in vec!["Oyelowo", "Oyedayo"] {
-                        let first = "Oyelowo";
-                        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-                    };
-
-                };
-            } else {
-                let score = 100;
-                select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-            };
-        } else if balance.less_than(100) {
-            let first_name = "Oyelowo";
-            let score = 100;
-            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-
-        } else if (balance.gte(100)) {
-           let first_name = "Oyelowo";
-            let score = 100;
-            return select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-        } else {
-            let first_name = "Oyelowo";
-            let score = 100;
-            select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-        };
-        let score = 100;
-
-        select(All).from(Account::table_name()).where_(acc.balance.eq(5));
-
-        if (balance.greater_than(100)) {
-            let first_name = "Oyelowo";
-        };
-        commit transaction;
-    };
 
     let query_chain = query_turbo! {
         begin transaction;
