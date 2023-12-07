@@ -21,7 +21,7 @@ impl From<&QueriesChainParser> for QueryTypeToken {
     fn from(value: &QueriesChainParser) -> Self {
         let GeneratedCode {
             to_render,
-            query_chain,
+            query_chain_var_ident,
         } = value.generate_code();
         let crate_name = get_crate_name(false);
 
@@ -43,7 +43,8 @@ impl From<&QueriesChainParser> for QueryTypeToken {
 
             let transaction = quote! {
                 #crate_name::statements::begin_transaction()
-                .query(#( #query_chain) *)
+                // .query(#( #query_chain) *)
+                .query(#query_chain_var_ident)
                 #ending
             };
 
@@ -59,7 +60,7 @@ impl From<&QueriesChainParser> for QueryTypeToken {
                 {
                     #( #to_render )*
 
-                    #( #query_chain )*
+                    #query_chain_var_ident
                     .as_block()
                 }
             })
@@ -68,7 +69,7 @@ impl From<&QueriesChainParser> for QueryTypeToken {
                 {
                     #( #to_render )*
 
-                    #( #query_chain )*
+                    #query_chain_var_ident
                 }
             })
         }
