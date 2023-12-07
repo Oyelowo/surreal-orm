@@ -102,12 +102,9 @@ async fn test_simple_standalone_if_else() -> SurrealOrmResult<()> {
     Ok(())
 }
 
-// with multiple if else statements
 #[tokio::test]
 async fn test_multiple_if_else() -> SurrealOrmResult<()> {
-    // let acc = Account::schema();
     let account::Schema { balance, .. } = Account::schema();
-    let account_table = &Account::table_name();
 
     let query = query_turbo! {
         let within_turbo_cond = balance.equal(33);
@@ -173,8 +170,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
 
     let acc = Account::schema();
     let account::Schema { balance, .. } = Account::schema();
-
-    let outside_turbo_cond = balance.greater_than(100);
 
     let query_chain = query_turbo! {
         begin transaction;
