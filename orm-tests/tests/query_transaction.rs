@@ -117,17 +117,18 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        let acc2 = create_only().content(Account {
+        
+        create_only().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
         });
 
         // You can reference the balance object by using the $balance variable and pass the amount
         // as a parameter to the decrement_by function. i.e $balance.amount
-        let updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
+        update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
 
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
-        let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+        update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
 
         COMMIT TRANSACTION;
     }
