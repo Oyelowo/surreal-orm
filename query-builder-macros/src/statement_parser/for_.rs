@@ -146,8 +146,8 @@ impl ForLoopMetaParser {
         //     }
         // };
         let GeneratedCode {
-            query_chain,
             to_render,
+            query_chain_var_ident,
         } = body.generate_code();
 
         let crate_name = get_crate_name(false);
@@ -160,7 +160,7 @@ impl ForLoopMetaParser {
 
             #crate_name::statements::for_(#iteration_param).in_(#iterable)
             .block(
-                #( #query_chain )*
+                #query_chain_var_ident
             )
         });
 

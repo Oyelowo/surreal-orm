@@ -260,14 +260,14 @@ impl IfElseWithoutIfKeywordMetaAst {
         let ref if_cond_expr = if_meta.condition;
         let if_body = &if_meta.body.generate_code();
         let if_body_to_render = &if_body.to_render;
-        let query_chain = &if_body.query_chain;
+        let query_chain_var_ident = &if_body.query_chain_var_ident;
 
         let if_code: proc_macro2::TokenStream = quote!(
             #crate_name::statements::if_(#if_cond_expr)
             .then({
                 #(#if_body_to_render)*
 
-                #(#query_chain)*
+                #query_chain_var_ident
             })
         );
 
@@ -277,14 +277,14 @@ impl IfElseWithoutIfKeywordMetaAst {
                 let cond_expr = &else_if_meta.condition;
                 let body = &else_if_meta.body.generate_code();
                 let body_to_render = &body.to_render;
-                let query_chain = &body.query_chain;
+                let query_chain_var_ident = &body.query_chain_var_ident;
 
                 quote!(
                         .else_if(#cond_expr)
                         .then({
                             #(#body_to_render)*
 
-                            #(#query_chain)*
+                            #query_chain_var_ident
                         })
                 )
             })
@@ -294,12 +294,13 @@ impl IfElseWithoutIfKeywordMetaAst {
             else_meta.as_ref().map_or(quote!(), |else_meta| {
                 let body = &else_meta.body.generate_code();
                 let body_to_render = &body.to_render;
-                let query_chain = &body.query_chain;
+                let query_chain_var_ident = &body.query_chain_var_ident;
 
                 quote!(
                     .else_({
                         #(#body_to_render)*
-                        #(#query_chain)*
+
+                        #query_chain_var_ident
                     })
                 )
             });
