@@ -1,0 +1,18 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.fine_tune_params()
+---
+{
+LET $within_turbo_cond = balance = $_param_00000001;
+
+LET $cond_username = $_param_00000002;
+
+LET $score = $_param_00000003;
+
+SELECT * FROM account WHERE balance = $_param_00000004;
+
+IF balance > $_param_00000005 
+	{ LET $first_name = $_param_00000006; };
+
+RETURN $cond_username;
+}

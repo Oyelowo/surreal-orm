@@ -1,0 +1,46 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.to_raw().build()
+---
+{
+LET $within_turbo_cond = balance = 33;
+
+LET $cond_username = IF $within_turbo_cond {
+LET $first_name = 'Oyelowo';
+IF balance = 33 {
+LET $username = 'oye';
+IF balance = 92 {
+LET $username = 'Oyedayo';
+IF $within_turbo_cond { LET $username = 'codebreather'; };
+FOR $name IN ['Oyelowo', 'Oyedayo'] {
+LET $first = 'Oyelowo';
+SELECT * FROM account WHERE balance = 5;
+};
+};
+} ELSE {
+LET $score = 100;
+SELECT * FROM account WHERE balance = 5;
+};
+} ELSE IF balance < 100 {
+LET $first_name = 'Oyelowo';
+LET $score = 100;
+SELECT * FROM account WHERE balance = 5;
+} ELSE IF balance >= 100 {
+LET $first_name = 'Oyelowo';
+LET $score = 100;
+RETURN (SELECT * FROM account WHERE balance = 5);
+} ELSE {
+LET $first_name = 'Oyelowo';
+LET $score = 100;
+SELECT * FROM account WHERE balance = 5;
+};
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5;
+
+IF balance > 100 
+	{ LET $first_name = 'Oyelowo'; };
+
+RETURN $cond_username;
+}
