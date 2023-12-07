@@ -97,18 +97,21 @@ pub fn define_function(input: TokenStream) -> TokenStream {
 /// A helper function to create a standalone for loop if you don't want to define within
 /// query_turbo! or block! or transaction! macro. This is almost never necessary. Just use
 /// query_turbo! or block! or transaction! macro and define your for loop within it,
-/// ```
+///
+/// ```rust, ignore
 /// use surreal_query_builder as surreal_orm;
-/// use surreal_orm::{*, statements::{select, for_}};
+/// use surreal_orm::{*, statements::select};
 ///
 /// let ref __name = Param::new("name");
 /// let ref person_table = Table::from("person");
 /// let ref user_name = Field::from("user_name");
-/// let for_loop = for_(__name).in_(vec!["Oyelowo", "Oyedayo"]).block(block! {
-///    LET nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
+///
+/// for_!(__name in vec!["Oyelowo", "Oyedayo"] {
+///    let nick_name = select(user_name).from_only(person_table).where_(user_name.eq(__name));
 ///    select(All).from(person_table).where_(user_name.eq(nick_name));
-/// });
+/// };
 /// println!("{}", for_loop);
+/// ```
 #[proc_macro]
 pub fn for_(input: TokenStream) -> TokenStream {
     statement_parser::for_::for_loop_without_for_keyword(input.into()).into()
