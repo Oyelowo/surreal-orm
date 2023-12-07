@@ -934,7 +934,7 @@ macro_rules! create_fn_with_two_strings_args {
 
             #[cfg(test)]
             mod [<test_ $function_name>] {
-                pub(self) use [<string_ $function_name>] as [<$function_name>];
+                 use [<string_ $function_name>] as [<$function_name>];
                 use $crate::{functions::string, *};
 
                 #[test]

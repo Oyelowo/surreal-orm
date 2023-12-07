@@ -15,7 +15,7 @@ use surrealdb::{engine::local::Mem, Surreal};
 
 #[test]
 fn test_duplicate_variable_name_properly_chain_bound_in_query_chain() {
-    let ref account_table = Account::table_name();
+    let account_table = &Account::table_name();
 
     let query = query_turbo! {
         let var_name = select(All).from(account_table);
@@ -30,7 +30,7 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_chain() {
 
 #[test]
 fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_transaction() {
-    let ref account_table = Account::table_name();
+    let account_table = &Account::table_name();
 
     let query = query_turbo! {
         begin transaction;
@@ -49,7 +49,7 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_transaction(
 
 #[test]
 fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_block() {
-    let ref account_table = Account::table_name();
+    let account_table = &Account::table_name();
 
     let query = query_turbo! {
         let var_name = "Oyelowo";
@@ -66,7 +66,7 @@ fn test_duplicate_variable_name_properly_chain_bound_in_query_turbo_block() {
 
 #[test]
 fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_transaction() {
-    let ref account_table = Account::table_name();
+    let account_table = &Account::table_name();
 
     let query = transaction! {
         BEGIN TRANSACTION;
@@ -85,7 +85,7 @@ fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_transaction() 
 
 #[test]
 fn test_duplicate_variable_name_properly_chain_bound_in_dedicated_block() {
-    let ref account_table = Account::table_name();
+    let account_table = &Account::table_name();
 
     let query = block! {
         let var_name = select(All).from(account_table);

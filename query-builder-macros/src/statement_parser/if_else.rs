@@ -175,8 +175,7 @@ impl ToTokens for IfElseWithoutIfKeywordMetaAst {
 
         let if_else: proc_macro2::TokenStream = quote!(
             #tokenized_if_else_content
-        )
-        .into();
+        );
 
         if_else.into_token_stream().to_tokens(tokens)
     }
@@ -257,7 +256,7 @@ impl IfElseWithoutIfKeywordMetaAst {
         } = self;
         let crate_name = get_crate_name(false);
 
-        let ref if_cond_expr = if_meta.condition;
+        let if_cond_expr = &if_meta.condition;
         let if_body = &if_meta.body.generate_code();
         let if_body_to_render = &if_body.to_render;
         let query_chain_var_ident = &if_body.query_chain_var_ident;
@@ -310,8 +309,7 @@ impl IfElseWithoutIfKeywordMetaAst {
             #else_if
             #else_code
             .end()
-        )
-        .into();
+        );
 
         TokenizedIfElseStmt {
             code_to_render: to_render.clone().into(),

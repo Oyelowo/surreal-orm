@@ -31,17 +31,17 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn query_turbo(input: TokenStream) -> TokenStream {
-    query_builder::query_turbo(input.into()).into()
+    query_builder::query_turbo(input)
 }
 
 #[proc_macro]
 pub fn block(input: TokenStream) -> TokenStream {
-    query_builder::query_block(input.into()).into()
+    query_builder::query_block(input)
 }
 
 #[proc_macro]
 pub fn transaction(input: TokenStream) -> TokenStream {
-    query_builder::query_transaction(input.into()).into()
+    query_builder::query_transaction(input)
 }
 
 /// A macro to generate a function definition statement and the corresponding helper function.
@@ -89,7 +89,7 @@ pub fn transaction(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn define_function(input: TokenStream) -> TokenStream {
-    statement_parser::define_function(input.into()).into()
+    statement_parser::define_function(input)
 }
 
 /// A helper function to create a standalone for loop if you don't want to define within
@@ -112,5 +112,5 @@ pub fn define_function(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn for_(input: TokenStream) -> TokenStream {
-    statement_parser::for_::for_loop_without_for_keyword(input.into()).into()
+    statement_parser::for_::for_loop_without_for_keyword(input)
 }
