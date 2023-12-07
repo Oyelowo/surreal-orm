@@ -1,0 +1,30 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.fine_tune_params()
+---
+LET $first_cond = balance >= $_param_00000001;
+
+IF $first_cond 
+	{ LET $first_name = $_param_00000002;
+
+LET $score = $_param_00000003;
+
+SELECT * FROM account WHERE balance = $_param_00000004; }
+ELSE IF balance <= $_param_00000005 
+	{ LET $first_name = $_param_00000006;
+
+LET $score = $_param_00000007;
+
+SELECT * FROM account WHERE balance = $_param_00000008; }
+ELSE IF balance >= $_param_00000009 
+	{ LET $first_name = $_param_00000010;
+
+LET $score = $_param_00000011;
+
+SELECT * FROM account WHERE balance = $_param_00000012; }
+ELSE
+	{ LET $first_name = $_param_00000013;
+
+LET $score = $_param_00000014;
+
+SELECT * FROM account WHERE balance = $_param_00000015; };

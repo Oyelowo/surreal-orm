@@ -1,0 +1,30 @@
+---
+source: orm-tests/tests/query_turbo.rs
+expression: query.to_raw().build()
+---
+LET $first_cond = balance >= 100;
+
+IF $first_cond 
+	{ LET $first_name = 'Oyelowo';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; }
+ELSE IF balance <= 54 
+	{ LET $first_name = 'Oyelowo';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; }
+ELSE IF balance >= 100 
+	{ LET $first_name = 'Oyelowo';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; }
+ELSE
+	{ LET $first_name = 'Oyelowo';
+
+LET $score = 100;
+
+SELECT * FROM account WHERE balance = 5; };
