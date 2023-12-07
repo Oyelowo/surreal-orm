@@ -31,7 +31,6 @@ async fn test_simple_standalone_for_loop() -> SurrealOrmResult<()> {
     Ok(())
 }
 
-// with multiple for loops
 #[tokio::test]
 async fn test_multiple_for_loops() -> SurrealOrmResult<()> {
     let account::Schema { balance, .. } = Account::schema();
@@ -67,14 +66,48 @@ async fn test_multiple_for_loops() -> SurrealOrmResult<()> {
 }
 
 // with simple standalone if else statement
-//
+#[tokio::test]
+async fn test_simple_standalone_if_else() -> SurrealOrmResult<()> {
+    let account::Schema { balance, .. } = Account::schema();
+    let account_table = &Account::table_name();
+
+    let second_cond_from_outside = balance.lte(54);
+    // let xx = {
+    // };
+
+    let query = query_turbo! {
+        let first_cond = balance.gte(100);
+        if first_cond {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(account_table).where_(balance.eq(5));
+        } else if second_cond_from_outside {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(account_table).where_(balance.eq(5));
+        } else if (balance.gte(100)) {
+           let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(account_table).where_(balance.eq(5));
+        } else {
+            let first_name = "Oyelowo";
+            let score = 100;
+            select(All).from(account_table).where_(balance.eq(5));
+        };
+    };
+
+    insta::assert_display_snapshot!(query.to_raw().build());
+    insta::assert_display_snapshot!(query.fine_tune_params());
+
+    Ok(())
+}
+
 // with multiple if else statements
 //
 // with for loop inside if else statement
 //
 // with if else statement inside for loop
 //
-// with for loop inside for loop
 // with if else statement inside if else statement
 //
 // with nested for loop inside if else statement
