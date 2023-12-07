@@ -504,7 +504,7 @@ impl Filter {
     /// Creates a new `Filter` instance.
     pub fn new(query: impl Conditional) -> Self {
         Self {
-            query_string: query.build(),
+            query_string: query.get_condition_query_string(),
             bindings: query.get_bindings(),
         }
     }
