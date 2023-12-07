@@ -10,13 +10,13 @@ pub struct Weapon {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
     // pub strength: u64,
-    #[surreal_orm(type_ = "int")]
+    #[surreal_orm(type_ = "float")]
     pub strength: Strength,
     pub created: DateTime<Utc>,
     #[surreal_orm(nest_object = "Rocket")]
     pub rocket: Rocket,
 }
-type Strength = u64;
+type Strength = f64;
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +24,7 @@ type Strength = u64;
 pub struct WeaponOld {
     pub id: SurrealSimpleId<Self>,
     pub name: String,
-    #[surreal_orm(type_ = "int")]
+    #[surreal_orm(type_ = "float")]
     pub strength: Strength,
     pub nice: bool,
     pub bunch_of_other_fields: i32,

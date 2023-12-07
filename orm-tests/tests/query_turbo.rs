@@ -8,7 +8,7 @@
 use pretty_assertions::assert_eq;
 use surreal_models::{account, Account, Balance};
 use surreal_orm::{
-    statements::{begin_transaction, create, create_only, let_, select, update},
+    statements::{create, create_only, select, update},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};

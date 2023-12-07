@@ -6,11 +6,10 @@
  */
 
 use pretty_assertions::assert_eq;
-use surreal_models::{weapon, weapon_stats, Weapon, WeaponStats};
+use surreal_models::{weapon, Weapon, WeaponStats};
 use surreal_orm::{
-    chain,
-    functions::math,
-    statements::{create, insert, let_, return_, select_value},
+    functions::{array, math},
+    statements::{create, insert, select_value},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};
@@ -27,7 +26,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
@@ -38,8 +37,8 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         // id: WeaponStats::create_simple_id(),
         averageStrength: block! {
             let strengths = select_value(strength).from(weapon);
-            let total = math::sum!(strengths);
-            let count = count!(strengths);
+            let total = math::sum!(strengths); // 105
+            let count = array::len!(strengths);     // 15
             return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
         }
     }));
@@ -51,7 +50,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + 4)) * 100);\n\
                 };"
     );
@@ -61,15 +60,13 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = $_param_00000001;\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + $_param_00000002)) * $_param_00000003);\n\
                 };"
     );
 
     let result = created_stats_statement.get_one(db.clone()).await.unwrap();
-    // NOTE: there is a problem with this result. Previously gave the correct answert with 10115.0
-    // but the test is now expecting 9400 which seems wrong
-    assert_eq!(result.average_strength, 9400.0);
+    assert_eq!(result.average_strength, 10115.0);
 
     Ok(())
 }
