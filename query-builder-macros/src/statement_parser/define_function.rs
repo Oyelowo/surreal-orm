@@ -1,14 +1,5 @@
 use std::fmt::Display;
 
-use nom::{
-    bytes::complete::{tag, take_while1},
-    character::complete::multispace0,
-    combinator::{all_consuming, cut},
-    error::context,
-    multi::separated_list0,
-    sequence::{delimited, tuple},
-    IResult,
-};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenTree};
 use proc_macros_helpers::get_crate_name;
@@ -16,11 +7,11 @@ use quote::{format_ident, quote, ToTokens};
 use surreal_query_builder::FieldType;
 use syn::{
     self,
-    parse::{discouraged::Speculative, Parse, ParseStream},
+    parse::{Parse, ParseStream},
     Ident, Token,
 };
 
-use super::{helpers::generate_variable_name, if_else::Body};
+use super::if_else::Body;
 
 #[derive(Clone, Debug)]
 struct FieldTypeParser(FieldType);
@@ -140,7 +131,6 @@ struct DefineFunctionStatementParser {
     function_name: Ident,
     args: Vec<Argument>,
     body: Body,
-    generated_ident: Ident,
 }
 
 impl Parse for DefineFunctionStatementParser {
@@ -157,7 +147,6 @@ impl Parse for DefineFunctionStatementParser {
             function_name,
             args: parsed_args.into_iter().collect::<Vec<_>>().into(),
             body,
-            generated_ident: generate_variable_name(),
         })
     }
 }
@@ -168,7 +157,6 @@ impl DefineFunctionStatementParser {
             function_name,
             args,
             body,
-            generated_ident,
         } = self;
         let crate_name = get_crate_name(false);
 
@@ -240,14 +228,6 @@ impl DefineFunctionStatementParser {
             }
 
         );
-
-        let mapped_field_types = args
-            .iter()
-            .map(|arg| {
-                let type_ = &arg.type_.to_lib_type();
-                quote!(#type_)
-            })
-            .collect::<Vec<_>>();
 
         let generated_func_macro = quote!(
                 #[macro_use]

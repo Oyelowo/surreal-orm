@@ -28,8 +28,6 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use surreal_query_builder::sql;
-use syn::{parse_macro_input, LitStr};
 mod models;
 
 #[proc_macro_derive(Node, attributes(surreal_orm))]

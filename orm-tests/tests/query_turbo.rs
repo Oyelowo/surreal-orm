@@ -260,7 +260,7 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
     insta::assert_display_snapshot!(query_chain.to_raw().build());
     insta::assert_display_snapshot!(query_chain.fine_tune_params());
 
-    let result = query_chain.run(db.clone()).await?;
+    let _result = query_chain.run(db.clone()).await?;
 
     let accounts = select(All)
         .from(id1..=id2)

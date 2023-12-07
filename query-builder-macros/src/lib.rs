@@ -2,8 +2,6 @@ use proc_macro::TokenStream;
 use surreal_query_builder::sql;
 use syn::{parse_macro_input, LitStr};
 
-use crate::statement_parser::for_::ForLoopMetaParser;
-
 mod query;
 mod query_builder;
 mod statement_parser;
