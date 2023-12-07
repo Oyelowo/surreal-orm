@@ -1,15 +1,14 @@
 ---
-source: surreal-orm-tests/tests/query_ifelse.rs
+source: orm-tests/tests/query_ifelse.rs
 expression: queries_1.fine_tune_params()
 ---
 LET $val = $_param_00000001;
 
 LET $name = $_param_00000002;
 
-IF $val > $_param_00000003 THEN
-	$_param_00000004
-ELSE IF $name = $_param_00000005 THEN
-	$_param_00000006
+IF $val > $_param_00000003 
+	{ $_param_00000004 }
+ELSE IF $name = $_param_00000005 
+	{ $_param_00000006 }
 ELSE
-	$_param_00000007
-END
+	{ $_param_00000007 };
