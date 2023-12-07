@@ -1,4 +1,5 @@
-use quote::quote;
+use proc_macro2::Ident;
+use quote::{quote, format_ident};
 use syn::parse::{Parse,  ParseStream};
 
 use proc_macros_helpers::get_crate_name;
@@ -46,7 +47,12 @@ impl QueriesChainParser {
 
 pub struct GeneratedCode {
     pub to_render: Vec<proc_macro2::TokenStream>,
-    pub query_chain: Vec<proc_macro2::TokenStream>
+    pub query_chain_var_ident: Ident
+}
+
+struct QueryLine {
+    pub rendered: proc_macro2::TokenStream,
+    pub var_ident: proc_macro2::TokenStream
 }
 
 impl QueriesChainParser {
@@ -55,16 +61,24 @@ impl QueriesChainParser {
         let crate_name = get_crate_name(false);
         
 
-        let (rendered, query_chain) : (Vec<_>, Vec<_>)= statements.iter().map(|stmt_or_expr| match stmt_or_expr {
+        let query_chain_var_name = format_ident!("query_chain_{}", generate_variable_name());
+        let lines = statements.iter().map(|stmt_or_expr| match stmt_or_expr {
         QueryParser::LetStatement(var_statement) => {
             let LetStatementParser { ident, expr, .. } = var_statement;
-            (quote! {
-                let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
-            }, quote!(#ident))
+            Some(QueryLine {
+                rendered: quote! (
+                    let ref #ident = #crate_name::statements::let_(stringify!(#ident)).equal_to(#expr);
+                ),
+                var_ident: quote!(#ident)
+            })
         }
-        QueryParser::Expr {expr, generated_ident} => (
-                quote! (let #generated_ident = #expr;),
-                quote!(#generated_ident)
+        QueryParser::Expr {expr, generated_ident} => Some(
+                QueryLine {
+                    rendered: quote! (
+                        let #generated_ident = #expr;
+                    ),
+                    var_ident: quote!(#generated_ident)
+                }
             ),
         QueryParser::ForLoop(for_loop_parser) => {
             let for_loop_content = &for_loop_parser.meta_content;
@@ -72,82 +86,120 @@ impl QueriesChainParser {
                 
             let tokenized = for_loop_content.tokenize();
             let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
-                (
-                quote!(
-                    let #generated_ident = #query_chain;
-                ),
-                    quote!(#generated_ident)
-                )
+                Some(QueryLine {
+                    rendered: quote! (
+                        let #generated_ident = #query_chain;
+                    ),
+                    var_ident: quote!(#generated_ident)
+                })
             },
             QueryParser::IfEsle(if_else_meta) => {
                 let tokenized = if_else_meta.meta_content.tokenize();
                 let query_chain: proc_macro2::TokenStream = tokenized.query_chain.into();
                 let generated_ident = &if_else_meta.meta_content.generated_ident;
-                (
-                quote!(
-                    let #generated_ident = #query_chain;
-                ),
-                    quote!(#generated_ident)
+                Some(
+                    QueryLine {
+                        rendered: quote! (
+                            let #generated_ident = #query_chain;
+                        ),
+                        var_ident: quote!(#generated_ident)
+                    }
                 )
                 
             },
             QueryParser::BeginTransaction => {
-                (quote!(), quote!())
+                None
             },
             QueryParser::CommitTransaction => {
-                (quote!(), quote!())
+                None
             },
             QueryParser::CancelTransaction => {
-                (quote!(), quote!())
+                None
             },
             QueryParser::ReturnStatement(r_stmt) => {
                 let ReturnStatementParser { expr, generated_ident, _return, } = r_stmt;
                 
-                (
-                quote! {
-                    let #generated_ident = #crate_name::statements::return_(#expr);
-                },
-                    quote!(#generated_ident)
+                Some(
+                    QueryLine {
+                        rendered: quote! (
+                            let #generated_ident = #crate_name::statements::return_(#expr);
+                        ),
+                        var_ident: quote!(#generated_ident)
+                    }
                 )
             },
             QueryParser::BreakStatement => {
                 let generated_ident = generate_variable_name();
-                (
-                quote! {
-                    let ref #generated_ident = #crate_name::statements::break_();
-                },
-                    quote!(#generated_ident)
+                Some(
+                    QueryLine {
+                        rendered: quote! (
+                            let #generated_ident = #crate_name::statements::break_();
+                        ),
+                        var_ident: quote!(#generated_ident)
+                    }
                 )
             },
             QueryParser::ContinueStatement => {
                 let generated_ident = generate_variable_name();
-                (
-                quote! {
-                    let ref #generated_ident = #crate_name::statements::continue_();
-                },
-                    quote!(#generated_ident)
+                Some(
+                    QueryLine {
+                        rendered: quote! (
+                            let #generated_ident = #crate_name::statements::continue_();
+                        ),
+                        var_ident: quote!(#generated_ident)
+                    }
                 )
             },
-    }).unzip();
+   });
 
-    let query_chain = query_chain
-        .iter()
-        .filter(| var_ident| !var_ident.is_empty())
-        .enumerate()
-        .map(|(i, var_ident)| {
-            let is_first = i == 0;
 
-            if is_first {
-                quote!(#crate_name::chain(#var_ident))
-            } else {
-                quote!(.chain(#var_ident))
-            }
-        })
-        .collect::<Vec<_>>();
+    let code = lines.filter(Option::is_some)
+            .enumerate()
+            .map(|(i, line)| {
+                let QueryLine { rendered, var_ident } = line.expect("Nonempty line should not be None");
+                let is_first = i == 0;
 
+                if is_first {
+                    quote!(
+                        #rendered
+                        let #query_chain_var_name  = #crate_name::chain(#var_ident);
+                    )
+                } else {
+                    quote!(
+                        #rendered
+                        let #query_chain_var_name  = #query_chain_var_name.chain(#var_ident);
+                    )
+                }
+            }).collect::<Vec<_>>();
+
+    // let xx = {
+    //     let ref var_name =
+    //         surreal_orm::statements::let_("var_name").equal_to(select(All).from(account_table));
+    //     let generated_query_chain_var_name = surreal_orm::chain(var_name);
+    //     let ref var_name = surreal_orm::statements::let_("var_name").equal_to("Oyelowo");
+    //     let generated_query_chain_var_name = generated_query_chain_var_name.chain(var_name);
+    //
+    //     generated_query_chain_var_name
+    // };
+
+    // let query_chain = query_chain
+    //     .iter()
+    //     .filter(| var_ident| !var_ident.is_empty())
+    //     .enumerate()
+    //     .map(|(i, var_ident)| {
+    //         let is_first = i == 0;
+    //
+    //         if is_first {
+    //             quote!(#crate_name::chain(#var_ident))
+    //         } else {
+    //             quote!(.chain(#var_ident))
+    //         }
+    //     })
+    //     .collect::<Vec<_>>();
+    //
         GeneratedCode {
-            to_render: rendered,
-            query_chain
+            to_render: code,
+            query_chain_var_ident: query_chain_var_name
         }
     }
     
