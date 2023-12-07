@@ -64,14 +64,14 @@ impl From<&Param> for ForParam {
 /// A helper function to create a for loop
 /// You are encouraged to use for loop within
 /// query_turbo! macro or use for_! macro.
-/// ```
+/// ```rust, ignore
 /// use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, statements::for_};
 ///
 /// let query = for_(vec![param!(name), param!(age)])
 ///    .in_(vec![1, 2, 3, 4, 5]);
 ///    .block(
-///         query_turbo!(select(All).from(SpaceShip::table_name())
+///         query_turbo!(select(All).from(SpaceShip::table_name()))
 ///     );
 /// ```
 pub fn for_(params: impl Into<ForParam>) -> ForIterable {
