@@ -32,7 +32,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
 
     let generated_weapons = (0..10)
         .map(|i| Weapon {
-            strength: i,
+            strength: i as f64,
             name: format!("weapon-{}", i),
             ..Default::default()
         })
@@ -138,7 +138,7 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
     if let SpaceShipOrWeapon::Weapon(w) = &query_result_2[0] {
         assert_eq!(w.name, "weapon-9");
         assert!(w.id.to_string().starts_with("weapon:"));
-        assert_eq!(w.strength, 9);
+        assert_eq!(w.strength, 9.0);
     };
 
     // Matches Else
@@ -307,7 +307,7 @@ async fn test_if_else_statement() -> SurrealOrmResult<()> {
 
     let generated_weapons = (0..10)
         .map(|i| Weapon {
-            strength: i,
+            strength: i as f64,
             name: format!("weapon-{}", i),
             ..Default::default()
         })
@@ -425,7 +425,7 @@ async fn test_if_else_in_update_statement_setter() -> SurrealOrmResult<()> {
 
     let generated_weapons = (0..=100)
         .map(|i| Weapon {
-            strength: i,
+            strength: i as f64,
             name: format!("weapon-{}", i),
             ..Default::default()
         })

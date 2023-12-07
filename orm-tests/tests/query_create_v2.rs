@@ -734,7 +734,7 @@ async fn test_access_array_record_links_with_some_null_links() -> SurrealOrmResu
         id: Weapon::create_simple_id(),
         name: "weapon1".to_string(),
         created: Utc::now(),
-        strength: 55,
+        strength: 55.0,
         ..Default::default()
     };
 

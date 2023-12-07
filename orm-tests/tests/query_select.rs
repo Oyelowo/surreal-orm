@@ -22,7 +22,7 @@ async fn test_subquery_in_select_statement() -> SurrealOrmResult<()> {
     let generated_spaceships = (1..=10)
         .map(|i| Weapon {
             name: format!("Weapon {}", i),
-            strength: i * 10,
+            strength: i as f64 * 10.0,
             created: Utc::now(),
             ..Default::default()
         })
@@ -77,7 +77,7 @@ async fn test_subquery_in_select_statement_with_order_functions() -> SurrealOrmR
     let generated_spaceships = (1..=10)
         .map(|i| Weapon {
             name: format!("Weapon {}", i),
-            strength: i * 10,
+            strength: i as f64 * 10f64,
             created: Utc::now(),
             ..Default::default()
         })

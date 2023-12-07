@@ -19,7 +19,7 @@ async fn create_test_data(db: Surreal<Db>) {
     let space_ships = (0..1000)
         .map(|i| Weapon {
             name: format!("weapon-{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default() // created: chrono::Utc::now(),
         })
         .collect::<Vec<Weapon>>();
