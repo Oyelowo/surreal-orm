@@ -1,5 +1,9 @@
 ---
 source: orm-tests/tests/query_define_function.rs
-expression: person.to_raw().build()
+expression: person_statement.to_raw().build()
 ---
-get_person('Oyelowo', 'Oyedayo', $birthday)
+DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {
+LET $person = (SELECT * FROM space_ship WHERE (id = $first_arg) AND (name = $last_arg) AND (created = $birthday_arg));
+
+RETURN IF $person[0].id != NONE { $person } ELSE { (CREATE space_ship SET id = $first_arg, name = $last_arg, created = $birthday_arg) };
+};

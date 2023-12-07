@@ -1,0 +1,12 @@
+---
+source: orm-tests/tests/query_define_function.rs
+expression: spaceship_statement.fine_tune_params()
+---
+DEFINE FUNCTION get_or_create_spaceship($first_arg: string, $last_arg: string, $birthday_arg: datetime, $_very_complex_type: int | option<float> | array<option<string> | int | null, 10> | set<option<number> | float | null, 10> | option<array<any>> | option<set<option<int>>>) {
+LET $person = $_param_00000001;
+
+IF $person[$_param_00000002].id IS NOT NONE 
+	{ RETURN $person; }
+ELSE
+	{ RETURN $_param_00000003; };
+};

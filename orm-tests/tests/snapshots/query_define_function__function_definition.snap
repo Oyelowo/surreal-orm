@@ -2,4 +2,4 @@
 source: orm-tests/tests/query_define_function.rs
 expression: person.to_raw().build()
 ---
-get_person('Oyelowo', 'Oyedayo', '1970-01-01T00:01:01Z')
+get_person('Oyelowo', 'Oyedayo', '2022-09-21')
