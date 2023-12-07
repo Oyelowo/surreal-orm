@@ -1144,7 +1144,7 @@ async fn test_insert_from_another_table() {
         .map(|i| Weapon {
             name: format!("Weapon{}", i),
             created: Utc::now(),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();

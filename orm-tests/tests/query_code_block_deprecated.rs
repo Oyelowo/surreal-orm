@@ -8,9 +8,9 @@
 use pretty_assertions::assert_eq;
 use surreal_models::{weapon, weapon_stats, Weapon, WeaponStats};
 use surreal_orm::{
-    chain,
-    functions::math,
-    statements::{create, insert, let_, return_, select_value},
+    block_deprecated as block, chain,
+    functions::{array, math},
+    statements::{create, insert, let_, return_, select_value, LetStatement},
     *,
 };
 use surrealdb::{engine::local::Mem, Surreal};
@@ -27,20 +27,26 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
 
     insert(generated_weapons).return_many(db.clone()).await?;
+    let x = block! {
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = array::len!(strengths);
+        return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+    };
 
     let created_stats_statement = create::<WeaponStats>().set(object_partial!(WeaponStats {
         // id: WeaponStats::create_simple_id(),
-        averageStrength: block_deprecated! {
-            LET strengths = select_value(strength).from(weapon);
-            LET total = math::sum!(strengths);
-            LET count = count!(strengths);
-            RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+        averageStrength: block! {
+            let strengths = select_value(strength).from(weapon);
+            let total = math::sum!(strengths);
+            let count = array::len!(strengths);
+            return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
         }
     }));
 
@@ -51,7 +57,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + 4)) * 100);\n\
                 };"
     );
@@ -61,15 +67,13 @@ async fn test_complex_code_block_with_sweet_macro_block_and_object_partial_and_a
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = $_param_00000001;\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + $_param_00000002)) * $_param_00000003);\n\
                 };"
     );
 
     let result = created_stats_statement.get_one(db.clone()).await.unwrap();
-    // NOTE: there is a problem with this result. Previously gave the correct answert with 10115.0
-    // but the test is now expecting 9400 which seems wrong
-    assert_eq!(result.average_strength, 9400.0);
+    assert_eq!(result.average_strength, 10115.0);
 
     Ok(())
 }
@@ -88,20 +92,19 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement =
-        create::<WeaponStats>().set(averageStrength.equal_to(block_deprecated! {
-            LET strengths = select_value(strength).from(weapon);
-            LET total = math::sum!(strengths);
-            LET count = count!(strengths);
-            RETURN math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
-        }));
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = array::len!(strengths);
+        return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+    }));
 
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
@@ -110,7 +113,7 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + 4)) * 100);\n\
                 };"
     );
@@ -120,15 +123,13 @@ async fn test_complex_code_block_with_sweet_macro_block_and_arithementic_ops(
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = $_param_00000001;\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN math::ceil(((($total / $count) * ($count * $total)) / ($total + $_param_00000002)) * $_param_00000003);\n\
                 };"
     );
 
     let result = created_stats_statement.get_one(db.clone()).await.unwrap();
-    // NOTE: there is a problem with this result. Previously gave the correct answert with 10115.0
-    // but the test is now expecting 9400 which seems wrong
-    assert_eq!(result.average_strength, 9400.0);
+    assert_eq!(result.average_strength, 10115.0);
 
     Ok(())
 }
@@ -147,20 +148,24 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
 
     insert(generated_weapons).return_many(db.clone()).await?;
+    let yy = query_turbo! {
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = array::len!(strengths);
+    };
 
-    let created_stats_statement =
-        create::<WeaponStats>().set(averageStrength.equal_to(block_deprecated! {
-            LET strengths = select_value(strength).from(weapon);
-            LET total = math::sum!(strengths);
-            LET count = count!(strengths);
-            RETURN total / count;
-        }));
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = array::len!(strengths);
+        return total / count;
+    }));
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
@@ -168,7 +173,7 @@ async fn test_code_block_with_sweet_macro_block_and_arithementic_ops() -> Surrea
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN $total / $count;\n\
                 };"
     );
@@ -193,20 +198,19 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
 
     insert(generated_weapons).return_many(db.clone()).await?;
 
-    let created_stats_statement =
-        create::<WeaponStats>().set(averageStrength.equal_to(block_deprecated! {
-            LET strengths = select_value(strength).from(weapon);
-            LET total = math::sum!(strengths);
-            LET count = count!(strengths);
-            RETURN total.divide(count);
-        }));
+    let created_stats_statement = create::<WeaponStats>().set(averageStrength.equal_to(block! {
+        let strengths = select_value(strength).from(weapon);
+        let total = math::sum!(strengths);
+        let count = array::len!(strengths);
+        return total.divide(count);
+    }));
     insta::assert_display_snapshot!(created_stats_statement.to_raw());
     insta::assert_display_snapshot!(created_stats_statement.fine_tune_params());
     assert_eq!(
@@ -214,7 +218,7 @@ async fn test_code_block_with_sweet_macro_block() -> SurrealOrmResult<()> {
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN $total / $count;\n\
                 };"
     );
@@ -238,7 +242,7 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
@@ -247,7 +251,7 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
 
     let_!(strengths = select_value(strength).from(weapon));
     let_!(total = math::sum!(&strengths));
-    let_!(count = count!(&strengths));
+    let_!(count = array::len!(&strengths));
     let returned = return_(bracket(total.divide(&count)));
     let code_block = block(chain(strengths).chain(total).chain(count).chain(returned));
 
@@ -260,7 +264,7 @@ async fn test_code_block_with_macro() -> SurrealOrmResult<()> {
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN ($total / $count);\n\
                 };"
     );
@@ -285,7 +289,7 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
@@ -294,7 +298,7 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
 
     let strengths = &let_("strengths").equal_to(select_value(strength).from(weapon));
     let total = &let_("total").equal_to(math::sum!(strengths));
-    let count = &let_("count").equal_to(count!(strengths));
+    let count = &let_("count").equal_to(array::len!(strengths));
     let return_value = return_(bracket(total.divide(count)));
 
     let code_block = block(
@@ -313,7 +317,7 @@ async fn test_code_block_simplified() -> SurrealOrmResult<()> {
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN ($total / $count);\n\
                 };"
     );
@@ -334,7 +338,7 @@ async fn test_code_block() -> SurrealOrmResult<()> {
     let generated_weapons = (0..=14)
         .map(|i| Weapon {
             name: format!("weapon_{}", i),
-            strength: i,
+            strength: i as f64,
             ..Default::default()
         })
         .collect::<Vec<_>>();
@@ -347,7 +351,7 @@ async fn test_code_block() -> SurrealOrmResult<()> {
     let step2_assign_total = &let_("total").equal_to(math::sum!(strengths));
     let total = step2_assign_total.get_param();
 
-    let step3_assign_count = &let_("count").equal_to(count!(strengths));
+    let step3_assign_count = &let_("count").equal_to(array::len!(strengths));
     let count = step3_assign_count.get_param();
 
     let step4_return_last = return_(bracket(total.divide(count)));
@@ -371,7 +375,7 @@ async fn test_code_block() -> SurrealOrmResult<()> {
         "CREATE weapon_stats SET averageStrength = {\n\
                 LET $strengths = (SELECT VALUE strength FROM weapon);\n\n\
                 LET $total = math::sum($strengths);\n\n\
-                LET $count = count($strengths);\n\n\
+                LET $count = array::len($strengths);\n\n\
                 RETURN ($total / $count);\n\
                 };"
     );
