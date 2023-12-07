@@ -71,12 +71,12 @@ impl Parse for ForLoopMetaParser {
 
             input.parse::<syn::Token![;]>()?;
 
-            return Ok(ForLoopMetaParser {
+            Ok(ForLoopMetaParser {
                 iteration_param,
                 iterable,
                 body,
                 generated_ident,
-            });
+            })
         } else {
             let iteration_param = input.parse()?;
 
@@ -91,13 +91,13 @@ impl Parse for ForLoopMetaParser {
 
             input.parse::<syn::Token![;]>()?;
 
-            return Ok(ForLoopMetaParser {
+            Ok(ForLoopMetaParser {
                 iteration_param,
                 iterable,
                 body,
                 generated_ident,
-            });
-        };
+            })
+        }
     }
 }
 

@@ -145,7 +145,7 @@ impl Parse for DefineFunctionStatementParser {
 
         Ok(Self {
             function_name,
-            args: parsed_args.into_iter().collect::<Vec<_>>().into(),
+            args: parsed_args.into_iter().collect::<Vec<_>>(),
             body,
         })
     }

@@ -305,7 +305,7 @@ impl Buildable for IfElseStatement {
             output.push_str(&format!("\nELSE\n\t{{ {} }}", else_body.build()));
         }
 
-        output.push_str(";");
+        output.push(';');
         output
     }
 }

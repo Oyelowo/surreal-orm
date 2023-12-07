@@ -5,7 +5,7 @@ use crate::statement_parser::query_chain::QueriesChainParser;
 
 pub fn query_transaction(input: TokenStream) -> TokenStream {
     let queries_chain = parse_macro_input!(input as QueriesChainParser);
-    let token: proc_macro2::TokenStream = queries_chain.to_tokenstream().into();
+    let token: proc_macro2::TokenStream = queries_chain.to_tokenstream();
     if !queries_chain.is_valid_transaction_statement() {
         return syn::Error::new_spanned(
             token,

@@ -1769,8 +1769,8 @@ mod tests {
     #[test]
     fn test_statement_with_alias() {
         let canadian_cities = AliasName::new("legal_age");
-        let ref age = Field::new("age");
-        let ref city = Field::new("city");
+        let age = &Field::new("age");
+        let city = &Field::new("city");
         let fake_id = sql::Thing::from(("user".to_string(), "oyelowo".to_string()));
         let ft_city = IndexName::new("ft_city");
 
