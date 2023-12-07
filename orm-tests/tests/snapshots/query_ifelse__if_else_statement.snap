@@ -1,15 +1,14 @@
 ---
-source: surreal-orm-tests/tests/query_ifelse.rs
-expression: queries.to_raw().build()
+source: orm-tests/tests/query_ifelse.rs
+expression: queries_1.to_raw().build()
 ---
 LET $val = 7;
 
 LET $name = 'Oyelowo';
 
-IF $val > 8 THEN
-	(SELECT * FROM space_ship)
-ELSE IF $name = 'Oyelowo' THEN
-	(SELECT * FROM weapon)
+IF $val > 5 
+	{ (SELECT * FROM space_ship ORDER BY name DESC) }
+ELSE IF $name = 'Oyelowo' 
+	{ (SELECT * FROM weapon ORDER BY strength DESC) }
 ELSE
-	5
-END
+	{ 2505 };

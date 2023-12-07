@@ -47,9 +47,6 @@ async fn test_if_else_statement_and_let_with_block_macro() -> SurrealOrmResult<(
         ..
     } = Weapon::schema();
 
-    //     let z = {
-    // };
-
     let queries_1 = block! {
         let val = 7;
         let oye_name = "Oyelowo";
@@ -213,19 +210,6 @@ async fn test_if_else_statement_and_let_macro() -> SurrealOrmResult<()> {
 
     insta::assert_display_snapshot!(queries_1.to_raw().build());
     insta::assert_display_snapshot!(queries_1.fine_tune_params());
-    assert_eq!(
-        queries_1.fine_tune_params(),
-        "\
-    LET $val = $_param_00000001;\n\n\
-    LET $name = $_param_00000002;\n\n\
-    F $val > $_param_00000003 THEN\n\
-    \t$_param_00000004\n\
-    ELSE IF $name = $_param_00000005 THEN\n\
-    \t$_param_00000006\n\
-    ELSE\n\
-    \t$_param_00000007\n\
-    END"
-    );
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]
@@ -334,19 +318,6 @@ async fn test_if_else_statement() -> SurrealOrmResult<()> {
 
     insta::assert_display_snapshot!(queries_1.to_raw().build());
     insta::assert_display_snapshot!(queries_1.fine_tune_params());
-    assert_eq!(
-        queries_1.fine_tune_params(),
-        "\
-    LET $val = $_param_00000001;\n\n\
-    LET $name = $_param_00000002;\n\n\
-    IF $val > $_param_00000003 THEN\n\
-    \t$_param_00000004\n\
-    ELSE IF $name = $_param_00000005 THEN\n\
-    \t$_param_00000006\n\
-    ELSE\n\
-    \t$_param_00000007\n\
-    END"
-    );
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(untagged)]
