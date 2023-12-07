@@ -117,7 +117,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             id: id1.clone(),
             balance: 135_605.16,
         });
-        
         create_only().content(Account {
             id: id2.clone(),
             balance: 91_031.31,
