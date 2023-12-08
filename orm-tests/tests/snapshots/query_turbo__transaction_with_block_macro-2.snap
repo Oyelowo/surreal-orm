@@ -68,9 +68,9 @@ UPDATE $_param_00000033 SET balance += $balance1.amount;
 
 UPDATE $_param_00000034 SET balance += $_param_00000035;
 
-LET $update2 = $_param_00000036;
+UPDATE $_param_00000036 SET balance -= $_param_00000037;
 
-LET $update3 = $_param_00000037;
+UPDATE $_param_00000038 SET balance -= $_param_00000039;
 
 COMMIT TRANSACTION;
 	

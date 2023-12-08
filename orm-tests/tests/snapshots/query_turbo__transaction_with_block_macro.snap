@@ -68,9 +68,9 @@ UPDATE account:one SET balance += $balance1.amount;
 
 UPDATE account:one SET balance += 45.3f;
 
-LET $update2 = (UPDATE account:two SET balance -= 300f);
+UPDATE account:two SET balance -= 300f;
 
-LET $update3 = (UPDATE account:two SET balance -= 50f);
+UPDATE account:two SET balance -= 50f;
 
 COMMIT TRANSACTION;
 	
