@@ -86,7 +86,7 @@ impl Queryable for DefineFunctionStatement {}
 
 impl Buildable for DefineFunctionStatement {
     fn build(&self) -> String {
-        let mut build = format!("DEFINE FUNCTION {}(", self.name);
+        let mut build = format!("DEFINE FUNCTION fn::{}(", self.name);
         build.push_str(
             &self
                 .args
