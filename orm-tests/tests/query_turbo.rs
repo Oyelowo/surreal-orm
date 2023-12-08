@@ -288,10 +288,6 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
         };
 
-        // You can also use parenthesis for the iteration if you want
-        // for (name in vec!["Oyelowo", "Oyedayo"]) {
-        // let names = vec!["Oyelowo", "Oyedayo"];
-        // for name in  names {
         for name in vec!["Oyelowo", "Oyedayo"] {
             let first = "Oyelowo";
             select(All).from(Account::table_name()).where_(acc.balance.eq(5));
@@ -332,14 +328,8 @@ async fn test_transaction_with_block_macro() -> SurrealOrmResult<()> {
         update::<Account>(id1).set(acc.balance.increment_by(45.3));
 
         // You can also pass the amount directly to the decrement_by function. i.e 300.00
-        let update2 = update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
-        // FIX: Scenario where the same variable is used twice, only the latest let statement value
-        // is duplicated because we are using the bound variable name in the chaining rather than
-        // the value itself. So, either probably consider suffixing the variable name with a random
-        // id or using the values directly in the binding.
-        // Or probably doing the chaining immediately after declaration and aggregating that after
-        // the entire chained queries.
-        let update3 = update::<Account>(id2).set(acc.balance.decrement_by(50));
+        update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+        update::<Account>(id2).set(acc.balance.decrement_by(50));
 
         commit transaction;
     };
