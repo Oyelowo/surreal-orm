@@ -97,16 +97,183 @@ pub fn query(raw_input: TokenStream) -> TokenStream {
     query::query(raw_input.into()).into()
 }
 
+/// A novel approach to writing SQL queries in Rust. It allows you to write SQL queries
+/// in a native-like Rust Syntax. It supports mixing query builder functions with native looking
+/// syntax such as if, for, let, return statements and standard Rust expressions which can be
+/// a normal surreal_orm query builder function statement.
+///
+/// It dynamically returns a query chain, transaction or a block depending on the usage.
+/// By default, it returns a query chain. If you want to return a transaction, you start
+/// with a `begin transaction;` and end with a `commit transaction;` or `cancel transaction;`
+/// keywords.
+/// To return a block, you have to return typically at the end.
+///
+/// # Arguments
+/// * `queries` - Series of queries to be checked at compile time.
+///
+/// # Example
+///
+/// ```rust, ignore
+/// query_turbo! {
+///     let balance1 = create_only().content(Balance {
+///     id: Balance::create_id("balance1".to_string()),
+///         amount: amount_to_transfer,
+///     });
+///
+///     create_only().content(Balance {
+///         id: Balance::create_id("balance2".to_string()),
+///         amount: amount_to_transfer,
+///     });
+///
+///     if balance.greater_than(100) {
+///         let first_name = "Oyelowo";
+///         let score = 100;
+///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///     } else if balance.gte(100) {
+///         let first_name = "Oyelowo";
+///         let score = 100;
+///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///     } else {
+///         let first_name = "Oyelowo";
+///         let score = 100;
+///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///     };
+///
+///     for name in vec!["Oyelowo", "Oyedayo"] {
+///         let first = "Oyelowo";
+///         select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///         
+///         let good_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(64));
+///
+///         if balance.gt(50) {
+///             let first_name = "Oyelowo";
+///         };
+///
+///         select(All).from(Account::table_name()).where_(acc.balance.eq(34));
+///
+///         let numbers = vec![23, 98];
+///
+///         for age in numbers {
+///             let score = 100;
+///             let first_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///
+///             let second_stmt = select(All).from(Account::table_name()).where_(acc.balance.eq(25));
+///             select(All).from(Account::table_name()).where_(acc.balance.eq(923));
+///             
+///         };
+///     };
+///
+///     // You can reference the balance object by using the $balance variable and pass the amount
+///     // as a parameter to the decrement_by function. i.e $balance.amount
+///     let updated1 = update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
+///     update::<Account>(id1).set(acc.balance.increment_by(balance1.with_path::<Balance>(E).amount));
+///     update::<Account>(id1).set(acc.balance.increment_by(45.3));
+///     
+///     // You can also pass the amount directly to the decrement_by function. i.e 300.00
+///     update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///     update::<Account>(id2).set(acc.balance.decrement_by(50));
+/// };
+///
+/// // as transaction.
+/// query_turbo! {
+///    BEGIN TRANSACTION;
+///    let balance1 = create_only().content(Balance {
+///         id: Balance::create_id("balance1".to_string()),
+///         amount: amount_to_transfer,
+///    });
+///
+///    COMMIT TRANSACTION;
+/// };
+///
+/// // as block.
+/// query_turbo! {
+///   let result = select(All).from(Account::table_name()).where_(acc.balance.eq(5));
+///
+///   return result;
+/// };
+/// ```
 #[proc_macro]
 pub fn query_turbo(input: TokenStream) -> TokenStream {
     query_builder::query_turbo(input)
 }
 
+/// A block is a series of queries that are executed as a single
+/// unit, surrounded by curly braces and typically returns a value. It can be assigned to a field or variable.
+/// It supports mixing query builder functions with native looking
+/// syntax such as if, for, let, return statements and standard Rust expressions which can be
+/// a normal surreal_orm query builder function statement.
+///
+/// # Arguments
+/// * `queries` - Series of queries to be checked at compile time.
+///
+/// # Example
+/// ```rust, ignore
+/// let created_stats_statement = create::<WeaponStats>().set(object_partial!(WeaponStats {
+///     averageStrength: block! {
+///         let strengths = select_value(strength).from(weapon);
+///         let total = math::sum!(strengths); // 105
+///         let count = array::len!(strengths);     // 15
+///         return math::ceil!((((total / count) * (count * total)) / (total + 4)) * 100);
+///     }
+/// }));
+/// ```
 #[proc_macro]
 pub fn block(input: TokenStream) -> TokenStream {
     query_builder::query_block(input)
 }
 
+/// A transaction is a series of queries that are executed as a single
+/// unit. It supports mixing query builder functions with native looking
+/// syntax such as if, for, let, return statements and standard Rust expressions which can be
+/// a normal surreal_orm query builder function statement.
+///
+/// It must start with a `begin transaction;` and end with a `commit transaction;` or `cancel transaction;`
+/// keywords.
+///
+/// # Arguments
+/// * `queries` - Series of queries to be checked at compile time.
+///
+/// # Example
+///
+/// ```rust, ignore
+///
+/// let db = Surreal::new::<Mem>(()).await.unwrap();
+/// db.use_ns("test").use_db("test").await.unwrap();
+///
+/// let id1 = &Account::create_id("one".to_string());
+/// let id2 = &Account::create_id("two".to_string());
+/// let amount_to_transfer = 300.00;
+///
+/// let acc = Account::schema();
+/// transaction! {
+///     BEGIN TRANSACTION;
+///     
+///     let balance = create_only().content(Balance {
+///         id: Balance::create_id("balance1".into()),
+///         amount: amount_to_transfer,
+///     });
+///
+///     create_only().content(Account {
+///         id: id1.clone(),
+///         balance: 135_605.16,
+///     });
+///     create_only().content(Account {
+///         id: id2.clone(),
+///         balance: 91_031.31,
+///     });
+///
+///     // You can reference the balance object by using the $balance variable and pass the amount
+///     // as a parameter to the decrement_by function. i.e $balance.amount
+///     update::<Account>(id1).set(acc.balance.increment_by(balance.with_path::<Balance>(E).amount));
+///
+///     // You can also pass the amount directly to the decrement_by function. i.e 300.00
+///     update::<Account>(id2).set(acc.balance.decrement_by(amount_to_transfer));
+///
+///     COMMIT TRANSACTION;
+/// }
+/// .run(db.clone())
+/// .await?;
+/// ```
 #[proc_macro]
 pub fn transaction(input: TokenStream) -> TokenStream {
     query_builder::query_transaction(input)
