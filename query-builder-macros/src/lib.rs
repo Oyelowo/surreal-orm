@@ -6,6 +6,21 @@ mod query;
 mod query_builder;
 mod statement_parser;
 
+/// Checks a query at compile time and returns the query as a string.
+/// Unlike, query! macro, this macro does not allow variable interpolation.
+///
+/// # Arguments
+/// * `query` - The query to be checked at compile time.
+///
+/// # Example
+/// ```rust
+/// # use query_builder_macros as surreal_orm;
+/// use surreal_orm::{query_raw, statements::select};
+///
+/// let query = query_raw!("SELECT name, age, * FROM users");
+/// let query = query_raw!("SELECT name, age, * FROM users WHERE name = $1 AND name = 'Oyelowo'");
+/// let query = query_raw!("SELECT ->purchased->product<-purchased<-person->purchased->product FROM person:tobie PARALLEL");
+/// ```
 #[proc_macro]
 pub fn query_raw(raw_input: TokenStream) -> TokenStream {
     let r_input = raw_input.clone();
@@ -64,26 +79,31 @@ pub fn transaction(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// ```rust, ignore   
-/// // The below generates a `get_person_statement` itself and `get_person` helper function created by the macro.
-/// define_function!(get_person(first_arg: string, last_arg: string, birthday_arg: string) {
+/// // The below generates a `get_or_create_spaceship_statement` itself and `get_or_create_spaceship` helper function created by the macro.
+/// define_function!(get_or_create_spaceship(
+///     first_arg: string,
+///     last_arg: string,
+///     birthday_arg: datetime,
+///     _very_complex_type: int | option<float> | array<option<string>|int|null, 10> | set<option<number>|float|null, 10> | option<array> | option<set<option<int>>>
+/// ) {
 ///     let person = select(All)
 ///         .from(SpaceShip::table_name())
 ///         .where_(
-///             cond(SpaceShip::schema().id.equal(&first_arg))
-///                 .and(SpaceShip::schema().name.equal(&last_arg))
-///                 .and(SpaceShip::schema().created.equal(&birthday_arg)),
+///             cond(SpaceShip::schema().id.equal(first_arg))
+///                 .and(SpaceShip::schema().name.equal(last_arg))
+///                 .and(SpaceShip::schema().created.equal(birthday_arg)),
 ///         );
 ///
-///    if person.with_path::<SpaceShip>(index(0)).id.is_not(NONE) {
-///         return person.with_path::<SpaceShip>(index(0));
+///     if person.with_path::<SpaceShip>([0]).id.is_not(NONE) {
+///         return person;
 ///     } else {
-///         create::<SpaceShip>(
-///             vec![
-///                 SpaceShip::schema().id.equal_to(&first_arg),
-///                 SpaceShip::schema().name.equal_to(&last_arg),
-///                 SpaceShip::schema().created.equal_to(&birthday_arg),
-///             ]
-///         )
+///         return create::<SpaceShip>().set(
+///                     object!(SpaceShip {
+///                         id: first_arg,
+///                         name: last_arg,
+///                         created: birthday_arg,
+///                     })
+///                 );
 ///     };
 /// });
 /// ```
