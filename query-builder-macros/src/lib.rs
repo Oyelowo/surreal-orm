@@ -39,6 +39,59 @@ pub fn query_raw(raw_input: TokenStream) -> TokenStream {
     raw_input
 }
 
+/// Checks one or multiple quer(ies) at compile time.
+/// It also allows interpolations of variables and can
+/// be run.
+///
+/// # Arguments
+/// * `db` - The database connection to be used.
+/// * `quer(ies)` - A single or list of queries to be checked at compile time.
+/// * `params` - The parameters to be used for the query.
+///
+/// # Example
+/// ```rust
+/// # use query_builder_macros as surreal_orm;
+/// use surreal_orm::{query};
+/// use surrealdb::{engine::local::Mem, Surreal};
+///
+/// let db = Surreal::new::<Mem>(()).await.unwrap();
+/// db.use_ns("test").use_db("test").await.unwrap();
+///
+/// let _query = query!(db, "SELECT * FROM users").await;
+/// let _query = query!(db, "SELECT * FROM users", {}).await;
+/// let _query = query!(db, "SELECT * FROM users WHERE id = $id", {id : 1} ).await;
+/// let username = "Oyelowo";
+/// let _query = query!(db, "SELECT name, age FROM users WHERE id = $id AND name = $name", {
+///     id : 1,
+///     name : username
+/// })
+/// .await;
+///
+/// ```
+///
+/// Also supports multiple queries in a single call.
+/// ```rust
+/// # use query_builder_macros as surreal_orm;
+/// use surreal_orm::{query};
+/// use surrealdb::{engine::local::Mem, Surreal};
+///
+/// let db = Surreal::new::<Mem>(()).await.unwrap();
+/// db.use_ns("test").use_db("test").await.unwrap();
+///
+/// let _queries = query!(
+///     db,
+///     [
+///         "SELECT * FROM users WHERE id = $id",
+///         "CREATE user:oyelowo SET name = $name, company = 'Codebreather', skills = $skills"
+///     ],
+///     {
+///         id: 1,
+///         name: "Oyelowo",
+///         skills: vec!["Rust", "python", "typescript"]
+///     }
+/// )
+/// .await;
+/// ```
 #[proc_macro]
 pub fn query(raw_input: TokenStream) -> TokenStream {
     query::query(raw_input.into()).into()
