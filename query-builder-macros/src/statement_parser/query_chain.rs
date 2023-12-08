@@ -113,13 +113,7 @@ impl QueriesChainParser {
                     }
                 )
             },
-            QueryParser::BeginTransaction => {
-                None
-            },
-            QueryParser::CommitTransaction => {
-                None
-            },
-            QueryParser::CancelTransaction => {
+            QueryParser::BeginTransaction | QueryParser::CommitTransaction | QueryParser::CancelTransaction => {
                 None
             },
             QueryParser::ReturnStatement(r_stmt) => {
