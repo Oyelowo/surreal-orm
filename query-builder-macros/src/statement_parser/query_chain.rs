@@ -33,12 +33,11 @@ impl QueriesChainParser {
         let ending = stmts.next();
 
         match (begin_stmt, commit_or_cancel_stmt, ending) {
-            (Some(QueryParser::BeginTransaction), Some(QueryParser::CommitTransaction), None) => {
-                true
-            }
-            (Some(QueryParser::BeginTransaction), Some(QueryParser::CancelTransaction), None) => {
-                true
-            }
+            (
+                Some(QueryParser::BeginTransaction),
+                Some(QueryParser::CommitTransaction | QueryParser::CancelTransaction),
+                None,
+            ) => true,
             _ => false,
         }
     }
@@ -175,31 +174,6 @@ impl QueriesChainParser {
             })
             .collect::<Vec<_>>();
 
-        // let xx = {
-        //     let ref var_name =
-        //         surreal_orm::statements::let_("var_name").equal_to(select(All).from(account_table));
-        //     let generated_query_chain_var_name = surreal_orm::chain(var_name);
-        //     let ref var_name = surreal_orm::statements::let_("var_name").equal_to("Oyelowo");
-        //     let generated_query_chain_var_name = generated_query_chain_var_name.chain(var_name);
-        //
-        //     generated_query_chain_var_name
-        // };
-
-        // let query_chain = query_chain
-        //     .iter()
-        //     .filter(| var_ident| !var_ident.is_empty())
-        //     .enumerate()
-        //     .map(|(i, var_ident)| {
-        //         let is_first = i == 0;
-        //
-        //         if is_first {
-        //             quote!(#crate_name::chain(#var_ident))
-        //         } else {
-        //             quote!(.chain(#var_ident))
-        //         }
-        //     })
-        //     .collect::<Vec<_>>();
-        //
         GeneratedCode {
             to_render: code,
             query_chain_var_ident: query_chain_var_name,
