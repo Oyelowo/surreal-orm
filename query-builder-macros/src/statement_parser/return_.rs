@@ -25,7 +25,6 @@ impl ToTokens for ReturnExpr {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             Self::Expr(expr) => expr.to_tokens(tokens),
-            // Self::Ident(ident) => ident.to_tokens(tokens),
             Self::IfElse(if_else) => tokens.extend(quote! {
                  #if_else
             }),
@@ -38,11 +37,7 @@ impl Parse for ReturnExpr {
         let lookahead = input.lookahead1();
         if lookahead.peek(Token![if]) {
             Ok(Self::IfElse(input.parse()?))
-        }
-        // else if lookahead.peek(Ident) {
-        //     Ok(Self::Ident(input.parse()?))
-        // }
-        else {
+        } else {
             Ok(Self::Expr(input.parse()?))
         }
     }
@@ -60,7 +55,6 @@ impl Parse for ReturnStatementParser {
         Ok(Self {
             _return,
             expr,
-            // _end: Token![;],
             generated_ident,
         })
     }
