@@ -158,13 +158,14 @@ impl QueriesChainParser {
    });
 
         let code = lines
-            .filter(Option::is_some)
+            .filter_map(|line| line)
             .enumerate()
             .map(|(i, line)| {
                 let QueryLine {
                     rendered,
                     var_ident,
-                } = line.expect("Nonempty line should not be None");
+                } = line;
+
                 let is_first = i == 0;
 
                 if is_first {
