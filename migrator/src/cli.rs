@@ -22,10 +22,10 @@ struct Cli {
 enum SubCommand {
     /// Generate migrations
     Generate(Generate),
-    /// Run migrations
-    Run(Run),
+    /// Run migrations forward
+    Up(Up),
     /// Rollback migrations
-    Rollback(Rollback),
+    Down(Down),
     /// List migrations
     List(List),
 }
@@ -34,8 +34,8 @@ impl SubCommand {
     pub fn get_verbosity(&self) -> u8 {
         match self {
             SubCommand::Generate(generate) => generate.shared_all.verbose,
-            SubCommand::Run(run) => run.shared_all.verbose,
-            SubCommand::Rollback(rollback) => rollback.shared_all.verbose,
+            SubCommand::Up(run) => run.shared_all.verbose,
+            SubCommand::Down(rollback) => rollback.shared_all.verbose,
             SubCommand::List(list) => list.shared_all.verbose,
         }
     }
@@ -67,7 +67,7 @@ struct Generate {
 
 /// Run migrations
 #[derive(Parser, Debug)]
-struct Run {
+struct Up {
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
@@ -212,7 +212,7 @@ struct RuntimeConfig {
 
 /// Rollback migrations
 #[derive(Parser, Debug)]
-struct Rollback {
+struct Down {
     /// Rollback to the latest migration
     #[clap(long, help = "Rollback to the latest migration")]
     latest: bool,
@@ -290,7 +290,7 @@ pub async fn migration_cli(
                     .expect("Failed to generate migrations");
             };
         }
-        SubCommand::Run(run) => {
+        SubCommand::Up(run) => {
             let db = setup_db(&user_provided_db, &run.shared_run_and_rollback).await;
 
             if let Some(path) = run.shared_all.migrations_dir {
@@ -319,7 +319,7 @@ pub async fn migration_cli(
                 .expect("Failed to get db info");
             log::info!("Database: {:?}", info);
         }
-        SubCommand::Rollback(rollback) => {
+        SubCommand::Down(rollback) => {
             let db = setup_db(&user_provided_db, &rollback.shared_run_and_rollback).await;
 
             if let Some(path) = rollback.shared_all.migrations_dir {
