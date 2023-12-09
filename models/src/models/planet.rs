@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surreal_orm::{Node, SurrealSimpleId};

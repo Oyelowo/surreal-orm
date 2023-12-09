@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use proc_macro::TokenStream;
 use surreal_query_builder::sql;
 use syn::{parse_macro_input, LitStr};

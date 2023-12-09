@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::time::Duration;
 
 use crate::{AlienVisitsPlanet, Planet, Rocket, SpaceShip, Weapon};
