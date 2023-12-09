@@ -220,7 +220,7 @@ impl DefineFunctionStatementParser {
                     #( #bindings_and_build )*
 
         // TODO: Confirm if a custom function has to be prefixed with 'fn::'
-                let build = format!("{}({})", stringify!(#function_name), __private_args.join(", "));
+                let build = format!("fn::{}({})", stringify!(#function_name), __private_args.join(", "));
                 #crate_name::Function::new()
                     .with_args_string(build)
                     .with_bindings(__private_bindings)

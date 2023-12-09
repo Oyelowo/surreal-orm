@@ -2,7 +2,7 @@
 source: orm-tests/tests/query_define_function.rs
 expression: person_statement.fine_tune_params()
 ---
-DEFINE FUNCTION get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {
+DEFINE FUNCTION fn::get_person($first_arg: string, $last_arg: string, $birthday_arg: string) {
 LET $person = $_param_00000001;
 
 RETURN $_param_00000002;
