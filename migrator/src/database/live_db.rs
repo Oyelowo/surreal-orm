@@ -64,8 +64,15 @@ impl From<EmbeddedMigrationOneWay> for PendingMigration {
     }
 }
 
-pub enum RollbackStrategy {
+pub enum UpdateStrategy {
     Latest,
+    Next,
+    ByCount(u32),
+    UntilMigrationFileName(MigrationFileName),
+}
+
+pub enum RollbackStrategy {
+    Previous,
     ByCount(u32),
     UntilMigrationFileName(MigrationFileName),
 }
@@ -81,7 +88,7 @@ impl MigrationRunner {
 
         let all_migrations = fm.get_two_way_migrations(false)?;
         let (queries_to_run, file_paths) = match rollback_strategy {
-            RollbackStrategy::Latest => {
+            RollbackStrategy::Previous => {
                 let latest_migration = all_migrations
                     .iter()
                     .max_by_key(|m| m.timestamp)
@@ -254,10 +261,130 @@ impl MigrationRunner {
 
     pub async fn run_pending_migrations(
         all_migrations: Vec<impl Into<PendingMigration>>,
+        update_strategy: UpdateStrategy,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
+        log::info!("Running pending migrations");
+
         let migration::Schema { timestamp, .. } = &Migration::schema();
-        let migration_table = Migration::table_name();
+        let migration_table = &Migration::table_name();
+
+        let xx = match update_strategy {
+            UpdateStrategy::Next => {
+                let latest_migration = select(All)
+                    .from(migration_table)
+                    .order_by(timestamp.desc())
+                    .limit(1)
+                    .return_one::<Migration>(db.clone())
+                    .await?;
+                
+                let latest_migration = latest_migration
+                    .as_ref()
+                    .map(|m| m.timestamp)
+                    .unwrap_or(0);
+                
+                let migration_to_run = all_migrations
+                    .into_iter()
+                    .map(|m| {
+                        let m: PendingMigration = m.into();
+                        m
+                    })
+                    .filter(|m| m.timestamp > latest_migration)
+                    .collect::<Vec<_>>()
+                    .first();
+
+                if let Some(migration) = migration_to_run {
+                    let migration_query = migration.content;
+                    let m = migration;
+                    let register_mig = Migration::create_raw(m.id, m.name, m.timestamp).build();
+
+                    let all = format!("{}\n{}", migration_query, register_mig);
+
+                    // Run them as a transaction against a local in-memory database
+                    if !all.trim().is_empty() {
+                        begin_transaction()
+                            .query(Raw::new(all))
+                            .commit_transaction()
+                            .run(db.clone())
+                            .await?;
+                    }
+                }
+            },
+            UpdateStrategy::Latest => {
+                let latest_migration = select(All)
+                    .from(migration_table)
+                    .order_by(timestamp.desc())
+                    .limit(1)
+                    .return_one::<Migration>(db.clone())
+                    .await?;
+
+                let latest_migration = latest_migration
+                    .as_ref()
+                    .map(|m| m.timestamp)
+                    .unwrap_or(0);
+
+                let migrations_to_run = all_migrations
+                    .into_iter()
+                    .map(|m| {
+                        let m: PendingMigration = m.into();
+                        m
+                    })
+                    .filter(|m| m.timestamp > latest_migration)
+                    .collect::<Vec<_>>();
+
+                // Get queries to run
+                let migration_queries = migrations_to_run
+                    .iter()
+                    .map(|m| m.content.clone())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                // Create queries to mark migrations as applied
+                let mark_queries_registered_queries = migrations_to_run
+                    .iter()
+                    .map(|m| Migration::create_raw(m.id.clone(), m.name.clone(), m.timestamp).build())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                // Join migrations with mark queries
+                let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
+
+                // Run them as a transaction against a local in-memory database
+                if !all.trim().is_empty() {
+                    begin_transaction()
+                        .query(Raw::new(all))
+                        .commit_transaction()
+                        .run(db.clone())
+                        .await?;
+                }
+            }
+            UpdateStrategy::ByCount(count) => {
+                let latest_migration = select(All)
+                    .from(migration_table.clone())
+                    .order_by(timestamp.desc())
+                    .limit(1)
+                    .return_one::<Migration>(db.clone())
+                    .await?;
+
+                let latest_migration = latest_migration
+                    .as_ref()
+                    .map(|m| m.timestamp)
+                    .unwrap_or(0);
+
+                let migrations_to_run = all_migrations
+                    .into_iter()
+                    .map(|m| {
+                        let m: PendingMigration = m.into();
+                        m
+                    })
+                    .filter(|m| m.timestamp > latest_migration)
+                    .take(count as usize)
+                    .collect::<Vec<_>>();
+
+                // Get queries to run
+                let migration_queries = migrations_to_run
+                    .iter()
+                    .map(|m| m
 
         // Get the latest migration
         let latest_migration = select(All)
