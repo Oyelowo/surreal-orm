@@ -2,4 +2,4 @@
 source: orm-tests/tests/query_define_function.rs
 expression: spaceship.fine_tune_params()
 ---
-get_or_create_spaceship($_param_00000001, $_param_00000002, birthday, $_param_00000003)
+fn::get_or_create_spaceship($_param_00000001, $_param_00000002, birthday, $_param_00000003)
