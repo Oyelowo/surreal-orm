@@ -404,10 +404,11 @@ impl TwoWayGetter {
     /// Make sure the migration directory exists when running migrations
     pub async fn run_pending_migrations(
         &self,
+        update_strategy: UpdateStrategy,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(migrations, db.clone()).await?;
+        MigrationRunner::run_pending_migrations(migrations, update_strategy, db.clone()).await?;
 
         Ok(())
     }
@@ -415,11 +416,12 @@ impl TwoWayGetter {
     /// For running embedded migrations
     pub async fn run_embedded_pending_migrations(
         &self,
+        update_strategy: UpdateStrategy,
         two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
         db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
         let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
-        MigrationRunner::run_pending_migrations(migrations, db).await?;
+        MigrationRunner::run_pending_migrations(migrations, update_strategy, db).await?;
 
         Ok(())
     }

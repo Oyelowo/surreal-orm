@@ -68,6 +68,15 @@ struct Generate {
 /// Run migrations
 #[derive(Parser, Debug)]
 struct Up {
+    /// Run forward to the latest migration
+    #[clap(long, help = "Run forward to the next migration")]
+    latest: bool,
+    /// Run forward by count/number
+    #[clap(long, help = "Run forward by the number specified")]
+    number: Option<u32>,
+    /// Run forward till a specific migration ID
+    #[clap(long, help = "Run forward till a specific migration ID")]
+    till: Option<String>,
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
@@ -214,11 +223,11 @@ struct RuntimeConfig {
 #[derive(Parser, Debug)]
 struct Down {
     /// Rollback to the latest migration
-    #[clap(long, help = "Rollback to the latest migration")]
-    latest: bool,
-    /// Rollback by count
+    #[clap(long, help = "Rollback to the previous migration")]
+    previous: bool,
+    /// Rollback by count/number
     #[clap(long, help = "Rollback by count")]
-    by_count: Option<u32>,
+    number: Option<u32>,
     /// Rollback till a specific migration ID
     #[clap(long, help = "Rollback till a specific migration ID")]
     till: Option<String>,
@@ -325,14 +334,14 @@ pub async fn migration_cli(
             if let Some(path) = rollback.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
-            let rollback_strategy = if rollback.latest {
-                RollbackStrategy::Latest
-            } else if let Some(by_count) = rollback.by_count {
+            let rollback_strategy = if rollback.previous {
+                RollbackStrategy::Previous
+            } else if let Some(by_count) = rollback.number {
                 RollbackStrategy::ByCount(by_count)
             } else if let Some(till) = rollback.till {
                 RollbackStrategy::UntilMigrationFileName(till.try_into().unwrap())
             } else {
-                RollbackStrategy::Latest
+                RollbackStrategy::Previous
             };
 
             files_config
