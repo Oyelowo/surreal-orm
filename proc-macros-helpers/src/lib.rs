@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use proc_macro2::{Span, TokenStream, TokenTree};
 use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;

@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use crate::statement_parser::query_chain::{GeneratedCode, QueriesChainParser};
 use proc_macros_helpers::get_crate_name;
 use quote::quote;
