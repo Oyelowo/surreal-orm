@@ -32,14 +32,14 @@ impl QueriesChainParser {
         let commit_or_cancel_stmt = stmts.next();
         let ending = stmts.next();
 
-        match (begin_stmt, commit_or_cancel_stmt, ending) {
+        matches!(
+            (begin_stmt, commit_or_cancel_stmt, ending),
             (
                 Some(QueryParser::BeginTransaction),
                 Some(QueryParser::CommitTransaction | QueryParser::CancelTransaction),
                 None,
-            ) => true,
-            _ => false,
-        }
+            )
+        )
     }
 
     pub fn _is_definitely_query_block(&self) -> bool {
