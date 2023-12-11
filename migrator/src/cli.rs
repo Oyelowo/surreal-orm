@@ -337,9 +337,9 @@ pub async fn migration_cli(
             let rollback_strategy = if rollback.previous {
                 RollbackStrategy::Previous
             } else if let Some(by_count) = rollback.number {
-                RollbackStrategy::ByCount(by_count)
+                RollbackStrategy::Number(by_count)
             } else if let Some(till) = rollback.till {
-                RollbackStrategy::UntilMigrationFileName(till.try_into().unwrap())
+                RollbackStrategy::Till(till.try_into().unwrap())
             } else {
                 RollbackStrategy::Previous
             };

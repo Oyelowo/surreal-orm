@@ -357,9 +357,6 @@ impl MigrationRunner {
     ) -> MigrationResult<()> {
         log::info!("Running pending migrations");
 
-        let migration::Schema { timestamp, .. } = &Migration::schema();
-        let migration_table = &Migration::table_name();
-
         let filtered_pending_migrations = match update_strategy {
             UpdateStrategy::Latest => {
                 Self::get_pending_migrations(all_migrations, db.clone()).await?
@@ -372,16 +369,28 @@ impl MigrationRunner {
                     .collect::<Vec<_>>()
             }
             UpdateStrategy::Till(mig_filename) => {
-                Self::get_pending_migrations(all_migrations, db.clone())
-                    .await?
-                    .into_iter()
-                    .take_while(|m| m.id.to_string() != mig_filename.to_string())
-                    .collect::<Vec<_>>()
+                let pending_migs = Self::get_pending_migrations(all_migrations, db.clone()).await?;
+
+                let mut migration_found = false;
+                let mut filtered_migs = vec![];
+
+                for mig in pending_migs {
+                    filtered_migs.push(mig.clone());
+                    if mig.id.to_string() == mig_filename.to_string() {
+                        migration_found = true;
+                        break;
+                    }
+                }
+
+                if !migration_found {
+                    return Err(MigrationError::MigrationDoesNotExist);
+                }
+
+                filtered_migs
             }
         };
 
-        Self::run_filtered_migrations(filtered_pending_migrations, db.clone()).await?;
-        Ok(())
+        Self::run_filtered_migrations(filtered_pending_migrations, db.clone()).await
     }
 
     pub(crate) async fn list_migrations(
