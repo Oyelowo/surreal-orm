@@ -6,7 +6,7 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
-use crate::{DbInfo, MigrationConfig, RollbackStrategy};
+use crate::{DbInfo, MigrationConfig, RollbackStrategy, UpdateStrategy};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
@@ -28,6 +28,34 @@ enum SubCommand {
     Down(Down),
     /// List migrations
     List(List),
+}
+
+impl From<&Up> for UpdateStrategy {
+    fn from(up: &Up) -> Self {
+        if up.latest {
+            UpdateStrategy::Latest
+        } else if let Some(by_count) = up.number {
+            UpdateStrategy::Number(by_count)
+        } else if let Some(till) = up.till {
+            UpdateStrategy::Till(till.try_into().unwrap())
+        } else {
+            UpdateStrategy::Latest
+        }
+    }
+}
+
+impl From<Down> for RollbackStrategy {
+    fn from(rollback: Down) -> Self {
+        if rollback.previous {
+            RollbackStrategy::Previous
+        } else if let Some(by_count) = rollback.number {
+            RollbackStrategy::Number(by_count)
+        } else if let Some(till) = rollback.till {
+            RollbackStrategy::Till(till.try_into().unwrap())
+        } else {
+            RollbackStrategy::Previous
+        }
+    }
 }
 
 impl SubCommand {
@@ -299,17 +327,19 @@ pub async fn migration_cli(
                     .expect("Failed to generate migrations");
             };
         }
-        SubCommand::Up(run) => {
-            let db = setup_db(&user_provided_db, &run.shared_run_and_rollback).await;
+        SubCommand::Up(up) => {
+            let db = setup_db(&user_provided_db, &up.shared_run_and_rollback).await;
+            let update_strategy = UpdateStrategy::from(&up);
 
-            if let Some(path) = run.shared_all.migrations_dir {
+            if let Some(path) = up.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
-            if run.shared_all.reversible {
+
+            if up.shared_all.reversible {
                 log::info!("Running two way migrations");
                 files_config
                     .two_way()
-                    .run_pending_migrations(db.clone())
+                    .run_pending_migrations(db.clone(), update_strategy)
                     .await
                     .expect("Failed to run migrations");
             } else {
@@ -334,15 +364,8 @@ pub async fn migration_cli(
             if let Some(path) = rollback.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
-            let rollback_strategy = if rollback.previous {
-                RollbackStrategy::Previous
-            } else if let Some(by_count) = rollback.number {
-                RollbackStrategy::Number(by_count)
-            } else if let Some(till) = rollback.till {
-                RollbackStrategy::Till(till.try_into().unwrap())
-            } else {
-                RollbackStrategy::Previous
-            };
+
+            let rollback_strategy = RollbackStrategy::from(rollback);
 
             files_config
                 .two_way()
