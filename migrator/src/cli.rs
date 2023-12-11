@@ -319,17 +319,21 @@ pub async fn migration_cli(
             };
 
             if generate.shared_all.reversible {
-                files_config
+                let gen = files_config
                     .two_way()
                     .generate_migrations(migration_name, codebase_resources)
-                    .await
-                    .expect("Failed to generate migrations");
+                    .await;
+                if let Err(e) = gen {
+                    log::error!("Failed to generate migrations: {}", e.to_string());
+                }
             } else {
-                files_config
+                let gen = files_config
                     .one_way()
                     .generate_migrations(migration_name, codebase_resources)
-                    .await
-                    .expect("Failed to generate migrations");
+                    .await;
+                if let Err(e) = gen {
+                    log::error!("Failed to generate migrations: {}", e.to_string());
+                }
             };
         }
         SubCommand::Up(up) => {
@@ -342,25 +346,28 @@ pub async fn migration_cli(
 
             if up.shared_all.reversible {
                 log::info!("Running two way migrations");
-                files_config
+                let run = files_config
                     .two_way()
                     .run_up_pending_migrations(db.clone(), update_strategy)
-                    .await
-                    .expect("Failed to run migrations");
+                    .await;
+                if let Err(e) = run {
+                    log::error!("Failed to run migrations: {}", e.to_string());
+                }
             } else {
                 log::info!("Running one way migrations");
-                files_config
+                let run = files_config
                     .one_way()
                     .run_pending_migrations(db.clone(), update_strategy)
-                    .await
-                    .expect("Failed to run migrations");
+                    .await;
+                if let Err(e) = run {
+                    log::error!("Failed to run migrations: {}", e.to_string());
+                }
             }
-            // define_table("nawa").run(db.clone()).await.unwrap();
-            let info = info_for()
-                .database()
-                .get_data::<DbInfo>(db.clone())
-                .await
-                .expect("Failed to get db info");
+            let info = info_for().database().get_data::<DbInfo>(db.clone()).await;
+            if let Err(ref e) = info {
+                log::error!("Failed to get db info: {}", e.to_string());
+            }
+
             log::info!("Database: {:?}", info);
         }
         SubCommand::Down(rollback) => {
@@ -372,11 +379,16 @@ pub async fn migration_cli(
                 files_config = files_config.custom_path(path)
             };
 
-            files_config
+            let rollback = files_config
                 .two_way()
                 .run_down_migrations(db.clone(), rollback_strategy)
-                .await
-                .expect("Failed to rollback migrations");
+                .await;
+
+            if let Err(ref e) = rollback {
+                log::error!("Failed to rollback migrations: {}", e.to_string());
+            }
+
+            log::info!("Rollback successful");
         }
         SubCommand::List(options) => {
             let db = setup_db(&user_provided_db, &options.runtime_config).await;
@@ -389,16 +401,23 @@ pub async fn migration_cli(
                 let migrations = files_config
                     .two_way()
                     .list_migrations(db.clone(), options.status.unwrap_or_default())
-                    .await
-                    .expect("Failed to get migrations");
+                    .await;
+
+                if let Err(ref e) = migrations {
+                    log::error!("Failed to get migrations: {}", e.to_string());
+                }
                 log::info!("Migrations: {:?}", migrations);
             } else {
                 log::info!("Listing one way migrations");
                 let migrations = files_config
                     .one_way()
                     .list_migrations(db.clone(), options.status.unwrap_or_default())
-                    .await
-                    .expect("Failed to get migrations");
+                    .await;
+
+                if let Err(ref e) = migrations {
+                    log::error!("Failed to get migrations: {}", e.to_string());
+                }
+
                 log::info!("Migrations: {:?}", migrations);
             }
         }
@@ -420,22 +439,36 @@ async fn setup_db(
             let db = connect(&cli_db_url.to_string()).await.unwrap();
             init_db(shared_run_and_rollback, db.clone()).await
         }
-        (None, None) => panic!("No db provided"),
+        (None, None) => {
+            log::error!("No db provided. Example: --path ws://localhost:8000");
+            panic!();
+        }
     }
 }
 
 async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
     match (&shared.user, &shared.pass) {
         (Some(u), Some(p)) => {
-            db.signin(Root {
-                username: u.as_str(),
-                password: p.as_str(),
-            })
-            .await
-            .expect("Failed to signin");
+            let signin = db
+                .signin(Root {
+                    username: u.as_str(),
+                    password: p.as_str(),
+                })
+                .await;
+            if let Err(e) = signin {
+                log::error!("Failed to signin: {}", e.to_string());
+                panic!();
+            }
+            log::info!("Signed in successfully");
         }
-        (Some(_), None) => panic!("Password not provided"),
-        (None, Some(_)) => panic!("User not provided"),
+        (Some(_), None) => {
+            log::error!("Password not provided");
+            panic!();
+        }
+        (None, Some(_)) => {
+            log::error!("User not provided");
+            panic!();
+        }
         _ => {
             log::warn!("User and password not provided, using root default");
             // db.signin(Root {
@@ -449,11 +482,20 @@ async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
 
     if let Some(db_name) = &shared.db {
         log::info!("Using db {}", db_name);
-        db.use_db(db_name).await.expect("Failed to use db");
+        let db = db.use_db(db_name).await;
+        if let Err(e) = db {
+            log::error!("Failed to use db: {}", e.to_string());
+            panic!();
+        }
     }
 
     if let Some(ns_name) = &shared.ns {
-        db.use_ns(ns_name).await.expect("Failed to use ns");
+        log::info!("Using ns {}", ns_name);
+        let ns = db.use_ns(ns_name).await;
+        if let Err(e) = ns {
+            log::error!("Failed to use ns: {}", e.to_string());
+            panic!();
+        }
     }
     db
 }
