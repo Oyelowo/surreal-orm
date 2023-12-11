@@ -505,7 +505,7 @@ impl FileManager {
                 fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
                 return Ok(path);
             }
-            Err(MigrationError::InvalidMigrationDirectory(
+            Err(MigrationError::MigrationDirectoryDoesNotExist(
                 path.to_string_lossy().to_string(),
             ))
         }

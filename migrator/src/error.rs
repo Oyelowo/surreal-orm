@@ -47,6 +47,11 @@ pub enum MigrationError {
     #[error("Invalid migration directory: {0}")]
     InvalidMigrationDirectory(String),
 
+    #[error("The migration directory ({0}) provided does not exist. You may need to explicitly provide a migration directory path argument. \
+        If you are using the default migration directory, make sure you are running the command from the root of your project.
+    Check --help for more information")]
+    MigrationDirectoryDoesNotExist(String),
+
     #[error("Invalid migration state. Migration up queries empty")]
     MigrationUpQueriesEmpty,
 
