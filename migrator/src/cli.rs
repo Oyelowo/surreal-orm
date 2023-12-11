@@ -374,7 +374,7 @@ pub async fn migration_cli(
 
             files_config
                 .two_way()
-                .run_down_migrations(rollback_strategy, db.clone())
+                .run_down_migrations(db.clone(), rollback_strategy)
                 .await
                 .expect("Failed to rollback migrations");
         }
