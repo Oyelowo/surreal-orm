@@ -351,9 +351,9 @@ impl MigrationRunner {
     }
 
     pub async fn run_pending_migrations(
+        db: Surreal<impl Connection>,
         all_migrations: Vec<impl Into<PendingMigration>>,
         update_strategy: UpdateStrategy,
-        db: Surreal<impl Connection>,
     ) -> MigrationResult<()> {
         log::info!("Running pending migrations");
 

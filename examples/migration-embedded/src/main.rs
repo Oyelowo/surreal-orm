@@ -27,10 +27,17 @@ async fn main() {
         .unwrap();
 
     // Run normal non-embedded pending migrations in migration directory
-    one_way.run_pending_migrations(db.clone()).await.unwrap();
+    one_way
+        .run_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
+        .await
+        .unwrap();
 
     one_way
-        .run_embedded_pending_migrations(MIGRATIONS_ONE_WAY, db.clone())
+        .run_embedded_pending_migrations(
+            db.clone(),
+            MIGRATIONS_ONE_WAY,
+            migrator::UpdateStrategy::Latest,
+        )
         .await
         .unwrap();
 
@@ -56,9 +63,13 @@ async fn main() {
     //     .unwrap();
 
     // Run normal non-embedded pending migrations in migration directory
-    two_way.run_pending_migrations(db.clone()).await.unwrap();
     two_way
-        .run_embedded_pending_migrations(MIGRATIONS_TWO_WAY, db.clone())
+        .run_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
+        .await
+        .unwrap();
+
+    two_way
+        .run_embedded_pending_migrations(MIGRATIONS_TWO_WAY, db.clone(), UpdateStrategy::Latest)
         .await
         .unwrap();
 }
