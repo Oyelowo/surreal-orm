@@ -32,7 +32,7 @@ enum SubCommand {
 
 impl From<&Up> for UpdateStrategy {
     fn from(up: &Up) -> Self {
-        if up.latest {
+        if let Some(true) = up.latest {
             UpdateStrategy::Latest
         } else if let Some(by_count) = up.number {
             UpdateStrategy::Number(by_count)
@@ -94,17 +94,22 @@ struct Generate {
 }
 
 /// Run migrations
+/// cargo run -- up
+/// cargo run -- up -l
+/// cargo run -- up -n 2
+/// cargo run -- up -t 2021-09-09-xxxxx
 #[derive(Parser, Debug)]
 struct Up {
     /// Run forward to the latest migration
     #[clap(long, help = "Run forward to the next migration")]
-    latest: bool,
+    latest: Option<bool>,
     /// Run forward by count/number
     #[clap(long, help = "Run forward by the number specified")]
     number: Option<u32>,
     /// Run forward till a specific migration ID
     #[clap(long, help = "Run forward till a specific migration ID")]
     till: Option<String>,
+
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
@@ -339,7 +344,7 @@ pub async fn migration_cli(
                 log::info!("Running two way migrations");
                 files_config
                     .two_way()
-                    .run_pending_migrations(db.clone(), update_strategy)
+                    .run_up_pending_migrations(db.clone(), update_strategy)
                     .await
                     .expect("Failed to run migrations");
             } else {
@@ -369,7 +374,7 @@ pub async fn migration_cli(
 
             files_config
                 .two_way()
-                .rollback_migrations(rollback_strategy, db.clone())
+                .run_down_migrations(rollback_strategy, db.clone())
                 .await
                 .expect("Failed to rollback migrations");
         }
