@@ -1,5 +1,7 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{self, embed_migrations, MigrationConfig, UpdateStrategy};
+use surreal_orm::migrator::{
+    self, embed_migrations, MigrationConfig, RollbackStrategy, UpdateStrategy,
+};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -52,24 +54,24 @@ async fn main() {
         .await
         .unwrap();
 
-    // two_way
-    //     .rollback_migrations(RollbackStrategy::Latest, db.clone())
-    //     // .rollback_migrations(RollbackStrategy::ByCount(4), db.clone())
-    //     // .rollback_migrations(
-    //     //     RollbackStrategy::UntilMigrationFileName("name".to_string().try_into().unwrap()),
-    //     //     db.clone(),
-    //     // )
-    //     .await
-    //     .unwrap();
+    two_way
+        .run_down_migrations(db.clone(), RollbackStrategy::Previous)
+        // .run_down_migrations(db.clone(), RollbackStrategy::Number(4))
+        // .run_down_migrations(
+        //     db.clone(),
+        //     RollbackStrategy::Till("name".to_string().try_into().unwrap()),
+        // )
+        .await
+        .unwrap();
 
     // Run normal non-embedded pending migrations in migration directory
     two_way
-        .run_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
+        .run_up_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
         .await
         .unwrap();
 
     two_way
-        .run_embedded_pending_migrations(db.clone(), MIGRATIONS_TWO_WAY, UpdateStrategy::Latest)
+        .run_up_embedded_pending_migrations(db.clone(), MIGRATIONS_TWO_WAY, UpdateStrategy::Latest)
         .await
         .unwrap();
 }

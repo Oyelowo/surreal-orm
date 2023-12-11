@@ -430,8 +430,8 @@ impl TwoWayGetter {
     /// Rollback migration using various strategies
     pub async fn run_down_migrations(
         &self,
-        rollback_strategy: RollbackStrategy,
         db: Surreal<impl Connection>,
+        rollback_strategy: RollbackStrategy,
     ) -> MigrationResult<()> {
         let _migrations = self.get_migrations()?;
         MigrationRunner::rollback_migrations(&self.0, rollback_strategy, db).await?;
