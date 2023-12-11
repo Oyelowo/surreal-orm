@@ -409,7 +409,7 @@ impl TwoWayGetter {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(migrations, update_strategy, db.clone()).await?;
+        MigrationRunner::run_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -417,12 +417,12 @@ impl TwoWayGetter {
     /// For running embedded migrations
     pub async fn run_embedded_pending_migrations(
         &self,
-        update_strategy: UpdateStrategy,
-        two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
         db: Surreal<impl Connection>,
+        two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
+        update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
-        MigrationRunner::run_pending_migrations(migrations, update_strategy, db).await?;
+        MigrationRunner::run_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
     }
