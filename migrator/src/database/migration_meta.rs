@@ -403,7 +403,7 @@ impl TwoWayGetter {
     }
 
     /// Make sure the migration directory exists when running migrations
-    pub async fn run_pending_migrations(
+    pub async fn run_up_pending_migrations(
         &self,
         db: Surreal<impl Connection>,
         update_strategy: UpdateStrategy,
@@ -415,7 +415,7 @@ impl TwoWayGetter {
     }
 
     /// For running embedded migrations
-    pub async fn run_embedded_pending_migrations(
+    pub async fn run_up_embedded_pending_migrations(
         &self,
         db: Surreal<impl Connection>,
         two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
@@ -428,7 +428,7 @@ impl TwoWayGetter {
     }
 
     /// Rollback migration using various strategies
-    pub async fn rollback_migrations(
+    pub async fn run_down_migrations(
         &self,
         rollback_strategy: RollbackStrategy,
         db: Surreal<impl Connection>,
