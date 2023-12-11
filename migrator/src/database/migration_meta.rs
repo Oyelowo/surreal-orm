@@ -266,7 +266,6 @@ pub struct FileManager {
     /// cargo.toml is defined
     pub custom_path: Option<String>,
     pub(crate) migration_flag: MigrationFlag,
-    // pub crea
 }
 
 #[derive(Debug, Clone)]
@@ -344,20 +343,22 @@ impl OneWayGetter {
     pub async fn run_pending_migrations(
         &self,
         db: Surreal<impl Connection>,
+        update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(migrations, db).await?;
+        MigrationRunner::run_pending_migrations(db, migrations, update_strategy).await?;
 
         Ok(())
     }
 
     pub async fn run_embedded_pending_migrations(
         &self,
-        one_way_embedded_migrations: EmbeddedMigrationsOneWay,
         db: Surreal<impl Connection>,
+        one_way_embedded_migrations: EmbeddedMigrationsOneWay,
+        update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = one_way_embedded_migrations.to_migrations_one_way()?;
-        MigrationRunner::run_pending_migrations(migrations, db).await?;
+        MigrationRunner::run_pending_migrations(db, migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -404,8 +405,8 @@ impl TwoWayGetter {
     /// Make sure the migration directory exists when running migrations
     pub async fn run_pending_migrations(
         &self,
-        update_strategy: UpdateStrategy,
         db: Surreal<impl Connection>,
+        update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
         MigrationRunner::run_pending_migrations(migrations, update_strategy, db.clone()).await?;
