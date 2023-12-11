@@ -36,7 +36,7 @@ impl From<&Up> for UpdateStrategy {
             UpdateStrategy::Latest
         } else if let Some(by_count) = up.number {
             UpdateStrategy::Number(by_count)
-        } else if let Some(till) = up.till {
+        } else if let Some(till) = up.till.clone() {
             UpdateStrategy::Till(till.try_into().unwrap())
         } else {
             UpdateStrategy::Latest
@@ -44,13 +44,13 @@ impl From<&Up> for UpdateStrategy {
     }
 }
 
-impl From<Down> for RollbackStrategy {
-    fn from(rollback: Down) -> Self {
+impl From<&Down> for RollbackStrategy {
+    fn from(rollback: &Down) -> Self {
         if rollback.previous {
             RollbackStrategy::Previous
         } else if let Some(by_count) = rollback.number {
             RollbackStrategy::Number(by_count)
-        } else if let Some(till) = rollback.till {
+        } else if let Some(till) = rollback.till.clone() {
             RollbackStrategy::Till(till.try_into().unwrap())
         } else {
             RollbackStrategy::Previous
@@ -346,7 +346,7 @@ pub async fn migration_cli(
                 log::info!("Running one way migrations");
                 files_config
                     .one_way()
-                    .run_pending_migrations(db.clone())
+                    .run_pending_migrations(db.clone(), update_strategy)
                     .await
                     .expect("Failed to run migrations");
             }
@@ -361,11 +361,11 @@ pub async fn migration_cli(
         SubCommand::Down(rollback) => {
             let db = setup_db(&user_provided_db, &rollback.shared_run_and_rollback).await;
 
+            let rollback_strategy = RollbackStrategy::from(&rollback);
+
             if let Some(path) = rollback.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
-
-            let rollback_strategy = RollbackStrategy::from(rollback);
 
             files_config
                 .two_way()

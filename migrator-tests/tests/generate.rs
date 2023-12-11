@@ -4,7 +4,9 @@ use std::io;
 use std::path::PathBuf;
 
 use surreal_models::migrations::{Resources, ResourcesV2};
-use surreal_orm::migrator::{DbInfo, Informational, Migration, MigrationConfig, MigrationFileName};
+use surreal_orm::migrator::{
+    DbInfo, Informational, Migration, MigrationConfig, MigrationFileName, UpdateStrategy,
+};
 use surreal_orm::statements::{info_for, select};
 use surreal_orm::{All, ReturnableSelect, Runnable};
 use surrealdb::engine::local::Db;
@@ -72,7 +74,10 @@ async fn test_oneway_migrations() {
     );
 
     // Run normal non-embedded pending migrations in migration directory
-    one_way.run_pending_migrations(db.clone()).await.unwrap();
+    one_way
+        .run_pending_migrations(db.clone(), UpdateStrategy::Latest)
+        .await
+        .unwrap();
 
     // Files would now be created
     let files = fs::read_dir(temp_test_migration_dir).unwrap();

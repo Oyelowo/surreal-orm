@@ -2,7 +2,7 @@ use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
-    cli::Status, migration, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError,
+    cli::Status, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError,
     MigrationFileName, MigrationOneWay, MigrationResult, MigrationTwoWay,
 };
 

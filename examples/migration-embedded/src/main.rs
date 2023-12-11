@@ -1,5 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{self, embed_migrations, MigrationConfig};
+use surreal_orm::migrator::{self, embed_migrations, MigrationConfig, UpdateStrategy};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -28,7 +28,7 @@ async fn main() {
 
     // Run normal non-embedded pending migrations in migration directory
     one_way
-        .run_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
+        .run_pending_migrations(db.clone(), UpdateStrategy::Latest)
         .await
         .unwrap();
 
@@ -69,7 +69,7 @@ async fn main() {
         .unwrap();
 
     two_way
-        .run_embedded_pending_migrations(MIGRATIONS_TWO_WAY, db.clone(), UpdateStrategy::Latest)
+        .run_embedded_pending_migrations(db.clone(), MIGRATIONS_TWO_WAY, UpdateStrategy::Latest)
         .await
         .unwrap();
 }
