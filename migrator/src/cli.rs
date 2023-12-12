@@ -234,7 +234,7 @@ struct RuntimeConfig {
                 - tikv://localhost:2379\n\
                 - fdb://fdb.cluster"
     )]
-    path: Option<Path>,
+    url: Option<Path>,
 
     #[clap(long, help = "Database name")]
     db: Option<String>,
@@ -446,7 +446,7 @@ async fn setup_db(
     user_provided_db: &Option<Surreal<Any>>,
     shared_run_and_rollback: &RuntimeConfig,
 ) -> Surreal<Any> {
-    let db_url = shared_run_and_rollback.path.clone();
+    let db_url = shared_run_and_rollback.url.clone();
 
     match (user_provided_db, &db_url) {
         (Some(user_db), None) => {
