@@ -199,14 +199,13 @@ struct SharedAll {
     migrations_dir: Option<String>,
 
     /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
-    #[clap(short, long, action = ArgAction::Count)]
+    #[clap(short, long, action = ArgAction::Count, default_value="3")]
     verbose: u8,
 }
 
 #[derive(Parser, Debug)]
 struct RuntimeConfig {
-    /// URL to connect to a database instance.
-    ///
+    /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
     /// - Local WebSocket: `ws://localhost:8000`
     /// - Remote WebSocket: `wss://cloud.surrealdb.com`
@@ -219,10 +218,7 @@ struct RuntimeConfig {
     /// - FoundationDB-Backed: `fdb://fdb.cluster`
     #[clap(
         long,
-        // short,
-        value_name = "URL",
-        // required = true,
-        // about = "URL or path to connect to a database. Supports various backends.",
+        // value_name = "URL",
         help = "Example:\n\
                 - ws://localhost:8000\n\
                 - wss://cloud.surrealdb.com\n\
@@ -234,7 +230,7 @@ struct RuntimeConfig {
                 - tikv://localhost:2379\n\
                 - fdb://fdb.cluster"
     )]
-    url: Option<Path>,
+    url: Path,
 
     #[clap(long, help = "Database name")]
     db: Option<String>,
@@ -304,10 +300,7 @@ use std::str::FromStr;
 ///         cli::migration_cli(db, Resources).await;
 /// }
 /// ```
-pub async fn migration_cli(
-    codebase_resources: impl DbResources,
-    user_provided_db: Option<Surreal<Any>>,
-) {
+pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
     cli.subcmd.setup_logging();
 
@@ -340,7 +333,7 @@ pub async fn migration_cli(
             log::info!("Successfully generated migrations");
         }
         SubCommand::Up(up) => {
-            let db = setup_db(&user_provided_db, &up.shared_run_and_rollback).await;
+            let db = setup_db(&up.shared_run_and_rollback).await;
             let update_strategy = UpdateStrategy::from(&up);
 
             if let Some(path) = up.shared_all.migrations_dir {
@@ -356,6 +349,7 @@ pub async fn migration_cli(
                         .await;
                     if let Err(e) = run {
                         log::error!("Failed to run migrations: {}", e.to_string());
+                        panic!();
                     }
                 }
                 Ok(MigrationFlag::OneWay) => {
@@ -366,10 +360,12 @@ pub async fn migration_cli(
                         .await;
                     if let Err(e) = run {
                         log::error!("Failed to run migrations: {}", e.to_string());
+                        panic!();
                     }
                 }
                 Err(e) => {
                     log::error!("Failed to detect migration type: {}", e.to_string());
+                    panic!();
                 }
             };
 
@@ -382,7 +378,7 @@ pub async fn migration_cli(
             log::info!("Database: {:?}", info);
         }
         SubCommand::Down(rollback) => {
-            let db = setup_db(&user_provided_db, &rollback.shared_run_and_rollback).await;
+            let db = setup_db(&rollback.shared_run_and_rollback).await;
 
             let rollback_strategy = RollbackStrategy::from(&rollback);
 
@@ -402,7 +398,7 @@ pub async fn migration_cli(
             log::info!("Rollback successful");
         }
         SubCommand::List(options) => {
-            let db = setup_db(&user_provided_db, &options.runtime_config).await;
+            let db = setup_db(&options.runtime_config).await;
 
             if let Some(path) = options.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
@@ -442,26 +438,10 @@ pub async fn migration_cli(
     }
 }
 
-async fn setup_db(
-    user_provided_db: &Option<Surreal<Any>>,
-    shared_run_and_rollback: &RuntimeConfig,
-) -> Surreal<Any> {
-    let db_url = shared_run_and_rollback.url.clone();
-
-    match (user_provided_db, &db_url) {
-        (Some(user_db), None) => {
-            let db = user_db;
-            init_db(shared_run_and_rollback, db.clone()).await
-        }
-        (_, Some(cli_db_url)) => {
-            let db = connect(&cli_db_url.to_string()).await.unwrap();
-            init_db(shared_run_and_rollback, db.clone()).await
-        }
-        (None, None) => {
-            log::error!("No db provided. Example: --path ws://localhost:8000");
-            panic!();
-        }
-    }
+async fn setup_db(shared_run_and_rollback: &RuntimeConfig) -> Surreal<Any> {
+    let cli_db_url = shared_run_and_rollback.url.clone();
+    let db = connect(&cli_db_url.to_string()).await.unwrap();
+    init_db(shared_run_and_rollback, db.clone()).await
 }
 
 async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {

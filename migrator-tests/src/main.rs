@@ -23,5 +23,5 @@ async fn main() {
     // Comment out the below to use your own db setup from within the code
     // let _db = _initialize_db().await;
     // cli::migration_cli(Resources, Some(db)).await;
-    cli::migration_cli(Resources, None).await;
+    cli::migration_cli(Resources).await;
 }

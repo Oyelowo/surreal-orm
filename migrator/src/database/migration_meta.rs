@@ -583,7 +583,6 @@ impl FileManager {
             match filename {
                 MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
                     if self.mode == Mode::Strict {
-                        log::error!("Bidirectional migration found in unidirectional migration directory. This is not allowed");
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
@@ -661,8 +660,6 @@ impl FileManager {
                     downs_basenames.push(filename.basename());
                 }
                 MigrationFileName::Unidirectional(_) => {
-                    log::error!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
-
                     if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
