@@ -378,6 +378,14 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             log::info!("Database: {:?}", info);
         }
         SubCommand::Down(rollback) => {
+            if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
+                log::error!(
+                    "Cannot rollback one way migrations. 
+                Please use two way migrations or Create a new migration to reverse the changes"
+                );
+                panic!();
+            }
+
             let db = setup_db(&rollback.shared_run_and_rollback).await;
 
             let rollback_strategy = RollbackStrategy::from(&rollback);
