@@ -12,16 +12,22 @@ use thiserror::Error;
 pub enum MigrationError {
     #[error("Migration already exists")]
     MigrationAlreadyExists,
+
     #[error("Migration does not exist")]
     MigrationDoesNotExist,
+
     #[error("Migration not registered")]
     MigrationNotRegistered,
+
     #[error("Migration not unregistered")]
     MigrationNotUnregistered,
+
     #[error("Direction does not exist")]
     DirectionDoesNotExist,
+
     #[error("Migration name does not exist")]
     MigrationNameDoesNotExist,
+
     #[error("Invalid migration name. {0}. Make sure it's in the format - <timestamp>_<migration_name>.<up|down|>.surql if two way or <timestamp>_<migration_name.surql if one way")]
     InvalidMigrationName(String),
 
@@ -43,7 +49,6 @@ pub enum MigrationError {
     #[error("No migration directories")]
     MigrationDirectoriesNotExist,
 
-    // invalid migration directory
     #[error("Invalid migration directory: {0}")]
     InvalidMigrationDirectory(String),
 
@@ -51,6 +56,9 @@ pub enum MigrationError {
         If you are using the default migration directory, make sure you are running the command from the root of your project.
     Check --help for more information")]
     MigrationDirectoryDoesNotExist(String),
+
+    #[error("Invalid migration directory. It must not be empty")]
+    MigrationDirectoryEmpty,
 
     #[error("Invalid migration state. Migration up queries empty")]
     MigrationUpQueriesEmpty,
@@ -74,6 +82,23 @@ pub enum MigrationError {
     #[error("Invalid DefineStatement: {0}")]
     InvalidDefineStatement(String),
 
+    #[error("Problem detecting migration mode. One way error: {one_way_error}. Two way error: {two_way_error}")]
+    ProblemDetectingMigrationMode {
+        one_way_error: String,
+        two_way_error: String,
+    },
+
+    #[error("Ambiguous migration direction. Both oneway and two file types found in migration directory. Use one or the other.
+Up only should not be sufficed with 'up.surql' or 'down.surql' but up and down migrations can be.
+There are {one_way_filecount} up only files and {two_way_filecount} up and down files")]
+    AmbiguousMigrationDirection {
+        one_way_filecount: usize,
+        two_way_filecount: usize,
+    },
+
+    #[error("Invalid migration flag detection: {0}")]
+    MigrationFlagDetectionError(String),
+
     #[error("Invalid migration file count: {0}")]
     InvalidUpsVsDownsMigrationFileCount(String),
 
@@ -86,8 +111,6 @@ pub enum MigrationError {
     #[error("Invalid migration file name: {0}")]
     IoError(String),
 
-    // #[error(transparent)]
-    // IoError(#[from] std::io::Error),
     #[error(transparent)]
     PromptError(#[from] inquire::error::InquireError),
 
