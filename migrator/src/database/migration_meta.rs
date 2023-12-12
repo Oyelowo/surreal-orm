@@ -300,6 +300,10 @@ impl MigrationConfig {
         Self(self.0.custom_path(custom_path))
     }
 
+    pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
+        self.0.detect_migration_type()
+    }
+
     pub fn one_way(&mut self) -> OneWayGetter {
         self.0.migration_flag = MigrationFlag::OneWay;
         OneWayGetter::new(self.0.clone())
@@ -388,6 +392,7 @@ impl TwoWayGetter {
         Self(file_manager)
     }
 
+    /// Get all migrations
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
         self.0.get_two_way_migrations(false)
     }
