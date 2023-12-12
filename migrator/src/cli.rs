@@ -6,7 +6,7 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
-use crate::{DbInfo, MigrationConfig, RollbackStrategy, UpdateStrategy};
+use crate::{DbInfo, MigrationConfig, MigrationFlag, RollbackStrategy, UpdateStrategy};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
@@ -89,6 +89,11 @@ struct Generate {
     /// Name of the migration
     #[clap(long, help = "Name of the migration")]
     name: String,
+
+    /// Two way migration
+    #[clap(short, long, help = "Two-way up & down migration")]
+    reversible: bool,
+
     #[clap(flatten)]
     shared_all: SharedAll,
 }
@@ -189,10 +194,6 @@ impl FromStr for Path {
 
 #[derive(Parser, Debug)]
 struct SharedAll {
-    /// Two way migration
-    #[clap(short, long, help = "Two-way up & down migration")]
-    reversible: bool,
-
     /// Optional custom migrations dir
     #[clap(short, long, help = "Optional custom migrations dir")]
     migrations_dir: Option<String>,
@@ -318,7 +319,7 @@ pub async fn migration_cli(
                 files_config = files_config.custom_path(path)
             };
 
-            if generate.shared_all.reversible {
+            if generate.reversible {
                 let gen = files_config
                     .two_way()
                     .generate_migrations(migration_name, codebase_resources)
@@ -331,10 +332,12 @@ pub async fn migration_cli(
                     .one_way()
                     .generate_migrations(migration_name, codebase_resources)
                     .await;
+
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {}", e.to_string());
                 }
             };
+            log::info!("Successfully generated migrations");
         }
         SubCommand::Up(up) => {
             let db = setup_db(&user_provided_db, &up.shared_run_and_rollback).await;
@@ -342,32 +345,40 @@ pub async fn migration_cli(
 
             if let Some(path) = up.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
+            }
+
+            match files_config.detect_migration_type() {
+                Ok(MigrationFlag::TwoWay) => {
+                    log::info!("Running two way migrations");
+                    let run = files_config
+                        .two_way()
+                        .run_up_pending_migrations(db.clone(), update_strategy)
+                        .await;
+                    if let Err(e) = run {
+                        log::error!("Failed to run migrations: {}", e.to_string());
+                    }
+                }
+                Ok(MigrationFlag::OneWay) => {
+                    log::info!("Running one way migrations");
+                    let run = files_config
+                        .one_way()
+                        .run_pending_migrations(db.clone(), update_strategy)
+                        .await;
+                    if let Err(e) = run {
+                        log::error!("Failed to run migrations: {}", e.to_string());
+                    }
+                }
+                Err(e) => {
+                    log::error!("Failed to detect migration type: {}", e.to_string());
+                }
             };
 
-            if up.shared_all.reversible {
-                log::info!("Running two way migrations");
-                let run = files_config
-                    .two_way()
-                    .run_up_pending_migrations(db.clone(), update_strategy)
-                    .await;
-                if let Err(e) = run {
-                    log::error!("Failed to run migrations: {}", e.to_string());
-                }
-            } else {
-                log::info!("Running one way migrations");
-                let run = files_config
-                    .one_way()
-                    .run_pending_migrations(db.clone(), update_strategy)
-                    .await;
-                if let Err(e) = run {
-                    log::error!("Failed to run migrations: {}", e.to_string());
-                }
-            }
             let info = info_for().database().get_data::<DbInfo>(db.clone()).await;
             if let Err(ref e) = info {
                 log::error!("Failed to get db info: {}", e.to_string());
             }
 
+            log::info!("Successfully ran migrations");
             log::info!("Database: {:?}", info);
         }
         SubCommand::Down(rollback) => {
@@ -396,30 +407,37 @@ pub async fn migration_cli(
             if let Some(path) = options.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
-            if options.shared_all.reversible {
-                log::info!("Listing two way migrations");
-                let migrations = files_config
-                    .two_way()
-                    .list_migrations(db.clone(), options.status.unwrap_or_default())
-                    .await;
 
-                if let Err(ref e) = migrations {
-                    log::error!("Failed to get migrations: {}", e.to_string());
+            match files_config.detect_migration_type() {
+                Ok(MigrationFlag::TwoWay) => {
+                    log::info!("Listing two way migrations");
+                    let migrations = files_config
+                        .two_way()
+                        .list_migrations(db.clone(), options.status.unwrap_or_default())
+                        .await;
+
+                    if let Err(ref e) = migrations {
+                        log::error!("Failed to get migrations: {}", e.to_string());
+                    }
+                    log::info!("Migrations: {:?}", migrations);
                 }
-                log::info!("Migrations: {:?}", migrations);
-            } else {
-                log::info!("Listing one way migrations");
-                let migrations = files_config
-                    .one_way()
-                    .list_migrations(db.clone(), options.status.unwrap_or_default())
-                    .await;
+                Ok(MigrationFlag::OneWay) => {
+                    log::info!("Listing one way migrations");
+                    let migrations = files_config
+                        .one_way()
+                        .list_migrations(db.clone(), options.status.unwrap_or_default())
+                        .await;
 
-                if let Err(ref e) = migrations {
-                    log::error!("Failed to get migrations: {}", e.to_string());
+                    if let Err(ref e) = migrations {
+                        log::error!("Failed to get migrations: {}", e.to_string());
+                    }
+
+                    log::info!("Migrations: {:?}", migrations);
                 }
-
-                log::info!("Migrations: {:?}", migrations);
-            }
+                Err(e) => {
+                    log::error!("Failed to detect migration type: {}", e.to_string());
+                }
+            };
         }
     }
 }
