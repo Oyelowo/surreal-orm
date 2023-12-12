@@ -309,6 +309,10 @@ impl MigrationConfig {
         self.0.migration_flag = MigrationFlag::TwoWay;
         TwoWayGetter::new(self.0.clone())
     }
+
+    pub fn get_path(&self) -> Option<&String> {
+        self.0.custom_path.as_ref()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -485,6 +489,43 @@ impl FileManager {
         TwoWayGetter::new(self.clone())
     }
 
+    pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
+        let oneway = self.get_oneway_migrations(false);
+        let twoway = self.get_two_way_migrations(false);
+
+        match (oneway, twoway) {
+            (Ok(oneway), Ok(twoway)) if !oneway.is_empty() && twoway.is_empty() => {
+                Ok(MigrationFlag::OneWay)
+            }
+            (Ok(oneway), Ok(twoway)) if oneway.is_empty() && !twoway.is_empty() => {
+                Ok(MigrationFlag::TwoWay)
+            }
+            (Ok(oneway), Err(_)) if !oneway.is_empty() => Ok(MigrationFlag::OneWay),
+            (Err(_), Ok(twoway)) if !twoway.is_empty() => Ok(MigrationFlag::TwoWay),
+            (Ok(oneway), Ok(twoway)) if oneway.is_empty() && twoway.is_empty() => {
+                Err(MigrationError::MigrationDirectoryEmpty)
+            }
+            (Ok(oneway_files), Ok(twoway_files))
+                if !oneway_files.is_empty() && !twoway_files.is_empty() =>
+            {
+                return Err(MigrationError::AmbiguousMigrationDirection {
+                    one_way_filecount: oneway_files.len(),
+                    two_way_filecount: twoway_files.len(),
+                });
+            }
+            (Err(one_way_err), Err(two_way_error)) => {
+                Err(MigrationError::ProblemDetectingMigrationMode {
+                    one_way_error: one_way_err.to_string(),
+                    two_way_error: two_way_error.to_string(),
+                })
+            }
+            _ => Err(MigrationError::MigrationFlagDetectionError(
+                "Unable to detect if you are using one way or two way migrations. \
+                Please make sure you have either one way or two way migrations in your migration directory".into()
+            )),
+        }
+    }
+
     pub(crate) fn resolve_migration_directory(
         &self,
         create_dir_if_not_exists: bool,
@@ -537,6 +578,7 @@ impl FileManager {
             match filename {
                 MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
                     if self.mode == Mode::Strict {
+                        log::error!("Bidirectional migration found in unidirectional migration directory. This is not allowed");
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
@@ -614,7 +656,7 @@ impl FileManager {
                     downs_basenames.push(filename.basename());
                 }
                 MigrationFileName::Unidirectional(_) => {
-                    log::info!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
+                    log::error!("Unidirectional migration found in bidirectional migration directory. This is not allowed");
 
                     if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
