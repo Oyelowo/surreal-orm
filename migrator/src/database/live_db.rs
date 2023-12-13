@@ -103,25 +103,50 @@ impl MigrationRunner {
         let all_migrations = fm.get_two_way_migrations(false)?;
         let (queries_to_run, file_paths) = match rollback_strategy {
             RollbackStrategy::Previous => {
+                // 1. Check the latest applied/registered migration in the db
+                // 2. Validate that the migration file exists
+                // 3. Check if there are subsequent unapplied migration files to the live db
+                // 4. If there are, panic with a message suggesting two options a and b:
+                //   a. Apply the subsequent migrations and then do the rollback after
+                //   that.(Suggest the command to do that).
+                //   b. Delete the subsequent migration files and then do the rollback after
+                //   that.(Suggest the command to do that). e.g cargo run -- reset/restore/prune
+                //
+                // 5. If there are no subsequent unapplied migration files to the live db,
+                // then rollback the latest migration.
+                // 6. If there are no applied migrations in the db, then panic with a message
+                //   stating that there are no migrations to rollback. Generate new ones and apply
+                //   them.
+                //
+                // 7. If there are no migration files in the migration directory, then panic with a
+                //  message stating that there are no migrations to rollback
+                //
+
+                // 1.
+                let latest_migration = Self::get_latest_migration(db.clone())
+                    .await?
+                    .ok_or(MigrationError::MigrationDoesNotExist)?;
+
+                // 2.
                 let latest_migration = all_migrations
                     .iter()
-                    .max_by_key(|m| m.timestamp)
-                    .ok_or(MigrationError::MigrationDoesNotExist)?;
-                // If we were to start with the db. Potentially delete later
-                // let latest_migration_in_db = select(All)
-                //     .from(Migration::table_name())
-                //     .order_by(Migration::schema().timestamp.desc())
-                //     .limit(1)
-                //     .return_one::<Migration>(db.clone())
-                //     .await?
-                //     .ok_or(MigrationError::MigrationDoesNotExist)?;
-                //
-                // let latest_migration = all_migrations
-                //     .iter()
-                //     .find(|m| m.id.to_string() == latest_migration_in_db.name)
-                //     .ok_or(MigrationError::MigrationDoesNotExist)?;
+                    .find(|m| m.id.to_string() == latest_migration.name)
+                    .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
-                let _migration_name = latest_migration.name.clone();
+                // 3.
+
+                let pending_migrations =
+                    Self::get_pending_migrations(all_migrations.clone(), db.clone()).await?;
+
+                let is_valid_rollback_state =
+                    pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
+
+                if !is_valid_rollback_state {
+                    return Err(MigrationError::UnappliedMigrationExists {
+                        migration_count: pending_migrations.len() / 2,
+                    });
+                }
+
                 let rollback_query = latest_migration.down.clone();
                 let rollbacked_migration_deletion_query =
                     Migration::delete_raw(latest_migration.id.clone()).build();
@@ -142,6 +167,74 @@ impl MigrationRunner {
                 (all, file_paths)
             }
             RollbackStrategy::Number(count) => {
+                // New implementation: cargo run -- down -n 3
+
+                // Perhaps, we should start with the db, getting tbe test (n) migrations from the db and then
+                // getting the corresponding migration files from the migration directory.
+                // Also, making sure that it tallies up chronologicaly with what's in the migration directory.
+                // If it doesn't tally up, then we should panic with a message stating that the migration
+                // directory and the db are out of sync. Suggest that the user should run the command
+                //
+                // // Implementing a checksum to make sure that the migration directory and the db are in sync
+                // is probaly the way to go
+                //
+                // original files -> 1, 2, 3, 4, 5
+                // compromised dir - > files -> 1, 2, 3, 4, 4.5, 5
+                // compromisable latest -1 from db -> 5
+                // less compromisable latest -n from db -> 4, 5
+                // cargo run -- down -n 2
+                select(All)
+                    .from(Migration::table_name())
+                    .order_by(Migration::schema().timestamp.desc())
+                    .limit(count)
+                    .return_one::<Migration>(db.clone())
+                    .await;
+
+                let latest_migration = Self::get_latest_migration(db.clone())
+                    .await?
+                    .ok_or(MigrationError::MigrationDoesNotExist)?;
+
+                // 2.
+                let latest_migration = all_migrations
+                    .iter()
+                    .find(|m| m.id.to_string() == latest_migration.name)
+                    .ok_or(MigrationError::MigrationFileDoesNotExist)?;
+
+                // 3.
+
+                let pending_migrations =
+                    Self::get_pending_migrations(all_migrations.clone(), db.clone()).await?;
+
+                let is_valid_rollback_state =
+                    pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
+
+                if !is_valid_rollback_state {
+                    return Err(MigrationError::UnappliedMigrationExists {
+                        migration_count: pending_migrations.len() / 2,
+                    });
+                }
+
+                let rollback_query = latest_migration.down.clone();
+                let rollbacked_migration_deletion_query =
+                    Migration::delete_raw(latest_migration.id.clone()).build();
+                let all = format!(
+                    "{}\n{}",
+                    rollback_query, rollbacked_migration_deletion_query
+                );
+                let file_paths = latest_migration
+                    .directory
+                    .clone()
+                    .map(|d| {
+                        vec![
+                            d.join(latest_migration.id.to_up().to_string()),
+                            d.join(latest_migration.id.to_down().to_string()),
+                        ]
+                    })
+                    .ok_or(MigrationError::MigrationPathNotFound)?;
+                // (all, file_paths)
+
+                ///////////
+
                 let mut migrations = all_migrations.clone();
                 // If we were to start with the db
                 // let migrations_from_db = select(All)
