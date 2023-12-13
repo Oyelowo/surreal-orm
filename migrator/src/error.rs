@@ -16,6 +16,9 @@ pub enum MigrationError {
     #[error("Migration does not exist")]
     MigrationDoesNotExist,
 
+    #[error("Migration file(s) does not exist")]
+    MigrationFileDoesNotExist,
+
     #[error("Migration not registered")]
     MigrationNotRegistered,
 
@@ -95,6 +98,10 @@ There are {one_way_filecount} up only files and {two_way_filecount} up and down 
         one_way_filecount: usize,
         two_way_filecount: usize,
     },
+
+    #[error("There {migration_count} unapplied migration files. Apply the Unapplied migration files to the database instance \
+        using the command 'cargo run -- up' to apply it/them or delete all unapplied migrations using 'cargo run -- prune'.")]
+    UnappliedMigrationExists { migration_count: usize },
 
     #[error("Invalid migration flag detection: {0}")]
     MigrationFlagDetectionError(String),
