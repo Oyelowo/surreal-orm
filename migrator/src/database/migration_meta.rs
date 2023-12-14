@@ -94,7 +94,17 @@ impl Display for Checksum {
 }
 
 impl Checksum {
-    pub fn generate(file_path: impl Into<std::path::PathBuf>) -> MigrationResult<Self> {
+    pub fn generate_from_str(str: impl Into<String>) -> MigrationResult<Self> {
+        let str = str.into();
+
+        let mut hasher = Sha256::new();
+        hasher.update(str.as_bytes());
+
+        let hash = hasher.finalize();
+        Ok(format!("{:x}", hash).into())
+    }
+
+    pub fn generate_from_path(file_path: impl Into<std::path::PathBuf>) -> MigrationResult<Self> {
         let file_path = file_path.into();
         let file = File::open(&file_path).map_err(|e| {
             MigrationError::IoError(format!(
@@ -122,7 +132,7 @@ impl Checksum {
         content: &str,
         migration_filename: &MigrationFilename,
     ) -> MigrationResult<()> {
-        let checksum = Checksum::generate(content)?;
+        let checksum = Checksum::generate_from_path(content)?;
         if checksum != *self {
             return Err(MigrationError::ChecksumMismatch {
                 migration_name: migration_filename.to_string(),
@@ -247,8 +257,8 @@ impl TryFrom<MigrationTwoWay> for Migration {
             id: Migration::create_id(&migration.name),
             name: migration.name.to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate(&migration.up.clone())?.into(),
-            checksum_down: Checksum::generate(migration.down.clone())?.into(),
+            checksum_up: Checksum::generate_from_path(&migration.up.clone())?.into(),
+            checksum_down: Checksum::generate_from_path(migration.down.clone())?.into(),
         })
     }
 }
@@ -279,7 +289,7 @@ impl TryFrom<MigrationOneWay> for Migration {
             id: Migration::create_id(&migration.name),
             name: migration.name.to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate(&migration.content.clone())?.into(),
+            checksum_up: Checksum::generate_from_path(&migration.content.clone())?.into(),
             checksum_down: None,
         })
     }
@@ -574,9 +584,10 @@ impl TwoWayGetter {
         &self,
         db: Surreal<impl Connection>,
         rollback_strategy: RollbackStrategy,
+        strictness: StrictNessLevel,
     ) -> MigrationResult<()> {
         let _migrations = self.get_migrations()?;
-        MigrationRunner::rollback_migrations(&self.0, rollback_strategy, db).await?;
+        MigrationRunner::rollback_migrations(db, &self.0, rollback_strategy, strictness).await?;
 
         Ok(())
     }
