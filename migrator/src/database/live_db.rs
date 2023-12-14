@@ -1,3 +1,9 @@
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+};
+
+use sha2::{self, Digest, Sha256};
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
@@ -29,7 +35,11 @@ pub struct PendingMigration {
     name: String,
     timestamp: u64,
     content: String,
+    // checksum_up: Checksum,
+    // checksum_down: Option<Checksum>,
 }
+
+type MigrationFileMeta = PendingMigration;
 
 impl From<MigrationTwoWay> for PendingMigration {
     fn from(m: MigrationTwoWay) -> Self {
@@ -38,6 +48,8 @@ impl From<MigrationTwoWay> for PendingMigration {
             name: m.name,
             timestamp: m.timestamp,
             content: m.up,
+            // checksum_up: m.checksum_up,
+            // checksum_down: Some(m.checksum_down),
         }
     }
 }
@@ -91,6 +103,28 @@ pub enum RollbackStrategy {
     Till(MigrationFileName),
 }
 
+// let file_content = std::fs::read_to_string(file_path).map_err(|e| {
+//     MigrationError::IoError(format!(
+//         "Failed to read migration file: {:?}. Error: {}",
+//         file_path, e
+//     ))
+// })?;
+//
+// sha2::Sha256::digest(file_content.as_bytes())
+//     .iter()
+//     .map(|b| format!("{:02x}", b))
+//     .collect::<Vec<_>>()
+//     .join("")
+//     .parse::<String>()
+//     .map_err(|e| {
+//         MigrationError::IoError(format!(
+//             "Failed to generate checksum for migration file: {:?}. Error: {}",
+//             file_path, e
+//         ))
+//     });
+// hasher.update(file_content);
+// let hash = hasher.finalize();
+// Ok(hash.to_string())
 impl MigrationRunner {
     /// Only two way migrations support rollback
     pub async fn rollback_migrations(
@@ -102,7 +136,20 @@ impl MigrationRunner {
 
         let all_migrations = fm.get_two_way_migrations(false)?;
         let (queries_to_run, file_paths) = match rollback_strategy {
+            // b7a7e95b763875743b243e0930e46f22833208f58ef68032d14619ae2dfe883b
+            // 16dfc18a5d5a508eee4ca1084a62518d6f6152ed2f483e3b98fee0e69f74d63a
+            // 224bb451dfafda16efb615cbd331d139097d780a44727355174dc72db46c7005
             RollbackStrategy::Previous => {
+                for m in &all_migrations {
+                    let path = m
+                        .directory
+                        .clone()
+                        .map(|d| d.join(m.id.to_down().to_string()))
+                        .ok_or(MigrationError::MigrationPathNotFound)?;
+                    // let x = Self::_generate_checksum(path)?;
+                    // log::warn!("Migration file shaaaaa: {:?}", x);
+                    panic!();
+                }
                 // 1. Check the latest applied/registered migration in the db
                 // 2. Validate that the migration file exists
                 // 3. Check if there are subsequent unapplied migration files to the live db
@@ -183,118 +230,160 @@ impl MigrationRunner {
                 // compromisable latest -1 from db -> 5
                 // less compromisable latest -n from db -> 4, 5
                 // cargo run -- down -n 2
-                select(All)
+                let migrations_from_db = select(All)
                     .from(Migration::table_name())
                     .order_by(Migration::schema().timestamp.desc())
                     .limit(count)
-                    .return_one::<Migration>(db.clone())
-                    .await;
+                    .return_many::<Migration>(db.clone())
+                    .await?;
 
-                let latest_migration = Self::get_latest_migration(db.clone())
-                    .await?
+                let latest_migration = migrations_from_db
+                    .first()
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-                // 2.
-                let latest_migration = all_migrations
-                    .iter()
-                    .find(|m| m.id.to_string() == latest_migration.name)
-                    .ok_or(MigrationError::MigrationFileDoesNotExist)?;
-
-                // 3.
-
-                let pending_migrations =
-                    Self::get_pending_migrations(all_migrations.clone(), db.clone()).await?;
-
-                let is_valid_rollback_state =
-                    pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
-
-                if !is_valid_rollback_state {
-                    return Err(MigrationError::UnappliedMigrationExists {
-                        migration_count: pending_migrations.len() / 2,
-                    });
-                }
-
-                let rollback_query = latest_migration.down.clone();
-                let rollbacked_migration_deletion_query =
-                    Migration::delete_raw(latest_migration.id.clone()).build();
-                let all = format!(
-                    "{}\n{}",
-                    rollback_query, rollbacked_migration_deletion_query
-                );
-                let file_paths = latest_migration
-                    .directory
+                let migrations_files_to_rollback = all_migrations
                     .clone()
-                    .map(|d| {
-                        vec![
-                            d.join(latest_migration.id.to_up().to_string()),
-                            d.join(latest_migration.id.to_down().to_string()),
-                        ]
-                    })
-                    .ok_or(MigrationError::MigrationPathNotFound)?;
-                // (all, file_paths)
-
-                ///////////
-
-                let mut migrations = all_migrations.clone();
-                // If we were to start with the db
-                // let migrations_from_db = select(All)
-                //     .from(Migration::table_name())
-                //     .order_by(Migration::schema().timestamp.desc())
-                //     .limit(count)
-                //     .return_many::<Migration>(db.clone())
-                //     .await?;
-                //
-                // let migrations_to_rollback = migrations
-                //     .iter()
-                //     .filter(|m| {
-                //         migrations_from_db
-                //             .iter()
-                //             .any(|m_from_db| m_from_db.name == m.id.to_string())
-                //     })
-                //     .collect::<Vec<_>>();
-                //
-                migrations.sort_unstable_by_key(|m| m.timestamp);
-                let migrations_to_rollback = migrations
-                    .iter()
-                    .rev()
+                    .into_iter()
+                    // .map(|m| {
+                    //     let m: MigrationFileMeta = m.into();
+                    //     m
+                    // })
+                    .filter(|m| m.timestamp < latest_migration.timestamp)
                     .take(count as usize)
                     .collect::<Vec<_>>();
-                let rollback_queries = migrations_to_rollback
-                    .iter()
-                    .map(|m| m.down.clone())
-                    .collect::<Vec<_>>()
-                    .join("\n");
 
-                let rollbacked_migration_deletion_queries = migrations_to_rollback
-                    .iter()
-                    .map(|m| Migration::delete_raw(m.id.clone()).build())
-                    .collect::<Vec<_>>()
-                    .join("\n");
+                for (m_from_file, m_from_db) in migrations_files_to_rollback
+                    .into_iter()
+                    .zip(migrations_from_db.into_iter())
+                {
+                    let x = m_from_db
+                        .checksum_up
+                        .verify(&m_from_file.up, &m_from_file.id)?;
 
-                let all = format!(
-                    "{}\n{}",
-                    rollback_queries, rollbacked_migration_deletion_queries
-                );
+                    let x = m_from_db
+                        .checksum_down
+                        .ok_or(MigrationError::NoChecksumInDb {
+                            migration_name: m_from_db.id.to_string(),
+                        })?
+                        .verify(&m_from_file.down, &m_from_file.id)?;
 
-                let file_paths = migrations_to_rollback
-                    .iter()
-                    .map(|m| {
-                        m.directory
-                            .clone()
-                            .map(|d| {
-                                vec![
-                                    d.join(m.id.to_up().to_string()),
-                                    d.join(m.id.to_down().to_string()),
-                                ]
-                            })
-                            .ok_or(MigrationError::MigrationPathNotFound)
-                    })
-                    .collect::<MigrationResult<Vec<_>>>()?;
+                    if m_from_file.name != m_from_db.name {
+                        return Err(MigrationError::MigrationFileDoesNotExist);
+                    }
+                }
 
-                (
-                    all,
-                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
-                )
+                // left nth migration files metadata, right nth live db migration metadata
+                // Compare the file names(which includes timestamps) and the checksum
+
+                // Check the migration meta from the live db against the older migration files in the migration directory meta
+                // Compare the file names(which includes timestamps) and the checksum
+
+                // let latest_migration = Self::get_latest_migration(db.clone())
+                //     .await?
+                //     .ok_or(MigrationError::MigrationDoesNotExist)?;
+                //
+                // // 2.
+                // let latest_migration = all_migrations
+                //     .iter()
+                //     .find(|m| m.id.to_string() == latest_migration.name)
+                //     .ok_or(MigrationError::MigrationFileDoesNotExist)?;
+                //
+                // // 3.
+                //
+                // let pending_migrations =
+                //     Self::get_pending_migrations(all_migrations.clone(), db.clone()).await?;
+                //
+                // let is_valid_rollback_state =
+                //     pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
+                //
+                // if !is_valid_rollback_state {
+                //     return Err(MigrationError::UnappliedMigrationExists {
+                //         migration_count: pending_migrations.len() / 2,
+                //     });
+                // }
+                //
+                // let rollback_query = latest_migration.down.clone();
+                // let rollbacked_migration_deletion_query =
+                //     Migration::delete_raw(latest_migration.id.clone()).build();
+                // let all = format!(
+                //     "{}\n{}",
+                //     rollback_query, rollbacked_migration_deletion_query
+                // );
+                // let file_paths = latest_migration
+                //     .directory
+                //     .clone()
+                //     .map(|d| {
+                //         vec![
+                //             d.join(latest_migration.id.to_up().to_string()),
+                //             d.join(latest_migration.id.to_down().to_string()),
+                //         ]
+                //     })
+                //     .ok_or(MigrationError::MigrationPathNotFound)?;
+                // // (all, file_paths)
+                //
+                // ///////////
+                //
+                // let mut migrations = all_migrations.clone();
+                // // If we were to start with the db
+                // // let migrations_from_db = select(All)
+                // //     .from(Migration::table_name())
+                // //     .order_by(Migration::schema().timestamp.desc())
+                // //     .limit(count)
+                // //     .return_many::<Migration>(db.clone())
+                // //     .await?;
+                // //
+                // // let migrations_to_rollback = migrations
+                // //     .iter()
+                // //     .filter(|m| {
+                // //         migrations_from_db
+                // //             .iter()
+                // //             .any(|m_from_db| m_from_db.name == m.id.to_string())
+                // //     })
+                // //     .collect::<Vec<_>>();
+                // //
+                // migrations.sort_unstable_by_key(|m| m.timestamp);
+                // let migrations_to_rollback = migrations
+                //     .iter()
+                //     .rev()
+                //     .take(count as usize)
+                //     .collect::<Vec<_>>();
+                // let rollback_queries = migrations_to_rollback
+                //     .iter()
+                //     .map(|m| m.down.clone())
+                //     .collect::<Vec<_>>()
+                //     .join("\n");
+                //
+                // let rollbacked_migration_deletion_queries = migrations_to_rollback
+                //     .iter()
+                //     .map(|m| Migration::delete_raw(m.id.clone()).build())
+                //     .collect::<Vec<_>>()
+                //     .join("\n");
+                //
+                // let all = format!(
+                //     "{}\n{}",
+                //     rollback_queries, rollbacked_migration_deletion_queries
+                // );
+                //
+                // let file_paths = migrations_to_rollback
+                //     .iter()
+                //     .map(|m| {
+                //         m.directory
+                //             .clone()
+                //             .map(|d| {
+                //                 vec![
+                //                     d.join(m.id.to_up().to_string()),
+                //                     d.join(m.id.to_down().to_string()),
+                //                 ]
+                //             })
+                //             .ok_or(MigrationError::MigrationPathNotFound)
+                //     })
+                //     .collect::<MigrationResult<Vec<_>>>()?;
+                //
+                // (
+                //     all,
+                //     file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+                // )
+                todo!()
             }
             RollbackStrategy::Till(id_name) => {
                 let mut migrations = all_migrations.clone();
@@ -443,7 +532,7 @@ impl MigrationRunner {
         Ok(())
     }
 
-    pub async fn run_pending_migrations(
+    pub async fn apply_pending_migrations(
         db: Surreal<impl Connection>,
         all_migrations: Vec<impl Into<PendingMigration>>,
         update_strategy: UpdateStrategy,
@@ -487,19 +576,13 @@ impl MigrationRunner {
     }
 
     pub(crate) async fn list_migrations(
-        migrations_local_dir: Vec<impl Into<Migration>>,
+        migrations_local_dir: Vec<Migration>,
         db: Surreal<impl Connection>,
         status: Status,
     ) -> MigrationResult<Vec<Migration>> {
         let migrations = match status {
             Status::All => {
-                let mut migrations = migrations_local_dir
-                    .into_iter()
-                    .map(|m| {
-                        let m: Migration = m.into();
-                        m
-                    })
-                    .collect::<Vec<_>>();
+                let mut migrations = migrations_local_dir;
                 migrations.sort_by_key(|m| m.timestamp);
                 migrations
             }
