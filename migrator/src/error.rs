@@ -10,6 +10,16 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum MigrationError {
+    #[error("Checksum mismaatch in {migration_name}. Expected checksum: {expected_checksum}. Actual checksum: {actual_checksum}")]
+    ChecksumMismatch {
+        migration_name: String,
+        expected_checksum: String,
+        actual_checksum: String,
+    },
+
+    #[error("Checksum not found in database for migration: {migration_name}")]
+    NoChecksumInDb { migration_name: String },
+
     #[error("Migration already exists")]
     MigrationAlreadyExists,
 
