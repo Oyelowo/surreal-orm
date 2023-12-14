@@ -582,7 +582,7 @@ impl Filter {
     /// let bracketed_filter = filter.bracketed();
     /// assert_eq!(bracketed_filter.to_raw().build(), "((age > 18) OR (title = 'Professor'))");
     /// ```
-    pub fn bracketed(&self) -> Self {
+    pub fn parenthesized(&self) -> Self {
         Filter {
             query_string: format!("({self})"),
             bindings: self.bindings.to_vec(),
@@ -740,7 +740,7 @@ mod tests {
             .or(title.equal("Professor"))
             .and(age.less_than(100));
 
-        let bracketed_filter = filter.bracketed();
+        let bracketed_filter = filter.parenthesized();
         assert_eq!(
             bracketed_filter.to_raw().build(),
             "((age > 18) OR (title = 'Professor') AND (age < 100))"
@@ -754,7 +754,7 @@ mod tests {
 
         let filter = cond!((age > 18) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.bracketed();
+        let bracketed_filter = filter.parenthesized();
         assert_eq!(
             bracketed_filter.fine_tune_params(),
             "((age > $_param_00000001) OR (title = $_param_00000002) AND (age < $_param_00000003))"
@@ -771,7 +771,7 @@ mod tests {
 
         let filter = cond!((age OR cond!(age >= 18)) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.bracketed();
+        let bracketed_filter = filter.parenthesized();
         assert_eq!(
             bracketed_filter.to_raw().build(),
             "((age OR age >= 18) OR (title = 'Professor') AND (age < 100))"
@@ -785,7 +785,7 @@ mod tests {
 
         let filter = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.bracketed();
+        let bracketed_filter = filter.parenthesized();
         assert_eq!(
             bracketed_filter.fine_tune_params(),
             "((age OR $_param_00000001 OR $_param_00000002 OR $_param_00000003) OR (title = $_param_00000004) AND (age < $_param_00000005))"

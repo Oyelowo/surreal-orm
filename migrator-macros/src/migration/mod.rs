@@ -35,13 +35,9 @@ fn generate_migration_code(
             .map(|meta| {
                 let name = meta.name.to_string();
                 let content = meta.content.to_string();
-                let timestamp = meta.timestamp;
-                let id = meta.id.to_string();
 
                 quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
-                    id: #id,
                     name: #name,
-                    timestamp: #timestamp,
                     content: #content,
                 })
             })
@@ -55,13 +51,9 @@ fn generate_migration_code(
                 let name = meta.name.to_string();
                 let up = meta.up.to_string();
                 let down = meta.down.to_string();
-                let timestamp = meta.timestamp;
-                let id = meta.id.clone().to_string();
 
                 quote!(#crate_name::migrator::EmbeddedMigrationTwoWay {
-                    id: #id,
                     name: #name,
-                    timestamp: #timestamp,
                     up: #up,
                     down: #down,
                 })

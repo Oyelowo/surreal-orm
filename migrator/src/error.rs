@@ -95,6 +95,17 @@ pub enum MigrationError {
     #[error("Invalid DefineStatement: {0}")]
     InvalidDefineStatement(String),
 
+    // TODO: Decide on how to handle suggestions in scenarios where there is a mismatch.
+    #[error("Invalid migration state. The number of registered migrations in the database ({db_migration_count}) does not match the number of migration files in the migration directory ({local_dir_migration_count}). \
+        This could be because you have deleted some migration files from the migration directory or you have deleted some migration records from the database. \
+        If you have deleted some migration files from the migration directory, you can run the command 'cargo run -- prune' to delete all unapplied migrations from the database. \
+        If you have deleted some migration records from the database, you can run the command 'cargo run -- reset' to delete all migration records from the database. \
+        If you have deleted some migration files from the migration directory and some migration records from the database, you can run the command 'cargo run -- reset --prune' to delete all migration records from the database and all unapplied migrations from the database.")]
+    InvalidMigrationState {
+        db_migration_count: usize,
+        local_dir_migration_count: usize,
+    },
+
     #[error("Problem detecting migration mode. One way error: {one_way_error}. Two way error: {two_way_error}")]
     ProblemDetectingMigrationMode {
         one_way_error: String,
