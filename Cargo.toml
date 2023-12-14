@@ -81,6 +81,7 @@ async-trait = "0.1.74"
 thiserror = "1.0.50"
 uuid = "1.5.0"
 tokio = { version = "1.33.0", features = ["full"] }
+sha2 = "0.10.8"
 typed-builder = "0.18.0"
 rand = "0.8.5"
 clap = { version = "4.4.7", features = ["derive"] }
