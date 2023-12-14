@@ -5,6 +5,9 @@
  * Licensed under the MIT license
  */
 
+use std::{fs::File, io::BufReader};
+
+use sha2::{self, Digest, Sha256};
 use std::convert::TryFrom;
 use std::env;
 
@@ -17,7 +20,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{define_field, define_table, DefineTableStatement};
-use surreal_query_builder::{DbResources, FieldType, Raw, Table, ToRaw};
+use surreal_query_builder::{DbResources, Field, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
 use surrealdb::{Connection, Surreal};
 
@@ -32,50 +35,147 @@ pub struct Migration {
     // pub id: SurrealId<Self, String>,
     pub id: Thing,
     pub name: String,
-    pub timestamp: u64,
+    pub timestamp: Timestamp,
+    pub checksum_up: Checksum,
+    pub checksum_down: Option<Checksum>,
     // pub timestamp: Datetime<Utc>,
     // status: String,
 }
 
+impl Ord for Migration {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
+impl PartialOrd for Migration {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.timestamp.cmp(&other.timestamp))
+    }
+}
+
+impl PartialEq for Migration {
+    fn eq(&self, other: &Self) -> bool {
+        self.timestamp == other.timestamp
+    }
+}
+
+impl Eq for Migration {}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Timestamp(u64);
+
+impl Timestamp {
+    pub fn into_inner(self) -> u64 {
+        self.0
+    }
+}
+
+impl From<u64> for Timestamp {
+    fn from(timestamp: u64) -> Self {
+        Self(timestamp)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Checksum(String);
+
+impl From<String> for Checksum {
+    fn from(checksum: String) -> Self {
+        Self(checksum)
+    }
+}
+
+impl Display for Checksum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Checksum(checksum) = self;
+        write!(f, "{}", checksum)
+    }
+}
+
+impl Checksum {
+    pub fn generate(file_path: impl Into<std::path::PathBuf>) -> MigrationResult<Self> {
+        let file_path = file_path.into();
+        let file = File::open(&file_path).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to open migration file: {:?}. Error: {}",
+                file_path, e
+            ))
+        })?;
+
+        let mut reader = BufReader::new(file);
+        let mut hasher = Sha256::new();
+
+        std::io::copy(&mut reader, &mut hasher).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to read migration file: {:?}. Error: {}",
+                file_path, e
+            ))
+        })?;
+
+        let hash = hasher.finalize();
+        Ok(format!("{:x}", hash).into())
+    }
+
+    pub fn verify(
+        &self,
+        content: &str,
+        migration_filename: &MigrationFilename,
+    ) -> MigrationResult<()> {
+        let checksum = Checksum::generate(content)?;
+        if checksum != *self {
+            return Err(MigrationError::ChecksumMismatch {
+                migration_name: migration_filename.to_string(),
+                expected_checksum: self.to_string(),
+                actual_checksum: checksum.to_string(),
+            });
+        }
+        Ok(())
+    }
+}
+
 pub struct MigrationSchema {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub timestamp: &'static str,
+    pub id: Field,
+    pub name: Field,
+    pub timestamp: Field,
 }
 
 impl Migration {
-    pub fn create_id(id_part: MigrationFileName) -> Thing {
+    pub fn create_id(filename: &MigrationFilename) -> Thing {
         Thing {
             tb: Migration::table_name().to_string(),
-            id: id_part.to_string().into(),
+            id: filename.to_string().into(),
         }
     }
     // pub fn create_raw(m: Self) -> Raw {
-    pub fn create_raw(id_part: MigrationFileName, name: String, timestamp: u64) -> Raw {
+    pub fn create_raw(filename: MigrationFilename) -> Raw {
         let migration::Schema {
             id: _id_field,
             name: name_field,
             timestamp: timestamp_field,
         } = Migration::schema();
 
-        let record_id = Self::create_id(id_part);
+        let record_id = Self::create_id(&filename);
+        let name = filename.to_string();
+        let timestamp = filename.timestamp().into_inner();
+
         Raw::new(format!(
             "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp};"
         ))
     }
 
-    pub fn delete_raw(id_part: MigrationFileName) -> Raw {
+    pub fn delete_raw(filename: &MigrationFilename) -> Raw {
         let _migration_table = Migration::table_name();
         let migration::Schema { .. } = Migration::schema();
-        let record_id = Self::create_id(id_part);
+        let record_id = Self::create_id(filename);
         Raw::new(format!("DELETE {record_id};"))
     }
 
     pub fn schema() -> MigrationSchema {
         MigrationSchema {
-            id: "id",
-            name: "name",
-            timestamp: "timestamp",
+            id: "id".into(),
+            name: Field::new("name"),
+            timestamp: Field::new("timestamp"),
         }
     }
 
@@ -120,42 +220,68 @@ impl Migration {}
 
 #[derive(Clone, Debug)]
 pub struct MigrationTwoWay {
-    pub id: MigrationFileName,
-    pub name: String,
-    pub timestamp: u64,
+    pub name: MigrationFilename,
     pub up: String,
     pub down: String,
     pub directory: Option<PathBuf>,
     // status: String,
 }
 
-impl From<MigrationTwoWay> for Migration {
-    fn from(migration: MigrationTwoWay) -> Self {
-        Self {
-            id: Migration::create_id(migration.id),
-            name: migration.name,
-            timestamp: migration.timestamp,
-        }
+// impl From<MigrationTwoWay> for Migration {
+//     fn from(migration: MigrationTwoWay) -> Self {
+//         Self {
+//             id: Migration::create_id(migration.id),
+//             name: migration.name,
+//             timestamp: migration.timestamp,
+//             checksum_up: CheckSum::generate(&migration.up.clone()).unwrap().into(),
+//             checksum_down: CheckSum::generate(migration.down.clone()).unwrap().into(),
+//         }
+//     }
+// }
+
+impl TryFrom<MigrationTwoWay> for Migration {
+    type Error = MigrationError;
+
+    fn try_from(migration: MigrationTwoWay) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: Migration::create_id(&migration.name),
+            name: migration.name.to_string(),
+            timestamp: migration.name.timestamp(),
+            checksum_up: Checksum::generate(&migration.up.clone())?.into(),
+            checksum_down: Checksum::generate(migration.down.clone())?.into(),
+        })
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct MigrationOneWay {
-    pub id: MigrationFileName,
-    pub name: String,
-    pub timestamp: u64,
+    pub name: MigrationFilename,
     pub content: String, // status: String,
 }
 
 impl MigrationOneWay {}
 
-impl From<MigrationOneWay> for Migration {
-    fn from(migration: MigrationOneWay) -> Self {
-        Self {
-            id: Migration::create_id(migration.id),
-            name: migration.name,
-            timestamp: migration.timestamp,
-        }
+// impl From<MigrationOneWay> for Migration {
+//     fn from(migration: MigrationOneWay) -> Self {
+//         Self {
+//             id: Migration::create_id(migration.id),
+//             name: migration.name,
+//             timestamp: migration.timestamp,
+//         }
+//     }
+// }
+
+impl TryFrom<MigrationOneWay> for Migration {
+    type Error = MigrationError;
+
+    fn try_from(migration: MigrationOneWay) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: Migration::create_id(&migration.name),
+            name: migration.name.to_string(),
+            timestamp: migration.name.timestamp(),
+            checksum_up: Checksum::generate(&migration.content.clone())?.into(),
+            checksum_down: None,
+        })
     }
 }
 
@@ -354,7 +480,7 @@ impl OneWayGetter {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(db, migrations, update_strategy).await?;
+        MigrationRunner::apply_pending_migrations(db, migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -366,7 +492,7 @@ impl OneWayGetter {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = one_way_embedded_migrations.to_migrations_one_way()?;
-        MigrationRunner::run_pending_migrations(db, migrations, update_strategy).await?;
+        MigrationRunner::apply_pending_migrations(db, migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -376,9 +502,16 @@ impl OneWayGetter {
         &self,
         db: Surreal<impl Connection>,
         status: Status,
-    ) -> MigrationResult<Vec<Migration>> {
-        let migrations = self.get_migrations()?;
-        let migrations = MigrationRunner::list_migrations(migrations, db.clone(), status).await?;
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
+        let migrations = self
+            .get_migrations()?
+            .into_iter()
+            .map(|m| m.name)
+            .collect::<Vec<_>>();
+
+        let migrations =
+            MigrationRunner::list_migrations(migrations, db.clone(), status, strictness).await?;
 
         Ok(migrations)
     }
@@ -418,7 +551,7 @@ impl TwoWayGetter {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
-        MigrationRunner::run_pending_migrations(db.clone(), migrations, update_strategy).await?;
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -431,7 +564,7 @@ impl TwoWayGetter {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
-        MigrationRunner::run_pending_migrations(db.clone(), migrations, update_strategy).await?;
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
     }
@@ -453,9 +586,16 @@ impl TwoWayGetter {
         &self,
         db: Surreal<impl Connection>,
         status: Status,
-    ) -> MigrationResult<Vec<Migration>> {
-        let migrations = self.get_migrations()?;
-        let migrations = MigrationRunner::list_migrations(migrations, db.clone(), status).await?;
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
+        let migrations = self
+            .get_migrations()?
+            .into_iter()
+            .map(|m| m.name)
+            .collect::<Vec<_>>();
+
+        let migrations =
+            MigrationRunner::list_migrations(migrations, db.clone(), status, strictness).await?;
 
         Ok(migrations)
     }
@@ -579,23 +719,21 @@ impl FileManager {
             let migration_name = path.file_name().expect("Problem reading migration name");
             let migration_up_name = migration_name.to_string_lossy().to_string();
 
-            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
+            let filename: MigrationFilename = migration_up_name.clone().try_into()?;
             match filename {
-                MigrationFileName::Up(_) | MigrationFileName::Down(_) => {
+                MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
                     if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
                     }
                 }
-                MigrationFileName::Unidirectional(_) => {
+                MigrationFilename::Unidirectional(_) => {
                     unidirectional_basenames.push(filename.basename());
                     let content = fs::read_to_string(path_str).unwrap();
 
                     let migration = MigrationOneWay {
-                        id: filename.clone(),
-                        timestamp: filename.timestamp(),
-                        name: filename.basename(),
+                        name: filename,
                         content,
                     };
 
@@ -604,7 +742,7 @@ impl FileManager {
             };
         }
 
-        migrations_uni_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        migrations_uni_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
         Ok(migrations_uni_meta)
     }
 
@@ -634,9 +772,9 @@ impl FileManager {
             let migration_name = path.split('/').last().unwrap();
             let migration_up_name = migration_name.to_string();
 
-            let filename: MigrationFileName = migration_up_name.clone().try_into()?;
+            let filename: MigrationFilename = migration_up_name.clone().try_into()?;
             match filename {
-                MigrationFileName::Up(_) => {
+                MigrationFilename::Up(_) => {
                     ups_basenames.push(filename.basename());
                     let content_up = fs::read_to_string(path).unwrap();
                     let content_down =
@@ -646,9 +784,7 @@ impl FileManager {
                             })?;
 
                     let migration = MigrationTwoWay {
-                        id: filename.clone(),
-                        timestamp: filename.timestamp(),
-                        name: filename.basename(),
+                        name: filename.clone(),
                         up: content_up,
                         down: content_down,
                         directory: Some(parent_dir.to_path_buf()),
@@ -656,10 +792,10 @@ impl FileManager {
 
                     migrations_bi_meta.push(migration);
                 }
-                MigrationFileName::Down(_) => {
+                MigrationFilename::Down(_) => {
                     downs_basenames.push(filename.basename());
                 }
-                MigrationFileName::Unidirectional(_) => {
+                MigrationFilename::Unidirectional(_) => {
                     if self.mode == Mode::Strict {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
@@ -696,7 +832,7 @@ impl FileManager {
                 ),
             ));
         }
-        migrations_bi_meta.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        migrations_bi_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
         Ok(migrations_bi_meta)
     }
 }

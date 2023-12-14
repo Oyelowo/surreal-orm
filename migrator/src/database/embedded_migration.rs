@@ -44,9 +44,7 @@ impl EmbeddedMigrationsTwoWay {
                 let id = meta.id.to_string();
 
                 MigrationTwoWay {
-                    id: id.try_into().unwrap(),
-                    name,
-                    timestamp,
+                    name: id.try_into().expect("Invalid migration name"),
                     up,
                     down,
                     directory: None,
@@ -73,17 +71,14 @@ impl EmbeddedMigrationsOneWay {
             .migrations
             .iter()
             .map(|meta| {
-                let name = meta.name.to_string();
+                let name = meta
+                    .name
+                    .to_string()
+                    .try_into()
+                    .expect("Invalid migration name");
                 let content = meta.content.to_string();
-                let timestamp = meta.timestamp;
-                let id = meta.id.to_string();
 
-                MigrationOneWay {
-                    id: id.try_into().unwrap(),
-                    name,
-                    timestamp,
-                    content,
-                }
+                MigrationOneWay { name, content }
             })
             .collect::<Vec<_>>();
         Ok(migs)
@@ -98,8 +93,6 @@ impl EmbeddedMigrationsOneWay {
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationOneWay {
-    pub id: &'static str,
     pub name: &'static str,
-    pub timestamp: u64,
     pub content: &'static str, // status: String,
 }

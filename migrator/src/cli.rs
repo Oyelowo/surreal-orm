@@ -247,6 +247,14 @@ struct RuntimeConfig {
 
     #[clap(short, long, help = "Password")]
     pass: Option<String>,
+
+    #[clap(
+        long,
+        help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
+        that file contents and valid and also checking filenames. Lax does not.",
+        default_value = "true"
+    )]
+    strict: bool,
 }
 
 /// Rollback migrations
@@ -417,7 +425,11 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                     log::info!("Listing two way migrations");
                     let migrations = files_config
                         .two_way()
-                        .list_migrations(db.clone(), options.status.unwrap_or_default())
+                        .list_migrations(
+                            db.clone(),
+                            options.status.unwrap_or_default(),
+                            options.runtime_config.strict.into(),
+                        )
                         .await;
 
                     if let Err(ref e) = migrations {
@@ -429,7 +441,11 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                     log::info!("Listing one way migrations");
                     let migrations = files_config
                         .one_way()
-                        .list_migrations(db.clone(), options.status.unwrap_or_default())
+                        .list_migrations(
+                            db.clone(),
+                            options.status.unwrap_or_default(),
+                            options.runtime_config.strict.into(),
+                        )
                         .await;
 
                     if let Err(ref e) = migrations {

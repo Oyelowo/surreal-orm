@@ -1,15 +1,11 @@
-use std::{
-    fs::File,
-    io::{BufReader, Read},
-};
+use std::{collections::BTreeSet, ops::Deref};
 
-use sha2::{self, Digest, Sha256};
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
     cli::Status, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError,
-    MigrationFileName, MigrationOneWay, MigrationResult, MigrationTwoWay,
+    MigrationFilename, MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
 
 // pub struct MigrationRunner<C: Connection> {
@@ -21,58 +17,65 @@ pub struct MigrationRunner {
 impl From<MigrationTwoWay> for MigrationOneWay {
     fn from(m: MigrationTwoWay) -> Self {
         Self {
-            id: m.id,
             name: m.name,
-            timestamp: m.timestamp,
             content: m.up,
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct PendingMigration {
-    id: MigrationFileName,
-    name: String,
-    timestamp: u64,
+pub struct MigrationFileMeta {
+    name: MigrationFilename,
     content: String,
     // checksum_up: Checksum,
     // checksum_down: Option<Checksum>,
 }
 
-type MigrationFileMeta = PendingMigration;
+pub struct PendingMigration(MigrationFileMeta);
+
+impl Deref for PendingMigration {
+    type Target = MigrationFileMeta;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<MigrationFileMeta> for PendingMigration {
+    fn from(m: MigrationFileMeta) -> Self {
+        Self(m)
+    }
+}
 
 impl From<MigrationTwoWay> for PendingMigration {
     fn from(m: MigrationTwoWay) -> Self {
-        Self {
-            id: m.id,
+        MigrationFileMeta {
             name: m.name,
-            timestamp: m.timestamp,
             content: m.up,
             // checksum_up: m.checksum_up,
             // checksum_down: Some(m.checksum_down),
         }
+        .into()
     }
 }
 
 impl From<MigrationOneWay> for PendingMigration {
     fn from(m: MigrationOneWay) -> Self {
-        Self {
-            id: m.id,
+        MigrationFileMeta {
             name: m.name,
-            timestamp: m.timestamp,
             content: m.content,
         }
+        .into()
     }
 }
 
 impl From<EmbeddedMigrationOneWay> for PendingMigration {
     fn from(m: EmbeddedMigrationOneWay) -> Self {
-        Self {
-            id: m.id.to_string().try_into().expect("Invalid migration id"),
-            name: m.name.to_string(),
-            timestamp: m.timestamp,
+        MigrationFileMeta {
+            name: m.name.to_string().try_into().expect("Invalid migration id"),
             content: m.content.to_string(),
         }
+        .into()
     }
 }
 
@@ -87,7 +90,7 @@ pub enum UpdateStrategy {
     Number(u32),
     // cargo run -- up -till 234y3498349304
     // cargo run -- up -t 234y3498349304
-    Till(MigrationFileName),
+    Till(MigrationFilename),
 }
 
 pub enum RollbackStrategy {
@@ -100,7 +103,7 @@ pub enum RollbackStrategy {
     Number(u32),
     // cargo run -- down -till 234y3498349304
     // cargo run -- down -t 234y3498349304
-    Till(MigrationFileName),
+    Till(MigrationFilename),
 }
 
 // let file_content = std::fs::read_to_string(file_path).map_err(|e| {
@@ -144,7 +147,7 @@ impl MigrationRunner {
                     let path = m
                         .directory
                         .clone()
-                        .map(|d| d.join(m.id.to_down().to_string()))
+                        .map(|d| d.join(m.name.to_down().to_string()))
                         .ok_or(MigrationError::MigrationPathNotFound)?;
                     // let x = Self::_generate_checksum(path)?;
                     // log::warn!("Migration file shaaaaa: {:?}", x);
@@ -177,7 +180,7 @@ impl MigrationRunner {
                 // 2.
                 let latest_migration = all_migrations
                     .iter()
-                    .find(|m| m.id.to_string() == latest_migration.name)
+                    .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
                     .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
                 // 3.
@@ -196,7 +199,7 @@ impl MigrationRunner {
 
                 let rollback_query = latest_migration.down.clone();
                 let rollbacked_migration_deletion_query =
-                    Migration::delete_raw(latest_migration.id.clone()).build();
+                    Migration::delete_raw(&latest_migration.name).build();
                 let all = format!(
                     "{}\n{}",
                     rollback_query, rollbacked_migration_deletion_query
@@ -206,8 +209,8 @@ impl MigrationRunner {
                     .clone()
                     .map(|d| {
                         vec![
-                            d.join(latest_migration.id.to_up().to_string()),
-                            d.join(latest_migration.id.to_down().to_string()),
+                            d.join(latest_migration.name.to_up().to_string()),
+                            d.join(latest_migration.name.to_down().to_string()),
                         ]
                     })
                     .ok_or(MigrationError::MigrationPathNotFound)?;
@@ -241,33 +244,47 @@ impl MigrationRunner {
                     .first()
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-                let migrations_files_to_rollback = all_migrations
+                let migrations_to_rollback = all_migrations
                     .clone()
                     .into_iter()
                     // .map(|m| {
                     //     let m: MigrationFileMeta = m.into();
                     //     m
                     // })
-                    .filter(|m| m.timestamp < latest_migration.timestamp)
+                    .filter(|m| {
+                        (m.name.timestamp() < latest_migration.timestamp)
+                            && (m.name
+                                == latest_migration
+                                    .name
+                                    .clone()
+                                    .try_into()
+                                    .expect("Invalid migration name"))
+                    })
                     .take(count as usize)
                     .collect::<Vec<_>>();
 
-                for (m_from_file, m_from_db) in migrations_files_to_rollback
-                    .into_iter()
-                    .zip(migrations_from_db.into_iter())
+                for (m_from_file, m_from_db) in
+                    migrations_to_rollback.iter().zip(migrations_from_db.iter())
                 {
-                    let x = m_from_db
-                        .checksum_up
-                        .verify(&m_from_file.up, &m_from_file.id)?;
+                    let db_mig_name = m_from_db
+                        .name
+                        .clone()
+                        .try_into()
+                        .expect("Invalid migration name");
 
-                    let x = m_from_db
+                    let up_check_verification = m_from_db
+                        .checksum_up
+                        .verify(&m_from_file.up, &m_from_file.name)?;
+
+                    let down_check_verification = m_from_db
+                        .clone()
                         .checksum_down
                         .ok_or(MigrationError::NoChecksumInDb {
-                            migration_name: m_from_db.id.to_string(),
+                            migration_name: m_from_db.name.clone(),
                         })?
-                        .verify(&m_from_file.down, &m_from_file.id)?;
+                        .verify(&m_from_file.down, &m_from_file.name)?;
 
-                    if m_from_file.name != m_from_db.name {
+                    if m_from_file.name != db_mig_name {
                         return Err(MigrationError::MigrationFileDoesNotExist);
                     }
                 }
@@ -347,6 +364,71 @@ impl MigrationRunner {
                 //     .rev()
                 //     .take(count as usize)
                 //     .collect::<Vec<_>>();
+                let rollback_queries = migrations_to_rollback
+                    .clone()
+                    .into_iter()
+                    .map(|m| m.down.to_string())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let rollbacked_migration_deletion_queries = migrations_to_rollback
+                    .iter()
+                    .map(|m| Migration::delete_raw(&m.name).build())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let all = format!(
+                    "{}\n{}",
+                    rollback_queries, rollbacked_migration_deletion_queries
+                );
+
+                let file_paths = migrations_to_rollback
+                    .iter()
+                    .map(|m| {
+                        m.directory
+                            .clone()
+                            .map(|d| {
+                                vec![
+                                    d.join(m.name.to_up().to_string()),
+                                    d.join(m.name.to_down().to_string()),
+                                ]
+                            })
+                            .ok_or(MigrationError::MigrationPathNotFound)
+                    })
+                    .collect::<MigrationResult<Vec<_>>>()?;
+
+                (
+                    all,
+                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+                )
+            }
+            RollbackStrategy::Till(id_name) => {
+                let file_cursor: MigrationFilename = todo!();
+                let MigrationSchema {
+                    timestamp, name, ..
+                } = &Migration::schema();
+
+                let timestamp_value = file_cursor.timestamp().into_inner();
+                let simple_name = file_cursor.simple_name().into_inner();
+
+                let migrations_from_db = select(All)
+                    .from(Migration::table_name())
+                    .where_(
+                        cond(timestamp.gt(timestamp_value))
+                            .or(cond(timestamp.eq(timestamp_value)).and(name.eq(simple_name))),
+                    )
+                    .order_by(timestamp.desc())
+                    .return_many::<Migration>(db.clone())
+                    .await?;
+
+                // let mut migrations = all_migrations.clone();
+                // migrations.sort_by_key(|m| m.timestamp);
+                // let migrations_to_rollback = migrations
+                //     .iter()
+                //     .rev()
+                //     .take_while(|m| m.name != id_name.to_string())
+                //     .collect::<Vec<_>>();
+                //
                 // let rollback_queries = migrations_to_rollback
                 //     .iter()
                 //     .map(|m| m.down.clone())
@@ -384,52 +466,6 @@ impl MigrationRunner {
                 //     file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
                 // )
                 todo!()
-            }
-            RollbackStrategy::Till(id_name) => {
-                let mut migrations = all_migrations.clone();
-                migrations.sort_by_key(|m| m.timestamp);
-                let migrations_to_rollback = migrations
-                    .iter()
-                    .rev()
-                    .take_while(|m| m.name != id_name.to_string())
-                    .collect::<Vec<_>>();
-
-                let rollback_queries = migrations_to_rollback
-                    .iter()
-                    .map(|m| m.down.clone())
-                    .collect::<Vec<_>>()
-                    .join("\n");
-
-                let rollbacked_migration_deletion_queries = migrations_to_rollback
-                    .iter()
-                    .map(|m| Migration::delete_raw(m.id.clone()).build())
-                    .collect::<Vec<_>>()
-                    .join("\n");
-
-                let all = format!(
-                    "{}\n{}",
-                    rollback_queries, rollbacked_migration_deletion_queries
-                );
-
-                let file_paths = migrations_to_rollback
-                    .iter()
-                    .map(|m| {
-                        m.directory
-                            .clone()
-                            .map(|d| {
-                                vec![
-                                    d.join(m.id.to_up().to_string()),
-                                    d.join(m.id.to_down().to_string()),
-                                ]
-                            })
-                            .ok_or(MigrationError::MigrationPathNotFound)
-                    })
-                    .collect::<MigrationResult<Vec<_>>>()?;
-
-                (
-                    all,
-                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
-                )
             }
         };
 
@@ -480,7 +516,7 @@ impl MigrationRunner {
             })
             .filter(|m| {
                 latest_migration.as_ref().map_or(true, |latest_migration| {
-                    m.timestamp > latest_migration.timestamp
+                    m.name.timestamp() > latest_migration.timestamp
                 })
             })
             .collect::<Vec<_>>();
@@ -501,7 +537,7 @@ impl MigrationRunner {
         // Create queries to mark migrations as applied
         let mark_queries_registered_queries = filtered_pending_migrations
             .iter()
-            .map(|m| Migration::create_raw(m.id.clone(), m.name.clone(), m.timestamp).build())
+            .map(|m| Migration::create_raw(m.name.clone()).build())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -554,11 +590,11 @@ impl MigrationRunner {
                 let pending_migs = Self::get_pending_migrations(all_migrations, db.clone()).await?;
 
                 let mut migration_found = false;
-                let mut filtered_migs = vec![];
+                let mut filtered_migs: Vec<PendingMigration> = vec![];
 
                 for mig in pending_migs {
-                    filtered_migs.push(mig.clone());
-                    if mig.id.to_string() == mig_filename.to_string() {
+                    filtered_migs.push(mig.clone().into());
+                    if mig.name == mig_filename {
                         migration_found = true;
                         break;
                     }
@@ -576,15 +612,16 @@ impl MigrationRunner {
     }
 
     pub(crate) async fn list_migrations(
-        migrations_local_dir: Vec<Migration>,
+        migrations_local_dir: Vec<MigrationFilename>,
         db: Surreal<impl Connection>,
         status: Status,
-    ) -> MigrationResult<Vec<Migration>> {
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
         let migrations = match status {
             Status::All => {
                 let mut migrations = migrations_local_dir;
-                migrations.sort_by_key(|m| m.timestamp);
-                migrations
+                migrations.sort_by_key(|name| name.timestamp());
+                migrations.into_iter().map(|name| name).collect::<Vec<_>>()
             }
             Status::Pending => {
                 let latest_applied_migration = select(All)
@@ -596,29 +633,74 @@ impl MigrationRunner {
 
                 let mut migrations = migrations_local_dir
                     .into_iter()
-                    .map(|m| {
-                        let m: Migration = m.into();
-                        m
-                    })
-                    .filter(|m| {
+                    .filter(|name| {
                         latest_applied_migration
                             .as_ref()
                             .map_or(true, |latest_migration| {
-                                m.timestamp > latest_migration.timestamp
+                                name.timestamp() > latest_migration.timestamp
                             })
                     })
                     .collect::<Vec<_>>();
-                migrations.sort_by_key(|m| m.timestamp);
+                migrations.sort_by_key(|name| name.timestamp());
                 migrations
             }
             Status::Applied => {
-                select(All)
+                let db_migs = select(All)
                     .from(Migration::table_name())
                     .order_by(Migration::schema().timestamp.asc())
                     .return_many::<Migration>(db.clone())
-                    .await?
+                    .await?;
+                Self::_get_db_migrations_meta_from_mig_files(
+                    migrations_local_dir,
+                    db_migs,
+                    strictness,
+                )?
             }
         };
         Ok(migrations)
+    }
+
+    fn _get_db_migrations_meta_from_mig_files(
+        local_migrations: Vec<MigrationFilename>,
+        db_migs: Vec<Migration>,
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
+        let db_migs: BTreeSet<MigrationFilename> = db_migs
+            .into_iter()
+            .map(|dbm| dbm.name.try_into().expect("Invalid migration file name."))
+            .collect();
+
+        let filtered_local_migrations = local_migrations
+            .into_iter()
+            .filter(|name| db_migs.contains(&name))
+            .collect::<Vec<_>>();
+
+        // TODO:: Check that the files are contiguous?
+        if strictness == StrictNessLevel::Strict {
+            if filtered_local_migrations.len() != db_migs.len() {
+                return Err(MigrationError::InvalidMigrationState {
+                    db_migration_count: db_migs.len(),
+                    local_dir_migration_count: filtered_local_migrations.len(),
+                });
+            }
+        }
+
+        Ok(filtered_local_migrations)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StrictNessLevel {
+    Strict,
+    Lax,
+}
+
+impl From<bool> for StrictNessLevel {
+    fn from(value: bool) -> Self {
+        if value {
+            Self::Strict
+        } else {
+            Self::Lax
+        }
     }
 }
