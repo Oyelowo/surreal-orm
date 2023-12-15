@@ -137,13 +137,13 @@ impl MigrationRunner {
     ) -> MigrationResult<()> {
         log::info!("Rolling back migration");
 
-        let all_migrations = fm.get_two_way_migrations(false)?;
+        let all_migrations_from_dir = fm.get_two_way_migrations(false)?;
         let (queries_to_run, file_paths) = match rollback_strategy {
             // b7a7e95b763875743b243e0930e46f22833208f58ef68032d14619ae2dfe883b
             // 16dfc18a5d5a508eee4ca1084a62518d6f6152ed2f483e3b98fee0e69f74d63a
             // 224bb451dfafda16efb615cbd331d139097d780a44727355174dc72db46c7005
             RollbackStrategy::Previous => {
-                for m in &all_migrations {
+                for m in &all_migrations_from_dir {
                     let path = m
                         .directory
                         .clone()
@@ -178,7 +178,7 @@ impl MigrationRunner {
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
                 // 2.
-                let latest_migration = all_migrations
+                let latest_migration = all_migrations_from_dir
                     .iter()
                     .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
                     .ok_or(MigrationError::MigrationFileDoesNotExist)?;
@@ -186,7 +186,8 @@ impl MigrationRunner {
                 // 3.
 
                 let pending_migrations =
-                    Self::get_pending_migrations(all_migrations.clone(), db.clone()).await?;
+                    Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone())
+                        .await?;
 
                 let is_valid_rollback_state =
                     pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
@@ -244,7 +245,7 @@ impl MigrationRunner {
                     .first()
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-                let migrations_to_rollback = all_migrations
+                let migrations_to_rollback = all_migrations_from_dir
                     .clone()
                     .into_iter()
                     // .map(|m| {
@@ -420,6 +421,52 @@ impl MigrationRunner {
                     .order_by(timestamp.desc())
                     .return_many::<Migration>(db.clone())
                     .await?;
+
+                // xxxxxxxxxxx
+
+                let MigrationSchema {
+                    timestamp, name, ..
+                } = &Migration::schema();
+
+                let timestamp_value = id_name.timestamp().into_inner();
+                let simple_name = id_name.simple_name().into_inner();
+
+                let migrations_from_db = select(All)
+                    .from(Migration::table_name())
+                    .where_(
+                        cond(timestamp.gt(timestamp_value))
+                            .or(cond(timestamp.eq(timestamp_value)).and(name.eq(simple_name))),
+                    )
+                    .order_by(timestamp.desc())
+                    .return_many::<Migration>(db.clone())
+                    .await?;
+
+                let latest_migration = migrations_from_db
+                    .first()
+                    .ok_or(MigrationError::MigrationDoesNotExist)?;
+
+                let migrations_files_to_roll_back = all_migrations_from_dir
+                    .clone()
+                    .into_iter()
+                    .filter(|m| {
+                        let is_latest = m.name
+                            == latest_migration
+                                .name
+                                .clone()
+                                .try_into()
+                                .expect("Invalid migration name");
+                        let is_before_db_latest_migration =
+                            m.name.timestamp() < latest_migration.timestamp;
+
+                        let is_after_file_cursor = m.name.timestamp() > file_cursor.timestamp();
+                        let is_file_cursor = m.name == file_cursor;
+
+                        (is_before_db_latest_migration || is_latest)
+                            && (is_after_file_cursor || is_file_cursor)
+                    })
+                    .collect::<Vec<_>>();
+
+                // xxxxxxxxxxx
 
                 // let mut migrations = all_migrations.clone();
                 // migrations.sort_by_key(|m| m.timestamp);
