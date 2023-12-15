@@ -535,7 +535,7 @@ impl OneWayGetter {
             .collect::<Vec<_>>();
 
         let migrations =
-            MigrationRunner::list_migrations(migrations, db.clone(), status, strictness).await?;
+            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
 
         Ok(migrations)
     }
@@ -597,11 +597,16 @@ impl TwoWayGetter {
     pub async fn run_down_migrations(
         &self,
         db: Surreal<impl Connection>,
-        rollback_strategy: RollbackStrategy,
-        strictness: StrictNessLevel,
+        rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         let _migrations = self.get_migrations()?;
-        MigrationRunner::rollback_migrations(db, &self.0, rollback_strategy, strictness).await?;
+        // let rollback_options = RollbackOptions {
+        //     rollback_strategy,
+        //     strictness,
+        //     prune_files_after_rollback: false,
+        // };
+
+        MigrationRunner::rollback_migrations(db, &self.0, rollback_options).await?;
 
         Ok(())
     }
@@ -620,7 +625,7 @@ impl TwoWayGetter {
             .collect::<Vec<_>>();
 
         let migrations =
-            MigrationRunner::list_migrations(migrations, db.clone(), status, strictness).await?;
+            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
 
         Ok(migrations)
     }
