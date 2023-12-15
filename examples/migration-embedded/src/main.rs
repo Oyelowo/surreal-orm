@@ -1,6 +1,6 @@
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{
-    self, embed_migrations, MigrationConfig, RollbackStrategy, UpdateStrategy,
+    self, embed_migrations, MigrationConfig, RollbackOptions, RollbackStrategy, UpdateStrategy,
 };
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
@@ -55,10 +55,14 @@ async fn main() {
         .unwrap();
 
     two_way
-        .run_down_migrations(db.clone(), RollbackStrategy::Previous)
+        .run_down_migrations(
+            db.clone(),
+            RollbackOptions::new().strategy(RollbackStrategy::Previous),
+        )
         // .run_down_migrations(db.clone(), RollbackStrategy::Number(4))
         // .run_down_migrations(
         //     db.clone(),
+        // RollbackOptions::new().strategy(RollbackStrategy::Till("name".to_string().try_into().unwrap())),
         //     RollbackStrategy::Till("name".to_string().try_into().unwrap()),
         // )
         .await

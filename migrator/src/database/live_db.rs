@@ -99,6 +99,37 @@ pub struct RollbackOptions {
     pub prune_files_after_rollback: bool,
 }
 
+impl Default for RollbackOptions {
+    fn default() -> Self {
+        Self {
+            rollback_strategy: RollbackStrategy::Previous,
+            strictness: StrictNessLevel::Strict,
+            prune_files_after_rollback: false,
+        }
+    }
+}
+
+impl RollbackOptions {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn strategy(mut self, rollback_strategy: RollbackStrategy) -> Self {
+        self.rollback_strategy = rollback_strategy;
+        self
+    }
+
+    pub fn strictness(mut self, strictness: StrictNessLevel) -> Self {
+        self.strictness = strictness;
+        self
+    }
+
+    pub fn prune_files_after_rollback(mut self, prune_files_after_rollback: bool) -> Self {
+        self.prune_files_after_rollback = prune_files_after_rollback;
+        self
+    }
+}
+
 pub enum RollbackStrategy {
     // Default
     // cargo run -- down

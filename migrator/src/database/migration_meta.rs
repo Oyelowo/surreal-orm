@@ -65,6 +65,19 @@ impl Eq for Migration {}
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Timestamp(u64);
 
+impl Display for Timestamp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Timestamp(timestamp) = self;
+        write!(f, "{}", timestamp)
+    }
+}
+
+impl From<Timestamp> for u64 {
+    fn from(timestamp: Timestamp) -> Self {
+        timestamp.0
+    }
+}
+
 impl Timestamp {
     pub fn into_inner(self) -> u64 {
         self.0

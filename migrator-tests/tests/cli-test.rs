@@ -1,7 +1,7 @@
 use std::process::{Command, Stdio};
 use tempfile::tempdir;
 
-use surreal_orm::migrator::MigrationFileName;
+use surreal_orm::migrator::MigrationFilename;
 
 #[tokio::test]
 async fn test_generate_command_success() {
@@ -44,7 +44,7 @@ async fn test_generate_command_success() {
             .to_str()
             .expect("Failed to get file name");
         let file_name_parsed =
-            MigrationFileName::try_from(file_name.to_string()).expect("Failed to parse file name");
+            MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
         assert_eq!(
             file_name_parsed.timestamp(),
             file_name
@@ -53,6 +53,7 @@ async fn test_generate_command_success() {
                 .expect("Failed to get timestamp")
                 .parse::<u64>()
                 .expect("Failed to parse timestamp")
+                .into()
         );
 
         if file_name.ends_with("_up.surql") {
