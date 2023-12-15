@@ -106,28 +106,6 @@ pub enum RollbackStrategy {
     Till(MigrationFilename),
 }
 
-// let file_content = std::fs::read_to_string(file_path).map_err(|e| {
-//     MigrationError::IoError(format!(
-//         "Failed to read migration file: {:?}. Error: {}",
-//         file_path, e
-//     ))
-// })?;
-//
-// sha2::Sha256::digest(file_content.as_bytes())
-//     .iter()
-//     .map(|b| format!("{:02x}", b))
-//     .collect::<Vec<_>>()
-//     .join("")
-//     .parse::<String>()
-//     .map_err(|e| {
-//         MigrationError::IoError(format!(
-//             "Failed to generate checksum for migration file: {:?}. Error: {}",
-//             file_path, e
-//         ))
-//     });
-// hasher.update(file_content);
-// let hash = hasher.finalize();
-// Ok(hash.to_string())
 impl MigrationRunner {
     /// Only two way migrations support rollback
     pub async fn rollback_migrations(
