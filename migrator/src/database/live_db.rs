@@ -143,13 +143,11 @@ impl MigrationRunner {
             .await?
             .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-        // 2.
         let migrations_from_dir = all_migrations_from_dir
             .iter()
             .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
             .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
-        // 3.
         let pending_migrations =
             Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone()).await?;
 
@@ -163,11 +161,8 @@ impl MigrationRunner {
         }
 
         let (queries_to_run, file_paths) = match rollback_strategy {
-            // b7a7e95b763875743b243e0930e46f22833208f58ef68032d14619ae2dfe883b
-            // 16dfc18a5d5a508eee4ca1084a62518d6f6152ed2f483e3b98fee0e69f74d63a
-            // 224bb451dfafda16efb615cbd331d139097d780a44727355174dc72db46c7005
             RollbackStrategy::Previous => Self::generate_rollback_queries_and_filepaths(
-                vec![*migrations_from_dir],
+                vec![migrations_from_dir.clone()],
                 vec![latest_migration],
                 strictness,
             )?,
@@ -272,7 +267,7 @@ impl MigrationRunner {
         };
 
         begin_transaction()
-            .query(Raw::new(queries_to_run))
+            .query(queries_to_run)
             .commit_transaction()
             .run(db)
             .await?;
