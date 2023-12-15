@@ -93,6 +93,12 @@ pub enum UpdateStrategy {
     Till(MigrationFilename),
 }
 
+pub struct RollbackOptions {
+    pub rollback_strategy: RollbackStrategy,
+    pub strictness: StrictNessLevel,
+    pub prune_files_after_rollback: bool,
+}
+
 pub enum RollbackStrategy {
     // Default
     // cargo run -- down
@@ -111,9 +117,13 @@ impl MigrationRunner {
     pub async fn rollback_migrations(
         db: Surreal<impl Connection>,
         fm: &FileManager,
-        rollback_strategy: RollbackStrategy,
-        strictness: StrictNessLevel,
+        rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
+        let RollbackOptions {
+            rollback_strategy,
+            strictness,
+            prune_files_after_rollback,
+        } = rollback_options;
         log::info!("Rolling back migration");
 
         let all_migrations_from_dir = fm.get_two_way_migrations(false)?;
@@ -237,15 +247,17 @@ impl MigrationRunner {
             .run(db)
             .await?;
 
-        for file_path in &file_paths {
-            log::info!("Deleting file: {:?}", file_path.to_str());
-            std::fs::remove_file(file_path).map_err(|e| {
-                MigrationError::IoError(format!(
-                    "Failed to delete migration file: {:?}. Error: {}",
-                    file_path, e
-                ))
-            })?;
-            log::info!("Deleted file: {:?}", file_path.to_str());
+        if prune_files_after_rollback {
+            for file_path in &file_paths {
+                log::info!("Deleting file: {:?}", file_path.to_str());
+                std::fs::remove_file(file_path).map_err(|e| {
+                    MigrationError::IoError(format!(
+                        "Failed to delete migration file: {:?}. Error: {}",
+                        file_path, e
+                    ))
+                })?;
+                log::info!("Deleted file: {:?}", file_path.to_str());
+            }
         }
 
         log::info!("Migration rolled back");
