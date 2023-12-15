@@ -350,8 +350,6 @@ impl MigrationRunner {
                     .return_many::<Migration>(db.clone())
                     .await?;
 
-                // xxxxxxxxxxx
-
                 let MigrationSchema {
                     timestamp, name, ..
                 } = &Migration::schema();
@@ -420,8 +418,6 @@ impl MigrationRunner {
                         return Err(MigrationError::MigrationFileDoesNotExist);
                     }
                 }
-
-                // xxxxxxxxxxx
 
                 let rollback_queries = migrations_files_to_rollback
                     .iter()
