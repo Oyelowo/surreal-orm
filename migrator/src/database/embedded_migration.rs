@@ -38,8 +38,8 @@ impl EmbeddedMigrationsTwoWay {
             .iter()
             .map(|meta| {
                 let name = meta.name.to_string();
-                let up = meta.up.to_string();
-                let down = meta.down.to_string();
+                let up = meta.up.to_string().into();
+                let down = meta.down.to_string().into();
                 let timestamp = meta.timestamp;
                 let id = meta.id.to_string();
 
@@ -76,7 +76,7 @@ impl EmbeddedMigrationsOneWay {
                     .to_string()
                     .try_into()
                     .expect("Invalid migration name");
-                let content = meta.content.to_string();
+                let content = meta.content.to_string().into();
 
                 MigrationOneWay { name, content }
             })
