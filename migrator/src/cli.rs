@@ -6,7 +6,9 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
-use crate::{DbInfo, MigrationConfig, MigrationFlag, RollbackStrategy, UpdateStrategy};
+use crate::{
+    DbInfo, MigrationConfig, MigrationFlag, RollbackOptions, RollbackStrategy, UpdateStrategy,
+};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
@@ -255,6 +257,13 @@ struct RuntimeConfig {
         default_value = "true"
     )]
     strict: bool,
+
+    #[clap(
+        long,
+        help = "If to prune migration files after rollback",
+        default_value = "false"
+    )]
+    prune: bool,
 }
 
 /// Rollback migrations
@@ -406,10 +415,10 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                 .two_way()
                 .run_down_migrations(
                     db.clone(),
-                    crate::RollbackOptions {
+                    RollbackOptions {
                         rollback_strategy,
                         strictness: rollback.shared_run_and_rollback.strict.into(),
-                        prune_files_after_rollback: false,
+                        prune_files_after_rollback: rollback.shared_run_and_rollback.prune,
                     },
                 )
                 .await;
