@@ -199,7 +199,7 @@ impl MigratorDatabase {
                 if query_str.trim().is_empty() {
                     match prompt_empty() {
                         Ok(true) => {
-                            MigrationFilename::create_oneway(timestamp, name)
+                            MigrationFilename::create_oneway(timestamp, name)?
                                 .create_file(query_str, file_manager)?;
                         }
                         Ok(false) => {
@@ -210,7 +210,7 @@ impl MigratorDatabase {
                         }
                     };
                 } else {
-                    MigrationFilename::create_oneway(timestamp, name)
+                    MigrationFilename::create_oneway(timestamp, name)?
                         .create_file(query_str, file_manager)?;
                 };
             }
@@ -219,9 +219,9 @@ impl MigratorDatabase {
                     (true, true) => {
                         match prompt_empty() {
                             Ok(true) => {
-                                MigrationFilename::create_up(timestamp, &name)
+                                MigrationFilename::create_up(timestamp, &name)?
                                     .create_file(up, file_manager)?;
-                                MigrationFilename::create_down(timestamp, name)
+                                MigrationFilename::create_down(timestamp, name)?
                                     .create_file(down, file_manager)?;
                             }
                             Ok(false) => {
@@ -233,9 +233,9 @@ impl MigratorDatabase {
                         };
                     }
                     (false, false) => {
-                        MigrationFilename::create_up(timestamp, &name)
+                        MigrationFilename::create_up(timestamp, &name)?
                             .create_file(up, file_manager)?;
-                        MigrationFilename::create_down(timestamp, name)
+                        MigrationFilename::create_down(timestamp, name)?
                             .create_file(down, file_manager)?;
                     }
                     (true, false) => {
