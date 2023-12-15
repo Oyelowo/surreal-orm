@@ -20,7 +20,6 @@ use nom::{
     sequence::tuple,
     IResult,
 };
-use serde::Deserialize;
 
 use crate::*;
 
@@ -59,7 +58,7 @@ impl PartialOrd for MigrationFilename {
 
 impl Eq for MigrationFilename {}
 
-struct Filename(String);
+pub struct Filename(String);
 
 impl From<String> for Filename {
     fn from(value: String) -> Self {
