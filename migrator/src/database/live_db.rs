@@ -265,16 +265,16 @@ impl MigrationRunner {
                     .take(count as usize)
                     .collect::<Vec<_>>();
 
-                for (m_from_file, m_from_db) in
-                    migrations_to_rollback.iter().zip(migrations_from_db.iter())
-                {
-                    let db_mig_name = m_from_db
-                        .name
-                        .clone()
-                        .try_into()
-                        .expect("Invalid migration name");
+                if strictness == StrictNessLevel::Strict {
+                    for (m_from_file, m_from_db) in
+                        migrations_to_rollback.iter().zip(migrations_from_db.iter())
+                    {
+                        let db_mig_name = m_from_db
+                            .name
+                            .clone()
+                            .try_into()
+                            .expect("Invalid migration name");
 
-                    if strictness == StrictNessLevel::Strict {
                         let up_check_verification = m_from_db
                             .checksum_up
                             .verify(&m_from_file.up, &m_from_file.name)?;
@@ -391,30 +391,32 @@ impl MigrationRunner {
                     })
                     .collect::<Vec<_>>();
 
-                for (m_from_file, m_from_db) in migrations_files_to_rollback
-                    .iter()
-                    .zip(migrations_from_db.iter())
-                {
-                    let db_mig_name: MigrationFilename = m_from_db
-                        .name
-                        .clone()
-                        .try_into()
-                        .expect("Invalid migration name");
+                if strictness == StrictNessLevel::Strict {
+                    for (m_from_file, m_from_db) in migrations_files_to_rollback
+                        .iter()
+                        .zip(migrations_from_db.iter())
+                    {
+                        let db_mig_name: MigrationFilename = m_from_db
+                            .name
+                            .clone()
+                            .try_into()
+                            .expect("Invalid migration name");
 
-                    let up_check_verification = m_from_db
-                        .checksum_up
-                        .verify(&m_from_file.up, &m_from_file.name)?;
+                        let up_check_verification = m_from_db
+                            .checksum_up
+                            .verify(&m_from_file.up, &m_from_file.name)?;
 
-                    let down_check_verification = m_from_db
-                        .clone()
-                        .checksum_down
-                        .ok_or(MigrationError::NoChecksumInDb {
-                            migration_name: m_from_db.name.clone(),
-                        })?
-                        .verify(&m_from_file.down, &m_from_file.name)?;
+                        let down_check_verification = m_from_db
+                            .clone()
+                            .checksum_down
+                            .ok_or(MigrationError::NoChecksumInDb {
+                                migration_name: m_from_db.name.clone(),
+                            })?
+                            .verify(&m_from_file.down, &m_from_file.name)?;
 
-                    if m_from_file.name != db_mig_name {
-                        return Err(MigrationError::MigrationFileDoesNotExist);
+                        if m_from_file.name != db_mig_name {
+                            return Err(MigrationError::MigrationFileDoesNotExist);
+                        }
                     }
                 }
 
