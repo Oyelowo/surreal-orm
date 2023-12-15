@@ -69,6 +69,12 @@ impl From<String> for Filename {
 #[derive(Debug, PartialEq)]
 pub struct SimpleName(String);
 
+impl Display for SimpleName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl SimpleName {
     pub fn into_inner(self) -> String {
         self.0
@@ -87,6 +93,12 @@ pub struct Extension(String);
 impl From<String> for Extension {
     fn from(value: String) -> Self {
         Self(value)
+    }
+}
+
+impl Display for Extension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, ".{}", self.0)
     }
 }
 

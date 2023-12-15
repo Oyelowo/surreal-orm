@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    DbInfo, Informational, Migration, MigrationConfig, MigrationFileName, UpdateStrategy,
+    DbInfo, Informational, Migration, MigrationConfig, MigrationFilename, UpdateStrategy,
 };
 use surreal_orm::statements::{info_for, select};
 use surreal_orm::{All, ReturnableSelect, Runnable};
@@ -147,7 +147,7 @@ fn get_files_meta(files: ReadDir) -> (Vec<String>, String) {
         .map(|path| {
             let content = fs::read_to_string(&path).unwrap();
 
-            let name: MigrationFileName = path
+            let name: MigrationFilename = path
                 .file_name()
                 .unwrap()
                 .to_str()
