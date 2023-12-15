@@ -331,8 +331,7 @@ impl MigrationRunner {
                     file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
                 )
             }
-            RollbackStrategy::Till(id_name) => {
-                let file_cursor: MigrationFilename = todo!();
+            RollbackStrategy::Till(file_cursor) => {
                 let MigrationSchema {
                     timestamp, name, ..
                 } = &Migration::schema();
@@ -354,8 +353,8 @@ impl MigrationRunner {
                     timestamp, name, ..
                 } = &Migration::schema();
 
-                let timestamp_value = id_name.timestamp().into_inner();
-                let simple_name = id_name.simple_name().into_inner();
+                let timestamp_value = file_cursor.timestamp().into_inner();
+                let simple_name = file_cursor.simple_name().into_inner();
 
                 let migrations_from_db = select(All)
                     .from(Migration::table_name())
