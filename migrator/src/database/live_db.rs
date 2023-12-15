@@ -423,51 +423,42 @@ impl MigrationRunner {
 
                 // xxxxxxxxxxx
 
-                // let mut migrations = all_migrations.clone();
-                // migrations.sort_by_key(|m| m.timestamp);
-                // let migrations_to_rollback = migrations
-                //     .iter()
-                //     .rev()
-                //     .take_while(|m| m.name != id_name.to_string())
-                //     .collect::<Vec<_>>();
-                //
-                // let rollback_queries = migrations_to_rollback
-                //     .iter()
-                //     .map(|m| m.down.clone())
-                //     .collect::<Vec<_>>()
-                //     .join("\n");
-                //
-                // let rollbacked_migration_deletion_queries = migrations_to_rollback
-                //     .iter()
-                //     .map(|m| Migration::delete_raw(m.id.clone()).build())
-                //     .collect::<Vec<_>>()
-                //     .join("\n");
-                //
-                // let all = format!(
-                //     "{}\n{}",
-                //     rollback_queries, rollbacked_migration_deletion_queries
-                // );
-                //
-                // let file_paths = migrations_to_rollback
-                //     .iter()
-                //     .map(|m| {
-                //         m.directory
-                //             .clone()
-                //             .map(|d| {
-                //                 vec![
-                //                     d.join(m.id.to_up().to_string()),
-                //                     d.join(m.id.to_down().to_string()),
-                //                 ]
-                //             })
-                //             .ok_or(MigrationError::MigrationPathNotFound)
-                //     })
-                //     .collect::<MigrationResult<Vec<_>>>()?;
-                //
-                // (
-                //     all,
-                //     file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
-                // )
-                todo!()
+                let rollback_queries = migrations_files_to_rollback
+                    .iter()
+                    .map(|m| m.down.to_string())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let rollbacked_migration_deletion_queries = migrations_files_to_rollback
+                    .iter()
+                    .map(|m| Migration::delete_raw(&m.name).build())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let all = format!(
+                    "{}\n{}",
+                    rollback_queries, rollbacked_migration_deletion_queries
+                );
+
+                let file_paths = migrations_files_to_rollback
+                    .iter()
+                    .map(|m| {
+                        m.directory
+                            .clone()
+                            .map(|d| {
+                                vec![
+                                    d.join(m.name.to_up().to_string()),
+                                    d.join(m.name.to_down().to_string()),
+                                ]
+                            })
+                            .ok_or(MigrationError::MigrationPathNotFound)
+                    })
+                    .collect::<MigrationResult<Vec<_>>>()?;
+
+                (
+                    all,
+                    file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+                )
             }
         };
 
