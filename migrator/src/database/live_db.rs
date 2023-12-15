@@ -183,13 +183,17 @@ impl MigrationRunner {
                 let migrations_to_rollback = all_migrations_from_dir
                     .into_iter()
                     .filter(|m| {
-                        (m.name.timestamp() < latest_migration.timestamp)
-                            && (m.name
-                                == latest_migration
-                                    .name
-                                    .clone()
-                                    .try_into()
-                                    .expect("Invalid migration name"))
+                        let is_before_db_latest_migration =
+                            m.name.timestamp() < latest_migration.timestamp;
+
+                        let is_latest = m.name
+                            == latest_migration
+                                .name
+                                .clone()
+                                .try_into()
+                                .expect("Invalid migration name");
+
+                        is_before_db_latest_migration || is_latest
                     })
                     .take(count as usize)
                     .collect::<Vec<_>>();
@@ -206,14 +210,12 @@ impl MigrationRunner {
                 } = &Migration::schema();
 
                 let timestamp_value = file_cursor.timestamp().into_inner();
-                let simple_name = file_cursor.simple_name().into_inner();
 
                 let migrations_from_db = select(All)
                     .from(Migration::table_name())
-                    .where_(
-                        cond(timestamp.gt(timestamp_value))
-                            .or(cond(timestamp.eq(timestamp_value)).and(name.eq(simple_name))),
-                    )
+                    .where_(cond(timestamp.gt(timestamp_value)).or(
+                        cond(timestamp.eq(timestamp_value)).and(name.eq(file_cursor.to_string())),
+                    ))
                     .order_by(timestamp.desc())
                     .return_many::<Migration>(db.clone())
                     .await?;
