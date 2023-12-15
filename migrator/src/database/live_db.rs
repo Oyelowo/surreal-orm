@@ -148,16 +148,18 @@ impl MigrationRunner {
             .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
             .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
-        let pending_migrations =
-            Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone()).await?;
+        if strictness == StrictNessLevel::Strict {
+            let pending_migrations =
+                Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone()).await?;
 
-        let is_valid_rollback_state =
-            pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
+            let is_valid_rollback_state =
+                pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
 
-        if !is_valid_rollback_state {
-            return Err(MigrationError::UnappliedMigrationExists {
-                migration_count: pending_migrations.len() / 2,
-            });
+            if !is_valid_rollback_state {
+                return Err(MigrationError::UnappliedMigrationExists {
+                    migration_count: pending_migrations.len() / 2,
+                });
+            }
         }
 
         let (queries_to_run, file_paths) = match rollback_strategy {
