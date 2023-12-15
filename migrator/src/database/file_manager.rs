@@ -341,11 +341,10 @@ fn parse_u64(input: &str) -> Result<u64, std::num::ParseIntError> {
 // format: <timestamp>_<name>.<direction>.surql
 // 14 numbers followed by _ and then name of migration
 fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFilename> {
-    let (input, timestamp) = map_res(take_while1(|c: char| c.is_ascii_digit()), parse_u64)(input)?;
-    // let (input, timestamp) = map_res(
-    //     take_while_m_n(14, 14, |c: char| c.is_ascii_digit()),
-    //     parse_u64,
-    // )(input)?;
+    let (input, timestamp) = map_res(
+        take_while_m_n(14, 20, |c: char| c.is_ascii_digit()),
+        parse_u64,
+    )(input)?;
     let (input, _) = tag("_")(input)?;
     let (input, (name, direction)) =
         tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;

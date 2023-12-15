@@ -7,7 +7,6 @@
 
 use std::{fs::File, io::BufReader};
 
-use chrono::{DateTime, Utc};
 use sha2::{self, Digest, Sha256};
 use std::convert::TryFrom;
 use std::env;
