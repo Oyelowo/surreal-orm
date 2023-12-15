@@ -16,7 +16,7 @@ use crate::{
 struct Cli {
     /// Subcommand: generate, run, rollback
     #[clap(subcommand)]
-    subcmd: SubCommand,
+    subcmd: Option<SubCommand>,
 }
 
 /// Subcommands
@@ -323,7 +323,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
-        SubCommand::Generate(generate) => {
+        Some(SubCommand::Generate(generate)) => {
             let migration_name = generate.name;
             if let Some(path) = generate.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
@@ -349,7 +349,10 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             };
             log::info!("Successfully generated migrations");
         }
-        SubCommand::Up(up) => {
+        None => {
+            todo!()
+        }
+        Some(SubCommand::Up(up)) => {
             let db = setup_db(&up.shared_run_and_rollback).await;
             let update_strategy = UpdateStrategy::from(&up);
 
@@ -394,7 +397,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             log::info!("Successfully ran migrations");
             log::info!("Database: {:?}", info);
         }
-        SubCommand::Down(rollback) => {
+        Some(SubCommand::Down(rollback)) => {
             if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
                 log::error!(
                     "Cannot rollback one way migrations. 
@@ -429,7 +432,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
             log::info!("Rollback successful");
         }
-        SubCommand::List(options) => {
+        Some(SubCommand::List(options)) => {
             let db = setup_db(&options.runtime_config).await;
 
             if let Some(path) = options.shared_all.migrations_dir {
