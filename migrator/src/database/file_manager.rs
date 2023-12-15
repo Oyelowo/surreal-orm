@@ -264,25 +264,40 @@ impl MigrationFilename {
         Ok(())
     }
 
-    pub fn create_up(timestamp: DateTime<Utc>, name: &String) -> Self {
-        let timestamp = timestamp.timestamp() as u64;
+    pub fn create_up(timestamp: DateTime<Utc>, name: &String) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp.into())?;
 
         let name = name.to_string();
-        Self::Up(MigrationNameBasicInfo { timestamp, name })
+        Ok(Self::Up(MigrationNameBasicInfo { timestamp, name }))
     }
 
-    pub fn create_down(timestamp: DateTime<Utc>, name: impl Into<String>) -> Self {
-        let timestamp = timestamp.timestamp() as u64;
+    pub fn create_down(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp.into())?;
 
         let name = name.into();
-        Self::Down(MigrationNameBasicInfo { timestamp, name })
+        Ok(Self::Down(MigrationNameBasicInfo { timestamp, name }))
     }
 
-    pub fn create_oneway(timestamp: DateTime<Utc>, name: impl Into<String>) -> Self {
-        let timestamp = timestamp.timestamp() as u64;
+    pub fn create_oneway(
+        timestamp: DateTime<Utc>,
+        name: impl Into<String>,
+    ) -> MigrationResult<Self> {
+        let timestamp = Self::format_timestamp(timestamp.into())?;
 
         let name = name.into();
-        Self::Unidirectional(MigrationNameBasicInfo { timestamp, name })
+        Ok(Self::Unidirectional(MigrationNameBasicInfo {
+            timestamp,
+            name,
+        }))
+    }
+
+    fn format_timestamp(timestamp: DateTime<Utc>) -> MigrationResult<u64> {
+        let timestamp = timestamp
+            .format("%Y%m%d%H%M%S")
+            .to_string()
+            .parse::<u64>()
+            .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
+        Ok(timestamp)
     }
 }
 
@@ -326,10 +341,11 @@ fn parse_u64(input: &str) -> Result<u64, std::num::ParseIntError> {
 // format: <timestamp>_<name>.<direction>.surql
 // 14 numbers followed by _ and then name of migration
 fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFilename> {
-    let (input, timestamp) = map_res(
-        take_while_m_n(14, 14, |c: char| c.is_ascii_digit()),
-        parse_u64,
-    )(input)?;
+    let (input, timestamp) = map_res(take_while1(|c: char| c.is_ascii_digit()), parse_u64)(input)?;
+    // let (input, timestamp) = map_res(
+    //     take_while_m_n(14, 14, |c: char| c.is_ascii_digit()),
+    //     parse_u64,
+    // )(input)?;
     let (input, _) = tag("_")(input)?;
     let (input, (name, direction)) =
         tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;

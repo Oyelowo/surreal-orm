@@ -7,6 +7,7 @@
 
 use std::{fs::File, io::BufReader};
 
+use chrono::{DateTime, Utc};
 use sha2::{self, Digest, Sha256};
 use std::convert::TryFrom;
 use std::env;
@@ -38,7 +39,7 @@ pub struct Migration {
     pub timestamp: Timestamp,
     pub checksum_up: Checksum,
     pub checksum_down: Option<Checksum>,
-    // pub timestamp: Datetime<Utc>,
+    // pub timestamp: DateTime<Utc>,
     // status: String,
 }
 
@@ -577,8 +578,6 @@ impl TwoWayGetter {
         let file_manager = self.0.clone();
         MigratorDatabase::generate_migrations(migration_name, &file_manager, codebase_resources)
             .await
-            .expect("Failed to generate migrations");
-        Ok(())
     }
 
     /// Make sure the migration directory exists when running migrations
@@ -858,7 +857,7 @@ impl FileManager {
         // Validate
         // 1. Length of ups and downs should be equal
         if ups_basenames.len() != downs_basenames.len() {
-            return Err(MigrationError::InvalidMigrationName(
+            return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
                 "Unequal number of up and down migrations.".into(),
             ));
         }
