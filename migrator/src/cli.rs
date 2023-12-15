@@ -406,8 +406,11 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                 .two_way()
                 .run_down_migrations(
                     db.clone(),
-                    rollback_strategy,
-                    rollback.shared_run_and_rollback.strict.into(),
+                    crate::RollbackOptions {
+                        rollback_strategy,
+                        strictness: rollback.shared_run_and_rollback.strict.into(),
+                        prune_files_after_rollback: false,
+                    },
                 )
                 .await;
 
