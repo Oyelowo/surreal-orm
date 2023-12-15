@@ -281,7 +281,6 @@ impl MigrationRunner {
                         }
                     }
                 }
-                // Self::run_filtered_migrations(db.clone(), filtered_pending_migrations).await
 
                 let rollback_queries = migrations_to_rollback
                     .clone()
