@@ -220,23 +220,6 @@ impl MigrationRunner {
                     .return_many::<Migration>(db.clone())
                     .await?;
 
-                let MigrationSchema {
-                    timestamp, name, ..
-                } = &Migration::schema();
-
-                let timestamp_value = file_cursor.timestamp().into_inner();
-                let simple_name = file_cursor.simple_name().into_inner();
-
-                let migrations_from_db = select(All)
-                    .from(Migration::table_name())
-                    .where_(
-                        cond(timestamp.gt(timestamp_value))
-                            .or(cond(timestamp.eq(timestamp_value)).and(name.eq(simple_name))),
-                    )
-                    .order_by(timestamp.desc())
-                    .return_many::<Migration>(db.clone())
-                    .await?;
-
                 let latest_migration = migrations_from_db
                     .first()
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
