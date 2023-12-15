@@ -4,7 +4,7 @@ use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
-    cli::Status, EmbeddedMigrationOneWay, FileManager, Migration, MigrationError,
+    cli::Status, EmbeddedMigrationOneWay, FileContent, FileManager, Migration, MigrationError,
     MigrationFilename, MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
 
@@ -26,7 +26,7 @@ impl From<MigrationTwoWay> for MigrationOneWay {
 #[derive(Debug, Clone)]
 pub struct MigrationFileMeta {
     name: MigrationFilename,
-    content: String,
+    content: FileContent,
     // checksum_up: Checksum,
     // checksum_down: Option<Checksum>,
 }
@@ -73,7 +73,7 @@ impl From<EmbeddedMigrationOneWay> for PendingMigration {
     fn from(m: EmbeddedMigrationOneWay) -> Self {
         MigrationFileMeta {
             name: m.name.to_string().try_into().expect("Invalid migration id"),
-            content: m.content.to_string(),
+            content: m.content.to_string().into(),
         }
         .into()
     }
@@ -607,7 +607,7 @@ impl MigrationRunner {
     ) -> MigrationResult<()> {
         let migration_queries = filtered_pending_migrations
             .iter()
-            .map(|m| m.content.clone())
+            .map(|m| m.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 

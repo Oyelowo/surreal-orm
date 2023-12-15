@@ -94,11 +94,9 @@ impl Display for Checksum {
 }
 
 impl Checksum {
-    pub fn generate_from_str(str: impl Into<String>) -> MigrationResult<Self> {
-        let str = str.into();
-
+    pub fn generate_from_content(content: &FileContent) -> MigrationResult<Self> {
         let mut hasher = Sha256::new();
-        hasher.update(str.as_bytes());
+        hasher.update(content.to_string().as_bytes());
 
         let hash = hasher.finalize();
         Ok(format!("{:x}", hash).into())
@@ -129,10 +127,10 @@ impl Checksum {
 
     pub fn verify(
         &self,
-        content: &str,
+        content: &FileContent,
         migration_filename: &MigrationFilename,
     ) -> MigrationResult<()> {
-        let checksum = Checksum::generate_from_path(content)?;
+        let checksum = Checksum::generate_from_content(content)?;
         if checksum != *self {
             return Err(MigrationError::ChecksumMismatch {
                 migration_name: migration_filename.to_string(),
@@ -229,10 +227,26 @@ pub mod migration {
 impl Migration {}
 
 #[derive(Clone, Debug)]
+pub struct FileContent(String);
+
+impl Display for FileContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let FileContent(content) = self;
+        write!(f, "{}", content)
+    }
+}
+
+impl From<String> for FileContent {
+    fn from(content: String) -> Self {
+        Self(content)
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct MigrationTwoWay {
     pub name: MigrationFilename,
-    pub up: String,
-    pub down: String,
+    pub up: FileContent,
+    pub down: FileContent,
     pub directory: Option<PathBuf>,
     // status: String,
 }
@@ -257,8 +271,8 @@ impl TryFrom<MigrationTwoWay> for Migration {
             id: Migration::create_id(&migration.name),
             name: migration.name.to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate_from_path(&migration.up.clone())?.into(),
-            checksum_down: Checksum::generate_from_path(migration.down.clone())?.into(),
+            checksum_up: Checksum::generate_from_content(&migration.up.clone())?.into(),
+            checksum_down: Checksum::generate_from_content(&migration.down.clone())?.into(),
         })
     }
 }
@@ -266,7 +280,7 @@ impl TryFrom<MigrationTwoWay> for Migration {
 #[derive(Clone, Debug)]
 pub struct MigrationOneWay {
     pub name: MigrationFilename,
-    pub content: String, // status: String,
+    pub content: FileContent, // status: String,
 }
 
 impl MigrationOneWay {}
@@ -289,7 +303,7 @@ impl TryFrom<MigrationOneWay> for Migration {
             id: Migration::create_id(&migration.name),
             name: migration.name.to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate_from_path(&migration.content.clone())?.into(),
+            checksum_up: Checksum::generate_from_content(&migration.content)?.into(),
             checksum_down: None,
         })
     }
@@ -741,7 +755,13 @@ impl FileManager {
                 }
                 MigrationFilename::Unidirectional(_) => {
                     unidirectional_basenames.push(filename.basename());
-                    let content = fs::read_to_string(path_str).unwrap();
+                    let content = fs::read_to_string(path_str)
+                        .map_err(|e| {
+                            MigrationError::IoError(format!(
+                                "Problem reading migration file: Error: {e}"
+                            ))
+                        })?
+                        .into();
 
                     let migration = MigrationOneWay {
                         name: filename,
@@ -787,12 +807,13 @@ impl FileManager {
             match filename {
                 MigrationFilename::Up(_) => {
                     ups_basenames.push(filename.basename());
-                    let content_up = fs::read_to_string(path).unwrap();
+                    let content_up = fs::read_to_string(path)
+                        .expect("Problem reading migration")
+                        .into();
                     let content_down =
                         fs::read_to_string(parent_dir.join(filename.to_down().to_string()))
-                            .map_err(|_e| {
-                                MigrationError::IoError(format!("Filename: {filename}"))
-                            })?;
+                            .map_err(|_e| MigrationError::IoError(format!("Filename: {filename}")))?
+                            .into();
 
                     let migration = MigrationTwoWay {
                         name: filename.clone(),

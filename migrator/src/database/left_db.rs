@@ -43,7 +43,7 @@ impl LeftDatabase {
 
         let queries = all_migrations
             .iter()
-            .map(|m: &MigrationTwoWay| m.up.clone())
+            .map(|m: &MigrationTwoWay| m.up.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -64,7 +64,7 @@ impl LeftDatabase {
     ) -> MigrationResult<()> {
         let queries = migrations
             .iter()
-            .map(|m| m.content.clone())
+            .map(|m| m.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -88,7 +88,7 @@ impl LeftDatabase {
         let all_migrations = fm.get_oneway_migrations(create_migration_table)?;
         let queries = all_migrations
             .into_iter()
-            .map(|m| m.content)
+            .map(|m| m.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
