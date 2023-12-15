@@ -239,7 +239,7 @@ pub mod migration {
 
 impl Migration {}
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FileContent(String);
 
 impl Display for FileContent {

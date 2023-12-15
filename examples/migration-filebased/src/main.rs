@@ -1,5 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{MigrationConfig, RollbackStrategy, UpdateStrategy};
+use surreal_orm::migrator::{MigrationConfig, RollbackOptions, UpdateStrategy};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -50,11 +50,11 @@ async fn main() {
         .await
         .unwrap();
     two_way
-        .run_down_migrations(db.clone(), RollbackStrategy::Previous)
-        // .run_down_migrations(db.clone(), RollbackStrategy::Number(4))
+        .run_down_migrations(db.clone(), RollbackOptions::default())
+        // .run_down_migrations(db.clone(), RollbackOptions::default().strategy(RollbackStrategy::Number(4)))
         // .run_down_migrations(
         //     db.clone(),
-        //     RollbackStrategy::Till("name".to_string().try_into().unwrap()),
+        //     RollbackOptions::default().strategy(RollbackStrategy::Till("name".to_string().try_into().unwrap())),
         // )
         .await
         .unwrap();

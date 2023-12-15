@@ -15,23 +15,38 @@ fn test_embedded() {
     let migs = MIGRATIONS_ONE_WAY.to_migrations_one_way().unwrap();
     assert_eq!(migs.len(), 2);
     // check the meta data
-    assert_eq!(migs[0].name, "20231029202315_create_new_stuff");
-    assert_eq!(migs[0].timestamp, 20231029202315);
-    insta::assert_snapshot!(migs[0].content);
-    assert_eq!(migs[1].name, "20231029224601_create_new_stuff");
-    assert_eq!(migs[1].timestamp, 20231029224601);
+    assert_eq!(
+        migs[0].name,
+        "20231029202315_create_new_stuff"
+            .to_string()
+            .try_into()
+            .unwrap()
+    );
+    insta::assert_display_snapshot!(migs[0].content);
+    assert_eq!(
+        migs[1].name,
+        "20231029224601_create_new_stuff"
+            .to_string()
+            .try_into()
+            .unwrap()
+    );
     assert_eq!(migs.len(), 2);
     assert_eq!(
         migs[1].content,
-        "DEFINE FIELD labels ON planet TYPE array;\nUPDATE planet SET labels = tags;\nREMOVE FIELD tags ON TABLE planet;"
+        "DEFINE FIELD labels ON planet TYPE array;\nUPDATE planet SET labels = tags;\nREMOVE FIELD tags ON TABLE planet;".to_string().into()
     );
 
     let migs = MIGRATIONS_TWO_WAY.to_migrations_two_way().unwrap();
     assert_eq!(migs.len(), 1);
 
     // check the meta data
-    assert_eq!(migs[0].name, "20231030025711_migration_name_example");
-    assert_eq!(migs[0].timestamp, 20231030025711);
-    insta::assert_snapshot!(migs[0].up);
-    insta::assert_snapshot!(migs[0].down);
+    assert_eq!(
+        migs[0].name,
+        "20231030025711_migration_name_example"
+            .to_string()
+            .try_into()
+            .unwrap()
+    );
+    insta::assert_display_snapshot!(migs[0].up);
+    insta::assert_display_snapshot!(migs[0].down);
 }
