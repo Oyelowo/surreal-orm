@@ -144,16 +144,6 @@ impl MigrationRunner {
             // 16dfc18a5d5a508eee4ca1084a62518d6f6152ed2f483e3b98fee0e69f74d63a
             // 224bb451dfafda16efb615cbd331d139097d780a44727355174dc72db46c7005
             RollbackStrategy::Previous => {
-                for m in &all_migrations_from_dir {
-                    let path = m
-                        .directory
-                        .clone()
-                        .map(|d| d.join(m.name.to_down().to_string()))
-                        .ok_or(MigrationError::MigrationPathNotFound)?;
-                    // let x = Self::_generate_checksum(path)?;
-                    // log::warn!("Migration file shaaaaa: {:?}", x);
-                    panic!();
-                }
                 // 1. Check the latest applied/registered migration in the db
                 // 2. Validate that the migration file exists
                 // 3. Check if there are subsequent unapplied migration files to the live db
