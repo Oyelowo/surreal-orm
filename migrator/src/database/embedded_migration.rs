@@ -9,9 +9,7 @@ use crate::{MigrationOneWay, MigrationResult, MigrationTwoWay};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
-    pub id: &'static str,
     pub name: &'static str,
-    pub timestamp: u64,
     pub up: &'static str,
     pub down: &'static str,
     // status: String,
@@ -40,11 +38,9 @@ impl EmbeddedMigrationsTwoWay {
                 let name = meta.name.to_string();
                 let up = meta.up.to_string().into();
                 let down = meta.down.to_string().into();
-                let timestamp = meta.timestamp;
-                let id = meta.id.to_string();
 
                 MigrationTwoWay {
-                    name: id.try_into().expect("Invalid migration name"),
+                    name: name.to_string().try_into().expect("Invalid migration name"),
                     up,
                     down,
                     directory: None,
