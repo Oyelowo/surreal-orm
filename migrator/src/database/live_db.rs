@@ -281,6 +281,7 @@ impl MigrationRunner {
                         }
                     }
                 }
+                // Self::run_filtered_migrations(db.clone(), filtered_pending_migrations).await
 
                 let rollback_queries = migrations_to_rollback
                     .clone()
@@ -503,9 +504,34 @@ impl MigrationRunner {
         Ok(pending_migrations)
     }
 
-    async fn run_filtered_migrations(
-        filtered_pending_migrations: Vec<PendingMigration>,
+    async fn run_down_migrations_in_tx(
         db: Surreal<impl Connection>,
+        migration_files: Vec<MigrationFileMeta>,
+    ) -> MigrationResult<()> {
+        let migration_queries = migration_files
+            .iter()
+            .map(|m| m.content.to_string())
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        log::info!(
+            "Rolling back {} migrations",
+            migration_queries.split(';').count()
+        );
+
+        if !migration_queries.trim().is_empty() {
+            begin_transaction()
+                .query(Raw::new(migration_queries))
+                .commit_transaction()
+                .run(db.clone())
+                .await?;
+        }
+        Ok(())
+    }
+
+    async fn run_pending_migrations(
+        db: Surreal<impl Connection>,
+        filtered_pending_migrations: Vec<PendingMigration>,
     ) -> MigrationResult<()> {
         let migration_queries = filtered_pending_migrations
             .iter()
@@ -521,7 +547,7 @@ impl MigrationRunner {
             .join("\n");
 
         log::info!(
-            "Running {} migrations and",
+            "Running {} migrations",
             migration_queries.split(';').count()
         );
         log::info!(
@@ -587,12 +613,12 @@ impl MigrationRunner {
             }
         };
 
-        Self::run_filtered_migrations(filtered_pending_migrations, db.clone()).await
+        Self::run_pending_migrations(db.clone(), filtered_pending_migrations).await
     }
 
     pub(crate) async fn list_migrations(
-        migrations_local_dir: Vec<MigrationFilename>,
         db: Surreal<impl Connection>,
+        migrations_local_dir: Vec<MigrationFilename>,
         status: Status,
         strictness: StrictNessLevel,
     ) -> MigrationResult<Vec<MigrationFilename>> {
