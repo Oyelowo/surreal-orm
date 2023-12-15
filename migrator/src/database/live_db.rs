@@ -175,7 +175,6 @@ impl MigrationRunner {
                     .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
                 // 3.
-
                 let pending_migrations =
                     Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone())
                         .await?;
