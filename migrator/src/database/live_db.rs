@@ -274,20 +274,22 @@ impl MigrationRunner {
                         .try_into()
                         .expect("Invalid migration name");
 
-                    let up_check_verification = m_from_db
-                        .checksum_up
-                        .verify(&m_from_file.up, &m_from_file.name)?;
+                    if strictness == StrictNessLevel::Strict {
+                        let up_check_verification = m_from_db
+                            .checksum_up
+                            .verify(&m_from_file.up, &m_from_file.name)?;
 
-                    let down_check_verification = m_from_db
-                        .clone()
-                        .checksum_down
-                        .ok_or(MigrationError::NoChecksumInDb {
-                            migration_name: m_from_db.name.clone(),
-                        })?
-                        .verify(&m_from_file.down, &m_from_file.name)?;
+                        let down_check_verification = m_from_db
+                            .clone()
+                            .checksum_down
+                            .ok_or(MigrationError::NoChecksumInDb {
+                                migration_name: m_from_db.name.clone(),
+                            })?
+                            .verify(&m_from_file.down, &m_from_file.name)?;
 
-                    if m_from_file.name != db_mig_name {
-                        return Err(MigrationError::MigrationFileDoesNotExist);
+                        if m_from_file.name != db_mig_name {
+                            return Err(MigrationError::MigrationFileDoesNotExist);
+                        }
                     }
                 }
 
