@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, ops::Deref};
+use std::{collections::BTreeSet, ops::Deref, path::PathBuf};
 
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
@@ -503,29 +503,76 @@ impl MigrationRunner {
         Ok(pending_migrations)
     }
 
-    async fn run_down_migrations_in_tx(
-        db: Surreal<impl Connection>,
-        migration_files: Vec<MigrationFileMeta>,
-    ) -> MigrationResult<()> {
-        let migration_queries = migration_files
-            .iter()
-            .map(|m| m.content.to_string())
+    async fn generate_rollback_queries_and_filepaths(
+        migrations_to_rollback: Vec<MigrationTwoWay>,
+        migrations_from_db: Vec<Migration>,
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<(Raw, Vec<PathBuf>)> {
+        if strictness == StrictNessLevel::Strict {
+            for (m_from_file, m_from_db) in
+                migrations_to_rollback.iter().zip(migrations_from_db.iter())
+            {
+                let db_mig_name = m_from_db
+                    .name
+                    .clone()
+                    .try_into()
+                    .expect("Invalid migration name");
+
+                m_from_db
+                    .checksum_up
+                    .verify(&m_from_file.up, &m_from_file.name)?;
+
+                m_from_db
+                    .clone()
+                    .checksum_down
+                    .ok_or(MigrationError::NoChecksumInDb {
+                        migration_name: m_from_db.name.clone(),
+                    })?
+                    .verify(&m_from_file.down, &m_from_file.name)?;
+
+                if m_from_file.name != db_mig_name {
+                    return Err(MigrationError::MigrationFileDoesNotExist);
+                }
+            }
+        }
+
+        let rollback_queries = migrations_to_rollback
+            .clone()
+            .into_iter()
+            .map(|m| m.down.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
-        log::info!(
-            "Rolling back {} migrations",
-            migration_queries.split(';').count()
+        let rollbacked_migration_deletion_queries = migrations_to_rollback
+            .iter()
+            .map(|m| Migration::delete_raw(&m.name).build())
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let all = format!(
+            "{}\n{}",
+            rollback_queries, rollbacked_migration_deletion_queries
         );
 
-        if !migration_queries.trim().is_empty() {
-            begin_transaction()
-                .query(Raw::new(migration_queries))
-                .commit_transaction()
-                .run(db.clone())
-                .await?;
-        }
-        Ok(())
+        let file_paths = migrations_to_rollback
+            .iter()
+            .map(|m| {
+                m.directory
+                    .clone()
+                    .map(|d| {
+                        vec![
+                            d.join(m.name.to_up().to_string()),
+                            d.join(m.name.to_down().to_string()),
+                        ]
+                    })
+                    .ok_or(MigrationError::MigrationPathNotFound)
+            })
+            .collect::<MigrationResult<Vec<_>>>()?;
+
+        Ok((
+            Raw::new(all),
+            file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+        ))
     }
 
     async fn run_pending_migrations(
