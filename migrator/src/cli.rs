@@ -404,7 +404,11 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
             let rollback = files_config
                 .two_way()
-                .run_down_migrations(db.clone(), rollback_strategy)
+                .run_down_migrations(
+                    db.clone(),
+                    rollback_strategy,
+                    rollback.shared_run_and_rollback.strict.into(),
+                )
                 .await;
 
             if let Err(ref e) = rollback {
