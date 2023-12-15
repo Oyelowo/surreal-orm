@@ -131,9 +131,10 @@ pub enum RollbackStrategy {
 impl MigrationRunner {
     /// Only two way migrations support rollback
     pub async fn rollback_migrations(
+        db: Surreal<impl Connection>,
         fm: &FileManager,
         rollback_strategy: RollbackStrategy,
-        db: Surreal<impl Connection>,
+        strictness: StrictNessLevel,
     ) -> MigrationResult<()> {
         log::info!("Rolling back migration");
 
@@ -445,7 +446,7 @@ impl MigrationRunner {
                     .first()
                     .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-                let migrations_files_to_roll_back = all_migrations_from_dir
+                let migrations_files_to_rollback = all_migrations_from_dir
                     .clone()
                     .into_iter()
                     .filter(|m| {
@@ -465,6 +466,33 @@ impl MigrationRunner {
                             && (is_after_file_cursor || is_file_cursor)
                     })
                     .collect::<Vec<_>>();
+
+                for (m_from_file, m_from_db) in migrations_files_to_rollback
+                    .iter()
+                    .zip(migrations_from_db.iter())
+                {
+                    let db_mig_name: MigrationFilename = m_from_db
+                        .name
+                        .clone()
+                        .try_into()
+                        .expect("Invalid migration name");
+
+                    let up_check_verification = m_from_db
+                        .checksum_up
+                        .verify(&m_from_file.up, &m_from_file.name)?;
+
+                    let down_check_verification = m_from_db
+                        .clone()
+                        .checksum_down
+                        .ok_or(MigrationError::NoChecksumInDb {
+                            migration_name: m_from_db.name.clone(),
+                        })?
+                        .verify(&m_from_file.down, &m_from_file.name)?;
+
+                    if m_from_file.name != db_mig_name {
+                        return Err(MigrationError::MigrationFileDoesNotExist);
+                    }
+                }
 
                 // xxxxxxxxxxx
 
