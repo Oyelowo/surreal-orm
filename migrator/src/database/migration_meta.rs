@@ -29,7 +29,7 @@ use crate::*;
 
 // #[derive(Node, Serialize, Deserialize, Clone, Debug)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
+// #[serde(rename_all = "camelCase")]
 // #[surreal_orm(table_name = "migration", schemafull)]
 pub struct Migration {
     // pub id: SurrealId<Self, String>,
@@ -159,6 +159,8 @@ pub struct MigrationSchema {
     pub id: Field,
     pub name: Field,
     pub timestamp: Field,
+    pub checksum_up: Field,
+    pub checksum_down: Field,
 }
 
 impl Migration {
@@ -169,19 +171,30 @@ impl Migration {
         }
     }
     // pub fn create_raw(m: Self) -> Raw {
-    pub fn create_raw(filename: MigrationFilename) -> Raw {
+    pub fn create_raw(
+        filename: MigrationFilename,
+        checksum_up: Checksum,
+        checksum_down: Option<Checksum>,
+    ) -> Raw {
         let migration::Schema {
             id: _id_field,
             name: name_field,
             timestamp: timestamp_field,
+            checksum_up: checksum_up_field,
+            checksum_down: checksum_down_field,
         } = Migration::schema();
 
         let record_id = Self::create_id(&filename);
         let name = filename.to_string();
         let timestamp = filename.timestamp().into_inner();
+        let checksum_up = checksum_up.to_string();
+        let checksum_down = checksum_down
+            .map(|c| c.to_string())
+            .unwrap_or("null".into());
 
         Raw::new(format!(
-            "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp};"
+            "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp} \
+        {checksum_up_field}={checksum_up} {checksum_down_field}={checksum_down};"
         ))
     }
 
@@ -197,6 +210,8 @@ impl Migration {
             id: "id".into(),
             name: Field::new("name"),
             timestamp: Field::new("timestamp"),
+            checksum_up: Field::new("checksum_up"),
+            checksum_down: Field::new("checksum_down"),
         }
     }
 
@@ -213,6 +228,8 @@ impl Migration {
             id,
             name,
             timestamp,
+            checksum_up,
+            checksum_down,
         } = Migration::schema();
         let id = define_field(id)
             .type_(FieldType::Record(vec![Migration::table_name()]))
@@ -229,7 +246,17 @@ impl Migration {
             .on_table(Migration::table_name())
             .to_raw();
 
-        vec![id, name, timestamp]
+        let checksum_up = define_field(checksum_up)
+            .type_(FieldType::String)
+            .on_table(Migration::table_name())
+            .to_raw();
+
+        let checksum_down = define_field(checksum_down)
+            .type_(FieldType::String)
+            .on_table(Migration::table_name())
+            .to_raw();
+
+        vec![id, name, timestamp, checksum_up, checksum_down]
     }
 }
 
@@ -585,8 +612,10 @@ impl TwoWayGetter {
         db: Surreal<impl Connection>,
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
-        let migrations = self.get_migrations()?;
-        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
+        let migrations = self.get_migrations().expect("nonesense");
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy)
+            .await
+            .expect("wahala");
 
         Ok(())
     }
