@@ -31,6 +31,11 @@ pub struct MigrationFileMeta {
     // checksum_down: Option<Checksum>,
 }
 
+enum MigrationFile {
+    OneWay(MigrationOneWay),
+    TwoWay(MigrationTwoWay),
+}
+
 pub struct PendingMigration(MigrationFileMeta);
 
 impl Deref for PendingMigration {
@@ -401,22 +406,43 @@ impl MigrationRunner {
         ))
     }
 
-    async fn run_pending_migrations(
+    async fn run_up_pending_migrations(
         db: Surreal<impl Connection>,
-        filtered_pending_migrations: Vec<PendingMigration>,
+        filtered_pending_migrations: Vec<MigrationFile>,
     ) -> MigrationResult<()> {
-        let migration_queries = filtered_pending_migrations
-            .iter()
-            .map(|m| m.content.to_string())
-            .collect::<Vec<_>>()
-            .join("\n");
+        let mut migration_queries = vec![];
+        let mut mark_queries_registered_queries = vec![];
+
+        for mf in filtered_pending_migrations.iter() {
+            match mf {
+                MigrationFile::OneWay(m) => {
+                    let created_registered_mig =
+                        Migration::create_raw(&m.name, &m.content.as_checksum()?, None)
+                            .build()
+                            .to_string();
+                    mark_queries_registered_queries.push(created_registered_mig);
+
+                    migration_queries.push(m.content.to_string());
+                }
+                MigrationFile::TwoWay(m) => {
+                    let created_registered_mig = Migration::create_raw(
+                        &m.name,
+                        &m.up.as_checksum()?,
+                        Some(&m.down.as_checksum()?),
+                    )
+                    .build()
+                    .to_string();
+                    migration_queries.push(created_registered_mig);
+
+                    migration_queries.push(m.up.to_string());
+                }
+            }
+        }
+
+        let migration_queries = migration_queries.join("\n");
 
         // Create queries to mark migrations as applied
-        let mark_queries_registered_queries = filtered_pending_migrations
-            .iter()
-            .map(|m| Migration::create_raw(m.name.clone()).build())
-            .collect::<Vec<_>>()
-            .join("\n");
+        let mark_queries_registered_queries = mark_queries_registered_queries.join("\n");
 
         log::info!(
             "Running {} migrations",
@@ -485,7 +511,7 @@ impl MigrationRunner {
             }
         };
 
-        Self::run_pending_migrations(db.clone(), filtered_pending_migrations).await
+        Self::run_up_pending_migrations(db.clone(), filtered_pending_migrations).await
     }
 
     pub(crate) async fn list_migrations(

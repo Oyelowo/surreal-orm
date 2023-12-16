@@ -172,9 +172,9 @@ impl Migration {
     }
     // pub fn create_raw(m: Self) -> Raw {
     pub fn create_raw(
-        filename: MigrationFilename,
-        checksum_up: Checksum,
-        checksum_down: Option<Checksum>,
+        filename: &MigrationFilename,
+        checksum_up: &Checksum,
+        checksum_down: Option<&Checksum>,
     ) -> Raw {
         let migration::Schema {
             id: _id_field,
@@ -273,6 +273,12 @@ impl Display for FileContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let FileContent(content) = self;
         write!(f, "{}", content)
+    }
+}
+
+impl FileContent {
+    pub fn as_checksum(&self) -> MigrationResult<Checksum> {
+        Checksum::generate_from_content(self)
     }
 }
 
@@ -612,10 +618,8 @@ impl TwoWayGetter {
         db: Surreal<impl Connection>,
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
-        let migrations = self.get_migrations().expect("nonesense");
-        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy)
-            .await
-            .expect("wahala");
+        let migrations = self.get_migrations()?;
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
     }
