@@ -8,6 +8,7 @@ use crate::{
     cli::Status, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
     MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
+use crate::{MigrationFlag, MigrationType};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {
@@ -20,6 +21,7 @@ impl From<MigrationTwoWay> for MigrationOneWay {
         Self {
             name: m.name,
             content: m.up,
+            directory: m.directory,
         }
     }
 }
@@ -72,6 +74,13 @@ impl MigrationFile {
         match self {
             Self::OneWay(_) => None,
             Self::TwoWay(m) => Some(&m.down),
+        }
+    }
+
+    pub fn directory(&self) -> &PathBuf {
+        match self {
+            Self::OneWay(m) => &m.directory,
+            Self::TwoWay(m) => &m.directory,
         }
     }
 }
@@ -320,7 +329,7 @@ impl MigrationRunner {
             .await
     }
 
-    async fn get_pending_migrations(
+    pub async fn get_pending_migrations(
         all_migrations: Vec<impl Into<MigrationFile>>,
         db: Surreal<impl Connection>,
     ) -> SurrealOrmResult<Vec<PendingMigrationFile>> {
@@ -338,6 +347,37 @@ impl MigrationRunner {
             .collect::<Vec<_>>();
 
         Ok(pending_migrations)
+    }
+
+    pub async fn delete_unapplied_migration_files(
+        fm: &FileManager,
+        db: Surreal<impl Connection>,
+    ) -> MigrationResult<()> {
+        let pending_migrations = match fm.detect_migration_type()? {
+            MigrationFlag::OneWay => {
+                let migrations = fm.get_oneway_migrations(false)?;
+                Self::get_pending_migrations(migrations, db).await?
+            }
+            MigrationFlag::TwoWay => {
+                let migrations = fm.get_two_way_migrations(false)?;
+                Self::get_pending_migrations(migrations, db).await?
+            }
+        };
+
+        for mig in pending_migrations {
+            let mig_name = mig.name().to_string();
+            let mig_path = fm.get_migration_path(&mig_name)?;
+            log::info!("Deleting file: {:?}", mig_path.to_str());
+            std::fs::remove_file(mig_path).map_err(|e| {
+                MigrationError::IoError(format!(
+                    "Failed to delete migration file: {:?}. Error: {}",
+                    mig_path, e
+                ))
+            })?;
+            log::info!("Deleted file: {:?}", mig_path.to_str());
+        }
+
+        Ok(())
     }
 
     fn generate_rollback_queries_and_filepaths(
@@ -394,17 +434,13 @@ impl MigrationRunner {
         let file_paths = migrations_to_rollback
             .iter()
             .map(|m| {
-                m.directory
-                    .clone()
-                    .map(|d| {
-                        vec![
-                            d.join(m.name.to_up().to_string()),
-                            d.join(m.name.to_down().to_string()),
-                        ]
-                    })
-                    .ok_or(MigrationError::MigrationPathNotFound)
+                let d = m.directory;
+                vec![
+                    d.join(m.name.to_up().to_string()),
+                    d.join(m.name.to_down().to_string()),
+                ]
             })
-            .collect::<MigrationResult<Vec<_>>>()?;
+            .collect::<Vec<_>>();
 
         Ok((
             Raw::new(all),
