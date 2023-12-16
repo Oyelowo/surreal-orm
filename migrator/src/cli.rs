@@ -7,14 +7,15 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 use crate::{
-    DbInfo, MigrationConfig, MigrationFlag, RollbackOptions, RollbackStrategy, UpdateStrategy,
+    DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions, RollbackStrategy,
+    UpdateStrategy,
 };
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
 struct Cli {
-    /// Subcommand: generate, run, rollback
+    /// Subcommand: generate, up, down, list
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
@@ -30,7 +31,11 @@ enum SubCommand {
     /// Rollback migrations
     Down(Down),
     /// List migrations
+    #[clap(alias = "ls")]
     List(List),
+    /// Delete Unapplied local migration files that have not been applied to the current database instance
+    #[clap(alias = "prune")]
+    Prune,
 }
 
 impl From<&Up> for UpdateStrategy {
@@ -68,6 +73,7 @@ impl SubCommand {
             SubCommand::Up(run) => run.shared_all.verbose,
             SubCommand::Down(rollback) => rollback.shared_all.verbose,
             SubCommand::List(list) => list.shared_all.verbose,
+            SubCommand::Prune => 4,
         }
     }
 
@@ -450,6 +456,45 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             }
 
             log::info!("Rollback successful");
+        }
+        SubCommand::Prune => {
+            let db = setup_db(&RuntimeConfig::default()).await;
+            match files_config.detect_migration_type() {
+                Ok(MigrationFlag::TwoWay) => {
+                    let prune = files_config
+                        .two_way()
+                        .prune_unapplied_migrations(db.clone())
+                        .await;
+
+                    if let Err(ref e) = prune {
+                        log::error!("Failed to prune migrations: {}", e.to_string());
+                    }
+                }
+                Ok(MigrationFlag::OneWay) => {
+                    log::error!(
+                        "Cannot prune one way migrations. 
+                    Please use two way migrations or Create a new migration to reverse the changes"
+                    );
+                    panic!();
+                }
+                Err(e) => {
+                    log::error!("Failed to detect migration type: {}", e.to_string());
+                    panic!();
+                }
+            };
+            let all_migrations_from_dir = files_config.two_way().get_migrations();
+
+            let xx = MigrationRunner::get_pending_migrations(all_migrations, db);
+            let prune = files_config
+                .two_way()
+                .prune_unapplied_migrations(db.clone())
+                .await;
+
+            if let Err(ref e) = prune {
+                log::error!("Failed to prune migrations: {}", e.to_string());
+            }
+
+            log::info!("Prune successful");
         }
         SubCommand::List(options) => {
             let db = setup_db(&options.runtime_config).await;
