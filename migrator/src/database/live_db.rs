@@ -412,55 +412,55 @@ impl MigrationRunner {
         db: Surreal<impl Connection>,
         filtered_pending_migrations: Vec<PendingMigrationFile>,
     ) -> MigrationResult<()> {
-        let mut migration_queries = vec![];
-        let mut mark_queries_registered_queries = vec![];
+        let mut migration_queries: Vec<FileContent> = vec![];
+        let mut mark_queries_registered_queries: Vec<Raw> = vec![];
 
         for mf in filtered_pending_migrations.into_iter() {
             match mf.into() {
                 MigrationFile::OneWay(m) => {
                     let created_registered_mig =
-                        Migration::create_raw(&m.name, &m.content.as_checksum()?, None)
-                            .build()
-                            .to_string();
-                    mark_queries_registered_queries.push(created_registered_mig);
+                        Migration::create_raw(&m.name, &m.content.as_checksum()?, None);
 
-                    migration_queries.push(m.content.to_string());
+                    migration_queries.push(m.content);
+                    mark_queries_registered_queries.push(created_registered_mig);
                 }
                 MigrationFile::TwoWay(m) => {
                     let created_registered_mig = Migration::create_raw(
                         &m.name,
                         &m.up.as_checksum()?,
                         Some(&m.down.as_checksum()?),
-                    )
-                    .build()
-                    .to_string();
-                    migration_queries.push(created_registered_mig);
+                    );
 
-                    migration_queries.push(m.up.to_string());
+                    migration_queries.push(m.up);
+                    mark_queries_registered_queries.push(created_registered_mig);
                 }
             }
         }
 
-        let migration_queries = migration_queries.join("\n");
+        let migration_queries_str = migration_queries
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join("\n");
 
         // Create queries to mark migrations as applied
-        let mark_queries_registered_queries = mark_queries_registered_queries.join("\n");
+        let mark_queries_registered_queries_str = mark_queries_registered_queries
+            .iter()
+            .map(|q| q.build())
+            .collect::<Vec<_>>()
+            .join("\n");
 
-        log::info!(
-            "Running {} migrations",
-            migration_queries.split(';').count()
-        );
+        log::info!("Running {} migrations", migration_queries.len());
         log::info!(
             "Marking {} query(ies) as registered",
-            mark_queries_registered_queries
-                .trim()
-                .split(';')
-                .filter(|q| q.trim().is_empty())
-                .count()
+            mark_queries_registered_queries.len()
         );
 
         // Join migrations with mark queries
-        let all = format!("{}\n{}", migration_queries, mark_queries_registered_queries);
+        let all = format!(
+            "{}\n{}",
+            migration_queries_str, mark_queries_registered_queries_str
+        );
 
         // Run them as a transaction against a local in-memory database
         if !all.trim().is_empty() {

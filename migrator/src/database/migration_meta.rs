@@ -170,7 +170,6 @@ impl Migration {
             id: filename.to_string().into(),
         }
     }
-    // pub fn create_raw(m: Self) -> Raw {
     pub fn create_raw(
         filename: &MigrationFilename,
         checksum_up: &Checksum,
@@ -192,13 +191,10 @@ impl Migration {
             .map(|c| c.to_string())
             .unwrap_or("null".into());
 
-        let xx = Raw::new(format!(
+        Raw::new(format!(
             "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp}, \
         {checksum_up_field}='{checksum_up}', {checksum_down_field}='{checksum_down}';"
-        ));
-        dbg!(&xx);
-
-        xx
+        ))
     }
 
     pub fn delete_raw(filename: &MigrationFilename) -> Raw {
@@ -646,13 +642,7 @@ impl TwoWayGetter {
         db: Surreal<impl Connection>,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
-        let _migrations = self.get_migrations()?;
-        // let rollback_options = RollbackOptions {
-        //     rollback_strategy,
-        //     strictness,
-        //     prune_files_after_rollback: false,
-        // };
-
+        // let _migrations = self.get_migrations()?;
         MigrationRunner::rollback_migrations(db, &self.0, rollback_options).await?;
 
         Ok(())
