@@ -31,6 +31,7 @@ pub struct MigrationFileMeta {
     // checksum_down: Option<Checksum>,
 }
 
+#[derive(Debug, Clone)]
 enum MigrationFile {
     OneWay(MigrationOneWay),
     TwoWay(MigrationTwoWay),
@@ -525,11 +526,11 @@ impl MigrationRunner {
                 let pending_migs = Self::get_pending_migrations(all_migrations, db.clone()).await?;
 
                 let mut migration_found = false;
-                let mut filtered_migs: Vec<PendingMigration> = vec![];
+                let mut filtered_migs: Vec<MigrationFile> = vec![];
 
                 for mig in pending_migs {
                     filtered_migs.push(mig.clone().into());
-                    if mig.name == mig_filename {
+                    if *mig.name() == mig_filename {
                         migration_found = true;
                         break;
                     }
