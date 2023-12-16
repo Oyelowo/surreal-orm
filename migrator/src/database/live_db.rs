@@ -1,11 +1,11 @@
-use std::{collections::BTreeSet, ops::Deref, path::PathBuf};
+use std::{collections::BTreeSet, path::PathBuf};
 
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
 use crate::{
-    cli::Status, EmbeddedMigrationOneWay, FileContent, FileManager, Migration, MigrationError,
-    MigrationFilename, MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
+    cli::Status, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
+    MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
 
 // pub struct MigrationRunner<C: Connection> {
@@ -24,15 +24,7 @@ impl From<MigrationTwoWay> for MigrationOneWay {
 }
 
 #[derive(Debug, Clone)]
-pub struct MigrationFileMeta {
-    name: MigrationFilename,
-    content: FileContent,
-    // checksum_up: Checksum,
-    // checksum_down: Option<Checksum>,
-}
-
-#[derive(Debug, Clone)]
-enum MigrationFile {
+pub enum MigrationFile {
     OneWay(MigrationOneWay),
     TwoWay(MigrationTwoWay),
 }
@@ -69,54 +61,6 @@ impl From<MigrationOneWay> for MigrationFile {
 impl From<MigrationTwoWay> for MigrationFile {
     fn from(m: MigrationTwoWay) -> Self {
         Self::TwoWay(m)
-    }
-}
-
-pub struct PendingMigration(MigrationFileMeta);
-
-impl Deref for PendingMigration {
-    type Target = MigrationFileMeta;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<MigrationFileMeta> for PendingMigration {
-    fn from(m: MigrationFileMeta) -> Self {
-        Self(m)
-    }
-}
-
-impl From<MigrationTwoWay> for PendingMigration {
-    fn from(m: MigrationTwoWay) -> Self {
-        MigrationFileMeta {
-            name: m.name,
-            content: m.up,
-            // checksum_up: m.checksum_up,
-            // checksum_down: Some(m.checksum_down),
-        }
-        .into()
-    }
-}
-
-impl From<MigrationOneWay> for PendingMigration {
-    fn from(m: MigrationOneWay) -> Self {
-        MigrationFileMeta {
-            name: m.name,
-            content: m.content,
-        }
-        .into()
-    }
-}
-
-impl From<EmbeddedMigrationOneWay> for PendingMigration {
-    fn from(m: EmbeddedMigrationOneWay) -> Self {
-        MigrationFileMeta {
-            name: m.name.to_string().try_into().expect("Invalid migration id"),
-            content: m.content.to_string().into(),
-        }
-        .into()
     }
 }
 
