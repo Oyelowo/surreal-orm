@@ -123,6 +123,10 @@ impl RollbackOptions {
         Self::default()
     }
 
+    pub fn is_strict(&self) -> bool {
+        self.strictness == StrictNessLevel::Strict
+    }
+
     pub fn strategy(mut self, rollback_strategy: RollbackStrategy) -> Self {
         self.rollback_strategy = rollback_strategy;
         self
@@ -160,8 +164,8 @@ impl MigrationRunner {
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         let RollbackOptions {
-            rollback_strategy,
-            strictness,
+            ref rollback_strategy,
+            ref strictness,
             prune_files_after_rollback,
         } = rollback_options;
         log::info!("Rolling back migration");
@@ -176,16 +180,21 @@ impl MigrationRunner {
             .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
             .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
-        if strictness == StrictNessLevel::Strict {
+        if rollback_options.is_strict() {
             let pending_migrations =
                 Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone()).await?;
 
             let is_valid_rollback_state =
                 pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
 
+            if rollback_options.prune_files_after_rollback && !is_valid_rollback_state {
+                return Err(MigrationError::UnappliedMigrationExists {
+                    migration_count: pending_migrations.len(),
+                });
+            }
             if !is_valid_rollback_state {
                 return Err(MigrationError::UnappliedMigrationExists {
-                    migration_count: pending_migrations.len() / 2,
+                    migration_count: pending_migrations.len(),
                 });
             }
         }
@@ -200,7 +209,7 @@ impl MigrationRunner {
                 let migrations_from_db = select(All)
                     .from(Migration::table_name())
                     .order_by(Migration::schema().timestamp.desc())
-                    .limit(count)
+                    .limit(*count)
                     .return_many::<Migration>(db.clone())
                     .await?;
 
@@ -223,7 +232,7 @@ impl MigrationRunner {
 
                         is_before_db_latest_migration || is_latest
                     })
-                    .take(count as usize)
+                    .take(*count as usize)
                     .collect::<Vec<_>>();
 
                 Self::generate_rollback_queries_and_filepaths(
@@ -266,7 +275,7 @@ impl MigrationRunner {
                             m.name.timestamp() < latest_migration.timestamp;
 
                         let is_after_file_cursor = m.name.timestamp() > file_cursor.timestamp();
-                        let is_file_cursor = m.name == file_cursor;
+                        let is_file_cursor = m.name == *file_cursor;
 
                         (is_before_db_latest_migration || is_latest)
                             && (is_after_file_cursor || is_file_cursor)
@@ -339,9 +348,9 @@ impl MigrationRunner {
     fn generate_rollback_queries_and_filepaths(
         migrations_to_rollback: Vec<MigrationTwoWay>,
         migrations_from_db: Vec<Migration>,
-        strictness: StrictNessLevel,
+        strictness: &StrictNessLevel,
     ) -> MigrationResult<(Raw, Vec<PathBuf>)> {
-        if strictness == StrictNessLevel::Strict {
+        if *strictness == StrictNessLevel::Strict {
             for (m_from_file, m_from_db) in
                 migrations_to_rollback.iter().zip(migrations_from_db.iter())
             {
