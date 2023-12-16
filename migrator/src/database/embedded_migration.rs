@@ -43,7 +43,6 @@ impl EmbeddedMigrationsTwoWay {
                     name: name.to_string().try_into().expect("Invalid migration name"),
                     up,
                     down,
-                    directory: None,
                 }
             })
             .collect::<Vec<_>>();

@@ -292,7 +292,6 @@ pub struct MigrationTwoWay {
     pub name: MigrationFilename,
     pub up: FileContent,
     pub down: FileContent,
-    pub directory: PathBuf,
     // status: String,
 }
 
@@ -326,20 +325,9 @@ impl TryFrom<MigrationTwoWay> for Migration {
 pub struct MigrationOneWay {
     pub name: MigrationFilename,
     pub content: FileContent, // status: String,
-    pub directory: PathBuf,
 }
 
 impl MigrationOneWay {}
-
-// impl From<MigrationOneWay> for Migration {
-//     fn from(migration: MigrationOneWay) -> Self {
-//         Self {
-//             id: Migration::create_id(migration.id),
-//             name: migration.name,
-//             timestamp: migration.timestamp,
-//         }
-//     }
-// }
 
 impl TryFrom<MigrationOneWay> for Migration {
     type Error = MigrationError;
@@ -510,8 +498,8 @@ impl MigrationConfig {
         TwoWayGetter::new(self.0.clone())
     }
 
-    pub fn get_path(&self) -> Option<&String> {
-        self.0.custom_path.as_ref()
+    pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
+        self.0.get_migration_dir()
     }
 }
 
@@ -739,6 +727,10 @@ impl FileManager {
         }
     }
 
+    pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
+        self.resolve_migration_directory(false)
+    }
+
     pub(crate) fn resolve_migration_directory(
         &self,
         create_dir_if_not_exists: bool,
@@ -809,10 +801,6 @@ impl FileManager {
                     let migration = MigrationOneWay {
                         name: filename,
                         content,
-                        directory: path
-                            .parent()
-                            .expect("Problem path's parent directory")
-                            .to_path_buf(),
                     };
 
                     migrations_uni_meta.push(migration);
@@ -866,7 +854,6 @@ impl FileManager {
                         name: filename.clone(),
                         up: content_up,
                         down: content_down,
-                        directory: Some(parent_dir.to_path_buf()),
                     };
 
                     migrations_bi_meta.push(migration);
