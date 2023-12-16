@@ -187,12 +187,7 @@ impl MigrationRunner {
             let is_valid_rollback_state =
                 pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
 
-            if rollback_options.prune_files_after_rollback && !is_valid_rollback_state {
-                return Err(MigrationError::UnappliedMigrationExists {
-                    migration_count: pending_migrations.len(),
-                });
-            }
-            if !is_valid_rollback_state {
+            if !is_valid_rollback_state && rollback_options.prune_files_after_rollback {
                 return Err(MigrationError::UnappliedMigrationExists {
                     migration_count: pending_migrations.len(),
                 });
