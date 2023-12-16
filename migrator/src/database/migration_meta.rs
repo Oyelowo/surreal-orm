@@ -296,34 +296,16 @@ pub struct MigrationTwoWay {
     // status: String,
 }
 
-pub enum MigrationTwoWayV2 {
-    Up(MigrationOneWay),
-    Down(MigrationOneWay),
-    OneWay(MigrationOneWay),
-}
-
-// impl From<MigrationTwoWay> for Migration {
-//     fn from(migration: MigrationTwoWay) -> Self {
-//         Self {
-//             id: Migration::create_id(migration.id),
-//             name: migration.name,
-//             timestamp: migration.timestamp,
-//             checksum_up: CheckSum::generate(&migration.up.clone()).unwrap().into(),
-//             checksum_down: CheckSum::generate(migration.down.clone()).unwrap().into(),
-//         }
-//     }
-// }
-
 impl TryFrom<MigrationTwoWay> for Migration {
     type Error = MigrationError;
 
     fn try_from(migration: MigrationTwoWay) -> Result<Self, Self::Error> {
         Ok(Self {
-            id: Migration::create_id(&migration.name),
-            name: migration.name.to_string(),
+            id: Migration::create_id(&migration.name.to_up()),
+            name: migration.name.to_up().to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate_from_content(&migration.up.clone())?.into(),
-            checksum_down: Checksum::generate_from_content(&migration.down.clone())?.into(),
+            checksum_up: migration.up.as_checksum()?,
+            checksum_down: Some(migration.down.as_checksum()?),
         })
     }
 }
