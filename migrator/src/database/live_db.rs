@@ -1,5 +1,6 @@
 use std::{collections::BTreeSet, path::PathBuf};
 
+use std::ops::Deref;
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
@@ -27,6 +28,29 @@ impl From<MigrationTwoWay> for MigrationOneWay {
 pub enum MigrationFile {
     OneWay(MigrationOneWay),
     TwoWay(MigrationTwoWay),
+}
+
+#[derive(Debug, Clone)]
+pub struct PendingMigrationFile(MigrationFile);
+
+impl Deref for PendingMigrationFile {
+    type Target = MigrationFile;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<PendingMigrationFile> for MigrationFile {
+    fn from(m: PendingMigrationFile) -> Self {
+        m.0
+    }
+}
+
+impl From<MigrationFile> for PendingMigrationFile {
+    fn from(m: MigrationFile) -> Self {
+        Self(m)
+    }
 }
 
 impl MigrationFile {
@@ -295,7 +319,7 @@ impl MigrationRunner {
     async fn get_pending_migrations(
         all_migrations: Vec<impl Into<MigrationFile>>,
         db: Surreal<impl Connection>,
-    ) -> SurrealOrmResult<Vec<MigrationFile>> {
+    ) -> SurrealOrmResult<Vec<PendingMigrationFile>> {
         let latest_migration = Self::get_latest_migration(db.clone()).await?;
 
         let pending_migrations = all_migrations
@@ -306,6 +330,7 @@ impl MigrationRunner {
                     m.name().timestamp() > latest_migration.timestamp
                 })
             })
+            .map(PendingMigrationFile::from)
             .collect::<Vec<_>>();
 
         Ok(pending_migrations)
@@ -385,13 +410,13 @@ impl MigrationRunner {
 
     async fn run_up_pending_migrations(
         db: Surreal<impl Connection>,
-        filtered_pending_migrations: Vec<MigrationFile>,
+        filtered_pending_migrations: Vec<PendingMigrationFile>,
     ) -> MigrationResult<()> {
         let mut migration_queries = vec![];
         let mut mark_queries_registered_queries = vec![];
 
-        for mf in filtered_pending_migrations.iter() {
-            match mf {
+        for mf in filtered_pending_migrations.into_iter() {
+            match mf.into() {
                 MigrationFile::OneWay(m) => {
                     let created_registered_mig =
                         Migration::create_raw(&m.name, &m.content.as_checksum()?, None)
@@ -470,7 +495,7 @@ impl MigrationRunner {
                 let pending_migs = Self::get_pending_migrations(all_migrations, db.clone()).await?;
 
                 let mut migration_found = false;
-                let mut filtered_migs: Vec<MigrationFile> = vec![];
+                let mut filtered_migs: Vec<PendingMigrationFile> = vec![];
 
                 for mig in pending_migs {
                     filtered_migs.push(mig.clone());
