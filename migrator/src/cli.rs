@@ -34,7 +34,7 @@ enum SubCommand {
     #[clap(alias = "ls")]
     List(List),
     /// Delete Unapplied local migration files that have not been applied to the current database instance
-    Prune,
+    Prune(Prune),
 }
 
 impl From<&Up> for UpdateStrategy {
@@ -72,7 +72,7 @@ impl SubCommand {
             SubCommand::Up(run) => run.shared_all.verbose,
             SubCommand::Down(rollback) => rollback.shared_all.verbose,
             SubCommand::List(list) => list.shared_all.verbose,
-            SubCommand::Prune => 4,
+            SubCommand::Prune(prune) => prune.shared_all.verbose,
         }
     }
 
@@ -179,6 +179,16 @@ struct List {
         default_value = "applied"
     )]
     status: Option<Status>,
+    #[clap(flatten)]
+    shared_all: SharedAll,
+    #[clap(flatten)]
+    runtime_config: RuntimeConfig,
+}
+
+/// Delete Unapplied local migration files that have not been applied to the current database instance
+/// cargo run -- prune
+#[derive(Parser, Debug)]
+struct Prune {
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
@@ -456,8 +466,8 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
             log::info!("Rollback successful");
         }
-        SubCommand::Prune => {
-            let db = setup_db(&RuntimeConfig::default()).await;
+        SubCommand::Prune(prune) => {
+            let db = setup_db(&prune.runtime_config).await;
             let res =
                 MigrationRunner::delete_unapplied_migration_files(db.clone(), &files_config).await;
             if let Err(ref e) = res {
