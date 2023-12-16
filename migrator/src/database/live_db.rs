@@ -348,20 +348,31 @@ impl MigrationRunner {
         db: Surreal<impl Connection>,
         mig_config: &MigrationConfig,
     ) -> MigrationResult<()> {
-        let pending_migrations = match mig_config.detect_migration_type()? {
+        let dir = mig_config.get_migration_dir()?;
+        let pending_migrations_paths = match mig_config.detect_migration_type()? {
             MigrationFlag::OneWay => {
                 let migrations = mig_config.one_way().get_migrations()?;
-                Self::get_pending_migrations(migrations, db).await?
+                let migs = Self::get_pending_migrations(migrations, db).await?;
+                migs.into_iter()
+                    .map(|m| dir.join(m.name().to_string()))
+                    .collect::<Vec<_>>()
             }
             MigrationFlag::TwoWay => {
                 let migrations = mig_config.two_way().get_migrations()?;
-                Self::get_pending_migrations(migrations, db).await?
+                let migs = Self::get_pending_migrations(migrations, db).await?;
+                migs.into_iter()
+                    .map(|m| {
+                        vec![
+                            dir.join(m.name().to_up().to_string()),
+                            dir.join(m.name().to_down().to_string()),
+                        ]
+                    })
+                    .flatten()
+                    .collect::<Vec<_>>()
             }
         };
 
-        for mig in pending_migrations {
-            let mig_name = mig.name().to_string();
-            let mig_path = mig_config.get_migration_dir().map(|d| d.join(mig_name))?;
+        for mig_path in pending_migrations_paths {
             log::info!("Deleting file: {:?}", &mig_path);
             std::fs::remove_file(&mig_path).map_err(|e| {
                 MigrationError::IoError(format!(
