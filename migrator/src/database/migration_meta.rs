@@ -488,14 +488,20 @@ impl MigrationConfig {
         self.0.detect_migration_type()
     }
 
-    pub fn one_way(&mut self) -> OneWayGetter {
-        self.0.migration_flag = MigrationFlag::OneWay;
-        OneWayGetter::new(self.0.clone())
+    pub fn one_way(&self) -> OneWayGetter {
+        let fm = FileManager {
+            migration_flag: MigrationFlag::OneWay,
+            ..self.0.clone()
+        };
+        OneWayGetter::new(fm)
     }
 
-    pub fn two_way(&mut self) -> TwoWayGetter {
-        self.0.migration_flag = MigrationFlag::TwoWay;
-        TwoWayGetter::new(self.0.clone())
+    pub fn two_way(&self) -> TwoWayGetter {
+        let fm = FileManager {
+            migration_flag: MigrationFlag::TwoWay,
+            ..self.0.clone()
+        };
+        TwoWayGetter::new(fm)
     }
 
     pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {

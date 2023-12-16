@@ -8,7 +8,7 @@ use crate::{
     cli::Status, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
     MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
-use crate::{MigrationFlag, MigrationType};
+use crate::{MigrationConfig, MigrationFlag, MigrationType};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {
@@ -345,25 +345,23 @@ impl MigrationRunner {
     }
 
     pub async fn delete_unapplied_migration_files(
-        fm: &FileManager,
         db: Surreal<impl Connection>,
+        mig_config: &MigrationConfig,
     ) -> MigrationResult<()> {
-        let pending_migrations = match fm.detect_migration_type()? {
+        let pending_migrations = match mig_config.detect_migration_type()? {
             MigrationFlag::OneWay => {
-                let migrations = fm.get_oneway_migrations(false)?;
+                let migrations = mig_config.one_way().get_migrations()?;
                 Self::get_pending_migrations(migrations, db).await?
             }
             MigrationFlag::TwoWay => {
-                let migrations = fm.get_two_way_migrations(false)?;
+                let migrations = mig_config.two_way().get_migrations()?;
                 Self::get_pending_migrations(migrations, db).await?
             }
         };
 
         for mig in pending_migrations {
             let mig_name = mig.name().to_string();
-            let mig_path = fm
-                .resolve_migration_directory(false)
-                .map(|d| d.join(mig_name))?;
+            let mig_path = mig_config.get_migration_dir().map(|d| d.join(mig_name))?;
             log::info!("Deleting file: {:?}", &mig_path);
             std::fs::remove_file(&mig_path).map_err(|e| {
                 MigrationError::IoError(format!(

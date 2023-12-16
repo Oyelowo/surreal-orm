@@ -459,39 +459,11 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         }
         SubCommand::Prune => {
             let db = setup_db(&RuntimeConfig::default()).await;
-            match files_config.detect_migration_type() {
-                Ok(MigrationFlag::TwoWay) => {
-                    let prune = files_config
-                        .two_way()
-                        .prune_unapplied_migrations(db.clone())
-                        .await;
-
-                    if let Err(ref e) = prune {
-                        log::error!("Failed to prune migrations: {}", e.to_string());
-                    }
-                }
-                Ok(MigrationFlag::OneWay) => {
-                    log::error!(
-                        "Cannot prune one way migrations. 
-                    Please use two way migrations or Create a new migration to reverse the changes"
-                    );
-                    panic!();
-                }
-                Err(e) => {
-                    log::error!("Failed to detect migration type: {}", e.to_string());
-                    panic!();
-                }
-            };
-            let all_migrations_from_dir = files_config.two_way().get_migrations();
-
-            let xx = MigrationRunner::get_pending_migrations(all_migrations, db);
-            let prune = files_config
-                .two_way()
-                .prune_unapplied_migrations(db.clone())
-                .await;
-
-            if let Err(ref e) = prune {
+            let res =
+                MigrationRunner::delete_unapplied_migration_files(db.clone(), &files_config).await;
+            if let Err(ref e) = res {
                 log::error!("Failed to prune migrations: {}", e.to_string());
+                panic!();
             }
 
             log::info!("Prune successful");
