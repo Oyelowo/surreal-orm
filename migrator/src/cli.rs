@@ -34,7 +34,6 @@ enum SubCommand {
     #[clap(alias = "ls")]
     List(List),
     /// Delete Unapplied local migration files that have not been applied to the current database instance
-    #[clap(alias = "prune")]
     Prune,
 }
 
