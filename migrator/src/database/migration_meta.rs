@@ -194,7 +194,7 @@ impl Migration {
 
         let xx = Raw::new(format!(
             "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp}, \
-        {checksum_up_field}={checksum_up}, {checksum_down_field}={checksum_down};"
+        {checksum_up_field}='{checksum_up}', {checksum_down_field}='{checksum_down}';"
         ));
         dbg!(&xx);
 
