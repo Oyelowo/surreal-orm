@@ -349,28 +349,34 @@ impl MigrationRunner {
         mig_config: &MigrationConfig,
     ) -> MigrationResult<()> {
         let dir = mig_config.get_migration_dir()?;
-        let pending_migrations_paths = match mig_config.detect_migration_type()? {
-            MigrationFlag::OneWay => {
-                let migrations = mig_config.one_way().get_migrations()?;
-                let migs = Self::get_pending_migrations(migrations, db).await?;
-                migs.into_iter()
-                    .map(|m| dir.join(m.name().to_string()))
-                    .collect::<Vec<_>>()
-            }
-            MigrationFlag::TwoWay => {
-                let migrations = mig_config.two_way().get_migrations()?;
-                let migs = Self::get_pending_migrations(migrations, db).await?;
-                migs.into_iter()
-                    .map(|m| {
-                        vec![
-                            dir.join(m.name().to_up().to_string()),
-                            dir.join(m.name().to_down().to_string()),
-                        ]
-                    })
-                    .flatten()
-                    .collect::<Vec<_>>()
-            }
-        };
+
+        let migrations = mig_config.one_way().get_migrations().unwrap_or_default();
+        let migs = Self::get_pending_migrations(migrations, db.clone()).await?;
+        let paths1 = migs
+            .into_iter()
+            .map(|m| dir.join(m.name().to_string()))
+            .collect::<Vec<_>>();
+
+        let migrations = mig_config.two_way().get_migrations().unwrap_or_default();
+        let migs = Self::get_pending_migrations(migrations, db.clone()).await?;
+
+        let paths2 = migs
+            .into_iter()
+            .map(|m| {
+                vec![
+                    dir.join(m.name().to_up().to_string()),
+                    dir.join(m.name().to_down().to_string()),
+                ]
+            })
+            .flatten()
+            .collect::<Vec<_>>();
+
+        let pending_migrations_paths = [&paths1[..], &paths2[..]].concat();
+        println!("Pending migrations paths: {:?}", &pending_migrations_paths);
+        log::info!(
+            "Deleting {} unapplied migration file(s)",
+            pending_migrations_paths.len()
+        );
 
         for mig_path in pending_migrations_paths {
             log::info!("Deleting file: {:?}", &mig_path);
@@ -646,6 +652,16 @@ impl MigrationRunner {
 pub enum StrictNessLevel {
     Strict,
     Lax,
+}
+
+impl StrictNessLevel {
+    pub fn is_strict(&self) -> bool {
+        *self == Self::Strict
+    }
+
+    pub fn is_lax(&self) -> bool {
+        *self == Self::Lax
+    }
 }
 
 impl From<bool> for StrictNessLevel {
