@@ -36,6 +36,41 @@ enum MigrationFile {
     TwoWay(MigrationTwoWay),
 }
 
+impl MigrationFile {
+    fn name(&self) -> &MigrationFilename {
+        match self {
+            Self::OneWay(m) => &m.name,
+            Self::TwoWay(m) => &m.name,
+        }
+    }
+
+    pub fn up_content(&self) -> &FileContent {
+        match self {
+            Self::OneWay(m) => &m.content,
+            Self::TwoWay(m) => &m.up,
+        }
+    }
+
+    pub fn down_content(&self) -> Option<&FileContent> {
+        match self {
+            Self::OneWay(_) => None,
+            Self::TwoWay(m) => Some(&m.down),
+        }
+    }
+}
+
+impl From<MigrationOneWay> for MigrationFile {
+    fn from(m: MigrationOneWay) -> Self {
+        Self::OneWay(m)
+    }
+}
+
+impl From<MigrationTwoWay> for MigrationFile {
+    fn from(m: MigrationTwoWay) -> Self {
+        Self::TwoWay(m)
+    }
+}
+
 pub struct PendingMigration(MigrationFileMeta);
 
 impl Deref for PendingMigration {
@@ -313,9 +348,9 @@ impl MigrationRunner {
     }
 
     async fn get_pending_migrations(
-        all_migrations: Vec<impl Into<PendingMigration>>,
+        all_migrations: Vec<impl Into<MigrationFile>>,
         db: Surreal<impl Connection>,
-    ) -> SurrealOrmResult<Vec<PendingMigration>> {
+    ) -> SurrealOrmResult<Vec<MigrationFile>> {
         let latest_migration = Self::get_latest_migration(db.clone()).await?;
 
         let pending_migrations = all_migrations
@@ -473,7 +508,7 @@ impl MigrationRunner {
 
     pub async fn apply_pending_migrations(
         db: Surreal<impl Connection>,
-        all_migrations: Vec<impl Into<PendingMigration>>,
+        all_migrations: Vec<impl Into<MigrationFile>>,
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         log::info!("Running pending migrations");
