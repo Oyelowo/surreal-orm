@@ -23,13 +23,13 @@ use nom::{
 
 use crate::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub struct MigrationNameBasicInfo {
     timestamp: u64,
     name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash)]
 pub enum MigrationFilename {
     Up(MigrationNameBasicInfo),
     Down(MigrationNameBasicInfo),

@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use std::collections::HashSet;
 use std::{fs::File, io::BufReader};
 
 use sha2::{self, Digest, Sha256};
@@ -418,6 +419,14 @@ impl Mode {
     pub fn options() -> Vec<String> {
         vec![Self::Strict.to_string(), Self::Relaxed.to_string()]
     }
+
+    pub fn is_strict(&self) -> bool {
+        matches!(self, Self::Strict)
+    }
+
+    pub fn is_relaxed(&self) -> bool {
+        matches!(self, Self::Relaxed)
+    }
 }
 
 impl TryFrom<String> for Mode {
@@ -474,7 +483,7 @@ impl MigrationConfig {
         Self(self.0.mode(Mode::Strict))
     }
 
-    pub fn make_relaxed(&self) -> Self {
+    pub fn relax(&self) -> Self {
         Self(self.0.mode(Mode::Relaxed))
     }
 
@@ -788,7 +797,7 @@ impl FileManager {
             let filename: MigrationFilename = migration_up_name.clone().try_into()?;
             match filename {
                 MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
-                    if self.mode == Mode::Strict {
+                    if self.mode.is_strict() {
                         return Err(MigrationError::InvalidMigrationFileNameForMode(
                             filename.to_string(),
                         ));
@@ -821,6 +830,7 @@ impl FileManager {
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
+        // strictness: StrictNessLevel,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         log::info!("Migration dir path: {:?}", migration_dir_path.clone());
@@ -835,26 +845,49 @@ impl FileManager {
 
         let mut ups_basenames = vec![];
         let mut downs_basenames = vec![];
+        let mut paths_registry_lookup = HashSet::new();
 
         for migration in migrations.expect("Problem reading migrations directory") {
             let migration = migration.expect("Problem reading migration");
             let path = migration.path();
             let parent_dir = path.parent().ok_or(MigrationError::PathDoesNotExist)?;
-            let path = path.to_str().unwrap();
-            let migration_name = path.split('/').last().unwrap();
-            let migration_up_name = migration_name.to_string();
+            let migration_name = path
+                .components()
+                .last()
+                .expect("Problem reading migration name")
+                .as_os_str()
+                .to_string_lossy()
+                .to_string();
 
-            let filename: MigrationFilename = migration_up_name.clone().try_into()?;
+            let filename: MigrationFilename = migration_name.clone().try_into()?;
+            let get_content = |filename: &MigrationFilename| -> MigrationResult<FileContent> {
+                let content = fs::read_to_string(parent_dir.join(filename.to_string()))
+                    .map_err(|_e| {
+                        MigrationError::IoError(format!("Filename: {filename} does not exist"))
+                    })?
+                    .into();
+                Ok(content)
+            };
+
             match filename {
-                MigrationFilename::Up(_) => {
-                    ups_basenames.push(filename.basename());
-                    let content_up = fs::read_to_string(path)
-                        .expect("Problem reading migration")
-                        .into();
-                    let content_down =
-                        fs::read_to_string(parent_dir.join(filename.to_down().to_string()))
-                            .map_err(|_e| MigrationError::IoError(format!("Filename: {filename}")))?
-                            .into();
+                MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
+                    match filename {
+                        MigrationFilename::Up(_) => {
+                            ups_basenames.push(filename.basename());
+                        }
+                        MigrationFilename::Down(_) => {
+                            downs_basenames.push(filename.basename());
+                        }
+                        _ => {}
+                    }
+
+                    let filetracker = filename.to_up();
+                    if paths_registry_lookup.contains(&filetracker) {
+                        continue;
+                    }
+
+                    let content_up = get_content(&filename.to_up())?;
+                    let content_down = get_content(&filename.to_down())?;
 
                     let migration = MigrationTwoWay {
                         name: filename.clone(),
@@ -862,10 +895,8 @@ impl FileManager {
                         down: content_down,
                     };
 
+                    paths_registry_lookup.insert(filetracker);
                     migrations_bi_meta.push(migration);
-                }
-                MigrationFilename::Down(_) => {
-                    downs_basenames.push(filename.basename());
                 }
                 MigrationFilename::Unidirectional(_) => {
                     if self.mode == Mode::Strict {
@@ -879,22 +910,23 @@ impl FileManager {
 
         // Validate
         // 1. Length of ups and downs should be equal
-        if ups_basenames.len() != downs_basenames.len() {
-            return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                "Unequal number of up and down migrations.".into(),
-            ));
-        }
+        if self.mode.is_strict() {
+            if ups_basenames.len() != downs_basenames.len() {
+                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+                    "Unequal number of up and down migrations.".into(),
+                ));
+            }
 
-        let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
-        let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
+            let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
+            let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
 
-        let up_down_difference = ups_basenames_as_set
-            .symmetric_difference(&downs_basenames_as_set)
-            .cloned()
-            .collect::<Vec<_>>();
-        if !up_down_difference.is_empty() {
-            return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                format!(
+            let up_down_difference = ups_basenames_as_set
+                .symmetric_difference(&downs_basenames_as_set)
+                .cloned()
+                .collect::<Vec<_>>();
+            if !up_down_difference.is_empty() {
+                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+                    format!(
                     "The following files do not exist for both up and down. only for either: {}",
                     up_down_difference
                         .iter()
@@ -902,7 +934,8 @@ impl FileManager {
                         .collect::<Vec<_>>()
                         .join(", "),
                 ),
-            ));
+                ));
+            }
         }
         migrations_bi_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
         Ok(migrations_bi_meta)

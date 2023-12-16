@@ -468,8 +468,12 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         }
         SubCommand::Prune(prune) => {
             let db = setup_db(&prune.runtime_config).await;
-            let res =
-                MigrationRunner::delete_unapplied_migration_files(db.clone(), &files_config).await;
+            let res = MigrationRunner::delete_unapplied_migration_files(
+                db.clone(),
+                &files_config.relax(),
+            )
+            .await;
+
             if let Err(ref e) = res {
                 log::error!("Failed to prune migrations: {}", e.to_string());
                 panic!();
