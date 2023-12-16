@@ -292,7 +292,7 @@ pub struct MigrationTwoWay {
     pub name: MigrationFilename,
     pub up: FileContent,
     pub down: FileContent,
-    pub directory: Option<PathBuf>,
+    pub directory: PathBuf,
     // status: String,
 }
 
@@ -326,6 +326,7 @@ impl TryFrom<MigrationTwoWay> for Migration {
 pub struct MigrationOneWay {
     pub name: MigrationFilename,
     pub content: FileContent, // status: String,
+    pub directory: PathBuf,
 }
 
 impl MigrationOneWay {}
@@ -808,6 +809,10 @@ impl FileManager {
                     let migration = MigrationOneWay {
                         name: filename,
                         content,
+                        directory: path
+                            .parent()
+                            .expect("Problem path's parent directory")
+                            .to_path_buf(),
                     };
 
                     migrations_uni_meta.push(migration);
