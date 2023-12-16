@@ -192,10 +192,13 @@ impl Migration {
             .map(|c| c.to_string())
             .unwrap_or("null".into());
 
-        Raw::new(format!(
-            "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp} \
-        {checksum_up_field}={checksum_up} {checksum_down_field}={checksum_down};"
-        ))
+        let xx = Raw::new(format!(
+            "CREATE {record_id} SET {name_field}='{name}', {timestamp_field}={timestamp}, \
+        {checksum_up_field}={checksum_up}, {checksum_down_field}={checksum_down};"
+        ));
+        dbg!(&xx);
+
+        xx
     }
 
     pub fn delete_raw(filename: &MigrationFilename) -> Raw {
