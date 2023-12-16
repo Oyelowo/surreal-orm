@@ -21,7 +21,6 @@ impl From<MigrationTwoWay> for MigrationOneWay {
         Self {
             name: m.name,
             content: m.up,
-            directory: m.directory,
         }
     }
 }
@@ -74,13 +73,6 @@ impl MigrationFile {
         match self {
             Self::OneWay(_) => None,
             Self::TwoWay(m) => Some(&m.down),
-        }
-    }
-
-    pub fn directory(&self) -> &PathBuf {
-        match self {
-            Self::OneWay(m) => &m.directory,
-            Self::TwoWay(m) => &m.directory,
         }
     }
 }
@@ -205,6 +197,7 @@ impl MigrationRunner {
 
         let (queries_to_run, file_paths) = match rollback_strategy {
             RollbackStrategy::Previous => Self::generate_rollback_queries_and_filepaths(
+                fm,
                 vec![migrations_from_dir.clone()],
                 vec![latest_migration],
                 strictness,
@@ -240,6 +233,7 @@ impl MigrationRunner {
                     .collect::<Vec<_>>();
 
                 Self::generate_rollback_queries_and_filepaths(
+                    fm,
                     migrations_to_rollback,
                     migrations_from_db,
                     strictness,
@@ -287,6 +281,7 @@ impl MigrationRunner {
                     .collect::<Vec<_>>();
 
                 Self::generate_rollback_queries_and_filepaths(
+                    fm,
                     migrations_files_to_rollback,
                     migrations_from_db,
                     strictness,
@@ -366,21 +361,24 @@ impl MigrationRunner {
 
         for mig in pending_migrations {
             let mig_name = mig.name().to_string();
-            let mig_path = fm.get_migration_path(&mig_name)?;
-            log::info!("Deleting file: {:?}", mig_path.to_str());
-            std::fs::remove_file(mig_path).map_err(|e| {
+            let mig_path = fm
+                .resolve_migration_directory(false)
+                .map(|d| d.join(mig_name))?;
+            log::info!("Deleting file: {:?}", &mig_path);
+            std::fs::remove_file(&mig_path).map_err(|e| {
                 MigrationError::IoError(format!(
                     "Failed to delete migration file: {:?}. Error: {}",
-                    mig_path, e
+                    &mig_path, e
                 ))
             })?;
-            log::info!("Deleted file: {:?}", mig_path.to_str());
+            log::info!("Deleted file: {:?}", &mig_path.to_str());
         }
 
         Ok(())
     }
 
     fn generate_rollback_queries_and_filepaths(
+        fm: &FileManager,
         migrations_to_rollback: Vec<MigrationTwoWay>,
         migrations_from_db: Vec<Migration>,
         strictness: &StrictNessLevel,
@@ -434,17 +432,18 @@ impl MigrationRunner {
         let file_paths = migrations_to_rollback
             .iter()
             .map(|m| {
-                let d = m.directory;
-                vec![
-                    d.join(m.name.to_up().to_string()),
-                    d.join(m.name.to_down().to_string()),
-                ]
+                fm.get_migration_dir().map(|d| {
+                    vec![
+                        d.join(m.name.to_up().to_string()),
+                        d.join(m.name.to_down().to_string()),
+                    ]
+                })
             })
-            .collect::<Vec<_>>();
+            .collect::<MigrationResult<Vec<_>>>();
 
         Ok((
             Raw::new(all),
-            file_paths.iter().flatten().cloned().collect::<Vec<_>>(),
+            file_paths?.iter().flatten().cloned().collect::<Vec<_>>(),
         ))
     }
 
