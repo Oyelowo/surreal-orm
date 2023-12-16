@@ -473,7 +473,7 @@ impl MigrationRunner {
                 let mut filtered_migs: Vec<MigrationFile> = vec![];
 
                 for mig in pending_migs {
-                    filtered_migs.push(mig.clone().into());
+                    filtered_migs.push(mig.clone());
                     if *mig.name() == mig_filename {
                         migration_found = true;
                         break;
