@@ -266,7 +266,7 @@ pub mod migration {
 
 impl Migration {}
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FileContent(String);
 
 impl Display for FileContent {
@@ -288,12 +288,18 @@ impl From<String> for FileContent {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MigrationTwoWay {
     pub name: MigrationFilename,
     pub up: FileContent,
     pub down: FileContent,
     // status: String,
+}
+
+pub enum MigrationTwoWayV2 {
+    Up(MigrationOneWay),
+    Down(MigrationOneWay),
+    OneWay(MigrationOneWay),
 }
 
 // impl From<MigrationTwoWay> for Migration {
@@ -841,7 +847,8 @@ impl FileManager {
             return Ok(vec![]);
         }
 
-        let mut migrations_bi_meta = vec![];
+        // let mut migrations_bi_meta = vec![];
+        let mut migrations_bi_meta = HashSet::new();
 
         let mut ups_basenames = vec![];
         let mut downs_basenames = vec![];
@@ -869,6 +876,8 @@ impl FileManager {
                 Ok(content)
             };
 
+            println!("Filename: {}", filename);
+            println!("Filenameto up: {}", filename.to_up());
             match filename {
                 MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
                     match filename {
@@ -882,9 +891,9 @@ impl FileManager {
                     }
 
                     let filetracker = filename.to_up();
-                    if paths_registry_lookup.contains(&filetracker) {
-                        continue;
-                    }
+                    // if paths_registry_lookup.contains(&filetracker) {
+                    //     continue;
+                    // }
 
                     let content_up = get_content(&filename.to_up())?;
                     let content_down = get_content(&filename.to_down())?;
@@ -896,7 +905,7 @@ impl FileManager {
                     };
 
                     paths_registry_lookup.insert(filetracker);
-                    migrations_bi_meta.push(migration);
+                    migrations_bi_meta.insert(migration);
                 }
                 MigrationFilename::Unidirectional(_) => {
                     if self.mode == Mode::Strict {
@@ -910,33 +919,38 @@ impl FileManager {
 
         // Validate
         // 1. Length of ups and downs should be equal
-        if self.mode.is_strict() {
-            if ups_basenames.len() != downs_basenames.len() {
-                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                    "Unequal number of up and down migrations.".into(),
-                ));
-            }
+        // if self.mode.is_strict() {
+        //     if ups_basenames.len() != downs_basenames.len() {
+        //         return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+        //             "Unequal number of up and down migrations.".into(),
+        //         ));
+        //     }
+        //
+        //     let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
+        //     let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
+        //
+        //     let up_down_difference = ups_basenames_as_set
+        //         .symmetric_difference(&downs_basenames_as_set)
+        //         .cloned()
+        //         .collect::<Vec<_>>();
+        //
+        //     if !up_down_difference.is_empty() {
+        //         return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+        //             format!(
+        //             "The following files do not exist for both up and down. only for either: {}",
+        //             up_down_difference
+        //                 .iter()
+        //                 .map(ToString::to_string)
+        //                 .collect::<Vec<_>>()
+        //                 .join(", "),
+        //         ),
+        //         ));
+        //     }
+        // }
+        //
+        let mut migrations_bi_meta = migrations_bi_meta.into_iter().collect::<Vec<_>>();
+        println!("Migrations: {:?}", migrations_bi_meta.clone());
 
-            let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
-            let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
-
-            let up_down_difference = ups_basenames_as_set
-                .symmetric_difference(&downs_basenames_as_set)
-                .cloned()
-                .collect::<Vec<_>>();
-            if !up_down_difference.is_empty() {
-                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                    format!(
-                    "The following files do not exist for both up and down. only for either: {}",
-                    up_down_difference
-                        .iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                ),
-                ));
-            }
-        }
         migrations_bi_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
         Ok(migrations_bi_meta)
     }
