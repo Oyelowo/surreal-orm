@@ -37,7 +37,7 @@ enum MigrationFile {
 }
 
 impl MigrationFile {
-    fn name(&self) -> &MigrationFilename {
+    pub fn name(&self) -> &MigrationFilename {
         match self {
             Self::OneWay(m) => &m.name,
             Self::TwoWay(m) => &m.name,
@@ -355,13 +355,10 @@ impl MigrationRunner {
 
         let pending_migrations = all_migrations
             .into_iter()
-            .map(|m| {
-                let m: PendingMigration = m.into();
-                m
-            })
+            .map(Into::into)
             .filter(|m| {
                 latest_migration.as_ref().map_or(true, |latest_migration| {
-                    m.name.timestamp() > latest_migration.timestamp
+                    m.name().timestamp() > latest_migration.timestamp
                 })
             })
             .collect::<Vec<_>>();
