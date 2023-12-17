@@ -358,6 +358,7 @@ impl MigrationRunner {
             .collect::<Vec<_>>();
 
         let migrations = mig_config.two_way().get_migrations().unwrap_or_default();
+        println!("Migrationsxxx: {:?}", &migrations);
         let migs = Self::get_pending_migrations(migrations, db.clone())
             .await
             .expect("kakakqkakak");

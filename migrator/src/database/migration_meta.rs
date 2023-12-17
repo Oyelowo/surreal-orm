@@ -815,6 +815,37 @@ impl FileManager {
         Ok(migrations_uni_meta)
     }
 
+    pub fn get_migrations_filenames(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<MigrationFilenames> {
+        let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
+        log::info!("Migration dir path: {:?}", migration_dir_path.clone());
+        let migrations = fs::read_dir(migration_dir_path.clone());
+        log::info!("Migration dir path: {:?}", migration_dir_path);
+
+        let mut filenames = vec![];
+
+        for migration in migrations.expect("Problem reading migrations directory") {
+            let migration = migration.expect("Problem reading migration");
+            let path = migration.path();
+            let migration_name = path
+                .components()
+                .last()
+                .expect("Problem reading migration name")
+                .as_os_str()
+                .to_string_lossy()
+                .to_string();
+
+            let filename: MigrationFilename = migration_name.clone().try_into()?;
+            filenames.push(filename);
+        }
+
+        filenames.sort_by(|a, b| a.cmp(b));
+        Ok(filenames)
+    }
+
+    // Validate
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
@@ -829,12 +860,9 @@ impl FileManager {
             return Ok(vec![]);
         }
 
-        // let mut migrations_bi_meta = vec![];
         let mut migrations_bi_meta = HashSet::new();
-
         let mut ups_basenames = vec![];
         let mut downs_basenames = vec![];
-        let mut paths_registry_lookup = HashSet::new();
 
         for migration in migrations.expect("Problem reading migrations directory") {
             let migration = migration.expect("Problem reading migration");
@@ -858,8 +886,6 @@ impl FileManager {
                 Ok(content)
             };
 
-            println!("Filename: {}", filename);
-            println!("Filenameto up: {}", filename.to_up());
             match filename {
                 MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
                     match filename {
@@ -872,11 +898,6 @@ impl FileManager {
                         _ => {}
                     }
 
-                    let filetracker = filename.to_up();
-                    // if paths_registry_lookup.contains(&filetracker) {
-                    //     continue;
-                    // }
-
                     let content_up = get_content(&filename.to_up())?;
                     let content_down = get_content(&filename.to_down())?;
 
@@ -886,7 +907,6 @@ impl FileManager {
                         down: content_down,
                     };
 
-                    paths_registry_lookup.insert(filetracker);
                     migrations_bi_meta.insert(migration);
                 }
                 MigrationFilename::Unidirectional(_) => {
@@ -901,39 +921,49 @@ impl FileManager {
 
         // Validate
         // 1. Length of ups and downs should be equal
-        // if self.mode.is_strict() {
-        //     if ups_basenames.len() != downs_basenames.len() {
-        //         return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-        //             "Unequal number of up and down migrations.".into(),
-        //         ));
-        //     }
-        //
-        //     let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
-        //     let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
-        //
-        //     let up_down_difference = ups_basenames_as_set
-        //         .symmetric_difference(&downs_basenames_as_set)
-        //         .cloned()
-        //         .collect::<Vec<_>>();
-        //
-        //     if !up_down_difference.is_empty() {
-        //         return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-        //             format!(
-        //             "The following files do not exist for both up and down. only for either: {}",
-        //             up_down_difference
-        //                 .iter()
-        //                 .map(ToString::to_string)
-        //                 .collect::<Vec<_>>()
-        //                 .join(", "),
-        //         ),
-        //         ));
-        //     }
-        // }
-        //
+        if self.mode.is_strict() {
+            if ups_basenames.len() != downs_basenames.len() {
+                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+                    "Unequal number of up and down migrations.".into(),
+                ));
+            }
+
+            let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
+            let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
+
+            let up_down_difference = ups_basenames_as_set
+                .symmetric_difference(&downs_basenames_as_set)
+                .cloned()
+                .collect::<Vec<_>>();
+
+            if !up_down_difference.is_empty() {
+                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
+                    format!(
+                    "The following files do not exist for both up and down. only for either: {}",
+                    up_down_difference
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                ),
+                ));
+            }
+        }
+
         let mut migrations_bi_meta = migrations_bi_meta.into_iter().collect::<Vec<_>>();
-        println!("Migrations: {:?}", migrations_bi_meta.clone());
+        migrations_bi_meta.push(MigrationTwoWay {
+            name: "20231216000000_create_migration_table.up.surql"
+                .to_string()
+                .try_into()
+                .expect("xrer"),
+            up: FileContent("upananan".into()),
+            down: FileContent("downwnw".into()),
+        });
 
         migrations_bi_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
+
+        log::info!("Successfully read {} migrations", migrations_bi_meta.len());
+
         Ok(migrations_bi_meta)
     }
 }
