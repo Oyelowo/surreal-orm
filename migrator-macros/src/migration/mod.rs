@@ -48,7 +48,7 @@ fn generate_migration_code(
             .expect("Failed to get migrations")
             .iter()
             .map(|meta| {
-                let name = meta.up_name.to_string();
+                let name = meta.name.to_up().to_string();
                 let up = meta.up.to_string();
                 let down = meta.down.to_string();
 
