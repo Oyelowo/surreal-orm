@@ -76,30 +76,29 @@ impl MigrationFilenames {
             .collect()
     }
 
-    // includes FileContent
-    // #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-    // pub struct MigrationTwoWay {
-    //     pub name: MigrationFilename,
-    //     pub up: FileContent,
-    //     pub down: FileContent,
-    //     // status: String,
-    // }
-
     pub fn bidirectional_pair_meta_checked(
         &self,
         migration_dir: &Path,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
         let mut bidirectional = self.bidirectional();
-        bidirectional.sort();
-        bidirectional.dedup();
 
         let mut bidirectional_pair = Vec::new();
         for migration in bidirectional {
             let up = migration_dir.join(migration.to_up().to_string());
             let down = migration_dir.join(migration.to_down().to_string());
 
-            let up = FileContent::from_file(&up)?;
-            let down = FileContent::from_file(&down)?;
+            let up = FileContent::from_file(&up).map_err(|e| {
+                MigrationError::MigrationFilePathDoesNotExist {
+                    path: up.to_string_lossy().to_string(),
+                    error: e.to_string(),
+                }
+            })?;
+            let down = FileContent::from_file(&down).map_err(|e| {
+                MigrationError::MigrationFilePathDoesNotExist {
+                    path: down.to_string_lossy().to_string(),
+                    error: e.to_string(),
+                }
+            })?;
 
             bidirectional_pair.push(MigrationTwoWay {
                 name: migration,
@@ -107,6 +106,42 @@ impl MigrationFilenames {
                 down,
             });
         }
+
+        bidirectional_pair.sort();
+        bidirectional_pair.dedup();
+
+        Ok(bidirectional_pair)
+    }
+
+    pub fn bidirectional_pair_meta_down_unchecked(
+        &self,
+        migration_dir: &Path,
+    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+        let mut bidirectional = self.bidirectional();
+
+        let mut bidirectional_pair = Vec::new();
+        for migration in bidirectional {
+            let up = migration_dir.join(migration.to_up().to_string());
+            let down = migration_dir.join(migration.to_down().to_string());
+
+            let up = FileContent::from_file(&up).map_err(|e| {
+                MigrationError::MigrationFilePathDoesNotExist {
+                    path: up.to_string_lossy().to_string(),
+                    error: e.to_string(),
+                }
+            })?;
+
+            let down = FileContent::from_file(&down).unwrap_or(FileContent::empty());
+
+            bidirectional_pair.push(MigrationTwoWay {
+                name: migration,
+                up,
+                down,
+            });
+        }
+
+        bidirectional_pair.sort();
+        bidirectional_pair.dedup();
 
         Ok(bidirectional_pair)
     }
