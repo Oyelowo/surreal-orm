@@ -4,11 +4,11 @@ use std::ops::Deref;
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
+use crate::MigrationConfig;
 use crate::{
     cli::Status, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
     MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
-use crate::{MigrationConfig, MigrationFlag};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {

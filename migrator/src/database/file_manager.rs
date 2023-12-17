@@ -80,7 +80,7 @@ impl MigrationFilenames {
         &self,
         migration_dir: &Path,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let mut bidirectional = self.bidirectional();
+        let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
         for migration in bidirectional {
@@ -117,7 +117,7 @@ impl MigrationFilenames {
         &self,
         migration_dir: &Path,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let mut bidirectional = self.bidirectional();
+        let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
         for migration in bidirectional {
