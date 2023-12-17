@@ -85,6 +85,9 @@ pub enum MigrationError {
     #[error("Invalid path")]
     PathDoesNotExist,
 
+    #[error("Problem reading migration file. Error: {0}")]
+    ProblemReadingMigrationFile(String),
+
     #[error("The field - {new_name} - on table - {table} - has an invalid old name - '{old_name}'. \
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
@@ -115,7 +118,7 @@ pub enum MigrationError {
         two_way_error: String,
     },
 
-    #[error("Ambiguous migration direction. Both oneway and two file types found in migration directory. Use one or the other.
+    #[error("Ambiguous migration direction. Both or neither one-way and two-way file types found in migration directory. Use one or the other.
 Up only should not be sufficed with 'up.surql' or 'down.surql' but up and down migrations can be.
 There are {one_way_filecount} up only files and {two_way_filecount} up and down files")]
     AmbiguousMigrationDirection {
