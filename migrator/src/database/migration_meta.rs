@@ -712,39 +712,19 @@ impl FileManager {
     }
 
     pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
-        let oneway = self.get_oneway_migrations(false);
-        let twoway = self.get_two_way_migrations(false);
+        let filenames = self.get_migrations_filenames(false)?;
+        let oneway = filenames.unidirectional();
+        let twoway = filenames.bidirectional();
 
-        match (oneway, twoway) {
-            (Ok(oneway), Ok(twoway)) if !oneway.is_empty() && twoway.is_empty() => {
-                Ok(MigrationFlag::OneWay)
-            }
-            (Ok(oneway), Ok(twoway)) if oneway.is_empty() && !twoway.is_empty() => {
-                Ok(MigrationFlag::TwoWay)
-            }
-            (Ok(oneway), Err(_)) if !oneway.is_empty() => Ok(MigrationFlag::OneWay),
-            (Err(_), Ok(twoway)) if !twoway.is_empty() => Ok(MigrationFlag::TwoWay),
-            (Ok(oneway), Ok(twoway)) if oneway.is_empty() && twoway.is_empty() => {
-                Err(MigrationError::MigrationDirectoryEmpty)
-            }
-            (Ok(oneway_files), Ok(twoway_files))
-                if !oneway_files.is_empty() && !twoway_files.is_empty() =>
-            {
+        match (oneway.is_empty(), twoway.is_empty()) {
+            (false, true) => Ok(MigrationFlag::OneWay),
+            (true, false) => Ok(MigrationFlag::TwoWay),
+            (false, false) | (true, true) => {
                 return Err(MigrationError::AmbiguousMigrationDirection {
-                    one_way_filecount: oneway_files.len(),
-                    two_way_filecount: twoway_files.len(),
+                    one_way_filecount: oneway.len(),
+                    two_way_filecount: twoway.len(),
                 });
             }
-            (Err(one_way_err), Err(two_way_error)) => {
-                Err(MigrationError::ProblemDetectingMigrationMode {
-                    one_way_error: one_way_err.to_string(),
-                    two_way_error: two_way_error.to_string(),
-                })
-            }
-            _ => Err(MigrationError::MigrationFlagDetectionError(
-                "Unable to detect if you are using one way or two way migrations. \
-                Please make sure you have either one way or two way migrations in your migration directory".into()
-            )),
         }
     }
 
@@ -868,22 +848,20 @@ impl FileManager {
         &self,
         create_dir_if_not_exists: bool,
         // strictness: StrictNessLevel,
-    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+    ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         log::info!("Migration dir path: {:?}", migration_dir_path.clone());
-        let migrations = fs::read_dir(migration_dir_path.clone());
+        let migrations = fs::read_dir(migration_dir_path.clone())
+            .map_err(|e| MigrationError::MigrationDirectoryDoesNotExist(e.to_string()))?;
         log::info!("Migration dir path: {:?}", migration_dir_path);
-
-        if migrations.is_err() {
-            return Ok(vec![]);
-        }
 
         let mut migrations_bi_meta = HashSet::new();
         let mut ups_basenames = vec![];
         let mut downs_basenames = vec![];
 
-        for migration in migrations.expect("Problem reading migrations directory") {
-            let migration = migration.expect("Problem reading migration");
+        for migration in migrations {
+            let migration = migration
+                .map_err(|e| MigrationError::ProblemReadingMigrationFile(e.to_string()))?;
             let path = migration.path();
             let parent_dir = path.parent().ok_or(MigrationError::PathDoesNotExist)?;
             let migration_name = path
