@@ -277,6 +277,10 @@ impl Display for FileContent {
 }
 
 impl FileContent {
+    pub fn empty() -> Self {
+        Self("".into())
+    }
+
     pub fn as_checksum(&self) -> MigrationResult<Checksum> {
         Checksum::generate_from_content(self)
     }
