@@ -153,6 +153,35 @@ impl MigrationFilenames {
             .cloned()
             .collect()
     }
+
+    pub fn unidirectional_pair_meta(
+        &self,
+        migration_dir: &Path,
+    ) -> MigrationResult<Vec<MigrationOneWay>> {
+        let unidirectional = self.unidirectional();
+
+        let mut unidirectional_pair = Vec::new();
+        for migration in unidirectional {
+            let up = migration_dir.join(migration.to_up().to_string());
+
+            let content = FileContent::from_file(&up).map_err(|e| {
+                MigrationError::MigrationFilePathDoesNotExist {
+                    path: up.to_string_lossy().to_string(),
+                    error: e.to_string(),
+                }
+            })?;
+
+            unidirectional_pair.push(MigrationOneWay {
+                name: migration,
+                content,
+            });
+        }
+
+        unidirectional_pair.sort_by_key(|meta| meta.name);
+        unidirectional_pair.dedup_by_key(|meta| meta.name);
+
+        Ok(unidirectional_pair)
+    }
 }
 
 impl PartialEq for MigrationFilename {
