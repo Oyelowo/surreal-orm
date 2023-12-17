@@ -36,6 +36,65 @@ pub enum MigrationFilename {
     Unidirectional(MigrationNameBasicInfo),
 }
 
+pub struct MigrationFilenames(Vec<MigrationFilename>);
+
+impl From<Vec<MigrationFilename>> for MigrationFilenames {
+    fn from(value: Vec<MigrationFilename>) -> Self {
+        Self(value)
+    }
+}
+
+impl MigrationFilenames {
+    pub fn all(&self) -> Vec<MigrationFilename> {
+        self.0.clone()
+    }
+
+    pub fn up(&self) -> Vec<MigrationFilename> {
+        self.0
+            .iter()
+            .filter(|m| matches!(m, MigrationFilename::Up(_)))
+            .cloned()
+            .collect()
+    }
+
+    pub fn down(&self) -> Vec<MigrationFilename> {
+        self.0
+            .iter()
+            .filter(|m| matches!(m, MigrationFilename::Down(_)))
+            .cloned()
+            .collect()
+    }
+
+    pub fn bidirectional(&self) -> Vec<MigrationFilename> {
+        self.0
+            .iter()
+            .filter(|m| {
+                matches!(m, MigrationFilename::Up(_)) || matches!(m, MigrationFilename::Down(_))
+            })
+            .cloned()
+            .collect()
+    }
+
+    // includes FileContent
+    // #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+    // pub struct MigrationTwoWay {
+    //     pub name: MigrationFilename,
+    //     pub up: FileContent,
+    //     pub down: FileContent,
+    //     // status: String,
+    // }
+
+    pub fn bidirectional_pair_meta_checked(&self) -> Vec<MigrationTwoWay> {}
+
+    pub fn unidirectional(&self) -> Vec<MigrationFilename> {
+        self.0
+            .iter()
+            .filter(|m| matches!(m, MigrationFilename::Unidirectional(_)))
+            .cloned()
+            .collect()
+    }
+}
+
 impl PartialEq for MigrationFilename {
     fn eq(&self, other: &Self) -> bool {
         self.timestamp() == other.timestamp()
