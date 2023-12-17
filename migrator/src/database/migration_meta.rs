@@ -280,6 +280,20 @@ impl FileContent {
     pub fn as_checksum(&self) -> MigrationResult<Checksum> {
         Checksum::generate_from_content(self)
     }
+
+    pub fn as_checksum_from_path(
+        &self,
+        file_path: impl Into<PathBuf>,
+    ) -> MigrationResult<Checksum> {
+        Checksum::generate_from_path(file_path)
+    }
+
+    pub fn from_file(file_path: impl Into<PathBuf>) -> MigrationResult<Self> {
+        let file_path = file_path.into();
+        let content = fs::read_to_string(&file_path)
+            .map_err(|e| MigrationError::IoError(format!("Error: {}", e)))?;
+        Ok(Self(content))
+    }
 }
 
 impl From<String> for FileContent {
@@ -842,7 +856,7 @@ impl FileManager {
         }
 
         filenames.sort_by(|a, b| a.cmp(b));
-        Ok(filenames)
+        Ok(filenames.into())
     }
 
     // Validate

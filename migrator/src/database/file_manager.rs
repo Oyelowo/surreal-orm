@@ -9,6 +9,7 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::Write,
+    path::Path,
 };
 
 use chrono::{DateTime, Utc};
@@ -84,7 +85,31 @@ impl MigrationFilenames {
     //     // status: String,
     // }
 
-    pub fn bidirectional_pair_meta_checked(&self) -> Vec<MigrationTwoWay> {}
+    pub fn bidirectional_pair_meta_checked(
+        &self,
+        migration_dir: &Path,
+    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+        let mut bidirectional = self.bidirectional();
+        bidirectional.sort();
+        bidirectional.dedup();
+
+        let mut bidirectional_pair = Vec::new();
+        for migration in bidirectional {
+            let up = migration_dir.join(migration.to_up().to_string());
+            let down = migration_dir.join(migration.to_down().to_string());
+
+            let up = FileContent::from_file(&up)?;
+            let down = FileContent::from_file(&down)?;
+
+            bidirectional_pair.push(MigrationTwoWay {
+                name: migration,
+                up,
+                down,
+            });
+        }
+
+        Ok(bidirectional_pair)
+    }
 
     pub fn unidirectional(&self) -> Vec<MigrationFilename> {
         self.0
