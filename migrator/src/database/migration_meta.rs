@@ -606,7 +606,9 @@ impl TwoWayGetter {
 
     /// Get all migrations
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
-        self.0.get_two_way_migrations(false)
+        self.0
+            .get_migrations_filenames(false)?
+            .bidirectional_pair_meta_checked(&self.0.resolve_migration_directory(false)?)
     }
 
     /// Generate migration directory if it does not exist
@@ -758,74 +760,29 @@ impl FileManager {
         }
     }
 
-    pub fn get_oneway_migrations(
-        &self,
-        create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Vec<MigrationOneWay>> {
-        let migration_directory = self.resolve_migration_directory(create_dir_if_not_exists)?;
-        let migrations = fs::read_dir(migration_directory);
-
-        if migrations.is_err() {
-            return Ok(vec![]);
-        }
-
-        let mut migrations_uni_meta = vec![];
-        let mut unidirectional_basenames = vec![];
-
-        for migration in migrations.expect("Problem reading migrations directory") {
-            let migration = migration.expect("Problem reading migration");
-            let path = migration.path();
-            let path_str = path.to_str().ok_or(MigrationError::PathDoesNotExist)?;
-
-            let migration_name = path.file_name().expect("Problem reading migration name");
-            let migration_up_name = migration_name.to_string_lossy().to_string();
-
-            let filename: MigrationFilename = migration_up_name.clone().try_into()?;
-            match filename {
-                MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
-                    if self.mode.is_strict() {
-                        return Err(MigrationError::InvalidMigrationFileNameForMode(
-                            filename.to_string(),
-                        ));
-                    }
-                }
-                MigrationFilename::Unidirectional(_) => {
-                    unidirectional_basenames.push(filename.basename());
-                    let content = fs::read_to_string(path_str)
-                        .map_err(|e| {
-                            MigrationError::IoError(format!(
-                                "Problem reading migration file: Error: {e}"
-                            ))
-                        })?
-                        .into();
-
-                    let migration = MigrationOneWay {
-                        name: filename,
-                        content,
-                    };
-
-                    migrations_uni_meta.push(migration);
-                }
-            };
-        }
-
-        migrations_uni_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
-        Ok(migrations_uni_meta)
-    }
-
     pub fn get_migrations_filenames(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         log::info!("Migration dir path: {:?}", migration_dir_path.clone());
-        let migrations = fs::read_dir(migration_dir_path.clone());
+        let migrations = fs::read_dir(migration_dir_path.clone()).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to read migration directory: {:?}. Error: {}",
+                migration_dir_path, e
+            ))
+        })?;
         log::info!("Migration dir path: {:?}", migration_dir_path);
 
         let mut filenames = vec![];
 
-        for migration in migrations.expect("Problem reading migrations directory") {
-            let migration = migration.expect("Problem reading migration");
+        for migration in migrations {
+            let migration = migration.map_err(|e| {
+                MigrationError::IoError(format!(
+                    "Failed to read migration directory: {:?}. Error: {}",
+                    migration_dir_path, e
+                ))
+            })?;
             let path = migration.path();
             let migration_name = path
                 .components()
@@ -847,119 +804,16 @@ impl FileManager {
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
-        // strictness: StrictNessLevel,
-    ) -> MigrationResult<MigrationFilenames> {
-        let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
-        log::info!("Migration dir path: {:?}", migration_dir_path.clone());
-        let migrations = fs::read_dir(migration_dir_path.clone())
-            .map_err(|e| MigrationError::MigrationDirectoryDoesNotExist(e.to_string()))?;
-        log::info!("Migration dir path: {:?}", migration_dir_path);
+    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+        self.get_migrations_filenames(create_dir_if_not_exists)?
+            .bidirectional_pair_meta_checked(&self.resolve_migration_directory(false)?)
+    }
 
-        let mut migrations_bi_meta = HashSet::new();
-        let mut ups_basenames = vec![];
-        let mut downs_basenames = vec![];
-
-        for migration in migrations {
-            let migration = migration
-                .map_err(|e| MigrationError::ProblemReadingMigrationFile(e.to_string()))?;
-            let path = migration.path();
-            let parent_dir = path.parent().ok_or(MigrationError::PathDoesNotExist)?;
-            let migration_name = path
-                .components()
-                .last()
-                .expect("Problem reading migration name")
-                .as_os_str()
-                .to_string_lossy()
-                .to_string();
-
-            let filename: MigrationFilename = migration_name.clone().try_into()?;
-            let get_content = |filename: &MigrationFilename| -> MigrationResult<FileContent> {
-                let content = fs::read_to_string(parent_dir.join(filename.to_string()))
-                    .map_err(|_e| {
-                        MigrationError::IoError(format!("Filename: {filename} does not exist"))
-                    })?
-                    .into();
-                Ok(content)
-            };
-
-            match filename {
-                MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
-                    match filename {
-                        MigrationFilename::Up(_) => {
-                            ups_basenames.push(filename.basename());
-                        }
-                        MigrationFilename::Down(_) => {
-                            downs_basenames.push(filename.basename());
-                        }
-                        _ => {}
-                    }
-
-                    let content_up = get_content(&filename.to_up())?;
-                    let content_down = get_content(&filename.to_down())?;
-
-                    let migration = MigrationTwoWay {
-                        name: filename.clone(),
-                        up: content_up,
-                        down: content_down,
-                    };
-
-                    migrations_bi_meta.insert(migration);
-                }
-                MigrationFilename::Unidirectional(_) => {
-                    if self.mode == Mode::Strict {
-                        return Err(MigrationError::InvalidMigrationFileNameForMode(
-                            filename.to_string(),
-                        ));
-                    }
-                }
-            };
-        }
-
-        // Validate
-        // 1. Length of ups and downs should be equal
-        if self.mode.is_strict() {
-            if ups_basenames.len() != downs_basenames.len() {
-                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                    "Unequal number of up and down migrations.".into(),
-                ));
-            }
-
-            let ups_basenames_as_set = ups_basenames.iter().collect::<BTreeSet<_>>();
-            let downs_basenames_as_set = downs_basenames.iter().collect::<BTreeSet<_>>();
-
-            let up_down_difference = ups_basenames_as_set
-                .symmetric_difference(&downs_basenames_as_set)
-                .cloned()
-                .collect::<Vec<_>>();
-
-            if !up_down_difference.is_empty() {
-                return Err(MigrationError::InvalidUpsVsDownsMigrationFileCount(
-                    format!(
-                    "The following files do not exist for both up and down. only for either: {}",
-                    up_down_difference
-                        .iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                ),
-                ));
-            }
-        }
-
-        let mut migrations_bi_meta = migrations_bi_meta.into_iter().collect::<Vec<_>>();
-        migrations_bi_meta.push(MigrationTwoWay {
-            name: "20231216000000_create_migration_table.up.surql"
-                .to_string()
-                .try_into()
-                .expect("xrer"),
-            up: FileContent("upananan".into()),
-            down: FileContent("downwnw".into()),
-        });
-
-        migrations_bi_meta.sort_by(|a, b| a.name.timestamp().cmp(&b.name.timestamp()));
-
-        log::info!("Successfully read {} migrations", migrations_bi_meta.len());
-
-        Ok(migrations_bi_meta)
+    pub fn get_oneway_migrations(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<Vec<MigrationOneWay>> {
+        self.get_migrations_filenames(create_dir_if_not_exists)?
+            .unidirectional_pair_meta(&self.resolve_migration_directory(false)?)
     }
 }
