@@ -5,7 +5,6 @@
  * Licensed under the MIT license
  */
 
-use std::collections::HashSet;
 use std::{fs::File, io::BufReader};
 
 use sha2::{self, Digest, Sha256};
@@ -13,7 +12,6 @@ use std::convert::TryFrom;
 use std::env;
 
 use std::{
-    collections::BTreeSet,
     fmt::Display,
     fs::{self},
     path::{Path, PathBuf},
@@ -765,34 +763,35 @@ impl FileManager {
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
-        log::info!("Migration dir path: {:?}", migration_dir_path.clone());
-        let migrations = fs::read_dir(migration_dir_path.clone()).map_err(|e| {
+        let migration_dir_path_str = migration_dir_path.to_string_lossy().to_string();
+        log::info!("Migration dir path: {}", &migration_dir_path_str);
+        let migrations = fs::read_dir(&migration_dir_path).map_err(|e| {
             MigrationError::IoError(format!(
-                "Failed to read migration directory: {:?}. Error: {}",
-                migration_dir_path, e
+                "Failed to read migration directory: {}. Error: {}",
+                &migration_dir_path_str, e
             ))
         })?;
-        log::info!("Migration dir path: {:?}", migration_dir_path);
+        log::info!("Migration dir path: {}", migration_dir_path_str);
 
         let mut filenames = vec![];
 
         for migration in migrations {
             let migration = migration.map_err(|e| {
                 MigrationError::IoError(format!(
-                    "Failed to read migration directory: {:?}. Error: {}",
-                    migration_dir_path, e
+                    "Failed to read migration directory: {}. Error: {}",
+                    migration_dir_path_str, e
                 ))
             })?;
             let path = migration.path();
-            let migration_name = path
+            let filename: MigrationFilename = path
                 .components()
                 .last()
                 .expect("Problem reading migration name")
                 .as_os_str()
                 .to_string_lossy()
-                .to_string();
+                .to_string()
+                .try_into()?;
 
-            let filename: MigrationFilename = migration_name.clone().try_into()?;
             filenames.push(filename);
         }
 

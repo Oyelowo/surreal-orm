@@ -160,7 +160,7 @@ impl MigrationFilenames {
     ) -> MigrationResult<Vec<MigrationOneWay>> {
         let unidirectional = self.unidirectional();
 
-        let mut unidirectional_pair = Vec::new();
+        let mut unidirectional_pair: Vec<MigrationOneWay> = Vec::new();
         for migration in unidirectional {
             let up = migration_dir.join(migration.to_up().to_string());
 
@@ -177,8 +177,8 @@ impl MigrationFilenames {
             });
         }
 
-        unidirectional_pair.sort_by_key(|meta| meta.name);
-        unidirectional_pair.dedup_by_key(|meta| meta.name);
+        unidirectional_pair.sort_by(|a, b| a.name.cmp(&b.name));
+        unidirectional_pair.dedup_by(|a, b| a.name.eq(&b.name));
 
         Ok(unidirectional_pair)
     }
