@@ -479,6 +479,10 @@ impl MigrationConfig {
         Self(FileManager::default())
     }
 
+    pub fn into_inner(self) -> FileManager {
+        self.0
+    }
+
     pub fn mode(&self, mode: Mode) -> Self {
         Self(self.0.mode(mode))
     }

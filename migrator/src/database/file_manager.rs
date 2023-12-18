@@ -9,6 +9,7 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::Write,
+    ops::Deref,
     path::Path,
 };
 
@@ -38,6 +39,14 @@ pub enum MigrationFilename {
 }
 
 pub struct MigrationFilenames(Vec<MigrationFilename>);
+
+impl Deref for MigrationFilenames {
+    type Target = Vec<MigrationFilename>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl From<Vec<MigrationFilename>> for MigrationFilenames {
     fn from(value: Vec<MigrationFilename>) -> Self {

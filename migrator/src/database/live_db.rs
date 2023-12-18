@@ -4,11 +4,11 @@ use std::ops::Deref;
 use surreal_query_builder::{statements::*, *};
 use surrealdb::{Connection, Surreal};
 
-use crate::MigrationConfig;
 use crate::{
     cli::Status, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
     MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
+use crate::{MigrationConfig, MigrationFilenames};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {
@@ -344,52 +344,57 @@ impl MigrationRunner {
         Ok(pending_migrations)
     }
 
+    pub async fn get_pending_migration_filenames(
+        db: Surreal<impl Connection>,
+        mig_config: &MigrationConfig,
+    ) -> MigrationResult<MigrationFilenames> {
+        let latest_migration = Self::get_latest_migration(db.clone()).await?;
+
+        let pending_migrations = mig_config
+            .clone()
+            .into_inner()
+            .get_migrations_filenames(false)?
+            .all()
+            .into_iter()
+            .filter(|filename| {
+                latest_migration.as_ref().map_or(true, |latest_migration| {
+                    filename.timestamp() > latest_migration.timestamp
+                })
+            })
+            .collect::<Vec<_>>();
+
+        Ok(pending_migrations.into())
+    }
+
     pub async fn delete_unapplied_migration_files(
         db: Surreal<impl Connection>,
         mig_config: &MigrationConfig,
     ) -> MigrationResult<()> {
         let dir = mig_config.get_migration_dir()?;
 
-        let migrations = mig_config.one_way().get_migrations().unwrap_or_default();
-        let migs = Self::get_pending_migrations(migrations, db.clone()).await?;
-        let paths1 = migs
-            .into_iter()
-            .map(|m| dir.join(m.name().to_string()))
+        let pending_migration_filenames =
+            Self::get_pending_migration_filenames(db.clone(), mig_config).await?;
+
+        let pending_migrations_paths = pending_migration_filenames
+            .iter()
+            .map(|filename| dir.join(filename.to_string()))
             .collect::<Vec<_>>();
 
-        let migrations = mig_config.two_way().get_migrations().unwrap_or_default();
-        println!("Migrationsxxx: {:?}", &migrations);
-        let migs = Self::get_pending_migrations(migrations, db.clone())
-            .await
-            .expect("kakakqkakak");
-
-        let paths2 = migs
-            .into_iter()
-            .map(|m| {
-                vec![
-                    dir.join(m.name().to_up().to_string()),
-                    dir.join(m.name().to_down().to_string()),
-                ]
-            })
-            .flatten()
-            .collect::<Vec<_>>();
-
-        let pending_migrations_paths = [&paths1[..], &paths2[..]].concat();
-        println!("Pending migrations paths: {:?}", &pending_migrations_paths);
         log::info!(
             "Deleting {} unapplied migration file(s)",
             pending_migrations_paths.len()
         );
 
         for mig_path in pending_migrations_paths {
-            log::info!("Deleting file: {:?}", &mig_path);
+            let mig_path_str = mig_path.to_string_lossy();
+            log::info!("Deleting file: {}", &mig_path_str);
             std::fs::remove_file(&mig_path).map_err(|e| {
                 MigrationError::IoError(format!(
-                    "Failed to delete migration file: {:?}. Error: {}",
-                    &mig_path, e
+                    "Failed to delete migration file: {}. Error: {}",
+                    &mig_path_str, e
                 ))
             })?;
-            log::info!("Deleted file: {:?}", &mig_path.to_str());
+            log::info!("Deleted file: {}", &mig_path_str);
         }
 
         Ok(())
