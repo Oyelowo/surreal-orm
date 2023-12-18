@@ -633,6 +633,106 @@ struct Reset {
     shared_run_and_rollback: RuntimeConfig,
 }
 
+impl Reset {
+    pub async fn apply(&self, codebase_resources: impl DbResources) {
+        let mut files_config = MigrationConfig::new().make_strict();
+        let db = setup_db(&self.shared_run_and_rollback).await;
+
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        };
+
+        let dir = files_config.get_migration_dir();
+        match dir {
+            Ok(dir) => {
+                if dir.exists() {
+                    let removed = fs::remove_dir_all(dir);
+                    if let Err(e) = removed {
+                        log::error!("Failed to remove dir: {}", e.to_string());
+                        panic!();
+                    }
+                } else {
+                    log::warn!("Migration dir does not exist");
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to get migration dir: {}", e.to_string());
+                panic!();
+            }
+        };
+
+        let init = Init {
+            name: self.name.clone(),
+            reversible: self.reversible.clone(),
+            shared_all: self.shared_all.clone(),
+        };
+        init.apply(codebase_resources).await;
+
+        let (filename, up_check, down_check) = if init.reversible {
+            let migs = files_config.two_way().get_migrations();
+            match migs {
+                Ok(mut m) => {
+                    if m.len() > 1 {
+                        log::error!("Invalid migration state. There should be only two files during reset and initialization of up and down migration files.");
+                        panic!();
+                    }
+                    let meta = m.swap_remove(0);
+                    (meta.name, meta.up, Some(meta.down))
+                }
+                Err(e) => {
+                    log::error!(
+                        "Problem reading Bidirectional up and down migrations. Error: {}",
+                        e
+                    );
+                    panic!();
+                }
+            }
+        } else {
+            let migs = files_config.one_way().get_migrations();
+            match migs {
+                Ok(mut m) => {
+                    if m.len() > 1 {
+                        log::error!("Invalid migration files state. there should only be 1 file during initialization/reset");
+                        panic!();
+                    }
+                    let meta = m.swap_remove(0);
+                    (meta.name, meta.content, None)
+                }
+                Err(e) => {
+                    log::error!(
+                        "Problem reading Bidirectional up and down migrations. Error: {}",
+                        e
+                    );
+                    panic!();
+                }
+            }
+        };
+
+        let log_error_panic = |checksum: MigrationResult<Checksum>| match checksum {
+            Ok(ch) => ch,
+            Err(e) => {
+                log::error!(
+                    "Problem generating checksum from file. Error: {}",
+                    e.to_string()
+                );
+                panic!()
+            }
+        };
+
+        Migration::create_reinitialize_table_raw_tx(
+            &filename,
+            &log_error_panic(up_check.as_checksum()),
+            down_check
+                .map(|d| log_error_panic(d.as_checksum()))
+                .as_ref(),
+        )
+        .run(db.clone())
+        .await;
+
+        log::info!("Reset successful");
+    }
+}
+
 /// Run migration cli
 /// # Example
 /// ```rust, ignore
@@ -686,105 +786,8 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         SubCommand::List(prune) => {
             prune.apply().await;
         }
-
         SubCommand::Reset(reset) => {
-            // Drop migration schema table
-            // Recreate the table
-
-            let db = setup_db(&reset.shared_run_and_rollback).await;
-
-            if let Some(path) = reset.shared_all.migrations_dir.clone() {
-                files_config = files_config.custom_path(path)
-            };
-
-            let dir = files_config.get_migration_dir();
-            // files_config.into_inner().get_migrations_filenames(create_dir_if_not_exists)
-            match dir {
-                Ok(dir) => {
-                    if dir.exists() {
-                        let removed = fs::remove_dir_all(dir);
-                        if let Err(e) = removed {
-                            log::error!("Failed to remove dir: {}", e.to_string());
-                            panic!();
-                        }
-                    } else {
-                        log::warn!("Migration dir does not exist");
-                    }
-                }
-                Err(e) => {
-                    log::error!("Failed to get migration dir: {}", e.to_string());
-                    panic!();
-                }
-            };
-
-            let init = Init {
-                name: reset.name,
-                reversible: reset.reversible,
-                shared_all: reset.shared_all,
-            };
-            init.apply(codebase_resources).await;
-
-            let (filename, up_check, down_check) = if init.reversible {
-                let migs = files_config.two_way().get_migrations();
-                match migs {
-                    Ok(mut m) => {
-                        if m.len() > 1 {
-                            log::error!("Invalid migration state. There should be only two files during reset and initialization of up and down migration files.");
-                            panic!();
-                        }
-                        let meta = m.swap_remove(0);
-                        (meta.name, meta.up, Some(meta.down))
-                    }
-                    Err(e) => {
-                        log::error!(
-                            "Problem reading Bidirectional up and down migrations. Error: {}",
-                            e
-                        );
-                        panic!();
-                    }
-                }
-            } else {
-                let migs = files_config.one_way().get_migrations();
-                match migs {
-                    Ok(mut m) => {
-                        if m.len() > 1 {
-                            log::error!("Invalid migration files state. there should only be 1 file during initialization/reset");
-                            panic!();
-                        }
-                        let meta = m.swap_remove(0);
-                        (meta.name, meta.content, None)
-                    }
-                    Err(e) => {
-                        log::error!(
-                            "Problem reading Bidirectional up and down migrations. Error: {}",
-                            e
-                        );
-                        panic!();
-                    }
-                }
-            };
-
-            let log_error_panic = |checksum: MigrationResult<Checksum>| match checksum {
-                Ok(ch) => ch,
-                Err(e) => {
-                    log::error!(
-                        "Problem generating checksum from file. Error: {}",
-                        e.to_string()
-                    );
-                    panic!()
-                }
-            };
-
-            Migration::create_reinitialize_table_raw_tx(
-                &filename,
-                &log_error_panic(up_check.as_checksum()),
-                down_check
-                    .map(|d| log_error_panic(d.as_checksum()))
-                    .as_ref(),
-            );
-
-            log::info!("Reset successful");
-            todo!();
+            reset.apply(codebase_resources).await;
         }
     }
 }
