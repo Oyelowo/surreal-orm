@@ -547,7 +547,7 @@ impl OneWayGetter {
         let migration_name = migration_name.into();
         let file_manager = self.0.clone();
 
-        MigratorDatabase::generate_migrations(migration_name, &file_manager, codebase_resources)
+        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
             .await
             .expect("Failed to generate migrations");
         Ok(())
@@ -616,12 +616,12 @@ impl TwoWayGetter {
     /// Generate migration directory if it does not exist
     pub async fn generate_migrations(
         &self,
-        migration_name: impl Into<String>,
+        migration_name: &String,
         codebase_resources: impl DbResources,
     ) -> MigrationResult<()> {
         let migration_name = migration_name.into();
         let file_manager = self.0.clone();
-        MigratorDatabase::generate_migrations(migration_name, &file_manager, codebase_resources)
+        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
             .await
     }
 
