@@ -11,8 +11,8 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 use crate::{
-    DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions, RollbackStrategy,
-    UpdateStrategy,
+    DbInfo, Migration, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions,
+    RollbackStrategy, UpdateStrategy,
 };
 
 /// Surreal ORM CLI
@@ -718,6 +718,8 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                 shared_all: reset.shared_all,
             };
             init.execute(codebase_resources).await;
+
+            Migration::remove_table_raw();
 
             log::info!("Reset successful");
             todo!();
