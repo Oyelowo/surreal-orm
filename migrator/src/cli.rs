@@ -23,6 +23,8 @@ struct Cli {
 /// Subcommands
 #[derive(Parser, Debug)]
 enum SubCommand {
+    /// Init migrations
+    Init(Init),
     /// Generate migrations
     #[clap(alias = "gen")]
     Generate(Generate),
@@ -68,6 +70,7 @@ impl From<&Down> for RollbackStrategy {
 impl SubCommand {
     pub fn get_verbosity(&self) -> u8 {
         match self {
+            SubCommand::Init(generate) => generate.shared_all.verbose,
             SubCommand::Generate(generate) => generate.shared_all.verbose,
             SubCommand::Up(run) => run.shared_all.verbose,
             SubCommand::Down(rollback) => rollback.shared_all.verbose,
@@ -91,16 +94,31 @@ impl SubCommand {
     }
 }
 
+/// Init migrations
+#[derive(Parser, Debug)]
+struct Init {
+    /// Name of the migration
+    #[clap(long, help = "Name of the first migration file(s)")]
+    name: String,
+
+    /// Two way migration
+    #[clap(
+        short,
+        long,
+        help = "Unidirectional(Up only) Bidirectional(up & down) migration(S)"
+    )]
+    reversible: bool,
+
+    #[clap(flatten)]
+    shared_all: SharedAll,
+}
+
 /// Generate migrations
 #[derive(Parser, Debug)]
 struct Generate {
     /// Name of the migration
     #[clap(long, help = "Name of the migration")]
     name: String,
-
-    /// Two way migration
-    #[clap(short, long, help = "Two-way up & down migration")]
-    reversible: bool,
 
     #[clap(flatten)]
     shared_all: SharedAll,
@@ -360,13 +378,13 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
-        SubCommand::Generate(generate) => {
-            let migration_name = generate.name;
-            if let Some(path) = generate.shared_all.migrations_dir {
+        SubCommand::Init(init) => {
+            let migration_name = init.name;
+            if let Some(path) = init.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
             };
 
-            if generate.reversible {
+            if init.reversible {
                 let gen = files_config
                     .two_way()
                     .generate_migrations(migration_name, codebase_resources)
@@ -384,6 +402,42 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                     log::error!("Failed to generate migrations: {}", e.to_string());
                 }
             };
+            log::info!("Successfully generated migrations");
+        }
+        SubCommand::Generate(generate) => {
+            let migration_name = generate.name;
+            if let Some(path) = generate.shared_all.migrations_dir {
+                files_config = files_config.custom_path(path)
+            };
+
+            let mig_type = files_config.detect_migration_type();
+
+            match mig_type {
+                Ok(MigrationFlag::TwoWay) => {
+                    let gen = files_config
+                        .two_way()
+                        .generate_migrations(migration_name, codebase_resources)
+                        .await;
+                    if let Err(e) = gen {
+                        log::error!("Failed to generate migrations: {}", e.to_string());
+                    }
+                }
+                Ok(MigrationFlag::OneWay) => {
+                    let gen = files_config
+                        .one_way()
+                        .generate_migrations(migration_name, codebase_resources)
+                        .await;
+
+                    if let Err(e) = gen {
+                        log::error!("Failed to generate migrations: {}", e.to_string());
+                    }
+                }
+                Err(e) => {
+                    log::error!("Failed to detect migration type: {}", e.to_string());
+                    panic!();
+                }
+            };
+
             log::info!("Successfully generated migrations");
         }
         SubCommand::Up(up) => {
