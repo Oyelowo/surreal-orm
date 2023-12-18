@@ -122,7 +122,7 @@ struct Init {
 }
 
 impl Init {
-    pub async fn execute(&self, codebase_resources: impl DbResources) {
+    pub async fn apply(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -180,7 +180,7 @@ struct Generate {
 }
 
 impl Generate {
-    pub async fn execute(&self, codebase_resources: impl DbResources) {
+    pub async fn apply(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = &self.name;
         let mig_type = files_config.detect_migration_type();
@@ -260,7 +260,7 @@ struct Up {
 }
 
 impl Up {
-    pub async fn execute(&self) {
+    pub async fn apply(&self) {
         let db = setup_db(&self.shared_run_and_rollback).await;
         let update_strategy = UpdateStrategy::from(self);
         let mut files_config = MigrationConfig::new().make_strict();
@@ -349,7 +349,7 @@ struct List {
 }
 
 impl List {
-    pub async fn execute(&self) {
+    pub async fn apply(&self) {
         let db = setup_db(&self.runtime_config).await;
         let mut files_config = MigrationConfig::new().make_strict();
 
@@ -409,7 +409,7 @@ struct Prune {
 }
 
 impl Prune {
-    pub async fn execute(&self) {
+    pub async fn apply(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
         let db = setup_db(&self.runtime_config).await;
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -574,7 +574,7 @@ struct Down {
 }
 
 impl Down {
-    pub async fn execute(&self) {
+    pub async fn apply(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
 
         if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
@@ -669,22 +669,22 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
         SubCommand::Init(init) => {
-            init.execute(codebase_resources).await;
+            init.apply(codebase_resources).await;
         }
         SubCommand::Generate(generate) => {
-            generate.execute(codebase_resources).await;
+            generate.apply(codebase_resources).await;
         }
         SubCommand::Up(up) => {
-            up.execute().await;
+            up.apply().await;
         }
         SubCommand::Down(down) => {
-            down.execute().await;
+            down.apply().await;
         }
         SubCommand::Prune(prune) => {
-            prune.execute().await;
+            prune.apply().await;
         }
         SubCommand::List(prune) => {
-            prune.execute().await;
+            prune.apply().await;
         }
 
         SubCommand::Reset(reset) => {
@@ -722,7 +722,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                 reversible: reset.reversible,
                 shared_all: reset.shared_all,
             };
-            init.execute(codebase_resources).await;
+            init.apply(codebase_resources).await;
 
             let (filename, up_check, down_check) = if init.reversible {
                 let migs = files_config.two_way().get_migrations();
