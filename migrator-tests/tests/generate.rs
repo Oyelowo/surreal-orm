@@ -172,7 +172,7 @@ async fn test_twoway_migrations() {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let test_migration_name = "test_migration";
-    let test_migration_namev2 = "test_migration_v2";
+    let test_migration_namev2 = "test_migration_v2".to_string();
     let _files = fs::read_dir(temp_test_migration_dir).expect_err("Migrations not yet created");
 
     let two_way = files_config
@@ -202,7 +202,7 @@ async fn test_twoway_migrations() {
     // FIRST MIGRATION
     // Generate first migration
     two_way
-        .generate_migrations(test_migration_name, Resources)
+        .generate_migrations(&test_migration_name.to_string(), Resources)
         .await
         .unwrap();
 
@@ -224,7 +224,7 @@ async fn test_twoway_migrations() {
 
     // SECOND MIGRATION GENERATION
     two_way
-        .generate_migrations(test_migration_namev2, ResourcesV2)
+        .generate_migrations(&test_migration_namev2, ResourcesV2)
         .await
         .unwrap();
     let files = fs::read_dir(temp_test_migration_dir).unwrap();
