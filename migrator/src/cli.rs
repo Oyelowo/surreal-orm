@@ -727,12 +727,12 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             let (filename, up_check, down_check) = if init.reversible {
                 let migs = files_config.two_way().get_migrations();
                 match migs {
-                    Ok(m) => {
+                    Ok(mut m) => {
                         if m.len() > 1 {
                             log::error!("Invalid migration state. There should be only two files during reset and initialization of up and down migration files.");
                             panic!();
                         }
-                        let meta = m.first().unwrap();
+                        let meta = m.swap_remove(0);
                         (meta.name, meta.up, Some(meta.down))
                     }
                     Err(e) => {
@@ -746,12 +746,12 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             } else {
                 let migs = files_config.one_way().get_migrations();
                 match migs {
-                    Ok(m) => {
+                    Ok(mut m) => {
                         if m.len() > 1 {
                             log::error!("Invalid migration files state. there should only be 1 file during initialization/reset");
                             panic!();
                         }
-                        let meta = m.first().unwrap();
+                        let meta = m.swap_remove(0);
                         (meta.name, meta.content, None)
                     }
                     Err(e) => {
