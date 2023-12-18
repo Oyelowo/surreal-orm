@@ -172,7 +172,11 @@ impl Migration {
         }
     }
 
-    pub fn create_reinitialize_table_raw_tx() -> TransactionCompletion {
+    pub fn create_reinitialize_table_raw_tx(
+        filename: &MigrationFilename,
+        checksum_up: &Checksum,
+        checksum_down: Option<&Checksum>,
+    ) -> Raw {
         let migration_table = Migration::table_name();
         let mut tx = begin_transaction()
             .query(Raw::new(format!("REMOVE TABLE {migration_table};")))
@@ -182,12 +186,9 @@ impl Migration {
             tx.query(def);
         });
 
-        tx.query(Migration::create_raw(
-            &MigrationFilename::new("reinitialize_table"),
-            &Checksum::generate_from_content(&FileContent::empty()).unwrap(),
-            None,
-        ))
-        .commit_transaction()
+        tx.query(Migration::create_raw(&filename, checksum_up, checksum_down))
+            .commit_transaction()
+            .to_raw()
     }
 
     pub fn create_raw(

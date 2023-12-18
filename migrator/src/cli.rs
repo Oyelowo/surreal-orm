@@ -11,8 +11,8 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 use crate::{
-    DbInfo, Migration, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions,
-    RollbackStrategy, UpdateStrategy,
+    Checksum, DbInfo, Migration, MigrationConfig, MigrationFlag, MigrationResult, MigrationRunner,
+    RollbackOptions, RollbackStrategy, UpdateStrategy,
 };
 
 /// Surreal ORM CLI
@@ -683,17 +683,22 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         SubCommand::Prune(prune) => {
             prune.execute().await;
         }
-        SubCommand::List(options) => {}
+        SubCommand::List(prune) => {
+            prune.execute().await;
+        }
 
         SubCommand::Reset(reset) => {
-            let db = setup_db(&reset.shared_run_and_rollback).await;
             // Drop migration schema table
-            // Recrate the table
+            // Recreate the table
+
+            let db = setup_db(&reset.shared_run_and_rollback).await;
 
             if let Some(path) = reset.shared_all.migrations_dir.clone() {
                 files_config = files_config.custom_path(path)
             };
+
             let dir = files_config.get_migration_dir();
+            // files_config.into_inner().get_migrations_filenames(create_dir_if_not_exists)
             match dir {
                 Ok(dir) => {
                     if dir.exists() {
@@ -719,7 +724,64 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             };
             init.execute(codebase_resources).await;
 
-            Migration::remove_table_raw();
+            let (filename, up_check, down_check) = if init.reversible {
+                let migs = files_config.two_way().get_migrations();
+                match migs {
+                    Ok(m) => {
+                        if m.len() > 1 {
+                            log::error!("Invalid migration state. There should be only two files during reset and initialization of up and down migration files.");
+                            panic!();
+                        }
+                        let meta = m.first().unwrap();
+                        (meta.name, meta.up, Some(meta.down))
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Problem reading Bidirectional up and down migrations. Error: {}",
+                            e
+                        );
+                        panic!();
+                    }
+                }
+            } else {
+                let migs = files_config.one_way().get_migrations();
+                match migs {
+                    Ok(m) => {
+                        if m.len() > 1 {
+                            log::error!("Invalid migration files state. there should only be 1 file during initialization/reset");
+                            panic!();
+                        }
+                        let meta = m.first().unwrap();
+                        (meta.name, meta.content, None)
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Problem reading Bidirectional up and down migrations. Error: {}",
+                            e
+                        );
+                        panic!();
+                    }
+                }
+            };
+
+            let log_error_panic = |checksum: MigrationResult<Checksum>| match checksum {
+                Ok(ch) => ch,
+                Err(e) => {
+                    log::error!(
+                        "Problem generating checksum from file. Error: {}",
+                        e.to_string()
+                    );
+                    panic!()
+                }
+            };
+
+            Migration::create_reinitialize_table_raw_tx(
+                &filename,
+                &log_error_panic(up_check.as_checksum()),
+                down_check
+                    .map(|d| log_error_panic(d.as_checksum()))
+                    .as_ref(),
+            );
 
             log::info!("Reset successful");
             todo!();
