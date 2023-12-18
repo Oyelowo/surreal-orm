@@ -178,6 +178,46 @@ struct Generate {
     shared_all: SharedAll,
 }
 
+impl Generate {
+    pub async fn execute(&self, codebase_resources: impl DbResources) {
+        let mut files_config = MigrationConfig::new().make_strict();
+        let migration_name = &self.name;
+        let mig_type = files_config.detect_migration_type();
+
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        };
+
+        match mig_type {
+            Ok(MigrationFlag::TwoWay) => {
+                let gen = files_config
+                    .two_way()
+                    .generate_migrations(&migration_name, codebase_resources)
+                    .await;
+                if let Err(e) = gen {
+                    log::error!("Failed to generate migrations: {}", e.to_string());
+                }
+            }
+            Ok(MigrationFlag::OneWay) => {
+                let gen = files_config
+                    .one_way()
+                    .generate_migrations(migration_name, codebase_resources)
+                    .await;
+
+                if let Err(e) = gen {
+                    log::error!("Failed to generate migrations: {}", e.to_string());
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to detect migration type: {}", e.to_string());
+                panic!();
+            }
+        };
+
+        log::info!("Successfully generated migrations");
+    }
+}
+
 /// Run migrations
 /// cargo run -- up
 /// cargo run -- up -l
@@ -462,40 +502,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             init.execute(codebase_resources).await;
         }
         SubCommand::Generate(generate) => {
-            let migration_name = generate.name;
-            if let Some(path) = generate.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            };
-
-            let mig_type = files_config.detect_migration_type();
-
-            match mig_type {
-                Ok(MigrationFlag::TwoWay) => {
-                    let gen = files_config
-                        .two_way()
-                        .generate_migrations(&migration_name, codebase_resources)
-                        .await;
-                    if let Err(e) = gen {
-                        log::error!("Failed to generate migrations: {}", e.to_string());
-                    }
-                }
-                Ok(MigrationFlag::OneWay) => {
-                    let gen = files_config
-                        .one_way()
-                        .generate_migrations(migration_name, codebase_resources)
-                        .await;
-
-                    if let Err(e) = gen {
-                        log::error!("Failed to generate migrations: {}", e.to_string());
-                    }
-                }
-                Err(e) => {
-                    log::error!("Failed to detect migration type: {}", e.to_string());
-                    panic!();
-                }
-            };
-
-            log::info!("Successfully generated migrations");
+            generate.execute(codebase_resources).await;
         }
         SubCommand::Up(up) => {
             let db = setup_db(&up.shared_run_and_rollback).await;
