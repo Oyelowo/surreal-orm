@@ -646,13 +646,17 @@ impl Reset {
         match dir {
             Ok(dir) => {
                 if dir.exists() {
-                    let removed = fs::remove_dir_all(dir);
+                    let removed = fs::remove_dir_all(&dir);
                     if let Err(e) = removed {
                         log::error!("Failed to remove dir: {}", e.to_string());
                         panic!();
+                    } else {
+                        fs::create_dir(&dir).expect("Problem creating migration directory");
+                        log::info!("Migration directory recreated.");
                     }
                 } else {
-                    log::warn!("Migration dir does not exist");
+                    fs::create_dir(dir).expect("Problem creating migration directory");
+                    log::info!("Migration directory recreated.");
                 }
             }
             Err(e) => {

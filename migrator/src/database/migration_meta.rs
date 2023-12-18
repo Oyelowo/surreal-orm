@@ -20,7 +20,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{
     begin_transaction, define_field, define_table, remove_table, DefineTableStatement,
-    RemoveTableStatement, TransactionCompletion,
+    RemoveTableStatement,
 };
 use surreal_query_builder::{DbResources, Field, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
@@ -545,6 +545,10 @@ impl MigrationConfig {
             ..self.0.clone()
         };
         TwoWayGetter::new(fm)
+    }
+
+    pub fn get_migration_dir_create_if_none(&self) -> MigrationResult<PathBuf> {
+        self.0.resolve_migration_directory(true)
     }
 
     pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
