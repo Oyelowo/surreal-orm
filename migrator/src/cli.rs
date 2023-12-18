@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::fs;
 use std::str::FromStr;
 
 use clap::{ArgAction, Parser};
@@ -458,7 +459,7 @@ impl FromStr for Path {
     }
 }
 
-#[derive(Parser, Debug, Default)]
+#[derive(Parser, Debug, Default, Clone)]
 struct SharedAll {
     /// Optional custom migrations dir
     #[clap(short, long, help = "Optional custom migrations dir")]
@@ -615,6 +616,17 @@ impl Down {
 /// migrations.
 #[derive(Parser, Debug)]
 struct Reset {
+    /// Name of the first migration file(s) to reinitialize to
+    #[clap(long)]
+    name: String,
+
+    /// Two way migration
+    #[clap(
+        short,
+        long,
+        help = "Whether to reinitialize as Unidirectional(Up only) Bidirectional(up & down) migration(S)"
+    )]
+    reversible: bool,
     #[clap(flatten)]
     shared_all: SharedAll,
     #[clap(flatten)]
@@ -675,10 +687,37 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 
         SubCommand::Reset(reset) => {
             let db = setup_db(&reset.shared_run_and_rollback).await;
+            // Drop migration schema table
+            // Recrate the table
 
-            if let Some(path) = reset.shared_all.migrations_dir {
+            if let Some(path) = reset.shared_all.migrations_dir.clone() {
                 files_config = files_config.custom_path(path)
             };
+            let dir = files_config.get_migration_dir();
+            match dir {
+                Ok(dir) => {
+                    if dir.exists() {
+                        let removed = fs::remove_dir_all(dir);
+                        if let Err(e) = removed {
+                            log::error!("Failed to remove dir: {}", e.to_string());
+                            panic!();
+                        }
+                    } else {
+                        log::warn!("Migration dir does not exist");
+                    }
+                }
+                Err(e) => {
+                    log::error!("Failed to get migration dir: {}", e.to_string());
+                    panic!();
+                }
+            };
+
+            let init = Init {
+                name: reset.name,
+                reversible: reset.reversible,
+                shared_all: reset.shared_all,
+            };
+            init.execute(codebase_resources).await;
 
             log::info!("Reset successful");
             todo!();
