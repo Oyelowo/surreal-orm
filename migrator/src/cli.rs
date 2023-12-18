@@ -141,6 +141,7 @@ struct Up {
     latest: Option<bool>,
     /// Run forward by count/number
     #[clap(
+        short,
         long,
         conflicts_with = "latest",
         conflicts_with = "till",
@@ -149,6 +150,7 @@ struct Up {
     number: Option<u32>,
     /// Run forward till a specific migration ID
     #[clap(
+        short,
         long,
         conflicts_with = "latest",
         conflicts_with = "number",
@@ -325,13 +327,30 @@ impl Default for RuntimeConfig {
 #[derive(Parser, Debug)]
 struct Down {
     /// Rollback to the latest migration
-    #[clap(long, help = "Rollback to the previous migration")]
+    #[clap(
+        long,
+        conflicts_with = "number",
+        conflicts_with = "till",
+        help = "Rollback to the previous migration"
+    )]
     previous: bool,
     /// Rollback by count/number
-    #[clap(long, help = "Rollback by count")]
+    #[clap(
+        short,
+        long,
+        conflicts_with = "previous",
+        conflicts_with = "till",
+        help = "Rollback by count"
+    )]
     number: Option<u32>,
     /// Rollback till a specific migration ID
-    #[clap(long, help = "Rollback till a specific migration ID")]
+    #[clap(
+        short,
+        long,
+        conflicts_with = "previous",
+        conflicts_with = "number",
+        help = "Rollback till a specific migration ID"
+    )]
     till: Option<String>,
 
     #[clap(flatten)]
@@ -382,6 +401,23 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
             let migration_name = init.name;
             if let Some(path) = init.shared_all.migrations_dir {
                 files_config = files_config.custom_path(path)
+            };
+            let files = files_config
+                .clone()
+                .into_inner()
+                .get_migrations_filenames(false);
+
+            match files {
+                Ok(files) => {
+                    if !files.is_empty() {
+                        log::warn!("Migrations already initialized");
+                        return ();
+                    }
+                }
+                Err(e) => {
+                    log::error!("Failed to get migrations: {}", e.to_string());
+                    panic!();
+                }
             };
 
             if init.reversible {
