@@ -18,7 +18,9 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use surreal_query_builder::statements::{define_field, define_table, DefineTableStatement};
+use surreal_query_builder::statements::{
+    begin_transaction, define_field, define_table, DefineTableStatement, TransactionCompletion,
+};
 use surreal_query_builder::{DbResources, Field, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
 use surrealdb::{Connection, Surreal};
@@ -169,6 +171,25 @@ impl Migration {
             id: filename.to_string().into(),
         }
     }
+
+    pub fn create_reinitialize_table_raw_tx() -> TransactionCompletion {
+        let migration_table = Migration::table_name();
+        let mut tx = begin_transaction()
+            .query(Raw::new(format!("REMOVE TABLE {migration_table};")))
+            .query(Migration::define_table());
+
+        Self::define_fields().into_iter().for_each(|def| {
+            tx.query(def);
+        });
+
+        tx.query(Migration::create_raw(
+            &MigrationFilename::new("reinitialize_table"),
+            &Checksum::generate_from_content(&FileContent::empty()).unwrap(),
+            None,
+        ))
+        .commit_transaction()
+    }
+
     pub fn create_raw(
         filename: &MigrationFilename,
         checksum_up: &Checksum,
