@@ -137,7 +137,7 @@ impl MigratorDatabase {
 
         // 2. Get all migrations from codebase synced with db - Right
         right
-            .run_codebase_schema_queries(&codebase_resources)
+            .run_codebase_schema_queries(&codebase_resources, file_manager.migration_flag)
             .await?;
         let init = ComparisonsInit {
             left_resources: &left.resources().await,

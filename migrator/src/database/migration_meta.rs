@@ -177,12 +177,13 @@ impl Migration {
         filename: &MigrationFilename,
         checksum_up: &Checksum,
         checksum_down: Option<&Checksum>,
+        migration_type: MigrationFlag,
     ) -> Raw {
         let mut tx = begin_transaction()
             .query(Self::remove_table())
             .query(Self::define_table());
 
-        for def in Self::define_fields() {
+        for def in Self::define_fields(migration_type) {
             tx = tx.query(def);
         }
 
@@ -247,7 +248,7 @@ impl Migration {
         remove_table(Self::table_name())
     }
 
-    pub fn define_fields() -> Vec<Raw> {
+    pub fn define_fields(migration_type: MigrationFlag) -> Vec<Raw> {
         let migration::Schema {
             id,
             name,
@@ -275,12 +276,18 @@ impl Migration {
             .on_table(Migration::table_name())
             .to_raw();
 
+        let mut fields = vec![id, name, timestamp, checksum_up];
+
         let checksum_down = define_field(checksum_down)
             .type_(FieldType::String)
             .on_table(Migration::table_name())
             .to_raw();
 
-        vec![id, name, timestamp, checksum_up, checksum_down]
+        if migration_type.is_twoway() {
+            fields.push(checksum_down);
+        }
+
+        fields
     }
 }
 
@@ -408,6 +415,10 @@ impl Display for MigrationFlag {
 }
 
 impl MigrationFlag {
+    pub fn is_twoway(&self) -> bool {
+        matches!(self, Self::TwoWay)
+    }
+
     pub fn options() -> Vec<String> {
         vec![Self::TwoWay.to_string(), Self::OneWay.to_string()]
     }

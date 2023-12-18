@@ -117,7 +117,7 @@ impl MigrationFilenames {
         }
 
         bidirectional_pair.sort();
-        bidirectional_pair.dedup();
+        bidirectional_pair.dedup_by(|a, b| a.name.to_up() == b.name.to_up());
 
         Ok(bidirectional_pair)
     }

@@ -33,9 +33,10 @@ impl RightDatabase {
     pub async fn run_codebase_schema_queries(
         &self,
         code_resources: &impl DbResources,
+        migration_type: MigrationFlag,
     ) -> MigrationResult<()> {
         let migration_meta_table_def = Migration::define_table().to_raw();
-        let migration_meta_table_fields_def = Migration::define_fields()
+        let migration_meta_table_fields_def = Migration::define_fields(migration_type)
             .iter()
             .map(|f| f.to_raw().build())
             .collect::<Vec<_>>()
