@@ -169,6 +169,7 @@ impl MigrationRunner {
             ref strictness,
             prune_files_after_rollback,
         } = rollback_options;
+
         log::info!("Rolling back migration");
 
         let all_migrations_from_dir = fm.get_two_way_migrations(false)?;
@@ -297,14 +298,18 @@ impl MigrationRunner {
 
         if prune_files_after_rollback {
             for file_path in &file_paths {
-                log::info!("Deleting file: {:?}", file_path.to_str());
+                let file_path_str = file_path.to_string_lossy();
+
+                log::info!("Deleting file: {}", file_path_str);
+
                 std::fs::remove_file(file_path).map_err(|e| {
                     MigrationError::IoError(format!(
-                        "Failed to delete migration file: {:?}. Error: {}",
-                        file_path, e
+                        "Failed to delete migration file: {}. Error: {}",
+                        file_path_str, e
                     ))
                 })?;
-                log::info!("Deleted file: {:?}", file_path.to_str());
+
+                log::info!("Deleted file: {}", file_path_str);
             }
         }
 
