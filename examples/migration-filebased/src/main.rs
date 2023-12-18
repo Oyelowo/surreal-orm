@@ -46,7 +46,7 @@ async fn main() {
     // comment out this line to generate twoway migrations
     // To be used from cli
     two_way
-        .generate_migrations("migration_name_example", Resources)
+        .generate_migrations(&"migration_name_example".to_string(), Resources)
         .await
         .unwrap();
     two_way

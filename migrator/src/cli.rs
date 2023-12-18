@@ -719,7 +719,7 @@ impl Reset {
             }
         };
 
-        Migration::create_reinitialize_table_raw_tx(
+        if let Err(e) = Migration::create_reinitialize_table_raw_tx(
             &filename,
             &log_error_panic(up_check.as_checksum()),
             down_check
@@ -727,7 +727,11 @@ impl Reset {
                 .as_ref(),
         )
         .run(db.clone())
-        .await;
+        .await
+        {
+            log::error!("Something went wrong while running reinitialisation transaction queries. Error: {}", e.to_string());
+            panic!()
+        }
 
         log::info!("Reset successful");
     }
@@ -769,7 +773,6 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
     cli.subcmd.setup_logging();
 
-    let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
         SubCommand::Init(init) => {
             init.run(codebase_resources).await;

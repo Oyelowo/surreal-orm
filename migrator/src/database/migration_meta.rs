@@ -19,7 +19,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{
-    begin_transaction, define_field, define_table, DefineTableStatement, TransactionCompletion,
+    begin_transaction, define_field, define_table, remove_table, DefineTableStatement,
+    RemoveTableStatement, TransactionCompletion,
 };
 use surreal_query_builder::{DbResources, Field, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
@@ -177,16 +178,15 @@ impl Migration {
         checksum_up: &Checksum,
         checksum_down: Option<&Checksum>,
     ) -> Raw {
-        let migration_table = Migration::table_name();
         let mut tx = begin_transaction()
-            .query(Raw::new(format!("REMOVE TABLE {migration_table};")))
-            .query(Migration::define_table());
+            .query(Self::remove_table())
+            .query(Self::define_table());
 
-        Self::define_fields().into_iter().for_each(|def| {
-            tx.query(def);
-        });
+        for def in Self::define_fields() {
+            tx = tx.query(def);
+        }
 
-        tx.query(Migration::create_raw(&filename, checksum_up, checksum_down))
+        tx.query(Self::create_raw(&filename, checksum_up, checksum_down))
             .commit_transaction()
             .to_raw()
     }
@@ -202,7 +202,7 @@ impl Migration {
             timestamp: timestamp_field,
             checksum_up: checksum_up_field,
             checksum_down: checksum_down_field,
-        } = Migration::schema();
+        } = Self::schema();
 
         let record_id = Self::create_id(&filename);
         let name = filename.to_string();
@@ -235,12 +235,16 @@ impl Migration {
         }
     }
 
-    pub fn table_name() -> surreal_query_builder::Table {
+    pub fn table_name() -> Table {
         Table::new("migration")
     }
 
     pub fn define_table() -> DefineTableStatement {
         define_table(Migration::table_name()).schemafull()
+    }
+
+    pub fn remove_table() -> RemoveTableStatement {
+        remove_table(Self::table_name())
     }
 
     pub fn define_fields() -> Vec<Raw> {
@@ -252,13 +256,13 @@ impl Migration {
             checksum_down,
         } = Migration::schema();
         let id = define_field(id)
-            .type_(FieldType::Record(vec![Migration::table_name()]))
-            .on_table(Migration::table_name())
+            .type_(FieldType::Record(vec![Self::table_name()]))
+            .on_table(Self::table_name())
             .to_raw();
 
         let name = define_field(name)
             .type_(FieldType::String)
-            .on_table(Migration::table_name())
+            .on_table(Self::table_name())
             .to_raw();
 
         let timestamp = define_field(timestamp)
