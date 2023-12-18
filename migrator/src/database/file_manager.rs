@@ -162,7 +162,7 @@ impl MigrationFilenames {
 
         let mut unidirectional_pair: Vec<MigrationOneWay> = Vec::new();
         for migration in unidirectional {
-            let up = migration_dir.join(migration.to_up().to_string());
+            let up = migration_dir.join(migration.to_unidirectional().to_string());
 
             let content = FileContent::from_file(&up).map_err(|e| {
                 MigrationError::MigrationFilePathDoesNotExist {
