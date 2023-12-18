@@ -258,6 +258,55 @@ struct Up {
     shared_run_and_rollback: RuntimeConfig,
 }
 
+impl Up {
+    pub async fn execute(&self, codebase_resources: impl DbResources) {
+        let db = setup_db(&self.shared_run_and_rollback).await;
+        let update_strategy = UpdateStrategy::from(self);
+        let mut files_config = MigrationConfig::new().make_strict();
+
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        }
+
+        match files_config.detect_migration_type() {
+            Ok(MigrationFlag::TwoWay) => {
+                log::info!("Running two way migrations");
+                let run = files_config
+                    .two_way()
+                    .run_up_pending_migrations(db.clone(), update_strategy)
+                    .await;
+                if let Err(e) = run {
+                    log::error!("Failed to run migrations: {}", e.to_string());
+                    panic!();
+                }
+            }
+            Ok(MigrationFlag::OneWay) => {
+                log::info!("Running one way migrations");
+                let run = files_config
+                    .one_way()
+                    .run_pending_migrations(db.clone(), update_strategy)
+                    .await;
+                if let Err(e) = run {
+                    log::error!("Failed to run migrations: {}", e.to_string());
+                    panic!();
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to detect migration type: {}", e.to_string());
+                panic!();
+            }
+        };
+
+        let info = info_for().database().get_data::<DbInfo>(db.clone()).await;
+        if let Err(ref e) = info {
+            log::error!("Failed to get db info: {}", e.to_string());
+        }
+
+        log::info!("Successfully ran migrations");
+        log::info!("Database: {:?}", info);
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub enum Status {
     #[default]
@@ -504,51 +553,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         SubCommand::Generate(generate) => {
             generate.execute(codebase_resources).await;
         }
-        SubCommand::Up(up) => {
-            let db = setup_db(&up.shared_run_and_rollback).await;
-            let update_strategy = UpdateStrategy::from(&up);
-
-            if let Some(path) = up.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            }
-
-            match files_config.detect_migration_type() {
-                Ok(MigrationFlag::TwoWay) => {
-                    log::info!("Running two way migrations");
-                    let run = files_config
-                        .two_way()
-                        .run_up_pending_migrations(db.clone(), update_strategy)
-                        .await;
-                    if let Err(e) = run {
-                        log::error!("Failed to run migrations: {}", e.to_string());
-                        panic!();
-                    }
-                }
-                Ok(MigrationFlag::OneWay) => {
-                    log::info!("Running one way migrations");
-                    let run = files_config
-                        .one_way()
-                        .run_pending_migrations(db.clone(), update_strategy)
-                        .await;
-                    if let Err(e) = run {
-                        log::error!("Failed to run migrations: {}", e.to_string());
-                        panic!();
-                    }
-                }
-                Err(e) => {
-                    log::error!("Failed to detect migration type: {}", e.to_string());
-                    panic!();
-                }
-            };
-
-            let info = info_for().database().get_data::<DbInfo>(db.clone()).await;
-            if let Err(ref e) = info {
-                log::error!("Failed to get db info: {}", e.to_string());
-            }
-
-            log::info!("Successfully ran migrations");
-            log::info!("Database: {:?}", info);
-        }
+        SubCommand::Up(up) => {}
         SubCommand::Down(rollback) => {
             if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
                 log::error!(
