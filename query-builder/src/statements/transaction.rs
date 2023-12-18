@@ -172,6 +172,7 @@ pub struct TransactionData {
     bindings: BindingsList,
 }
 
+/// Completed Transaction statements. Either COMMIT or CANCEL Transaction.
 #[derive(Debug, Clone)]
 pub struct TransactionCompletion {
     data: TransactionData,
