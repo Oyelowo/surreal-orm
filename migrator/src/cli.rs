@@ -259,7 +259,7 @@ struct Up {
 }
 
 impl Up {
-    pub async fn execute(&self, codebase_resources: impl DbResources) {
+    pub async fn execute(&self) {
         let db = setup_db(&self.shared_run_and_rollback).await;
         let update_strategy = UpdateStrategy::from(self);
         let mut files_config = MigrationConfig::new().make_strict();
@@ -307,9 +307,8 @@ impl Up {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub enum Status {
-    #[default]
     Applied,
     Pending,
     All,
@@ -348,6 +347,56 @@ struct List {
     runtime_config: RuntimeConfig,
 }
 
+impl List {
+    pub async fn execute(&self) {
+        let db = setup_db(&self.runtime_config).await;
+        let mut files_config = MigrationConfig::new().make_strict();
+
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        };
+
+        match files_config.detect_migration_type() {
+            Ok(MigrationFlag::TwoWay) => {
+                log::info!("Listing two way migrations");
+                let migrations = files_config
+                    .two_way()
+                    .list_migrations(
+                        db.clone(),
+                        self.status.unwrap_or(Status::All),
+                        self.runtime_config.strict.into(),
+                    )
+                    .await;
+
+                if let Err(ref e) = migrations {
+                    log::error!("Failed to get migrations: {}", e.to_string());
+                }
+                log::info!("Migrations: {:?}", migrations);
+            }
+            Ok(MigrationFlag::OneWay) => {
+                log::info!("Listing one way migrations");
+                let migrations = files_config
+                    .one_way()
+                    .list_migrations(
+                        db.clone(),
+                        self.status.unwrap_or(Status::All),
+                        self.runtime_config.strict.into(),
+                    )
+                    .await;
+
+                if let Err(ref e) = migrations {
+                    log::error!("Failed to get migrations: {}", e.to_string());
+                }
+
+                log::info!("Migrations: {:?}", migrations);
+            }
+            Err(e) => {
+                log::error!("Failed to detect migration type: {}", e.to_string());
+            }
+        };
+    }
+}
+
 /// Delete Unapplied local migration files that have not been applied to the current database instance
 /// cargo run -- prune
 #[derive(Parser, Debug)]
@@ -356,6 +405,27 @@ struct Prune {
     shared_all: SharedAll,
     #[clap(flatten)]
     runtime_config: RuntimeConfig,
+}
+
+impl Prune {
+    pub async fn execute(&self) {
+        let mut files_config = MigrationConfig::new().make_strict();
+        let db = setup_db(&self.runtime_config).await;
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        }
+
+        let res =
+            MigrationRunner::delete_unapplied_migration_files(db.clone(), &files_config.relax())
+                .await;
+
+        if let Err(ref e) = res {
+            log::error!("Failed to prune migrations: {}", e.to_string());
+            panic!();
+        }
+
+        log::info!("Prune successful");
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -502,6 +572,45 @@ struct Down {
     shared_run_and_rollback: RuntimeConfig,
 }
 
+impl Down {
+    pub async fn execute(&self) {
+        let mut files_config = MigrationConfig::new().make_strict();
+
+        if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
+            log::error!(
+                "Cannot rollback one way migrations. 
+                Please use two way migrations or Create a new migration to reverse the changes"
+            );
+            panic!();
+        }
+
+        let db = setup_db(&self.shared_run_and_rollback).await;
+        let rollback_strategy = RollbackStrategy::from(self);
+
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        };
+
+        let rollback = files_config
+            .two_way()
+            .run_down_migrations(
+                db.clone(),
+                RollbackOptions {
+                    rollback_strategy,
+                    strictness: self.shared_run_and_rollback.strict.into(),
+                    prune_files_after_rollback: self.shared_run_and_rollback.prune,
+                },
+            )
+            .await;
+
+        if let Err(ref e) = rollback {
+            log::error!("Failed to rollback migrations: {}", e.to_string());
+        }
+
+        log::info!("Rollback successful");
+    }
+}
+
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
 #[derive(Parser, Debug)]
@@ -553,106 +662,16 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         SubCommand::Generate(generate) => {
             generate.execute(codebase_resources).await;
         }
-        SubCommand::Up(up) => {}
-        SubCommand::Down(rollback) => {
-            if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
-                log::error!(
-                    "Cannot rollback one way migrations. 
-                Please use two way migrations or Create a new migration to reverse the changes"
-                );
-                panic!();
-            }
-
-            let db = setup_db(&rollback.shared_run_and_rollback).await;
-
-            let rollback_strategy = RollbackStrategy::from(&rollback);
-
-            if let Some(path) = rollback.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            };
-
-            let rollback = files_config
-                .two_way()
-                .run_down_migrations(
-                    db.clone(),
-                    RollbackOptions {
-                        rollback_strategy,
-                        strictness: rollback.shared_run_and_rollback.strict.into(),
-                        prune_files_after_rollback: rollback.shared_run_and_rollback.prune,
-                    },
-                )
-                .await;
-
-            if let Err(ref e) = rollback {
-                log::error!("Failed to rollback migrations: {}", e.to_string());
-            }
-
-            log::info!("Rollback successful");
+        SubCommand::Up(up) => {
+            up.execute().await;
+        }
+        SubCommand::Down(down) => {
+            down.execute().await;
         }
         SubCommand::Prune(prune) => {
-            let db = setup_db(&prune.runtime_config).await;
-            if let Some(path) = prune.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            }
-            let res = MigrationRunner::delete_unapplied_migration_files(
-                db.clone(),
-                &files_config.relax(),
-            )
-            .await;
-
-            if let Err(ref e) = res {
-                log::error!("Failed to prune migrations: {}", e.to_string());
-                panic!();
-            }
-
-            log::info!("Prune successful");
+            prune.execute().await;
         }
-        SubCommand::List(options) => {
-            let db = setup_db(&options.runtime_config).await;
-
-            if let Some(path) = options.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            };
-
-            match files_config.detect_migration_type() {
-                Ok(MigrationFlag::TwoWay) => {
-                    log::info!("Listing two way migrations");
-                    let migrations = files_config
-                        .two_way()
-                        .list_migrations(
-                            db.clone(),
-                            options.status.unwrap_or_default(),
-                            options.runtime_config.strict.into(),
-                        )
-                        .await;
-
-                    if let Err(ref e) = migrations {
-                        log::error!("Failed to get migrations: {}", e.to_string());
-                    }
-                    log::info!("Migrations: {:?}", migrations);
-                }
-                Ok(MigrationFlag::OneWay) => {
-                    log::info!("Listing one way migrations");
-                    let migrations = files_config
-                        .one_way()
-                        .list_migrations(
-                            db.clone(),
-                            options.status.unwrap_or_default(),
-                            options.runtime_config.strict.into(),
-                        )
-                        .await;
-
-                    if let Err(ref e) = migrations {
-                        log::error!("Failed to get migrations: {}", e.to_string());
-                    }
-
-                    log::info!("Migrations: {:?}", migrations);
-                }
-                Err(e) => {
-                    log::error!("Failed to detect migration type: {}", e.to_string());
-                }
-            };
-        }
+        SubCommand::List(options) => {}
 
         SubCommand::Reset(reset) => {
             let db = setup_db(&reset.shared_run_and_rollback).await;
