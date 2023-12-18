@@ -122,7 +122,7 @@ struct Init {
 }
 
 impl Init {
-    pub async fn apply(&self, codebase_resources: impl DbResources) {
+    pub async fn run(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -180,7 +180,7 @@ struct Generate {
 }
 
 impl Generate {
-    pub async fn apply(&self, codebase_resources: impl DbResources) {
+    pub async fn run(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = &self.name;
         let mig_type = files_config.detect_migration_type();
@@ -260,7 +260,7 @@ struct Up {
 }
 
 impl Up {
-    pub async fn apply(&self) {
+    pub async fn run(&self) {
         let db = setup_db(&self.shared_run_and_rollback).await;
         let update_strategy = UpdateStrategy::from(self);
         let mut files_config = MigrationConfig::new().make_strict();
@@ -349,7 +349,7 @@ struct List {
 }
 
 impl List {
-    pub async fn apply(&self) {
+    pub async fn run(&self) {
         let db = setup_db(&self.runtime_config).await;
         let mut files_config = MigrationConfig::new().make_strict();
 
@@ -409,7 +409,7 @@ struct Prune {
 }
 
 impl Prune {
-    pub async fn apply(&self) {
+    pub async fn run(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
         let db = setup_db(&self.runtime_config).await;
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -574,7 +574,7 @@ struct Down {
 }
 
 impl Down {
-    pub async fn apply(&self) {
+    pub async fn run(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
 
         if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
@@ -634,7 +634,7 @@ struct Reset {
 }
 
 impl Reset {
-    pub async fn apply(&self, codebase_resources: impl DbResources) {
+    pub async fn run(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let db = setup_db(&self.shared_run_and_rollback).await;
 
@@ -666,7 +666,7 @@ impl Reset {
             reversible: self.reversible.clone(),
             shared_all: self.shared_all.clone(),
         };
-        init.apply(codebase_resources).await;
+        init.run(codebase_resources).await;
 
         let (filename, up_check, down_check) = if init.reversible {
             let migs = files_config.two_way().get_migrations();
@@ -743,23 +743,26 @@ impl Reset {
 /// use surrealdb::{Connection, Surreal};
 ///
 /// async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
-///    let db = Surreal::new::<Ws>("localhost:8000")
+///     let db = Surreal::new::<Ws>("localhost:8000")
 ///    .await
 ///    .expect("Failed to connect to db");
-///    db.signin(Root {
+///     
+///     db.signin(Root {
 ///         username: "root",
 ///         password: "root",
-/// })
-///    .await
-///    .expect("Failed to signin");
-///    db.use_ns("test").use_db("test").await.unwrap();
-///    db
+///     })
+///     .await
+///     .expect("Failed to signin");
+///
+///     db.use_ns("test").use_db("test").await.unwrap();
+///     db
 /// }
-///    #[tokio::main]
+///
+/// #[tokio::main]
 /// async fn main() {
-///         let db = initialize_db().await;
+///     let db = initialize_db().await;
 ///    // include example usage as rust doc
-///         cli::migration_cli(db, Resources).await;
+///     cli::migration_cli(db, Resources).await;
 /// }
 /// ```
 pub async fn migration_cli(codebase_resources: impl DbResources) {
@@ -769,25 +772,25 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
         SubCommand::Init(init) => {
-            init.apply(codebase_resources).await;
+            init.run(codebase_resources).await;
         }
         SubCommand::Generate(generate) => {
-            generate.apply(codebase_resources).await;
+            generate.run(codebase_resources).await;
         }
         SubCommand::Up(up) => {
-            up.apply().await;
+            up.run().await;
         }
         SubCommand::Down(down) => {
-            down.apply().await;
+            down.run().await;
         }
         SubCommand::Prune(prune) => {
-            prune.apply().await;
+            prune.run().await;
         }
         SubCommand::List(prune) => {
-            prune.apply().await;
+            prune.run().await;
         }
         SubCommand::Reset(reset) => {
-            reset.apply(codebase_resources).await;
+            reset.run(codebase_resources).await;
         }
     }
 }
