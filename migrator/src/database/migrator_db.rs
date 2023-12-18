@@ -107,7 +107,7 @@ impl MigratorDatabase {
     }
 
     pub async fn generate_migrations(
-        migration_name: String,
+        migration_name: &String,
         file_manager: &FileManager,
         codebase_resources: impl DbResources,
     ) -> MigrationResult<()> {

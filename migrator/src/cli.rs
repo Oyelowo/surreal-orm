@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::str::FromStr;
+
 use clap::{ArgAction, Parser};
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::{DbResources, Runnable};
@@ -32,6 +35,9 @@ enum SubCommand {
     Up(Up),
     /// Rollback migrations
     Down(Down),
+    /// Reset migrations. Deletes all migration files, migration table and reinitializes
+    /// migrations
+    Reset(Reset),
     /// List migrations
     #[clap(alias = "ls")]
     List(List),
@@ -76,6 +82,7 @@ impl SubCommand {
             SubCommand::Down(rollback) => rollback.shared_all.verbose,
             SubCommand::List(list) => list.shared_all.verbose,
             SubCommand::Prune(prune) => prune.shared_all.verbose,
+            SubCommand::Reset(reset) => reset.shared_all.verbose,
         }
     }
 
@@ -111,6 +118,53 @@ struct Init {
 
     #[clap(flatten)]
     shared_all: SharedAll,
+}
+
+impl Init {
+    pub async fn execute(&self, codebase_resources: impl DbResources) {
+        let mut files_config = MigrationConfig::new().make_strict();
+        let migration_name = self.name.clone();
+        if let Some(path) = self.shared_all.migrations_dir.clone() {
+            files_config = files_config.custom_path(path)
+        };
+        let files = files_config
+            .clone()
+            .into_inner()
+            .get_migrations_filenames(false);
+
+        match files {
+            Ok(files) => {
+                if !files.is_empty() {
+                    log::warn!("Migrations already initialized");
+                    return ();
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to get migrations: {}", e.to_string());
+                panic!();
+            }
+        };
+
+        if self.reversible {
+            let gen = files_config
+                .two_way()
+                .generate_migrations(&migration_name, codebase_resources)
+                .await;
+            if let Err(e) = gen {
+                log::error!("Failed to generate migrations: {}", e.to_string());
+            }
+        } else {
+            let gen = files_config
+                .one_way()
+                .generate_migrations(migration_name, codebase_resources)
+                .await;
+
+            if let Err(e) = gen {
+                log::error!("Failed to generate migrations: {}", e.to_string());
+            }
+        };
+        log::info!("Successfully generated migrations");
+    }
 }
 
 /// Generate migrations
@@ -359,8 +413,15 @@ struct Down {
     shared_run_and_rollback: RuntimeConfig,
 }
 
-use std::fmt::Display;
-use std::str::FromStr;
+/// Resets migrations. Deletes all migration files, migration table and reinitializes
+/// migrations.
+#[derive(Parser, Debug)]
+struct Reset {
+    #[clap(flatten)]
+    shared_all: SharedAll,
+    #[clap(flatten)]
+    shared_run_and_rollback: RuntimeConfig,
+}
 
 /// Run migration cli
 /// # Example
@@ -398,47 +459,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     let mut files_config = MigrationConfig::new().make_strict();
     match cli.subcmd {
         SubCommand::Init(init) => {
-            let migration_name = init.name;
-            if let Some(path) = init.shared_all.migrations_dir {
-                files_config = files_config.custom_path(path)
-            };
-            let files = files_config
-                .clone()
-                .into_inner()
-                .get_migrations_filenames(false);
-
-            match files {
-                Ok(files) => {
-                    if !files.is_empty() {
-                        log::warn!("Migrations already initialized");
-                        return ();
-                    }
-                }
-                Err(e) => {
-                    log::error!("Failed to get migrations: {}", e.to_string());
-                    panic!();
-                }
-            };
-
-            if init.reversible {
-                let gen = files_config
-                    .two_way()
-                    .generate_migrations(migration_name, codebase_resources)
-                    .await;
-                if let Err(e) = gen {
-                    log::error!("Failed to generate migrations: {}", e.to_string());
-                }
-            } else {
-                let gen = files_config
-                    .one_way()
-                    .generate_migrations(migration_name, codebase_resources)
-                    .await;
-
-                if let Err(e) = gen {
-                    log::error!("Failed to generate migrations: {}", e.to_string());
-                }
-            };
-            log::info!("Successfully generated migrations");
+            init.execute(codebase_resources).await;
         }
         SubCommand::Generate(generate) => {
             let migration_name = generate.name;
@@ -452,7 +473,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                 Ok(MigrationFlag::TwoWay) => {
                     let gen = files_config
                         .two_way()
-                        .generate_migrations(migration_name, codebase_resources)
+                        .generate_migrations(&migration_name, codebase_resources)
                         .await;
                     if let Err(e) = gen {
                         log::error!("Failed to generate migrations: {}", e.to_string());
@@ -558,6 +579,9 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
         }
         SubCommand::Prune(prune) => {
             let db = setup_db(&prune.runtime_config).await;
+            if let Some(path) = prune.shared_all.migrations_dir {
+                files_config = files_config.custom_path(path)
+            }
             let res = MigrationRunner::delete_unapplied_migration_files(
                 db.clone(),
                 &files_config.relax(),
@@ -616,6 +640,17 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
                     log::error!("Failed to detect migration type: {}", e.to_string());
                 }
             };
+        }
+
+        SubCommand::Reset(reset) => {
+            let db = setup_db(&reset.shared_run_and_rollback).await;
+
+            if let Some(path) = reset.shared_all.migrations_dir {
+                files_config = files_config.custom_path(path)
+            };
+
+            log::info!("Reset successful");
+            todo!();
         }
     }
 }
