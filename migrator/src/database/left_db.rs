@@ -34,7 +34,7 @@ impl LeftDatabase {
         )
     }
 
-    pub async fn run_all_local_dir_up_migrations(
+    pub async fn run_twoway_up_migrations(
         &self,
         file_manager: &FileManager,
         create_migration_table: bool,
@@ -80,7 +80,7 @@ impl LeftDatabase {
         }
         Ok(())
     }
-    pub async fn run_all_local_dir_one_way_migrations(
+    pub async fn run_oneway_migrations(
         &self,
         fm: &FileManager,
         create_migration_table: bool,
