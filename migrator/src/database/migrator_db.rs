@@ -126,12 +126,10 @@ impl MigratorDatabase {
         let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
         match file_manager.migration_flag {
             MigrationFlag::TwoWay => {
-                left.run_all_local_dir_up_migrations(file_manager, true)
-                    .await?;
+                left.run_twoway_up_migrations(file_manager, true).await?;
             }
             MigrationFlag::OneWay => {
-                left.run_all_local_dir_one_way_migrations(file_manager, true)
-                    .await?;
+                left.run_oneway_migrations(file_manager, true).await?;
             }
         };
 
