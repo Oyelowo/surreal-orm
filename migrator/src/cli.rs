@@ -579,8 +579,9 @@ impl Down {
 
         if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
             log::error!(
-                "Cannot rollback one way migrations. 
-                Please use two way migrations or Create a new migration to reverse the changes"
+                "Cannot rollback one way migrations. \
+            Create a new migration to reverse the changes or run cargo run -- reset -r \
+            to use two way migrations"
             );
             panic!();
         }
