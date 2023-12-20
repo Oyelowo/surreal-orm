@@ -36,10 +36,12 @@ fn generate_migration_code(
                 let name = meta.name().to_string();
                 let content = meta.content().to_string();
 
-                quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
-                    name: #name,
-                    content: #content,
-                })
+                quote!(#crate_name::migrator::EmbeddedMigrationOneWay (
+                    #crate_name::migrator::FileMetadataStatic {
+                        name: #name,
+                        content: #content,
+                    }
+                ))
             })
             .collect::<Vec<_>>(),
         MigrationFlag::TwoWay => files_config
