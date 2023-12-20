@@ -138,7 +138,7 @@ impl Init {
         let files = files_config
             .clone()
             .into_inner()
-            .get_migrations_filenames(false);
+            .get_migrations_filenames(true);
 
         match files {
             Ok(files) => {
@@ -198,8 +198,15 @@ struct Generate {
     #[clap(long, help = "Name of the migration")]
     name: String,
 
+    /// Whether or not to run the migrations after generation.
+    #[clap(long, help = "Whether to run the migrations after generation")]
+    run: bool,
+
     #[clap(flatten)]
     shared_all: SharedAll,
+
+    #[clap(flatten)]
+    shared_run_and_rollback: RuntimeConfig,
 }
 
 impl Generate {
@@ -238,7 +245,22 @@ impl Generate {
             }
         };
 
-        log::info!("Successfully generated migrations");
+        if self.run {
+            log::info!("Running generated migrations");
+
+            let run = Up {
+                latest: Some(true),
+                number: None,
+                till: None,
+                shared_all: self.shared_all.clone(),
+                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+            };
+            run.run().await;
+
+            log::info!("Successfully ran the generated migration(s)");
+        }
+
+        log::info!("Migration generation done.")
     }
 }
 
