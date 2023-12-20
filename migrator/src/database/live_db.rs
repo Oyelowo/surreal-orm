@@ -532,14 +532,18 @@ impl MigrationRunner {
             migration_queries_str, mark_queries_registered_queries_str
         );
 
-        // Run them as a transaction against a local in-memory database
-        if !all.trim().is_empty() {
+        if all.trim().is_empty() {
+            log::info!("No new migrations to apply");
+        } else {
             begin_transaction()
                 .query(Raw::new(all))
                 .commit_transaction()
                 .run(db.clone())
                 .await?;
+
+            log::info!("Applied {} migrations", migration_queries.len());
         }
+
         Ok(())
     }
 

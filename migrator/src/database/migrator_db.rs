@@ -116,7 +116,9 @@ impl MigratorDatabase {
             .split(|c: char| c != '_' && !c.is_alphanumeric())
             .collect::<Vec<_>>()
             .join("_");
+
         log::info!("Running migrations");
+
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         // Left = migration directory
@@ -204,6 +206,7 @@ impl MigratorDatabase {
             confirmation
         };
 
+        let all_migs_count = [up_queries, down_queries].concat().len();
         match migration_type {
             MigrationType::OneWay(query_str) => {
                 if query_str.trim().is_empty() {
@@ -211,6 +214,7 @@ impl MigratorDatabase {
                         Ok(true) => {
                             MigrationFilename::create_oneway(timestamp, name)?
                                 .create_file(query_str, file_manager)?;
+                            log::info!("New migration generated.");
                         }
                         Ok(false) => {
                             log::info!("No migration created");
@@ -222,6 +226,7 @@ impl MigratorDatabase {
                 } else {
                     MigrationFilename::create_oneway(timestamp, name)?
                         .create_file(query_str, file_manager)?;
+                    log::info!("New migration generated.");
                 };
             }
             MigrationType::TwoWay { up, down } => {
@@ -233,6 +238,7 @@ impl MigratorDatabase {
                                     .create_file(up, file_manager)?;
                                 MigrationFilename::create_down(timestamp, name)?
                                     .create_file(down, file_manager)?;
+                                log::info!("New migration pair generated.");
                             }
                             Ok(false) => {
                                 log::info!("No migration created");
@@ -247,6 +253,7 @@ impl MigratorDatabase {
                             .create_file(up, file_manager)?;
                         MigrationFilename::create_down(timestamp, name)?
                             .create_file(down, file_manager)?;
+                        log::info!("New migration pair generated.");
                     }
                     (true, false) => {
                         return Err(MigrationError::MigrationUpQueriesEmpty);
@@ -257,6 +264,7 @@ impl MigratorDatabase {
                 };
             }
         }
+
         Ok(())
     }
 }
