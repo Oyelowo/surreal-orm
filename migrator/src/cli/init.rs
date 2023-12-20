@@ -1,19 +1,10 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use clap::{ArgAction, Parser};
-use std::fmt::Display;
-use std::fs;
-use std::str::FromStr;
+use crate::MigrationConfig;
 
-use surreal_query_builder::statements::info_for;
-use surreal_query_builder::{DbResources, Runnable};
-use surrealdb::engine::any::{connect, Any};
-
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
-use crate::{DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions};
+use clap::Parser;
+use surreal_query_builder::DbResources;
 
 /// Init migrations
 #[derive(Parser, Debug)]
@@ -45,6 +36,7 @@ impl Init {
     pub async fn run(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
+
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.custom_path(path)
         };

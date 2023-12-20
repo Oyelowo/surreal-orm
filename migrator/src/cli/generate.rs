@@ -1,7 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use crate::{MigrationConfig, MigrationFlag, RollbackOptions};
+use crate::{MigrationConfig, MigrationFlag};
 use clap::Parser;
 use surreal_query_builder::DbResources;
 
