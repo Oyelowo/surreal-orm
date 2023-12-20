@@ -1,21 +1,10 @@
-use super::config::{RuntimeConfig, SharedAll};
-
-use clap::{ArgAction, Parser};
-use std::fmt::Display;
-use std::fs;
-use std::str::FromStr;
-
-use surreal_query_builder::statements::info_for;
-use surreal_query_builder::{DbResources, Runnable};
-use surrealdb::engine::any::{connect, Any};
-
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
 use super::config::setup_db;
-use crate::{
-    DbInfo, MigrationConfig, MigrationFilename, MigrationFlag, MigrationRunner, RollbackOptions,
-};
+use super::config::{RuntimeConfig, SharedAll};
+use crate::{DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
+
+use clap::Parser;
+use surreal_query_builder::statements::info_for;
+use surreal_query_builder::Runnable;
 
 /// Run migrations
 /// cargo run -- up
