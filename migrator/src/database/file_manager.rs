@@ -147,7 +147,7 @@ impl FileManager {
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
         self.get_migrations_filenames(create_dir_if_not_exists)?
             .bidirectional_pair_meta_checked(&self.resolve_migration_directory(false)?)
     }
@@ -311,7 +311,7 @@ impl TwoWayGetter {
     }
 
     /// Get all migrations
-    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileBiPair>> {
         self.0
             .get_migrations_filenames(false)?
             .bidirectional_pair_meta_checked(&self.0.resolve_migration_directory(false)?)

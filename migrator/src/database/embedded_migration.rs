@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{MigrationOneWay, MigrationResult, MigrationTwoWay};
+use crate::{MigrationFileBiPair, MigrationOneWay, MigrationResult};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
@@ -30,7 +30,7 @@ impl EmbeddedMigrationsTwoWay {
         Self { migrations }
     }
 
-    pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+    pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationFileBiPair>> {
         let migs = self
             .migrations
             .iter()
@@ -39,7 +39,7 @@ impl EmbeddedMigrationsTwoWay {
                 let up = meta.up.to_string().into();
                 let down = meta.down.to_string().into();
 
-                MigrationTwoWay {
+                MigrationFileBiPair {
                     name: name.to_string().try_into().expect("Invalid migration name"),
                     up,
                     down,
