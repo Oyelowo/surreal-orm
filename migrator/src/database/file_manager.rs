@@ -292,7 +292,7 @@ impl OneWayGetter {
         let migrations = self
             .get_migrations()?
             .into_iter()
-            .map(|m| m.name())
+            .map(|m| m.name().to_owned())
             .collect::<Vec<_>>();
 
         let migrations =
