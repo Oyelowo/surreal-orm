@@ -8,11 +8,11 @@ mod reset;
 mod up;
 
 pub use down::{Down, RollbackStrategy};
-use generate::Generate;
-use init::Init;
+pub use generate::Generate;
+pub use init::Init;
 pub use list::{List, Status};
-use prune::Prune;
-use reset::Reset;
+pub use prune::Prune;
+pub use reset::Reset;
 pub use up::{Up, UpdateStrategy};
 
 use clap::{ArgAction, Parser};
