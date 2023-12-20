@@ -10,6 +10,7 @@ mod database;
 mod error;
 mod resources;
 
+pub use cli::*;
 pub use database::*;
 pub use error::*;
 pub use resources::*;
