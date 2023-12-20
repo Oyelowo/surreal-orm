@@ -142,7 +142,7 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
         });
 
     let mode = args.next().flatten().map_or(Mode::default(), |md| {
-        md.try_into()
+        md.parse()
             .map_err(|e: MigrationError| e.to_string())
             .expect("Invalid mode")
     });

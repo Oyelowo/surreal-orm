@@ -65,7 +65,7 @@ impl TryFrom<String> for MigrationFlag {
 pub enum Mode {
     #[default]
     Strict,
-    Relaxed,
+    Lax,
 }
 
 impl FromStr for Mode {
@@ -74,7 +74,7 @@ impl FromStr for Mode {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim().to_lowercase().as_str() {
             "strict" => Ok(Self::Strict),
-            "relaxed" => Ok(Self::Relaxed),
+            "lax" => Ok(Self::Lax),
             _ => Err(MigrationError::InvalidMigrationMode(
                 s.to_string(),
                 Self::options().join(", "),
@@ -87,15 +87,15 @@ impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mode = match self {
             Self::Strict => "strict",
-            Self::Relaxed => "relaxed",
+            Self::Lax => "lax",
         };
-        write!(f, "{}", mode)
+        write!(f, "{mode}")
     }
 }
 
 impl Mode {
     pub fn options() -> Vec<String> {
-        vec![Self::Strict.to_string(), Self::Relaxed.to_string()]
+        vec![Self::Strict.to_string(), Self::Lax.to_string()]
     }
 
     pub fn is_strict(&self) -> bool {
@@ -103,22 +103,7 @@ impl Mode {
     }
 
     pub fn is_relaxed(&self) -> bool {
-        matches!(self, Self::Relaxed)
-    }
-}
-
-impl TryFrom<String> for Mode {
-    type Error = MigrationError;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        match value.as_str() {
-            "strict" => Ok(Self::Strict),
-            "relaxed" => Ok(Self::Relaxed),
-            _ => Err(MigrationError::InvalidMigrationMode(
-                value,
-                Self::options().join(", "),
-            )),
-        }
+        matches!(self, Self::Lax)
     }
 }
 
