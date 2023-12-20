@@ -27,10 +27,9 @@ impl Deref for LeftDatabase {
 impl LeftDatabase {
     pub async fn resources(&self) -> LeftFullDbInfo {
         LeftFullDbInfo(
-            self.0
-                .get_all_resources()
-                .await
-                .expect("nothing for u on left"),
+            self.0.get_all_resources().await.expect(
+                "Something went wrong getting all resources info about local migration files.",
+            ),
         )
     }
 
@@ -46,6 +45,8 @@ impl LeftDatabase {
             .map(|m: &MigrationTwoWay| m.up.to_string())
             .collect::<Vec<_>>()
             .join("\n");
+
+        // println!("Left side local migration Files: {}", &queries);
 
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {

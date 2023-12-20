@@ -10,6 +10,7 @@ use std::{fs::File, io::BufReader};
 use sha2::{self, Digest, Sha256};
 use std::convert::TryFrom;
 use std::env;
+use surrealdb::sql::statements::DeleteStatement;
 
 use std::{
     fmt::Display,
@@ -19,10 +20,10 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::statements::{
-    begin_transaction, define_field, define_table, remove_table, DefineTableStatement,
+    begin_transaction, define_field, define_table, delete, remove_table, DefineTableStatement,
     RemoveTableStatement,
 };
-use surreal_query_builder::{DbResources, Field, FieldType, Raw, Table, ToRaw};
+use surreal_query_builder::{All, DbResources, Field, FieldType, Raw, Table, ToRaw};
 use surrealdb::sql::Thing;
 use surrealdb::{Connection, Surreal};
 
@@ -246,6 +247,10 @@ impl Migration {
 
     pub fn remove_table() -> RemoveTableStatement {
         remove_table(Self::table_name())
+    }
+
+    pub fn delete_all() -> Raw {
+        Raw::new(format!("DELETE {};", Self::table_name()))
     }
 
     pub fn define_fields(migration_type: MigrationFlag) -> Vec<Raw> {
@@ -487,6 +492,7 @@ impl TryFrom<String> for Mode {
 
 impl MigrationTwoWay {}
 
+#[derive(Debug)]
 pub enum MigrationType {
     OneWay(String),
     TwoWay { up: String, down: String },
