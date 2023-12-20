@@ -89,20 +89,6 @@ impl From<MigrationTwoWay> for MigrationFile {
     }
 }
 
-pub enum UpdateStrategy {
-    // Default
-    // cargo run -- up
-    // cargo run -- up -latest
-    // cargo run -- up -l
-    Latest,
-    // cargo run -- up -number 34
-    // cargo run -- up -n 34
-    Number(u32),
-    // cargo run -- up -till 234y3498349304
-    // cargo run -- up -t 234y3498349304
-    Till(MigrationFilename),
-}
-
 pub struct RollbackOptions {
     pub rollback_strategy: RollbackStrategy,
     pub strictness: StrictNessLevel,
@@ -142,19 +128,6 @@ impl RollbackOptions {
         self.prune_files_after_rollback = prune_files_after_rollback;
         self
     }
-}
-
-pub enum RollbackStrategy {
-    // Default
-    // cargo run -- down
-    // cargo run -- down -n 1
-    Previous,
-    // cargo run -- down -number 34
-    // cargo run -- down -n 34
-    Number(u32),
-    // cargo run -- down -till 234y3498349304
-    // cargo run -- down -t 234y3498349304
-    Till(MigrationFilename),
 }
 
 impl MigrationRunner {
