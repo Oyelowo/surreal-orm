@@ -113,7 +113,7 @@ impl MigratorDatabase {
     ) -> MigrationResult<()> {
         let name = migration_name
             .to_string()
-            .split_whitespace()
+            .split(|c: char| c != '_' && !c.is_alphanumeric())
             .collect::<Vec<_>>()
             .join("_");
         log::info!("Running migrations");
@@ -141,8 +141,6 @@ impl MigratorDatabase {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
         };
-        println!("Mig typs LEFT: {:?}", &init.left_resources);
-        println!("Mig typs RIGHT: {:?}", &init.right_resources);
 
         let tables = init.new_tables(&codebase_resources).queries();
         let analyzers = init.new_analyzers().queries();
