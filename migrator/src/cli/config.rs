@@ -5,8 +5,6 @@ use std::fmt::Display;
 use std::fs;
 use std::str::FromStr;
 
-use surreal_query_builder::statements::info_for;
-use surreal_query_builder::{DbResources, Runnable};
 use surrealdb::engine::any::{connect, Any};
 
 use surrealdb::opt::auth::Root;
