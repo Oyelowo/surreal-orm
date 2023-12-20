@@ -15,15 +15,8 @@ pub use prune::Prune;
 pub use reset::Reset;
 pub use up::{Up, UpdateStrategy};
 
-use clap::{ArgAction, Parser};
-use surreal_query_builder::statements::info_for;
-use surreal_query_builder::{DbResources, Runnable};
-use surrealdb::engine::any::{connect, Any};
-
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
-use crate::{DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions};
+use clap::Parser;
+use surreal_query_builder::DbResources;
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
