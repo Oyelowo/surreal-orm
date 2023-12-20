@@ -16,7 +16,7 @@ pub enum By {
     OldName(String),
 }
 
-// For the codebase
+// Represents connection/db instance for the codebase
 #[derive(Debug, Clone)]
 pub struct RightDatabase(pub MigratorDatabase);
 
