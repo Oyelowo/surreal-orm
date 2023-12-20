@@ -206,7 +206,6 @@ impl MigratorDatabase {
             confirmation
         };
 
-        let all_migs_count = [up_queries, down_queries].concat().len();
         match migration_type {
             MigrationType::OneWay(query_str) => {
                 if query_str.trim().is_empty() {
