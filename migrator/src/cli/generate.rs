@@ -1,19 +1,9 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use clap::{ArgAction, Parser};
-use std::fmt::Display;
-use std::fs;
-use std::str::FromStr;
-
-use surreal_query_builder::statements::info_for;
-use surreal_query_builder::{DbResources, Runnable};
-use surrealdb::engine::any::{connect, Any};
-
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
-use crate::{MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions};
+use crate::{MigrationConfig, MigrationFlag, RollbackOptions};
+use clap::Parser;
+use surreal_query_builder::DbResources;
 
 /// Generate migrations
 #[derive(Parser, Debug)]
