@@ -192,7 +192,7 @@ impl MigrationConfig {
     }
 
     pub fn relax(&self) -> Self {
-        Self(self.0.mode(Mode::Relaxed))
+        Self(self.0.mode(Mode::Lax))
     }
 
     /// Default path is 'migrations' ralative to the nearest project root where
