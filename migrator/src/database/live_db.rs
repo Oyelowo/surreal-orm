@@ -7,9 +7,9 @@ use surrealdb::{Connection, Surreal};
 use crate::cli::Status;
 use crate::{
     cli::RollbackStrategy, FileContent, FileManager, Migration, MigrationError,
-    MigrationFileBiPair, MigrationFilename, MigrationOneWay, MigrationResult, MigrationSchema,
+    MigrationFileBiPair, MigrationFileUni, MigrationFilename, MigrationResult, MigrationSchema,
 };
-use crate::{MigrationConfig, MigrationFilenames, Mode, UpdateStrategy};
+use crate::{FileMetadata, MigrationConfig, MigrationFilenames, Mode, UpdateStrategy};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {
@@ -17,18 +17,15 @@ pub struct MigrationRunner {
     // file_manager: FileManager,
 }
 
-impl From<MigrationFileBiPair> for MigrationOneWay {
+impl From<MigrationFileBiPair> for MigrationFileUni {
     fn from(m: MigrationFileBiPair) -> Self {
-        Self {
-            name: m.name,
-            content: m.up,
-        }
+        Self::new(FileMetadata::new(m.up.name, m.up.content))
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum MigrationFile {
-    OneWay(MigrationOneWay),
+    OneWay(MigrationFileUni),
     TwoWay(MigrationFileBiPair),
 }
 
@@ -56,30 +53,30 @@ impl From<MigrationFile> for PendingMigrationFile {
 }
 
 impl MigrationFile {
-    pub fn name(&self) -> &MigrationFilename {
+    pub fn name_forward(&self) -> &MigrationFilename {
         match self {
-            Self::OneWay(m) => &m.name,
-            Self::TwoWay(m) => &m.name,
+            Self::OneWay(m) => &m.name(),
+            Self::TwoWay(m) => &m.up.name,
         }
     }
 
     pub fn up_content(&self) -> &FileContent {
         match self {
-            Self::OneWay(m) => &m.content,
-            Self::TwoWay(m) => &m.up,
+            Self::OneWay(m) => &m.content(),
+            Self::TwoWay(m) => &m.up.content,
         }
     }
 
     pub fn down_content(&self) -> Option<&FileContent> {
         match self {
             Self::OneWay(_) => None,
-            Self::TwoWay(m) => Some(&m.down),
+            Self::TwoWay(m) => Some(&m.down.content),
         }
     }
 }
 
-impl From<MigrationOneWay> for MigrationFile {
-    fn from(m: MigrationOneWay) -> Self {
+impl From<MigrationFileUni> for MigrationFile {
+    fn from(m: MigrationFileUni) -> Self {
         Self::OneWay(m)
     }
 }
@@ -153,7 +150,7 @@ impl MigrationRunner {
 
         let migrations_from_dir = all_migrations_from_dir
             .iter()
-            .find(|m| m.name == latest_migration.name.clone().try_into().unwrap())
+            .find(|m| m.up.name == latest_migration.name.clone().try_into().unwrap())
             .ok_or(MigrationError::MigrationFileDoesNotExist)?;
 
         if rollback_options.is_strict() {
@@ -193,9 +190,9 @@ impl MigrationRunner {
                     .into_iter()
                     .filter(|m| {
                         let is_before_db_latest_migration =
-                            m.name.timestamp() < latest_migration.timestamp;
+                            m.up.name.timestamp() < latest_migration.timestamp;
 
-                        let is_latest = m.name
+                        let is_latest = m.up.name
                             == latest_migration
                                 .name
                                 .clone()
@@ -238,17 +235,17 @@ impl MigrationRunner {
                     .clone()
                     .into_iter()
                     .filter(|m| {
-                        let is_latest = m.name
+                        let is_latest = m.up.name
                             == latest_migration
                                 .name
                                 .clone()
                                 .try_into()
                                 .expect("Invalid migration name");
                         let is_before_db_latest_migration =
-                            m.name.timestamp() < latest_migration.timestamp;
+                            m.up.name.timestamp() < latest_migration.timestamp;
 
-                        let is_after_file_cursor = m.name.timestamp() > file_cursor.timestamp();
-                        let is_file_cursor = m.name == *file_cursor;
+                        let is_after_file_cursor = m.up.name.timestamp() > file_cursor.timestamp();
+                        let is_file_cursor = m.up.name == *file_cursor;
 
                         (is_before_db_latest_migration || is_latest)
                             && (is_after_file_cursor || is_file_cursor)
@@ -317,7 +314,7 @@ impl MigrationRunner {
             })
             .filter(|m| {
                 latest_migration.as_ref().map_or(true, |latest_migration| {
-                    m.name().timestamp() > latest_migration.timestamp
+                    m.name_forward().timestamp() > latest_migration.timestamp
                 })
             })
             .map(PendingMigrationFile::from)
@@ -400,7 +397,7 @@ impl MigrationRunner {
 
                 m_from_db
                     .checksum_up
-                    .verify(&m_from_file.up, &m_from_file.name)?;
+                    .verify(&m_from_file.up.name, &m_from_file.up.content)?;
 
                 m_from_db
                     .clone()
@@ -408,9 +405,9 @@ impl MigrationRunner {
                     .ok_or(MigrationError::NoChecksumInDb {
                         migration_name: m_from_db.name.clone(),
                     })?
-                    .verify(&m_from_file.down, &m_from_file.name)?;
+                    .verify(&m_from_file.down.name, &m_from_file.down.content)?;
 
-                if m_from_file.name != db_mig_name {
+                if m_from_file.up.name != db_mig_name {
                     return Err(MigrationError::MigrationFileDoesNotExist);
                 }
             }
@@ -419,13 +416,14 @@ impl MigrationRunner {
         let rollback_queries = migrations_to_rollback
             .clone()
             .into_iter()
-            .map(|m| m.down.to_string())
+            .map(|m| m.down.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
         let rollbacked_migration_deletion_queries = migrations_to_rollback
             .iter()
-            .map(|m| Migration::delete_raw(&m.name).build())
+            // We are deleting by upname because that's how theyre are stored
+            .map(|m| Migration::delete_raw(&m.down.name.to_up()).build())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -439,8 +437,8 @@ impl MigrationRunner {
             .map(|m| {
                 fm.get_migration_dir().map(|d| {
                     vec![
-                        d.join(m.name.to_up().to_string()),
-                        d.join(m.name.to_down().to_string()),
+                        d.join(m.up.name.to_string()),
+                        d.join(m.down.name.to_string()),
                     ]
                 })
             })
@@ -463,19 +461,19 @@ impl MigrationRunner {
             match mf.into() {
                 MigrationFile::OneWay(m) => {
                     let created_registered_mig =
-                        Migration::create_raw(&m.name, &m.content.as_checksum()?, None);
+                        Migration::create_raw(&m.name(), &m.content().as_checksum()?, None);
 
-                    migration_queries.push(m.content);
+                    migration_queries.push(m.content());
                     mark_queries_registered_queries.push(created_registered_mig);
                 }
                 MigrationFile::TwoWay(m) => {
                     let created_registered_mig = Migration::create_raw(
-                        &m.name,
-                        &m.up.as_checksum()?,
-                        Some(&m.down.as_checksum()?),
+                        &m.up.name,
+                        &m.up.content.as_checksum()?,
+                        Some(&m.down.content.as_checksum()?),
                     );
 
-                    migration_queries.push(m.up);
+                    migration_queries.push(m.up.content);
                     mark_queries_registered_queries.push(created_registered_mig);
                 }
             }
@@ -547,7 +545,7 @@ impl MigrationRunner {
 
                 for mig in pending_migs {
                     filtered_migs.push(mig.clone());
-                    if *mig.name() == mig_filename {
+                    if *mig.name_forward() == mig_filename {
                         migration_found = true;
                         break;
                     }

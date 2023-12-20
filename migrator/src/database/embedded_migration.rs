@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{MigrationFileBiPair, MigrationOneWay, MigrationResult};
+use crate::{MigrationFileBiPair, MigrationFileUni, MigrationResult};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
