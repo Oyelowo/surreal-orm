@@ -173,6 +173,8 @@ impl Init {
         };
 
         if self.run {
+            log::info!("Running initial migrations");
+
             let run = Up {
                 latest: Some(true),
                 number: None,
@@ -181,6 +183,8 @@ impl Init {
                 shared_run_and_rollback: self.shared_run_and_rollback.clone(),
             };
             run.run().await;
+
+            log::info!("Successfully ran initial migrations");
         }
 
         log::info!("Successfully initialized and generated first migration(s)");
