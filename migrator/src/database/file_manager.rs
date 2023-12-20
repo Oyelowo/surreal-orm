@@ -1,544 +1,383 @@
-/*
- * Author: Oyelowo Oyedayo
- * Email: oyelowo.oss@gmail.com
- * Copyright (c) 2023 Oyelowo Oyedayo
- * Licensed under the MIT license
- */
-
 use std::{
-    fmt::Display,
-    fs::{self, File},
-    io::Write,
-    ops::Deref,
-    path::Path,
+    env, fs,
+    path::{Path, PathBuf},
 };
 
-use chrono::{DateTime, Utc};
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take_while1, take_while_m_n},
-    combinator::{all_consuming, cut, map_res},
-    error::context,
-    sequence::tuple,
-    IResult,
-};
+use surreal_query_builder::DbResources;
+use surrealdb::{Connection, Surreal};
 
 use crate::*;
 
-#[derive(Debug, Clone, Hash)]
-pub struct MigrationNameBasicInfo {
-    timestamp: u64,
-    name: String,
+#[derive(Debug, Clone, Default)]
+pub struct FileManager {
+    // pub migration_name: String,
+    pub mode: Mode,
+    /// Default path is 'migrations' ralative to the nearest project root where
+    /// cargo.toml is defined
+    pub custom_path: Option<String>,
+    pub(crate) migration_flag: MigrationFlag,
 }
 
-#[derive(Debug, Clone, Hash)]
-pub enum MigrationFilename {
-    Up(MigrationNameBasicInfo),
-    Down(MigrationNameBasicInfo),
-    Unidirectional(MigrationNameBasicInfo),
-}
-
-pub struct MigrationFilenames(Vec<MigrationFilename>);
-
-impl Deref for MigrationFilenames {
-    type Target = Vec<MigrationFilename>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<Vec<MigrationFilename>> for MigrationFilenames {
-    fn from(value: Vec<MigrationFilename>) -> Self {
-        Self(value)
-    }
-}
-
-impl MigrationFilenames {
-    pub fn all(&self) -> Vec<MigrationFilename> {
-        self.0.clone()
+///
+impl FileManager {
+    pub fn mode(&self, mode: Mode) -> Self {
+        Self {
+            mode,
+            ..self.clone()
+        }
     }
 
-    pub fn up(&self) -> Vec<MigrationFilename> {
-        self.0
-            .iter()
-            .filter(|m| matches!(m, MigrationFilename::Up(_)))
-            .cloned()
-            .collect()
+    pub fn custom_path(&self, custom_path: String) -> Self {
+        Self {
+            custom_path: Some(custom_path),
+            ..self.clone()
+        }
     }
 
-    pub fn down(&self) -> Vec<MigrationFilename> {
-        self.0
-            .iter()
-            .filter(|m| matches!(m, MigrationFilename::Down(_)))
-            .cloned()
-            .collect()
+    pub fn migration_flag(&self, migration_flag: MigrationFlag) -> Self {
+        Self {
+            migration_flag,
+            ..self.clone()
+        }
     }
 
-    pub fn bidirectional(&self) -> Vec<MigrationFilename> {
-        self.0
-            .iter()
-            .filter(|m| {
-                matches!(m, MigrationFilename::Up(_)) || matches!(m, MigrationFilename::Down(_))
-            })
-            .cloned()
-            .collect()
+    pub fn one_way(&mut self) -> OneWayGetter {
+        self.migration_flag = MigrationFlag::OneWay;
+        OneWayGetter::new(self.clone())
     }
 
-    pub fn bidirectional_pair_meta_checked(
+    pub fn two_way(&mut self) -> TwoWayGetter {
+        self.migration_flag = MigrationFlag::TwoWay;
+        TwoWayGetter::new(self.clone())
+    }
+
+    pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
+        let filenames = self.get_migrations_filenames(false)?;
+        let oneway = filenames.unidirectional();
+        let twoway = filenames.bidirectional();
+
+        match (oneway.is_empty(), twoway.is_empty()) {
+            (false, true) => Ok(MigrationFlag::OneWay),
+            (true, false) => Ok(MigrationFlag::TwoWay),
+            (false, false) | (true, true) => {
+                return Err(MigrationError::AmbiguousMigrationDirection {
+                    one_way_filecount: oneway.len(),
+                    two_way_filecount: twoway.len(),
+                });
+            }
+        }
+    }
+
+    pub fn is_first_migration(&self) -> MigrationResult<bool> {
+        Ok(self.get_migrations_filenames(false)?.all().is_empty())
+    }
+
+    pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
+        self.resolve_migration_directory(false)
+    }
+
+    pub(crate) fn resolve_migration_directory(
         &self,
-        migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let bidirectional = self.bidirectional();
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<PathBuf> {
+        let cargo_toml_directory =
+            env::var("CARGO_MANIFEST_DIR").map_err(|_| MigrationError::PathDoesNotExist)?;
+        let cargo_manifests_dir = Path::new(&cargo_toml_directory);
+        let default_path = cargo_manifests_dir.join("migrations");
+        let path = self
+            .custom_path
+            .as_ref()
+            .map_or(default_path, |fp| cargo_manifests_dir.join(Path::new(&fp)));
 
-        let mut bidirectional_pair = Vec::new();
-        for migration in bidirectional {
-            let up = migration_dir.join(migration.to_up().to_string());
-            let down = migration_dir.join(migration.to_down().to_string());
+        if path.exists() && path.is_dir() {
+            Ok(path)
+        } else {
+            if create_dir_if_not_exists {
+                fs::create_dir(&path).map_err(|e| MigrationError::IoError(e.to_string()))?;
+                return Ok(path);
+            }
+            Err(MigrationError::MigrationDirectoryDoesNotExist(
+                path.to_string_lossy().to_string(),
+            ))
+        }
+    }
 
-            let up = FileContent::from_file(&up).map_err(|e| {
-                MigrationError::MigrationFilePathDoesNotExist {
-                    path: up.to_string_lossy().to_string(),
-                    error: e.to_string(),
-                }
+    pub fn get_migrations_filenames(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<MigrationFilenames> {
+        let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
+        let migration_dir_path_str = migration_dir_path.to_string_lossy().to_string();
+        log::info!("Migration dir path: {}", &migration_dir_path_str);
+        let migrations = fs::read_dir(&migration_dir_path).map_err(|e| {
+            MigrationError::IoError(format!(
+                "Failed to read migration directory: {}. Error: {}",
+                &migration_dir_path_str, e
+            ))
+        })?;
+        log::info!("Migration dir path: {}", migration_dir_path_str);
+
+        let mut filenames = vec![];
+
+        for migration in migrations {
+            let migration = migration.map_err(|e| {
+                MigrationError::IoError(format!(
+                    "Failed to read migration directory: {}. Error: {}",
+                    migration_dir_path_str, e
+                ))
             })?;
-            let down = FileContent::from_file(&down).map_err(|e| {
-                MigrationError::MigrationFilePathDoesNotExist {
-                    path: down.to_string_lossy().to_string(),
-                    error: e.to_string(),
-                }
-            })?;
+            let path = migration.path();
+            let filename: MigrationFilename = path
+                .components()
+                .last()
+                .expect("Problem reading migration name")
+                .as_os_str()
+                .to_string_lossy()
+                .to_string()
+                .try_into()?;
 
-            bidirectional_pair.push(MigrationTwoWay {
-                name: migration,
-                up,
-                down,
-            });
+            filenames.push(filename);
         }
 
-        bidirectional_pair.sort();
-        bidirectional_pair.dedup_by(|a, b| a.name.to_up() == b.name.to_up());
-
-        Ok(bidirectional_pair)
+        filenames.sort_by(|a, b| a.cmp(b));
+        Ok(filenames.into())
     }
 
-    pub fn bidirectional_pair_meta_down_unchecked(
+    // Validate
+    pub fn get_two_way_migrations(
         &self,
-        migration_dir: &Path,
+        create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationTwoWay>> {
-        let bidirectional = self.bidirectional();
-
-        let mut bidirectional_pair = Vec::new();
-        for migration in bidirectional {
-            let up = migration_dir.join(migration.to_up().to_string());
-            let down = migration_dir.join(migration.to_down().to_string());
-
-            let up = FileContent::from_file(&up).map_err(|e| {
-                MigrationError::MigrationFilePathDoesNotExist {
-                    path: up.to_string_lossy().to_string(),
-                    error: e.to_string(),
-                }
-            })?;
-
-            let down = FileContent::from_file(&down).unwrap_or(FileContent::empty());
-
-            bidirectional_pair.push(MigrationTwoWay {
-                name: migration,
-                up,
-                down,
-            });
-        }
-
-        bidirectional_pair.sort();
-        bidirectional_pair.dedup();
-
-        Ok(bidirectional_pair)
+        self.get_migrations_filenames(create_dir_if_not_exists)?
+            .bidirectional_pair_meta_checked(&self.resolve_migration_directory(false)?)
     }
 
-    pub fn unidirectional(&self) -> Vec<MigrationFilename> {
-        self.0
-            .iter()
-            .filter(|m| matches!(m, MigrationFilename::Unidirectional(_)))
-            .cloned()
-            .collect()
-    }
-
-    pub fn unidirectional_pair_meta(
+    pub fn get_oneway_migrations(
         &self,
-        migration_dir: &Path,
+        create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationOneWay>> {
-        let unidirectional = self.unidirectional();
-
-        let mut unidirectional_pair: Vec<MigrationOneWay> = Vec::new();
-        for migration in unidirectional {
-            let up = migration_dir.join(migration.to_unidirectional().to_string());
-
-            let content = FileContent::from_file(&up).map_err(|e| {
-                MigrationError::MigrationFilePathDoesNotExist {
-                    path: up.to_string_lossy().to_string(),
-                    error: e.to_string(),
-                }
-            })?;
-
-            unidirectional_pair.push(MigrationOneWay {
-                name: migration,
-                content,
-            });
-        }
-
-        unidirectional_pair.sort_by(|a, b| a.name.cmp(&b.name));
-        unidirectional_pair.dedup_by(|a, b| a.name.eq(&b.name));
-
-        Ok(unidirectional_pair)
-    }
-}
-
-impl PartialEq for MigrationFilename {
-    fn eq(&self, other: &Self) -> bool {
-        self.timestamp() == other.timestamp()
-            && self.simple_name() == other.simple_name()
-            && self.extension() == other.extension()
-    }
-}
-
-impl Ord for MigrationFilename {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.timestamp().cmp(&other.timestamp())
-    }
-}
-
-impl PartialOrd for MigrationFilename {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Eq for MigrationFilename {}
-
-pub struct Filename(String);
-
-impl From<String> for Filename {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct SimpleName(String);
-
-impl Display for SimpleName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl SimpleName {
-    pub fn into_inner(self) -> String {
-        self.0
-    }
-}
-
-impl From<String> for SimpleName {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Extension(String);
-
-impl From<String> for Extension {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl Display for Extension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, ".{}", self.0)
-    }
-}
-
-#[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
-pub struct Basename(String);
-
-impl From<String> for Basename {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl Display for Basename {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl MigrationFilename {
-    pub fn filename(&self) -> Filename {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.up.surql")
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.down.surql")
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.surql")
-            }
-        }
-        .into()
-    }
-
-    pub fn timestamp(&self) -> Timestamp {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, .. }) => *timestamp,
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, .. }) => {
-                *timestamp
-            }
-        }
-        .into()
-    }
-
-    /// just the file name without extension nor timestamp
-    pub fn simple_name(&self) -> SimpleName {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { name, .. }) => name.clone(),
-            MigrationFilename::Down(MigrationNameBasicInfo { name, .. }) => name.clone(),
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { name, .. }) => name.clone(),
-        }
-        .into()
-    }
-
-    pub fn extension(&self) -> Extension {
-        match self {
-            MigrationFilename::Up(_) => "up.surql".to_string(),
-            MigrationFilename::Down(_) => "down.surql".to_string(),
-            MigrationFilename::Unidirectional(_) => "surql".to_string(),
-        }
-        .into()
-    }
-
-    pub fn basename(&self) -> Basename {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
-            }
-        }
-        .into()
-    }
-
-    pub fn to_up(&self) -> MigrationFilename {
-        match self {
-            MigrationFilename::Up(_) => self.clone(),
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Up(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Up(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-        }
-    }
-
-    pub fn to_down(&self) -> MigrationFilename {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Down(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Down(_) => self.clone(),
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Down(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-        }
-    }
-
-    pub fn to_unidirectional(&self) -> MigrationFilename {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Unidirectional(_) => self.clone(),
-        }
-    }
-
-    pub fn create_file(&self, query: String, file_namager: &FileManager) -> MigrationResult<()> {
-        let file_name = self.to_string();
-        let migration_dir = file_namager.resolve_migration_directory(true)?;
-        let file_path = migration_dir.join(file_name);
-
-        // Ensure the migrations directory exists
-        if let Err(err) = fs::create_dir_all(migration_dir) {
-            return Err(MigrationError::IoError(format!(
-                "Failed to create migrations directory: {}",
-                err
-            )));
-        }
-
-        let mut file = File::create(&file_path).map_err(|e| {
-            MigrationError::IoError(format!(
-                "Failed to create file path: {}. Error: {}",
-                file_path.to_string_lossy(),
-                e
-            ))
-        })?;
-
-        file.write_all(query.as_bytes()).map_err(|e| {
-            MigrationError::IoError(format!(
-                "Failed to create file. Filename - {}: {}",
-                file_path.to_string_lossy(),
-                e
-            ))
-        })?;
-
-        Ok(())
-    }
-
-    pub fn create_up(timestamp: DateTime<Utc>, name: &String) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
-
-        let name = name.to_string();
-        Ok(Self::Up(MigrationNameBasicInfo { timestamp, name }))
-    }
-
-    pub fn create_down(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
-
-        let name = name.into();
-        Ok(Self::Down(MigrationNameBasicInfo { timestamp, name }))
-    }
-
-    pub fn create_oneway(
-        timestamp: DateTime<Utc>,
-        name: impl Into<String>,
-    ) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
-
-        let name = name.into();
-        Ok(Self::Unidirectional(MigrationNameBasicInfo {
-            timestamp,
-            name,
-        }))
-    }
-
-    fn format_timestamp(timestamp: DateTime<Utc>) -> MigrationResult<u64> {
-        let timestamp = timestamp
-            .format("%Y%m%d%H%M%S")
-            .to_string()
-            .parse::<u64>()
-            .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
-        Ok(timestamp)
-    }
-}
-
-// parse_migration_name
-impl TryFrom<String> for MigrationFilename {
-    type Error = MigrationError;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        let (_, migration_name) = parse_migration_name(value.clone().as_str())
-            .map_err(|_e| MigrationError::InvalidMigrationName(value))?;
-        Ok(migration_name)
+        self.get_migrations_filenames(create_dir_if_not_exists)?
+            .unidirectional_pair_meta(&self.resolve_migration_directory(false)?)
     }
 }
 
 #[derive(Debug, Clone)]
-enum Direction {
-    Up,
-    Down,
-    OneWay,
-}
-// .up.surql or .down.surql or .surql
-fn parse_direction(input: &str) -> IResult<&str, Direction> {
-    use nom::combinator::value;
+pub struct MigrationConfig(FileManager);
 
-    let (input, direction) = alt((
-        value(Direction::Up, tag(".up.surql")),
-        value(Direction::Down, tag(".down.surql")),
-        value(Direction::OneWay, tag(".surql")),
-    ))(input)?;
-    Ok((input, direction))
+impl Default for MigrationConfig {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
-fn is_valid_migration_identifier(c: char) -> bool {
-    c.is_alphanumeric() || c == '_' || c == '-'
-}
+impl MigrationConfig {
+    pub fn new() -> Self {
+        Self(FileManager::default())
+    }
 
-fn parse_u64(input: &str) -> Result<u64, std::num::ParseIntError> {
-    input.parse()
-}
+    pub fn into_inner(self) -> FileManager {
+        self.0
+    }
 
-// format: <timestamp>_<name>.<direction>.surql
-// 14 numbers followed by _ and then name of migration
-fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFilename> {
-    let (input, timestamp) = map_res(
-        take_while_m_n(14, 20, |c: char| c.is_ascii_digit()),
-        parse_u64,
-    )(input)?;
-    let (input, _) = tag("_")(input)?;
-    let (input, (name, direction)) =
-        tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
-    let basic_info = MigrationNameBasicInfo {
-        timestamp,
-        name: name.to_string(),
-    };
+    pub fn mode(&self, mode: Mode) -> Self {
+        Self(self.0.mode(mode))
+    }
 
-    let m2 = match direction {
-        Direction::Up => MigrationFilename::Up(basic_info),
-        Direction::Down => MigrationFilename::Down(basic_info),
-        Direction::OneWay => MigrationFilename::Unidirectional(basic_info),
-    };
+    pub fn make_strict(&self) -> Self {
+        Self(self.0.mode(Mode::Strict))
+    }
 
-    Ok((input, m2))
-}
+    pub fn relax(&self) -> Self {
+        Self(self.0.mode(Mode::Relaxed))
+    }
 
-fn parse_migration_name(input: &str) -> IResult<&str, MigrationFilename> {
-    all_consuming(cut(context(
-        "Unexpected characters found after parsing",
-        parse_migration_name_unconsumed,
-    )))(input)
-}
+    /// Default path is 'migrations' ralative to the nearest project root where
+    pub fn custom_path(&self, custom_path: impl Into<String>) -> Self {
+        let custom_path = custom_path.into();
+        Self(self.0.custom_path(custom_path))
+    }
 
-impl Display for MigrationFilename {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let file_name_str = match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.up.surql")
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.down.surql")
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}.surql")
-            }
+    pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
+        self.0.detect_migration_type()
+    }
+
+    pub fn one_way(&self) -> OneWayGetter {
+        let fm = FileManager {
+            migration_flag: MigrationFlag::OneWay,
+            ..self.0.clone()
         };
-        write!(f, "{file_name_str}")
+        OneWayGetter::new(fm)
+    }
+
+    pub fn two_way(&self) -> TwoWayGetter {
+        let fm = FileManager {
+            migration_flag: MigrationFlag::TwoWay,
+            ..self.0.clone()
+        };
+        TwoWayGetter::new(fm)
+    }
+
+    pub fn get_migration_dir_create_if_none(&self) -> MigrationResult<PathBuf> {
+        self.0.resolve_migration_directory(true)
+    }
+
+    pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
+        self.0.get_migration_dir()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct OneWayGetter(FileManager);
+
+impl OneWayGetter {
+    pub(crate) fn new(file_manager: FileManager) -> Self {
+        Self(file_manager)
+    }
+
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+        self.0.get_oneway_migrations(false)
+    }
+
+    /// Generate migration directory if it does not exist
+    pub async fn generate_migrations(
+        &self,
+        migration_name: impl Into<String>,
+        codebase_resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let migration_name = migration_name.into();
+        let file_manager = self.0.clone();
+
+        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
+            .await
+            .expect("Failed to generate migrations");
+        Ok(())
+    }
+
+    /// Runs migrations at runtime against a database
+    /// Make sure the migration directory exists when running migrations
+    pub async fn run_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        update_strategy: UpdateStrategy,
+    ) -> MigrationResult<()> {
+        let migrations = self.get_migrations()?;
+        MigrationRunner::apply_pending_migrations(db, migrations, update_strategy).await?;
+
+        Ok(())
+    }
+
+    pub async fn run_embedded_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        one_way_embedded_migrations: EmbeddedMigrationsOneWay,
+        update_strategy: UpdateStrategy,
+    ) -> MigrationResult<()> {
+        let migrations = one_way_embedded_migrations.to_migrations_one_way()?;
+        MigrationRunner::apply_pending_migrations(db, migrations, update_strategy).await?;
+
+        Ok(())
+    }
+
+    /// List all migrations
+    pub async fn list_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        status: Status,
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
+        let migrations = self
+            .get_migrations()?
+            .into_iter()
+            .map(|m| m.name)
+            .collect::<Vec<_>>();
+
+        let migrations =
+            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
+
+        Ok(migrations)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TwoWayGetter(FileManager);
+
+impl TwoWayGetter {
+    pub(crate) fn new(file_manager: FileManager) -> Self {
+        Self(file_manager)
+    }
+
+    /// Get all migrations
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationTwoWay>> {
+        self.0
+            .get_migrations_filenames(false)?
+            .bidirectional_pair_meta_checked(&self.0.resolve_migration_directory(false)?)
+    }
+
+    /// Generate migration directory if it does not exist
+    pub async fn generate_migrations(
+        &self,
+        migration_name: &String,
+        codebase_resources: impl DbResources,
+    ) -> MigrationResult<()> {
+        let migration_name = migration_name.into();
+        let file_manager = self.0.clone();
+        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
+            .await
+    }
+
+    /// Make sure the migration directory exists when running migrations
+    pub async fn run_up_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        update_strategy: UpdateStrategy,
+    ) -> MigrationResult<()> {
+        let migrations = self.get_migrations()?;
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
+
+        Ok(())
+    }
+
+    /// For running embedded migrations
+    pub async fn run_up_embedded_pending_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        two_way_embedded_migrations: EmbeddedMigrationsTwoWay,
+        update_strategy: UpdateStrategy,
+    ) -> MigrationResult<()> {
+        let migrations = two_way_embedded_migrations.to_migrations_two_way()?;
+        MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
+
+        Ok(())
+    }
+
+    /// Rollback migration using various strategies
+    pub async fn run_down_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        rollback_options: RollbackOptions,
+    ) -> MigrationResult<()> {
+        // let _migrations = self.get_migrations()?;
+        MigrationRunner::rollback_migrations(db, &self.0, rollback_options).await?;
+
+        Ok(())
+    }
+
+    /// List all migrations
+    pub async fn list_migrations(
+        &self,
+        db: Surreal<impl Connection>,
+        status: Status,
+        strictness: StrictNessLevel,
+    ) -> MigrationResult<Vec<MigrationFilename>> {
+        let migrations = self
+            .get_migrations()?
+            .into_iter()
+            .map(|m| m.name.to_up())
+            .collect::<Vec<_>>();
+
+        let migrations =
+            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
+
+        Ok(migrations)
     }
 }
