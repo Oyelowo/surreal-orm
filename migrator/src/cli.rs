@@ -470,7 +470,7 @@ struct SharedAll {
     verbose: u8,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 struct RuntimeConfig {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
@@ -607,7 +607,7 @@ impl Down {
             .await;
 
         if let Err(ref e) = rollback {
-            log::error!("Failed to rollback migrations: {}", e.to_string());
+            log::error!("Failed to rollback migrations: {e}");
         }
 
         log::info!("Rollback successful");
@@ -621,6 +621,13 @@ struct Reset {
     /// Name of the first migration file(s) to reinitialize to
     #[clap(long)]
     name: String,
+
+    /// Whether or not to run the migrations after reinitialization. Reinitalization
+    /// is done by deleting all migration files, and regenerating
+    /// the first migration file(s) which include queries to delete all old
+    /// migration metadata in the database before creating the new ones.
+    #[clap(long)]
+    run: bool,
 
     /// Two way migration
     #[clap(
@@ -638,7 +645,6 @@ struct Reset {
 impl Reset {
     pub async fn run(&self, codebase_resources: impl DbResources) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let db = setup_db(&self.shared_run_and_rollback).await;
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.custom_path(path)
@@ -674,80 +680,17 @@ impl Reset {
             shared_all: self.shared_all.clone(),
         };
         init.run(codebase_resources).await;
-        // let migration_type = if init.reversible {
-        //     MigrationFlag::TwoWay
-        // } else {
-        //     MigrationFlag::OneWay
-        // };
-        //
-        // let (filename, up_check, down_check) = match migration_type {
-        //     MigrationFlag::TwoWay => {
-        //         let migs = files_config.two_way().get_migrations();
-        //         match migs {
-        //             Ok(mut m) => {
-        //                 if m.len() > 1 {
-        //                     log::error!("Invalid migration state. There should be only two files during reset and initialization of up and down migration files.");
-        //                     panic!();
-        //                 }
-        //                 let meta = m.swap_remove(0);
-        //                 (meta.name, meta.up, Some(meta.down))
-        //             }
-        //             Err(e) => {
-        //                 log::error!(
-        //                     "Problem reading Bidirectional up and down migrations. Error: {}",
-        //                     e
-        //                 );
-        //                 panic!();
-        //             }
-        //         }
-        //     }
-        //     MigrationFlag::OneWay => {
-        //         let migs = files_config.one_way().get_migrations();
-        //         match migs {
-        //             Ok(mut m) => {
-        //                 if m.len() > 1 {
-        //                     log::error!("Invalid migration files state. there should only be 1 file during initialization/reset");
-        //                     panic!();
-        //                 }
-        //                 let meta = m.swap_remove(0);
-        //                 (meta.name, meta.content, None)
-        //             }
-        //             Err(e) => {
-        //                 log::error!(
-        //                     "Problem reading Bidirectional up and down migrations. Error: {}",
-        //                     e
-        //                 );
-        //                 panic!();
-        //             }
-        //         }
-        //     }
-        // };
-        //
-        // let log_error_panic = |checksum: MigrationResult<Checksum>| match checksum {
-        //     Ok(ch) => ch,
-        //     Err(e) => {
-        //         log::error!(
-        //             "Problem generating checksum from file. Error: {}",
-        //             e.to_string()
-        //         );
-        //         panic!()
-        //     }
-        // };
 
-        // if let Err(e) = Migration::create_reinitialize_table_raw_tx(
-        //     &filename,
-        //     &log_error_panic(up_check.as_checksum()),
-        //     down_check
-        //         .map(|d| log_error_panic(d.as_checksum()))
-        //         .as_ref(),
-        //     migration_type,
-        // )
-        // .run(db.clone())
-        // .await
-        // {
-        //     log::error!("Something went wrong while running reinitialisation transaction queries. Error: {}", e.to_string());
-        //     panic!()
-        // }
+        if self.run {
+            let run = Up {
+                latest: Some(true),
+                number: None,
+                till: None,
+                shared_all: self.shared_all.clone(),
+                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+            };
+            run.run().await;
+        }
 
         log::info!("Reset successful");
     }
