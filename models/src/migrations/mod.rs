@@ -104,7 +104,7 @@ impl TableResources for Animal {
 
         let event1 = define_event("event1".to_string())
             .on_table("animal".to_string())
-            .when(cond(species.eq("Homo Erectus").and(velocity.gt(545))))
+            .when(cond(species.eq("Homo Erectus")).and(velocity.gt(545)))
             .then(select(All).from(Crop::table_name()))
             .to_raw();
 

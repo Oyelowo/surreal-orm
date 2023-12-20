@@ -194,7 +194,7 @@ impl Display for FieldType {
             FieldType::Uuid => write!(f, "uuid"),
             FieldType::Record(ref_tables) => {
                 if ref_tables.is_empty() {
-                    write!(f, "record")
+                    write!(f, "record<any>")
                 } else {
                     write!(
                         f,
@@ -209,7 +209,7 @@ impl Display for FieldType {
             }
             FieldType::Geometry(ref_tables) => {
                 if ref_tables.is_empty() {
-                    write!(f, "geometry")
+                    write!(f, "geometry<feature>")
                 } else {
                     write!(
                         f,

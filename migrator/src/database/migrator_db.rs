@@ -73,7 +73,7 @@ impl MigratorDatabase {
             .database()
             .get_data::<DbInfo>(self.db())
             .await?
-            .unwrap();
+            .expect("Database not found");
         Ok(info)
     }
 
@@ -82,7 +82,7 @@ impl MigratorDatabase {
             .table(table_name)
             .get_data::<TableResourcesData>(self.db())
             .await?
-            .unwrap();
+            .expect("Table not found");
         Ok(info)
     }
 
@@ -141,6 +141,9 @@ impl MigratorDatabase {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
         };
+        println!("Mig typs LEFT: {:?}", &init.left_resources);
+        println!("Mig typs RIGHT: {:?}", &init.right_resources);
+
         let tables = init.new_tables(&codebase_resources).queries();
         let analyzers = init.new_analyzers().queries();
         let params = init.new_params().queries();

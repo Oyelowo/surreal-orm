@@ -40,7 +40,7 @@ migration-filebased = { path = "examples/migration-filebased" }
 migration-embedded = { path = "examples/migration-embedded" }
 migration-cli = { path = "examples/migration-cli" }
 
-surrealdb = { version = "1.0.0", features = [
+surrealdb = { version = "1.0.1", features = [
   "protocol-ws",
   "protocol-http",
   "kv-mem",
