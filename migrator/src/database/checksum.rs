@@ -55,8 +55,8 @@ impl Checksum {
 
     pub fn verify(
         &self,
-        content: &FileContent,
         migration_filename: &MigrationFilename,
+        content: &FileContent,
     ) -> MigrationResult<()> {
         let checksum = Checksum::generate_from_content(content)?;
         if checksum != *self {

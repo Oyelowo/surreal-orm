@@ -110,14 +110,19 @@ impl MigrationFilenames {
             })?;
 
             bidirectional_pair.push(MigrationFileBiPair {
-                name: migration,
-                up,
-                down,
+                up: FileMetadata {
+                    name: migration.to_up(),
+                    content: up,
+                },
+                down: FileMetadata {
+                    name: migration.to_down(),
+                    content: down,
+                },
             });
         }
 
         bidirectional_pair.sort();
-        bidirectional_pair.dedup_by(|a, b| a.name.to_up() == b.name.to_up());
+        bidirectional_pair.dedup_by(|a, b| a.up.name == b.up.name);
 
         Ok(bidirectional_pair)
     }
@@ -143,9 +148,14 @@ impl MigrationFilenames {
             let down = FileContent::from_file(&down).unwrap_or(FileContent::empty());
 
             bidirectional_pair.push(MigrationFileBiPair {
-                name: migration,
-                up,
-                down,
+                up: FileMetadata {
+                    name: migration.to_up(),
+                    content: up,
+                },
+                down: FileMetadata {
+                    name: migration.to_down(),
+                    content: down,
+                },
             });
         }
 
@@ -166,10 +176,10 @@ impl MigrationFilenames {
     pub fn unidirectional_pair_meta(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationOneWay>> {
+    ) -> MigrationResult<Vec<MigrationFileUni>> {
         let unidirectional = self.unidirectional();
 
-        let mut unidirectional_pair: Vec<MigrationOneWay> = Vec::new();
+        let mut unidirectional_pair: Vec<MigrationFileUni> = Vec::new();
         for migration in unidirectional {
             let up = migration_dir.join(migration.to_unidirectional().to_string());
 
@@ -180,14 +190,14 @@ impl MigrationFilenames {
                 }
             })?;
 
-            unidirectional_pair.push(MigrationOneWay {
+            unidirectional_pair.push(MigrationFileUni::new(FileMetadata {
                 name: migration,
                 content,
-            });
+            }));
         }
 
-        unidirectional_pair.sort_by(|a, b| a.name.cmp(&b.name));
-        unidirectional_pair.dedup_by(|a, b| a.name.eq(&b.name));
+        unidirectional_pair.sort_by(|a, b| a.file_meta().name.cmp(&b.file_meta().name));
+        unidirectional_pair.dedup_by(|a, b| a.file_meta().name.eq(&b.file_meta().name));
 
         Ok(unidirectional_pair)
     }

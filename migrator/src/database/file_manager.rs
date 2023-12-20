@@ -155,7 +155,7 @@ impl FileManager {
     pub fn get_oneway_migrations(
         &self,
         create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Vec<MigrationOneWay>> {
+    ) -> MigrationResult<Vec<MigrationFileUni>> {
         self.get_migrations_filenames(create_dir_if_not_exists)?
             .unidirectional_pair_meta(&self.resolve_migration_directory(false)?)
     }
@@ -238,7 +238,7 @@ impl OneWayGetter {
         Self(file_manager)
     }
 
-    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileUni>> {
         self.0.get_oneway_migrations(false)
     }
 
@@ -292,7 +292,7 @@ impl OneWayGetter {
         let migrations = self
             .get_migrations()?
             .into_iter()
-            .map(|m| m.name)
+            .map(|m| m.name())
             .collect::<Vec<_>>();
 
         let migrations =
@@ -376,7 +376,7 @@ impl TwoWayGetter {
         let migrations = self
             .get_migrations()?
             .into_iter()
-            .map(|m| m.name.to_up())
+            .map(|m| m.up.name)
             .collect::<Vec<_>>();
 
         let migrations =
