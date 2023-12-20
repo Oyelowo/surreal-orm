@@ -109,6 +109,10 @@ struct Init {
     #[clap(long, help = "Name of the first migration file(s)")]
     name: String,
 
+    /// Whether or not to run the migrations after initialization.
+    #[clap(long)]
+    run: bool,
+
     /// Two way migration
     #[clap(
         short,
@@ -119,6 +123,9 @@ struct Init {
 
     #[clap(flatten)]
     shared_all: SharedAll,
+
+    #[clap(flatten)]
+    shared_run_and_rollback: RuntimeConfig,
 }
 
 impl Init {
@@ -141,7 +148,7 @@ impl Init {
                 }
             }
             Err(e) => {
-                log::error!("Failed to get migrations: {}", e.to_string());
+                log::error!("Failed to get migrations: {e}");
                 panic!();
             }
         };
@@ -152,7 +159,7 @@ impl Init {
                 .generate_migrations(&migration_name, codebase_resources)
                 .await;
             if let Err(e) = gen {
-                log::error!("Failed to generate migrations: {}", e.to_string());
+                log::error!("Failed to generate migrations: {e}");
             }
         } else {
             let gen = files_config
@@ -161,10 +168,22 @@ impl Init {
                 .await;
 
             if let Err(e) = gen {
-                log::error!("Failed to generate migrations: {}", e.to_string());
+                log::error!("Failed to generate migrations: {e}");
             }
         };
-        log::info!("Successfully generated migrations");
+
+        if self.run {
+            let run = Up {
+                latest: Some(true),
+                number: None,
+                till: None,
+                shared_all: self.shared_all.clone(),
+                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+            };
+            run.run().await;
+        }
+
+        log::info!("Successfully initialized and generated first migration(s)");
     }
 }
 
@@ -651,13 +670,12 @@ impl Reset {
         };
 
         let dir = files_config.get_migration_dir_create_if_none();
-        // files_config.into_inner().resolve_migration_directory(true);
         match dir {
             Ok(dir) => {
                 if dir.exists() {
                     let removed = fs::remove_dir_all(&dir);
                     if let Err(e) = removed {
-                        log::error!("Failed to remove dir: {}", e.to_string());
+                        log::error!("Failed to remove dir: {e}");
                         panic!();
                     } else {
                         fs::create_dir(&dir).expect("Problem creating migration directory");
@@ -669,28 +687,19 @@ impl Reset {
                 }
             }
             Err(e) => {
-                log::error!("Failed to get migration dir: {}", e.to_string());
+                log::error!("Failed to get migration dir: {e}");
                 panic!();
             }
         };
 
         let init = Init {
             name: self.name.clone(),
+            run: self.run,
             reversible: self.reversible.clone(),
             shared_all: self.shared_all.clone(),
+            shared_run_and_rollback: self.shared_run_and_rollback.clone(),
         };
         init.run(codebase_resources).await;
-
-        if self.run {
-            let run = Up {
-                latest: Some(true),
-                number: None,
-                till: None,
-                shared_all: self.shared_all.clone(),
-                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
-            };
-            run.run().await;
-        }
 
         log::info!("Reset successful");
     }
