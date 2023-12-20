@@ -486,6 +486,7 @@ struct RuntimeConfig {
     #[clap(
         long,
         // value_name = "URL",
+        default_value = "ws://localhost:8000",
         help = "Example:\n\
                 - ws://localhost:8000\n\
                 - wss://cloud.surrealdb.com\n\
@@ -499,20 +500,20 @@ struct RuntimeConfig {
     )]
     url: Path,
 
-    #[clap(long, help = "Database name")]
+    #[clap(long, default_value = "test", help = "Database name")]
     db: Option<String>,
 
-    #[clap(long, help = "Namespace name")]
+    #[clap(long, default_value = "test", help = "Namespace name")]
     ns: Option<String>,
 
     /// users scope
     #[clap(long, help = "Scope")]
     sc: Option<String>,
 
-    #[clap(short, long, help = "User name")]
+    #[clap(short, long, default_value = "root", help = "User name")]
     user: Option<String>,
 
-    #[clap(short, long, help = "Password")]
+    #[clap(short, long, default_value = "root", help = "Password")]
     pass: Option<String>,
 
     #[clap(
