@@ -88,7 +88,7 @@ impl MigrationFilenames {
     pub fn bidirectional_pair_meta_checked(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
         let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
@@ -109,7 +109,7 @@ impl MigrationFilenames {
                 }
             })?;
 
-            bidirectional_pair.push(MigrationTwoWay {
+            bidirectional_pair.push(MigrationFileBiPair {
                 name: migration,
                 up,
                 down,
@@ -125,7 +125,7 @@ impl MigrationFilenames {
     pub fn bidirectional_pair_meta_down_unchecked(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationTwoWay>> {
+    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
         let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
@@ -142,7 +142,7 @@ impl MigrationFilenames {
 
             let down = FileContent::from_file(&down).unwrap_or(FileContent::empty());
 
-            bidirectional_pair.push(MigrationTwoWay {
+            bidirectional_pair.push(MigrationFileBiPair {
                 name: migration,
                 up,
                 down,

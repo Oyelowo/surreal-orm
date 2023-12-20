@@ -42,7 +42,7 @@ impl LeftDatabase {
 
         let queries = all_migrations
             .iter()
-            .map(|m: &MigrationTwoWay| m.up.to_string())
+            .map(|m: &MigrationFileBiPair| m.up.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
