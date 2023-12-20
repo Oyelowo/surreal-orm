@@ -15,10 +15,6 @@ use prune::Prune;
 use reset::Reset;
 pub use up::{Up, UpdateStrategy};
 
-use std::fmt::Display;
-use std::fs;
-use std::str::FromStr;
-
 use clap::{ArgAction, Parser};
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::{DbResources, Runnable};

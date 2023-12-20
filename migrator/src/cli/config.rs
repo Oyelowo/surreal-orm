@@ -1,16 +1,11 @@
-use super::up::Up;
-
 use clap::{ArgAction, Parser};
 use std::fmt::Display;
-use std::fs;
 use std::str::FromStr;
 
 use surrealdb::engine::any::{connect, Any};
 
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
-
-use crate::{DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions};
 
 #[derive(Parser, Debug, Default, Clone)]
 pub struct SharedAll {
@@ -24,30 +19,30 @@ pub struct SharedAll {
 }
 
 #[derive(Clone, Debug)]
-enum Path {
+pub(crate) enum UrlDb {
     Memory,
     Others(String),
 }
 
-impl Display for Path {
+impl Display for UrlDb {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Path::Memory => write!(f, "mem://"),
-            Path::Others(s) => write!(f, "{}", s),
+            UrlDb::Memory => write!(f, "mem://"),
+            UrlDb::Others(s) => write!(f, "{}", s),
         }
     }
 }
 
-impl FromStr for Path {
+impl FromStr for UrlDb {
     type Err = String;
 
     // Can be one of memory, file:<path>, tikv:<addr>, file://<path>, tikv://<addr>
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.trim().to_lowercase();
         if s == "memory" {
-            Ok(Path::Memory)
+            Ok(UrlDb::Memory)
         } else {
-            Ok(Path::Others(s))
+            Ok(UrlDb::Others(s))
             // Err("Invalid path".to_string())
         }
     }
@@ -81,7 +76,7 @@ pub(crate) struct RuntimeConfig {
                 - tikv://localhost:2379\n\
                 - fdb://fdb.cluster"
     )]
-    pub(crate) url: Path,
+    pub(crate) url: UrlDb,
 
     #[clap(long, default_value = "test", help = "Database name")]
     pub(crate) db: Option<String>,
