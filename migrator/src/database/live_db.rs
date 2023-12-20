@@ -337,7 +337,10 @@ impl MigrationRunner {
 
         let pending_migrations = all_migrations
             .into_iter()
-            .map(Into::into)
+            .map(|m| {
+                let m: MigrationFile = m.into();
+                PendingMigrationFile::from(m)
+            })
             .filter(|m| {
                 latest_migration.as_ref().map_or(true, |latest_migration| {
                     m.name().timestamp() > latest_migration.timestamp
