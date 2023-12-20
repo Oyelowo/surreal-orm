@@ -7,6 +7,8 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
+use crate::Mode;
+
 #[derive(Parser, Debug, Default, Clone)]
 pub struct SharedAll {
     /// Optional custom migrations dir
@@ -98,9 +100,9 @@ pub(crate) struct RuntimeConfig {
         long,
         help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
         that file contents and valid and also checking filenames. Lax does not.",
-        default_value = "true"
+        // default_value_t = "Mode::Strict"
     )]
-    pub(crate) strict: bool,
+    pub(crate) mode: Mode,
 
     #[clap(
         long,
