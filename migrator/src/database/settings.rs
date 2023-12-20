@@ -1,4 +1,5 @@
-use std::fmt::Display;
+use clap::Parser;
+use std::{fmt::Display, str::FromStr};
 
 use crate::MigrationError;
 
@@ -60,11 +61,26 @@ impl TryFrom<String> for MigrationFlag {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Parser, Default, Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
     #[default]
     Strict,
     Relaxed,
+}
+
+impl FromStr for Mode {
+    type Err = MigrationError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "strict" => Ok(Self::Strict),
+            "relaxed" => Ok(Self::Relaxed),
+            _ => Err(MigrationError::InvalidMigrationMode(
+                s.to_string(),
+                Self::options().join(", "),
+            )),
+        }
+    }
 }
 
 impl Display for Mode {

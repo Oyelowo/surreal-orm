@@ -9,7 +9,7 @@ use crate::{
     cli::RollbackStrategy, FileContent, FileManager, Migration, MigrationError, MigrationFilename,
     MigrationOneWay, MigrationResult, MigrationSchema, MigrationTwoWay,
 };
-use crate::{MigrationConfig, MigrationFilenames, UpdateStrategy};
+use crate::{MigrationConfig, MigrationFilenames, Mode, UpdateStrategy};
 
 // pub struct MigrationRunner<C: Connection> {
 pub struct MigrationRunner {
@@ -92,7 +92,7 @@ impl From<MigrationTwoWay> for MigrationFile {
 
 pub struct RollbackOptions {
     pub rollback_strategy: RollbackStrategy,
-    pub strictness: StrictNessLevel,
+    pub mode: Mode,
     pub prune_files_after_rollback: bool,
 }
 
@@ -100,7 +100,7 @@ impl Default for RollbackOptions {
     fn default() -> Self {
         Self {
             rollback_strategy: RollbackStrategy::Previous,
-            strictness: StrictNessLevel::Strict,
+            mode: Mode::default(),
             prune_files_after_rollback: false,
         }
     }
@@ -112,7 +112,7 @@ impl RollbackOptions {
     }
 
     pub fn is_strict(&self) -> bool {
-        self.strictness == StrictNessLevel::Strict
+        self.mode == Mode::Strict
     }
 
     pub fn strategy(mut self, rollback_strategy: RollbackStrategy) -> Self {
@@ -120,8 +120,8 @@ impl RollbackOptions {
         self
     }
 
-    pub fn strictness(mut self, strictness: StrictNessLevel) -> Self {
-        self.strictness = strictness;
+    pub fn mode(mut self, mode: Mode) -> Self {
+        self.mode = mode;
         self
     }
 
@@ -140,7 +140,7 @@ impl MigrationRunner {
     ) -> MigrationResult<()> {
         let RollbackOptions {
             ref rollback_strategy,
-            ref strictness,
+            mode: ref strictness,
             prune_files_after_rollback,
         } = rollback_options;
 
@@ -386,9 +386,9 @@ impl MigrationRunner {
         fm: &FileManager,
         migrations_to_rollback: Vec<MigrationTwoWay>,
         migrations_from_db: Vec<Migration>,
-        strictness: &StrictNessLevel,
+        mode: &Mode,
     ) -> MigrationResult<(Raw, Vec<PathBuf>)> {
-        if *strictness == StrictNessLevel::Strict {
+        if mode.is_strict() {
             for (m_from_file, m_from_db) in
                 migrations_to_rollback.iter().zip(migrations_from_db.iter())
             {
@@ -568,7 +568,7 @@ impl MigrationRunner {
         db: Surreal<impl Connection>,
         migrations_local_dir: Vec<MigrationFilename>,
         status: Status,
-        strictness: StrictNessLevel,
+        mode: Mode,
     ) -> MigrationResult<Vec<MigrationFilename>> {
         let migrations = match status {
             Status::All => {
@@ -603,11 +603,7 @@ impl MigrationRunner {
                     .order_by(Migration::schema().timestamp.asc())
                     .return_many::<Migration>(db.clone())
                     .await?;
-                Self::_get_db_migrations_meta_from_mig_files(
-                    migrations_local_dir,
-                    db_migs,
-                    strictness,
-                )?
+                Self::_get_db_migrations_meta_from_mig_files(migrations_local_dir, db_migs, mode)?
             }
         };
         Ok(migrations)
@@ -616,7 +612,7 @@ impl MigrationRunner {
     fn _get_db_migrations_meta_from_mig_files(
         local_migrations: Vec<MigrationFilename>,
         db_migs: Vec<Migration>,
-        strictness: StrictNessLevel,
+        mode: Mode,
     ) -> MigrationResult<Vec<MigrationFilename>> {
         let db_migs: BTreeSet<MigrationFilename> = db_migs
             .into_iter()
@@ -629,7 +625,7 @@ impl MigrationRunner {
             .collect::<Vec<_>>();
 
         // TODO:: Check that the files are contiguous?
-        if strictness == StrictNessLevel::Strict {
+        if mode.is_strict() {
             if filtered_local_migrations.len() != db_migs.len() {
                 return Err(MigrationError::InvalidMigrationState {
                     db_migration_count: db_migs.len(),
@@ -639,31 +635,5 @@ impl MigrationRunner {
         }
 
         Ok(filtered_local_migrations)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum StrictNessLevel {
-    Strict,
-    Lax,
-}
-
-impl StrictNessLevel {
-    pub fn is_strict(&self) -> bool {
-        *self == Self::Strict
-    }
-
-    pub fn is_lax(&self) -> bool {
-        *self == Self::Lax
-    }
-}
-
-impl From<bool> for StrictNessLevel {
-    fn from(value: bool) -> Self {
-        if value {
-            Self::Strict
-        } else {
-            Self::Lax
-        }
     }
 }

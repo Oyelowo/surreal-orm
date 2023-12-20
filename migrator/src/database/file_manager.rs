@@ -179,8 +179,12 @@ impl MigrationConfig {
         self.0
     }
 
-    pub fn mode(&self, mode: Mode) -> Self {
+    pub fn set_mode(&self, mode: Mode) -> Self {
         Self(self.0.mode(mode))
+    }
+
+    pub fn mode(&self) -> Mode {
+        self.0.mode
     }
 
     pub fn make_strict(&self) -> Self {
@@ -283,7 +287,7 @@ impl OneWayGetter {
         &self,
         db: Surreal<impl Connection>,
         status: Status,
-        strictness: StrictNessLevel,
+        mode: Mode,
     ) -> MigrationResult<Vec<MigrationFilename>> {
         let migrations = self
             .get_migrations()?
@@ -292,7 +296,7 @@ impl OneWayGetter {
             .collect::<Vec<_>>();
 
         let migrations =
-            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
+            MigrationRunner::list_migrations(db.clone(), migrations, status, mode).await?;
 
         Ok(migrations)
     }
@@ -367,7 +371,7 @@ impl TwoWayGetter {
         &self,
         db: Surreal<impl Connection>,
         status: Status,
-        strictness: StrictNessLevel,
+        mode: Mode,
     ) -> MigrationResult<Vec<MigrationFilename>> {
         let migrations = self
             .get_migrations()?
@@ -376,7 +380,7 @@ impl TwoWayGetter {
             .collect::<Vec<_>>();
 
         let migrations =
-            MigrationRunner::list_migrations(db.clone(), migrations, status, strictness).await?;
+            MigrationRunner::list_migrations(db.clone(), migrations, status, mode).await?;
 
         Ok(migrations)
     }
