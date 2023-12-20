@@ -719,7 +719,7 @@ impl TwoWayGetter {
         let migrations = self
             .get_migrations()?
             .into_iter()
-            .map(|m| m.name)
+            .map(|m| m.name.to_up())
             .collect::<Vec<_>>();
 
         let migrations =

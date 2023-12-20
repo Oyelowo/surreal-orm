@@ -414,10 +414,20 @@ impl List {
                     )
                     .await;
 
-                if let Err(ref e) = migrations {
-                    log::error!("Failed to get migrations: {}", e.to_string());
+                match migrations {
+                    Ok(migrations) => {
+                        log::info!("Listing {} migrations.", migrations.len());
+                        log::info!("=================================================");
+                        for migration in migrations {
+                            log::info!("{migration} ");
+                        }
+                        log::info!("=================================================");
+                        log::info!("Listing end.");
+                    }
+                    Err(ref e) => {
+                        log::error!("Failed to get migrations: {e}");
+                    }
                 }
-                log::info!("Migrations: {:?}", migrations);
             }
             Ok(MigrationFlag::OneWay) => {
                 log::info!("Listing one way migrations");
@@ -430,11 +440,16 @@ impl List {
                     )
                     .await;
 
-                if let Err(ref e) = migrations {
-                    log::error!("Failed to get migrations: {}", e.to_string());
+                match migrations {
+                    Ok(migrations) => {
+                        for migration in migrations {
+                            log::info!("Migration name: {migration} ");
+                        }
+                    }
+                    Err(ref e) => {
+                        log::error!("Failed to get migrations: {e}");
+                    }
                 }
-
-                log::info!("Migrations: {:?}", migrations);
             }
             Err(e) => {
                 log::error!("Failed to detect migration type: {}", e.to_string());
