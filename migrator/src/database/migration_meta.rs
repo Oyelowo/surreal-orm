@@ -779,6 +779,10 @@ impl FileManager {
         }
     }
 
+    pub fn is_first_migration(&self) -> MigrationResult<bool> {
+        Ok(self.get_migrations_filenames(false)?.all().is_empty())
+    }
+
     pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
         self.resolve_migration_directory(false)
     }

@@ -33,7 +33,6 @@ impl RightDatabase {
         code_resources: &impl DbResources,
         migration_type: MigrationFlag,
     ) -> MigrationResult<()> {
-        let delete_all_migrations = Migration::delete_all();
         let migration_meta_table_def = Migration::define_table().to_raw();
         let migration_meta_table_fields_def = Migration::define_fields(migration_type)
             .iter()
@@ -41,16 +40,11 @@ impl RightDatabase {
             .collect::<Vec<_>>()
             .join("\n");
         let queries = Self::get_codebase_schema_queries(code_resources);
-        // Defining before removing is important because
-        // removing a table that doesn't exist will throw an error
-        // and the transaction will be rolled back
-        // so we define the table first, then remove it
-        // then define the table again, to be sure it exists
         let queries =
-            format!("{delete_all_migrations}\n{migration_meta_table_def}\n{migration_meta_table_fields_def}\n{queries}");
+            format!("{migration_meta_table_def}\n{migration_meta_table_fields_def}\n{queries}");
 
         if !queries.is_empty() {
-            let queries = begin_transaction()
+            begin_transaction()
                 .query(Raw::new(queries))
                 .commit_transaction()
                 .run(self.db())
