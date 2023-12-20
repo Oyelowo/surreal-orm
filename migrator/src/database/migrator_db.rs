@@ -167,6 +167,17 @@ impl MigratorDatabase {
             .join("\n")
             .trim()
             .to_string();
+
+        let up_queries_str = if file_manager.is_first_migration()? {
+            // Defining before removing is important because
+            // removing a table that doesn't exist will throw an error
+            // and the transaction will be rolled back
+            // so we define the table first, then remove it
+            // then define the table again, to be sure it exists
+            format!("{}\n{}", Migration::delete_all(), up_queries_str,)
+        } else {
+            up_queries_str
+        };
         let down_queries_str = down_queries
             .iter()
             .map(ToString::to_string)
