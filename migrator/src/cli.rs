@@ -11,8 +11,8 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 use crate::{
-    Checksum, DbInfo, Migration, MigrationConfig, MigrationFlag, MigrationResult, MigrationRunner,
-    RollbackOptions, RollbackStrategy, UpdateStrategy,
+    DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions, RollbackStrategy,
+    UpdateStrategy,
 };
 
 /// Surreal ORM CLI
