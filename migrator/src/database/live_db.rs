@@ -463,7 +463,7 @@ impl MigrationRunner {
                     let created_registered_mig =
                         Migration::create_raw(&m.name(), &m.content().as_checksum()?, None);
 
-                    migration_queries.push(m.content());
+                    migration_queries.push(m.content().to_owned());
                     mark_queries_registered_queries.push(created_registered_mig);
                 }
                 MigrationFile::TwoWay(m) => {

@@ -5,14 +5,12 @@
  * Licensed under the MIT license
  */
 
-use crate::{MigrationFileBiPair, MigrationFileUni, MigrationResult};
+use crate::{FileMetadata, MigrationFileBiPair, MigrationFileUni, MigrationResult};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
-    pub name: &'static str,
-    pub up: &'static str,
-    pub down: &'static str,
-    // status: String,
+    pub up: &'static FileMetadataStatic,
+    pub down: &'static FileMetadataStatic,
 }
 
 #[allow(missing_copy_implementations)]
@@ -22,12 +20,12 @@ pub struct EmbeddedMigrationsTwoWay {
 }
 
 impl EmbeddedMigrationsTwoWay {
-    pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationTwoWay] {
-        self.migrations
-    }
-
     pub const fn new(migrations: &'static [EmbeddedMigrationTwoWay]) -> Self {
         Self { migrations }
+    }
+
+    pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationTwoWay] {
+        self.migrations
     }
 
     pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationFileBiPair>> {
@@ -35,14 +33,26 @@ impl EmbeddedMigrationsTwoWay {
             .migrations
             .iter()
             .map(|meta| {
-                let name = meta.name.to_string();
-                let up = meta.up.to_string().into();
-                let down = meta.down.to_string().into();
+                let up_name = meta
+                    .up
+                    .name
+                    .to_string()
+                    .to_string()
+                    .try_into()
+                    .expect("Invalid migration name");
+                let up_content = meta.up.content.to_string().into();
+                let down_name = meta
+                    .up
+                    .name
+                    .to_string()
+                    .to_string()
+                    .try_into()
+                    .expect("Invalid migration name");
+                let down_content = meta.down.content.to_string().into();
 
                 MigrationFileBiPair {
-                    name: name.to_string().try_into().expect("Invalid migration name"),
-                    up,
-                    down,
+                    up: FileMetadata::new(up_name, up_content),
+                    down: FileMetadata::new(down_name, down_content),
                 }
             })
             .collect::<Vec<_>>();
@@ -61,19 +71,19 @@ impl EmbeddedMigrationsOneWay {
         self.migrations
     }
 
-    pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationOneWay>> {
+    pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationFileUni>> {
         let migs = self
             .migrations
             .iter()
             .map(|meta| {
                 let name = meta
-                    .name
+                    .name()
                     .to_string()
                     .try_into()
                     .expect("Invalid migration name");
-                let content = meta.content.to_string().into();
+                let content = meta.content().to_string().into();
 
-                MigrationOneWay { name, content }
+                MigrationFileUni::new(FileMetadata { name, content })
             })
             .collect::<Vec<_>>();
         Ok(migs)
@@ -87,7 +97,20 @@ impl EmbeddedMigrationsOneWay {
 }
 
 #[derive(Clone, Debug)]
-pub struct EmbeddedMigrationOneWay {
+pub struct EmbeddedMigrationOneWay(FileMetadataStatic);
+
+impl EmbeddedMigrationOneWay {
+    pub fn name(&self) -> &'static str {
+        self.0.name
+    }
+
+    pub fn content(&self) -> &'static str {
+        self.0.content
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct FileMetadataStatic {
     pub name: &'static str,
     pub content: &'static str, // status: String,
 }

@@ -34,16 +34,16 @@ impl MigrationFileUni {
         Self(file)
     }
 
-    pub fn file_meta(&self) -> FileMetadata {
-        self.0
+    pub fn file_meta(&self) -> &FileMetadata {
+        &self.0
     }
 
-    pub fn name(&self) -> MigrationFilename {
-        self.0.name.clone()
+    pub fn name(&self) -> &MigrationFilename {
+        &self.0.name
     }
 
-    pub fn content(&self) -> FileContent {
-        self.0.content.clone()
+    pub fn content(&self) -> &FileContent {
+        &self.0.content
     }
 }
 

@@ -33,8 +33,8 @@ fn generate_migration_code(
             .expect("Failed to get migrations")
             .iter()
             .map(|meta| {
-                let name = meta.name.to_string();
-                let content = meta.content.to_string();
+                let name = meta.name().to_string();
+                let content = meta.content().to_string();
 
                 quote!(#crate_name::migrator::EmbeddedMigrationOneWay {
                     name: #name,
@@ -48,14 +48,20 @@ fn generate_migration_code(
             .expect("Failed to get migrations")
             .iter()
             .map(|meta| {
-                let name = meta.name.to_up().to_string();
-                let up = meta.up.to_string();
-                let down = meta.down.to_string();
+                let up_name = meta.up.name.to_string();
+                let up_content = meta.up.content.to_string();
+                let down_name = meta.down.name.to_string();
+                let down_content = meta.down.content.to_string();
 
                 quote!(#crate_name::migrator::EmbeddedMigrationTwoWay {
-                    name: #name,
-                    up: #up,
-                    down: #down,
+                    up: #crate_name::migrator::FileMetadataStatic {
+                        name: #up_name,
+                        content: #up_content,
+                    },
+                    down: #crate_name::migrator::FileMetadataStatic {
+                        name: #down_name,
+                        content: #down_content
+                    },
                 })
             })
             .collect::<Vec<_>>(),
