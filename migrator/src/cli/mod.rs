@@ -7,12 +7,13 @@ mod prune;
 mod reset;
 mod up;
 
-use down::Down;
+pub use down::{Down, RollbackStrategy};
 use generate::Generate;
 use init::Init;
-use list::List;
+pub use list::{List, Status};
 use prune::Prune;
 use reset::Reset;
+pub use up::{Up, UpdateStrategy};
 
 use std::fmt::Display;
 use std::fs;
@@ -27,8 +28,6 @@ use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 use crate::{DbInfo, MigrationConfig, MigrationFlag, MigrationRunner, RollbackOptions};
-
-use self::up::Up;
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]

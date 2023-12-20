@@ -42,6 +42,7 @@ pub struct Up {
         help = "Run forward by the number specified"
     )]
     pub(crate) number: Option<u32>,
+
     /// Run forward till a specific migration ID
     #[clap(
         short,
@@ -54,8 +55,9 @@ pub struct Up {
 
     #[clap(flatten)]
     pub(crate) shared_all: SharedAll,
+
     #[clap(flatten)]
-    shared_run_and_rollback: RuntimeConfig,
+    pub(crate) shared_run_and_rollback: RuntimeConfig,
 }
 
 pub enum UpdateStrategy {
