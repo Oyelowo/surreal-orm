@@ -1,6 +1,6 @@
 use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use super::config::setup_db;
 use crate::{MigrationConfig, MigrationFlag};
@@ -10,6 +10,25 @@ pub enum Status {
     Applied,
     Pending,
     All,
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Status::Applied => write!(f, "applied"),
+            Status::Pending => write!(f, "pending"),
+            Status::All => write!(f, "all"),
+        }
+    }
+}
+
+impl Status {
+    pub fn variants() -> Vec<String> {
+        [Status::Applied, Status::Pending, Status::All]
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>()
+    }
 }
 
 impl FromStr for Status {
@@ -24,7 +43,10 @@ impl FromStr for Status {
         } else if s == "all" {
             Ok(Status::All)
         } else {
-            Err("Invalid status".to_string())
+            Err(format!(
+                "Invalid status. Must be one of: {}",
+                Status::variants().join(", ")
+            ))
         }
     }
 }
