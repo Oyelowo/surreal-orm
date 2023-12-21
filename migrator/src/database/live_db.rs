@@ -29,6 +29,20 @@ pub enum MigrationFile {
     TwoWay(MigrationFileBiPair),
 }
 
+impl MigrationFile {
+    pub fn create_file(&self, file_manager: &MigrationConfig) -> MigrationResult<()> {
+        match self {
+            Self::OneWay(m) => m.name().create_file(m.content(), file_manager)?,
+            Self::TwoWay(m) => {
+                m.up.name.create_file(&m.up.content, file_manager)?;
+                m.down.name.create_file(&m.down.content, file_manager)?;
+            }
+        };
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct PendingMigrationFile(MigrationFile);
 

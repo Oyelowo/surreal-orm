@@ -34,6 +34,10 @@ impl FileContent {
             .map_err(|e| MigrationError::IoError(format!("Error: {}", e)))?;
         Ok(Self(content))
     }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
 }
 
 impl From<String> for FileContent {
