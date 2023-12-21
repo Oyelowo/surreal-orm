@@ -6,8 +6,8 @@ use surrealdb::{Connection, Surreal};
 
 use crate::cli::Status;
 use crate::{
-    cli::RollbackStrategy, FileContent, Migration, MigrationError, MigrationFileBiPair,
-    MigrationFileUni, MigrationFilename, MigrationResult, MigrationSchema,
+    cli::RollbackStrategy, FileContent, Migration, MigrationError, MigrationFileOneWay,
+    MigrationFileTwoWayPair, MigrationFilename, MigrationResult, MigrationSchema,
 };
 use crate::{FileMetadata, MigrationConfig, MigrationFilenames, Mode, UpdateStrategy};
 
@@ -17,16 +17,16 @@ pub struct MigrationRunner {
     // file_manager: FileManager,
 }
 
-impl From<MigrationFileBiPair> for MigrationFileUni {
-    fn from(m: MigrationFileBiPair) -> Self {
+impl From<MigrationFileTwoWayPair> for MigrationFileOneWay {
+    fn from(m: MigrationFileTwoWayPair) -> Self {
         Self::new(FileMetadata::new(m.up.name, m.up.content))
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum MigrationFile {
-    OneWay(MigrationFileUni),
-    TwoWay(MigrationFileBiPair),
+    OneWay(MigrationFileOneWay),
+    TwoWay(MigrationFileTwoWayPair),
 }
 
 impl MigrationFile {
@@ -89,14 +89,14 @@ impl MigrationFile {
     }
 }
 
-impl From<MigrationFileUni> for MigrationFile {
-    fn from(m: MigrationFileUni) -> Self {
+impl From<MigrationFileOneWay> for MigrationFile {
+    fn from(m: MigrationFileOneWay) -> Self {
         Self::OneWay(m)
     }
 }
 
-impl From<MigrationFileBiPair> for MigrationFile {
-    fn from(m: MigrationFileBiPair) -> Self {
+impl From<MigrationFileTwoWayPair> for MigrationFile {
+    fn from(m: MigrationFileTwoWayPair) -> Self {
         Self::TwoWay(m)
     }
 }
@@ -393,7 +393,7 @@ impl MigrationRunner {
 
     fn generate_rollback_queries_and_filepaths(
         fm: &MigrationConfig,
-        migrations_to_rollback: Vec<MigrationFileBiPair>,
+        migrations_to_rollback: Vec<MigrationFileTwoWayPair>,
         migrations_from_db: Vec<Migration>,
         mode: &Mode,
     ) -> MigrationResult<(Raw, Vec<PathBuf>)> {
