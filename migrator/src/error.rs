@@ -26,6 +26,9 @@ pub enum MigrationError {
     #[error("Migration does not exist")]
     MigrationDoesNotExist,
 
+    #[error("Migration with name: {name} not found in pending migrations. It has either been applied or does not exist.")]
+    MigrationNotFoundFromPendingMigrations { name: String },
+
     #[error("Migration file - {0} - does not exist")]
     MigrationFileDoesNotExist(String),
 
