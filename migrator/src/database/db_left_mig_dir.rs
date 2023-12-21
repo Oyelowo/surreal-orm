@@ -38,7 +38,8 @@ impl LeftDatabase {
         file_manager: &MigrationConfig,
         create_migration_table: bool,
     ) -> MigrationResult<()> {
-        let all_migrations = file_manager.get_two_way_migrations(create_migration_table)?;
+        let all_migrations =
+            file_manager.get_two_way_migrations_sorted_desc(create_migration_table)?;
 
         let queries = all_migrations
             .iter()

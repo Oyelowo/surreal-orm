@@ -173,12 +173,12 @@ impl MigrationConfig {
     }
 
     // Validate
-    pub fn get_two_way_migrations(
+    pub fn get_two_way_migrations_sorted_desc(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         self.get_migrations_filenames(create_dir_if_not_exists)?
-            .bidirectional_pair_meta_checked(&self.resolve_migration_directory(false)?)
+            .bidirectional_pair_meta_sorted_desc_checked(&self.resolve_migration_directory(false)?)
     }
 
     pub fn get_oneway_migrations(
@@ -282,7 +282,9 @@ impl FileManagerBi {
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         self.0
             .get_migrations_filenames(false)?
-            .bidirectional_pair_meta_checked(&self.0.resolve_migration_directory(false)?)
+            .bidirectional_pair_meta_sorted_desc_checked(
+                &self.0.resolve_migration_directory(false)?,
+            )
     }
 
     /// Generate migration directory if it does not exist

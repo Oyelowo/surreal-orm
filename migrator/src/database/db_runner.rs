@@ -67,7 +67,7 @@ impl MigrationRunner {
 
         log::info!("Rolling back migration");
 
-        let all_migrations_from_dir = fm.get_two_way_migrations(false)?;
+        let all_migrations_from_dir = fm.get_two_way_migrations_sorted_desc(false)?;
         let latest_migration = Self::get_latest_migration(db.clone())
             .await?
             .ok_or(MigrationError::MigrationDoesNotExist)?;
@@ -116,19 +116,7 @@ impl MigrationRunner {
 
                 let migrations_to_rollback = all_migrations_from_dir
                     .into_iter()
-                    .filter(|m| {
-                        let is_before_db_latest_migration =
-                            m.up.name.timestamp() < latest_migration.timestamp;
-
-                        let is_latest = m.up.name
-                            == latest_migration
-                                .name
-                                .clone()
-                                .try_into()
-                                .expect("Invalid migration name");
-
-                        is_before_db_latest_migration || is_latest
-                    })
+                    .filter(|m| m.up.name.timestamp() <= latest_migration.timestamp)
                     .take(*count as usize)
                     .collect::<Vec<_>>();
 
