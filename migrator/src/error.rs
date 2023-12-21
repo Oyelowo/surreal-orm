@@ -50,7 +50,7 @@ pub enum MigrationError {
     #[error("Migration file not found in path: {path} with error: {error}")]
     MigrationFilePathDoesNotExist { path: String, error: String },
 
-    #[error("Invalid migration mode: {0}. It must be one of {1}")]
+    #[error("Invalid migration mode: {0}. It must be one of: {1}")]
     InvalidMigrationMode(String, String),
 
     #[error("Invalid migration flag: {0}. It must be one of {1}")]
