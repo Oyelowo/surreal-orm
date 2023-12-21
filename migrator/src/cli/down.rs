@@ -92,7 +92,7 @@ impl Down {
                 db.clone(),
                 RollbackOptions {
                     rollback_strategy,
-                    mode: self.shared_run_and_rollback.mode,
+                    mode: self.shared_run_and_rollback.mode.unwrap_or_default(),
                     prune_files_after_rollback: self.shared_run_and_rollback.prune,
                 },
             )

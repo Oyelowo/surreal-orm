@@ -100,9 +100,9 @@ pub(crate) struct RuntimeConfig {
         long,
         help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
         that file contents and valid and also checking filenames. Lax does not.",
-        // default_value_t = "Mode::Strict"
+        default_value = "strict"
     )]
-    pub(crate) mode: Mode,
+    pub(crate) mode: Option<Mode>,
 
     #[clap(
         long,
