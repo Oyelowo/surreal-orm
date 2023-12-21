@@ -222,7 +222,7 @@ impl MigrationRunner {
     ) -> SurrealOrmResult<Vec<PendingMigrationFile>> {
         let latest_migration = Self::get_latest_migration(db.clone()).await?;
 
-        let pending_migrations = all_migrations
+        let mut pending_migrations = all_migrations
             .into_iter()
             .map(|m| {
                 let m: MigrationFile = m.into();
@@ -235,6 +235,8 @@ impl MigrationRunner {
             })
             .map(PendingMigrationFile::from)
             .collect::<Vec<_>>();
+
+        pending_migrations.sort_by_key(|m| m.name_forward().timestamp());
 
         Ok(pending_migrations)
     }
@@ -467,7 +469,9 @@ impl MigrationRunner {
                 }
 
                 if !migration_found {
-                    return Err(MigrationError::MigrationDoesNotExist);
+                    return Err(MigrationError::MigrationNotFoundFromPendingMigrations {
+                        name: mig_filename.to_string(),
+                    });
                 }
 
                 filtered_migs
