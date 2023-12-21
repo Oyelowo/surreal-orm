@@ -64,7 +64,7 @@ impl List {
                     .list_migrations(
                         db.clone(),
                         self.status.unwrap_or(Status::All),
-                        self.runtime_config.mode.into(),
+                        self.runtime_config.mode.unwrap_or_default(),
                     )
                     .await;
 
@@ -90,7 +90,7 @@ impl List {
                     .list_migrations(
                         db.clone(),
                         self.status.unwrap_or(Status::All),
-                        self.runtime_config.mode.into(),
+                        self.runtime_config.mode.unwrap_or_default(),
                     )
                     .await;
 
