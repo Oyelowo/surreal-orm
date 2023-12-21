@@ -36,7 +36,7 @@ pub struct Reset {
     pub(crate) shared_all: SharedAll,
 
     #[clap(flatten)]
-    pub(crate) shared_run_and_rollback: RuntimeConfig,
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 impl Reset {
@@ -47,7 +47,7 @@ impl Reset {
         db_setup: &mut SetupDb,
     ) -> Surreal<Any> {
         let mut files_config = MigrationConfig::new().make_strict();
-        let mut setup = db_setup.override_runtime_config(&self.shared_run_and_rollback);
+        let mut setup = db_setup.override_runtime_config(&self.runtime_config);
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.set_custom_path(path)
@@ -81,7 +81,7 @@ impl Reset {
             run: self.run,
             reversible: self.reversible.clone(),
             shared_all: self.shared_all.clone(),
-            shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+            runtime_config: self.runtime_config.clone(),
         };
         init.run(codebase_resources, prompter, &mut setup).await;
 

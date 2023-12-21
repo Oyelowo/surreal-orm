@@ -6,6 +6,8 @@ use crate::{MigrationConfig, Prompter};
 
 use clap::Parser;
 use surreal_query_builder::DbResources;
+use surrealdb::engine::any::Any;
+use surrealdb::Surreal;
 
 /// Init migrations
 #[derive(Parser, Debug)]
@@ -30,7 +32,7 @@ pub struct Init {
     pub(crate) shared_all: SharedAll,
 
     #[clap(flatten)]
-    pub(crate) shared_run_and_rollback: RuntimeConfig,
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 impl Init {
@@ -39,8 +41,9 @@ impl Init {
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
         db_setup: &mut SetupDb,
-    ) {
+    ) -> Surreal<Any> {
         let mut files_config = MigrationConfig::new().make_strict();
+        let setup = db_setup.override_runtime_config(&self.runtime_config);
         let migration_name = self.name.clone();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -52,7 +55,8 @@ impl Init {
             Ok(files) => {
                 if !files.is_empty() {
                     log::warn!("Migrations already initialized");
-                    return ();
+                    let db = setup.db();
+                    return db.clone();
                 }
             }
             Err(e) => {
@@ -88,13 +92,15 @@ impl Init {
                 number: None,
                 till: None,
                 shared_all: self.shared_all.clone(),
-                runtime_config: self.shared_run_and_rollback.clone(),
+                runtime_config: self.runtime_config.clone(),
             };
-            run.run(db_setup).await;
+            run.run(setup).await;
 
             log::info!("Successfully ran initial migrations");
         }
 
         log::info!("Successfully initialized and generated first migration(s)");
+        let db = setup.db();
+        db.clone()
     }
 }
