@@ -6,8 +6,8 @@ use surrealdb::{Connection, Surreal};
 
 use crate::cli::Status;
 use crate::{
-    cli::RollbackStrategy, FileContent, FileManager, Migration, MigrationError,
-    MigrationFileBiPair, MigrationFileUni, MigrationFilename, MigrationResult, MigrationSchema,
+    cli::RollbackStrategy, FileContent, Migration, MigrationError, MigrationFileBiPair,
+    MigrationFileUni, MigrationFilename, MigrationResult, MigrationSchema,
 };
 use crate::{FileMetadata, MigrationConfig, MigrationFilenames, Mode, UpdateStrategy};
 
@@ -132,7 +132,7 @@ impl MigrationRunner {
     /// Only two way migrations support rollback
     pub async fn rollback_migrations(
         db: Surreal<impl Connection>,
-        fm: &FileManager,
+        fm: &MigrationConfig,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         let RollbackOptions {
@@ -330,8 +330,6 @@ impl MigrationRunner {
         let latest_migration = Self::get_latest_migration(db.clone()).await?;
 
         let pending_migrations = mig_config
-            .clone()
-            .into_inner()
             .get_migrations_filenames(false)?
             .all()
             .into_iter()
@@ -380,7 +378,7 @@ impl MigrationRunner {
     }
 
     fn generate_rollback_queries_and_filepaths(
-        fm: &FileManager,
+        fm: &MigrationConfig,
         migrations_to_rollback: Vec<MigrationFileBiPair>,
         migrations_from_db: Vec<Migration>,
         mode: &Mode,
