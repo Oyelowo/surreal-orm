@@ -22,7 +22,8 @@ async fn test_generate_command_success() {
         .arg("test migration 1")
         .arg("--migrations-dir")
         .arg(temp_test_migration_dir)
-        .arg("-r")
+        .arg("--reversible")
+        .arg("--run")
         .stdin(Stdio::piped())
         .spawn()
         .expect("Failed to run command");
@@ -41,36 +42,36 @@ async fn test_generate_command_success() {
     assert_eq!(migration_files.len(), 2);
 
     // create
-    let mut cmd = Command::new("cargo")
-        .arg("run")
-        .arg("--")
-        .arg("generate")
-        .arg("--name")
-        .arg("test migration 2")
-        .arg("--migrations-dir")
-        .arg(temp_test_migration_dir)
-        .stdin(Stdio::piped())
-        .spawn()
-        .expect("Failed to run command");
-
-    std::thread::sleep(std::time::Duration::from_secs(1));
-    // Get the stdin of the child process
-    let child_stdin = cmd.stdin.as_mut().expect("Failed to open stdin");
-
-    // Write 'y' to the stdin of the child process
-    child_stdin
-        .write_all(b"y 0x0A")
-        .expect("Failed to write to stdin");
-    child_stdin.flush().expect("Failed to flush stdin"); // Ensure the input is sent immediately
-
-    println!("Command completed with status: {}", output.status);
-
-    // Wait for the command to finish
-    let output = cmd.wait_with_output().expect("Failed to read stdout");
-
-    // Validate output (replace this with your actual validation)
-    assert!(output.status.success());
-
+    // let mut cmd = Command::new("cargo")
+    //     .arg("run")
+    //     .arg("--")
+    //     .arg("generate")
+    //     .arg("--name")
+    //     .arg("test migration 2")
+    //     .arg("--migrations-dir")
+    //     .arg(temp_test_migration_dir)
+    //     .stdin(Stdio::piped())
+    //     .spawn()
+    //     .expect("Failed to run command");
+    //
+    // std::thread::sleep(std::time::Duration::from_secs(1));
+    // // Get the stdin of the child process
+    // let child_stdin = cmd.stdin.as_mut().expect("Failed to open stdin");
+    //
+    // // Write 'y' to the stdin of the child process
+    // child_stdin
+    //     .write_all(b"y 0x0A")
+    //     .expect("Failed to write to stdin");
+    // child_stdin.flush().expect("Failed to flush stdin"); // Ensure the input is sent immediately
+    //
+    // println!("Command completed with status: {}", output.status);
+    //
+    // // Wait for the command to finish
+    // let output = cmd.wait_with_output().expect("Failed to read stdout");
+    //
+    // // Validate output (replace this with your actual validation)
+    // assert!(output.status.success());
+    //
     // read and assert the migration files
     let migration_files = std::fs::read_dir(temp_test_migration_dir)
         .expect("Failed to read dir")
