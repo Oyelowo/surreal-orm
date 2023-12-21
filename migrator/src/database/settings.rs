@@ -15,7 +15,7 @@ impl Display for Direction {
             Self::Up => "up",
             Self::Down => "down",
         };
-        write!(f, "{}", direction)
+        write!(f, "{direction}")
     }
 }
 
@@ -32,7 +32,7 @@ impl Display for MigrationFlag {
             Self::TwoWay => "two_way",
             Self::OneWay => "one_way",
         };
-        write!(f, "{}", flag)
+        write!(f, "{flag}")
     }
 }
 
@@ -105,10 +105,4 @@ impl Mode {
     pub fn is_relaxed(&self) -> bool {
         matches!(self, Self::Lax)
     }
-}
-
-#[derive(Debug)]
-pub enum MigrationType {
-    OneWay(String),
-    TwoWay { up: String, down: String },
 }
