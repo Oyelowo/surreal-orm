@@ -42,7 +42,7 @@ impl LeftDatabase {
 
         let queries = all_migrations
             .iter()
-            .map(|m: &MigrationFileBiPair| m.up.content.to_string())
+            .map(|m: &MigrationFileTwoWayPair| m.up.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
 
@@ -61,7 +61,7 @@ impl LeftDatabase {
 
     pub async fn run_local_dir_oneway_content_migrations<C: Connection>(
         db: Surreal<C>,
-        migrations: Vec<MigrationFileUni>,
+        migrations: Vec<MigrationFileOneWay>,
     ) -> MigrationResult<()> {
         let queries = migrations
             .iter()

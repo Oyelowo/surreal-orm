@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use crate::{FileMetadata, MigrationFileBiPair, MigrationFileUni, MigrationResult};
+use crate::{FileMetadata, MigrationFileOneWay, MigrationFileTwoWayPair, MigrationResult};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
@@ -28,7 +28,7 @@ impl EmbeddedMigrationsTwoWay {
         self.migrations
     }
 
-    pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationFileBiPair>> {
+    pub fn to_migrations_two_way(&self) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         let migs = self
             .migrations
             .iter()
@@ -48,7 +48,7 @@ impl EmbeddedMigrationsTwoWay {
                     .expect("Invalid migration name");
                 let down_content = meta.down.content.to_string().into();
 
-                MigrationFileBiPair {
+                MigrationFileTwoWayPair {
                     up: FileMetadata::new(up_name, up_content),
                     down: FileMetadata::new(down_name, down_content),
                 }
@@ -69,7 +69,7 @@ impl EmbeddedMigrationsOneWay {
         self.migrations
     }
 
-    pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationFileUni>> {
+    pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationFileOneWay>> {
         let migs = self
             .migrations
             .iter()
@@ -81,7 +81,7 @@ impl EmbeddedMigrationsOneWay {
                     .expect("Invalid migration name");
                 let content = meta.content().to_string().into();
 
-                MigrationFileUni::new(FileMetadata { name, content })
+                MigrationFileOneWay::new(FileMetadata { name, content })
             })
             .collect::<Vec<_>>();
         Ok(migs)

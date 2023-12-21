@@ -189,7 +189,7 @@ impl MigratorDatabase {
         let timestamp = Utc::now();
         let migration_file = match &file_manager.migration_flag {
             MigrationFlag::TwoWay => {
-                let file = MigrationFileBiPair {
+                let file = MigrationFileTwoWayPair {
                     up: FileMetadata {
                         name: MigrationFilename::create_up(timestamp, &name)?,
                         content: up_queries_str.clone().into(),
@@ -202,7 +202,7 @@ impl MigratorDatabase {
                 MigrationFile::TwoWay(file)
             }
             MigrationFlag::OneWay => {
-                let file = MigrationFileUni::new(FileMetadata {
+                let file = MigrationFileOneWay::new(FileMetadata {
                     name: MigrationFilename::create_oneway(timestamp, &name)?,
                     content: up_queries_str.clone().into(),
                 });

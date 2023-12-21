@@ -88,7 +88,7 @@ impl MigrationFilenames {
     pub fn bidirectional_pair_meta_checked(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
+    ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
@@ -109,7 +109,7 @@ impl MigrationFilenames {
                 }
             })?;
 
-            bidirectional_pair.push(MigrationFileBiPair {
+            bidirectional_pair.push(MigrationFileTwoWayPair {
                 up: FileMetadata {
                     name: migration.to_up(),
                     content: up,
@@ -130,7 +130,7 @@ impl MigrationFilenames {
     pub fn bidirectional_pair_meta_down_unchecked(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
+    ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         let bidirectional = self.bidirectional();
 
         let mut bidirectional_pair = Vec::new();
@@ -147,7 +147,7 @@ impl MigrationFilenames {
 
             let down = FileContent::from_file(&down).unwrap_or(FileContent::empty());
 
-            bidirectional_pair.push(MigrationFileBiPair {
+            bidirectional_pair.push(MigrationFileTwoWayPair {
                 up: FileMetadata {
                     name: migration.to_up(),
                     content: up,
@@ -176,10 +176,10 @@ impl MigrationFilenames {
     pub fn unidirectional_pair_meta(
         &self,
         migration_dir: &Path,
-    ) -> MigrationResult<Vec<MigrationFileUni>> {
+    ) -> MigrationResult<Vec<MigrationFileOneWay>> {
         let unidirectional = self.unidirectional();
 
-        let mut unidirectional_pair: Vec<MigrationFileUni> = Vec::new();
+        let mut unidirectional_pair: Vec<MigrationFileOneWay> = Vec::new();
         for migration in unidirectional {
             let up = migration_dir.join(migration.to_unidirectional().to_string());
 
@@ -190,7 +190,7 @@ impl MigrationFilenames {
                 }
             })?;
 
-            unidirectional_pair.push(MigrationFileUni::new(FileMetadata {
+            unidirectional_pair.push(MigrationFileOneWay::new(FileMetadata {
                 name: migration,
                 content,
             }));

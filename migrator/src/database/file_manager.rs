@@ -176,7 +176,7 @@ impl MigrationConfig {
     pub fn get_two_way_migrations(
         &self,
         create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Vec<MigrationFileBiPair>> {
+    ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         self.get_migrations_filenames(create_dir_if_not_exists)?
             .bidirectional_pair_meta_checked(&self.resolve_migration_directory(false)?)
     }
@@ -184,7 +184,7 @@ impl MigrationConfig {
     pub fn get_oneway_migrations(
         &self,
         create_dir_if_not_exists: bool,
-    ) -> MigrationResult<Vec<MigrationFileUni>> {
+    ) -> MigrationResult<Vec<MigrationFileOneWay>> {
         self.get_migrations_filenames(create_dir_if_not_exists)?
             .unidirectional_pair_meta(&self.resolve_migration_directory(false)?)
     }
@@ -202,7 +202,7 @@ impl FileManagerUni {
         self.0.clone()
     }
 
-    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileUni>> {
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileOneWay>> {
         self.0.get_oneway_migrations(false)
     }
 
@@ -279,7 +279,7 @@ impl FileManagerBi {
     }
 
     /// Get all migrations
-    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileBiPair>> {
+    pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
         self.0
             .get_migrations_filenames(false)?
             .bidirectional_pair_meta_checked(&self.0.resolve_migration_directory(false)?)

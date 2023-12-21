@@ -1,21 +1,21 @@
 use crate::*;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MigrationFileBiPair {
+pub struct MigrationFileTwoWayPair {
     pub up: FileMetadata,
     pub down: FileMetadata,
 }
 
-impl MigrationFileBiPair {
+impl MigrationFileTwoWayPair {
     pub fn new(up: FileMetadata, down: FileMetadata) -> Self {
         Self { up, down }
     }
 }
 
-impl TryFrom<MigrationFileBiPair> for Migration {
+impl TryFrom<MigrationFileTwoWayPair> for Migration {
     type Error = MigrationError;
 
-    fn try_from(migration: MigrationFileBiPair) -> Result<Self, Self::Error> {
+    fn try_from(migration: MigrationFileTwoWayPair) -> Result<Self, Self::Error> {
         Ok(Self {
             id: Migration::create_id(&migration.up.name),
             name: migration.up.name.to_up().to_string(),
@@ -27,9 +27,9 @@ impl TryFrom<MigrationFileBiPair> for Migration {
 }
 
 #[derive(Clone, Debug)]
-pub struct MigrationFileUni(FileMetadata);
+pub struct MigrationFileOneWay(FileMetadata);
 
-impl MigrationFileUni {
+impl MigrationFileOneWay {
     pub fn new(file: FileMetadata) -> Self {
         Self(file)
     }
@@ -59,10 +59,10 @@ impl FileMetadata {
     }
 }
 
-impl TryFrom<MigrationFileUni> for Migration {
+impl TryFrom<MigrationFileOneWay> for Migration {
     type Error = MigrationError;
 
-    fn try_from(migration: MigrationFileUni) -> Result<Self, Self::Error> {
+    fn try_from(migration: MigrationFileOneWay) -> Result<Self, Self::Error> {
         let migration = migration.0;
         Ok(Self {
             id: Migration::create_id(&migration.name),
