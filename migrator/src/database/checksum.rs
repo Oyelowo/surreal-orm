@@ -1,4 +1,4 @@
-use std::{fmt::Display, fs::File, io::BufReader};
+use std::{fmt::Display, fs::File, io::BufReader, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use sha2::{self, Digest, Sha256};
@@ -17,7 +17,7 @@ impl From<String> for Checksum {
 impl Display for Checksum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Checksum(checksum) = self;
-        write!(f, "{}", checksum)
+        write!(f, "{checksum}")
     }
 }
 
@@ -27,15 +27,16 @@ impl Checksum {
         hasher.update(content.to_string().as_bytes());
 
         let hash = hasher.finalize();
-        Ok(format!("{:x}", hash).into())
+        Ok(format!("{hash:x}").into())
     }
 
-    pub fn generate_from_path(file_path: impl Into<std::path::PathBuf>) -> MigrationResult<Self> {
-        let file_path = file_path.into();
+    pub fn generate_from_path(file_path: impl Into<PathBuf>) -> MigrationResult<Self> {
+        let file_path: PathBuf = file_path.into();
         let file = File::open(&file_path).map_err(|e| {
             MigrationError::IoError(format!(
-                "Failed to open migration file: {:?}. Error: {}",
-                file_path, e
+                "Failed to open migration file: {}. Error: {}",
+                file_path.to_string_lossy().to_string(),
+                e
             ))
         })?;
 
@@ -44,13 +45,14 @@ impl Checksum {
 
         std::io::copy(&mut reader, &mut hasher).map_err(|e| {
             MigrationError::IoError(format!(
-                "Failed to read migration file: {:?}. Error: {}",
-                file_path, e
+                "Failed to read migration file: {}. Error: {}",
+                file_path.to_string_lossy().to_string(),
+                e
             ))
         })?;
 
         let hash = hasher.finalize();
-        Ok(format!("{:x}", hash).into())
+        Ok(format!("{hash:x}").into())
     }
 
     pub fn verify(
