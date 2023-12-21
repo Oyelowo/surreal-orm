@@ -118,9 +118,12 @@ impl List {
 
                 match migrations {
                     Ok(migrations) => {
+                        log::info!("=================================================");
                         for migration in migrations {
                             log::info!("Migration name: {migration} ");
                         }
+                        log::info!("=================================================");
+                        log::info!("Listing end.");
                     }
                     Err(ref e) => {
                         log::error!("Failed to get migrations: {e}");
