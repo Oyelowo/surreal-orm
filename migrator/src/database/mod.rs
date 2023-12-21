@@ -17,6 +17,7 @@ mod filename;
 mod full_db_info;
 mod migration_model;
 mod migrator_db;
+mod prompter;
 mod queries;
 mod settings;
 
@@ -32,5 +33,6 @@ pub use filename::*;
 pub use full_db_info::*;
 pub use migration_model::*;
 pub use migrator_db::*;
+pub use prompter::*;
 pub use queries::*;
 pub use settings::*;

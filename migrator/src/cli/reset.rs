@@ -6,7 +6,7 @@ use std::fs;
 use surreal_query_builder::DbResources;
 
 use super::init::Init;
-use crate::MigrationConfig;
+use crate::{MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
@@ -39,7 +39,7 @@ pub struct Reset {
 }
 
 impl Reset {
-    pub async fn run(&self, codebase_resources: impl DbResources) {
+    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -76,7 +76,7 @@ impl Reset {
             shared_all: self.shared_all.clone(),
             shared_run_and_rollback: self.shared_run_and_rollback.clone(),
         };
-        init.run(codebase_resources).await;
+        init.run(codebase_resources, prompter).await;
 
         log::info!("Reset successful");
     }
