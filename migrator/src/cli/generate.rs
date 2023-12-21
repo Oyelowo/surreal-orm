@@ -1,7 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use crate::{MigrationConfig, MigrationFlag};
+use crate::{MigrationConfig, MigrationFlag, Prompter};
 use clap::Parser;
 use surreal_query_builder::DbResources;
 
@@ -24,7 +24,7 @@ pub struct Generate {
 }
 
 impl Generate {
-    pub async fn run(&self, codebase_resources: impl DbResources) {
+    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = &self.name;
         let mig_type = files_config.detect_migration_type();
@@ -37,7 +37,7 @@ impl Generate {
             Ok(MigrationFlag::TwoWay) => {
                 let gen = files_config
                     .two_way()
-                    .generate_migrations(&migration_name, codebase_resources)
+                    .generate_migrations(&migration_name, codebase_resources, prompter)
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {}", e.to_string());
@@ -46,7 +46,7 @@ impl Generate {
             Ok(MigrationFlag::OneWay) => {
                 let gen = files_config
                     .one_way()
-                    .generate_migrations(migration_name, codebase_resources)
+                    .generate_migrations(migration_name, codebase_resources, prompter)
                     .await;
 
                 if let Err(e) = gen {

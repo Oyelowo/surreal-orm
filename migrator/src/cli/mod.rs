@@ -18,6 +18,8 @@ pub use up::{Up, UpdateStrategy};
 use clap::Parser;
 use surreal_query_builder::DbResources;
 
+use crate::{Prompter, RealPrompter};
+
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
@@ -112,18 +114,22 @@ impl SubCommand {
 pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
     cli.subcmd.setup_logging();
-    migration_cli_fn(cli, codebase_resources).await;
+    migration_cli_fn(cli, codebase_resources, RealPrompter).await;
 }
 
-pub(crate) async fn migration_cli_fn(cli: Cli, codebase_resources: impl DbResources) {
+pub(crate) async fn migration_cli_fn(
+    cli: Cli,
+    codebase_resources: impl DbResources,
+    prompter: impl Prompter,
+) {
     cli.subcmd.setup_logging();
 
     match cli.subcmd {
         SubCommand::Init(init) => {
-            init.run(codebase_resources).await;
+            init.run(codebase_resources, prompter).await;
         }
         SubCommand::Generate(generate) => {
-            generate.run(codebase_resources).await;
+            generate.run(codebase_resources, prompter).await;
         }
         SubCommand::Up(up) => {
             up.run().await;
@@ -138,7 +144,7 @@ pub(crate) async fn migration_cli_fn(cli: Cli, codebase_resources: impl DbResour
             prune.run().await;
         }
         SubCommand::Reset(reset) => {
-            reset.run(codebase_resources).await;
+            reset.run(codebase_resources, prompter).await;
         }
     }
 }

@@ -5,7 +5,8 @@ use std::path::PathBuf;
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    DbInfo, Informational, Migration, MigrationConfig, MigrationFilename, UpdateStrategy,
+    DbInfo, Informational, Migration, MigrationConfig, MigrationFilename, TrueMockPrompter,
+    UpdateStrategy,
 };
 use surreal_orm::statements::{info_for, select};
 use surreal_orm::{All, ReturnableSelect, Runnable};
@@ -64,7 +65,7 @@ async fn test_oneway_migrations() {
     // Comment out this line to generate oneway migrations
     // To be used from cli
     one_way
-        .generate_migrations(test_migration_name, Resources)
+        .generate_migrations(test_migration_name, Resources, TrueMockPrompter)
         .await
         .unwrap();
 
@@ -202,7 +203,11 @@ async fn test_twoway_migrations() {
     // FIRST MIGRATION
     // Generate first migration
     two_way
-        .generate_migrations(&test_migration_name.to_string(), Resources)
+        .generate_migrations(
+            &test_migration_name.to_string(),
+            Resources,
+            TrueMockPrompter,
+        )
         .await
         .unwrap();
 
@@ -224,7 +229,7 @@ async fn test_twoway_migrations() {
 
     // SECOND MIGRATION GENERATION
     two_way
-        .generate_migrations(&test_migration_namev2, ResourcesV2)
+        .generate_migrations(&test_migration_namev2, ResourcesV2, TrueMockPrompter)
         .await
         .unwrap();
     let files = fs::read_dir(temp_test_migration_dir).unwrap();

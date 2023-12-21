@@ -110,6 +110,7 @@ impl MigratorDatabase {
         migration_name: &String,
         file_manager: &MigrationConfig,
         codebase_resources: impl DbResources,
+        prompter: impl Prompter,
     ) -> MigrationResult<()> {
         let name = migration_name
             .to_string()
@@ -210,19 +211,9 @@ impl MigratorDatabase {
             }
         };
 
-        let prompt_empty = || {
-            let confirmation = inquire::Confirm::new(
-                "Are you sure you want to generate an empty migration? (y/n)",
-            )
-            .with_default(false)
-            .with_help_message("This is good if you want to write out some queries manually")
-            .prompt();
-            confirmation
-        };
-
         let query_str = format!("{}{}", up_queries_str, down_queries_str);
         if query_str.trim().is_empty() {
-            match prompt_empty() {
+            match prompter.prompt() {
                 Ok(true) => {
                     migration_file.create_file(file_manager)?;
                     log::info!("New migration generated.");

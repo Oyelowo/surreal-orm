@@ -1,6 +1,7 @@
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{
-    self, embed_migrations, MigrationConfig, RollbackOptions, RollbackStrategy, UpdateStrategy,
+    self, embed_migrations, MigrationConfig, RealPrompter, RollbackOptions, RollbackStrategy,
+    UpdateStrategy,
 };
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
@@ -27,7 +28,11 @@ async fn main() {
     // Comment out this line to generate oneway migrations
     // To be used from cli
     one_way
-        .generate_migrations(&"migration_name_example".to_string(), Resources)
+        .generate_migrations(
+            &"migration_name_example".to_string(),
+            Resources,
+            RealPrompter,
+        )
         .await
         .unwrap();
 
@@ -53,7 +58,11 @@ async fn main() {
     // comment out this line to generate twoway migrations
     // To be used from cli
     two_way
-        .generate_migrations(&"migration_name_example".to_string(), Resources)
+        .generate_migrations(
+            &"migration_name_example".to_string(),
+            Resources,
+            RealPrompter,
+        )
         .await
         .unwrap();
 

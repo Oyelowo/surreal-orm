@@ -211,13 +211,19 @@ impl FileManagerUni {
         &self,
         migration_name: impl Into<String>,
         codebase_resources: impl DbResources,
+        prompter: impl Prompter,
     ) -> MigrationResult<()> {
         let migration_name = migration_name.into();
         let file_manager = self.into_inner();
 
-        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
-            .await
-            .expect("Failed to generate migrations");
+        MigratorDatabase::generate_migrations(
+            &migration_name,
+            &file_manager,
+            codebase_resources,
+            prompter,
+        )
+        .await
+        .expect("Failed to generate migrations");
         Ok(())
     }
 
@@ -292,11 +298,17 @@ impl FileManagerBi {
         &self,
         migration_name: &String,
         codebase_resources: impl DbResources,
+        prompter: impl Prompter,
     ) -> MigrationResult<()> {
         let migration_name = migration_name.into();
         let file_manager = self.0.clone();
-        MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
-            .await
+        MigratorDatabase::generate_migrations(
+            &migration_name,
+            &file_manager,
+            codebase_resources,
+            prompter,
+        )
+        .await
     }
 
     /// Make sure the migration directory exists when running migrations
