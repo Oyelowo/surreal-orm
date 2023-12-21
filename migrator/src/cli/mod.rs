@@ -13,6 +13,7 @@ pub use init::Init;
 pub use list::{List, Status};
 pub use prune::Prune;
 pub use reset::Reset;
+use surrealdb::{engine::any::Any, Surreal};
 pub use up::{Up, UpdateStrategy};
 
 use clap::Parser;
@@ -20,18 +21,28 @@ use surreal_query_builder::DbResources;
 
 use crate::{Prompter, RealPrompter};
 
+use self::config::{RuntimeConfig, SetupDb};
+
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
-pub(crate) struct Cli {
+pub struct Cli {
     /// Subcommand: generate, up, down, list
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
 
+impl Cli {
+    pub fn _new(sub_command: SubCommand) -> Self {
+        Self {
+            subcmd: sub_command,
+        }
+    }
+}
+
 /// Subcommands
 #[derive(Parser, Debug)]
-enum SubCommand {
+pub enum SubCommand {
     /// Init migrations
     Init(Init),
     /// Generate migrations
@@ -114,37 +125,48 @@ impl SubCommand {
 pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
     cli.subcmd.setup_logging();
-    migration_cli_fn(cli, codebase_resources, RealPrompter).await;
+    let mut setup = SetupDb::new(RuntimeConfig::default()).await;
+
+    migration_cli_fn(&mut setup, cli, codebase_resources, RealPrompter).await;
 }
 
-pub(crate) async fn migration_cli_fn(
+pub async fn migration_cli_fn(
+    setup: &mut SetupDb,
     cli: Cli,
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
-) {
+) -> Surreal<Any> {
     cli.subcmd.setup_logging();
 
-    match cli.subcmd {
+    let db = match cli.subcmd {
         SubCommand::Init(init) => {
-            init.run(codebase_resources, prompter).await;
+            init.run(codebase_resources, prompter, setup).await;
+            todo!()
         }
         SubCommand::Generate(generate) => {
-            generate.run(codebase_resources, prompter).await;
+            generate.run(codebase_resources, prompter, setup).await;
+            todo!()
         }
         SubCommand::Up(up) => {
-            up.run().await;
+            log::info!("Running migrationsxxxxxxx");
+            up.run(setup).await
         }
         SubCommand::Down(down) => {
-            down.run().await;
+            log::info!("Rolling back migrations");
+            down.run(setup).await
         }
         SubCommand::Prune(prune) => {
-            prune.run().await;
+            log::info!("Pruning migrations");
+            prune.run(setup).await
         }
         SubCommand::List(prune) => {
-            prune.run().await;
+            log::info!("Listing migrations");
+            prune.run(setup).await
         }
         SubCommand::Reset(reset) => {
-            reset.run(codebase_resources, prompter).await;
+            reset.run(codebase_resources, prompter, setup).await;
+            todo!()
         }
-    }
+    };
+    db
 }

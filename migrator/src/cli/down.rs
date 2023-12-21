@@ -1,7 +1,8 @@
-use super::config::{setup_db, RuntimeConfig, SharedAll};
+use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
+use surrealdb::{engine::any::Any, Surreal};
 
-use crate::{MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions};
+use crate::{config::SetupDb, MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions};
 
 /// Rollback migrations
 #[derive(Parser, Debug)]
@@ -67,8 +68,10 @@ impl From<&Down> for RollbackStrategy {
 }
 
 impl Down {
-    pub async fn run(&self) {
+    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
         let mut files_config = MigrationConfig::new().make_strict();
+        let setup = db_setup.override_runtime_config(&self.shared_run_and_rollback);
+        let db = setup.db();
 
         if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
             log::error!(
@@ -79,7 +82,6 @@ impl Down {
             panic!();
         }
 
-        let db = setup_db(&self.shared_run_and_rollback).await;
         let rollback_strategy = RollbackStrategy::from(self);
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -103,5 +105,7 @@ impl Down {
         } else {
             log::info!("Rollback successful");
         }
+
+        db.clone()
     }
 }

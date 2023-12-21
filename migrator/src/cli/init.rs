@@ -1,6 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
+use crate::config::SetupDb;
 use crate::{MigrationConfig, Prompter};
 
 use clap::Parser;
@@ -33,7 +34,12 @@ pub struct Init {
 }
 
 impl Init {
-    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
+    pub async fn run(
+        &self,
+        codebase_resources: impl DbResources,
+        prompter: impl Prompter,
+        db_setup: &mut SetupDb,
+    ) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
 
@@ -82,9 +88,9 @@ impl Init {
                 number: None,
                 till: None,
                 shared_all: self.shared_all.clone(),
-                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+                runtime_config: self.shared_run_and_rollback.clone(),
             };
-            run.run().await;
+            run.run(db_setup).await;
 
             log::info!("Successfully ran initial migrations");
         }
