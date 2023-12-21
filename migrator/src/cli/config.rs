@@ -118,62 +118,92 @@ impl Default for RuntimeConfig {
     }
 }
 
-pub(crate) async fn setup_db(shared_run_and_rollback: &RuntimeConfig) -> Surreal<Any> {
-    let cli_db_url = shared_run_and_rollback.url.clone();
-    let db = connect(&cli_db_url.to_string()).await.unwrap();
-    init_db(shared_run_and_rollback, db.clone()).await
+pub struct SetupDb {
+    runtime_config: RuntimeConfig,
+    db: Surreal<Any>,
 }
 
-pub(crate) async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal<Any> {
-    match (&shared.user, &shared.pass) {
-        (Some(u), Some(p)) => {
-            let signin = db
-                .signin(Root {
-                    username: u.as_str(),
-                    password: p.as_str(),
-                })
-                .await;
-            if let Err(e) = signin {
-                log::error!("Failed to signin: {e}");
+impl SetupDb {
+    pub async fn new(runtime_config: RuntimeConfig) -> Self {
+        let db = Self::setup_db(&runtime_config).await;
+        Self {
+            runtime_config: runtime_config.clone(),
+            db,
+        }
+    }
+
+    pub fn db(&self) -> &Surreal<Any> {
+        &self.db
+    }
+
+    pub fn override_runtime_config(&mut self, runtime_config: &RuntimeConfig) -> &mut Self {
+        self.runtime_config = runtime_config.clone();
+        // self.db = Self::setup_db(&self.runtime_config).await;
+        self
+    }
+
+    // pub fn override_runtime_config2(&mut self, runner: &impl RunnableMigration) -> &Self {
+    //     self.runtime_config = runner.runtime_config().clone();
+    //     &self
+    // }
+
+    pub(crate) async fn setup_db(runtime_config: &RuntimeConfig) -> Surreal<Any> {
+        let cli_db_url = &runtime_config.url;
+        let db = connect(cli_db_url.to_string()).await.unwrap();
+        Self::init_db(db.clone(), &runtime_config).await
+    }
+
+    pub async fn init_db(db: Surreal<Any>, shared: &RuntimeConfig) -> Surreal<Any> {
+        match (&shared.user, &shared.pass) {
+            (Some(u), Some(p)) => {
+                let signin = db
+                    .signin(Root {
+                        username: u.as_str(),
+                        password: p.as_str(),
+                    })
+                    .await;
+                if let Err(e) = signin {
+                    log::error!("Failed to signin: {e}");
+                    panic!();
+                }
+                log::info!("Signed in successfully");
+            }
+            (Some(_), None) => {
+                log::error!("Password not provided");
                 panic!();
             }
-            log::info!("Signed in successfully");
-        }
-        (Some(_), None) => {
-            log::error!("Password not provided");
-            panic!();
-        }
-        (None, Some(_)) => {
-            log::error!("User not provided");
-            panic!();
-        }
-        _ => {
-            log::warn!("User and password not provided, using root default");
-            // db.signin(Root {
-            //     username: "root",
-            //     password: "root",
-            // })
-            // .await
-            // .expect("Failed to signin");
-        }
-    };
+            (None, Some(_)) => {
+                log::error!("User not provided");
+                panic!();
+            }
+            _ => {
+                log::warn!("User and password not provided, using root default");
+                // db.signin(Root {
+                //     username: "root",
+                //     password: "root",
+                // })
+                // .await
+                // .expect("Failed to signin");
+            }
+        };
 
-    if let Some(db_name) = &shared.db {
-        log::info!("Using db {}", db_name);
-        let db = db.use_db(db_name).await;
-        if let Err(e) = db {
-            log::error!("Failed to use db: {}", e.to_string());
-            panic!();
+        if let Some(db_name) = &shared.db {
+            log::info!("Using db {}", db_name);
+            let db = db.use_db(db_name).await;
+            if let Err(e) = db {
+                log::error!("Failed to use db: {}", e.to_string());
+                panic!();
+            }
         }
-    }
 
-    if let Some(ns_name) = &shared.ns {
-        log::info!("Using ns {}", ns_name);
-        let ns = db.use_ns(ns_name).await;
-        if let Err(e) = ns {
-            log::error!("Failed to use ns: {}", e.to_string());
-            panic!();
+        if let Some(ns_name) = &shared.ns {
+            log::info!("Using ns {}", ns_name);
+            let ns = db.use_ns(ns_name).await;
+            if let Err(e) = ns {
+                log::error!("Failed to use ns: {}", e.to_string());
+                panic!();
+            }
         }
+        db
     }
-    db
 }

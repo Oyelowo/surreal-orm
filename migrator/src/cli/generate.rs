@@ -1,9 +1,12 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
+use crate::config::SetupDb;
 use crate::{MigrationConfig, MigrationFlag, Prompter};
 use clap::Parser;
 use surreal_query_builder::DbResources;
+use surrealdb::engine::any::Any;
+use surrealdb::Surreal;
 
 /// Generate migrations
 #[derive(Parser, Debug)]
@@ -20,12 +23,18 @@ pub struct Generate {
     pub(crate) shared_all: SharedAll,
 
     #[clap(flatten)]
-    pub(crate) shared_run_and_rollback: RuntimeConfig,
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 impl Generate {
-    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
+    pub async fn run(
+        &self,
+        codebase_resources: impl DbResources,
+        prompter: impl Prompter,
+        db_setup: &mut SetupDb,
+    ) -> Surreal<Any> {
         let mut files_config = MigrationConfig::new().make_strict();
+        let mut setup = db_setup.override_runtime_config(&self.runtime_config);
         let migration_name = &self.name;
         let mig_type = files_config.detect_migration_type();
 
@@ -67,13 +76,15 @@ impl Generate {
                 number: None,
                 till: None,
                 shared_all: self.shared_all.clone(),
-                shared_run_and_rollback: self.shared_run_and_rollback.clone(),
+                runtime_config: self.runtime_config.clone(),
             };
-            run.run().await;
+            run.run(setup).await;
 
             log::info!("Successfully ran the generated migration(s)");
         }
 
-        log::info!("Migration generation done.")
+        log::info!("Migration generation done.");
+        let db = setup.db();
+        db.clone()
     }
 }

@@ -1,10 +1,12 @@
-use super::config::setup_db;
 use super::config::{RuntimeConfig, SharedAll};
+use crate::config::SetupDb;
 use crate::{DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
 
 use clap::Parser;
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::Runnable;
+use surrealdb::engine::any::Any;
+use surrealdb::Surreal;
 
 /// Run migrations
 /// cargo run -- up
@@ -46,7 +48,7 @@ pub struct Up {
     pub(crate) shared_all: SharedAll,
 
     #[clap(flatten)]
-    pub(crate) shared_run_and_rollback: RuntimeConfig,
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 pub enum UpdateStrategy {
@@ -77,9 +79,20 @@ impl From<&Up> for UpdateStrategy {
     }
 }
 
+pub trait RunnableMigration {
+    fn runtime_config(&self) -> &RuntimeConfig;
+}
+
+impl RunnableMigration for Up {
+    fn runtime_config(&self) -> &RuntimeConfig {
+        &self.runtime_config
+    }
+}
+
 impl Up {
-    pub async fn run(&self) {
-        let db = setup_db(&self.shared_run_and_rollback).await;
+    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
+        let db = db_setup.override_runtime_config(&self.runtime_config).db();
+
         let update_strategy = UpdateStrategy::from(self);
         let mut files_config = MigrationConfig::new().make_strict();
 
@@ -123,5 +136,7 @@ impl Up {
 
         log::info!("Successfully ran migrations");
         log::info!("Database: {:?}", info);
+
+        db.clone()
     }
 }

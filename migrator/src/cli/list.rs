@@ -1,9 +1,9 @@
 use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
 use std::{fmt::Display, str::FromStr};
+use surrealdb::{engine::any::Any, Surreal};
 
-use super::config::setup_db;
-use crate::{MigrationConfig, MigrationFlag};
+use crate::{config::SetupDb, MigrationConfig, MigrationFlag};
 
 #[derive(Clone, Copy, Debug)]
 pub enum Status {
@@ -70,8 +70,9 @@ pub struct List {
 }
 
 impl List {
-    pub async fn run(&self) {
-        let db = setup_db(&self.runtime_config).await;
+    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
+        let setup = db_setup.override_runtime_config(&self.runtime_config);
+        let db = setup.db();
         let mut files_config = MigrationConfig::new().make_strict();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -134,5 +135,6 @@ impl List {
                 log::error!("Failed to detect migration type: {}", e.to_string());
             }
         };
+        db.clone()
     }
 }
