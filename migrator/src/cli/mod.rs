@@ -139,14 +139,8 @@ pub async fn migration_cli_fn(
     cli.subcmd.setup_logging();
 
     let db = match cli.subcmd {
-        SubCommand::Init(init) => {
-            init.run(codebase_resources, prompter, setup).await;
-            todo!()
-        }
-        SubCommand::Generate(generate) => {
-            generate.run(codebase_resources, prompter, setup).await;
-            todo!()
-        }
+        SubCommand::Init(init) => init.run(codebase_resources, prompter, setup).await,
+        SubCommand::Generate(generate) => generate.run(codebase_resources, prompter, setup).await,
         SubCommand::Up(up) => {
             log::info!("Running migrationsxxxxxxx");
             up.run(setup).await
