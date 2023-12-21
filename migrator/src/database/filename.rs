@@ -399,7 +399,11 @@ impl MigrationFilename {
         }
     }
 
-    pub fn create_file(&self, query: String, file_namager: &FileManager) -> MigrationResult<()> {
+    pub fn create_file(
+        &self,
+        query: String,
+        file_namager: &MigrationConfig,
+    ) -> MigrationResult<()> {
         let file_name = self.to_string();
         let migration_dir = file_namager.resolve_migration_directory(true)?;
         let file_path = migration_dir.join(file_name);

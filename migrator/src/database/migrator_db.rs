@@ -108,7 +108,7 @@ impl MigratorDatabase {
 
     pub async fn generate_migrations(
         migration_name: &String,
-        file_manager: &FileManager,
+        file_manager: &MigrationConfig,
         codebase_resources: impl DbResources,
     ) -> MigrationResult<()> {
         let name = migration_name

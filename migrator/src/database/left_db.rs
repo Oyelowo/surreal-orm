@@ -35,7 +35,7 @@ impl LeftDatabase {
 
     pub async fn run_twoway_up_migrations(
         &self,
-        file_manager: &FileManager,
+        file_manager: &MigrationConfig,
         create_migration_table: bool,
     ) -> MigrationResult<()> {
         let all_migrations = file_manager.get_two_way_migrations(create_migration_table)?;
@@ -83,7 +83,7 @@ impl LeftDatabase {
     }
     pub async fn run_oneway_migrations(
         &self,
-        fm: &FileManager,
+        fm: &MigrationConfig,
         create_migration_table: bool,
     ) -> MigrationResult<&Self> {
         let all_migrations = fm.get_oneway_migrations(create_migration_table)?;

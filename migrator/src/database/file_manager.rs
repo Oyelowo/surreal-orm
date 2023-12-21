@@ -1,5 +1,6 @@
 use std::{
     env, fs,
+    ops::Deref,
     path::{Path, PathBuf},
 };
 
@@ -9,7 +10,13 @@ use surrealdb::{Connection, Surreal};
 use crate::*;
 
 #[derive(Debug, Clone, Default)]
-pub struct FileManager {
+struct FileManager {}
+
+///
+impl FileManager {}
+
+#[derive(Debug, Clone, Default)]
+pub struct MigrationConfig {
     // pub migration_name: String,
     pub mode: Mode,
     /// Default path is 'migrations' ralative to the nearest project root where
@@ -18,20 +25,53 @@ pub struct FileManager {
     pub(crate) migration_flag: MigrationFlag,
 }
 
-///
-impl FileManager {
-    pub fn mode(&self, mode: Mode) -> Self {
-        Self {
-            mode,
-            ..self.clone()
-        }
+impl MigrationConfig {
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn custom_path(&self, custom_path: String) -> Self {
-        Self {
-            custom_path: Some(custom_path),
-            ..self.clone()
-        }
+    pub fn set_mode(mut self, mode: Mode) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    pub fn mode(&self) -> Mode {
+        self.mode
+    }
+
+    pub fn make_strict(mut self) -> Self {
+        self.mode = Mode::Strict;
+        self
+    }
+
+    pub fn relax(mut self) -> Self {
+        self.mode = Mode::Lax;
+        self
+    }
+
+    /// Default path is 'migrations' ralative to the nearest project root where
+    pub fn custom_path(mut self, custom_path: impl Into<String>) -> Self {
+        let custom_path = custom_path.into();
+        self.custom_path = Some(custom_path);
+        self
+    }
+
+    pub fn one_way(&self) -> FileManagerUni {
+        let mut config = self.clone();
+        config.migration_flag = MigrationFlag::OneWay;
+
+        FileManagerUni::new(config)
+    }
+
+    pub fn two_way(&self) -> FileManagerBi {
+        let mut config = self.clone();
+        config.migration_flag = MigrationFlag::TwoWay;
+
+        FileManagerBi::new(config)
+    }
+
+    pub fn get_migration_dir_create_if_none(&self) -> MigrationResult<PathBuf> {
+        self.resolve_migration_directory(true)
     }
 
     pub fn migration_flag(&self, migration_flag: MigrationFlag) -> Self {
@@ -39,16 +79,6 @@ impl FileManager {
             migration_flag,
             ..self.clone()
         }
-    }
-
-    pub fn one_way(&mut self) -> OneWayGetter {
-        self.migration_flag = MigrationFlag::OneWay;
-        OneWayGetter::new(self.clone())
-    }
-
-    pub fn two_way(&mut self) -> TwoWayGetter {
-        self.migration_flag = MigrationFlag::TwoWay;
-        TwoWayGetter::new(self.clone())
     }
 
     pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
@@ -162,80 +192,15 @@ impl FileManager {
 }
 
 #[derive(Debug, Clone)]
-pub struct MigrationConfig(FileManager);
+pub struct FileManagerUni(MigrationConfig);
 
-impl Default for MigrationConfig {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl MigrationConfig {
-    pub fn new() -> Self {
-        Self(FileManager::default())
-    }
-
-    pub fn into_inner(self) -> FileManager {
-        self.0
-    }
-
-    pub fn set_mode(&self, mode: Mode) -> Self {
-        Self(self.0.mode(mode))
-    }
-
-    pub fn mode(&self) -> Mode {
-        self.0.mode
-    }
-
-    pub fn make_strict(&self) -> Self {
-        Self(self.0.mode(Mode::Strict))
-    }
-
-    pub fn relax(&self) -> Self {
-        Self(self.0.mode(Mode::Lax))
-    }
-
-    /// Default path is 'migrations' ralative to the nearest project root where
-    pub fn custom_path(&self, custom_path: impl Into<String>) -> Self {
-        let custom_path = custom_path.into();
-        Self(self.0.custom_path(custom_path))
-    }
-
-    pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
-        self.0.detect_migration_type()
-    }
-
-    pub fn one_way(&self) -> OneWayGetter {
-        let fm = FileManager {
-            migration_flag: MigrationFlag::OneWay,
-            ..self.0.clone()
-        };
-        OneWayGetter::new(fm)
-    }
-
-    pub fn two_way(&self) -> TwoWayGetter {
-        let fm = FileManager {
-            migration_flag: MigrationFlag::TwoWay,
-            ..self.0.clone()
-        };
-        TwoWayGetter::new(fm)
-    }
-
-    pub fn get_migration_dir_create_if_none(&self) -> MigrationResult<PathBuf> {
-        self.0.resolve_migration_directory(true)
-    }
-
-    pub fn get_migration_dir(&self) -> MigrationResult<PathBuf> {
-        self.0.get_migration_dir()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct OneWayGetter(FileManager);
-
-impl OneWayGetter {
-    pub(crate) fn new(file_manager: FileManager) -> Self {
+impl FileManagerUni {
+    pub(crate) fn new(file_manager: MigrationConfig) -> Self {
         Self(file_manager)
+    }
+
+    pub(crate) fn into_inner(&self) -> MigrationConfig {
+        self.0.clone()
     }
 
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileUni>> {
@@ -249,7 +214,7 @@ impl OneWayGetter {
         codebase_resources: impl DbResources,
     ) -> MigrationResult<()> {
         let migration_name = migration_name.into();
-        let file_manager = self.0.clone();
+        let file_manager = self.into_inner();
 
         MigratorDatabase::generate_migrations(&migration_name, &file_manager, codebase_resources)
             .await
@@ -303,11 +268,15 @@ impl OneWayGetter {
 }
 
 #[derive(Debug, Clone)]
-pub struct TwoWayGetter(FileManager);
+pub struct FileManagerBi(MigrationConfig);
 
-impl TwoWayGetter {
-    pub(crate) fn new(file_manager: FileManager) -> Self {
+impl FileManagerBi {
+    pub(crate) fn new(file_manager: MigrationConfig) -> Self {
         Self(file_manager)
+    }
+
+    pub(crate) fn into_inner(&self) -> MigrationConfig {
+        self.0.clone()
     }
 
     /// Get all migrations
@@ -361,7 +330,7 @@ impl TwoWayGetter {
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         // let _migrations = self.get_migrations()?;
-        MigrationRunner::rollback_migrations(db, &self.0, rollback_options).await?;
+        MigrationRunner::rollback_migrations(db, &self.into_inner(), rollback_options).await?;
 
         Ok(())
     }
