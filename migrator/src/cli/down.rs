@@ -99,9 +99,9 @@ impl Down {
             .await;
 
         if let Err(ref e) = rollback {
-            log::error!("Failed to rollback migrations: {e}");
+            log::error!("Rollback Failed: {e}");
+        } else {
+            log::info!("Rollback successful");
         }
-
-        log::info!("Rollback successful");
     }
 }

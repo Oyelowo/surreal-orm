@@ -26,8 +26,17 @@ pub enum MigrationError {
     #[error("Migration does not exist")]
     MigrationDoesNotExist,
 
-    #[error("Migration file(s) does not exist")]
-    MigrationFileDoesNotExist,
+    #[error("Migration file - {0} - does not exist")]
+    MigrationFileDoesNotExist(String),
+
+    #[error("Rollback failed. Error: {0}")]
+    RollbackFailed(String),
+
+    #[error("Migration file name and database name mismatch. Migration file name: {migration_file_name}. Migration database name: {migration_db_name}")]
+    MigrationFileVsDbNamesMismatch {
+        migration_file_name: String,
+        migration_db_name: String,
+    },
 
     #[error("Migration not registered")]
     MigrationNotRegistered,
