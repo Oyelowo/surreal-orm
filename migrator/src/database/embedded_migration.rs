@@ -13,6 +13,12 @@ pub struct EmbeddedMigrationTwoWay {
     pub down: &'static FileMetadataStatic,
 }
 
+impl EmbeddedMigrationTwoWay {
+    pub fn new(up: &'static FileMetadataStatic, down: &'static FileMetadataStatic) -> Self {
+        Self { up, down }
+    }
+}
+
 #[allow(missing_copy_implementations)]
 #[derive(Debug, Clone)]
 pub struct EmbeddedMigrationsTwoWay {
@@ -37,14 +43,12 @@ impl EmbeddedMigrationsTwoWay {
                     .up
                     .name
                     .to_string()
-                    .to_string()
                     .try_into()
                     .expect("Invalid migration name");
                 let up_content = meta.up.content.to_string().into();
                 let down_name = meta
                     .up
                     .name
-                    .to_string()
                     .to_string()
                     .try_into()
                     .expect("Invalid migration name");
@@ -97,9 +101,13 @@ impl EmbeddedMigrationsOneWay {
 }
 
 #[derive(Clone, Debug)]
-pub struct EmbeddedMigrationOneWay(FileMetadataStatic);
+pub struct EmbeddedMigrationOneWay(pub &'static FileMetadataStatic);
 
 impl EmbeddedMigrationOneWay {
+    pub fn new(field_meta_static: &'static FileMetadataStatic) -> Self {
+        Self(field_meta_static)
+    }
+
     pub fn name(&self) -> &'static str {
         self.0.name
     }
@@ -113,4 +121,10 @@ impl EmbeddedMigrationOneWay {
 pub struct FileMetadataStatic {
     pub name: &'static str,
     pub content: &'static str, // status: String,
+}
+
+impl FileMetadataStatic {
+    pub fn new(name: &'static str, content: &'static str) -> Self {
+        Self { name, content }
+    }
 }
