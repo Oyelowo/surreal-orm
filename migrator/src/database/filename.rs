@@ -85,7 +85,7 @@ impl MigrationFilenames {
             .collect()
     }
 
-    pub fn bidirectional_pair_meta_checked(
+    pub fn bidirectional_pair_meta_sorted_desc_checked(
         &self,
         migration_dir: &Path,
     ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
@@ -121,13 +121,13 @@ impl MigrationFilenames {
             });
         }
 
-        bidirectional_pair.sort();
+        bidirectional_pair.sort_by(|a, b| b.up.name.cmp(&a.up.name));
         bidirectional_pair.dedup_by(|a, b| a.up.name == b.up.name);
 
         Ok(bidirectional_pair)
     }
 
-    pub fn bidirectional_pair_meta_down_unchecked(
+    pub fn bidirectional_pair_meta_down_sorted_desc_unchecked(
         &self,
         migration_dir: &Path,
     ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
@@ -159,7 +159,7 @@ impl MigrationFilenames {
             });
         }
 
-        bidirectional_pair.sort();
+        bidirectional_pair.sort_by(|a, b| b.up.name.cmp(&a.up.name));
         bidirectional_pair.dedup();
 
         Ok(bidirectional_pair)
