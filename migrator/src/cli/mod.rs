@@ -141,26 +141,11 @@ pub async fn migration_cli_fn(
     let db = match cli.subcmd {
         SubCommand::Init(init) => init.run(codebase_resources, prompter, setup).await,
         SubCommand::Generate(generate) => generate.run(codebase_resources, prompter, setup).await,
-        SubCommand::Up(up) => {
-            log::info!("Running migrationsxxxxxxx");
-            up.run(setup).await
-        }
-        SubCommand::Down(down) => {
-            log::info!("Rolling back migrations");
-            down.run(setup).await
-        }
-        SubCommand::Prune(prune) => {
-            log::info!("Pruning migrations");
-            prune.run(setup).await
-        }
-        SubCommand::List(prune) => {
-            log::info!("Listing migrations");
-            prune.run(setup).await
-        }
-        SubCommand::Reset(reset) => {
-            reset.run(codebase_resources, prompter, setup).await;
-            todo!()
-        }
+        SubCommand::Up(up) => up.run(setup).await,
+        SubCommand::Down(down) => down.run(setup).await,
+        SubCommand::Prune(prune) => prune.run(setup).await,
+        SubCommand::List(prune) => prune.run(setup).await,
+        SubCommand::Reset(reset) => reset.run(codebase_resources, prompter, setup).await,
     };
     db
 }

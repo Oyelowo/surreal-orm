@@ -51,7 +51,7 @@ impl FromStr for UrlDb {
 }
 
 #[derive(Parser, Debug, Clone)]
-pub(crate) struct RuntimeConfig {
+pub struct RuntimeConfig {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
     /// - Local WebSocket: `ws://localhost:8000`
