@@ -8,6 +8,8 @@
 use surreal_query_builder::SurrealOrmError;
 use thiserror::Error;
 
+use crate::MigrationFilename;
+
 #[derive(Error, Debug)]
 pub enum MigrationError {
     #[error("Checksum mismaatch in {migration_name}. Expected checksum: {expected_checksum}. Actual checksum: {actual_checksum}")]
@@ -26,8 +28,8 @@ pub enum MigrationError {
     #[error("Migration does not exist")]
     MigrationDoesNotExist,
 
-    #[error("Migration with name: {name} not found in pending migrations. It has either been applied or does not exist.")]
-    MigrationNotFoundFromPendingMigrations { name: String },
+    #[error("Migration with name: {0} not found in pending migrations. It has either been applied or does not exist.")]
+    MigrationNotFoundFromPendingMigrations(MigrationFilename),
 
     #[error("Migration file - {0} - does not exist")]
     MigrationFileDoesNotExist(String),

@@ -469,9 +469,9 @@ impl MigrationRunner {
                 }
 
                 if !migration_found {
-                    return Err(MigrationError::MigrationNotFoundFromPendingMigrations {
-                        name: mig_filename.to_string(),
-                    });
+                    return Err(MigrationError::MigrationNotFoundFromPendingMigrations(
+                        mig_filename,
+                    ));
                 }
 
                 filtered_migs
