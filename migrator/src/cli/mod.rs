@@ -21,7 +21,7 @@ use surreal_query_builder::DbResources;
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
-struct Cli {
+pub(crate) struct Cli {
     /// Subcommand: generate, up, down, list
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -111,6 +111,11 @@ impl SubCommand {
 /// ```
 pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
+    cli.subcmd.setup_logging();
+    migration_cli_fn(cli, codebase_resources).await;
+}
+
+pub(crate) async fn migration_cli_fn(cli: Cli, codebase_resources: impl DbResources) {
     cli.subcmd.setup_logging();
 
     match cli.subcmd {
