@@ -401,7 +401,7 @@ impl MigrationFilename {
 
     pub fn create_file(
         &self,
-        query: String,
+        query: &FileContent,
         file_namager: &MigrationConfig,
     ) -> MigrationResult<()> {
         let file_name = self.to_string();

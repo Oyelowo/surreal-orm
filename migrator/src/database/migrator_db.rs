@@ -186,15 +186,29 @@ impl MigratorDatabase {
             .trim()
             .to_string();
 
-        let migration_type = match &file_manager.migration_flag {
-            MigrationFlag::TwoWay => MigrationType::TwoWay {
-                up: up_queries_str.clone(),
-                down: down_queries_str.clone(),
-            },
-            MigrationFlag::OneWay => MigrationType::OneWay(up_queries_str.clone()),
-        };
-
         let timestamp = Utc::now();
+        let migration_file = match &file_manager.migration_flag {
+            MigrationFlag::TwoWay => {
+                let file = MigrationFileBiPair {
+                    up: FileMetadata {
+                        name: MigrationFilename::create_up(timestamp, &name)?,
+                        content: up_queries_str.clone().into(),
+                    },
+                    down: FileMetadata {
+                        name: MigrationFilename::create_down(Utc::now(), &name)?,
+                        content: down_queries_str.clone().into(),
+                    },
+                };
+                MigrationFile::TwoWay(file)
+            }
+            MigrationFlag::OneWay => {
+                let file = MigrationFileUni::new(FileMetadata {
+                    name: MigrationFilename::create_oneway(timestamp, &name)?,
+                    content: up_queries_str.clone().into(),
+                });
+                MigrationFile::OneWay(file)
+            }
+        };
 
         let prompt_empty = || {
             let confirmation = inquire::Confirm::new(
@@ -206,63 +220,24 @@ impl MigratorDatabase {
             confirmation
         };
 
-        match migration_type {
-            MigrationType::OneWay(query_str) => {
-                if query_str.trim().is_empty() {
-                    match prompt_empty() {
-                        Ok(true) => {
-                            MigrationFilename::create_oneway(timestamp, name)?
-                                .create_file(query_str, file_manager)?;
-                            log::info!("New migration generated.");
-                        }
-                        Ok(false) => {
-                            log::info!("No migration created");
-                        }
-                        Err(e) => {
-                            return Err(MigrationError::PromptError(e));
-                        }
-                    };
-                } else {
-                    MigrationFilename::create_oneway(timestamp, name)?
-                        .create_file(query_str, file_manager)?;
+        let query_str = format!("{}{}", up_queries_str, down_queries_str);
+        if query_str.trim().is_empty() {
+            match prompt_empty() {
+                Ok(true) => {
+                    migration_file.create_file(file_manager)?;
                     log::info!("New migration generated.");
-                };
-            }
-            MigrationType::TwoWay { up, down } => {
-                match (up.is_empty(), down.is_empty()) {
-                    (true, true) => {
-                        match prompt_empty() {
-                            Ok(true) => {
-                                MigrationFilename::create_up(timestamp, &name)?
-                                    .create_file(up, file_manager)?;
-                                MigrationFilename::create_down(timestamp, name)?
-                                    .create_file(down, file_manager)?;
-                                log::info!("New migration pair generated.");
-                            }
-                            Ok(false) => {
-                                log::info!("No migration created");
-                            }
-                            Err(e) => {
-                                return Err(MigrationError::PromptError(e));
-                            }
-                        };
-                    }
-                    (false, false) => {
-                        MigrationFilename::create_up(timestamp, &name)?
-                            .create_file(up, file_manager)?;
-                        MigrationFilename::create_down(timestamp, name)?
-                            .create_file(down, file_manager)?;
-                        log::info!("New migration pair generated.");
-                    }
-                    (true, false) => {
-                        return Err(MigrationError::MigrationUpQueriesEmpty);
-                    }
-                    (false, true) => {
-                        return Err(MigrationError::MigrationDownQueriesEmpty);
-                    }
-                };
-            }
-        }
+                }
+                Ok(false) => {
+                    log::info!("No migration created");
+                }
+                Err(e) => {
+                    return Err(MigrationError::PromptError(e));
+                }
+            };
+        } else {
+            migration_file.create_file(file_manager)?;
+            log::info!("New migration generated.");
+        };
 
         Ok(())
     }
