@@ -127,16 +127,16 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     cli.subcmd.setup_logging();
     let mut setup = SetupDb::new(RuntimeConfig::default()).await;
 
-    migration_cli_fn(&mut setup, cli, codebase_resources, RealPrompter).await;
+    let _ = migration_cli_fn(cli, &mut setup,  codebase_resources, RealPrompter).await;
+    ()
 }
 
 pub async fn migration_cli_fn(
-    setup: &mut SetupDb,
     cli: Cli,
+    setup: &mut SetupDb,
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
 ) -> Surreal<Any> {
-    cli.subcmd.setup_logging();
 
     let db = match cli.subcmd {
         SubCommand::Init(init) => init.run(codebase_resources, prompter, setup).await,
