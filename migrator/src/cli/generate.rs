@@ -30,7 +30,7 @@ impl Generate {
         let mig_type = files_config.detect_migration_type();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.custom_path(path)
+            files_config = files_config.set_custom_path(path)
         };
 
         match mig_type {

@@ -53,7 +53,7 @@ impl List {
         let mut files_config = MigrationConfig::new().make_strict();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.custom_path(path)
+            files_config = files_config.set_custom_path(path)
         };
 
         match files_config.detect_migration_type() {

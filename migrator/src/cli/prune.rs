@@ -21,7 +21,7 @@ impl Prune {
         let mut files_config = MigrationConfig::new().make_strict();
         let db = setup_db(&self.runtime_config).await;
         if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.custom_path(path)
+            files_config = files_config.set_custom_path(path)
         }
 
         let res =

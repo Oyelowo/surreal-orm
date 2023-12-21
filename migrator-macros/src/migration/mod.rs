@@ -22,7 +22,7 @@ fn generate_migration_code(
 ) -> proc_macro2::TokenStream {
     let mut files_config = MigrationConfig::new().set_mode(mode);
     if let Some(custom_path) = custom_path {
-        files_config = files_config.custom_path(custom_path);
+        files_config = files_config.set_custom_path(custom_path);
     }
 
     let crate_name = get_crate_name(false);

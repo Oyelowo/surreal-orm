@@ -1,6 +1,5 @@
 use std::{
     env, fs,
-    ops::Deref,
     path::{Path, PathBuf},
 };
 
@@ -50,7 +49,7 @@ impl MigrationConfig {
     }
 
     /// Default path is 'migrations' ralative to the nearest project root where
-    pub fn custom_path(mut self, custom_path: impl Into<String>) -> Self {
+    pub fn set_custom_path(mut self, custom_path: impl Into<String>) -> Self {
         let custom_path = custom_path.into();
         self.custom_path = Some(custom_path);
         self
