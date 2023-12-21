@@ -134,7 +134,7 @@ pub(crate) async fn init_db(shared: &RuntimeConfig, db: Surreal<Any>) -> Surreal
                 })
                 .await;
             if let Err(e) = signin {
-                log::error!("Failed to signin: {}", e.to_string());
+                log::error!("Failed to signin: {e}");
                 panic!();
             }
             log::info!("Signed in successfully");
