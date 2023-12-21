@@ -72,10 +72,14 @@ impl MigrationRunner {
             .await?
             .ok_or(MigrationError::MigrationDoesNotExist)?;
 
+        let latest_migration_name: MigrationFilename = latest_migration.name.clone().try_into()?;
         let migrations_from_dir = all_migrations_from_dir
             .iter()
-            .find(|m| m.up.name == latest_migration.name.clone().try_into().unwrap())
-            .ok_or(MigrationError::MigrationFileDoesNotExist)?;
+            .find(|m| m.up.name == latest_migration_name.to_up())
+            .ok_or(MigrationError::RollbackFailed(format!(
+                "The latest migration - {} - does not have a corresponding down migration file",
+                latest_migration_name.to_string()
+            )))?;
 
         if rollback_options.is_strict() {
             let pending_migrations =
@@ -311,11 +315,7 @@ impl MigrationRunner {
             for (m_from_file, m_from_db) in
                 migrations_to_rollback.iter().zip(migrations_from_db.iter())
             {
-                let db_mig_name = m_from_db
-                    .name
-                    .clone()
-                    .try_into()
-                    .expect("Invalid migration name");
+                let db_mig_name: MigrationFilename = m_from_db.name.clone().try_into()?;
 
                 m_from_db
                     .checksum_up
@@ -329,8 +329,11 @@ impl MigrationRunner {
                     })?
                     .verify(&m_from_file.down.name, &m_from_file.down.content)?;
 
-                if m_from_file.up.name != db_mig_name {
-                    return Err(MigrationError::MigrationFileDoesNotExist);
+                if m_from_file.up.name != db_mig_name.to_up() {
+                    return Err(MigrationError::MigrationFileVsDbNamesMismatch {
+                        migration_file_name: m_from_file.up.name.to_string(),
+                        migration_db_name: db_mig_name.to_string(),
+                    });
                 }
             }
         }
@@ -342,10 +345,10 @@ impl MigrationRunner {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let rollbacked_migration_deletion_queries = migrations_to_rollback
+        let rollbacked_migration_deletion_queries = migrations_from_db
             .iter()
             // We are deleting by upname because that's how theyre are stored
-            .map(|m| Migration::delete_raw(&m.down.name.to_up()).build())
+            .map(|m| Migration::delete_raw(&m.id).build())
             .collect::<Vec<_>>()
             .join("\n");
 

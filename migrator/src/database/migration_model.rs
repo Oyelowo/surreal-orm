@@ -137,11 +137,9 @@ impl Migration {
         ))
     }
 
-    pub fn delete_raw(filename: &MigrationFilename) -> Raw {
-        let _migration_table = Migration::table_name();
-        let migration::Schema { .. } = Migration::schema();
-        let record_id = Self::create_id(filename);
-        Raw::new(format!("DELETE {record_id};"))
+    pub fn delete_raw(migration_id: &Thing) -> Raw {
+        // let record_id = Self::create_id(filename);
+        Raw::new(format!("DELETE {migration_id};"))
     }
 
     pub fn schema() -> MigrationSchema {
