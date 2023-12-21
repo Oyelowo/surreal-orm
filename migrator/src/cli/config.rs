@@ -132,8 +132,8 @@ impl SetupDb {
         }
     }
 
-    pub fn db(&self) -> &Surreal<Any> {
-        &self.db
+    pub fn db(&self) -> Surreal<Any> {
+        self.db.clone()
     }
 
     pub fn override_runtime_config(&mut self, runtime_config: &RuntimeConfig) -> &mut Self {
