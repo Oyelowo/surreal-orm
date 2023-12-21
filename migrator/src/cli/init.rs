@@ -38,12 +38,9 @@ impl Init {
         let migration_name = self.name.clone();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.custom_path(path)
+            files_config = files_config.set_custom_path(path)
         };
-        let files = files_config
-            .clone()
-            .into_inner()
-            .get_migrations_filenames(true);
+        let files = files_config.clone().get_migrations_filenames(true);
 
         match files {
             Ok(files) => {

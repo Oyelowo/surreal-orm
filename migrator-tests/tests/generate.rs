@@ -45,7 +45,7 @@ async fn test_oneway_migrations() {
     let _files = fs::read_dir(temp_test_migration_dir).expect_err("Migrations not yet created");
 
     let one_way = files_config
-        .custom_path(temp_test_migration_dir.display().to_string())
+        .set_custom_path(temp_test_migration_dir.display().to_string())
         .one_way();
 
     let db_info = || async {
@@ -176,7 +176,7 @@ async fn test_twoway_migrations() {
     let _files = fs::read_dir(temp_test_migration_dir).expect_err("Migrations not yet created");
 
     let two_way = files_config
-        .custom_path(temp_test_migration_dir.display().to_string())
+        .set_custom_path(temp_test_migration_dir.display().to_string())
         .two_way();
 
     let get_db_info = || async {

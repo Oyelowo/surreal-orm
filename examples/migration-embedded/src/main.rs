@@ -20,7 +20,10 @@ async fn main() {
     // ONE WAY MIGRATIONS
     let files_config = MigrationConfig::new().make_strict();
 
-    let one_way = files_config.custom_path("migrations-oneway").one_way();
+    let one_way = files_config
+        .clone()
+        .set_custom_path("migrations-oneway")
+        .one_way();
     // Comment out this line to generate oneway migrations
     // To be used from cli
     one_way
@@ -44,7 +47,7 @@ async fn main() {
         .unwrap();
 
     // TWO WAY MIGRATIONS
-    let two_way = files_config.custom_path("migrations-twoway").two_way();
+    let two_way = files_config.set_custom_path("migrations-twoway").two_way();
 
     // GENERATE MIGRATIONS
     // comment out this line to generate twoway migrations
