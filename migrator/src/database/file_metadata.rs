@@ -1,4 +1,5 @@
 use crate::*;
+use std::ops::Deref;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MigrationFileTwoWayPair {
@@ -71,5 +72,89 @@ impl TryFrom<MigrationFileOneWay> for Migration {
             checksum_up: Checksum::generate_from_content(&migration.content)?.into(),
             checksum_down: None,
         })
+    }
+}
+
+impl From<MigrationFileTwoWayPair> for MigrationFileOneWay {
+    fn from(m: MigrationFileTwoWayPair) -> Self {
+        Self::new(FileMetadata::new(m.up.name, m.up.content))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum MigrationFile {
+    OneWay(MigrationFileOneWay),
+    TwoWay(MigrationFileTwoWayPair),
+}
+
+impl MigrationFile {
+    pub fn create_file(&self, file_manager: &MigrationConfig) -> MigrationResult<()> {
+        match self {
+            Self::OneWay(m) => m.name().create_file(m.content(), file_manager)?,
+            Self::TwoWay(m) => {
+                m.up.name.create_file(&m.up.content, file_manager)?;
+                m.down.name.create_file(&m.down.content, file_manager)?;
+            }
+        };
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PendingMigrationFile(MigrationFile);
+
+impl Deref for PendingMigrationFile {
+    type Target = MigrationFile;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<PendingMigrationFile> for MigrationFile {
+    fn from(m: PendingMigrationFile) -> Self {
+        m.0
+    }
+}
+
+impl From<MigrationFile> for PendingMigrationFile {
+    fn from(m: MigrationFile) -> Self {
+        Self(m)
+    }
+}
+
+impl MigrationFile {
+    pub fn name_forward(&self) -> &MigrationFilename {
+        match self {
+            Self::OneWay(m) => &m.name(),
+            Self::TwoWay(m) => &m.up.name,
+        }
+    }
+
+    pub fn up_content(&self) -> &FileContent {
+        match self {
+            Self::OneWay(m) => &m.content(),
+            Self::TwoWay(m) => &m.up.content,
+        }
+    }
+
+    pub fn down_content(&self) -> Option<&FileContent> {
+        match self {
+            Self::OneWay(_) => None,
+            Self::TwoWay(m) => Some(&m.down.content),
+        }
+    }
+}
+
+impl From<MigrationFileOneWay> for MigrationFile {
+    fn from(m: MigrationFileOneWay) -> Self {
+        Self::OneWay(m)
+    }
+}
+
+impl From<MigrationFileTwoWayPair> for MigrationFile {
+    fn from(m: MigrationFileTwoWayPair) -> Self {
+        Self::TwoWay(m)
     }
 }
