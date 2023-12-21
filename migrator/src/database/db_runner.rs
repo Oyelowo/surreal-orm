@@ -326,6 +326,8 @@ impl MigrationRunner {
             }
         }
 
+        log::info!("Rolling back {} migration(s)", migrations_to_rollback.len());
+
         let rollback_queries = migrations_to_rollback
             .clone()
             .into_iter()
