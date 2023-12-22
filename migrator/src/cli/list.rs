@@ -2,6 +2,7 @@ use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
 use std::{fmt::Display, str::FromStr};
 use surrealdb::{engine::any::Any, Surreal};
+use typed_builder::TypedBuilder;
 
 use crate::{config::SetupDb, MigrationConfig, MigrationFlag};
 
@@ -52,7 +53,7 @@ impl FromStr for Status {
 }
 
 /// Run migrations
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct List {
     /// Status of migrations to list
     #[clap(
