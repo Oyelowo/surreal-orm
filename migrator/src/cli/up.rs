@@ -55,13 +55,13 @@ pub struct Up {
 pub enum UpdateStrategy {
     // Default
     // cargo run -- up
-    // cargo run -- up -latest
+    // cargo run -- up --latest
     // cargo run -- up -l
     Latest,
-    // cargo run -- up -number 34
+    // cargo run -- up --number 34
     // cargo run -- up -n 34
     Number(u32),
-    // cargo run -- up -till 234y3498349304
+    // cargo run -- up --till 234y3498349304
     // cargo run -- up -t 234y3498349304
     Till(MigrationFilename),
 }
@@ -73,7 +73,7 @@ impl From<&Up> for UpdateStrategy {
         } else if let Some(by_count) = up.number {
             UpdateStrategy::Number(by_count)
         } else if let Some(till) = up.till.clone() {
-            UpdateStrategy::Till(till.try_into().unwrap())
+            UpdateStrategy::Till(till.try_into().expect("Failed to parse migration filename"))
         } else {
             UpdateStrategy::Latest
         }
