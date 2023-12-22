@@ -8,9 +8,10 @@ use clap::Parser;
 use surreal_query_builder::DbResources;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
+use typed_builder::TypedBuilder;
 
 /// Init migrations
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Init {
     /// Name of the migration
     #[clap(long, help = "Name of the first migration file(s)")]

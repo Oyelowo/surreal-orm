@@ -7,9 +7,10 @@ use clap::Parser;
 use surreal_query_builder::DbResources;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
+use typed_builder::TypedBuilder;
 
 /// Generate migrations
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Generate {
     /// Name of the migration
     #[clap(long, help = "Name of the migration")]

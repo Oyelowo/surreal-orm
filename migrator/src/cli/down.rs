@@ -1,11 +1,12 @@
 use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
 use surrealdb::{engine::any::Any, Surreal};
+use typed_builder::TypedBuilder;
 
 use crate::{config::SetupDb, MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions};
 
 /// Rollback migrations
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Down {
     /// Rollback to the latest migration
     #[clap(

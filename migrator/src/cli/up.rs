@@ -7,13 +7,14 @@ use surreal_query_builder::statements::info_for;
 use surreal_query_builder::Runnable;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
+use typed_builder::TypedBuilder;
 
 /// Run migrations
 /// cargo run -- up
 /// cargo run -- up -l
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
-#[derive(Parser, Debug, Default)]
+#[derive(Parser, Debug, Default, TypedBuilder)]
 pub struct Up {
     /// Run forward to the latest migration
     #[clap(

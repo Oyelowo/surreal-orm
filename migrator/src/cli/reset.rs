@@ -3,6 +3,7 @@ use super::config::{RuntimeConfig, SharedAll};
 use clap::Parser;
 use std::fs;
 use surrealdb::{engine::any::Any, Surreal};
+use typed_builder::TypedBuilder;
 
 use surreal_query_builder::DbResources;
 
@@ -11,7 +12,7 @@ use crate::{config::SetupDb, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Reset {
     /// Name of the first migration file(s) to reinitialize to
     #[clap(long)]

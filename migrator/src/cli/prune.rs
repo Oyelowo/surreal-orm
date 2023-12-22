@@ -2,12 +2,13 @@ use super::config::{RuntimeConfig, SharedAll};
 
 use clap::Parser;
 use surrealdb::{engine::any::Any, Surreal};
+use typed_builder::TypedBuilder;
 
 use crate::{config::SetupDb, MigrationConfig, MigrationRunner};
 
 /// Delete Unapplied local migration files that have not been applied to the current database instance
 /// cargo run -- prune
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Prune {
     #[clap(flatten)]
     pub(crate) shared_all: SharedAll,

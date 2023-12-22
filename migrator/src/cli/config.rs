@@ -1,6 +1,7 @@
 use clap::{ArgAction, Parser};
 use std::fmt::Display;
 use std::str::FromStr;
+use typed_builder::TypedBuilder;
 
 use surrealdb::engine::any::{connect, Any};
 
@@ -9,11 +10,12 @@ use surrealdb::Surreal;
 
 use crate::Mode;
 
-#[derive(Parser, Debug, Default, Clone)]
+#[derive(Parser, Debug, Default, Clone, TypedBuilder)]
 pub struct SharedAll {
     /// Optional custom migrations dir
     #[clap(short, long, help = "Optional custom migrations dir")]
-    pub(crate) migrations_dir: Option<String>,
+    #[builder(default, setter(strip_option))]
+    pub migrations_dir: Option<String>,
 
     /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
     #[clap(short, long, action = ArgAction::Count, default_value="3")]
@@ -21,7 +23,7 @@ pub struct SharedAll {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) enum UrlDb {
+pub enum UrlDb {
     Memory,
     Others(String),
 }
@@ -50,7 +52,7 @@ impl FromStr for UrlDb {
     }
 }
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, TypedBuilder)]
 pub struct RuntimeConfig {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
@@ -81,19 +83,24 @@ pub struct RuntimeConfig {
     pub(crate) url: UrlDb,
 
     #[clap(long, default_value = "test", help = "Database name")]
+    #[builder(default, setter(strip_option))]
     pub(crate) db: Option<String>,
 
     #[clap(long, default_value = "test", help = "Namespace name")]
+    #[builder(default, setter(strip_option))]
     pub(crate) ns: Option<String>,
 
     /// users scope
     #[clap(long, help = "Scope")]
+    #[builder(default, setter(strip_option))]
     pub(crate) sc: Option<String>,
 
     #[clap(short, long, default_value = "root", help = "User name")]
+    #[builder(default, setter(strip_option))]
     pub(crate) user: Option<String>,
 
     #[clap(short, long, default_value = "root", help = "Password")]
+    #[builder(default, setter(strip_option))]
     pub(crate) pass: Option<String>,
 
     #[clap(
@@ -102,6 +109,7 @@ pub struct RuntimeConfig {
         that file contents and valid and also checking filenames. Lax does not.",
         default_value = "strict"
     )]
+    #[builder(default, setter(strip_option))]
     pub(crate) mode: Option<Mode>,
 
     #[clap(
@@ -109,6 +117,7 @@ pub struct RuntimeConfig {
         help = "If to prune migration files after rollback",
         default_value = "false"
     )]
+    #[builder(default = false)]
     pub(crate) prune: bool,
 }
 

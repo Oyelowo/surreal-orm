@@ -28,3 +28,4 @@ log = { workspace = true }
 pretty_env_logger = { workspace = true }
 quote = { workspace = true }
 proc-macro2 = { workspace = true }
+typed-builder = { workspace = true }

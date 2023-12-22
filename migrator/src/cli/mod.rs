@@ -33,7 +33,7 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn _new(sub_command: SubCommand) -> Self {
+    pub fn new(sub_command: SubCommand) -> Self {
         Self {
             subcmd: sub_command,
         }
@@ -127,7 +127,7 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
     cli.subcmd.setup_logging();
     let mut setup = SetupDb::new(RuntimeConfig::default()).await;
 
-    let _ = migration_cli_fn(cli, &mut setup,  codebase_resources, RealPrompter).await;
+    let _ = migration_cli_fn(cli, &mut setup, codebase_resources, RealPrompter).await;
     ()
 }
 
@@ -137,7 +137,6 @@ pub async fn migration_cli_fn(
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
 ) -> Surreal<Any> {
-
     let db = match cli.subcmd {
         SubCommand::Init(init) => init.run(codebase_resources, prompter, setup).await,
         SubCommand::Generate(generate) => generate.run(codebase_resources, prompter, setup).await,
