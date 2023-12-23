@@ -84,11 +84,11 @@ pub struct RuntimeConfig {
     pub(crate) url: UrlDb,
 
     #[clap(long, default_value = "test", help = "Database name")]
-    #[builder(default, setter(strip_option))]
+    #[builder(setter(strip_option))]
     pub(crate) db: Option<String>,
 
     #[clap(long, default_value = "test", help = "Namespace name")]
-    #[builder(default, setter(strip_option))]
+    #[builder(setter(strip_option))]
     pub(crate) ns: Option<String>,
 
     /// users scope
@@ -97,11 +97,11 @@ pub struct RuntimeConfig {
     pub(crate) sc: Option<String>,
 
     #[clap(short, long, default_value = "root", help = "User name")]
-    #[builder(default, setter(strip_option))]
+    #[builder(setter(strip_option))]
     pub(crate) user: Option<String>,
 
     #[clap(short, long, default_value = "root", help = "Password")]
-    #[builder(default, setter(strip_option))]
+    #[builder(setter(strip_option))]
     pub(crate) pass: Option<String>,
 
     #[clap(
@@ -110,7 +110,7 @@ pub struct RuntimeConfig {
             that file contents and valid and also checking filenames. Lax does not.",
         default_value = "strict"
     )]
-    #[builder(default, setter(strip_option))]
+    #[builder(setter(strip_option))]
     pub(crate) mode: Option<Mode>,
 
     #[clap(
@@ -118,13 +118,20 @@ pub struct RuntimeConfig {
         help = "If to prune migration files after rollback",
         default_value = "false"
     )]
-    #[builder(default = false)]
     pub(crate) prune: bool,
 }
 
 impl Default for RuntimeConfig {
     fn default() -> Self {
-        RuntimeConfig::parse()
+        RuntimeConfig::builder()
+            .db("test".into())
+            .ns("test".into())
+            .user("root".into())
+            .pass("root".into())
+            .mode(Mode::Strict)
+            .prune(false)
+            .url(UrlDb::Memory)
+            .build()
     }
 }
 
@@ -158,6 +165,7 @@ impl SetupDb {
                     })
                     .await;
                 if let Err(e) = signin {
+                    println!("Failed to signin: {e}");
                     log::error!("Failed to signin: {e}");
                     panic!();
                 }

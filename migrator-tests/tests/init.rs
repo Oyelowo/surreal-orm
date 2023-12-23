@@ -13,7 +13,7 @@ use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::{
     migrator::{
         config::{RuntimeConfig, SetupDb, SharedAll, UrlDb},
-        migration_cli_fn, Cli, Init, Migration, MockPrompter, SubCommand,
+        migration_cli_fn, Cli, Init, Migration, MockPrompter, Mode, SubCommand,
     },
     statements::select,
     All, ReturnableSelect,
@@ -36,11 +36,19 @@ async fn test_up_only_init_without_run() {
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
     assert_eq!(migration_files.len(), 0);
 
-    let runtime_config = RuntimeConfig::builder().url(UrlDb::Memory).build();
+    let runtime_config = RuntimeConfig::builder()
+        .db("test".into())
+        .ns("test".into())
+        .user("root".into())
+        .pass("root".into())
+        .mode(Mode::Strict)
+        .prune(false)
+        .url(UrlDb::Memory)
+        .build();
 
     let shared_all = SharedAll::builder()
         .migrations_dir(temp_test_migration_dir.into())
-        .verbose(4)
+        .verbose(3)
         .build();
 
     let init = Init::builder()
@@ -51,8 +59,8 @@ async fn test_up_only_init_without_run() {
         .shared_all(shared_all)
         .build();
 
-    dbg!(&init);
-    println!("init: {:#?}", init);
+    // dbg!(&init);
+    // println!("init: {:#?}", init);
 
     let cli = Cli::new(SubCommand::Init(init));
     let resources = Resources;
