@@ -95,8 +95,7 @@ impl Reset {
 #[async_trait]
 impl DbConnection for Reset {
     async fn create_and_set_connection(&mut self) {
-        // let db = SetupDb::new(&self.runtime_config).await.clone();
-        // self.db = Some(db.clone());
+        self.init_command().create_and_set_connection().await;
     }
 
     async fn db(&self) -> Surreal<Any> {
