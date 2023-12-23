@@ -1,5 +1,6 @@
 use std::{
     fs::{self, DirEntry},
+    future::Future,
     path::PathBuf,
 };
 
@@ -10,11 +11,9 @@ use surrealdb::Surreal;
 //     process::{Command, Stdio},
 // };
 use surreal_models::migrations::{Resources, ResourcesV2};
-use surreal_orm::{
-    migrator::{
-        config::{RuntimeConfig,  SharedAll, UrlDb},
-        migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
-    },
+use surreal_orm::migrator::{
+    config::{RuntimeConfig, SharedAll, UrlDb},
+    migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
 };
 use tempfile::tempdir;
 
@@ -51,6 +50,60 @@ fn assert_migration_files_presence_and_format(
         );
     }
 }
+struct AssertionArg {
+    db: Surreal<Any>,
+    mig_files_count: u8,
+    db_mig_count: u8,
+    migration_files_dir: PathBuf,
+    test_migration_name: &'static str,
+}
+async fn assert_with_db_instance(args: AssertionArg) {
+    let AssertionArg {
+        db,
+        mig_files_count,
+        db_mig_count,
+        migration_files_dir,
+        test_migration_name,
+    } = args;
+
+    let migrations = Migration::get_all(db).await;
+    let migration_files = read_migs_from_dir(migration_files_dir.clone());
+
+    assert_eq!(
+        migrations.len() as u8,
+        db_mig_count,
+        "No migrations should be created in the database because we set run to false"
+    );
+    assert_eq!(
+            migration_files.len() as u8,
+            mig_files_count,
+            "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
+        );
+    assert_migration_files_presence_and_format(migration_files, test_migration_name);
+}
+
+// fn ass(
+//     migration_files_dir: PathBuf,
+//     test_migration_name: &str,
+// ) -> impl Fn(Surreal<Any>, u8, u8) -> impl Future<()> {
+//     let assert_with_db_instance = |db: Surreal<Any>, mig_files_count: u8, db_mig_count: u8| async move {
+//         let migrations = Migration::get_all(db).await;
+//         let migration_files = read_migs_from_dir(migration_files_dir.clone());
+//
+//         assert_eq!(
+//             migrations.len() as u8,
+//             db_mig_count,
+//             "No migrations should be created in the database because we set run to false"
+//         );
+//         assert_eq!(
+//             migration_files.len() as u8,
+//             mig_files_count,
+//             "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
+//         );
+//         assert_migration_files_presence_and_format(migration_files, test_migration_name);
+//     };
+//     assert_with_db_instance
+// }
 
 #[tokio::test]
 async fn test_duplicate_up_only_init_without_run() {
@@ -94,7 +147,7 @@ async fn test_duplicate_up_only_init_without_run() {
     let resourcesV2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
     let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
-    
+
     let migrations = Migration::get_all(db.clone()).await;
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
 
@@ -129,7 +182,6 @@ async fn test_duplicate_up_only_init_without_run() {
     );
     assert_migration_files_presence_and_format(migration_files, test_migration_name);
 
-
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     let db = migration_cli_fn(cli, resourcesV2, mock_prompter).await;
 
@@ -147,9 +199,7 @@ async fn test_duplicate_up_only_init_without_run() {
         "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
     );
     assert_migration_files_presence_and_format(migration_files, test_migration_name);
-
 }
-
 
 #[tokio::test]
 async fn test_duplicate_up_only_init_and_run() {
@@ -189,42 +239,47 @@ async fn test_duplicate_up_only_init_and_run() {
     let resources = Resources;
     let resourcesV2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
-    
-    let assert_with_db_instance = |db: Surreal<Any>, mig_files_count: u8, db_mig_count: u8| async move {
-        let migrations = Migration::get_all(db).await;
-        let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-
-        assert_eq!(
-            migrations.len() as u8,
-            db_mig_count,
-            "No migrations should be created in the database because we set run to false"
-        );
-        assert_eq!(
-            migration_files.len() as u8,
-            mig_files_count,
-            "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
-        );
-        assert_migration_files_presence_and_format(migration_files, test_migration_name);
-    };
-
 
     // 1st run
     let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
+    let assert_with_db_instance1 = |db: Surreal<Any>| async move {
+        assert_with_db_instance(AssertionArg {
+            db: db.clone(),
+            mig_files_count: 1,
+            db_mig_count: 1,
+            migration_files_dir: temp_test_migration_dir.clone(),
+            test_migration_name,
+        })
+        .await;
+    };
 
-    assert_with_db_instance(db.clone(), 1, 1);
+    assert_with_db_instance1(db.clone()).await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     let db2 = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
 
-    assert_with_db_instance(db.clone(), 1, 1);
-    assert_with_db_instance(db2.clone(), 1, 0);
+    assert_with_db_instance1(db.clone()).await;
 
+    assert_with_db_instance(AssertionArg {
+        db: db2.clone(),
+        mig_files_count: 1,
+        db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     let db3 = migration_cli_fn(cli, resourcesV2, mock_prompter).await;
 
-    assert_with_db_instance(db.clone(), 1, 1);
-    assert_with_db_instance(db3.clone(), 1, 0);
+    assert_with_db_instance1(db.clone()).await;
 
+    assert_with_db_instance(AssertionArg {
+        db: db3.clone(),
+        mig_files_count: 1,
+        db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
 }
-
