@@ -5,7 +5,7 @@ use clap::Parser;
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
-use crate::{config::SetupDb, Command, MigrationConfig, MigrationRunner};
+use crate::{config::SetupDb, DbConnection, MigrationConfig, MigrationRunner};
 
 /// Delete Unapplied local migration files that have not been applied to the current database instance
 /// cargo run -- prune
@@ -43,7 +43,7 @@ impl Prune {
 }
 
 #[async_trait]
-impl Command for Prune {
+impl DbConnection for Prune {
     async fn create_and_set_connection(&mut self) {
         let db = SetupDb::new(&self.runtime_config).await.clone();
         if self.db.is_none() {

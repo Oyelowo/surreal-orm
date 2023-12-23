@@ -8,13 +8,14 @@ mod reset;
 mod shared_traits;
 mod up;
 
+use async_trait::async_trait;
 pub use down::{Down, RollbackStrategy};
 pub use generate::Generate;
 pub use init::Init;
 pub use list::{List, Status};
 pub use prune::Prune;
 pub use reset::Reset;
-pub use shared_traits::Command;
+pub use shared_traits::DbConnection;
 
 use surrealdb::{engine::any::Any, Surreal};
 pub use up::{Up, UpdateStrategy};
@@ -63,8 +64,21 @@ pub enum SubCommand {
     Prune(Prune),
 }
 
-impl SubCommand {
-    pub async fn db(&self) -> Surreal<Any> {
+#[async_trait]
+impl crate::DbConnection for SubCommand {
+    async fn create_and_set_connection(&mut self) {
+        match self {
+            SubCommand::Init(init) => init.create_and_set_connection().await,
+            SubCommand::Generate(generate) => generate.create_and_set_connection().await,
+            SubCommand::Up(up) => up.create_and_set_connection().await,
+            SubCommand::Down(down) => down.create_and_set_connection().await,
+            SubCommand::List(list) => list.create_and_set_connection().await,
+            SubCommand::Prune(prune) => prune.create_and_set_connection().await,
+            SubCommand::Reset(reset) => reset.create_and_set_connection().await,
+        };
+    }
+
+    async fn db(&self) -> Surreal<Any> {
         match self {
             SubCommand::Init(init) => init.db().await,
             SubCommand::Generate(generate) => generate.db().await,
@@ -75,7 +89,9 @@ impl SubCommand {
             SubCommand::Reset(reset) => reset.db().await,
         }
     }
+}
 
+impl SubCommand {
     pub fn get_verbosity(&self) -> u8 {
         match self {
             SubCommand::Init(generate) => generate.shared_all.verbose,
@@ -144,10 +160,12 @@ pub async fn migration_cli(codebase_resources: impl DbResources) {
 }
 
 pub async fn migration_cli_fn(
-    cli: Cli,
+    mut cli: Cli,
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
 ) -> Surreal<Any> {
+    cli.subcmd.create_and_set_connection().await;
+
     match &cli.subcmd {
         SubCommand::Init(init) => init.run(codebase_resources, prompter).await,
         SubCommand::Generate(generate) => generate.run(codebase_resources, prompter).await,

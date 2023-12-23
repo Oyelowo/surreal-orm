@@ -5,7 +5,8 @@ use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
 use crate::{
-    config::SetupDb, Command, MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions,
+    config::SetupDb, DbConnection, MigrationConfig, MigrationFilename, MigrationFlag,
+    RollbackOptions,
 };
 
 /// Rollback migrations
@@ -115,7 +116,7 @@ impl Down {
 }
 
 #[async_trait]
-impl Command for Down {
+impl DbConnection for Down {
     async fn create_and_set_connection(&mut self) {
         let db = SetupDb::new(&self.runtime_config).await.clone();
         self.db = Some(db.clone());

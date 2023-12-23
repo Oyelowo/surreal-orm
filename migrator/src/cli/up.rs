@@ -1,6 +1,6 @@
 use super::config::{RuntimeConfig, SharedAll};
 use crate::config::SetupDb;
-use crate::{Command, DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
+use crate::{DbConnection, DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
 
 use async_trait::async_trait;
 use clap::Parser;
@@ -146,7 +146,7 @@ impl Up {
 }
 
 #[async_trait]
-impl Command for Up {
+impl DbConnection for Up {
     async fn create_and_set_connection(&mut self) {
         let db = SetupDb::new(&self.runtime_config).await.clone();
         if self.db.is_none() {

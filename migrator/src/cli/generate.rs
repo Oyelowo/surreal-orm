@@ -2,7 +2,7 @@ use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
 use crate::config::SetupDb;
-use crate::{Command, MigrationConfig, MigrationFlag, Prompter, RealPrompter};
+use crate::{DbConnection, MigrationConfig, MigrationFlag, Prompter, RealPrompter};
 use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::DbResources;
@@ -92,7 +92,7 @@ impl Generate {
 }
 
 #[async_trait]
-impl Command for Generate {
+impl DbConnection for Generate {
     async fn create_and_set_connection(&mut self) {
         // let db = SetupDb::new(&self.runtime_config).await.clone();
         // self.db = Some(db.clone());
