@@ -94,10 +94,12 @@ impl Generate {
 #[async_trait]
 impl DbConnection for Generate {
     async fn create_and_set_connection(&mut self) {
-        self.up().create_and_set_connection().await;
+        let mut up = self.up();
+        up.create_and_set_connection().await;
+        self.db = up.db.clone();
     }
 
     async fn db(&self) -> Surreal<Any> {
-        self.up().db().await
+        self.db.clone().expect("Failed to get db")
     }
 }
