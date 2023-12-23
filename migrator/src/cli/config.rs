@@ -1,5 +1,6 @@
 use clap::{ArgAction, Parser};
 use std::fmt::Display;
+use std::path::PathBuf;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
 
@@ -15,7 +16,7 @@ pub struct SharedAll {
     /// Optional custom migrations dir
     #[clap(short, long, help = "Optional custom migrations dir")]
     #[builder(default, setter(strip_option))]
-    pub migrations_dir: Option<String>,
+    pub migrations_dir: Option<PathBuf>,
 
     /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
     #[clap(short, long, action = ArgAction::Count, default_value="3")]
@@ -61,10 +62,10 @@ pub struct RuntimeConfig {
     /// - HTTP: `http://localhost:8000`
     /// - HTTPS: `https://cloud.surrealdb.com`
     /// - In-Memory: `mem://`
-    /// - File-Backed: `file://temp.db`
-    /// - IndxDB-Backed: `indxdb://MyDatabase`
-    /// - TiKV-Backed: `tikv://localhost:2379`
-    /// - FoundationDB-Backed: `fdb://fdb.cluster`
+    /// - File-Backend: `file://temp.db`
+    /// - IndxDB-Backend: `indxdb://MyDatabase`
+    /// - TiKV-Backend: `tikv://localhost:2379`
+    /// - FoundationDB-Backend: `fdb://fdb.cluster`
     #[clap(
             long,
             // value_name = "URL",

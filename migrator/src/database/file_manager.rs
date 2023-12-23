@@ -20,7 +20,7 @@ pub struct MigrationConfig {
     pub mode: Mode,
     /// Default path is 'migrations' ralative to the nearest project root where
     /// cargo.toml is defined
-    pub custom_path: Option<String>,
+    pub custom_path: Option<PathBuf>,
     pub(crate) migration_flag: MigrationFlag,
 }
 
@@ -49,7 +49,7 @@ impl MigrationConfig {
     }
 
     /// Default path is 'migrations' ralative to the nearest project root where
-    pub fn set_custom_path(mut self, custom_path: impl Into<String>) -> Self {
+    pub fn set_custom_path(mut self, custom_path: impl Into<PathBuf>) -> Self {
         let custom_path = custom_path.into();
         self.custom_path = Some(custom_path);
         self
