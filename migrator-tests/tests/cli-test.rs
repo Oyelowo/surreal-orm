@@ -1,7 +1,4 @@
-use std::{
-    io::Write,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 use tempfile::tempdir;
 
 use surreal_orm::migrator::MigrationFilename;

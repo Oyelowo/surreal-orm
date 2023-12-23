@@ -6,7 +6,7 @@ use surreal_query_builder::{
         begin_transaction, define_field, define_table, remove_table, select, DefineTableStatement,
         RemoveTableStatement,
     },
-    All, Field, FieldType, Raw, ReturnableSelect, SurrealOrmResult, Table, ToRaw,
+    All, Field, FieldType, Raw, ReturnableSelect, Table, ToRaw,
 };
 use surrealdb::{engine::any::Any, sql::Thing, Surreal};
 
