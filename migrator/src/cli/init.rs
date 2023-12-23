@@ -53,7 +53,9 @@ impl Init {
         match files {
             Ok(files) => {
                 if !files.is_empty() {
-                    log::error!("Migrations already initialized. Run cargo run -- reset to reset migrations");
+                    log::error!("Migrations already initialized. Run 'cargo run -- reset' to reset migration. \
+                    You can also specify the '-r' or '--reversible' argument to set as reversible. \
+                    Or delete the migrations directory and run 'cargo run -- init' again.");
                     return;
                 }
             }
