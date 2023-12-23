@@ -137,22 +137,20 @@ impl MigrationConfig {
     ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
         let migration_dir_path_str = migration_dir_path.to_string_lossy().to_string();
-        log::info!("Migration dir path: {}", &migration_dir_path_str);
+        log::info!("Migration dir path: {migration_dir_path_str}");
         let migrations = fs::read_dir(&migration_dir_path).map_err(|e| {
             MigrationError::IoError(format!(
-                "Failed to read migration directory: {}. Error: {}",
-                &migration_dir_path_str, e
+                "Failed to read migration directory: {migration_dir_path_str}. Error: {e}"
             ))
         })?;
-        log::info!("Migration dir path: {}", migration_dir_path_str);
+        log::info!("Migration dir path: {migration_dir_path_str}");
 
         let mut filenames = vec![];
 
         for migration in migrations {
             let migration = migration.map_err(|e| {
                 MigrationError::IoError(format!(
-                    "Failed to read migration directory: {}. Error: {}",
-                    migration_dir_path_str, e
+                    "Failed to read migration directory: {migration_dir_path_str}. Error: {e}"
                 ))
             })?;
             let path = migration.path();

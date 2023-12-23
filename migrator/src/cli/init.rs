@@ -53,12 +53,13 @@ impl Init {
         match files {
             Ok(files) => {
                 if !files.is_empty() {
-                    log::warn!("Migrations already initialized");
+                    log::error!("Migrations already initialized. Run cargo run -- reset to reset migrations");
+                    return;
                 }
             }
             Err(e) => {
                 log::error!("Failed to get migrations: {e}");
-                panic!();
+                return;
             }
         };
 
@@ -69,6 +70,7 @@ impl Init {
                 .await;
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");
+                return;
             }
         } else {
             let gen = files_config
@@ -78,6 +80,7 @@ impl Init {
 
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");
+                return;
             }
         };
 
