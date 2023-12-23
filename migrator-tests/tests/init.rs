@@ -21,10 +21,12 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
 
 fn assert_migration_files_presence_and_format(
     migration_files: Vec<DirEntry>,
+    db_migrations: Vec<Migration>,
     test_migration_name: &str,
 ) {
     for f in migration_files.iter() {
         let filepath = f.path();
+        let content = fs::read_to_string(&filepath).expect("Failed to read file");
         let file_name = filepath
             .file_name()
             .expect("Failed to get file name")
@@ -37,6 +39,22 @@ fn assert_migration_files_presence_and_format(
         let basename = file_name_parsed.basename();
         let extension = file_name_parsed.extension();
 
+        let found_db_mig = db_migrations
+            .iter()
+            .find(|m| {
+                let db_name: MigrationFilename = m
+                    .name
+                    .clone()
+                    .try_into()
+                    .expect("Failed to parse file name");
+                db_name == file_name_parsed
+            })
+            .expect("Migration file not found in db");
+
+        assert_eq!(found_db_mig.name, file_name);
+        assert_eq!(found_db_mig.timestamp, timestamp);
+
+        insta::assert_display_snapshot!(content);
         assert_eq!(basename.to_string(), test_migration_name.to_string());
         assert_eq!(
             file_name.to_string(),
@@ -81,11 +99,11 @@ async fn assert_with_db_instance(args: AssertionArg) {
         test_migration_name,
     } = args;
 
-    let migrations = Migration::get_all(db).await;
+    let db_migrations = Migration::get_all_desc(db).await;
     let migration_files = read_migs_from_dir(migration_files_dir.clone());
 
     assert_eq!(
-        migrations.len() as u8,
+        db_migrations.len() as u8,
         db_mig_count,
         "No migrations should be created in the database because we set run to false"
     );
@@ -94,7 +112,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
             mig_files_count,
             "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
         );
-    assert_migration_files_presence_and_format(migration_files, test_migration_name);
+    assert_migration_files_presence_and_format(migration_files, db_migrations, test_migration_name);
 }
 
 struct TestConfig {
