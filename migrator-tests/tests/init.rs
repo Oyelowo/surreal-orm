@@ -55,7 +55,7 @@ fn assert_migration_files_presence_and_format(
 }
 
 #[tokio::test]
-async fn test_up_only_init_without_run() {
+async fn test_duplicate_up_only_init_without_run() {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
@@ -93,7 +93,7 @@ async fn test_up_only_init_without_run() {
 
     let cli = Cli::new(SubCommand::Init(init));
     let resources = Resources;
-    // let resourcesV2 = ResourcesV2;
+    let resourcesV2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
     let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
     
@@ -113,8 +113,8 @@ async fn test_up_only_init_without_run() {
 
     assert_migration_files_presence_and_format(migration_files, test_migration_name);
 
-    // Initialize the 2nd time
-    let db = migration_cli_fn(cli, resources, mock_prompter).await;
+    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+    let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
 
     let migrations = Migration::get_all(db.clone()).await;
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
@@ -127,7 +127,27 @@ async fn test_up_only_init_without_run() {
     assert_eq!(
         migration_files.len(),
         1,
-        "One migration file should be created"
+        "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
     );
     assert_migration_files_presence_and_format(migration_files, test_migration_name);
+
+
+    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+    let db = migration_cli_fn(cli, resourcesV2, mock_prompter).await;
+
+    let migrations = Migration::get_all(db.clone()).await;
+    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
+
+    assert_eq!(
+        migrations.len(),
+        0,
+        "No migrations should be created in the database because we set run to false"
+    );
+    assert_eq!(
+        migration_files.len(),
+        1,
+        "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
+    );
+    assert_migration_files_presence_and_format(migration_files, test_migration_name);
+
 }
