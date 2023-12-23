@@ -16,6 +16,9 @@ pub struct Prune {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Prune {
@@ -31,7 +34,7 @@ impl Prune {
                 .await;
 
         if let Err(ref e) = res {
-            log::error!("Failed to prune migrations: {}", e.to_string());
+            log::error!("Failed to prune migrations: {e}");
             panic!();
         }
 
@@ -41,7 +44,14 @@ impl Prune {
 
 #[async_trait]
 impl Command for Prune {
+    async fn create_and_set_connection(&mut self) {
+        let db = SetupDb::new(&self.runtime_config).await.clone();
+        if self.db.is_none() {
+            self.db = Some(db.clone());
+        }
+    }
+
     async fn db(&self) -> Surreal<Any> {
-        SetupDb::setup_db(&self.runtime_config).await.clone()
+        self.db.clone().expect("Failed to get db")
     }
 }

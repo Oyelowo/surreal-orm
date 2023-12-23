@@ -42,6 +42,9 @@ pub struct Down {
     pub(crate) shared_all: SharedAll,
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 pub enum RollbackStrategy {
@@ -113,8 +116,12 @@ impl Down {
 
 #[async_trait]
 impl Command for Down {
+    async fn create_and_set_connection(&mut self) {
+        let db = SetupDb::new(&self.runtime_config).await.clone();
+        self.db = Some(db.clone());
+    }
+
     async fn db(&self) -> Surreal<Any> {
-        let db = SetupDb::setup_db(&self.runtime_config).await;
-        db.clone()
+        self.db.clone().expect("Failed to get db")
     }
 }

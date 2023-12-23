@@ -39,6 +39,9 @@ pub struct Reset {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Reset {
@@ -84,12 +87,18 @@ impl Reset {
             reversible: self.reversible.clone(),
             shared_all: self.shared_all.clone(),
             runtime_config: self.runtime_config.clone(),
+            db: self.db.clone(),
         }
     }
 }
 
 #[async_trait]
 impl Command for Reset {
+    async fn create_and_set_connection(&mut self) {
+        // let db = SetupDb::new(&self.runtime_config).await.clone();
+        // self.db = Some(db.clone());
+    }
+
     async fn db(&self) -> Surreal<Any> {
         self.init_command().db().await
     }

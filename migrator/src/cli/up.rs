@@ -15,7 +15,7 @@ use typed_builder::TypedBuilder;
 /// cargo run -- up -l
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
-#[derive(Parser, Debug, Default, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder)]
 pub struct Up {
     /// Run forward to the latest migration
     #[clap(
@@ -51,6 +51,9 @@ pub struct Up {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 pub enum UpdateStrategy {
@@ -93,6 +96,7 @@ impl RunnableMigration for Up {
 
 impl Up {
     pub async fn run(&self) {
+        // create_and_set_connection
         let db = self.db().await;
 
         let update_strategy = UpdateStrategy::from(self);
@@ -142,8 +146,15 @@ impl Up {
 }
 
 #[async_trait]
-impl crate::Command for Up {
+impl Command for Up {
+    async fn create_and_set_connection(&mut self) {
+        let db = SetupDb::new(&self.runtime_config).await.clone();
+        if self.db.is_none() {
+            self.db = Some(db.clone());
+        }
+    }
+
     async fn db(&self) -> Surreal<Any> {
-        SetupDb::setup_db(&self.runtime_config).await.clone()
+        self.db.clone().expect("Failed to get db")
     }
 }
