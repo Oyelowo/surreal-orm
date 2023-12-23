@@ -1,6 +1,5 @@
 ---
 source: migrator-tests/tests/init.rs
-assertion_line: 43
 expression: content
 ---
 DELETE migration;
