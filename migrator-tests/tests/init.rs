@@ -13,7 +13,7 @@ use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::{
     migrator::{
         config::{RuntimeConfig, SetupDb, SharedAll, UrlDb},
-        migration_cli_fn, Cli, Init, Migration, MockPrompter, Mode, SubCommand,
+        migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
     },
     statements::select,
     All, ReturnableSelect,
@@ -25,6 +25,33 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
         .expect("Failed to read dir")
         .map(|p| p.expect("Failed to read dir2"))
         .collect::<Vec<_>>()
+}
+
+fn assert_migration_files_presence_and_format(
+    migration_files: Vec<DirEntry>,
+    test_migration_name: &str,
+) {
+    for f in migration_files.iter() {
+        let filepath = f.path();
+        let file_name = filepath
+            .file_name() //.expect("Failed to get file namezz
+            .expect("Failed to get file name")
+            .to_str()
+            .expect("Failed to get file name");
+        let file_name_parsed =
+            MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
+
+        let timestamp = file_name_parsed.timestamp();
+        let basename = file_name_parsed.basename();
+        let extension = file_name_parsed.extension();
+
+        assert_eq!(basename.to_string(), test_migration_name.to_string());
+        assert_eq!(
+            file_name.to_string(),
+            format!("{timestamp}_{basename}.{extension}"),
+            "File name should be in the format of {timestamp}_{basename}.{extension}"
+        );
+    }
 }
 
 #[tokio::test]
@@ -54,13 +81,15 @@ async fn test_up_only_init_without_run() {
     let init = Init::builder()
         .name(test_migration_name.to_string())
         .reversible(false) // when false, it's up only or one way or unidirectional
+        // We are setting run to false here
+        // This means that we are not running the migrations after generation
+        // This is the default behavior
+        // Which means new migration metadata will not be created in
+        // the database, nor would the generated migration files be run
         .run(false)
         .runtime_config(runtime_config)
         .shared_all(shared_all)
         .build();
-
-    // dbg!(&init);
-    // println!("init: {:#?}", init);
 
     let cli = Cli::new(SubCommand::Init(init));
     let resources = Resources;
@@ -71,32 +100,16 @@ async fn test_up_only_init_without_run() {
     let migrations = Migration::get_all(db.clone()).await;
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
 
-    assert_eq!(migrations.len(), 1);
-    assert_eq!(migration_files.len(), 1);
-    // for f in migration_files.iter() {
-    //     let binding = f.as_ref().expect("Failed to read dir").path();
-    //     let file_name = binding
-    //         .file_name() //.expect("Failed to get file namezz
-    //         .expect("Failed to get file name")
-    //         .to_str()
-    //         .expect("Failed to get file name");
-    //     let file_name_parsed =
-    //         MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
-    //     assert_eq!(
-    //         file_name_parsed.timestamp(),
-    //         file_name
-    //             .split('_')
-    //             .next()
-    //             .expect("Failed to get timestamp")
-    //             .parse::<u64>()
-    //             .expect("Failed to parse timestamp")
-    //             .into()
-    //     );
-    //
-    //     if file_name.ends_with("_up.surql") {
-    //         assert!(file_name.ends_with(&format!("{}_up.surql", test_migration_name)));
-    //     } else if file_name.ends_with("_down.surql") {
-    //         assert!(file_name.ends_with(&format!("{}_down.surql", test_migration_name)));
-    //     }
-    // }
+    assert_eq!(
+        migrations.len(),
+        0,
+        "No migrations should be created in the database because we set run to false"
+    );
+    assert_eq!(
+        migration_files.len(),
+        1,
+        "One migration file should be created"
+    );
+
+    assert_migration_files_presence_and_format(migration_files, test_migration_name);
 }
