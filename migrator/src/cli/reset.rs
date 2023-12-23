@@ -95,10 +95,12 @@ impl Reset {
 #[async_trait]
 impl DbConnection for Reset {
     async fn create_and_set_connection(&mut self) {
-        self.init_command().create_and_set_connection().await;
+        let mut up = self.init_command();
+        up.create_and_set_connection().await;
+        self.db = up.db.clone();
     }
 
     async fn db(&self) -> Surreal<Any> {
-        self.init_command().db().await
+        self.db.clone().expect("Failed to get db")
     }
 }
