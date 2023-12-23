@@ -3,8 +3,8 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::{
     statements::{
-        begin_transaction, define_field, define_table, remove_table, select, DefineTableStatement,
-        RemoveTableStatement,
+        begin_transaction, define_field, define_table, order, remove_table, select,
+        DefineTableStatement, RemoveTableStatement,
     },
     All, Field, FieldType, Raw, ReturnableSelect, Table, ToRaw,
 };
@@ -211,9 +211,12 @@ impl Migration {
     }
 
     // pub async fn get_all(db: Surreal<Any>) -> SurrealOrmResult<Vec<Self>> {
-    pub async fn get_all(db: Surreal<Any>) -> Vec<Self> {
+    pub async fn get_all_desc(db: Surreal<Any>) -> Vec<Self> {
+        let migration::Schema { timestamp, .. } = Self::schema();
+
         select(All)
             .from(Self::table_name())
+            .order_by(order(timestamp).desc())
             .return_many::<Self>(db.clone())
             .await
             .expect("Failed to get migrations")
