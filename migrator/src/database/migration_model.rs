@@ -6,7 +6,7 @@ use surreal_query_builder::{
         begin_transaction, define_field, define_table, order, remove_table, select,
         DefineTableStatement, RemoveTableStatement,
     },
-    All, Field, FieldType, Raw, ReturnableSelect, Table, ToRaw,
+    All, Field, FieldType, Operatable, Raw, ReturnableSelect, Table, ToRaw,
 };
 use surrealdb::{engine::any::Any, sql::Thing, Surreal};
 
@@ -210,7 +210,17 @@ impl Migration {
         fields
     }
 
-    // pub async fn get_all(db: Surreal<Any>) -> SurrealOrmResult<Vec<Self>> {
+    pub async fn get_by_filename(db: Surreal<Any>, filename: MigrationFilename) -> Option<Self> {
+        let migration::Schema { name, .. } = Self::schema();
+
+        select(All)
+            .from(Self::table_name())
+            .where_(name.equal(filename.to_string()))
+            .return_one::<Self>(db.clone())
+            .await
+            .expect("Failed to get migrations")
+    }
+
     pub async fn get_all_desc(db: Surreal<Any>) -> Vec<Self> {
         let migration::Schema { timestamp, .. } = Self::schema();
 
