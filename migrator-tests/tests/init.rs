@@ -95,6 +95,25 @@ async fn test_up_only_init_without_run() {
     let resources = Resources;
     // let resourcesV2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
+    let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
+    
+    let migrations = Migration::get_all(db.clone()).await;
+    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
+
+    assert_eq!(
+        migrations.len(),
+        0,
+        "No migrations should be created in the database because we set run to false"
+    );
+    assert_eq!(
+        migration_files.len(),
+        1,
+        "One migration file should be created"
+    );
+
+    assert_migration_files_presence_and_format(migration_files, test_migration_name);
+
+    // Initialize the 2nd time
     let db = migration_cli_fn(cli, resources, mock_prompter).await;
 
     let migrations = Migration::get_all(db.clone()).await;
@@ -110,6 +129,5 @@ async fn test_up_only_init_without_run() {
         1,
         "One migration file should be created"
     );
-
     assert_migration_files_presence_and_format(migration_files, test_migration_name);
 }

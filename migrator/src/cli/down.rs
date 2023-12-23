@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Rollback migrations
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Down {
     /// Rollback to the latest migration
     #[clap(

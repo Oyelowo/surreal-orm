@@ -9,11 +9,11 @@ use typed_builder::TypedBuilder;
 use surreal_query_builder::DbResources;
 
 use super::init::Init;
-use crate::{config::SetupDb, DbConnection, MigrationConfig, Prompter};
+use crate::{DbConnection, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Reset {
     /// Name of the first migration file(s) to reinitialize to
     #[clap(long)]

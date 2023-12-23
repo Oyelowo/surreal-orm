@@ -9,7 +9,7 @@ use crate::{config::SetupDb, DbConnection, MigrationConfig, MigrationRunner};
 
 /// Delete Unapplied local migration files that have not been applied to the current database instance
 /// cargo run -- prune
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Prune {
     #[clap(flatten)]
     pub(crate) shared_all: SharedAll,
