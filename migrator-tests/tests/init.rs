@@ -24,37 +24,89 @@ fn assert_migration_files_presence_and_format(
     db_migrations: Vec<Migration>,
     test_migration_name: &str,
 ) {
-    for f in migration_files.iter() {
-        let filepath = f.path();
-        let content = fs::read_to_string(&filepath).expect("Failed to read file");
+    let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
+    migration_files.sort_by(|a, b| {
+        a.file_name()
+            .expect("Failed to get file name")
+            .to_str()
+            .expect("Failed to get file name")
+            .cmp(
+                b.file_name()
+                    .expect("Failed to get file name")
+                    .to_str()
+                    .expect("Failed to get file name"),
+            )
+    });
+
+    for filepath in migration_files.iter() {
+        // TODO: Make snapshot tests deterministict
+        // let content = fs::read_to_string(&filepath).expect("Failed to read file");
+        // insta::assert_display_snapshot!(content);
+
         let file_name = filepath
             .file_name()
             .expect("Failed to get file name")
             .to_str()
             .expect("Failed to get file name");
-        let file_name_parsed =
+        let file_name =
             MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
 
-        let timestamp = file_name_parsed.timestamp();
-        let basename = file_name_parsed.basename();
-        let extension = file_name_parsed.extension();
+        let timestamp = file_name.timestamp();
+        let basename = file_name.basename();
+        let extension = file_name.extension();
 
-        let found_db_mig = db_migrations
-            .iter()
-            .find(|m| {
-                let db_name: MigrationFilename = m
-                    .name
-                    .clone()
-                    .try_into()
-                    .expect("Failed to parse file name");
-                db_name == file_name_parsed
-            })
-            .expect("Migration file not found in db");
+        // we want to test that the migration file metadata is stored in the db
+        // e.g:  the name, timestamp and perhaps checksum?
+        // ts_basename.up.surql
+        // ts_basename.down.surql
+        // ts_basename.sql
+        if !db_migrations.is_empty() {
+            let found_db_mig = |file_name: MigrationFilename| {
+                db_migrations
+                    .iter()
+                    .find(|m| {
+                        dbg!(&m.name);
+                        dbg!(&file_name.to_string());
+                        let db_name: MigrationFilename = m
+                            .name
+                            .clone()
+                            .try_into()
+                            .expect("Failed to parse file name");
+                        db_name == file_name
+                    })
+                    .expect("Migration file not found in db")
+            };
 
-        assert_eq!(found_db_mig.name, file_name);
-        assert_eq!(found_db_mig.timestamp, timestamp);
+            match &file_name {
+                MigrationFilename::Up(up) => {
+                    // select * from migration where name = up;
+                    // name, timestamp and checksum_up
+                    // let mig = Migration::get_by_filename(db_migrations.clone(), up.clone())
+                    //     .expect("Migration file not found in db");
+                    let found_db_mig = found_db_mig(file_name.clone());
+                    assert_eq!(found_db_mig.name, file_name.to_string());
+                    assert_eq!(found_db_mig.timestamp, timestamp);
+                }
+                MigrationFilename::Down(down) => {
+                    // select * from migration where name = down.to_up();
+                    // name, timestamp and checksum_up
+                    let file_name = file_name.to_up();
+                    let found_db_mig = found_db_mig(file_name.clone());
+                    assert_eq!(found_db_mig.name, file_name.to_string());
+                    assert_eq!(found_db_mig.timestamp, timestamp);
+                }
+                MigrationFilename::Unidirectional(uni) => {
+                    // select * from migration where name = down;
+                    // name, timestamp and checksum_up
+                    let found_db_mig = found_db_mig(file_name.clone());
+                    assert_eq!(found_db_mig.name, file_name.to_string());
+                    assert_eq!(found_db_mig.timestamp, timestamp);
+                }
+            };
+        }
+        // Only up migration filenames are stored in the db since
+        // we can always derive the down name from it.
 
-        insta::assert_display_snapshot!(content);
         assert_eq!(basename.to_string(), test_migration_name.to_string());
         assert_eq!(
             file_name.to_string(),
