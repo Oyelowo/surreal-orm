@@ -26,8 +26,9 @@ pub struct Generate {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
-    // #[clap(skip)]
-    // xxxx: RealPrompter,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Generate {
@@ -85,12 +86,18 @@ impl Generate {
             till: None,
             shared_all: self.shared_all.clone(),
             runtime_config: self.runtime_config.clone(),
+            db: self.db.clone(),
         }
     }
 }
 
 #[async_trait]
-impl crate::Command for Generate {
+impl Command for Generate {
+    async fn create_and_set_connection(&mut self) {
+        // let db = SetupDb::new(&self.runtime_config).await.clone();
+        // self.db = Some(db.clone());
+    }
+
     async fn db(&self) -> Surreal<Any> {
         self.up().db().await
     }

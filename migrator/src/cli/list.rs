@@ -69,6 +69,9 @@ pub struct List {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+
+    #[clap(skip)]
+    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl List {
@@ -141,7 +144,14 @@ impl List {
 
 #[async_trait]
 impl Command for List {
+    async fn create_and_set_connection(&mut self) {
+        let db = SetupDb::new(&self.runtime_config).await.clone();
+        if self.db.is_none() {
+            self.db = Some(db.clone());
+        }
+    }
+
     async fn db(&self) -> Surreal<Any> {
-        SetupDb::setup_db(&self.runtime_config).await.clone()
+        self.db.clone().expect("Failed to get db")
     }
 }

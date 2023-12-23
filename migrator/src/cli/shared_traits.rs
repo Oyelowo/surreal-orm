@@ -3,5 +3,6 @@ use surrealdb::{engine::any::Any, Surreal};
 
 #[async_trait]
 pub trait Command {
+    async fn create_and_set_connection(&mut self);
     async fn db(&self) -> Surreal<Any>;
 }

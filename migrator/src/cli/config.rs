@@ -140,16 +140,16 @@ pub struct SetupDb {
 }
 
 impl SetupDb {
-    pub async fn new(runtime_config: RuntimeConfig) -> Self {
-        let db = Self::setup_db(&runtime_config).await;
-        Self { db }
-    }
+    // pub async fn new(runtime_config: RuntimeConfig) -> Self {
+    //     let db = Self::setup_db(&runtime_config).await;
+    //     Self { db }
+    // }
 
     pub fn db(&self) -> Surreal<Any> {
         self.db.clone()
     }
 
-    pub(crate) async fn setup_db(runtime_config: &RuntimeConfig) -> Surreal<Any> {
+    pub(crate) async fn new(runtime_config: &RuntimeConfig) -> Surreal<Any> {
         let cli_db_url = &runtime_config.url;
         let db = connect(cli_db_url.to_string()).await.unwrap();
         Self::init_db(db.clone(), &runtime_config).await
