@@ -66,20 +66,20 @@ pub struct RuntimeConfig {
     /// - TiKV-Backed: `tikv://localhost:2379`
     /// - FoundationDB-Backed: `fdb://fdb.cluster`
     #[clap(
-        long,
-        // value_name = "URL",
-        default_value = "ws://localhost:8000",
-        help = "Example:\n\
-                - ws://localhost:8000\n\
-                - wss://cloud.surrealdb.com\n\
-                - http://localhost:8000\n\
-                - https://cloud.surrealdb.com\n\
-                - mem://\n\
-                - file://temp.db\n\
-                - indxdb://MyDatabase\n\
-                - tikv://localhost:2379\n\
-                - fdb://fdb.cluster"
-    )]
+            long,
+            // value_name = "URL",
+            default_value = "ws://localhost:8000",
+            help = "Example:\n\
+                    - ws://localhost:8000\n\
+                    - wss://cloud.surrealdb.com\n\
+                    - http://localhost:8000\n\
+                    - https://cloud.surrealdb.com\n\
+                    - mem://\n\
+                    - file://temp.db\n\
+                    - indxdb://MyDatabase\n\
+                    - tikv://localhost:2379\n\
+                    - fdb://fdb.cluster"
+        )]
     pub(crate) url: UrlDb,
 
     #[clap(long, default_value = "test", help = "Database name")]
@@ -106,7 +106,7 @@ pub struct RuntimeConfig {
     #[clap(
         long,
         help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
-        that file contents and valid and also checking filenames. Lax does not.",
+            that file contents and valid and also checking filenames. Lax does not.",
         default_value = "strict"
     )]
     #[builder(default, setter(strip_option))]
@@ -128,33 +128,18 @@ impl Default for RuntimeConfig {
 }
 
 pub struct SetupDb {
-    runtime_config: RuntimeConfig,
     db: Surreal<Any>,
 }
 
 impl SetupDb {
     pub async fn new(runtime_config: RuntimeConfig) -> Self {
         let db = Self::setup_db(&runtime_config).await;
-        Self {
-            runtime_config: runtime_config.clone(),
-            db,
-        }
+        Self { db }
     }
 
     pub fn db(&self) -> Surreal<Any> {
         self.db.clone()
     }
-
-    pub fn override_runtime_config(&mut self, runtime_config: &RuntimeConfig) -> &mut Self {
-        self.runtime_config = runtime_config.clone();
-        // self.db = Self::setup_db(&self.runtime_config).await;
-        self
-    }
-
-    // pub fn override_runtime_config2(&mut self, runner: &impl RunnableMigration) -> &Self {
-    //     self.runtime_config = runner.runtime_config().clone();
-    //     &self
-    // }
 
     pub(crate) async fn setup_db(runtime_config: &RuntimeConfig) -> Surreal<Any> {
         let cli_db_url = &runtime_config.url;

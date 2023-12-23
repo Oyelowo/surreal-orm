@@ -2,8 +2,9 @@ use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
 use crate::config::SetupDb;
-use crate::{MigrationConfig, Prompter};
+use crate::{Command, MigrationConfig, Prompter};
 
+use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::DbResources;
 use surrealdb::engine::any::Any;
@@ -37,14 +38,8 @@ pub struct Init {
 }
 
 impl Init {
-    pub async fn run(
-        &self,
-        codebase_resources: impl DbResources,
-        prompter: impl Prompter,
-        db_setup: &mut SetupDb,
-    ) -> Surreal<Any> {
+    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let setup = db_setup.override_runtime_config(&self.runtime_config);
         let migration_name = self.name.clone();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
@@ -56,8 +51,6 @@ impl Init {
             Ok(files) => {
                 if !files.is_empty() {
                     log::warn!("Migrations already initialized");
-                    let db = setup.db();
-                    return db.clone();
                 }
             }
             Err(e) => {
@@ -88,20 +81,28 @@ impl Init {
         if self.run {
             log::info!("Running initial migrations");
 
-            let run = Up {
-                latest: Some(true),
-                number: None,
-                till: None,
-                shared_all: self.shared_all.clone(),
-                runtime_config: self.runtime_config.clone(),
-            };
-            run.run(setup).await;
+            self.up().run().await;
 
             log::info!("Successfully ran initial migrations");
         }
 
         log::info!("Successfully initialized and generated first migration(s)");
-        let db = setup.db();
-        db.clone()
+    }
+
+    pub fn up(&self) -> Up {
+        Up {
+            latest: Some(true),
+            number: None,
+            till: None,
+            shared_all: self.shared_all.clone(),
+            runtime_config: self.runtime_config.clone(),
+        }
+    }
+}
+
+#[async_trait]
+impl Command for Init {
+    async fn db(&self) -> Surreal<Any> {
+        self.up().db().await
     }
 }

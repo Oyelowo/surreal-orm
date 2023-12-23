@@ -1,5 +1,6 @@
 use super::config::{RuntimeConfig, SharedAll};
 
+use async_trait::async_trait;
 use clap::Parser;
 use std::fs;
 use surrealdb::{engine::any::Any, Surreal};
@@ -8,7 +9,7 @@ use typed_builder::TypedBuilder;
 use surreal_query_builder::DbResources;
 
 use super::init::Init;
-use crate::{config::SetupDb, MigrationConfig, Prompter};
+use crate::{config::SetupDb, Command, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
@@ -41,14 +42,8 @@ pub struct Reset {
 }
 
 impl Reset {
-    pub async fn run(
-        &self,
-        codebase_resources: impl DbResources,
-        prompter: impl Prompter,
-        db_setup: &mut SetupDb,
-    ) -> Surreal<Any> {
+    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let mut setup = db_setup.override_runtime_config(&self.runtime_config);
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.set_custom_path(path)
@@ -77,18 +72,25 @@ impl Reset {
             }
         };
 
-        let init = Init {
+        self.init_command().run(codebase_resources, prompter).await;
+
+        log::info!("Reset successful");
+    }
+
+    fn init_command(&self) -> Init {
+        Init {
             name: self.name.clone(),
             run: self.run,
             reversible: self.reversible.clone(),
             shared_all: self.shared_all.clone(),
             runtime_config: self.runtime_config.clone(),
-        };
-        init.run(codebase_resources, prompter, &mut setup).await;
+        }
+    }
+}
 
-        log::info!("Reset successful");
-
-        let db = setup.db();
-        db.clone()
+#[async_trait]
+impl Command for Reset {
+    async fn db(&self) -> Surreal<Any> {
+        self.init_command().db().await
     }
 }

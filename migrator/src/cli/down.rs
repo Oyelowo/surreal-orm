@@ -1,9 +1,12 @@
 use super::config::{RuntimeConfig, SharedAll};
+use async_trait::async_trait;
 use clap::Parser;
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
-use crate::{config::SetupDb, MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions};
+use crate::{
+    config::SetupDb, Command, MigrationConfig, MigrationFilename, MigrationFlag, RollbackOptions,
+};
 
 /// Rollback migrations
 #[derive(Parser, Debug, TypedBuilder)]
@@ -38,7 +41,7 @@ pub struct Down {
     #[clap(flatten)]
     pub(crate) shared_all: SharedAll,
     #[clap(flatten)]
-    pub(crate) shared_run_and_rollback: RuntimeConfig,
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 pub enum RollbackStrategy {
@@ -69,10 +72,9 @@ impl From<&Down> for RollbackStrategy {
 }
 
 impl Down {
-    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
+    pub async fn run(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let setup = db_setup.override_runtime_config(&self.shared_run_and_rollback);
-        let db = setup.db();
+        let db = self.db().await;
 
         if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
             log::error!(
@@ -95,8 +97,8 @@ impl Down {
                 db.clone(),
                 RollbackOptions {
                     rollback_strategy,
-                    mode: self.shared_run_and_rollback.mode.unwrap_or_default(),
-                    prune_files_after_rollback: self.shared_run_and_rollback.prune,
+                    mode: self.runtime_config.mode.unwrap_or_default(),
+                    prune_files_after_rollback: self.runtime_config.prune,
                 },
             )
             .await;
@@ -106,7 +108,13 @@ impl Down {
         } else {
             log::info!("Rollback successful");
         }
+    }
+}
 
+#[async_trait]
+impl Command for Down {
+    async fn db(&self) -> Surreal<Any> {
+        let db = SetupDb::setup_db(&self.runtime_config).await;
         db.clone()
     }
 }

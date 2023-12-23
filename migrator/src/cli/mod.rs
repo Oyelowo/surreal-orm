@@ -5,6 +5,7 @@ mod init;
 mod list;
 mod prune;
 mod reset;
+mod shared_traits;
 mod up;
 
 pub use down::{Down, RollbackStrategy};
@@ -13,6 +14,8 @@ pub use init::Init;
 pub use list::{List, Status};
 pub use prune::Prune;
 pub use reset::Reset;
+pub use shared_traits::Command;
+
 use surrealdb::{engine::any::Any, Surreal};
 pub use up::{Up, UpdateStrategy};
 
@@ -20,8 +23,6 @@ use clap::Parser;
 use surreal_query_builder::DbResources;
 
 use crate::{Prompter, RealPrompter};
-
-use self::config::{RuntimeConfig, SetupDb};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug)]
@@ -63,6 +64,18 @@ pub enum SubCommand {
 }
 
 impl SubCommand {
+    pub async fn db(&self) -> Surreal<Any> {
+        match self {
+            SubCommand::Init(init) => init.db().await,
+            SubCommand::Generate(generate) => generate.db().await,
+            SubCommand::Up(up) => up.db().await,
+            SubCommand::Down(down) => down.db().await,
+            SubCommand::List(list) => list.db().await,
+            SubCommand::Prune(prune) => prune.db().await,
+            SubCommand::Reset(reset) => reset.db().await,
+        }
+    }
+
     pub fn get_verbosity(&self) -> u8 {
         match self {
             SubCommand::Init(generate) => generate.shared_all.verbose,
@@ -125,26 +138,25 @@ impl SubCommand {
 pub async fn migration_cli(codebase_resources: impl DbResources) {
     let cli = Cli::parse();
     cli.subcmd.setup_logging();
-    let mut setup = SetupDb::new(RuntimeConfig::default()).await;
 
-    let _ = migration_cli_fn(cli, &mut setup, codebase_resources, RealPrompter).await;
+    let _ = migration_cli_fn(cli, codebase_resources, RealPrompter).await;
     ()
 }
 
 pub async fn migration_cli_fn(
     cli: Cli,
-    setup: &mut SetupDb,
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
 ) -> Surreal<Any> {
-    let db = match cli.subcmd {
-        SubCommand::Init(init) => init.run(codebase_resources, prompter, setup).await,
-        SubCommand::Generate(generate) => generate.run(codebase_resources, prompter, setup).await,
-        SubCommand::Up(up) => up.run(setup).await,
-        SubCommand::Down(down) => down.run(setup).await,
-        SubCommand::Prune(prune) => prune.run(setup).await,
-        SubCommand::List(prune) => prune.run(setup).await,
-        SubCommand::Reset(reset) => reset.run(codebase_resources, prompter, setup).await,
+    match &cli.subcmd {
+        SubCommand::Init(init) => init.run(codebase_resources, prompter).await,
+        SubCommand::Generate(generate) => generate.run(codebase_resources, prompter).await,
+        SubCommand::Up(up) => up.run().await,
+        SubCommand::Down(down) => down.run().await,
+        SubCommand::Prune(prune) => prune.run().await,
+        SubCommand::List(prune) => prune.run().await,
+        SubCommand::Reset(reset) => reset.run(codebase_resources, prompter).await,
     };
-    db
+
+    cli.subcmd.db().await
 }
