@@ -265,7 +265,7 @@ impl From<String> for Extension {
 
 impl Display for Extension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, ".{}", self.0)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -332,14 +332,14 @@ impl MigrationFilename {
 
     pub fn basename(&self) -> Basename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
+            MigrationFilename::Up(MigrationNameBasicInfo { name, .. }) => {
+                format!("{name}")
             }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
+            MigrationFilename::Down(MigrationNameBasicInfo { name, .. }) => {
+                format!("{name}")
             }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                format!("{timestamp}_{name}")
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo { name, .. }) => {
+                format!("{name}")
             }
         }
         .into()
