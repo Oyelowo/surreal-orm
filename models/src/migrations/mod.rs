@@ -16,6 +16,10 @@ use surreal_orm::{
 #[derive(Debug, Clone)]
 pub struct Resources;
 
+impl DbResources for Resources {
+    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
+}
+
 #[derive(Debug, Clone)]
 pub struct ResourcesV2;
 
@@ -34,10 +38,6 @@ pub struct NewStuff {
 }
 
 impl TableResources for NewStuff {}
-
-impl DbResources for Resources {
-    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
-}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
