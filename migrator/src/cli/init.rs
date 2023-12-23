@@ -108,8 +108,7 @@ impl Init {
 #[async_trait]
 impl DbConnection for Init {
     async fn create_and_set_connection(&mut self) {
-        // let db = SetupDb::new(&self.runtime_config).await.clone();
-        // self.db = Some(db.clone());
+        self.up().create_and_set_connection().await;
     }
 
     async fn db(&self) -> Surreal<Any> {
