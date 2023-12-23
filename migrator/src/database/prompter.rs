@@ -16,18 +16,12 @@ pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}
 
-pub struct TrueMockPrompter;
-
-impl Prompter for TrueMockPrompter {
-    fn prompt(&self) -> Result<bool, InquireError> {
-        Ok(true)
-    }
+pub struct MockPrompter {
+    pub confirmation: bool,
 }
 
-pub struct FalseMockPrompter;
-
-impl Prompter for FalseMockPrompter {
+impl Prompter for MockPrompter {
     fn prompt(&self) -> Result<bool, InquireError> {
-        Ok(false)
+        Ok(self.confirmation)
     }
 }
