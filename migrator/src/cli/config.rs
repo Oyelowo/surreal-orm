@@ -151,8 +151,22 @@ impl SetupDb {
 
     pub(crate) async fn new(runtime_config: &RuntimeConfig) -> Surreal<Any> {
         let cli_db_url = &runtime_config.url;
+        dbg!(&cli_db_url.to_string());
         let db = connect(cli_db_url.to_string()).await.unwrap();
-        Self::init_db(db.clone(), &runtime_config).await
+        db.signin(Root {
+            username: runtime_config.user.clone().unwrap_or_default().as_str(),
+            password: runtime_config.pass.clone().unwrap_or_default().as_str(),
+        })
+        .await
+        .expect("Failed to signin");
+        db.use_db(runtime_config.clone().db.unwrap_or_default())
+            .await
+            .expect("Failed to use db");
+        db.use_ns(runtime_config.clone().sc.unwrap_or_default())
+            .await
+            .expect("Failed to use ns");
+        db
+        // Self::init_db(db.clone(), &runtime_config).await
     }
 
     pub async fn init_db(db: Surreal<Any>, shared: &RuntimeConfig) -> Surreal<Any> {
