@@ -1,7 +1,8 @@
 use super::config::{RuntimeConfig, SharedAll};
 use crate::config::SetupDb;
-use crate::{DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
+use crate::{Command, DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
 
+use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::Runnable;
@@ -91,8 +92,8 @@ impl RunnableMigration for Up {
 }
 
 impl Up {
-    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
-        let db = db_setup.override_runtime_config(&self.runtime_config).db();
+    pub async fn run(&self) {
+        let db = self.db().await;
 
         let update_strategy = UpdateStrategy::from(self);
         let mut files_config = MigrationConfig::new().make_strict();
@@ -137,7 +138,12 @@ impl Up {
 
         log::info!("Successfully ran migrations");
         log::info!("Database: {:?}", info);
+    }
+}
 
-        db.clone()
+#[async_trait]
+impl crate::Command for Up {
+    async fn db(&self) -> Surreal<Any> {
+        SetupDb::setup_db(&self.runtime_config).await.clone()
     }
 }

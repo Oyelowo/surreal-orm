@@ -2,7 +2,8 @@ use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
 use crate::config::SetupDb;
-use crate::{MigrationConfig, MigrationFlag, Prompter};
+use crate::{Command, MigrationConfig, MigrationFlag, Prompter, RealPrompter};
+use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::DbResources;
 use surrealdb::engine::any::Any;
@@ -25,17 +26,13 @@ pub struct Generate {
 
     #[clap(flatten)]
     pub(crate) runtime_config: RuntimeConfig,
+    // #[clap(skip)]
+    // xxxx: RealPrompter,
 }
 
 impl Generate {
-    pub async fn run(
-        &self,
-        codebase_resources: impl DbResources,
-        prompter: impl Prompter,
-        db_setup: &mut SetupDb,
-    ) -> Surreal<Any> {
+    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let mut setup = db_setup.override_runtime_config(&self.runtime_config);
         let migration_name = &self.name;
         let mig_type = files_config.detect_migration_type();
 
@@ -50,7 +47,7 @@ impl Generate {
                     .generate_migrations(&migration_name, codebase_resources, prompter)
                     .await;
                 if let Err(e) = gen {
-                    log::error!("Failed to generate migrations: {}", e.to_string());
+                    log::error!("Failed to generate migrations: {e}");
                 }
             }
             Ok(MigrationFlag::OneWay) => {
@@ -60,11 +57,11 @@ impl Generate {
                     .await;
 
                 if let Err(e) = gen {
-                    log::error!("Failed to generate migrations: {}", e.to_string());
+                    log::error!("Failed to generate migrations: {e}");
                 }
             }
             Err(e) => {
-                log::error!("Failed to detect migration type: {}", e.to_string());
+                log::error!("Failed to detect migration type: {e}");
                 panic!();
             }
         };
@@ -72,20 +69,29 @@ impl Generate {
         if self.run {
             log::info!("Running generated migrations");
 
-            let run = Up {
-                latest: Some(true),
-                number: None,
-                till: None,
-                shared_all: self.shared_all.clone(),
-                runtime_config: self.runtime_config.clone(),
-            };
-            run.run(setup).await;
+            self.up().run().await;
 
             log::info!("Successfully ran the generated migration(s)");
         }
 
         log::info!("Migration generation done.");
-        let db = setup.db();
-        db.clone()
+        self.up().run().await;
+    }
+
+    fn up(&self) -> Up {
+        Up {
+            latest: Some(true),
+            number: None,
+            till: None,
+            shared_all: self.shared_all.clone(),
+            runtime_config: self.runtime_config.clone(),
+        }
+    }
+}
+
+#[async_trait]
+impl crate::Command for Generate {
+    async fn db(&self) -> Surreal<Any> {
+        self.up().db().await
     }
 }

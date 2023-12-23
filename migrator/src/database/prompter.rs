@@ -10,6 +10,8 @@ pub trait Prompter {
         confirmation
     }
 }
+
+#[derive(Debug, Default)]
 pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}

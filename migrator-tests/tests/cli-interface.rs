@@ -32,7 +32,7 @@ async fn test_generate_command_success() {
     let resourcesV2 = ResourcesV2;
     let prompter_returns_true = TrueMockPrompter;
     let prompter_returns_false = FalseMockPrompter;
-    let db = migration_cli_fn(cli, &mut setup, resources, TrueMockPrompter).await;
+    let db = migration_cli_fn(cli, resources, TrueMockPrompter).await;
     //
     // let migrations = select(All)
     //     .from(Migration::table_name())

@@ -1,10 +1,11 @@
 use super::config::{RuntimeConfig, SharedAll};
 
+use async_trait::async_trait;
 use clap::Parser;
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
-use crate::{config::SetupDb, MigrationConfig, MigrationRunner};
+use crate::{config::SetupDb, Command, MigrationConfig, MigrationRunner};
 
 /// Delete Unapplied local migration files that have not been applied to the current database instance
 /// cargo run -- prune
@@ -18,10 +19,9 @@ pub struct Prune {
 }
 
 impl Prune {
-    pub async fn run(&self, db_setup: &mut SetupDb) -> Surreal<Any> {
+    pub async fn run(&self) {
         let mut files_config = MigrationConfig::new().make_strict();
-        let setup = db_setup.override_runtime_config(&self.runtime_config);
-        let db = setup.db();
+        let db = self.db().await;
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.set_custom_path(path)
         }
@@ -36,6 +36,12 @@ impl Prune {
         }
 
         log::info!("Prune successful");
-        db.clone()
+    }
+}
+
+#[async_trait]
+impl Command for Prune {
+    async fn db(&self) -> Surreal<Any> {
+        SetupDb::setup_db(&self.runtime_config).await.clone()
     }
 }
