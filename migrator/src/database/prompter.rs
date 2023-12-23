@@ -11,11 +11,12 @@ pub trait Prompter {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}
 
+#[derive(Debug, Default, Clone)]
 pub struct MockPrompter {
     pub confirmation: bool,
 }

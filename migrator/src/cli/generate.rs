@@ -1,7 +1,6 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use crate::config::SetupDb;
 use crate::{DbConnection, MigrationConfig, MigrationFlag, Prompter, RealPrompter};
 use async_trait::async_trait;
 use clap::Parser;
@@ -11,7 +10,7 @@ use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Generate migrations
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Generate {
     /// Name of the migration
     #[clap(long, help = "Name of the migration")]

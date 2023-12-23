@@ -54,7 +54,7 @@ impl FromStr for Status {
 }
 
 /// Run migrations
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct List {
     /// Status of migrations to list
     #[clap(

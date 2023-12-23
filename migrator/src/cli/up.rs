@@ -15,7 +15,7 @@ use typed_builder::TypedBuilder;
 /// cargo run -- up -l
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Up {
     /// Run forward to the latest migration
     #[clap(

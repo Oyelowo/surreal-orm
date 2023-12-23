@@ -1,7 +1,6 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use crate::config::SetupDb;
 use crate::{DbConnection, MigrationConfig, Prompter};
 
 use async_trait::async_trait;
@@ -12,7 +11,7 @@ use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Init migrations
-#[derive(Parser, Debug, TypedBuilder)]
+#[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Init {
     /// Name of the migration
     #[clap(long, help = "Name of the first migration file(s)")]

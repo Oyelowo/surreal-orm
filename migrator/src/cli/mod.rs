@@ -26,7 +26,7 @@ use surreal_query_builder::DbResources;
 use crate::{Prompter, RealPrompter};
 
 /// Surreal ORM CLI
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
 pub struct Cli {
     /// Subcommand: generate, up, down, list
@@ -43,7 +43,7 @@ impl Cli {
 }
 
 /// Subcommands
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub enum SubCommand {
     /// Init migrations
     Init(Init),
