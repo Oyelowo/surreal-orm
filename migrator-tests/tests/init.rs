@@ -46,13 +46,13 @@ fn assert_migration_files_presence_and_format(
     }
 }
 
-fn runtime_config() -> RuntimeConfig {
+fn runtime_config(mode: Mode) -> RuntimeConfig {
     RuntimeConfig::builder()
         .db("test".into())
         .ns("test".into())
         .user("root".into())
         .pass("root".into())
-        .mode(Mode::Strict)
+        .mode(mode)
         .prune(false)
         .url(UrlDb::Memory)
         .build()
@@ -102,6 +102,7 @@ struct TestConfig {
     run: bool,
     mig_files_count: u8,
     db_mig_count: u8,
+    mode: Mode,
 }
 
 async fn test_init(config: TestConfig) {
@@ -110,6 +111,7 @@ async fn test_init(config: TestConfig) {
         run,
         mig_files_count,
         db_mig_count,
+        mode,
     } = config;
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -117,7 +119,7 @@ async fn test_init(config: TestConfig) {
     fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
     let test_migration_name = "test_migration";
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let runtime_config = runtime_config();
+    let runtime_config = runtime_config(mode);
     let shared_all = shared_all(temp_test_migration_dir.clone());
 
     assert_eq!(migration_files.len(), 0);
@@ -180,10 +182,11 @@ async fn test_init(config: TestConfig) {
 }
 
 #[tokio::test]
-async fn test_duplicate_up_only_init_without_run() {
+async fn test_duplicate_up_only_init_without_run_strict() {
     test_init(TestConfig {
         reversible: false,
         run: false,
+        mode: Mode::Strict,
         mig_files_count: 1,
         db_mig_count: 0,
     })
@@ -191,10 +194,11 @@ async fn test_duplicate_up_only_init_without_run() {
 }
 
 #[tokio::test]
-async fn test_duplicate_up_only_init_and_run() {
+async fn test_duplicate_up_only_init_and_run_strict() {
     test_init(TestConfig {
         reversible: false,
         run: true,
+        mode: Mode::Strict,
         mig_files_count: 1,
         db_mig_count: 1,
     })
@@ -202,10 +206,11 @@ async fn test_duplicate_up_only_init_and_run() {
 }
 
 #[tokio::test]
-async fn test_duplicate_bidirectional_up_and_down_init_without_run() {
+async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     test_init(TestConfig {
         reversible: true,
         run: false,
+        mode: Mode::Strict,
         mig_files_count: 2,
         db_mig_count: 0,
     })
@@ -213,10 +218,59 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run() {
 }
 
 #[tokio::test]
-async fn test_duplicate_bidirectional_up_and_down_init_and_run() {
+async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
     test_init(TestConfig {
         reversible: true,
         run: true,
+        mode: Mode::Strict,
+        mig_files_count: 2,
+        db_mig_count: 1,
+    })
+    .await;
+}
+
+#[tokio::test]
+async fn test_duplicate_up_only_init_without_run_relaxed() {
+    test_init(TestConfig {
+        reversible: false,
+        run: false,
+        mode: Mode::Lax,
+        mig_files_count: 1,
+        db_mig_count: 0,
+    })
+    .await;
+}
+
+#[tokio::test]
+async fn test_duplicate_up_only_init_and_run_relaxed() {
+    test_init(TestConfig {
+        reversible: false,
+        run: true,
+        mode: Mode::Lax,
+        mig_files_count: 1,
+        db_mig_count: 1,
+    })
+    .await;
+}
+
+#[tokio::test]
+async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
+    test_init(TestConfig {
+        reversible: true,
+        run: false,
+        mode: Mode::Lax,
+        mig_files_count: 2,
+        db_mig_count: 0,
+    })
+    .await;
+}
+
+#[tokio::test]
+async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
+    test_init(TestConfig {
+        reversible: true,
+        run: true,
+        mode: Mode::Lax,
         mig_files_count: 2,
         db_mig_count: 1,
     })
