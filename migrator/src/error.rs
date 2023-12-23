@@ -70,6 +70,9 @@ pub enum MigrationError {
     #[error("Invalid migration flag: {0}. It must be one of {1}")]
     InvalidMigrationFlag(String, String),
 
+    #[error("Migration flag not set")]
+    MigrationFlagNotSet,
+
     #[error("Invalid timestamp: {0}")]
     InvalidTimestamp(String),
 

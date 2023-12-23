@@ -21,12 +21,23 @@ pub struct MigrationConfig {
     /// Default path is 'migrations' ralative to the nearest project root where
     /// cargo.toml is defined
     pub custom_path: Option<PathBuf>,
-    pub(crate) migration_flag: MigrationFlag,
+    // This is optional because, we cannot infer
+    // the migration type from the migration directory
+    // before initializing the migration directory.
+    // Before init => None,
+    // After init => Some(MigrationFlag)
+    pub migration_flag: Option<MigrationFlag>,
 }
 
 impl MigrationConfig {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn migration_flag_checked(&self) -> MigrationResult<MigrationFlag> {
+        self.migration_flag
+            .clone()
+            .ok_or(MigrationError::MigrationFlagNotSet)
     }
 
     pub fn set_mode(mut self, mode: Mode) -> Self {
@@ -57,27 +68,20 @@ impl MigrationConfig {
 
     pub fn one_way(&self) -> FileManagerUni {
         let mut config = self.clone();
-        config.migration_flag = MigrationFlag::OneWay;
+        config.migration_flag = Some(MigrationFlag::OneWay);
 
         FileManagerUni::new(config)
     }
 
     pub fn two_way(&self) -> FileManagerBi {
         let mut config = self.clone();
-        config.migration_flag = MigrationFlag::TwoWay;
+        config.migration_flag = Some(MigrationFlag::TwoWay);
 
         FileManagerBi::new(config)
     }
 
     pub fn get_migration_dir_create_if_none(&self) -> MigrationResult<PathBuf> {
         self.resolve_migration_directory(true)
-    }
-
-    pub fn migration_flag(&self, migration_flag: MigrationFlag) -> Self {
-        Self {
-            migration_flag,
-            ..self.clone()
-        }
     }
 
     pub fn detect_migration_type(&self) -> MigrationResult<MigrationFlag> {
@@ -136,13 +140,19 @@ impl MigrationConfig {
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
+        dbg!("===========================================");
+        dbg!(&migration_dir_path);
+        dbg!("===========================================");
+
         let migration_dir_path_str = migration_dir_path.to_string_lossy().to_string();
         log::info!("Migration dir path: {migration_dir_path_str}");
+
         let migrations = fs::read_dir(&migration_dir_path).map_err(|e| {
             MigrationError::IoError(format!(
                 "Failed to read migration directory: {migration_dir_path_str}. Error: {e}"
             ))
         })?;
+
         log::info!("Migration dir path: {migration_dir_path_str}");
 
         let mut filenames = vec![];

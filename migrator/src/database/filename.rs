@@ -38,6 +38,7 @@ pub enum MigrationFilename {
     Unidirectional(MigrationNameBasicInfo),
 }
 
+#[derive(Debug, Clone)]
 pub struct MigrationFilenames(Vec<MigrationFilename>);
 
 impl Deref for MigrationFilenames {
