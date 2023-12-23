@@ -9,7 +9,7 @@ use typed_builder::TypedBuilder;
 use surreal_query_builder::DbResources;
 
 use super::init::Init;
-use crate::{config::SetupDb, Command, MigrationConfig, Prompter};
+use crate::{config::SetupDb, DbConnection, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
@@ -93,7 +93,7 @@ impl Reset {
 }
 
 #[async_trait]
-impl Command for Reset {
+impl DbConnection for Reset {
     async fn create_and_set_connection(&mut self) {
         // let db = SetupDb::new(&self.runtime_config).await.clone();
         // self.db = Some(db.clone());

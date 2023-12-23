@@ -5,7 +5,7 @@ use std::{fmt::Display, str::FromStr};
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
-use crate::{config::SetupDb, Command, MigrationConfig, MigrationFlag};
+use crate::{config::SetupDb, DbConnection, MigrationConfig, MigrationFlag};
 
 #[derive(Clone, Copy, Debug)]
 pub enum Status {
@@ -143,7 +143,7 @@ impl List {
 }
 
 #[async_trait]
-impl Command for List {
+impl DbConnection for List {
     async fn create_and_set_connection(&mut self) {
         let db = SetupDb::new(&self.runtime_config).await.clone();
         if self.db.is_none() {
