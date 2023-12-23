@@ -2,6 +2,8 @@ use clap::{ArgAction, Parser};
 use std::fmt::Display;
 use std::path::PathBuf;
 use std::str::FromStr;
+use surrealdb::dbs::Capabilities;
+use surrealdb::opt::Config;
 use typed_builder::TypedBuilder;
 
 use surrealdb::engine::any::{connect, Any};
@@ -151,14 +153,25 @@ impl SetupDb {
 
     pub(crate) async fn new(runtime_config: &RuntimeConfig) -> Surreal<Any> {
         let cli_db_url = &runtime_config.url;
-        dbg!(&cli_db_url.to_string());
-        let db = connect(cli_db_url.to_string()).await.unwrap();
-        db.signin(Root {
-            username: runtime_config.user.clone().unwrap_or_default().as_str(),
-            password: runtime_config.pass.clone().unwrap_or_default().as_str(),
-        })
-        .await
-        .expect("Failed to signin");
+        let username = runtime_config.user.clone().unwrap_or_default();
+        let username = username.as_str();
+        let password = runtime_config.pass.clone().unwrap_or_default();
+        let password = password.as_str();
+        let config = Config::new().capabilities(Capabilities::all());
+
+        let config = match cli_db_url {
+            UrlDb::Memory => {
+                let creds = Root { username, password };
+                config.user(creds)
+            }
+            UrlDb::Others(_s) => config,
+        };
+
+        let db = connect((cli_db_url.to_string(), config)).await.unwrap();
+
+        db.signin(Root { username, password })
+            .await
+            .expect("Failed to signin");
         db.use_db(runtime_config.clone().db.unwrap_or_default())
             .await
             .expect("Failed to use db");
