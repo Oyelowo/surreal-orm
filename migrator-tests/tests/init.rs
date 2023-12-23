@@ -8,15 +8,11 @@ use std::{
 //     process::{Command, Stdio},
 // };
 use surreal_models::migrations::{Resources, ResourcesV2};
-// use tempfile::tempdir;
-//
 use surreal_orm::{
     migrator::{
-        config::{RuntimeConfig, SetupDb, SharedAll, UrlDb},
+        config::{RuntimeConfig,  SharedAll, UrlDb},
         migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
     },
-    statements::select,
-    All, ReturnableSelect,
 };
 use tempfile::tempdir;
 

@@ -1,7 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
 use super::up::Up;
 
-use crate::{DbConnection, MigrationConfig, MigrationFlag, Prompter, RealPrompter};
+use crate::{DbConnection, MigrationConfig, MigrationFlag, Prompter};
 use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::DbResources;
