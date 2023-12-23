@@ -8,7 +8,7 @@ use typed_builder::TypedBuilder;
 
 use surrealdb::engine::any::{connect, Any};
 
-use surrealdb::opt::auth::Root;
+use surrealdb::opt::auth::{Database, Root};
 use surrealdb::Surreal;
 
 use crate::Mode;
@@ -153,6 +153,10 @@ impl SetupDb {
 
     pub(crate) async fn new(runtime_config: &RuntimeConfig) -> Surreal<Any> {
         let cli_db_url = &runtime_config.url;
+        let database = runtime_config.db.clone().unwrap_or_default();
+        let database = database.as_str();
+        let namespace = runtime_config.ns.clone().unwrap_or_default();
+        let namespace = namespace.as_str();
         let username = runtime_config.user.clone().unwrap_or_default();
         let username = username.as_str();
         let password = runtime_config.pass.clone().unwrap_or_default();
@@ -169,9 +173,15 @@ impl SetupDb {
 
         let db = connect((cli_db_url.to_string(), config)).await.unwrap();
 
-        db.signin(Root { username, password })
-            .await
-            .expect("Failed to signin");
+        let db_creds = Database {
+            username,
+            password,
+            database,
+            namespace,
+        };
+
+        // TODO: Support scope signin
+        db.signin(db_creds).await.expect("Failed to signin");
         db.use_db(runtime_config.clone().db.unwrap_or_default())
             .await
             .expect("Failed to use db");
