@@ -127,7 +127,9 @@ impl MigratorDatabase {
         // ### TABLES
         // 1. Get all migrations from migration directory synced with db - Left
         let ComparisonDatabase { left, right } = ComparisonDatabase::init().await;
-        match file_manager.migration_flag {
+        let migration_flag = file_manager.migration_flag_checked()?;
+
+        match migration_flag {
             MigrationFlag::TwoWay => {
                 left.run_twoway_up_migrations(file_manager, true).await?;
             }
@@ -138,7 +140,7 @@ impl MigratorDatabase {
 
         // 2. Get all migrations from codebase synced with db - Right
         right
-            .run_codebase_schema_queries(&codebase_resources, file_manager.migration_flag)
+            .run_codebase_schema_queries(&codebase_resources, migration_flag)
             .await?;
         let init = ComparisonsInit {
             left_resources: &left.resources().await,
@@ -188,7 +190,7 @@ impl MigratorDatabase {
             .to_string();
 
         let timestamp = Utc::now();
-        let migration_file = match &file_manager.migration_flag {
+        let migration_file = match &file_manager.migration_flag_checked()? {
             MigrationFlag::TwoWay => {
                 let file = MigrationFileTwoWayPair {
                     up: FileMetadata {

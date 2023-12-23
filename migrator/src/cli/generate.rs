@@ -27,6 +27,7 @@ pub struct Generate {
     pub(crate) runtime_config: RuntimeConfig,
 
     #[clap(skip)]
+    #[builder(default)]
     pub(crate) db: Option<Surreal<Any>>,
 }
 
@@ -34,20 +35,22 @@ impl Generate {
     pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = &self.name;
-        let mig_type = files_config.detect_migration_type();
 
         if let Some(path) = self.shared_all.migrations_dir.clone() {
             files_config = files_config.set_custom_path(path)
         };
+        let mig_type = files_config.detect_migration_type();
 
         match mig_type {
             Ok(MigrationFlag::TwoWay) => {
+                log::info!("Generating two-way migration");
                 let gen = files_config
                     .two_way()
                     .generate_migrations(&migration_name, codebase_resources, prompter)
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
+                    panic!();
                 }
             }
             Ok(MigrationFlag::OneWay) => {
@@ -58,11 +61,12 @@ impl Generate {
 
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
+                    panic!();
                 }
             }
             Err(e) => {
                 log::error!("Failed to detect migration type: {e}");
-                panic!();
+                return;
             }
         };
 
@@ -75,7 +79,6 @@ impl Generate {
         }
 
         log::info!("Migration generation done.");
-        self.up().run().await;
     }
 
     fn up(&self) -> Up {
