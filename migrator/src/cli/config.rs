@@ -1,6 +1,5 @@
-use clap::{ArgAction, Args, Parser};
+use clap::Args;
 use std::fmt::Display;
-use std::path::PathBuf;
 use std::str::FromStr;
 use surrealdb::dbs::Capabilities;
 use surrealdb::opt::Config;
