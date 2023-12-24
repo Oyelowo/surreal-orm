@@ -65,8 +65,6 @@ fn assert_migration_files_presence_and_format(
                 db_migrations
                     .iter()
                     .find(|m| {
-                        dbg!(&m.name);
-                        dbg!(&file_name.to_string());
                         let db_name: MigrationFilename = m
                             .name
                             .clone()
