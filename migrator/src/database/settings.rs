@@ -1,4 +1,4 @@
-use clap::{Parser, ValueEnum};
+use clap::ValueEnum;
 use std::{fmt::Display, str::FromStr};
 
 use crate::MigrationError;

@@ -5,7 +5,7 @@ use std::{
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    config::{RuntimeConfig, SharedAll, UrlDb},
+    config::{RuntimeConfig, UrlDb},
     migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
@@ -128,13 +128,6 @@ fn runtime_config(mode: Mode) -> RuntimeConfig {
         .build()
 }
 
-fn shared_all(migrations_dir: PathBuf) -> SharedAll {
-    SharedAll::builder()
-        .migrations_dir(migrations_dir.into())
-        .verbose(3)
-        .build()
-}
-
 struct AssertionArg {
     db: Surreal<Any>,
     mig_files_count: u8,
@@ -190,7 +183,6 @@ async fn test_init(config: TestConfig) {
     let test_migration_name = "test_migration";
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
     let runtime_config = runtime_config(mode);
-    let shared_all = shared_all(temp_test_migration_dir.clone());
 
     assert_eq!(migration_files.len(), 0);
 
@@ -198,17 +190,20 @@ async fn test_init(config: TestConfig) {
         .name(test_migration_name.to_string())
         .reversible(reversible)
         .run(run)
-        .runtime_config(runtime_config)
-        .shared_all(shared_all)
         .build();
 
-    let cli = Cli::new(SubCommand::Init(init));
+    let mut cli = Cli::builder()
+        .subcmd(SubCommand::Init(init))
+        .verbose(3)
+        .migrations_dir(temp_test_migration_dir.clone())
+        .runtime_config(runtime_config)
+        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
     // 1st run
-    let db = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
+    let db = migration_cli_fn(&mut cli.clone(), resources.clone(), mock_prompter.clone()).await;
     let assert_with_db_instance1 = |db: Surreal<Any>| async move {
         assert_with_db_instance(AssertionArg {
             db: db.clone(),
@@ -223,7 +218,7 @@ async fn test_init(config: TestConfig) {
     assert_with_db_instance1(db.clone()).await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    let db2 = migration_cli_fn(cli.clone(), resources.clone(), mock_prompter.clone()).await;
+    let db2 = migration_cli_fn(&mut cli, resources.clone(), mock_prompter.clone()).await;
 
     assert_with_db_instance1(db.clone()).await;
 
@@ -237,7 +232,7 @@ async fn test_init(config: TestConfig) {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    let db3 = migration_cli_fn(cli, resources_v2, mock_prompter).await;
+    let db3 = migration_cli_fn(&mut cli, resources_v2, mock_prompter).await;
 
     assert_with_db_instance1(db.clone()).await;
 

@@ -5,7 +5,7 @@ use std::{
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    config::{RuntimeConfig, SharedAll, UrlDb},
+    config::{RuntimeConfig, UrlDb},
     migration_cli_fn, Cli, Generate, Init, Migration, MigrationFilename, MockPrompter, Mode,
     SubCommand,
 };
@@ -127,13 +127,6 @@ fn runtime_config(mode: Mode) -> RuntimeConfig {
         .build()
 }
 
-fn shared_all(migrations_dir: PathBuf) -> SharedAll {
-    SharedAll::builder()
-        .migrations_dir(migrations_dir.into())
-        .verbose(3)
-        .build()
-}
-
 struct AssertionArg {
     db: Surreal<Any>,
     mig_files_count: u8,
@@ -196,7 +189,6 @@ async fn test_generate(config: TestConfig) {
     //     .collect::<Vec<_>>();
 
     let runtime_config = runtime_config(mode);
-    let shared_all = shared_all(temp_test_migration_dir.clone());
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
