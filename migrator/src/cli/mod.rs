@@ -24,18 +24,17 @@ use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 pub use up::{Up, UpdateStrategy};
 
-use clap::{ArgAction, Args, Parser};
+use clap::{ArgAction, Parser};
 use surreal_query_builder::DbResources;
 
-use self::config::{RuntimeConfig, UrlDb};
-use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter};
-use pretty_env_logger;
+use self::config::RuntimeConfig;
+use crate::{MigrationConfig, MockPrompter, Prompter, RealPrompter};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug, Clone, TypedBuilder)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
 #[command(version)]
-pub struct Cli {
+pub struct Migrator {
     /// Subcommand: generate, up, down, list
     #[command(subcommand)]
     subcmd: SubCommand,
@@ -53,7 +52,7 @@ pub struct Cli {
     pub(crate) runtime_config: RuntimeConfig,
 }
 
-impl Cli {
+impl Migrator {
     pub async fn setup(&mut self) {
         self.setup_logging();
         self.setup_db().await;

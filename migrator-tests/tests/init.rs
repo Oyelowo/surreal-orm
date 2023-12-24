@@ -6,7 +6,7 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     config::{RuntimeConfig, UrlDb},
-    migration_cli_fn, Cli, Init, Migration, MigrationFilename, MockPrompter, Mode, SubCommand,
+    Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -190,7 +190,7 @@ async fn test_init(config: TestConfig) {
         .run(run)
         .build();
 
-    let mut cli = Cli::builder()
+    let mut cli = Migrator::builder()
         .subcmd(SubCommand::Init(init))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())

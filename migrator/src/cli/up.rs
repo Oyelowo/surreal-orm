@@ -72,7 +72,7 @@ impl From<&Up> for UpdateStrategy {
 }
 
 impl Up {
-    pub async fn run(&self, cli: &mut Cli) {
+    pub async fn run(&self, cli: &mut Migrator) {
         let file_manager = cli.file_manager();
         let update_strategy = self.update_strategy();
         let db = cli.db().clone();

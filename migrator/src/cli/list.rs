@@ -35,7 +35,7 @@ pub struct List {
 }
 
 impl List {
-    pub async fn run(&self, cli: &mut Cli) {
+    pub async fn run(&self, cli: &mut Migrator) {
         let db = cli.db().clone();
         let file_manager = cli.file_manager();
 
