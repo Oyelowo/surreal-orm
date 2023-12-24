@@ -1,51 +1,40 @@
-use super::config::{RuntimeConfig, SharedAll};
-use async_trait::async_trait;
-use clap::Parser;
-use surrealdb::{engine::any::Any, Surreal};
+use clap::{Args, Parser};
 use typed_builder::TypedBuilder;
 
-use crate::{
-    config::SetupDb, DbConnection, MigrationConfig, MigrationFilename, MigrationFlag,
-    RollbackOptions,
-};
+use crate::*;
 
 /// Rollback migrations
 #[derive(Parser, Debug, TypedBuilder, Clone)]
 pub struct Down {
-    /// Rollback to the latest migration
-    #[clap(
-        long,
-        conflicts_with = "number",
-        conflicts_with = "till",
-        help = "Rollback to the previous migration"
-    )]
+    #[command(flatten)]
+    strategy: RollbackDelta,
+}
+
+impl Down {
+    pub fn rollback_strategy(&self) -> RollbackStrategy {
+        RollbackStrategy::from(self)
+    }
+}
+
+#[derive(Args, Debug, Clone)]
+#[group(required = false, multiple = false)]
+pub struct RollbackDelta {
+    /// Rollback to the previous migration
+    #[arg(long, help = "Rollback to the previous migration")]
     pub(crate) previous: bool,
+
     /// Rollback by count/number
-    #[clap(
-        short,
-        long,
-        conflicts_with = "previous",
-        conflicts_with = "till",
-        help = "Rollback by count"
-    )]
+    #[arg(short, long, help = "Rollback by the number specified")]
     pub(crate) number: Option<u32>,
+
     /// Rollback till a specific migration ID
-    #[clap(
+    #[arg(
         short,
         long,
-        conflicts_with = "previous",
-        conflicts_with = "number",
+        value_parser = mig_name_parser,
         help = "Rollback till a specific migration ID"
     )]
-    pub(crate) till: Option<String>,
-
-    #[clap(flatten)]
-    pub(crate) shared_all: SharedAll,
-    #[clap(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
-
-    #[clap(skip)]
-    pub(crate) db: Option<Surreal<Any>>,
+    pub(crate) till: Option<MigrationFilename>,
 }
 
 pub enum RollbackStrategy {
@@ -63,12 +52,12 @@ pub enum RollbackStrategy {
 
 impl From<&Down> for RollbackStrategy {
     fn from(rollback: &Down) -> Self {
-        if rollback.previous {
+        if rollback.strategy.previous {
             RollbackStrategy::Previous
-        } else if let Some(by_count) = rollback.number {
+        } else if let Some(by_count) = rollback.strategy.number {
             RollbackStrategy::Number(by_count)
-        } else if let Some(till) = rollback.till.clone() {
-            RollbackStrategy::Till(till.try_into().unwrap())
+        } else if let Some(by_name) = rollback.strategy.till.clone() {
+            RollbackStrategy::Till(by_name)
         } else {
             RollbackStrategy::Previous
         }
@@ -76,11 +65,11 @@ impl From<&Down> for RollbackStrategy {
 }
 
 impl Down {
-    pub async fn run(&self) {
-        let mut files_config = MigrationConfig::new().make_strict();
-        let db = self.db().await;
+    pub async fn run(&self, cli: &mut Cli) {
+        let file_manager = cli.file_manager();
+        let db = cli.db().clone();
 
-        if let Ok(MigrationFlag::OneWay) = files_config.detect_migration_type() {
+        if let Ok(MigrationFlag::OneWay) = file_manager.detect_migration_type() {
             log::error!(
                 "Cannot rollback one way migrations. \
             Create a new migration to reverse the changes or run cargo run -- reset -r \
@@ -89,20 +78,16 @@ impl Down {
             panic!();
         }
 
-        let rollback_strategy = RollbackStrategy::from(self);
+        let rollback_strategy = self.rollback_strategy();
 
-        if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.set_custom_path(path)
-        };
-
-        let rollback = files_config
+        let rollback = file_manager
             .two_way()
             .run_down_migrations(
                 db.clone(),
                 RollbackOptions {
                     rollback_strategy,
-                    mode: self.runtime_config.mode.unwrap_or_default(),
-                    prune_files_after_rollback: self.runtime_config.prune,
+                    mode: cli.runtime_config.mode,
+                    prune_files_after_rollback: cli.runtime_config.prune,
                 },
             )
             .await;
@@ -112,17 +97,5 @@ impl Down {
         } else {
             log::info!("Rollback successful");
         }
-    }
-}
-
-#[async_trait]
-impl DbConnection for Down {
-    async fn create_and_set_connection(&mut self) {
-        let db = SetupDb::new(&self.runtime_config).await.clone();
-        self.db = Some(db.clone());
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        self.db.clone().expect("Failed to get db")
     }
 }

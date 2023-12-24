@@ -1,7 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
-use super::up::Up;
+use super::up::{FastForwardDelta, Up};
 
-use crate::{DbConnection, MigrationConfig, MigrationFlag, Prompter};
+use crate::{Cli, DbConnection, MigrationConfig, MigrationFlag, Prompter};
 use async_trait::async_trait;
 use clap::Parser;
 use surreal_query_builder::DbResources;
@@ -19,32 +19,23 @@ pub struct Generate {
     /// Whether or not to run the migrations after generation.
     #[clap(long, help = "Whether to run the migrations after generation")]
     pub(crate) run: bool,
-
-    #[clap(flatten)]
-    pub(crate) shared_all: SharedAll,
-
-    #[clap(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
-
-    #[clap(skip)]
-    #[builder(default)]
-    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Generate {
-    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
-        let mut files_config = MigrationConfig::new().make_strict();
+    pub async fn run(
+        &self,
+        cli: &mut Cli,
+        codebase_resources: impl DbResources,
+        prompter: impl Prompter,
+    ) {
+        let file_manager = cli.file_manager();
         let migration_name = &self.name;
-
-        if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.set_custom_path(path)
-        };
-        let mig_type = files_config.detect_migration_type();
+        let mig_type = file_manager.detect_migration_type();
 
         match mig_type {
             Ok(MigrationFlag::TwoWay) => {
                 log::info!("Generating two-way migration");
-                let gen = files_config
+                let gen = file_manager
                     .two_way()
                     .generate_migrations(&migration_name, codebase_resources, prompter)
                     .await;
@@ -54,7 +45,7 @@ impl Generate {
                 }
             }
             Ok(MigrationFlag::OneWay) => {
-                let gen = files_config
+                let gen = file_manager
                     .one_way()
                     .generate_migrations(migration_name, codebase_resources, prompter)
                     .await;
@@ -73,7 +64,7 @@ impl Generate {
         if self.run {
             log::info!("Running generated migrations");
 
-            self.up().run().await;
+            self.up().run(cli).await;
 
             log::info!("Successfully ran the generated migration(s)");
         }
@@ -83,25 +74,11 @@ impl Generate {
 
     fn up(&self) -> Up {
         Up {
-            latest: Some(true),
-            number: None,
-            till: None,
-            shared_all: self.shared_all.clone(),
-            runtime_config: self.runtime_config.clone(),
-            db: self.db.clone(),
+            fast_forward: FastForwardDelta {
+                latest: true,
+                number: None,
+                till: None,
+            },
         }
-    }
-}
-
-#[async_trait]
-impl DbConnection for Generate {
-    async fn create_and_set_connection(&mut self) {
-        let mut up = self.up();
-        up.create_and_set_connection().await;
-        self.db = up.db.clone();
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        self.db.clone().expect("Failed to get db")
     }
 }

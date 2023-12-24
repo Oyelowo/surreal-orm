@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use std::{fmt::Display, str::FromStr};
 
 use crate::MigrationError;
@@ -61,26 +61,11 @@ impl TryFrom<String> for MigrationFlag {
     }
 }
 
-#[derive(Parser, Default, Debug, Clone, Copy, PartialEq)]
+#[derive(ValueEnum, Default, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Mode {
     #[default]
     Strict,
     Lax,
-}
-
-impl FromStr for Mode {
-    type Err = MigrationError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.trim().to_lowercase().as_str() {
-            "strict" => Ok(Self::Strict),
-            "lax" => Ok(Self::Lax),
-            _ => Err(MigrationError::InvalidMigrationMode(
-                s.to_string(),
-                Self::options().join(", "),
-            )),
-        }
-    }
 }
 
 impl Display for Mode {
@@ -94,15 +79,11 @@ impl Display for Mode {
 }
 
 impl Mode {
-    pub fn options() -> Vec<String> {
-        vec![Self::Strict.to_string(), Self::Lax.to_string()]
-    }
-
     pub fn is_strict(&self) -> bool {
         matches!(self, Self::Strict)
     }
 
-    pub fn is_relaxed(&self) -> bool {
+    pub fn is_lax(&self) -> bool {
         matches!(self, Self::Lax)
     }
 }

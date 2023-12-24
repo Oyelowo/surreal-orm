@@ -1,13 +1,10 @@
-use super::config::{RuntimeConfig, SharedAll};
-use async_trait::async_trait;
-use clap::Parser;
-use std::{fmt::Display, str::FromStr};
-use surrealdb::{engine::any::Any, Surreal};
+use clap::{Args, ValueEnum};
+use std::fmt::Display;
 use typed_builder::TypedBuilder;
 
-use crate::{config::SetupDb, DbConnection, MigrationConfig, MigrationFlag};
+use crate::*;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug)]
 pub enum Status {
     Applied,
     Pending,
@@ -24,75 +21,31 @@ impl Display for Status {
     }
 }
 
-impl Status {
-    pub fn variants() -> Vec<String> {
-        [Status::Applied, Status::Pending, Status::All]
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>()
-    }
-}
-
-impl FromStr for Status {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.trim().to_lowercase();
-        if s == "pending" {
-            Ok(Status::Pending)
-        } else if s == "applied" {
-            Ok(Status::Applied)
-        } else if s == "all" {
-            Ok(Status::All)
-        } else {
-            Err(format!(
-                "Invalid status. Must be one of: {}",
-                Status::variants().join(", ")
-            ))
-        }
-    }
-}
-
 /// Run migrations
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct List {
     /// Status of migrations to list
-    #[clap(
+    #[arg(
+        value_enum,
         long,
         help = "Status of migrations to list. Can be 'applied', 'pending' or 'all'",
-        default_value = "applied"
+        default_value_t = Status::Applied
     )]
-    pub(crate) status: Option<Status>,
-
-    #[clap(flatten)]
-    pub(crate) shared_all: SharedAll,
-
-    #[clap(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
-
-    #[clap(skip)]
-    pub(crate) db: Option<Surreal<Any>>,
+    pub(crate) status: Status,
 }
 
 impl List {
-    pub async fn run(&self) {
-        let db = self.db().await;
-        let mut files_config = MigrationConfig::new().make_strict();
+    pub async fn run(&self, cli: &mut Cli) {
+        let db = cli.db().clone();
+        let file_manager = cli.file_manager();
 
-        if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.set_custom_path(path)
-        };
-
-        match files_config.detect_migration_type() {
+        match file_manager.detect_migration_type() {
             Ok(MigrationFlag::TwoWay) => {
                 log::info!("Listing two way migrations");
-                let migrations = files_config
+
+                let migrations = file_manager
                     .two_way()
-                    .list_migrations(
-                        db.clone(),
-                        self.status.unwrap_or(Status::All),
-                        self.runtime_config.mode.unwrap_or_default(),
-                    )
+                    .list_migrations(db.clone(), self.status, cli.runtime_config.mode)
                     .await;
 
                 match migrations {
@@ -112,13 +65,9 @@ impl List {
             }
             Ok(MigrationFlag::OneWay) => {
                 log::info!("Listing one way migrations");
-                let migrations = files_config
+                let migrations = file_manager
                     .one_way()
-                    .list_migrations(
-                        db.clone(),
-                        self.status.unwrap_or(Status::All),
-                        self.runtime_config.mode.unwrap_or_default(),
-                    )
+                    .list_migrations(db.clone(), self.status, cli.runtime_config.mode)
                     .await;
 
                 match migrations {
@@ -139,19 +88,5 @@ impl List {
                 log::error!("Failed to detect migration type: {}", e.to_string());
             }
         };
-    }
-}
-
-#[async_trait]
-impl DbConnection for List {
-    async fn create_and_set_connection(&mut self) {
-        let db = SetupDb::new(&self.runtime_config).await.clone();
-        if self.db.is_none() {
-            self.db = Some(db.clone());
-        }
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        self.db.clone().expect("Failed to get db")
     }
 }
