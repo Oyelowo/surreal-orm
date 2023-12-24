@@ -159,11 +159,8 @@ impl MigrationConfig {
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<MigrationFilenames> {
         let migration_dir_path = self.resolve_migration_directory(create_dir_if_not_exists)?;
-        dbg!("===========================================");
-        dbg!(&migration_dir_path);
-        dbg!("===========================================");
-
         let migration_dir_path_str = migration_dir_path.to_string_lossy().to_string();
+
         log::info!("Migration dir path: {migration_dir_path_str}");
 
         let migrations = fs::read_dir(&migration_dir_path).map_err(|e| {

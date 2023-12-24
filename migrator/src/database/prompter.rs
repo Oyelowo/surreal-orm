@@ -1,4 +1,5 @@
 use inquire::error::InquireError;
+use typed_builder::TypedBuilder;
 
 pub trait Prompter {
     fn prompt(&self) -> Result<bool, InquireError> {
@@ -16,7 +17,7 @@ pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, TypedBuilder)]
 pub struct MockPrompter {
     pub confirmation: bool,
 }

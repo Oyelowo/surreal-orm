@@ -26,7 +26,7 @@ async fn main() {
     let _db = initialize_db().await;
     // Directly run the cli
     // cli::migration_cli(Resources, Some(db)).await;
-    cli::migration_cli(Resources).await;
+    cli::Cli::run(Resources).await;
 
     // Run the cli through cargo
     // _generate();
