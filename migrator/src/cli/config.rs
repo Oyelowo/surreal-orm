@@ -1,4 +1,4 @@
-use clap::{ArgAction, Parser};
+use clap::{ArgAction, Args, Parser};
 use std::fmt::Display;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -55,7 +55,7 @@ impl FromStr for UrlDb {
     }
 }
 
-#[derive(Parser, Debug, Clone, TypedBuilder)]
+#[derive(Args, Debug, Clone, TypedBuilder)]
 pub struct RuntimeConfig {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
@@ -68,7 +68,8 @@ pub struct RuntimeConfig {
     /// - IndxDB-Backend: `indxdb://MyDatabase`
     /// - TiKV-Backend: `tikv://localhost:2379`
     /// - FoundationDB-Backend: `fdb://fdb.cluster`
-    #[clap(
+    #[arg(
+            global = true,
             long,
             // value_name = "URL",
             default_value = "ws://localhost:8000",
@@ -85,81 +86,65 @@ pub struct RuntimeConfig {
         )]
     pub(crate) url: UrlDb,
 
-    #[clap(long, default_value = "test", help = "Database name")]
-    #[builder(setter(strip_option))]
-    pub(crate) db: Option<String>,
+    #[arg(global = true, long, default_value_t = String::from("test"), help = "Database name")]
+    #[builder(default = "test".into())]
+    pub(crate) db: String,
 
-    #[clap(long, default_value = "test", help = "Namespace name")]
-    #[builder(setter(strip_option))]
-    pub(crate) ns: Option<String>,
+    #[arg(global = true, long, default_value_t = String::from("test"), help = "Namespace name")]
+    pub(crate) ns: String,
 
     /// users scope
-    #[clap(long, help = "Scope")]
+    #[arg(global = true, long, help = "Scope")]
     #[builder(default, setter(strip_option))]
     pub(crate) sc: Option<String>,
 
-    #[clap(short, long, default_value = "root", help = "User name")]
-    #[builder(setter(strip_option))]
-    pub(crate) user: Option<String>,
+    #[arg(
+        global = true,
+        short,
+        long,
+        default_value_t = String::from("root"),
+        help = "User name"
+    )]
+    #[builder(default = "root".into())]
+    pub(crate) user: String,
 
-    #[clap(short, long, default_value = "root", help = "Password")]
-    #[builder(setter(strip_option))]
-    pub(crate) pass: Option<String>,
+    #[arg(global = true, short, long, default_value_t = String::from("root"), help = "Password")]
+    #[builder(default = "root".into())]
+    pub(crate) pass: String,
 
-    #[clap(
+    #[arg(
+        value_enum,
+        global = true,
         long,
         help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
             that file contents and valid and also checking filenames. Lax does not.",
-        default_value = "strict"
+        default_value_t = Mode::Strict,
     )]
-    #[builder(setter(strip_option))]
-    pub(crate) mode: Option<Mode>,
+    pub(crate) mode: Mode,
 
-    #[clap(
+    #[arg(
+        global = true,
         long,
         help = "If to prune migration files after rollback",
-        default_value = "false"
+        default_value_t = false
     )]
     pub(crate) prune: bool,
+
+    #[arg(skip)]
+    #[builder(setter(strip_option))]
+    db_connection: Option<Surreal<Any>>,
 }
 
-impl Default for RuntimeConfig {
-    fn default() -> Self {
-        RuntimeConfig::builder()
-            .db("test".into())
-            .ns("test".into())
-            .user("root".into())
-            .pass("root".into())
-            .mode(Mode::Strict)
-            .prune(false)
-            .url(UrlDb::Memory)
-            .build()
-    }
-}
-
-pub struct SetupDb {
-    db: Surreal<Any>,
-}
-
-impl SetupDb {
-    // pub async fn new(runtime_config: RuntimeConfig) -> Self {
-    //     let db = Self::setup_db(&runtime_config).await;
-    //     Self { db }
-    // }
-
-    pub fn db(&self) -> Surreal<Any> {
-        self.db.clone()
-    }
-
-    pub(crate) async fn new(runtime_config: &RuntimeConfig) -> Surreal<Any> {
-        let cli_db_url = &runtime_config.url;
-        let database = runtime_config.db.clone().unwrap_or_default();
+impl RuntimeConfig {
+    pub async fn setup(&mut self) -> &mut Self {
+        let cli_db_url = &self.url;
+        let database = self.db.clone();
         let database = database.as_str();
-        let namespace = runtime_config.ns.clone().unwrap_or_default();
+        let namespace = self.ns.clone();
         let namespace = namespace.as_str();
-        let username = runtime_config.user.clone().unwrap_or_default();
+        let username = self.user.clone();
         let username = username.as_str();
-        let password = runtime_config.pass.clone().unwrap_or_default();
+        let password = self.pass.clone();
         let password = password.as_str();
         let config = Config::new().capabilities(Capabilities::all());
 
@@ -171,7 +156,7 @@ impl SetupDb {
             UrlDb::Others(_s) => config,
         };
 
-        let db = connect((cli_db_url.to_string(), config)).await.unwrap();
+        let db_instance = connect((cli_db_url.to_string(), config)).await.unwrap();
 
         let db_creds = Database {
             username,
@@ -181,69 +166,50 @@ impl SetupDb {
         };
 
         // TODO: Support scope signin
-        db.signin(db_creds).await.expect("Failed to signin");
-        db.use_db(runtime_config.clone().db.unwrap_or_default())
+        db_instance
+            .signin(db_creds)
+            .await
+            .expect("Failed to signin");
+        db_instance
+            .use_db(self.clone().db)
             .await
             .expect("Failed to use db");
-        db.use_ns(runtime_config.clone().sc.unwrap_or_default())
+        db_instance
+            .use_ns(self.clone().sc.unwrap_or_default())
             .await
             .expect("Failed to use ns");
-        db
-        // Self::init_db(db.clone(), &runtime_config).await
+
+        self.db_connection = Some(db_instance);
+
+        // Self {
+        //     url: cli_db_url.clone(),
+        //     db: database.into(),
+        //     ns: namespace.into(),
+        //     sc: self.sc.clone(),
+        //     user: username.into(),
+        //     pass: password.into(),
+        //     mode: self.mode.clone(),
+        //     prune: self.prune,
+        //     db_connection: self.db_connection.clone(),
+        // }
+        self
     }
 
-    pub async fn init_db(db: Surreal<Any>, shared: &RuntimeConfig) -> Surreal<Any> {
-        match (&shared.user, &shared.pass) {
-            (Some(u), Some(p)) => {
-                let signin = db
-                    .signin(Root {
-                        username: u.as_str(),
-                        password: p.as_str(),
-                    })
-                    .await;
-                if let Err(e) = signin {
-                    println!("Failed to signin: {e}");
-                    log::error!("Failed to signin: {e}");
-                    panic!();
-                }
-                log::info!("Signed in successfully");
-            }
-            (Some(_), None) => {
-                log::error!("Password not provided");
-                panic!();
-            }
-            (None, Some(_)) => {
-                log::error!("User not provided");
-                panic!();
-            }
-            _ => {
-                log::warn!("User and password not provided, using root default");
-                // db.signin(Root {
-                //     username: "root",
-                //     password: "root",
-                // })
-                // .await
-                // .expect("Failed to signin");
-            }
-        };
-
-        if let Some(db_name) = &shared.db {
-            log::info!("Using db {}", db_name);
-            let db = db.use_db(db_name).await;
-            if let Err(e) = db {
-                log::error!("Failed to use db: {}", e.to_string());
-                panic!();
-            }
-        }
-
-        if let Some(ns_name) = &shared.ns {
-            log::info!("Using ns {}", ns_name);
-            let ns = db.use_ns(ns_name).await;
-            if let Err(e) = ns {
-                log::error!("Failed to use ns: {}", e.to_string());
-                panic!();
-            }
-        }
-        db
+    pub fn db(&self) -> Option<Surreal<Any>> {
+        self.db_connection.clone()
     }
 }
+
+// impl Default for RuntimeConfig {
+//     fn default() -> Self {
+//         RuntimeConfig::builder()
+//             .db("test".into())
+//             .ns("test".into())
+//             .user("root".into())
+//             .pass("root".into())
+//             .mode(Mode::Strict)
+//             .prune(false)
+//             .url(UrlDb::Memory)
+//             .build()
+//     }
+// }

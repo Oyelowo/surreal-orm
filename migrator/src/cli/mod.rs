@@ -1,3 +1,4 @@
+mod arg_parser;
 pub mod config;
 mod down;
 mod generate;
@@ -8,7 +9,9 @@ mod reset;
 mod shared_traits;
 mod up;
 
-use async_trait::async_trait;
+use std::path::PathBuf;
+
+pub use arg_parser::*;
 pub use down::{Down, RollbackStrategy};
 pub use generate::Generate;
 pub use init::Init;
@@ -18,27 +21,85 @@ pub use reset::Reset;
 pub use shared_traits::DbConnection;
 
 use surrealdb::{engine::any::Any, Surreal};
+use typed_builder::TypedBuilder;
 pub use up::{Up, UpdateStrategy};
 
-use clap::Parser;
+use clap::{ArgAction, Args, Parser};
 use surreal_query_builder::DbResources;
 
-use crate::{Prompter, RealPrompter};
+use crate::{MigrationConfig, Mode, Prompter, RealPrompter};
+
+use self::config::{RuntimeConfig, UrlDb};
 
 /// Surreal ORM CLI
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, TypedBuilder)]
 #[clap(name = "SurrealOrm", about = "Surreal ORM CLI")]
+#[command(version)]
 pub struct Cli {
     /// Subcommand: generate, up, down, list
-    #[clap(subcommand)]
+    #[command(subcommand)]
     subcmd: SubCommand,
+
+    /// Optional custom migrations dir
+    #[arg(global = true, short, long, help = "Optional custom migrations dir")]
+    #[builder(default, setter(strip_option))]
+    pub migrations_dir: Option<PathBuf>,
+
+    /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
+    #[arg(global = true, short, long, action = ArgAction::Count, default_value_t=3)]
+    pub(crate) verbose: u8,
+
+    #[command(flatten)]
+    pub(crate) runtime_config: RuntimeConfig,
 }
 
 impl Cli {
-    pub fn new(sub_command: SubCommand) -> Self {
-        Self {
-            subcmd: sub_command,
-        }
+    // pub fn new(sub_command: SubCommand) -> Self {
+    //     Self {
+    //         subcmd: sub_command,
+    //         runtime_config: todo!(),
+    //         db: None,
+    //     }
+    // }
+
+    pub fn setup_logging(&self) {
+        let verbosity = self.verbose;
+        let log_level = match verbosity {
+            0 => "error",
+            1 => "warn",
+            2 => "info",
+            3 => "debug",
+            _ => "trace",
+        };
+
+        std::env::set_var("RUST_LOG", log_level);
+        pretty_env_logger::init();
+    }
+
+    pub fn setup_db(&mut self) {
+        self.runtime_config.setup();
+    }
+
+    pub fn setup(&mut self) {
+        self.setup_db();
+        self.setup_logging();
+    }
+
+    pub fn db(&self) -> Surreal<Any> {
+        self.runtime_config.db().expect("Failed to get db")
+    }
+
+    pub fn file_manager(&self) -> MigrationConfig {
+        let fm_init = MigrationConfig::builder()
+            .custom_path(self.migrations_dir.clone())
+            .mode(self.runtime_config.mode);
+
+        // let fm = fm_init.build().detect_migration_type().ok();
+
+        // fm_init
+        //     .migration_flag(fm_init.build().detect_migration_type().ok())
+        //     .build()
+        fm_init.build()
     }
 }
 
@@ -62,61 +123,6 @@ pub enum SubCommand {
     List(List),
     /// Delete Unapplied local migration files that have not been applied to the current database instance
     Prune(Prune),
-}
-
-#[async_trait]
-impl crate::DbConnection for SubCommand {
-    async fn create_and_set_connection(&mut self) {
-        match self {
-            SubCommand::Init(init) => init.create_and_set_connection().await,
-            SubCommand::Generate(generate) => generate.create_and_set_connection().await,
-            SubCommand::Up(up) => up.create_and_set_connection().await,
-            SubCommand::Down(down) => down.create_and_set_connection().await,
-            SubCommand::List(list) => list.create_and_set_connection().await,
-            SubCommand::Prune(prune) => prune.create_and_set_connection().await,
-            SubCommand::Reset(reset) => reset.create_and_set_connection().await,
-        };
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        match self {
-            SubCommand::Init(init) => init.db().await,
-            SubCommand::Generate(generate) => generate.db().await,
-            SubCommand::Up(up) => up.db().await,
-            SubCommand::Down(down) => down.db().await,
-            SubCommand::List(list) => list.db().await,
-            SubCommand::Prune(prune) => prune.db().await,
-            SubCommand::Reset(reset) => reset.db().await,
-        }
-    }
-}
-
-impl SubCommand {
-    pub fn get_verbosity(&self) -> u8 {
-        match self {
-            SubCommand::Init(generate) => generate.shared_all.verbose,
-            SubCommand::Generate(generate) => generate.shared_all.verbose,
-            SubCommand::Up(run) => run.shared_all.verbose,
-            SubCommand::Down(rollback) => rollback.shared_all.verbose,
-            SubCommand::List(list) => list.shared_all.verbose,
-            SubCommand::Prune(prune) => prune.shared_all.verbose,
-            SubCommand::Reset(reset) => reset.shared_all.verbose,
-        }
-    }
-
-    pub fn setup_logging(&self) {
-        let verbosity = self.get_verbosity();
-        let log_level = match verbosity {
-            0 => "error",
-            1 => "warn",
-            2 => "info",
-            3 => "debug",
-            _ => "trace",
-        };
-
-        std::env::set_var("RUST_LOG", log_level);
-        pretty_env_logger::init();
-    }
 }
 
 /// Run migration cli
@@ -152,29 +158,25 @@ impl SubCommand {
 /// }
 /// ```
 pub async fn migration_cli(codebase_resources: impl DbResources) {
-    let cli = Cli::parse();
-    cli.subcmd.setup_logging();
+    let mut cli = Cli::parse();
 
-    let _ = migration_cli_fn(cli, codebase_resources, RealPrompter).await;
-    ()
+    let _ = migration_cli_fn(&mut cli, codebase_resources, RealPrompter).await;
 }
 
 pub async fn migration_cli_fn(
-    mut cli: Cli,
+    cli: &mut Cli,
     codebase_resources: impl DbResources,
     prompter: impl Prompter,
 ) -> Surreal<Any> {
-    cli.subcmd.create_and_set_connection().await;
-
-    match &cli.subcmd {
-        SubCommand::Init(init) => init.run(codebase_resources, prompter).await,
-        SubCommand::Generate(generate) => generate.run(codebase_resources, prompter).await,
-        SubCommand::Up(up) => up.run().await,
-        SubCommand::Down(down) => down.run().await,
-        SubCommand::Prune(prune) => prune.run().await,
-        SubCommand::List(prune) => prune.run().await,
-        SubCommand::Reset(reset) => reset.run(codebase_resources, prompter).await,
+    match cli.subcmd.clone() {
+        SubCommand::Init(init) => init.run(cli, codebase_resources, prompter).await,
+        SubCommand::Generate(generate) => generate.run(cli, codebase_resources, prompter).await,
+        SubCommand::Up(up) => up.run(cli).await,
+        SubCommand::Down(down) => down.run(cli).await,
+        SubCommand::Prune(prune) => prune.run(cli).await,
+        SubCommand::List(prune) => prune.run(cli).await,
+        SubCommand::Reset(reset) => reset.run(cli, codebase_resources, prompter).await,
     };
 
-    cli.subcmd.db().await
+    cli.db().clone()
 }

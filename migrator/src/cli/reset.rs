@@ -1,7 +1,7 @@
 use super::config::{RuntimeConfig, SharedAll};
 
 use async_trait::async_trait;
-use clap::Parser;
+use clap::{Args, Parser};
 use std::fs;
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
@@ -9,50 +9,42 @@ use typed_builder::TypedBuilder;
 use surreal_query_builder::DbResources;
 
 use super::init::Init;
-use crate::{DbConnection, MigrationConfig, Prompter};
+use crate::{Cli, DbConnection, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Reset {
     /// Name of the first migration file(s) to reinitialize to
-    #[clap(long)]
+    #[arg(long)]
     pub(crate) name: String,
 
     /// Whether or not to run the migrations after reinitialization. Reinitalization
     /// is done by deleting all migration files, and regenerating
     /// the first migration file(s) which include queries to delete all old
     /// migration metadata in the database before creating the new ones.
-    #[clap(long)]
+    #[arg(long)]
     pub(crate) run: bool,
 
     /// Two way migration
-    #[clap(
+    #[arg(
         short,
         long,
         help = "Whether to reinitialize as Unidirectional(Up only) Bidirectional(up & down) migration(S)"
     )]
     pub(crate) reversible: bool,
-
-    #[clap(flatten)]
-    pub(crate) shared_all: SharedAll,
-
-    #[clap(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
-
-    #[clap(skip)]
-    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Reset {
-    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
-        let mut files_config = MigrationConfig::new().make_strict();
+    pub async fn run(
+        &self,
+        cli: &mut Cli,
+        codebase_resources: impl DbResources,
+        prompter: impl Prompter,
+    ) {
+        let file_manager = cli.file_manager();
+        let dir = file_manager.get_migration_dir_create_if_none();
 
-        if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.set_custom_path(path)
-        };
-
-        let dir = files_config.get_migration_dir_create_if_none();
         match dir {
             Ok(dir) => {
                 if dir.exists() {
@@ -75,7 +67,9 @@ impl Reset {
             }
         };
 
-        self.init_command().run(codebase_resources, prompter).await;
+        self.init_command()
+            .run(cli, codebase_resources, prompter)
+            .await;
 
         log::info!("Reset successful");
     }
@@ -85,22 +79,6 @@ impl Reset {
             name: self.name.clone(),
             run: self.run,
             reversible: self.reversible.clone(),
-            shared_all: self.shared_all.clone(),
-            runtime_config: self.runtime_config.clone(),
-            db: self.db.clone(),
         }
-    }
-}
-
-#[async_trait]
-impl DbConnection for Reset {
-    async fn create_and_set_connection(&mut self) {
-        let mut up = self.init_command();
-        up.create_and_set_connection().await;
-        self.db = up.db.clone();
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        self.db.clone().expect("Failed to get db")
     }
 }

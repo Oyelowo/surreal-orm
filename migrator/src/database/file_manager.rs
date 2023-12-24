@@ -5,6 +5,7 @@ use std::{
 
 use surreal_query_builder::DbResources;
 use surrealdb::{Connection, Surreal};
+use typed_builder::TypedBuilder;
 
 use crate::*;
 
@@ -14,7 +15,7 @@ struct FileManager {}
 ///
 impl FileManager {}
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, TypedBuilder)]
 pub struct MigrationConfig {
     // pub migration_name: String,
     pub mode: Mode,
@@ -26,12 +27,30 @@ pub struct MigrationConfig {
     // before initializing the migration directory.
     // Before init => None,
     // After init => Some(MigrationFlag)
+    #[builder(default)]
     pub migration_flag: Option<MigrationFlag>,
 }
 
 impl MigrationConfig {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    // pub fn from_cli(cli: Cli) -> MigrationResult<Self> {
+    //     let rc = cli.runtime_config;
+    //     let conf_init = Self::builder()
+    //         .mode(rc.mode)
+    //         .custom_path(cli.migrations_dir);
+    //     let conf = conf_init.build();
+    //     let res = conf_init
+    //         .migration_flag(conf.detect_migration_type()?)
+    //         .build();
+    //     Ok(res)
+    // }
+
+    pub fn set_flag(mut self, flag: MigrationFlag) -> Self {
+        self.migration_flag = Some(flag);
+        self
     }
 
     pub fn migration_flag_checked(&self) -> MigrationResult<MigrationFlag> {

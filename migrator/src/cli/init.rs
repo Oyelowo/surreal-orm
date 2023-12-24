@@ -1,17 +1,17 @@
 use super::config::{RuntimeConfig, SharedAll};
-use super::up::Up;
+use super::up::{FastForwardDelta, Up};
 
-use crate::{DbConnection, MigrationConfig, Prompter};
+use crate::{Cli, DbConnection, MigrationConfig, Prompter};
 
 use async_trait::async_trait;
-use clap::Parser;
+use clap::{Args, Parser};
 use surreal_query_builder::DbResources;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Init migrations
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Init {
     /// Name of the migration
     #[clap(long, help = "Name of the first migration file(s)")]
@@ -28,27 +28,20 @@ pub struct Init {
         help = "Unidirectional(Up only) Bidirectional(up & down) migration(S)"
     )]
     pub(crate) reversible: bool,
-
-    #[clap(flatten)]
-    pub(crate) shared_all: SharedAll,
-
-    #[clap(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
-
-    #[clap(skip)]
-    #[builder(default)]
-    pub(crate) db: Option<Surreal<Any>>,
 }
 
 impl Init {
-    pub async fn run(&self, codebase_resources: impl DbResources, prompter: impl Prompter) {
-        let mut files_config = MigrationConfig::new().make_strict();
+    pub async fn run(
+        &self,
+        cli: &mut Cli,
+        codebase_resources: impl DbResources,
+        prompter: impl Prompter,
+    ) {
+        // let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
 
-        if let Some(path) = self.shared_all.migrations_dir.clone() {
-            files_config = files_config.set_custom_path(path)
-        };
-        let files = files_config.clone().get_migrations_filenames(true);
+        let file_manager = cli.file_manager();
+        let files = file_manager.get_migrations_filenames(true);
 
         match files {
             Ok(files) => {
@@ -66,7 +59,7 @@ impl Init {
         };
 
         if self.reversible {
-            let gen = files_config
+            let gen = file_manager
                 .two_way()
                 .generate_migrations(&migration_name, codebase_resources, prompter)
                 .await;
@@ -75,7 +68,7 @@ impl Init {
                 return;
             }
         } else {
-            let gen = files_config
+            let gen = file_manager
                 .one_way()
                 .generate_migrations(migration_name, codebase_resources, prompter)
                 .await;
@@ -89,7 +82,7 @@ impl Init {
         if self.run {
             log::info!("Running initial migrations");
 
-            self.up().run().await;
+            self.up().run(cli).await;
 
             log::info!("Successfully ran initial migrations");
         }
@@ -99,25 +92,11 @@ impl Init {
 
     pub fn up(&self) -> Up {
         Up {
-            latest: Some(true),
-            number: None,
-            till: None,
-            shared_all: self.shared_all.clone(),
-            runtime_config: self.runtime_config.clone(),
-            db: self.db.clone(),
+            fast_forward: FastForwardDelta {
+                latest: true,
+                number: None,
+                till: None,
+            },
         }
-    }
-}
-
-#[async_trait]
-impl DbConnection for Init {
-    async fn create_and_set_connection(&mut self) {
-        let mut up = self.up();
-        up.create_and_set_connection().await;
-        self.db = up.db.clone();
-    }
-
-    async fn db(&self) -> Surreal<Any> {
-        self.db.clone().expect("Failed to get db")
     }
 }
