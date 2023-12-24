@@ -6,7 +6,7 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     config::{RuntimeConfig, UrlDb},
-    Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
+    Generate, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -201,7 +201,7 @@ async fn test_generate(config: TestConfig) {
     //     .runtime_config(runtime_config.clone())
     // .shared_all(shared_all.clone())
 
-    let mut cli_gen = Cli::builder()
+    let mut cli_gen = Migrator::builder()
         .subcmd(SubCommand::Generate(generate_config))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
@@ -211,12 +211,11 @@ async fn test_generate(config: TestConfig) {
     //     .build()
     let resources = Resources;
 
-    let db = migration_cli_fn(
-        &mut cli_gen.clone(),
-        resources.clone(),
-        mock_prompter.clone(),
-    )
-    .await;
+    cli_gen
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+    let db = cli_gen.db().clone();
+
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
     let mig_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     // You have to first initialize before you can start generating migrations.

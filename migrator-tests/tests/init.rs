@@ -190,7 +190,7 @@ async fn test_init(config: TestConfig) {
         .run(run)
         .build();
 
-    let mut cli = Migrator::builder()
+    let mut migrator1 = Migrator::builder()
         .subcmd(SubCommand::Init(init))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
@@ -201,10 +201,13 @@ async fn test_init(config: TestConfig) {
     let mock_prompter = MockPrompter { confirmation: true };
 
     // 1st run
-    let db = migration_cli_fn(&mut cli.clone(), resources.clone(), mock_prompter.clone()).await;
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+
     let assert_with_db_instance1 = |db: Surreal<Any>| async move {
         assert_with_db_instance(AssertionArg {
-            db: db.clone(),
+            db,
             mig_files_count,
             db_mig_count,
             migration_files_dir: temp_test_migration_dir.clone(),
@@ -213,15 +216,18 @@ async fn test_init(config: TestConfig) {
         .await;
     };
 
-    assert_with_db_instance1(db.clone()).await;
+    let cli_db = migrator1.db().clone();
+    assert_with_db_instance1(cli_db.clone()).await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    let db2 = migration_cli_fn(&mut cli, resources.clone(), mock_prompter.clone()).await;
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
 
-    assert_with_db_instance1(db.clone()).await;
+    assert_with_db_instance1(cli_db.clone()).await;
 
     assert_with_db_instance(AssertionArg {
-        db: db2.clone(),
+        db: cli_db.clone(),
         mig_files_count,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
@@ -230,12 +236,12 @@ async fn test_init(config: TestConfig) {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    let db3 = migration_cli_fn(&mut cli, resources_v2, mock_prompter).await;
+    migrator1.run_fn(resources_v2, mock_prompter).await;
 
-    assert_with_db_instance1(db.clone()).await;
+    assert_with_db_instance1(cli_db.clone()).await;
 
     assert_with_db_instance(AssertionArg {
-        db: db3.clone(),
+        db: cli_db.clone(),
         mig_files_count,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
