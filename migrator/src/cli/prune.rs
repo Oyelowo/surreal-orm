@@ -7,7 +7,7 @@ use clap::Args;
 pub struct Prune;
 
 impl Prune {
-    pub async fn run(&self, cli: &mut Cli) {
+    pub async fn run(&self, cli: &mut Migrator) {
         let file_manager = cli.file_manager();
         let db = cli.db().clone();
 

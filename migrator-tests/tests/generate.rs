@@ -6,8 +6,7 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     config::{RuntimeConfig, UrlDb},
-    migration_cli_fn, Cli, Generate, Init, Migration, MigrationFilename, MockPrompter, Mode,
-    SubCommand,
+    Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;

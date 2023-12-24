@@ -32,7 +32,7 @@ pub struct Reset {
 impl Reset {
     pub async fn run(
         &self,
-        cli: &mut Cli,
+        cli: &mut Migrator,
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) {

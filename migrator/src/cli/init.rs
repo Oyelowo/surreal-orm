@@ -27,7 +27,7 @@ pub struct Init {
 impl Init {
     pub async fn run(
         &self,
-        cli: &mut Cli,
+        cli: &mut Migrator,
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) {
