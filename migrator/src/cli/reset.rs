@@ -1,15 +1,9 @@
-use super::config::{RuntimeConfig, SharedAll};
-
-use async_trait::async_trait;
-use clap::{Args, Parser};
+use clap::Args;
 use std::fs;
-use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
 
+use crate::*;
 use surreal_query_builder::DbResources;
-
-use super::init::Init;
-use crate::{Cli, DbConnection, MigrationConfig, Prompter};
 
 /// Resets migrations. Deletes all migration files, migration table and reinitializes
 /// migrations.

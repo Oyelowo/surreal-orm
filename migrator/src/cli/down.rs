@@ -1,10 +1,10 @@
-use clap::{Args, Parser};
+use clap::Args;
 use typed_builder::TypedBuilder;
 
 use crate::*;
 
 /// Rollback migrations
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Down {
     #[command(flatten)]
     strategy: RollbackDelta,
