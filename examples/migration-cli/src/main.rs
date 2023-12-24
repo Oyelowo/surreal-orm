@@ -2,7 +2,7 @@ use std::process::{Command, Stdio};
 
 // use pretty_env_logger;
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::cli;
+use surreal_orm::migrator::{cli, Migrator};
 use surrealdb::engine::any::{connect, Any};
 
 use surrealdb::opt::auth::Root;
@@ -26,7 +26,7 @@ async fn main() {
     let _db = initialize_db().await;
     // Directly run the cli
     // cli::migration_cli(Resources, Some(db)).await;
-    cli::Cli::run(Resources).await;
+    Migrator::run(Resources).await;
 
     // Run the cli through cargo
     // _generate();
