@@ -13,18 +13,6 @@ use surrealdb::Surreal;
 
 use crate::Mode;
 
-#[derive(Parser, Debug, Default, Clone, TypedBuilder)]
-pub struct SharedAll {
-    /// Optional custom migrations dir
-    #[clap(short, long, help = "Optional custom migrations dir")]
-    #[builder(default, setter(strip_option))]
-    pub migrations_dir: Option<PathBuf>,
-
-    /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
-    #[clap(short, long, action = ArgAction::Count, default_value="3")]
-    pub(crate) verbose: u8,
-}
-
 #[derive(Clone, Debug)]
 pub enum UrlDb {
     Memory,
@@ -131,7 +119,7 @@ pub struct RuntimeConfig {
     pub(crate) prune: bool,
 
     #[arg(skip)]
-    #[builder(setter(strip_option))]
+    #[builder(default, setter(strip_option))]
     db_connection: Option<Surreal<Any>>,
 }
 

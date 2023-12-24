@@ -1,13 +1,8 @@
-use super::config::{RuntimeConfig, SharedAll};
-use crate::{Cli, DbConnection, DbInfo, MigrationConfig, MigrationFilename, MigrationFlag};
-
 use crate::*;
-use async_trait::async_trait;
-use clap::{Args, Parser};
+
+use clap::Args;
 use surreal_query_builder::statements::info_for;
 use surreal_query_builder::Runnable;
-use surrealdb::engine::any::Any;
-use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Run migrations
@@ -15,7 +10,7 @@ use typed_builder::TypedBuilder;
 /// cargo run -- up -l
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Up {
     #[command(flatten)]
     pub(crate) fast_forward: FastForwardDelta,

@@ -1,28 +1,22 @@
-use super::config::{RuntimeConfig, SharedAll};
 use super::up::{FastForwardDelta, Up};
-
-use crate::{Cli, DbConnection, MigrationConfig, Prompter};
-
-use async_trait::async_trait;
-use clap::{Args, Parser};
+use crate::*;
+use clap::Args;
 use surreal_query_builder::DbResources;
-use surrealdb::engine::any::Any;
-use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Init migrations
 #[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Init {
     /// Name of the migration
-    #[clap(long, help = "Name of the first migration file(s)")]
+    #[arg(long, help = "Name of the first migration file(s)")]
     pub(crate) name: String,
 
     /// Whether or not to run the migrations after initialization.
-    #[clap(long)]
+    #[arg(long)]
     pub(crate) run: bool,
 
     /// Two way migration
-    #[clap(
+    #[arg(
         short,
         long,
         help = "Unidirectional(Up only) Bidirectional(up & down) migration(S)"

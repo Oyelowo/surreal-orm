@@ -68,6 +68,21 @@ pub enum Mode {
     Lax,
 }
 
+impl FromStr for Mode {
+    type Err = MigrationError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "strict" => Ok(Self::Strict),
+            "lax" => Ok(Self::Lax),
+            _ => Err(MigrationError::InvalidMigrationMode(
+                s.to_string(),
+                Self::options().join(", "),
+            )),
+        }
+    }
+}
+
 impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mode = match self {
@@ -79,11 +94,15 @@ impl Display for Mode {
 }
 
 impl Mode {
+    pub fn options() -> Vec<String> {
+        vec![Self::Strict.to_string(), Self::Lax.to_string()]
+    }
+
     pub fn is_strict(&self) -> bool {
         matches!(self, Self::Strict)
     }
 
-    pub fn is_lax(&self) -> bool {
+    pub fn is_relaxed(&self) -> bool {
         matches!(self, Self::Lax)
     }
 }

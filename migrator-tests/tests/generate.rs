@@ -205,14 +205,27 @@ async fn test_generate(config: TestConfig) {
     let generate_config = Generate::builder()
         .name(test_migration_name.to_string())
         .run(run)
-        .runtime_config(runtime_config.clone())
-        .shared_all(shared_all.clone())
         .build();
 
-    let cli_gen = Cli::new(SubCommand::Generate(generate_config));
+    //     .runtime_config(runtime_config.clone())
+    // .shared_all(shared_all.clone())
+
+    let mut cli_gen = Cli::builder()
+        .subcmd(SubCommand::Generate(generate_config))
+        .verbose(3)
+        .migrations_dir(temp_test_migration_dir.clone())
+        .runtime_config(runtime_config.clone())
+        .build();
+    // cli_gen
+    //     .build()
     let resources = Resources;
 
-    let db = migration_cli_fn(cli_gen.clone(), resources.clone(), mock_prompter.clone()).await;
+    let db = migration_cli_fn(
+        &mut cli_gen.clone(),
+        resources.clone(),
+        mock_prompter.clone(),
+    )
+    .await;
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
     let mig_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     // You have to first initialize before you can start generating migrations.

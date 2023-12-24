@@ -1,23 +1,19 @@
-use super::config::{RuntimeConfig, SharedAll};
 use super::up::{FastForwardDelta, Up};
 
-use crate::{Cli, DbConnection, MigrationConfig, MigrationFlag, Prompter};
-use async_trait::async_trait;
-use clap::Parser;
+use crate::*;
+use clap::Args;
 use surreal_query_builder::DbResources;
-use surrealdb::engine::any::Any;
-use surrealdb::Surreal;
 use typed_builder::TypedBuilder;
 
 /// Generate migrations
-#[derive(Parser, Debug, TypedBuilder, Clone)]
+#[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Generate {
     /// Name of the migration
-    #[clap(long, help = "Name of the migration")]
+    #[arg(long, help = "Name of the migration")]
     pub(crate) name: String,
 
     /// Whether or not to run the migrations after generation.
-    #[clap(long, help = "Whether to run the migrations after generation")]
+    #[arg(long, help = "Whether to run the migrations after generation")]
     pub(crate) run: bool,
 }
 
