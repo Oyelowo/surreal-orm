@@ -387,8 +387,6 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
 
-    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
-
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
         .run_fn(resources.clone(), mock_prompter.clone())
