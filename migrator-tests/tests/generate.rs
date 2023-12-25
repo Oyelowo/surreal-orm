@@ -114,7 +114,7 @@ fn assert_migration_files_presence_and_format(
     }
 }
 
-fn get_db_connection_config(mode: Mode) -> DatabaseConnection {
+fn get_db_connection_config() -> DatabaseConnection {
     DatabaseConnection::builder()
         .db("test".into())
         .ns("test".into())
@@ -185,7 +185,7 @@ async fn test_generate(config: TestConfig) {
     //     .map(|f| fs::read_to_string(f.path()).unwrap())
     //     .collect::<Vec<_>>();
 
-    let db_connection_conf = get_db_connection_config(mode);
+    let db_connection_conf = get_db_connection_config();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
