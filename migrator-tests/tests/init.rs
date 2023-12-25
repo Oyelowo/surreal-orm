@@ -38,10 +38,11 @@ fn assert_migration_files_presence_and_format(
             )
     });
 
+    let mut migrations_contents = vec![];
     for filepath in migration_files.iter() {
         // TODO: Make snapshot tests deterministict
-        // let content = fs::read_to_string(&filepath).expect("Failed to read file");
-        // insta::assert_display_snapshot!(content);
+        let content = fs::read_to_string(&filepath).expect("Failed to read file");
+        migrations_contents.push(content);
 
         let file_name = filepath
             .file_name()
@@ -112,6 +113,10 @@ fn assert_migration_files_presence_and_format(
             "File name should be in the format of {timestamp}_{basename}.{extension}"
         );
     }
+
+    migrations_contents.sort();
+    // println!("{}", &migrations_contents.join("\n\n"));
+    // insta::assert_display_snapshot!(migrations_contents.join("\n\n"));
 }
 
 fn get_db_connection_config() -> DatabaseConnection {
@@ -143,8 +148,6 @@ async fn assert_with_db_instance(args: AssertionArg) {
     let db_migrations = Migration::get_all_desc(db).await;
     let migration_files = read_migs_from_dir(migration_files_dir.clone());
 
-    dbg!(&db_migrations);
-    dbg!(&db_mig_count);
     assert_eq!(
         db_migrations.len() as u8,
         db_mig_count,
@@ -156,6 +159,30 @@ async fn assert_with_db_instance(args: AssertionArg) {
             "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
         );
     assert_migration_files_presence_and_format(migration_files, db_migrations, test_migration_name);
+}
+
+fn snapshot_all_files_in_dir_ordered(dir: PathBuf) {
+    let mut migration_files = read_migs_from_dir(dir.clone());
+    migration_files.sort_by(|a, b| {
+        a.file_name()
+            .to_string_lossy()
+            .to_string()
+            .cmp(&b.file_name().to_string_lossy().to_string())
+    });
+
+    let migrations_contents = migration_files
+        .iter()
+        .map(|f| {
+            let content = fs::read_to_string(&f.path()).expect("Failed to read file");
+            content
+        })
+        .collect::<Vec<_>>();
+    // let mut migrations_contents = vec![];
+    // for filepath in migration_files {
+    //     let content = fs::read_to_string(&filepath.path()).expect("Failed to read file");
+    //     migrations_contents.push(content);
+    // }
+    insta::assert_display_snapshot!(migrations_contents.join("\n\n"));
 }
 
 struct TestConfig {
@@ -244,6 +271,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -260,6 +288,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -272,6 +301,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
