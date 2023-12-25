@@ -1,7 +1,10 @@
 use inquire::error::InquireError;
 use typed_builder::TypedBuilder;
 
-pub trait Prompter {
+pub trait Prompter
+where
+    Self: std::fmt::Debug,
+{
     fn prompt(&self) -> Result<bool, InquireError> {
         let confirmation =
             inquire::Confirm::new("Are you sure you want to generate an empty migration? (y/n)")

@@ -72,6 +72,14 @@ impl Migrator {
         self.db_connection.db().expect("Failed to get db")
     }
 
+    pub fn set_cmd(&mut self, cmd: SubCommand) {
+        self.subcmd = cmd;
+    }
+
+    pub fn set_db_connection_from_migrator(&mut self, migrator: &Migrator) {
+        self.db_connection = migrator.db_connection.clone();
+    }
+
     pub fn file_manager(&self) -> MigrationConfig {
         let fm_init = MigrationConfig::builder()
             .custom_path(self.migrations_dir.clone())
