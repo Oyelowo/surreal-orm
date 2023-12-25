@@ -161,19 +161,22 @@ async fn assert_with_db_instance(args: AssertionArg) {
 struct TestConfig {
     reversible: bool,
     run: bool,
-    mig_files_count: u8,
-    db_mig_count: u8,
     mode: Mode,
 }
 
-#[tokio::test]
-async fn test_duplicate_up_only_init_without_run_strict() {
-    let reversible = false;
-    let run = false;
-    let mode = Mode::Strict;
+struct TestSetup {
+    migrator: Migrator,
+    temp_test_migration_dir: PathBuf,
+    test_migration_name: &'static str,
+}
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+fn setup_test(conf: TestConfig, mig_dir: &PathBuf) -> TestSetup {
+    let TestConfig {
+        reversible,
+        run,
+        mode,
+    } = conf;
+    let temp_test_migration_dir = mig_dir;
     fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
     let test_migration_name = "test_migration";
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
@@ -187,22 +190,50 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         .run(run)
         .build();
 
-    let mut migrator1 = Migrator::builder()
+    let migrator = Migrator::builder()
         .subcmd(SubCommand::Init(init))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
         .db_connection(db_conn_config)
         .mode(mode)
         .build();
+
+    TestSetup {
+        migrator,
+        temp_test_migration_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    }
+}
+
+#[tokio::test]
+async fn test_duplicate_up_only_init_without_run_strict() {
+    let reversible = false;
+    let run = false;
+    let mode = Mode::Strict;
+
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
 
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
@@ -215,7 +246,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -231,7 +262,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -251,35 +282,27 @@ async fn test_duplicate_up_only_init_and_run_strict() {
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -291,7 +314,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -307,7 +330,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -325,37 +348,30 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     let run = false;
     let mode = Mode::Strict;
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
+
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -367,7 +383,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -383,7 +399,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -401,37 +417,29 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
     let run = true;
     let mode = Mode::Strict;
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
 
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -443,7 +451,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -459,7 +467,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -477,37 +485,30 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
     let run = false;
     let mode = Mode::Lax;
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
+
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
@@ -520,7 +521,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -536,7 +537,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -553,37 +554,31 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
     let reversible = false;
     let run = true;
     let mode = Mode::Lax;
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
 
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
+
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
@@ -596,7 +591,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -612,7 +607,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -630,37 +625,30 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
     let run = false;
     let mode = Mode::Lax;
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
+
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -672,7 +660,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -688,7 +676,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -706,37 +694,30 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
     let run = true;
     let mode = Mode::Lax;
 
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
-    let test_migration_name = "test_migration";
-    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let db_conn_config = get_db_connection_config();
-
-    assert_eq!(migration_files.len(), 0);
-
-    let init = Init::builder()
-        .name(test_migration_name.to_string())
-        .reversible(reversible)
-        .run(run)
-        .build();
-
-    let mut migrator1 = Migrator::builder()
-        .subcmd(SubCommand::Init(init))
-        .verbose(3)
-        .migrations_dir(temp_test_migration_dir.clone())
-        .db_connection(db_conn_config)
-        .mode(mode)
-        .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
 
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let TestSetup {
+        mut migrator,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_test(
+        TestConfig {
+            reversible,
+            run,
+            mode,
+        },
+        temp_test_migration_dir,
+    );
+
     // 1st run
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator1.db().clone();
+    let cli_db = migrator.db().clone();
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -748,7 +729,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
     .await;
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator1
+    migrator
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -764,7 +745,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
     .await;
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator1.run_fn(resources_v2, mock_prompter).await;
+    migrator.run_fn(resources_v2, mock_prompter).await;
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
