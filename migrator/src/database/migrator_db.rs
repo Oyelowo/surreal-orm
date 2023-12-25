@@ -213,7 +213,7 @@ impl MigratorDatabase {
             }
         };
 
-        let query_str = format!("{}{}", up_queries_str, down_queries_str);
+        let query_str = format!("{up_queries_str}{down_queries_str}");
         if query_str.trim().is_empty() {
             match prompter.prompt() {
                 Ok(true) => {
