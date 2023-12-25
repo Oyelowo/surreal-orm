@@ -76,16 +76,14 @@ fn assert_migration_files_presence_and_format(
             };
 
             match &file_name {
-                MigrationFilename::Up(up) => {
+                MigrationFilename::Up(_up) => {
                     // select * from migration where name = up;
                     // name, timestamp and checksum_up
-                    // let mig = Migration::get_by_filename(db_migrations.clone(), up.clone())
-                    //     .expect("Migration file not found in db");
                     let found_db_mig = found_db_mig(file_name.clone());
                     assert_eq!(found_db_mig.name, file_name.to_string());
                     assert_eq!(found_db_mig.timestamp, timestamp);
                 }
-                MigrationFilename::Down(down) => {
+                MigrationFilename::Down(_down) => {
                     // select * from migration where name = down.to_up();
                     // name, timestamp and checksum_up
                     let file_name = file_name.to_up();
@@ -93,7 +91,7 @@ fn assert_migration_files_presence_and_format(
                     assert_eq!(found_db_mig.name, file_name.to_string());
                     assert_eq!(found_db_mig.timestamp, timestamp);
                 }
-                MigrationFilename::Unidirectional(uni) => {
+                MigrationFilename::Unidirectional(_uni) => {
                     // select * from migration where name = down;
                     // name, timestamp and checksum_up
                     let found_db_mig = found_db_mig(file_name.clone());
@@ -104,7 +102,6 @@ fn assert_migration_files_presence_and_format(
         }
         // Only up migration filenames are stored in the db since
         // we can always derive the down name from it.
-
         assert_eq!(basename.to_string(), test_migration_name.to_string());
         assert_eq!(
             file_name.to_string(),

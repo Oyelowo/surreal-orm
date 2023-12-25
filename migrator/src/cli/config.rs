@@ -10,7 +10,6 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::{Database, Root};
 use surrealdb::Surreal;
 
-use crate::Mode;
 
 #[derive(Clone, Debug)]
 pub enum UrlDb {

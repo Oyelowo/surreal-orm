@@ -2,7 +2,7 @@ use std::process::{Command, Stdio};
 
 // use pretty_env_logger;
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{cli, Migrator};
+use surreal_orm::migrator::Migrator;
 use surrealdb::engine::any::{connect, Any};
 
 use surrealdb::opt::auth::Root;
