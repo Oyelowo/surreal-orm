@@ -5,7 +5,7 @@ use std::{
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    config::{RuntimeConfig, UrlDb},
+    config::{DatabaseConnection, UrlDb},
     Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
@@ -114,8 +114,8 @@ fn assert_migration_files_presence_and_format(
     }
 }
 
-fn runtime_config(mode: Mode) -> RuntimeConfig {
-    RuntimeConfig::builder()
+fn runtime_config(mode: Mode) -> DatabaseConnection {
+    DatabaseConnection::builder()
         .db("test".into())
         .ns("test".into())
         .user("root".into())

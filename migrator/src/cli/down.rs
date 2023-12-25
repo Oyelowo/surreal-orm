@@ -8,6 +8,14 @@ use crate::*;
 pub struct Down {
     #[command(flatten)]
     strategy: RollbackDelta,
+
+    #[arg(
+        global = true,
+        long,
+        help = "If to prune migration files after rollback",
+        default_value_t = false
+    )]
+    pub(crate) prune: bool,
 }
 
 impl Down {
@@ -86,8 +94,8 @@ impl Down {
                 db.clone(),
                 RollbackOptions {
                     rollback_strategy,
-                    mode: cli.runtime_config.mode,
-                    prune_files_after_rollback: cli.runtime_config.prune,
+                    mode: cli.mode,
+                    prune_files_after_rollback: self.prune,
                 },
             )
             .await;

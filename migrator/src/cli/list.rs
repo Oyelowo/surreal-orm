@@ -45,7 +45,7 @@ impl List {
 
                 let migrations = file_manager
                     .two_way()
-                    .list_migrations(db.clone(), self.status, cli.runtime_config.mode)
+                    .list_migrations(db.clone(), self.status, cli.mode)
                     .await;
 
                 match migrations {
@@ -67,7 +67,7 @@ impl List {
                 log::info!("Listing one way migrations");
                 let migrations = file_manager
                     .one_way()
-                    .list_migrations(db.clone(), self.status, cli.runtime_config.mode)
+                    .list_migrations(db.clone(), self.status, cli.mode)
                     .await;
 
                 match migrations {
