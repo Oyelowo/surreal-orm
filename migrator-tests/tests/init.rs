@@ -222,8 +222,8 @@ async fn test_init(config: TestConfig) {
     // assert_migration_data_static().await;
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count,
-        db_mig_count,
+        mig_files_count: 1,
+        db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         test_migration_name,
     })
@@ -240,7 +240,7 @@ async fn test_init(config: TestConfig) {
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count,
+        mig_files_count: 1,
         db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
         test_migration_name,
@@ -267,8 +267,8 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     let reversible = false;
     let run = false;
     let mode = Mode::Strict;
-    let mig_files_count = 1;
-    let db_mig_count = 1;
+    // let mig_files_count = 1;
+    // let db_mig_count = 1;
 
     // test_init(TestConfig {
     //     reversible: false,
@@ -343,7 +343,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
 
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count,
+        mig_files_count: 1,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         test_migration_name,
@@ -365,29 +365,184 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     .await;
 }
 
-// #[tokio::test]
-// async fn test_duplicate_up_only_init_and_run_strict() {
-//     test_init(TestConfig {
-//         reversible: false,
-//         run: true,
-//         mode: Mode::Strict,
-//         mig_files_count: 1,
-//         db_mig_count: 1,
-//     })
-//     .await;
-// }
-//
-// #[tokio::test]
-// async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
-//     test_init(TestConfig {
-//         reversible: true,
-//         run: false,
-//         mode: Mode::Strict,
-//         mig_files_count: 2,
-//         db_mig_count: 0,
-//     })
-//     .await;
-// }
+#[tokio::test]
+async fn test_duplicate_up_only_init_and_run_strict() {
+    // test_init(TestConfig {
+    //     reversible: false,
+    //     run: true,
+    //     mode: Mode::Strict,
+    //     mig_files_count: 1,
+    //     db_mig_count: 1,
+    // })
+    // .await;
+
+    let reversible = false;
+    let run = true;
+    let mode = Mode::Strict;
+
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
+    let test_migration_name = "test_migration";
+    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
+    let db_conn_config = get_db_connection_config();
+
+    assert_eq!(migration_files.len(), 0);
+
+    let init = Init::builder()
+        .name(test_migration_name.to_string())
+        .reversible(reversible)
+        .run(run)
+        .build();
+
+    let mut migrator1 = Migrator::builder()
+        .subcmd(SubCommand::Init(init))
+        .verbose(3)
+        .migrations_dir(temp_test_migration_dir.clone())
+        .db_connection(db_conn_config)
+        .mode(mode)
+        .build();
+    let resources = Resources;
+    let resources_v2 = ResourcesV2;
+    let mock_prompter = MockPrompter { confirmation: true };
+
+    // 1st run
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+    let cli_db = migrator1.db().clone();
+
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 1,
+        db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+
+    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+
+    // Second time, should not create migration files nor db records. i.e should be idempotent/
+    // Remain the same as the first time.
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 1,
+        db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+
+    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+    migrator1.run_fn(resources_v2, mock_prompter).await;
+
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 1,
+        db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+}
+
+#[tokio::test]
+async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
+    // test_init(TestConfig {
+    //     reversible: true,
+    //     run: false,
+    //     mode: Mode::Strict,
+    //     mig_files_count: 2,
+    //     db_mig_count: 0,
+    // })
+    // .await;
+
+    // test_init(TestConfig {
+    //     reversible: false,
+    //     run: true,
+    //     mode: Mode::Strict,
+    //     mig_files_count: 1,
+    //     db_mig_count: 1,
+    // })
+    // .await;
+
+    let reversible = true;
+    let run = false;
+    let mode = Mode::Strict;
+
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
+    let test_migration_name = "test_migration";
+    let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
+    let db_conn_config = get_db_connection_config();
+
+    assert_eq!(migration_files.len(), 0);
+
+    let init = Init::builder()
+        .name(test_migration_name.to_string())
+        .reversible(reversible)
+        .run(run)
+        .build();
+
+    let mut migrator1 = Migrator::builder()
+        .subcmd(SubCommand::Init(init))
+        .verbose(3)
+        .migrations_dir(temp_test_migration_dir.clone())
+        .db_connection(db_conn_config)
+        .mode(mode)
+        .build();
+    let resources = Resources;
+    let resources_v2 = ResourcesV2;
+    let mock_prompter = MockPrompter { confirmation: true };
+
+    // 1st run
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+    let cli_db = migrator1.db().clone();
+
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 2,
+        db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+
+    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+    migrator1
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+
+    // Second time, should not create migration files nor db records. i.e should be idempotent/
+    // Remain the same as the first time.
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 2,
+        db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+
+    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+    migrator1.run_fn(resources_v2, mock_prompter).await;
+
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        mig_files_count: 2,
+        db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        test_migration_name,
+    })
+    .await;
+}
 //
 // #[tokio::test]
 // async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
