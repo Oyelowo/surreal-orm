@@ -43,7 +43,7 @@ impl FromStr for UrlDb {
 }
 
 #[derive(Args, Debug, Clone, TypedBuilder)]
-pub struct RuntimeConfig {
+pub struct DatabaseConnection {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
     /// - Local WebSocket: `ws://localhost:8000`
@@ -99,30 +99,12 @@ pub struct RuntimeConfig {
     #[builder(default = "root".into())]
     pub(crate) pass: String,
 
-    #[arg(
-        value_enum,
-        global = true,
-        long,
-        help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
-            that file contents and valid and also checking filenames. Lax does not.",
-        default_value_t = Mode::Strict,
-    )]
-    pub(crate) mode: Mode,
-
-    #[arg(
-        global = true,
-        long,
-        help = "If to prune migration files after rollback",
-        default_value_t = false
-    )]
-    pub(crate) prune: bool,
-
     #[arg(skip)]
     #[builder(default, setter(strip_option))]
     db_connection: Option<Surreal<Any>>,
 }
 
-impl RuntimeConfig {
+impl DatabaseConnection {
     pub async fn setup(&mut self) -> &mut Self {
         let cli_db_url = &self.url;
         let database = self.db.clone();

@@ -27,8 +27,8 @@ pub use up::{Up, UpdateStrategy};
 use clap::{ArgAction, Parser};
 use surreal_query_builder::DbResources;
 
-use self::config::RuntimeConfig;
-use crate::{MigrationConfig, MockPrompter, Prompter, RealPrompter};
+use self::config::DatabaseConnection;
+use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug, Clone, TypedBuilder)]
@@ -48,8 +48,18 @@ pub struct Migrator {
     #[arg(global = true, short, long, action = ArgAction::Count, default_value_t=3)]
     pub(crate) verbose: u8,
 
+    #[arg(
+        value_enum,
+        global = true,
+        long,
+        help = "If to be strict or lax. Strictness validates the migration files against the database e.g doing checksum checks to make sure.\
+            that file contents and valid and also checking filenames. Lax does not.",
+        default_value_t = Mode::Strict,
+    )]
+    pub(crate) mode: Mode,
+
     #[command(flatten)]
-    pub(crate) runtime_config: RuntimeConfig,
+    pub(crate) db_connection: DatabaseConnection,
 }
 
 impl Migrator {
@@ -59,13 +69,13 @@ impl Migrator {
     }
 
     pub fn db(&self) -> Surreal<Any> {
-        self.runtime_config.db().expect("Failed to get db")
+        self.db_connection.db().expect("Failed to get db")
     }
 
     pub fn file_manager(&self) -> MigrationConfig {
         let fm_init = MigrationConfig::builder()
             .custom_path(self.migrations_dir.clone())
-            .mode(self.runtime_config.mode);
+            .mode(self.mode);
 
         // let fm = fm_init.build().detect_migration_type().ok();
 
@@ -157,7 +167,7 @@ impl Migrator {
     }
 
     pub(crate) async fn setup_db(&mut self) {
-        self.runtime_config.setup().await;
+        self.db_connection.setup().await;
     }
 }
 
