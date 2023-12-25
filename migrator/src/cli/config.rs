@@ -10,7 +10,6 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::{Database, Root};
 use surrealdb::Surreal;
 
-
 #[derive(Clone, Debug)]
 pub enum UrlDb {
     Memory,
@@ -100,7 +99,7 @@ pub struct DatabaseConnection {
 
     #[arg(skip)]
     #[builder(default, setter(strip_option))]
-    db_connection: Option<Surreal<Any>>,
+    pub(crate) db_connection: Option<Surreal<Any>>,
 }
 
 impl DatabaseConnection {

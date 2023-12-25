@@ -465,7 +465,7 @@ impl MigrationFilename {
 
     fn format_timestamp(timestamp: DateTime<Utc>) -> MigrationResult<u64> {
         let timestamp = timestamp
-            .format("%Y%m%d%H%M%S")
+            .format("%Y%m%d%H%M%S%3f")
             .to_string()
             .parse::<u64>()
             .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;

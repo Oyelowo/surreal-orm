@@ -175,7 +175,9 @@ impl Migrator {
     }
 
     pub(crate) async fn setup_db(&mut self) {
-        self.db_connection.setup().await;
+        if let None = self.db_connection.db_connection {
+            self.db_connection.setup().await;
+        }
     }
 }
 
