@@ -114,14 +114,12 @@ fn assert_migration_files_presence_and_format(
     }
 }
 
-fn runtime_config(mode: Mode) -> DatabaseConnection {
+fn get_db_connection_config() -> DatabaseConnection {
     DatabaseConnection::builder()
         .db("test".into())
         .ns("test".into())
         .user("root".into())
         .pass("root".into())
-        .mode(mode)
-        .prune(false)
         .url(UrlDb::Memory)
         .build()
 }
@@ -182,7 +180,7 @@ async fn test_init(config: TestConfig) {
     fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
     let test_migration_name = "test_migration";
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let runtime_config = runtime_config(mode);
+    let db_conn_config = get_db_connection_config();
 
     assert_eq!(migration_files.len(), 0);
 
@@ -196,7 +194,8 @@ async fn test_init(config: TestConfig) {
         .subcmd(SubCommand::Init(init))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
-        .runtime_config(runtime_config)
+        .mode(mode)
+        .db_connection(db_conn_config)
         .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -284,7 +283,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     fs::create_dir_all(temp_test_migration_dir).expect("Failed to create dir");
     let test_migration_name = "test_migration";
     let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    let runtime_config = runtime_config(mode);
+    let db_conn_config = get_db_connection_config();
 
     assert_eq!(migration_files.len(), 0);
 
@@ -298,7 +297,8 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         .subcmd(SubCommand::Init(init))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
-        .runtime_config(runtime_config)
+        .db_connection(db_conn_config)
+        .mode(mode)
         .build();
     let resources = Resources;
     let resources_v2 = ResourcesV2;

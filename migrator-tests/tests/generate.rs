@@ -5,7 +5,7 @@ use std::{
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    config::{RuntimeConfig, UrlDb},
+    config::{DatabaseConnection, UrlDb},
     Generate, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
@@ -114,14 +114,12 @@ fn assert_migration_files_presence_and_format(
     }
 }
 
-fn runtime_config(mode: Mode) -> RuntimeConfig {
-    RuntimeConfig::builder()
+fn get_db_connection_config(mode: Mode) -> DatabaseConnection {
+    DatabaseConnection::builder()
         .db("test".into())
         .ns("test".into())
         .user("root".into())
         .pass("root".into())
-        .mode(mode)
-        .prune(false)
         .url(UrlDb::Memory)
         .build()
 }
@@ -187,7 +185,7 @@ async fn test_generate(config: TestConfig) {
     //     .map(|f| fs::read_to_string(f.path()).unwrap())
     //     .collect::<Vec<_>>();
 
-    let runtime_config = runtime_config(mode);
+    let db_connection_conf = get_db_connection_config(mode);
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter { confirmation: true };
@@ -205,7 +203,8 @@ async fn test_generate(config: TestConfig) {
         .subcmd(SubCommand::Generate(generate_config))
         .verbose(3)
         .migrations_dir(temp_test_migration_dir.clone())
-        .runtime_config(runtime_config.clone())
+        .db_connection(db_connection_conf.clone())
+        .mode(mode)
         .build();
     // cli_gen
     //     .build()
