@@ -1,7 +1,14 @@
 ---
 source: migrator-tests/tests/init.rs
-expression: content
+expression: "migrations_contents.join(\"\\n\\n\")"
 ---
+REMOVE TABLE animal;
+REMOVE TABLE crop;
+REMOVE TABLE eats;
+REMOVE TABLE migration;
+REMOVE TABLE planet;
+REMOVE TABLE student;
+
 DELETE migration;
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;

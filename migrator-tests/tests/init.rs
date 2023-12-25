@@ -6,7 +6,7 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     config::{DatabaseConnection, UrlDb},
-    Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
+    FileContent, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -23,7 +23,7 @@ fn assert_migration_files_presence_and_format(
     migration_files: Vec<DirEntry>,
     db_migrations: Vec<Migration>,
     test_migration_name: &str,
-) {
+) -> FileContent {
     let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     migration_files.sort_by(|a, b| {
         a.file_name()
@@ -115,6 +115,7 @@ fn assert_migration_files_presence_and_format(
     }
 
     migrations_contents.sort();
+    migrations_contents.join("\n\n").into()
     // println!("{}", &migrations_contents.join("\n\n"));
     // insta::assert_display_snapshot!(migrations_contents.join("\n\n"));
 }
@@ -136,7 +137,7 @@ struct AssertionArg {
     migration_files_dir: PathBuf,
     test_migration_name: &'static str,
 }
-async fn assert_with_db_instance(args: AssertionArg) {
+async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     let AssertionArg {
         db,
         mig_files_count,
@@ -158,7 +159,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
             mig_files_count,
             "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type."
         );
-    assert_migration_files_presence_and_format(migration_files, db_migrations, test_migration_name);
+    assert_migration_files_presence_and_format(migration_files, db_migrations, test_migration_name)
 }
 
 fn snapshot_all_files_in_dir_ordered(dir: PathBuf) {
@@ -263,7 +264,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 1,
         db_mig_count: 0,
@@ -271,7 +272,8 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
-    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
+    insta::assert_display_snapshot!(joined_migration_files);
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -288,7 +290,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
-    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -301,7 +303,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         test_migration_name,
     })
     .await;
-    snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -334,7 +336,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
         .await;
     let cli_db = migrator.db().clone();
 
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 1,
         db_mig_count: 1,
@@ -342,6 +344,9 @@ async fn test_duplicate_up_only_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -358,6 +363,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -370,6 +376,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -403,7 +410,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
         .await;
     let cli_db = migrator.db().clone();
 
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 2,
         db_mig_count: 0,
@@ -411,6 +418,9 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -427,6 +437,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -439,6 +450,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -471,7 +483,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
         .await;
     let cli_db = migrator.db().clone();
 
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 2,
         db_mig_count: 1,
@@ -479,6 +491,8 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -495,6 +509,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -507,6 +522,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -541,7 +557,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
     let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 1,
         db_mig_count: 0,
@@ -549,6 +565,9 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -565,6 +584,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -577,6 +597,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -611,7 +632,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
     let cli_db = migrator.db().clone();
 
     // First time, should create migration files and db records
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 1,
         db_mig_count: 1,
@@ -619,6 +640,8 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -635,6 +658,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -647,6 +671,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -680,7 +705,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
         .await;
     let cli_db = migrator.db().clone();
 
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 2,
         db_mig_count: 0,
@@ -688,6 +713,8 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -704,6 +731,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -716,6 +744,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
 
 #[tokio::test]
@@ -749,7 +778,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
         .await;
     let cli_db = migrator.db().clone();
 
-    assert_with_db_instance(AssertionArg {
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 2,
         db_mig_count: 1,
@@ -757,6 +786,8 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     migrator
@@ -773,6 +804,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     migrator.run_fn(resources_v2, mock_prompter).await;
@@ -785,4 +817,5 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
         test_migration_name,
     })
     .await;
+    // snapshot_all_files_in_dir_ordered(temp_test_migration_dir.clone());
 }
