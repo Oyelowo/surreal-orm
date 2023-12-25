@@ -89,7 +89,7 @@ impl TableResources for Student {}
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // Improve error essage for old_nmae using word similarity algo
+    // Improve error message for old_nmae using word similarity algo
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,

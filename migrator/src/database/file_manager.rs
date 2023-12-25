@@ -246,8 +246,7 @@ impl FileManagerUni {
             codebase_resources,
             prompter,
         )
-        .await
-        .expect("Failed to generate migrations");
+        .await?;
         Ok(())
     }
 
