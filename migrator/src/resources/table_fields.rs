@@ -218,14 +218,14 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
 }
 
 #[derive(Debug, Clone)]
-struct FieldChangeMeta {
+pub struct FieldChangeMeta {
     table: Table,
     old_name: Field,
     new_name: Field,
 }
 
 #[derive(Debug, Clone)]
-enum SingleFieldChangeType {
+pub enum SingleFieldChangeType {
     Delete(FieldChangeMeta),
     Rename(FieldChangeMeta),
 }
