@@ -26,6 +26,14 @@ pub struct ResourcesV2;
 impl DbResources for ResourcesV2 {
     create_table_resources!(AnimalV2, Crop, AnimalEatsCropV2, PlanetV2, NewStuff);
 }
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV3;
+
+impl DbResources for ResourcesV3 {
+    create_table_resources!(Crop, PlanetV2, Student);
+}
+
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "new_stuff", schemafull)]

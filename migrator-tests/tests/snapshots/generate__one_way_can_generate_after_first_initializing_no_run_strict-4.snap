@@ -103,3 +103,11 @@ DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
 UPDATE planet SET newName = firstName;
 REMOVE FIELD firstName ON TABLE planet;
 REMOVE TABLE student;
+
+Migration file base name with extenstion: test_migration.surql
+Migration file content:
+REMOVE TABLE animal;
+REMOVE TABLE eats;
+DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
+UPDATE planet SET newName = firstName;
+REMOVE FIELD firstName ON TABLE planet;

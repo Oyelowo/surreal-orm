@@ -3,7 +3,7 @@ use std::{
     path::PathBuf,
 };
 
-use surreal_models::migrations::{Resources, ResourcesV2};
+use surreal_models::migrations::{Resources, ResourcesV2, ResourcesV3};
 use surreal_orm::migrator::{
     config::{DatabaseConnection, UrlDb},
     FileContent, Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode,
@@ -12,6 +12,7 @@ use surreal_orm::migrator::{
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use tempfile::tempdir;
+use test_case::*;
 use typed_builder::TypedBuilder;
 
 fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
@@ -40,7 +41,7 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
 fn assert_migration_files_presence_and_format(
     migration_files: &Vec<DirEntry>,
     db_migrations: &Vec<Migration>,
-    test_migration_name: &str,
+    latest_migration_name: &str,
 ) -> FileContent {
     let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     migration_files.sort_by(|a, b| {
@@ -57,23 +58,23 @@ fn assert_migration_files_presence_and_format(
     });
 
     let mut migrations_contents = vec![];
-    for (i, filepath) in migration_files.iter().enumerate() {
-        dbg!(i);
-        dbg!(&filepath);
-        let content = fs::read_to_string(&filepath).expect("Failed to read file");
-        migrations_contents.push(content);
-
+    for filepath in migration_files.iter() {
         let file_name = filepath
             .file_name()
             .expect("Failed to get file name")
             .to_str()
             .expect("Failed to get file name");
+
         let file_name =
             MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
-
         let timestamp = file_name.timestamp();
         let basename = file_name.basename();
         let extension = file_name.extension();
+
+        migrations_contents.push(format!(
+            "Migration file base name with extenstion: {basename}.{extension}\nMigration file content:\n{}",
+            fs::read_to_string(&filepath).expect("Failed to read file")
+        ));
 
         // we want to test that the migration file metadata is stored in the db
         // e.g:  the name, timestamp and perhaps checksum?
@@ -255,10 +256,14 @@ fn set_init(conf: TestConfig, temp_test_migration_dir: &PathBuf) -> Migrator {
 
 // Cannot generate without init first
 #[tokio::test]
-async fn test_duplicate_up_only_init_without_run_strict() {
+async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     let reversible = false;
     let run = false;
     let mode = Mode::Strict;
+    let test_config = TestConfig::builder()
+        .reversible(false)
+        .run(false)
+        .mode(Mode::Strict);
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -268,35 +273,28 @@ async fn test_duplicate_up_only_init_without_run_strict() {
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let migrator_init = set_init(
-        TestConfig {
-            reversible,
-            run,
-            mode,
-            test_migration_name: "test_migration",
-        },
-        &temp_test_migration_dir,
-    );
+    // let migrator_init = set_init(
+    //     test_config
+    //         .clone()
+    //         .test_migration_name("test_migration")
+    //         .build(),
+    //     &temp_test_migration_dir,
+    // );
 
     let TestSetup {
-        migrator: mut migrator_gen,
+        migrator: mut generate,
         temp_test_migration_dir,
         test_migration_name,
     } = setup_gen_cmd(
-        TestConfig {
-            reversible,
-            run,
-            mode,
-            test_migration_name: "test_migration",
-        },
+        test_config.test_migration_name("test_migration").build(),
         temp_test_migration_dir,
     );
 
     // 1st run
-    migrator_gen
+    generate
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = migrator_gen.db().clone();
+    let cli_db = generate.db().clone();
 
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
@@ -310,7 +308,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    migrator_gen
+    generate
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -327,7 +325,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator_gen.run_fn(resources_v2, mock_prompter).await;
+    generate.run_fn(resources_v2, mock_prompter).await;
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -340,15 +338,15 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 }
 
-// Cannot generate without init first
 #[tokio::test]
-async fn whatever() {
+async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
     let reversible = false;
     let run = false;
     let mode = Mode::Strict;
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
+    let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
         .confirm_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
@@ -381,24 +379,23 @@ async fn whatever() {
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
 
-    // let migration_files = read_migs_from_dir(temp_test_migration_dir.clone());
-    // dbg!(&migration_files);
-    // dbg!(&joined_migration_files);
-    // if !joined_migration_files.is_empty() {
+    let setup_mig = |mig_name: &'static str| {
+        setup_gen_cmd(
+            TestConfig {
+                reversible,
+                run,
+                mode,
+                test_migration_name: "test_migration",
+            },
+            temp_test_migration_dir,
+        )
+    };
 
     let TestSetup {
         migrator: mut migrator_gen,
         temp_test_migration_dir,
         test_migration_name,
-    } = setup_gen_cmd(
-        TestConfig {
-            reversible,
-            run,
-            mode,
-            test_migration_name: "test_migration",
-        },
-        temp_test_migration_dir,
-    );
+    } = setup_mig("generate db resources 1");
     // Set generate command db connection to the same db instance as the init command
     migrator_gen.set_db_connection_from_migrator(&migrator_init);
 
@@ -427,6 +424,11 @@ async fn whatever() {
 
     // Run 3 generate
 
+    let TestSetup {
+        migrator: mut migrator_gen,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_mig("generate db resources 2");
     // Second time, should not create migration files nor db records. i.e should be idempotent/
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
@@ -440,15 +442,20 @@ async fn whatever() {
 
     insta::assert_display_snapshot!(joined_migration_files);
 
+    let TestSetup {
+        migrator: mut migrator_gen,
+        temp_test_migration_dir,
+        test_migration_name,
+    } = setup_mig("generate db resources 3");
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    migrator_gen.run_fn(resources_v2, mock_prompter).await;
+    migrator_gen.run_fn(resources_v3, mock_prompter).await;
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         mig_files_count: 4,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_name: "test_migration",
+        test_migration_name: "test_migration 4",
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
