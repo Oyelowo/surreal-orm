@@ -208,19 +208,19 @@ impl TestConfig {
         self
     }
 
-    fn setup_db_if_none(&mut self, migrator: &mut Migrator) {
-        migrator.setup_db();
+    async fn setup_db_if_none(&mut self, migrator: &mut Migrator) {
+        migrator.setup_db().await;
         if self.db.is_none() {
             self.db = Some(migrator.db().clone());
         }
     }
 
-    fn setup_db_override(&mut self, migrator: &mut Migrator) {
-        migrator.setup_db();
+    async fn setup_db_override(&mut self, migrator: &mut Migrator) {
+        migrator.setup_db().await;
         self.db = Some(migrator.db().clone());
     }
 
-    pub(crate) fn generator_cmd(&mut self) -> Migrator {
+    pub(crate) async fn generator_cmd(&mut self) -> Migrator {
         let TestConfig {
             reversible,
             run,
@@ -247,11 +247,11 @@ impl TestConfig {
             .db_connection(db_conn_config)
             .mode(*mode)
             .build();
-        self.setup_db_if_none(&mut migrator);
+        self.setup_db_if_none(&mut migrator).await;
         migrator
     }
 
-    fn init_cmd(&mut self) -> Migrator {
+    pub(crate) async fn init_cmd(&mut self) -> Migrator {
         let TestConfig {
             reversible,
             run,
@@ -274,7 +274,7 @@ impl TestConfig {
             .db_connection(db_conn_config)
             .mode(*mode)
             .build();
-        self.setup_db_if_none(&mut migrator);
+        self.setup_db_if_none(&mut migrator).await;
         migrator
     }
 }
@@ -304,14 +304,13 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
 
     // 1st run
-    let mut generator = conf
-        .set_file_basename("migration gen without init 1".to_string())
-        .generator_cmd();
 
-    generator
+    conf.set_file_basename("migration gen without init 1".to_string())
+        .generator_cmd()
+        .await
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
-    let cli_db = generator.db().clone();
+    let cli_db = conf.db().clone();
 
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
@@ -325,11 +324,9 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    let mut generator = conf
-        .set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd();
-
-    generator
+    conf.set_file_basename("migration gen without init 2".to_string())
+        .generator_cmd()
+        .await
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -346,7 +343,11 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    generator.run_fn(resources_v2, mock_prompter).await;
+    conf.set_file_basename("migration gen without init 2".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(resources_v2, mock_prompter)
+        .await;
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -384,14 +385,18 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
 
     // #### Init Phase ####
     // Run 1 init
-    let mut init = conf
-        .set_file_basename("migration init".to_string())
-        .init_cmd();
+    conf.set_file_basename("migration init".to_string())
+        .init_cmd()
+        .await
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
 
-    init.run_fn(resources.clone(), mock_prompter.clone()).await;
+    // init cmd should instantiate the database connection which is reused internally in test
+    // config.
+    let cli_db = conf.db().clone();
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: init.db().clone(),
+        db: cli_db.clone(),
         mig_files_count: 1,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
@@ -409,10 +414,9 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
 
     conf.set_file_basename("migration gen 1 after init".to_string())
         .generator_cmd()
+        .await
         .run_fn(resources_v2.clone(), mock_prompter.clone())
         .await;
-    let cli_db = conf.db().clone();
-    // let cli_db = generator.db().clone();
 
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
@@ -428,6 +432,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
     // Run 3 generate
     conf.set_file_basename("migration gen 2 after init".to_string())
         .generator_cmd()
+        .await
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
@@ -449,6 +454,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
         .generator_cmd()
+        .await
         .run_fn(resources_v3, mock_prompter)
         .await;
 
