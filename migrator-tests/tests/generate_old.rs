@@ -66,7 +66,7 @@ async fn test_oneway_migrations() {
     // To be used from cli
     one_way
         .generate_migrations(
-            test_migration_name,
+            &test_migration_name.into(),
             Resources,
             MockPrompter::builder()
                 .confirm_empty_migrations_gen(false)
@@ -163,9 +163,9 @@ fn get_files_meta(files: ReadDir) -> (Vec<String>, String) {
                 .to_string()
                 .try_into()
                 .unwrap();
-            let simple_name = format!("{}.{}", name.simple_name(), name.extension());
+            let basename = format!("{}.{}", name.basename(), name.extension());
 
-            (simple_name, content)
+            (basename, content)
         })
         .unzip::<_, _, Vec<_>, Vec<_>>();
 
@@ -180,7 +180,7 @@ async fn test_twoway_migrations() {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let test_migration_name = "test_migration";
-    let test_migration_namev2 = "test_migration_v2".to_string();
+    let test_migration_namev2 = "test_migration_v2".into();
     let _files = fs::read_dir(temp_test_migration_dir).expect_err("Migrations not yet created");
 
     let two_way = files_config
@@ -211,7 +211,7 @@ async fn test_twoway_migrations() {
     // Generate first migration
     two_way
         .generate_migrations(
-            &test_migration_name.to_string(),
+            &test_migration_name.into(),
             Resources,
             MockPrompter::builder()
                 .confirm_empty_migrations_gen(false)

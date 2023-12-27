@@ -549,7 +549,7 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFilena
         tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
     let basic_info = MigrationNameBasicInfo {
         timestamp,
-        basename: Basename::from(basename),
+        basename: basename.to_string().into(),
     };
 
     let m2 = match direction {

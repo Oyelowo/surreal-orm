@@ -9,7 +9,7 @@ use typed_builder::TypedBuilder;
 pub struct Init {
     /// Name of the migration
     #[arg(long, help = "Name of the first migration file(s)")]
-    pub(crate) name: String,
+    pub(crate) basename: Basename,
 
     /// Whether or not to run the migrations after initialization.
     #[arg(long)]
@@ -32,7 +32,7 @@ impl Init {
         prompter: impl Prompter,
     ) {
         // let mut files_config = MigrationConfig::new().make_strict();
-        let migration_name = self.name.clone();
+        let migration_name = self.basename.clone();
 
         let file_manager = cli.file_manager();
         let files = file_manager.get_migrations_filenames(true);
@@ -55,7 +55,7 @@ impl Init {
         if self.reversible {
             let gen = file_manager
                 .two_way()
-                .generate_migrations(&migration_name, codebase_resources, prompter)
+                .generate_migrations(&migration_name.into(), codebase_resources, prompter)
                 .await;
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");
@@ -64,7 +64,7 @@ impl Init {
         } else {
             let gen = file_manager
                 .one_way()
-                .generate_migrations(migration_name, codebase_resources, prompter)
+                .generate_migrations(&migration_name, codebase_resources, prompter)
                 .await;
 
             if let Err(e) = gen {

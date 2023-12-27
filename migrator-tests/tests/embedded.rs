@@ -16,7 +16,7 @@ fn test_embedded() {
     assert_eq!(migs.len(), 2);
     // check the meta data
     assert_eq!(
-        migs[0].name().simple_name(),
+        migs[0].name().basename(),
         "20231029202315_create_new_stuff"
             .to_string()
             .try_into()
@@ -24,7 +24,7 @@ fn test_embedded() {
     );
     insta::assert_display_snapshot!(migs[0].content());
     assert_eq!(
-        migs[1].name().simple_name(),
+        migs[1].name().basename(),
         "20231029224601_create_new_stuff"
             .to_string()
             .try_into()
@@ -41,7 +41,7 @@ fn test_embedded() {
 
     // check the meta data
     assert_eq!(
-        migs[0].up.name.simple_name(),
+        migs[0].up.name.basename(),
         "20231030025711_migration_name_example"
             .to_string()
             .try_into()

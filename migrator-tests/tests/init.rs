@@ -184,7 +184,7 @@ fn setup_test(conf: TestConfig, mig_dir: &PathBuf) -> TestSetup {
     assert_eq!(migration_files.len(), 0);
 
     let init = Init::builder()
-        .name(test_migration_name.to_string())
+        .basename(test_migration_name.into())
         .reversible(reversible)
         .run(run)
         .build();

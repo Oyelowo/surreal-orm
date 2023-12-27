@@ -28,11 +28,7 @@ async fn main() {
     // Comment out this line to generate oneway migrations
     // To be used from cli
     one_way
-        .generate_migrations(
-            &"migration_name_example".to_string(),
-            Resources,
-            RealPrompter,
-        )
+        .generate_migrations(&"migration_name_example".into(), Resources, RealPrompter)
         .await
         .unwrap();
 
@@ -58,11 +54,7 @@ async fn main() {
     // comment out this line to generate twoway migrations
     // To be used from cli
     two_way
-        .generate_migrations(
-            &"migration_name_example".to_string(),
-            Resources,
-            RealPrompter,
-        )
+        .generate_migrations(&"migration_name_example".into(), Resources, RealPrompter)
         .await
         .unwrap();
 

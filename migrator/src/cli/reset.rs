@@ -11,7 +11,7 @@ use surreal_query_builder::DbResources;
 pub struct Reset {
     /// Name of the first migration file(s) to reinitialize to
     #[arg(long)]
-    pub(crate) name: String,
+    pub(crate) basename: Basename,
 
     /// Whether or not to run the migrations after reinitialization. Reinitalization
     /// is done by deleting all migration files, and regenerating
@@ -70,7 +70,7 @@ impl Reset {
 
     fn init_command(&self) -> Init {
         Init {
-            name: self.name.clone(),
+            basename: self.basename.clone(),
             run: self.run,
             reversible: self.reversible.clone(),
         }
