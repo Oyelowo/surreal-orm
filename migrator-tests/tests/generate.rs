@@ -41,7 +41,6 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
 fn assert_migration_files_presence_and_format(
     migration_files: &Vec<DirEntry>,
     db_migrations: &Vec<Migration>,
-    latest_migration_name: Basename,
 ) -> FileContent {
     let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     migration_files.sort_by(|a, b| {
@@ -123,7 +122,6 @@ fn assert_migration_files_presence_and_format(
         }
         // Only up migration filenames are stored in the db since
         // we can always derive the down name from it.
-        // assert_eq!(basename.to_string(), test_migration_name.to_string());
         assert_eq!(
             file_name.to_string(),
             format!("{timestamp}_{basename}.{extension}"),
@@ -192,11 +190,7 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         assert_eq!(latest_file_name.basename(), migration_basename);
     }
 
-    let content = assert_migration_files_presence_and_format(
-        &migration_files,
-        &db_migrations,
-        migration_basename,
-    );
+    let content = assert_migration_files_presence_and_format(&migration_files, &db_migrations);
 
     assert_eq!(
         db_migrations.len() as u8,
@@ -243,14 +237,8 @@ impl TestConfig {
         }
     }
 
-    async fn setup_db_override(&mut self, migrator: &mut Migrator) {
-        migrator.setup_db().await;
-        self.db = Some(migrator.db().clone());
-    }
-
     pub(crate) async fn generator_cmd(&mut self) -> Migrator {
         let TestConfig {
-            reversible,
             run,
             mode,
             migration_basename,
@@ -258,10 +246,7 @@ impl TestConfig {
             ..
         } = self;
         fs::create_dir_all(&migration_dir).expect("Failed to create dir");
-        let migration_files = read_migs_from_dir(migration_dir.clone());
         let db_conn_config = get_db_connection_config();
-
-        // assert_eq!(migration_files.len(), 0);
 
         let gen = Generate::builder()
             .basename(migration_basename.clone())
