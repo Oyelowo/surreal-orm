@@ -8,7 +8,7 @@ where
     Self: std::fmt::Debug,
 {
     // TODO: Rename to prompt_empty_migration_gen
-    fn prompt(&self) -> Result<bool, InquireError> {
+    fn prompt_empty_migrations_trigger(&self) -> Result<bool, InquireError> {
         let confirmation =
             inquire::Confirm::new("Are you sure you want to generate an empty migration? (y/n)")
                 .with_default(false)
@@ -17,7 +17,7 @@ where
         confirmation
     }
 
-    fn prompt_field_rename(
+    fn prompt_single_field_rename_or_delete(
         &self,
         delete_option: SingleFieldChangeType,
         rename_option: SingleFieldChangeType,
@@ -57,11 +57,11 @@ pub struct MockPrompter {
 }
 
 impl Prompter for MockPrompter {
-    fn prompt(&self) -> Result<bool, InquireError> {
+    fn prompt_empty_migrations_trigger(&self) -> Result<bool, InquireError> {
         Ok(self.confirm_empty_migrations_gen)
     }
 
-    fn prompt_field_rename(
+    fn prompt_single_field_rename_or_delete(
         &self,
         delete_option: SingleFieldChangeType,
         rename_option: SingleFieldChangeType,

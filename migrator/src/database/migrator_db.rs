@@ -216,7 +216,7 @@ impl MigratorDatabase {
 
         let query_str = format!("{up_queries_str}{down_queries_str}");
         if query_str.trim().is_empty() {
-            match prompter.prompt() {
+            match prompter.prompt_empty_migrations_trigger() {
                 Ok(true) => {
                     migration_file.create_file(file_manager)?;
                     log::info!("New migration generated.");
