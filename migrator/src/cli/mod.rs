@@ -80,6 +80,10 @@ impl Migrator {
         self.db_connection = migrator.db_connection.clone();
     }
 
+    pub fn set_db(&mut self, db: Surreal<Any>) {
+        self.db_connection.db_connection = Some(db);
+    }
+
     pub fn file_manager(&self) -> MigrationConfig {
         let fm_init = MigrationConfig::builder()
             .custom_path(self.migrations_dir.clone())
