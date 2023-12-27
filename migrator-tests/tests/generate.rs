@@ -587,7 +587,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 1,
+        mig_files_count: 2,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
@@ -612,7 +612,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 2,
+        mig_files_count: 4,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         migration_basename: "migration_gen_1_after_init".into(),
@@ -633,7 +633,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 3,
+        mig_files_count: 6,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         migration_basename: "migration_gen_2_after_init".into(),
@@ -651,7 +651,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 4,
+        mig_files_count: 8,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         migration_basename: "migration_gen_3_after_init".into(),
