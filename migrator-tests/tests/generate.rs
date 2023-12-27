@@ -297,9 +297,6 @@ impl TestConfig {
 // Cannot generate without init first
 #[tokio::test]
 async fn test_one_way_cannot_generate_without_init_no_run_strict() {
-    let reversible = false;
-    let run = false;
-    let mode = Mode::Strict;
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
@@ -319,7 +316,6 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
 
     // 1st run
-
     conf.set_file_basename("migration gen without init 1".to_string())
         .generator_cmd()
         .await
@@ -377,10 +373,6 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
 
 #[tokio::test]
 async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
-    let reversible = false;
-    let run = false;
-    let mode = Mode::Strict;
-
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
