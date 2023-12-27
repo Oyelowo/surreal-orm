@@ -270,9 +270,14 @@ impl Display for Extension {
     }
 }
 
-#[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
+#[derive(Clone, Debug, PartialEq, Ord, PartialOrd, Eq)]
 pub struct Basename(String);
 
+impl From<&'static str> for Basename {
+    fn from(value: &'static str) -> Self {
+        Self(value.to_string())
+    }
+}
 impl From<String> for Basename {
     fn from(value: String) -> Self {
         Self(value)
