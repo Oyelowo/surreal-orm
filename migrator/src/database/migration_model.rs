@@ -211,11 +211,11 @@ impl Migration {
     }
 
     pub async fn get_latest(db: Surreal<Any>) -> Option<Self> {
-        let migration::Schema { name, .. } = Self::schema();
+        let migration::Schema { timestamp, .. } = Self::schema();
 
         select(All)
             .from(Self::table_name())
-            .order_by(order(name).desc())
+            .order_by(order(timestamp).desc())
             .limit(1)
             .return_one::<Self>(db.clone())
             .await
