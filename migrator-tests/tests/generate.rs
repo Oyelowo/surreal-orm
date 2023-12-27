@@ -415,7 +415,8 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 1,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "test_migration".into(),
+        // name is normalized to snake case
+        migration_basename: "migration_init".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -439,7 +440,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 2,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "wrong 1 first".into(),
+        migration_basename: "migration_gen_1_after_init".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -460,7 +461,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 3,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "test_migration 2".into(),
+        migration_basename: "migration_gen_2_after_init".into(),
     })
     .await;
 
@@ -478,7 +479,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 4,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "test_migration 3".into(),
+        migration_basename: "migration_gen_3_after_init".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
