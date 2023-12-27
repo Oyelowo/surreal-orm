@@ -6,7 +6,8 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     config::{DatabaseConnection, UrlDb},
-    FileContent, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, SubCommand,
+    FileContent, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode, RenameOrDelete,
+    SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -211,7 +212,10 @@ async fn test_duplicate_up_only_init_without_run_strict() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let TestSetup {
@@ -297,7 +301,10 @@ async fn test_duplicate_up_only_init_and_run_strict() {
     );
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     // 1st run
     migrator
@@ -354,7 +361,10 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -426,7 +436,10 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let TestSetup {
@@ -497,7 +510,10 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -570,7 +586,10 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -643,7 +662,10 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -715,7 +737,10 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
 
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");

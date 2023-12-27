@@ -88,11 +88,11 @@ clap = { version = "4.4.7", features = ["derive"] }
 tempfile = "3.8.1"
 log = "0.4"
 pretty_env_logger = "0.5.0"
+geo = { version = "0.27.0", features = ["use-serde"] }
 
-# [dev-dependencies]
 inquire = "0.6.2"
-geo = { version = "0.26.0", features = ["use-serde"] }
 insta = "1.34.0"
 pretty_assertions = "1.4.0"
 static_assertions = "1.1.0"
 tokio-test = "0.4.3"
+test-case = "3.3.1"

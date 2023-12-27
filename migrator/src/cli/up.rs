@@ -86,7 +86,7 @@ impl Up {
                     .await;
                 if let Err(e) = run {
                     log::error!("Failed to run migrations: {e}");
-                    panic!();
+                    panic!("Failed to run migrations due to error: {e}");
                 }
             }
             Ok(MigrationFlag::OneWay) => {

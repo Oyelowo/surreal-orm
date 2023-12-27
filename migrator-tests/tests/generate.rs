@@ -5,10 +5,9 @@ use std::{
 
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
-    self,
     config::{DatabaseConnection, UrlDb},
     FileContent, Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter, Mode,
-    SubCommand,
+    RenameOrDelete, SubCommand,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -21,6 +20,22 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
         .map(|p| p.expect("Failed to read dir2"))
         .collect::<Vec<_>>()
 }
+// #[should_panic]
+// let result = std::panic::catch_unwind(|| {});
+//    assert!(result.is_err());
+//
+//
+//use std::panic;
+//
+// fn catch_unwind_silent<F: FnOnce() -> R + panic::UnwindSafe, R>(f: F) -> std::thread::Result<R> {
+//     let prev_hook = panic::take_hook();
+//     panic::set_hook(Box::new(|_| {}));
+//     let result = panic::catch_unwind(f);
+//     panic::set_hook(prev_hook);
+//     result
+// }
+//
+//  #[should_panic(expected = "Divide result is zero")]
 
 fn assert_migration_files_presence_and_format(
     migration_files: &Vec<DirEntry>,
@@ -247,7 +262,10 @@ async fn test_duplicate_up_only_init_without_run_strict() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let migrator_init = set_init(
@@ -331,7 +349,10 @@ async fn whatever() {
 
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter { confirmation: true };
+    let mock_prompter = MockPrompter::builder()
+        .confirm_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut migrator_init = set_init(

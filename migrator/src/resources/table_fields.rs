@@ -15,6 +15,8 @@ pub(crate) struct ComparisonFields<'a, R: DbResources> {
     pub(crate) table: &'a Table,
     pub(crate) resources: &'a ComparisonsInit<'a>,
     pub(crate) codebase_resources: &'a R,
+    // pub(crate) rename_or_delete_single_field_change_prompt: bool,
+    pub(crate) prompter: &'a dyn Prompter,
 }
 
 impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> {
@@ -206,12 +208,9 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         let delete_option = SingleFieldChangeType::Delete(field_change_meta.clone());
         let rename_option = SingleFieldChangeType::Rename(field_change_meta);
 
-        let confirmation = inquire::Select::new("Do you want to rename \
-                                this field or delete the old one completely without transferring the data",
-            vec![delete_option, rename_option]
-        )
-        .with_help_message("Use the arrow keys to navigate. Press enter to select.")
-        .prompt();
+        let confirmation = self
+            .prompter
+            .prompt_field_rename(delete_option, rename_option);
 
         Some(confirmation.expect("Invalid confirmation"))
     }

@@ -49,6 +49,7 @@ pub struct ComparisonsInit<'a> {
     pub left_resources: &'a LeftFullDbInfo,
     // Codebase latest state tables
     pub right_resources: &'a RightFullDbInfo,
+    pub prompter: &'a dyn Prompter,
 }
 
 impl<'a> ComparisonsInit<'a> {
@@ -58,6 +59,7 @@ impl<'a> ComparisonsInit<'a> {
         ComparisonTables {
             resources: self,
             codebase_resources,
+            prompter: self.prompter,
         }
     }
 

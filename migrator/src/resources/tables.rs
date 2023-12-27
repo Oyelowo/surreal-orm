@@ -43,6 +43,7 @@ impl TableResourcesData {
 pub struct ComparisonTables<'a, R: DbResources> {
     pub resources: &'a ComparisonsInit<'a>,
     pub codebase_resources: &'a R,
+    pub prompter: &'a dyn Prompter,
 }
 
 impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
@@ -78,6 +79,7 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                 table: &Table::from(table_name.clone()),
                 resources: self.resources,
                 codebase_resources: self.codebase_resources,
+                prompter: self.prompter,
             };
 
             let fields = fields.queries()?;

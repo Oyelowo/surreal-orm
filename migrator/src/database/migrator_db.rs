@@ -145,6 +145,7 @@ impl MigratorDatabase {
         let init = ComparisonsInit {
             left_resources: &left.resources().await,
             right_resources: &right.resources().await,
+            prompter: &prompter,
         };
 
         let tables = init.new_tables(&codebase_resources).queries();

@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use surreal_models::migrations::{Resources, ResourcesV2};
 use surreal_orm::migrator::{
     DbInfo, Informational, Migration, MigrationConfig, MigrationFilename, MockPrompter,
-    UpdateStrategy,
+    RenameOrDelete, UpdateStrategy,
 };
 use surreal_orm::statements::{info_for, select};
 use surreal_orm::{All, ReturnableSelect, Runnable};
@@ -68,7 +68,10 @@ async fn test_oneway_migrations() {
         .generate_migrations(
             test_migration_name,
             Resources,
-            MockPrompter { confirmation: true },
+            MockPrompter::builder()
+                .confirm_empty_migrations_gen(false)
+                .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+                .build(),
         )
         .await
         .unwrap();
@@ -210,7 +213,10 @@ async fn test_twoway_migrations() {
         .generate_migrations(
             &test_migration_name.to_string(),
             Resources,
-            MockPrompter { confirmation: true },
+            MockPrompter::builder()
+                .confirm_empty_migrations_gen(false)
+                .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+                .build(),
         )
         .await
         .unwrap();
@@ -236,7 +242,10 @@ async fn test_twoway_migrations() {
         .generate_migrations(
             &test_migration_namev2,
             ResourcesV2,
-            MockPrompter { confirmation: true },
+            MockPrompter::builder()
+                .confirm_empty_migrations_gen(false)
+                .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+                .build(),
         )
         .await
         .unwrap();

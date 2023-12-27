@@ -32,18 +32,43 @@ where
     }
 }
 
+// What is use in the actual codebase and typically just uses the default implementation
 #[derive(Debug, Default, Clone)]
 pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}
 
-#[derive(Debug, Default, Clone, TypedBuilder)]
+#[derive(Debug, Clone)]
+pub enum RenameOrDelete {
+    Rename,
+    Delete,
+}
+
+#[derive(Debug, Clone, TypedBuilder)]
 pub struct MockPrompter {
-    pub confirmation: bool,
+    // triggered when empty migration(s) are about to be generated.
+    // This is good if you want to write out some queries manually.
+    // Prompts the user to confirm the generation of empty migrations.
+    // If true, empty migrations will be generated.
+    // If false, the program will exit/abort.
+    pub confirm_empty_migrations_gen: bool,
+
+    pub rename_or_delete_single_field_change: RenameOrDelete,
 }
 
 impl Prompter for MockPrompter {
     fn prompt(&self) -> Result<bool, InquireError> {
-        Ok(self.confirmation)
+        Ok(self.confirm_empty_migrations_gen)
+    }
+
+    fn prompt_field_rename(
+        &self,
+        delete_option: SingleFieldChangeType,
+        rename_option: SingleFieldChangeType,
+    ) -> Result<SingleFieldChangeType, InquireError> {
+        match self.rename_or_delete_single_field_change {
+            RenameOrDelete::Rename => Ok(rename_option),
+            RenameOrDelete::Delete => Ok(delete_option),
+        }
     }
 }
