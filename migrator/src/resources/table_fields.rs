@@ -210,7 +210,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
 
         let confirmation = self
             .prompter
-            .prompt_field_rename(delete_option, rename_option);
+            .prompt_single_field_rename_or_delete(delete_option, rename_option);
 
         Some(confirmation.expect("Invalid confirmation"))
     }
