@@ -210,6 +210,18 @@ impl Migration {
         fields
     }
 
+    pub async fn get_latest(db: Surreal<Any>) -> Option<Self> {
+        let migration::Schema { name, .. } = Self::schema();
+
+        select(All)
+            .from(Self::table_name())
+            .order_by(order(name).desc())
+            .limit(1)
+            .return_one::<Self>(db.clone())
+            .await
+            .expect("Failed to get the latest migration")
+    }
+
     pub async fn get_by_filename(db: Surreal<Any>, filename: MigrationFilename) -> Option<Self> {
         let migration::Schema { name, .. } = Self::schema();
 
