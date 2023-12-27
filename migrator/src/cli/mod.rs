@@ -28,7 +28,7 @@ use clap::{ArgAction, Parser};
 use surreal_query_builder::DbResources;
 
 use self::config::DatabaseConnection;
-use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter};
+use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter, RenameOrDelete};
 
 /// Surreal ORM CLI
 #[derive(Parser, Debug, Clone, TypedBuilder)]
@@ -139,7 +139,10 @@ impl Migrator {
         cli.setup_logging();
         cli.run_fn(
             codebase_resources,
-            MockPrompter::builder().confirmation(true).build(),
+            MockPrompter::builder()
+                .confirm_empty_migrations_gen(false)
+                .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+                .build(),
         )
         .await;
     }
