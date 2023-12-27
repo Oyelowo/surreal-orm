@@ -177,7 +177,7 @@ impl Migrator {
         pretty_env_logger::init();
     }
 
-    pub(crate) async fn setup_db(&mut self) {
+    pub async fn setup_db(&mut self) {
         if let None = self.db_connection.db_connection {
             self.db_connection.setup().await;
         }
