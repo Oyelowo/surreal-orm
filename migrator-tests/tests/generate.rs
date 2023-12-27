@@ -251,7 +251,7 @@ impl TestConfig {
         // assert_eq!(migration_files.len(), 0);
 
         let gen = Generate::builder()
-            .name(migration_basename.to_string())
+            .basename(migration_basename.clone())
             .run(*run)
             .build();
 
@@ -276,7 +276,7 @@ impl TestConfig {
             ..
         } = self;
         let gen = Init::builder()
-            .name(migration_basename.to_string())
+            .basename(migration_basename.clone())
             .reversible(*reversible)
             .run(*run)
             .build();

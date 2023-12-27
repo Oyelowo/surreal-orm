@@ -10,7 +10,7 @@ use typed_builder::TypedBuilder;
 pub struct Generate {
     /// Name of the migration
     #[arg(long, help = "Name of the migration")]
-    pub(crate) name: String,
+    pub(crate) basename: Basename,
 
     /// Whether or not to run the migrations after generation.
     #[arg(long, help = "Whether to run the migrations after generation")]
@@ -25,7 +25,7 @@ impl Generate {
         prompter: impl Prompter,
     ) {
         let file_manager = cli.file_manager();
-        let migration_name = &self.name;
+        let migration_basename = &self.basename;
         let mig_type = file_manager.detect_migration_type();
 
         match mig_type {
@@ -33,7 +33,7 @@ impl Generate {
                 log::info!("Generating two-way migration");
                 let gen = file_manager
                     .two_way()
-                    .generate_migrations(&migration_name, codebase_resources, prompter)
+                    .generate_migrations(&migration_basename, codebase_resources, prompter)
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
@@ -43,7 +43,7 @@ impl Generate {
             Ok(MigrationFlag::OneWay) => {
                 let gen = file_manager
                     .one_way()
-                    .generate_migrations(migration_name, codebase_resources, prompter)
+                    .generate_migrations(migration_basename, codebase_resources, prompter)
                     .await;
 
                 if let Err(e) = gen {
