@@ -150,7 +150,7 @@ struct AssertionArg {
     mig_files_count: u8,
     db_mig_count: u8,
     migration_files_dir: PathBuf,
-    test_migration_basename: Basename,
+    migration_basename: Basename,
 }
 async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     let AssertionArg {
@@ -158,20 +158,35 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         mig_files_count,
         db_mig_count,
         migration_files_dir,
-        test_migration_basename: test_migration_name,
+        migration_basename,
     } = args;
 
     let db_migrations = Migration::get_all_desc(db.clone()).await;
-    if let Some(latest_migration_name) = Migration::get_latest(db.clone()).await {
+    let latest_migration = Migration::get_latest(db.clone()).await;
+
+    if let Some(latest_migration_name) = latest_migration {
         let name = MigrationFilename::try_from(latest_migration_name.name.clone())
             .expect("Failed to parse file name");
-        assert_eq!(name.basename(), test_migration_name);
+        assert_eq!(name.basename(), migration_basename);
     }
+
     let migration_files = read_migs_from_dir(migration_files_dir.clone());
+    let latest_file_name = migration_files
+        .iter()
+        .map(|f| {
+            MigrationFilename::try_from(f.file_name().to_string_lossy().to_string())
+                .expect("Failed to parse file name")
+        })
+        .max();
+
+    if let Some(latest_file_name) = latest_file_name {
+        assert_eq!(latest_file_name.basename(), migration_basename);
+    }
+
     let content = assert_migration_files_presence_and_format(
         &migration_files,
         &db_migrations,
-        test_migration_name,
+        migration_basename,
     );
 
     assert_eq!(
@@ -318,7 +333,7 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
         mig_files_count: 0,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "migration 1".into(),
+        migration_basename: "migration 1".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -337,7 +352,7 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
         mig_files_count: 0,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "migration 1".into(),
+        migration_basename: "migration 1".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -354,7 +369,7 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
         mig_files_count: 0,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "migration 1".into(),
+        migration_basename: "migration 1".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -400,7 +415,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 1,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "test_migration".into(),
+        migration_basename: "test_migration".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -424,7 +439,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 2,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "wrong 1 first".into(),
+        migration_basename: "wrong 1 first".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -445,7 +460,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 3,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "test_migration 2".into(),
+        migration_basename: "test_migration 2".into(),
     })
     .await;
 
@@ -463,7 +478,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
         mig_files_count: 4,
         db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        test_migration_basename: "test_migration 3".into(),
+        migration_basename: "test_migration 3".into(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);

@@ -2,7 +2,7 @@
 source: migrator-tests/tests/generate.rs
 expression: joined_migration_files
 ---
-Migration file base name with extenstion: test_migration.surql
+Migration file base name with extenstion: migration_init.surql
 Migration file content:
 DELETE migration;
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;

@@ -233,11 +233,11 @@ impl FileManagerUni {
     /// Generate migration directory if it does not exist
     pub async fn generate_migrations(
         &self,
-        migration_name: impl Into<String>,
+        migration_basename: Basename,
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) -> MigrationResult<()> {
-        let migration_name = migration_name.into();
+        let migration_name = migration_basename.into();
         let file_manager = self.into_inner();
 
         MigratorDatabase::generate_migrations(

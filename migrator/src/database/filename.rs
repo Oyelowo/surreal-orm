@@ -28,7 +28,7 @@ use crate::*;
 #[derive(Debug, Clone, Hash)]
 pub struct MigrationNameBasicInfo {
     timestamp: u64,
-    name: String,
+    basename: Basename,
 }
 
 #[derive(Debug, Clone, Hash)]
@@ -207,7 +207,7 @@ impl MigrationFilenames {
 impl PartialEq for MigrationFilename {
     fn eq(&self, other: &Self) -> bool {
         self.timestamp() == other.timestamp()
-            && self.simple_name() == other.simple_name()
+            && self.basename() == other.basename()
             && self.extension() == other.extension()
     }
 }
@@ -270,8 +270,20 @@ impl Display for Extension {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Ord, PartialOrd, Eq)]
+#[derive(Clone, Hash, Debug, PartialEq, Ord, PartialOrd, Eq)]
 pub struct Basename(String);
+
+impl Basename {
+    pub fn normalize_ensure(&self) -> Basename {
+        let name = self
+            .to_string()
+            .split(|c: char| c != '_' && !c.is_alphanumeric())
+            .collect::<Vec<_>>()
+            .join("_");
+
+        name.into()
+    }
+}
 
 impl From<&'static str> for Basename {
     fn from(value: &'static str) -> Self {
@@ -293,13 +305,22 @@ impl Display for Basename {
 impl MigrationFilename {
     pub fn filename(&self) -> Filename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.up.surql")
             }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.down.surql")
             }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.surql")
             }
         }
@@ -317,16 +338,6 @@ impl MigrationFilename {
         .into()
     }
 
-    /// just the file name without extension nor timestamp
-    pub fn simple_name(&self) -> SimpleName {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { name, .. }) => name.clone(),
-            MigrationFilename::Down(MigrationNameBasicInfo { name, .. }) => name.clone(),
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { name, .. }) => name.clone(),
-        }
-        .into()
-    }
-
     pub fn extension(&self) -> Extension {
         match self {
             MigrationFilename::Up(_) => "up.surql".to_string(),
@@ -338,13 +349,15 @@ impl MigrationFilename {
 
     pub fn basename(&self) -> Basename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { name, .. }) => {
+            MigrationFilename::Up(MigrationNameBasicInfo { basename: name, .. }) => {
                 format!("{name}")
             }
-            MigrationFilename::Down(MigrationNameBasicInfo { name, .. }) => {
+            MigrationFilename::Down(MigrationNameBasicInfo { basename: name, .. }) => {
                 format!("{name}")
             }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { name, .. }) => {
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                basename: name, ..
+            }) => {
                 format!("{name}")
             }
         }
@@ -354,53 +367,59 @@ impl MigrationFilename {
     pub fn to_up(&self) -> MigrationFilename {
         match self {
             MigrationFilename::Up(_) => self.clone(),
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Up(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Up(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
+            MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
         }
     }
 
     pub fn to_down(&self) -> MigrationFilename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Down(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
+            MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
             MigrationFilename::Down(_) => self.clone(),
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Down(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
         }
     }
 
     pub fn to_unidirectional(&self) -> MigrationFilename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
-                MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                    timestamp: *timestamp,
-                    name: name.clone(),
-                })
-            }
+            MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
+            MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp: *timestamp,
+                basename: name.clone(),
+            }),
             MigrationFilename::Unidirectional(_) => self.clone(),
         }
     }
@@ -441,30 +460,33 @@ impl MigrationFilename {
         Ok(())
     }
 
-    pub fn create_up(timestamp: DateTime<Utc>, name: &String) -> MigrationResult<Self> {
+    pub fn create_up(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
         let timestamp = Self::format_timestamp(timestamp.into())?;
+        let basename = basename.clone();
 
-        let name = name.to_string();
-        Ok(Self::Up(MigrationNameBasicInfo { timestamp, name }))
+        Ok(Self::Up(MigrationNameBasicInfo {
+            timestamp,
+            basename,
+        }))
     }
 
-    pub fn create_down(timestamp: DateTime<Utc>, name: impl Into<String>) -> MigrationResult<Self> {
+    pub fn create_down(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
         let timestamp = Self::format_timestamp(timestamp.into())?;
 
-        let name = name.into();
-        Ok(Self::Down(MigrationNameBasicInfo { timestamp, name }))
+        let basename = basename.clone();
+        Ok(Self::Down(MigrationNameBasicInfo {
+            timestamp,
+            basename,
+        }))
     }
 
-    pub fn create_oneway(
-        timestamp: DateTime<Utc>,
-        name: impl Into<String>,
-    ) -> MigrationResult<Self> {
+    pub fn create_oneway(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
         let timestamp = Self::format_timestamp(timestamp.into())?;
+        let basename = basename.clone();
 
-        let name = name.into();
         Ok(Self::Unidirectional(MigrationNameBasicInfo {
             timestamp,
-            name,
+            basename,
         }))
     }
 
@@ -523,11 +545,11 @@ fn parse_migration_name_unconsumed(input: &str) -> IResult<&str, MigrationFilena
         parse_u64,
     )(input)?;
     let (input, _) = tag("_")(input)?;
-    let (input, (name, direction)) =
+    let (input, (basename, direction)) =
         tuple((take_while1(is_valid_migration_identifier), parse_direction))(input)?;
     let basic_info = MigrationNameBasicInfo {
         timestamp,
-        name: name.to_string(),
+        basename: Basename::from(basename),
     };
 
     let m2 = match direction {
@@ -549,13 +571,22 @@ fn parse_migration_name(input: &str) -> IResult<&str, MigrationFilename> {
 impl Display for MigrationFilename {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let file_name_str = match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Up(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.up.surql")
             }
-            MigrationFilename::Down(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Down(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.down.surql")
             }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo { timestamp, name }) => {
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
+                timestamp,
+                basename: name,
+            }) => {
                 format!("{timestamp}_{name}.surql")
             }
         };

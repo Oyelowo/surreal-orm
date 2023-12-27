@@ -107,16 +107,12 @@ impl MigratorDatabase {
     }
 
     pub async fn generate_migrations(
-        migration_name: &String,
+        migration_basename: &Basename,
         file_manager: &MigrationConfig,
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) -> MigrationResult<()> {
-        let name = migration_name
-            .to_string()
-            .split(|c: char| c != '_' && !c.is_alphanumeric())
-            .collect::<Vec<_>>()
-            .join("_");
+        let migration_basename = migration_basename.normalize_ensure();
 
         log::info!("Running migrations");
 
@@ -195,11 +191,11 @@ impl MigratorDatabase {
             MigrationFlag::TwoWay => {
                 let file = MigrationFileTwoWayPair {
                     up: FileMetadata {
-                        name: MigrationFilename::create_up(timestamp, &name)?,
+                        name: MigrationFilename::create_up(timestamp, &migration_basename)?,
                         content: up_queries_str.clone().into(),
                     },
                     down: FileMetadata {
-                        name: MigrationFilename::create_down(Utc::now(), &name)?,
+                        name: MigrationFilename::create_down(Utc::now(), &migration_basename)?,
                         content: down_queries_str.clone().into(),
                     },
                 };
@@ -207,7 +203,7 @@ impl MigratorDatabase {
             }
             MigrationFlag::OneWay => {
                 let file = MigrationFileOneWay::new(FileMetadata {
-                    name: MigrationFilename::create_oneway(timestamp, &name)?,
+                    name: MigrationFilename::create_oneway(timestamp, &migration_basename)?,
                     content: up_queries_str.clone().into(),
                 });
                 MigrationFile::OneWay(file)
