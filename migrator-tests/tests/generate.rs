@@ -148,19 +148,19 @@ fn get_db_connection_config() -> DatabaseConnection {
 #[derive(Clone, TypedBuilder)]
 struct AssertionArg {
     db: Surreal<Any>,
-    mig_files_count: u8,
-    db_mig_count: u8,
+    expected_mig_files_count: u8,
+    expected_db_mig_count: u8,
     migration_files_dir: PathBuf,
-    migration_basename: Basename,
+    expected_migration_basename: Basename,
     code_origin_line: u32,
 }
 async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     let AssertionArg {
         db,
-        mig_files_count,
-        db_mig_count,
+        expected_mig_files_count: mig_files_count,
+        expected_db_mig_count: db_mig_count,
         migration_files_dir,
-        migration_basename,
+        expected_migration_basename: migration_basename,
         code_origin_line,
     } = args;
 
@@ -234,10 +234,8 @@ impl TestConfig {
     }
 
     async fn setup_db_if_none(&mut self, migrator: &mut Migrator) {
-        match self.db.clone() {
-            Some(db) => {
-                migrator.set_db(db);
-            }
+        match &self.db {
+            Some(db) => migrator.set_db(db.clone()),
             None => {
                 migrator.setup_db().await;
                 self.db = Some(migrator.db().clone());
@@ -341,10 +339,11 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -360,10 +359,11 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -377,10 +377,11 @@ async fn test_one_way_cannot_generate_without_init_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -417,10 +418,11 @@ async fn test_one_way_cannot_generate_without_init_with_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -436,10 +438,11 @@ async fn test_one_way_cannot_generate_without_init_with_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -453,10 +456,11 @@ async fn test_one_way_cannot_generate_without_init_with_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -495,11 +499,12 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 1,
-        db_mig_count: 0,
+        expected_mig_files_count: 1,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        migration_basename: "migration_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -520,10 +525,11 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 2,
-        db_mig_count: 0,
+        expected_mig_files_count: 2,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_1_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_1_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -541,10 +547,11 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 3,
-        db_mig_count: 0,
+        expected_mig_files_count: 3,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_2_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_2_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
 
@@ -559,10 +566,11 @@ async fn test_one_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 4,
-        db_mig_count: 0,
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_3_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_3_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -601,17 +609,18 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 1,
-        db_mig_count: 1,
+        expected_mig_files_count: 1,
+        expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        migration_basename: "migration_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
 
     // #### Generate Phase ####
-    // Run 2: Generate
+    // Run 2: Generate  1st
 
     // Set the db connection from the init migrator so that
     // the generator can use the same db connection.
@@ -627,10 +636,11 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
         // First time, should create migration files and db records
         let joined_migration_files = assert_with_db_instance(AssertionArg {
             db: cli_db.clone(),
-            mig_files_count: 2,
-            db_mig_count: 0,
+            expected_mig_files_count: 2,
+            expected_db_mig_count: 2,
             migration_files_dir: temp_test_migration_dir.clone(),
-            migration_basename: "migration_gen_1_after_init".into(),code_origin_line: std::line!()
+            expected_migration_basename: "migration_gen_1_after_init".into(),
+            code_origin_line: std::line!(),
         })
         .await;
         insta::assert_display_snapshot!(joined_migration_files);
@@ -649,10 +659,11 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 3,
-        db_mig_count: 0,
+        expected_mig_files_count: 3,
+        expected_db_mig_count: 3,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_2_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_2_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
 
@@ -667,10 +678,11 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 4,
-        db_mig_count: 0,
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 4,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_3_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_3_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -708,10 +720,11 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -727,10 +740,11 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -744,10 +758,11 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 0,
-        db_mig_count: 0,
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration 1".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration 1".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -786,11 +801,12 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 2,
-        db_mig_count: 0,
+        expected_mig_files_count: 2,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        migration_basename: "migration_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -811,10 +827,11 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     // First time, should create migration files and db records
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 4,
-        db_mig_count: 0,
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_1_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_1_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
@@ -832,10 +849,11 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 6,
-        db_mig_count: 0,
+        expected_mig_files_count: 6,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_2_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_2_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
 
@@ -850,10 +868,11 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        mig_files_count: 8,
-        db_mig_count: 0,
+        expected_mig_files_count: 8,
+        expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        migration_basename: "migration_gen_3_after_init".into(),code_origin_line: std::line!()
+        expected_migration_basename: "migration_gen_3_after_init".into(),
+        code_origin_line: std::line!(),
     })
     .await;
 
@@ -1369,5 +1388,3 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 //     .await;
 //     insta::assert_display_snapshot!(joined_migration_files);
 // }
-
-
