@@ -249,7 +249,7 @@ impl TestConfig {
         let db_conn_config = get_db_connection_config();
 
         let gen = Generate::builder()
-            .basename(migration_basename.clone())
+            .name(migration_basename.clone())
             .run(*db_run)
             .build();
 

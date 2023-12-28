@@ -69,7 +69,7 @@ async fn test_oneway_migrations() {
             &test_migration_name.into(),
             Resources,
             MockPrompter::builder()
-                .confirm_empty_migrations_gen(false)
+                .allow_empty_migrations_gen(false)
                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
                 .build(),
         )
@@ -214,7 +214,7 @@ async fn test_twoway_migrations() {
             &test_migration_name.into(),
             Resources,
             MockPrompter::builder()
-                .confirm_empty_migrations_gen(false)
+                .allow_empty_migrations_gen(false)
                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
                 .build(),
         )
@@ -243,7 +243,7 @@ async fn test_twoway_migrations() {
             &test_migration_namev2,
             ResourcesV2,
             MockPrompter::builder()
-                .confirm_empty_migrations_gen(false)
+                .allow_empty_migrations_gen(false)
                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
                 .build(),
         )
