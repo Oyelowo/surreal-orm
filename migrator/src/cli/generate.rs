@@ -48,7 +48,7 @@ impl Generate {
 
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
-                    panic!();
+                    panic!("Failed to generate migrations: {e}");
                 }
             }
             Err(e) => {
@@ -78,4 +78,3 @@ impl Generate {
         }
     }
 }
-
