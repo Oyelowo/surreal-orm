@@ -144,7 +144,7 @@ impl Migrator {
         cli.run_fn(
             codebase_resources,
             MockPrompter::builder()
-                .confirm_empty_migrations_gen(false)
+                .allow_empty_migrations_gen(false)
                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
                 .build(),
         )
