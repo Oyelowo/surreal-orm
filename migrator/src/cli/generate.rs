@@ -10,7 +10,7 @@ use typed_builder::TypedBuilder;
 pub struct Generate {
     /// Name of the migration
     #[arg(long, help = "Name of the migration")]
-    pub(crate) basename: Basename,
+    pub(crate) name: Basename,
 
     /// Whether or not to run the migrations after generation.
     #[arg(long, help = "Whether to run the migrations after generation")]
@@ -25,7 +25,7 @@ impl Generate {
         prompter: impl Prompter,
     ) {
         let file_manager = cli.file_manager();
-        let migration_basename = &self.basename;
+        let migration_basename = &self.name;
         let mig_type = file_manager.detect_migration_type();
 
         match mig_type {
