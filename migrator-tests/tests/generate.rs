@@ -308,7 +308,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -387,7 +387,7 @@ async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -458,7 +458,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -568,7 +568,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -690,7 +690,7 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -769,7 +769,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -835,12 +835,12 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
+async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -951,7 +951,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .confirm_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -1056,3 +1056,5 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
 }
+
+
