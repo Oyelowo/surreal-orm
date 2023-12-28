@@ -51,14 +51,14 @@ pub struct MockPrompter {
     // Prompts the user to confirm the generation of empty migrations.
     // If true, empty migrations will be generated.
     // If false, the program will exit/abort.
-    pub confirm_empty_migrations_gen: bool,
+    pub allow_empty_migrations_gen: bool,
 
     pub rename_or_delete_single_field_change: RenameOrDelete,
 }
 
 impl Prompter for MockPrompter {
     fn prompt_empty_migrations_trigger(&self) -> Result<bool, InquireError> {
-        Ok(self.confirm_empty_migrations_gen)
+        Ok(self.allow_empty_migrations_gen)
     }
 
     fn prompt_single_field_rename_or_delete(
