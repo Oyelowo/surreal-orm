@@ -188,8 +188,6 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         assert_eq!(latest_file_name.basename(), migration_basename);
     }
 
-    let content = assert_migration_files_presence_and_format(&migration_files, &db_migrations);
-
     assert_eq!(
         db_migrations.len() as u8,
         db_mig_count,
@@ -201,6 +199,7 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
             "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type. Line:
             {code_origin_line}"
         );
+    let content = assert_migration_files_presence_and_format(&migration_files, &db_migrations);
     content
 }
 
@@ -1130,7 +1129,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
     conf.set_file_basename("migration gen 2 after init".to_string())
         .generator_cmd()
         .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
+        .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
     // Run 3 generate
@@ -1139,10 +1138,10 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 2,
+        expected_mig_files_count: 2,
+        expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1161,7 +1160,10 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
         expected_mig_files_count: 4,
         expected_db_mig_count: 2,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+        // This should change unlike previous because we are using
+        // resources v2 which is different from the one used at
+        // initialization.
+        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
