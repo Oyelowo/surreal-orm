@@ -832,7 +832,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
+async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
@@ -1168,4 +1168,91 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
+}
+
+#[tokio::test]
+#[should_panic]
+async fn should_panic_if_same_field_renaming_twice() {
+    let resources = Resources;
+    let resources_v2 = ResourcesV2;
+    let mock_prompter = MockPrompter::builder()
+        // disallow empty migration generation on no diffs
+        .allow_empty_migrations_gen(false)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfig::builder()
+        .reversible(true)
+        .db_run(true)
+        .mode(Mode::Strict)
+        .migration_basename("migration init".into())
+        .migration_dir(temp_test_migration_dir.clone())
+        .build();
+
+    // #### Init Phase ####
+    // Run 1 init
+    conf.set_file_basename("migration init".to_string())
+        .init_cmd()
+        .await
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+
+    // init cmd should instantiate the database connection which is reused internally in test
+    // config.
+    let cli_db = conf.db().clone();
+
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 2,
+        expected_db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        // name is normalized to snake case
+        expected_latest_migration_basename_normalized: "migration_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+
+    // #### Generate Phase ####
+    // Run 2: Generate  1st
+
+    // Set the db connection from the init migrator so that
+    // the generator can use the same db connection.
+    // generator.set_db_connection_from_migrator(&init);
+
+    conf.set_file_basename("migration gen 1 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(resources_v2.clone(), mock_prompter.clone())
+        .await;
+
+    // First time, should create migration files and db records
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 2,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        // The latest should stll remain the first generated at
+        // initialization becauase we set in the cli prompter
+        // to now allow empty migrations on no diffs.
+        // we are still using resources v1 here which is same
+        // as used at initialization.
+        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    insta::assert_display_snapshot!(joined_migration_files);
+
+    // Run 3 generate
+    // Would panic because we are renaming the same field twice.
+    // within resources v2, animal struct table has the old_name
+    // attribute which must have already taken effect previously up here.
+    // We need to remove it before running another migration, otherwise,
+    // it will panic.
+    conf.set_file_basename("migration gen 2 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(resources_v2.clone(), mock_prompter.clone())
+        .await;
 }
