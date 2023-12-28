@@ -149,7 +149,7 @@ struct AssertionArg {
     expected_mig_files_count: u8,
     expected_db_mig_count: u8,
     migration_files_dir: PathBuf,
-    expected_migration_basename: Basename,
+    expected_latest_migration_basename_normalized: Basename,
     code_origin_line: u32,
 }
 async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
@@ -158,14 +158,12 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         expected_mig_files_count: mig_files_count,
         expected_db_mig_count: db_mig_count,
         migration_files_dir,
-        expected_migration_basename: migration_basename,
+        expected_latest_migration_basename_normalized: migration_basename,
         code_origin_line,
     } = args;
 
     let db_migrations = Migration::get_all_desc(db.clone()).await;
-    dbg!(&db_migrations);
     let latest_migration = Migration::get_latest(db.clone()).await;
-    dbg!(&latest_migration);
 
     if let Some(latest_migration_name) = latest_migration {
         let name = MigrationFilename::try_from(latest_migration_name.name.clone())
@@ -327,7 +325,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "".into(),
+        expected_latest_migration_basename_normalized: "".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -347,7 +345,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "".into(),
+        expected_latest_migration_basename_normalized: "".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -365,7 +363,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "".into(),
+        expected_latest_migration_basename_normalized: "".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -407,7 +405,7 @@ async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -427,7 +425,7 @@ async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -445,7 +443,7 @@ async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -489,7 +487,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        expected_migration_basename: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -514,7 +512,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
         expected_mig_files_count: 2,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_1_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -536,7 +534,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
         expected_mig_files_count: 3,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -555,7 +553,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
         expected_mig_files_count: 4,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_3_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -599,7 +597,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        expected_migration_basename: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -625,7 +623,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
             expected_mig_files_count: 2,
             expected_db_mig_count: 2,
             migration_files_dir: temp_test_migration_dir.clone(),
-            expected_migration_basename: "migration_gen_1_after_init".into(),
+            expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
             code_origin_line: std::line!(),
         })
         .await;
@@ -648,7 +646,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
         expected_mig_files_count: 3,
         expected_db_mig_count: 3,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -667,7 +665,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
         expected_mig_files_count: 4,
         expected_db_mig_count: 4,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_3_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -709,7 +707,7 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -729,7 +727,7 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -747,7 +745,7 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -789,7 +787,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -809,7 +807,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -827,7 +825,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration 1".into(),
+        expected_latest_migration_basename_normalized: "migration 1".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -871,7 +869,7 @@ async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        expected_migration_basename: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -891,7 +889,7 @@ async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
         expected_mig_files_count: 4,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_1_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -913,7 +911,7 @@ async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
         expected_mig_files_count: 6,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -932,7 +930,7 @@ async fn test_two_way_can_gzenerate_after_first_initializing_no_run_strict() {
         expected_mig_files_count: 8,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_3_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -977,7 +975,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        expected_migration_basename: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1003,7 +1001,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
             expected_mig_files_count: 4,
             expected_db_mig_count: 2,
             migration_files_dir: temp_test_migration_dir.clone(),
-            expected_migration_basename: "migration_gen_1_after_init".into(),
+            expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
             code_origin_line: std::line!(),
         })
         .await;
@@ -1026,7 +1024,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
         expected_mig_files_count: 6,
         expected_db_mig_count: 3,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1045,7 +1043,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
         expected_mig_files_count: 8,
         expected_db_mig_count: 4,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_3_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1090,7 +1088,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
         // name is normalized to snake case
-        expected_migration_basename: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1113,10 +1111,15 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
         // First time, should create migration files and db records
         let joined_migration_files = assert_with_db_instance(AssertionArg {
             db: cli_db.clone(),
-            expected_mig_files_count: 4,
-            expected_db_mig_count: 2,
+            expected_mig_files_count: 2,
+            expected_db_mig_count: 1,
             migration_files_dir: temp_test_migration_dir.clone(),
-            expected_migration_basename: "migration_gen_1_after_init".into(),
+            // The latest should stll remain the first generated at
+            // initialization becauase we set in the cli prompter
+            // to now allow empty migrations on no diffs.
+            // we are still using resources v1 here which is same
+            // as used at initialization.
+            expected_latest_migration_basename_normalized: "migration_init".into(),
             code_origin_line: std::line!(),
         })
         .await;
@@ -1136,10 +1139,10 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
     // Remain the same as the first time.
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        expected_mig_files_count: 6,
-        expected_db_mig_count: 3,
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 2,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_2_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -1155,10 +1158,10 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        expected_mig_files_count: 8,
-        expected_db_mig_count: 4,
+        expected_mig_files_count: 4,
+        expected_db_mig_count: 2,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_migration_basename: "migration_gen_3_after_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
