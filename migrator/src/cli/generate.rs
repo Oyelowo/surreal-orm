@@ -37,7 +37,7 @@ impl Generate {
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
-                    panic!();
+                    panic!("Failed to generate migrations: {e}");
                 }
             }
             Ok(MigrationFlag::OneWay) => {
@@ -78,3 +78,4 @@ impl Generate {
         }
     }
 }
+
