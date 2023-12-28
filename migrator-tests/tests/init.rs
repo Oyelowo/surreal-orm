@@ -213,7 +213,7 @@ async fn test_duplicate_up_only_init_without_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -302,7 +302,7 @@ async fn test_duplicate_up_only_init_and_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
@@ -362,7 +362,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
@@ -437,7 +437,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_strict() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
@@ -511,7 +511,7 @@ async fn test_duplicate_up_only_init_without_run_relaxed() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
@@ -587,7 +587,7 @@ async fn test_duplicate_up_only_init_and_run_relaxed() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
@@ -663,7 +663,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_without_run_relaxed() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
@@ -738,7 +738,7 @@ async fn test_duplicate_bidirectional_up_and_down_init_and_run_relaxed() {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
-        .confirm_empty_migrations_gen(false)
+        .allow_empty_migrations_gen(false)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
 
