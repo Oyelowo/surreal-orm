@@ -186,29 +186,12 @@ impl MigratorDatabase {
             .trim()
             .to_string();
 
-        let timestamp = Utc::now();
-        let migration_file = match &file_manager.migration_flag_checked()? {
-            MigrationFlag::TwoWay => {
-                let file = MigrationFileTwoWayPair {
-                    up: FileMetadata {
-                        name: MigrationFilename::create_up(timestamp, &migration_basename)?,
-                        content: up_queries_str.clone().into(),
-                    },
-                    down: FileMetadata {
-                        name: MigrationFilename::create_down(Utc::now(), &migration_basename)?,
-                        content: down_queries_str.clone().into(),
-                    },
-                };
-                MigrationFile::TwoWay(file)
-            }
-            MigrationFlag::OneWay => {
-                let file = MigrationFileOneWay::new(FileMetadata {
-                    name: MigrationFilename::create_oneway(timestamp, &migration_basename)?,
-                    content: up_queries_str.clone().into(),
-                });
-                MigrationFile::OneWay(file)
-            }
-        };
+        let migration_file = MigrationFile::new(
+            &migration_basename,
+            &file_manager.migration_flag_checked()?,
+            &up_queries_str.clone().into(),
+            &down_queries_str.clone().into(),
+        )?;
 
         let query_str = format!("{up_queries_str}{down_queries_str}");
         if query_str.trim().is_empty() {
