@@ -1,3 +1,6 @@
+use chrono::Utc;
+use typed_builder::TypedBuilder;
+
 use crate::*;
 use std::ops::Deref;
 
@@ -88,12 +91,45 @@ pub enum MigrationFile {
 }
 
 impl MigrationFile {
+    pub fn new(
+        migration_basename: &Basename,
+        flag: &MigrationFlag,
+        up_queries: &FileContent,
+        down_queries: &FileContent,
+    ) -> MigrationResult<Self> {
+        let timestamp = Utc::now();
+        let migration_file = match flag {
+            MigrationFlag::TwoWay => {
+                let file = MigrationFileTwoWayPair {
+                    up: FileMetadata {
+                        name: MigrationFilename::create_up(timestamp, &migration_basename)?,
+                        content: up_queries.clone(),
+                    },
+                    down: FileMetadata {
+                        name: MigrationFilename::create_down(timestamp, &migration_basename)?,
+                        content: down_queries.clone(),
+                    },
+                };
+                MigrationFile::TwoWay(file)
+            }
+            MigrationFlag::OneWay => {
+                let file = MigrationFileOneWay::new(FileMetadata {
+                    name: MigrationFilename::create_oneway(timestamp, &migration_basename)?,
+                    content: up_queries.clone().into(),
+                });
+                MigrationFile::OneWay(file)
+            }
+        };
+
+        Ok(migration_file)
+    }
+
     pub fn create_file(&self, file_manager: &MigrationConfig) -> MigrationResult<()> {
         match self {
             Self::OneWay(m) => m.name().create_file(m.content(), file_manager)?,
             Self::TwoWay(m) => {
-                m.up.name.create_file(&m.up.content, file_manager)?;
                 m.down.name.create_file(&m.down.content, file_manager)?;
+                m.up.name.create_file(&m.up.content, file_manager)?;
             }
         };
 
