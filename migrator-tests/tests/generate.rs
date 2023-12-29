@@ -289,15 +289,13 @@ impl TestConfig {
     }
 }
 
-// Cannot generate without init first
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
+async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(false)
         .db_run(false)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -367,6 +365,17 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
     })
     .await;
     insta::assert_display_snapshot!(joined_migration_files);
+}
+
+// Cannot generate without init first
+#[tokio::test]
+async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
+    test_one_way_cannot_generate_without_init_no_db_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_one_way_cannot_generate_without_init_no_db_run_lax() {
+    test_one_way_cannot_generate_without_init_no_db_run(Mode::Lax).await;
 }
 
 #[tokio::test]
