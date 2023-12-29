@@ -378,14 +378,13 @@ async fn test_one_way_cannot_generate_without_init_no_db_run_lax() {
     test_one_way_cannot_generate_without_init_no_db_run(Mode::Lax).await;
 }
 
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
+async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(false)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -459,7 +458,16 @@ async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
 }
 
 #[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
+async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
+    test_one_way_cannot_generate_without_init_with_db_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_one_way_cannot_generate_without_init_with_db_run_lax() {
+    test_one_way_cannot_generate_without_init_with_db_run(Mode::Lax).await;
+}
+
+async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
@@ -472,7 +480,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
     let mut conf = TestConfig::builder()
         .reversible(false)
         .db_run(false)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -569,7 +577,16 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
 }
 
 #[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
+async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
+    test_one_way_can_generate_after_first_initializing_no_db_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_one_way_can_generate_after_first_initializing_no_db_run_lax() {
+    test_one_way_can_generate_after_first_initializing_no_db_run(Mode::Lax).await;
+}
+
+async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
@@ -680,15 +697,24 @@ async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
     insta::assert_display_snapshot!(joined_migration_files);
 }
 
-// Two way/Bidirectional(Up and down) migrations
 #[tokio::test]
-async fn test_two_way_cannot_generate_without_init_no_run_strict() {
+async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
+    test_one_way_can_generate_after_first_initializing_with_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_one_way_can_generate_after_first_initializing_with_run_lax() {
+    test_one_way_can_generate_after_first_initializing_with_run(Mode::Lax).await;
+}
+
+// Two way/Bidirectional(Up and down) migrations
+async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(false)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -761,7 +787,16 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
+async fn test_two_way_cannot_generate_without_init_no_run_strict() {
+    test_two_way_cannot_generate_without_init_no_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_two_way_cannot_generate_without_init_no_run_lax() {
+    test_two_way_cannot_generate_without_init_no_run(Mode::Lax).await;
+}
+
+async fn test_two_way_cannot_generate_without_init_with_db_run() {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
@@ -841,7 +876,16 @@ async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
+async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
+    test_two_way_cannot_generate_without_init_with_db_run().await;
+}
+
+#[tokio::test]
+async fn test_two_way_cannot_generate_without_init_with_db_run_lax() {
+    test_two_way_cannot_generate_without_init_with_db_run().await;
+}
+
+async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
@@ -854,7 +898,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(false)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -947,7 +991,16 @@ async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
+async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
+    test_two_way_can_generate_after_first_initializing_no_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_two_way_can_generate_after_first_initializing_no_run_lax() {
+    test_two_way_can_generate_after_first_initializing_no_run(Mode::Lax).await;
+}
+
+async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let resources_v3 = ResourcesV3;
@@ -960,7 +1013,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -1059,21 +1112,29 @@ async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
 }
 
 #[tokio::test]
-async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
+async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
+    test_two_way_can_generate_after_first_initializing_with_run(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_two_way_can_generate_after_first_initializing_with_run_lax() {
+    test_two_way_can_generate_after_first_initializing_with_run(Mode::Lax).await;
+}
+
+async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
     let mock_prompter = MockPrompter::builder()
         // disallow empty migration generation on no diffs
         .allow_empty_migrations_gen(false)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .rename_or_delete_single_field_change(RenameOrDelete::Delete)
         .build();
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -1180,8 +1241,16 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
 }
 
 #[tokio::test]
-#[should_panic]
-async fn should_panic_if_same_field_renaming_twice() {
+async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff_strict() {
+    test_two_way_can_disallow_empty_migration_gen_on_no_diff(Mode::Strict).await;
+}
+
+#[tokio::test]
+async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff_lax() {
+    test_two_way_can_disallow_empty_migration_gen_on_no_diff(Mode::Lax).await;
+}
+
+async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
@@ -1194,7 +1263,7 @@ async fn should_panic_if_same_field_renaming_twice() {
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -1264,4 +1333,16 @@ async fn should_panic_if_same_field_renaming_twice() {
         .await
         .run_fn(resources_v2.clone(), mock_prompter.clone())
         .await;
+}
+
+#[tokio::test]
+#[should_panic]
+async fn should_panic_if_same_field_renaming_twice_strict() {
+    should_panic_if_same_field_renaming_twice(Mode::Strict).await;
+}
+
+#[tokio::test]
+#[should_panic]
+async fn should_panic_if_same_field_renaming_twice_lax() {
+    should_panic_if_same_field_renaming_twice(Mode::Lax).await;
 }
