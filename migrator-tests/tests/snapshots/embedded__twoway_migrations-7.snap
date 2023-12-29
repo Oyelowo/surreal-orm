@@ -1,9 +1,0 @@
----
-source: examples/migration-cli/tests/embedded.rs
-expression: "fields_info.as_ref().unwrap().values().map(|v|\n                v.keys().map(|k|\n                                k.to_string()).collect::<Vec<_>>().join(\", \")).collect::<Vec<_>>().join(\"\\n\")"
----
-
-createdAt, id, in, location, out, updatedAt
-
-
-

@@ -1,5 +1,0 @@
----
-source: migrator-tests/tests/generate.rs
-expression: "files.join(\"\\n\")"
----
-test_migration.surql
