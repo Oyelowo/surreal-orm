@@ -1,0 +1,18 @@
+---
+source: migrator-tests/tests/generate_old.rs
+expression: fields_info.unwrap()
+---
+{
+    "events": {},
+    "fields": {
+        "createdAt": "DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL",
+        "firstName": "DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL",
+        "id": "DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL",
+        "labels": "DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL",
+        "population": "DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL",
+        "updatedAt": "DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL",
+    },
+    "indexes": {},
+    "lives": {},
+    "tables": {},
+}

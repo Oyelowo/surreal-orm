@@ -12,7 +12,7 @@ use surreal_orm::migrator::{
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use tempfile::tempdir;
-use test_case::*;
+use test_case::test_case;
 use typed_builder::TypedBuilder;
 
 fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
@@ -287,8 +287,19 @@ impl TestConfig {
         self.setup_db_if_none(&mut migrator).await;
         migrator
     }
+
+    pub fn snapshot_name_str(self) -> String {
+        let n = format!(
+            "migration basename: {}, reversible: {}, db_run: {}, mode: {}",
+            self.migration_basename, self.reversible, self.db_run, self.mode
+        );
+        n
+    }
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
 async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -326,7 +337,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -346,7 +357,7 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -364,20 +375,13 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
-// Cannot generate without init first
+// // Cannot generate without init first
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
-    test_one_way_cannot_generate_without_init_no_db_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_no_db_run_lax() {
-    test_one_way_cannot_generate_without_init_no_db_run(Mode::Lax).await;
-}
-
 async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -416,7 +420,9 @@ async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+    // insta::assert_display_snapshot!\(mode_str, joined_migration_files\);
+    // insta::assert_display_snapshot!\(conf.clone\(\).snapshot_name_str\(\), joined_migration_files\);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -436,7 +442,7 @@ async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -454,19 +460,12 @@ async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
-    test_one_way_cannot_generate_without_init_with_db_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_with_db_run_lax() {
-    test_one_way_cannot_generate_without_init_with_db_run(Mode::Lax).await;
-}
-
 async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -507,7 +506,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate
@@ -532,7 +531,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Run 3 generate
     conf.set_file_basename("migration gen 2 after init".to_string())
@@ -555,7 +554,7 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
@@ -573,19 +572,12 @@ async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
-    test_one_way_can_generate_after_first_initializing_no_db_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_no_db_run_lax() {
-    test_one_way_can_generate_after_first_initializing_no_db_run(Mode::Lax).await;
-}
-
 async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -599,7 +591,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode)
     let mut conf = TestConfig::builder()
         .reversible(false)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -626,7 +618,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode)
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate  1st
@@ -652,7 +644,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode)
             code_origin_line: std::line!(),
         })
         .await;
-        insta::assert_display_snapshot!(joined_migration_files);
+        insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
     }
 
     // Run 3 generate
@@ -676,7 +668,7 @@ async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode)
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
@@ -694,20 +686,13 @@ async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode)
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
-    test_one_way_can_generate_after_first_initializing_with_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_with_run_lax() {
-    test_one_way_can_generate_after_first_initializing_with_run(Mode::Lax).await;
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
 // Two way/Bidirectional(Up and down) migrations
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
 async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -745,7 +730,7 @@ async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -765,7 +750,7 @@ async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -783,26 +768,19 @@ async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_cannot_generate_without_init_no_run_strict() {
-    test_two_way_cannot_generate_without_init_no_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_two_way_cannot_generate_without_init_no_run_lax() {
-    test_two_way_cannot_generate_without_init_no_run(Mode::Lax).await;
-}
-
-async fn test_two_way_cannot_generate_without_init_with_db_run() {
+async fn test_two_way_cannot_generate_without_init_with_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(true)
         .db_run(true)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
@@ -834,7 +812,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run() {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -854,7 +832,7 @@ async fn test_two_way_cannot_generate_without_init_with_db_run() {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
@@ -872,19 +850,12 @@ async fn test_two_way_cannot_generate_without_init_with_db_run() {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
-    test_two_way_cannot_generate_without_init_with_db_run().await;
-}
-
-#[tokio::test]
-async fn test_two_way_cannot_generate_without_init_with_db_run_lax() {
-    test_two_way_cannot_generate_without_init_with_db_run().await;
-}
-
 async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -925,7 +896,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate
@@ -945,7 +916,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Run 3 generate
     conf.set_file_basename("migration gen 2 after init".to_string())
@@ -968,7 +939,7 @@ async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
@@ -987,19 +958,12 @@ async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
-    test_two_way_can_generate_after_first_initializing_no_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_no_run_lax() {
-    test_two_way_can_generate_after_first_initializing_no_run(Mode::Lax).await;
-}
-
 async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -1040,7 +1004,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode)
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate  1st
@@ -1066,7 +1030,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode)
             code_origin_line: std::line!(),
         })
         .await;
-        insta::assert_display_snapshot!(joined_migration_files);
+        insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
     }
 
     // Run 3 generate
@@ -1090,7 +1054,7 @@ async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode)
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
@@ -1108,19 +1072,12 @@ async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode)
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
-    test_two_way_can_generate_after_first_initializing_with_run(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_with_run_lax() {
-    test_two_way_can_generate_after_first_initializing_with_run(Mode::Lax).await;
-}
-
 async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -1161,7 +1118,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate  1st
@@ -1192,7 +1149,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
             code_origin_line: std::line!(),
         })
         .await;
-        insta::assert_display_snapshot!(joined_migration_files);
+        insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
     }
 
     // Run 3 generate
@@ -1216,7 +1173,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
     })
     .await;
 
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen 3 after init".to_string())
@@ -1237,19 +1194,12 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff_strict() {
-    test_two_way_can_disallow_empty_migration_gen_on_no_diff(Mode::Strict).await;
-}
-
-#[tokio::test]
-async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff_lax() {
-    test_two_way_can_disallow_empty_migration_gen_on_no_diff(Mode::Lax).await;
-}
-
 async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
     let resources = Resources;
     let resources_v2 = ResourcesV2;
@@ -1290,7 +1240,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // #### Generate Phase ####
     // Run 2: Generate  1st
@@ -1320,7 +1270,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    insta::assert_display_snapshot!(joined_migration_files);
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // Run 3 generate
     // Would panic because we are renaming the same field twice.
@@ -1333,16 +1283,4 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
         .await
         .run_fn(resources_v2.clone(), mock_prompter.clone())
         .await;
-}
-
-#[tokio::test]
-#[should_panic]
-async fn should_panic_if_same_field_renaming_twice_strict() {
-    should_panic_if_same_field_renaming_twice(Mode::Strict).await;
-}
-
-#[tokio::test]
-#[should_panic]
-async fn should_panic_if_same_field_renaming_twice_lax() {
-    should_panic_if_same_field_renaming_twice(Mode::Lax).await;
 }
