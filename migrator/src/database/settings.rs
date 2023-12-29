@@ -105,4 +105,11 @@ impl Mode {
     pub fn is_relaxed(&self) -> bool {
         matches!(self, Self::Lax)
     }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Strict => "strict",
+            Self::Lax => "lax",
+        }
+    }
 }
