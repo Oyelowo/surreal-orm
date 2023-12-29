@@ -1,0 +1,5 @@
+---
+source: migrator-tests/tests/generate.rs
+expression: joined_migration_files
+---
+
