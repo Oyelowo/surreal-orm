@@ -3,14 +3,17 @@ use std::{
     path::PathBuf,
 };
 
-use surreal_models::migrations::{Resources, ResourcesV2, ResourcesV3};
+use surreal_models::migrations::{
+    Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
+    ResourcesV7, ResourcesV8, ResourcesV9,
+};
 use surreal_orm::{
     migrator::{
         config::{DatabaseConnection, UrlDb},
         Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
         Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
     },
-    serde::de,
+    DbResources,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -58,12 +61,12 @@ fn assert_migration_files_presence_and_format(
         a.file_name()
             .expect("Failed to get file name")
             .to_str()
-            .expect("Failed to get file name")
+            .expect("Failed to get convert file name to string")
             .cmp(
                 b.file_name()
                     .expect("Failed to get file name")
                     .to_str()
-                    .expect("Failed to get file name"),
+                    .expect("Failed to get convert file name to string"),
             )
     });
 
@@ -73,7 +76,7 @@ fn assert_migration_files_presence_and_format(
             .file_name()
             .expect("Failed to get file name")
             .to_str()
-            .expect("Failed to get file name");
+            .expect("Failed to get convert file name to string");
 
         let file_name =
             MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
@@ -163,6 +166,7 @@ struct AssertionArg {
     expected_latest_migration_basename_normalized: Basename,
     code_origin_line: u32,
 }
+
 async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     let AssertionArg {
         db,
@@ -511,35 +515,91 @@ async fn test_run_up_default_which_should_be_latest(mode: Mode) {
     conf.set_file_basename("migration init".to_string())
         .init_cmd()
         .await
-        .run_fn(resources.clone(), mock_prompter.clone())
+        .run_fn(Resources, mock_prompter.clone())
         .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
     let cli_db = conf.db().clone();
-
-    // #### Generate Phase ####
-    // Run 2: Generate
 
     conf.set_file_basename("migration gen 1 after init".to_string())
         .generator_cmd()
         .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
+        .run_fn(Resources, mock_prompter.clone())
         .await;
 
-    // Run 3 generate
+    conf.set_file_basename("migration gen 1a after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(Resources, mock_prompter.clone())
+        .await;
+
     conf.set_file_basename("migration gen 2 after init".to_string())
         .generator_cmd()
         .await
-        .run_fn(resources.clone(), mock_prompter.clone())
+        .run_fn(ResourcesV2, mock_prompter.clone())
         .await;
 
-    // Run 3 generate
     conf.set_file_basename("migration gen 3 after init".to_string())
         .generator_cmd()
         .await
-        .run_fn(resources_v3, mock_prompter)
+        .run_fn(ResourcesV3, mock_prompter.clone())
         .await;
+
+    conf.set_file_basename("migration gen 4 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV4, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 5 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV5, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 6 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV6, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 7 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV7, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 8 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV8, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 9 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV9, mock_prompter.clone())
+        .await;
+
+    conf.set_file_basename("migration gen 10 after init".to_string())
+        .generator_cmd()
+        .await
+        .run_fn(ResourcesV10, mock_prompter.clone())
+        .await;
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 1,
+        expected_db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    // insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+
+    // init cmd should instantiate the database connection which is reused internally in test
+    // config.
 }
 
 // #[test_case(Mode::Strict; "Strict")]

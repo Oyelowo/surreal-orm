@@ -31,7 +31,7 @@ impl DbResources for ResourcesV2 {
 pub struct ResourcesV3;
 
 impl DbResources for ResourcesV3 {
-    create_table_resources!(Crop, PlanetV2, Student);
+    create_table_resources!(Crop, Student);
 }
 
 #[derive(Debug, Clone)]
