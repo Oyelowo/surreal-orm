@@ -51,9 +51,7 @@ impl DbResources for ResourcesV5 {
 #[derive(Debug, Clone)]
 pub struct ResourcesV6;
 
-impl DbResources for ResourcesV6 {
-    create_table_resources!();
-}
+impl DbResources for ResourcesV6 {}
 
 #[derive(Debug, Clone)]
 pub struct ResourcesV7;
@@ -65,15 +63,18 @@ impl DbResources for ResourcesV7 {
 #[derive(Debug, Clone)]
 pub struct ResourcesV8;
 
-impl DbResources for ResourcesV8 {
-    create_table_resources!();
-}
+impl DbResources for ResourcesV8 {}
 
 #[derive(Debug, Clone)]
 pub struct ResourcesV9;
 
-impl DbResources for ResourcesV9 {
-    create_table_resources!();
+impl DbResources for ResourcesV9 {}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV10;
+
+impl DbResources for ResourcesV10 {
+    create_table_resources!(Animal, Crop, Planet);
 }
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
