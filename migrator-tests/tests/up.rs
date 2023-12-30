@@ -7,13 +7,21 @@ use surreal_models::migrations::{Resources, ResourcesV2, ResourcesV3};
 use surreal_orm::migrator::{
     config::{DatabaseConnection, UrlDb},
     Basename, FileContent, Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter,
-    Mode, RenameOrDelete, SubCommand,
+    Mode, RenameOrDelete, SubCommand, Up,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use tempfile::tempdir;
-use test_case::*;
+use test_case::test_case;
 use typed_builder::TypedBuilder;
+
+macro_rules! set_snapshot_suffix {
+    ($($expr:expr),*) => {
+        let mut settings = insta::Settings::clone_current();
+        settings.set_snapshot_suffix(format!($($expr,)*));
+        let _guard = settings.bind_to_scope();
+    }
+}
 
 fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
     std::fs::read_dir(path)
@@ -233,6 +241,32 @@ impl TestConfig {
             }
         }
     }
+    pub(crate) async fn up_cmd(&mut self) -> Migrator {
+        let TestConfig {
+            db_run,
+            mode,
+            migration_basename,
+            migration_dir,
+            ..
+        } = self;
+        fs::create_dir_all(&migration_dir).expect("Failed to create dir");
+        let db_conn_config = get_db_connection_config();
+
+        let gen = Up::builder()
+            .name(migration_basename.clone())
+            .run(*db_run)
+            .build();
+
+        let mut migrator = Migrator::builder()
+            .subcmd(SubCommand::Up(gen))
+            .verbose(3)
+            .migrations_dir(migration_dir.clone())
+            .db_connection(db_conn_config)
+            .mode(*mode)
+            .build();
+        self.setup_db_if_none(&mut migrator).await;
+        migrator
+    }
 
     pub(crate) async fn generator_cmd(&mut self) -> Migrator {
         let TestConfig {
@@ -287,404 +321,31 @@ impl TestConfig {
         self.setup_db_if_none(&mut migrator).await;
         migrator
     }
-}
 
-// Cannot generate without init first
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_no_db_run_strict() {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(false)
-        .db_run(false)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-
-    // 1st run
-    conf.set_file_basename("migration gen without init 1".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-    let cli_db = conf.db().clone();
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_one_way_cannot_generate_without_init_with_db_run_strict() {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(false)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-
-    // Generating without init should not yield any migrations
-    // 1st run
-    conf.set_file_basename("migration gen without init 1".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-    let cli_db = conf.db().clone();
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_no_db_run_strict() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(false)
-        .db_run(false)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 1,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate
-
-    // Set the db connection from the init migrator so that
-    // the generator can use the same db connection.
-    // generator.set_db_connection_from_migrator(&init);
-
-    conf.set_file_basename("migration gen 1 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
-        .await;
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Run 3 generate
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Run 3 generate
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 3,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen 3 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v3, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_one_way_can_generate_after_first_initializing_with_run_strict() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(false)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 1,
-        expected_db_mig_count: 1,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate  1st
-
-    // Set the db connection from the init migrator so that
-    // the generator can use the same db connection.
-    // generator.set_db_connection_from_migrator(&init);
-
-    if !joined_migration_files.is_empty() {
-        conf.set_file_basename("migration gen 1 after init".to_string())
-            .generator_cmd()
-            .await
-            .run_fn(resources_v2.clone(), mock_prompter.clone())
-            .await;
-
-        // First time, should create migration files and db records
-        let joined_migration_files = assert_with_db_instance(AssertionArg {
-            db: cli_db.clone(),
-            expected_mig_files_count: 2,
-            expected_db_mig_count: 2,
-            migration_files_dir: temp_test_migration_dir.clone(),
-            expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
-            code_origin_line: std::line!(),
-        })
-        .await;
-        insta::assert_display_snapshot!(joined_migration_files);
+    pub fn snapshot_name_str(self) -> String {
+        let n = format!(
+            "migration basename: {}, reversible: {}, db_run: {}, mode: {}",
+            self.migration_basename, self.reversible, self.db_run, self.mode
+        );
+        n
     }
-
-    // Run 3 generate
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Run 3 generate
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 3,
-        expected_db_mig_count: 3,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen 3 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v3, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 4,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
 }
 
-// Two way/Bidirectional(Up and down) migrations
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_two_way_cannot_generate_without_init_no_run_strict() {
+async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
-        .reversible(true)
+        .reversible(false)
         .db_run(false)
-        .mode(Mode::Strict)
+        .mode(mode)
         .migration_basename("migration init".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
 
-    let mode_str = mode.as_str();let resources = Resources;
+    let resources = Resources;
     let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
         .allow_empty_migrations_gen(true)
@@ -701,17 +362,6 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
     let cli_db = conf.db().clone();
 
     // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
         .generator_cmd()
@@ -719,540 +369,919 @@ async fn test_two_way_cannot_generate_without_init_no_run_strict() {
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
     conf.set_file_basename("migration gen without init 2".to_string())
         .generator_cmd()
         .await
         .run_fn(resources_v2, mock_prompter)
         .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
 }
 
-#[tokio::test]
-async fn test_two_way_cannot_generate_without_init_with_db_run_strict() {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(true)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-
-    // Generating without init should not yield any migrations
-    // 1st run
-    conf.set_file_basename("migration gen without init 1".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-    let cli_db = conf.db().clone();
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration 1".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_no_run_strict() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(true)
-        .db_run(false)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate
-    conf.set_file_basename("migration gen 1 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
-        .await;
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Run 3 generate
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Run 3 generate
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 6,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen 3 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v3, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 8,
-        expected_db_mig_count: 0,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_two_way_can_generate_after_first_initializing_with_run_strict() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(true)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 1,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate  1st
-
-    // Set the db connection from the init migrator so that
-    // the generator can use the same db connection.
-    // generator.set_db_connection_from_migrator(&init);
-
-    if !joined_migration_files.is_empty() {
-        conf.set_file_basename("migration gen 1 after init".to_string())
-            .generator_cmd()
-            .await
-            .run_fn(resources_v2.clone(), mock_prompter.clone())
-            .await;
-
-        // First time, should create migration files and db records
-        let joined_migration_files = assert_with_db_instance(AssertionArg {
-            db: cli_db.clone(),
-            expected_mig_files_count: 4,
-            expected_db_mig_count: 2,
-            migration_files_dir: temp_test_migration_dir.clone(),
-            expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
-            code_origin_line: std::line!(),
-        })
-        .await;
-        insta::assert_display_snapshot!(joined_migration_files);
-    }
-
-    // Run 3 generate
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Run 3 generate
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 6,
-        expected_db_mig_count: 3,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen 3 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v3, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 8,
-        expected_db_mig_count: 4,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
-    let mock_prompter = MockPrompter::builder()
-        // disallow empty migration generation on no diffs
-        .allow_empty_migrations_gen(false)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(true)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 1,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate  1st
-
-    // Set the db connection from the init migrator so that
-    // the generator can use the same db connection.
-    // generator.set_db_connection_from_migrator(&init);
-
-    if !joined_migration_files.is_empty() {
-        conf.set_file_basename("migration gen 1 after init".to_string())
-            .generator_cmd()
-            .await
-            .run_fn(resources.clone(), mock_prompter.clone())
-            .await;
-
-        // First time, should create migration files and db records
-        let joined_migration_files = assert_with_db_instance(AssertionArg {
-            db: cli_db.clone(),
-            expected_mig_files_count: 2,
-            expected_db_mig_count: 1,
-            migration_files_dir: temp_test_migration_dir.clone(),
-            // The latest should stll remain the first generated at
-            // initialization becauase we set in the cli prompter
-            // to now allow empty migrations on no diffs.
-            // we are still using resources v1 here which is same
-            // as used at initialization.
-            expected_latest_migration_basename_normalized: "migration_init".into(),
-            code_origin_line: std::line!(),
-        })
-        .await;
-        insta::assert_display_snapshot!(joined_migration_files);
-    }
-
-    // Run 3 generate
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // Run 3 generate
-
-    // Second time, should not create migration files nor db records. i.e should be idempotent/
-    // Remain the same as the first time.
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 1,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen 3 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2, mock_prompter)
-        .await;
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 2,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // This should change unlike previous because we are using
-        // resources v2 which is different from the one used at
-        // initialization.
-        expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-}
-
-#[tokio::test]
-#[should_panic]
-async fn should_panic_if_same_field_renaming_twice() {
-    let mode_str = mode.as_str();let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let mock_prompter = MockPrompter::builder()
-        // disallow empty migration generation on no diffs
-        .allow_empty_migrations_gen(false)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(true)
-        .db_run(true)
-        .mode(Mode::Strict)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir.clone())
-        .build();
-
-    // #### Init Phase ####
-    // Run 1 init
-    conf.set_file_basename("migration init".to_string())
-        .init_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
-    let cli_db = conf.db().clone();
-
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 2,
-        expected_db_mig_count: 1,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // name is normalized to snake case
-        expected_latest_migration_basename_normalized: "migration_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // #### Generate Phase ####
-    // Run 2: Generate  1st
-
-    // Set the db connection from the init migrator so that
-    // the generator can use the same db connection.
-    // generator.set_db_connection_from_migrator(&init);
-
-    conf.set_file_basename("migration gen 1 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
-        .await;
-
-    // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 4,
-        expected_db_mig_count: 2,
-        migration_files_dir: temp_test_migration_dir.clone(),
-        // The latest should stll remain the first generated at
-        // initialization becauase we set in the cli prompter
-        // to now allow empty migrations on no diffs.
-        // we are still using resources v1 here which is same
-        // as used at initialization.
-        expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
-        code_origin_line: std::line!(),
-    })
-    .await;
-    insta::assert_display_snapshot!(joined_migration_files);
-
-    // Run 3 generate
-    // Would panic because we are renaming the same field twice.
-    // within resources v2, animal struct table has the old_name
-    // attribute which must have already taken effect previously up here.
-    // We need to remove it before running another migration, otherwise,
-    // it will panic.
-    conf.set_file_basename("migration gen 2 after init".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2.clone(), mock_prompter.clone())
-        .await;
-}
+// // Cannot generate without init first
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_one_way_cannot_generate_without_init_with_db_run(mode: Mode) {
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(false)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//
+//     // Generating without init should not yield any migrations
+//     // 1st run
+//     conf.set_file_basename("migration gen without init 1".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//     let cli_db = conf.db().clone();
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//     // insta::assert_display_snapshot!\(mode_str, joined_migration_files\);
+//     // insta::assert_display_snapshot!\(conf.clone\(\).snapshot_name_str\(\), joined_migration_files\);
+//
+//     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_one_way_can_generate_after_first_initializing_no_db_run(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let resources_v3 = ResourcesV3;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(false)
+//         .db_run(false)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 1,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate
+//
+//     // Set the db connection from the init migrator so that
+//     // the generator can use the same db connection.
+//     // generator.set_db_connection_from_migrator(&init);
+//
+//     conf.set_file_basename("migration gen 1 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Run 3 generate
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Run 3 generate
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 3,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen 3 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v3, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 4,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_one_way_can_generate_after_first_initializing_with_run(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let resources_v3 = ResourcesV3;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(false)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 1,
+//         expected_db_mig_count: 1,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate  1st
+//
+//     // Set the db connection from the init migrator so that
+//     // the generator can use the same db connection.
+//     // generator.set_db_connection_from_migrator(&init);
+//
+//     if !joined_migration_files.is_empty() {
+//         conf.set_file_basename("migration gen 1 after init".to_string())
+//             .generator_cmd()
+//             .await
+//             .run_fn(resources_v2.clone(), mock_prompter.clone())
+//             .await;
+//
+//         // First time, should create migration files and db records
+//         let joined_migration_files = assert_with_db_instance(AssertionArg {
+//             db: cli_db.clone(),
+//             expected_mig_files_count: 2,
+//             expected_db_mig_count: 2,
+//             migration_files_dir: temp_test_migration_dir.clone(),
+//             expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+//             code_origin_line: std::line!(),
+//         })
+//         .await;
+//         insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//     }
+//
+//     // Run 3 generate
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Run 3 generate
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 3,
+//         expected_db_mig_count: 3,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen 3 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v3, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 4,
+//         expected_db_mig_count: 4,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// // // Two way/Bidirectional(Up and down) migrations
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_two_way_cannot_generate_without_init_no_run(mode: Mode) {
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(false)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//
+//     // 1st run
+//     conf.set_file_basename("migration gen without init 1".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//     let cli_db = conf.db().clone();
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_two_way_cannot_generate_without_init_with_db_run(mode: Mode) {
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//
+//     // Generating without init should not yield any migrations
+//     // 1st run
+//     conf.set_file_basename("migration gen without init 1".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//     let cli_db = conf.db().clone();
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen without init 2".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 0,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration 1".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_two_way_can_generate_after_first_initializing_no_run(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let resources_v3 = ResourcesV3;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(false)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate
+//     conf.set_file_basename("migration gen 1 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 4,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Run 3 generate
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Run 3 generate
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 6,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen 3 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v3, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 8,
+//         expected_db_mig_count: 0,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_two_way_can_generate_after_first_initializing_with_run(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let resources_v3 = ResourcesV3;
+//     let mock_prompter = MockPrompter::builder()
+//         .allow_empty_migrations_gen(true)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 1,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate  1st
+//
+//     // Set the db connection from the init migrator so that
+//     // the generator can use the same db connection.
+//     // generator.set_db_connection_from_migrator(&init);
+//
+//     if !joined_migration_files.is_empty() {
+//         conf.set_file_basename("migration gen 1 after init".to_string())
+//             .generator_cmd()
+//             .await
+//             .run_fn(resources_v2.clone(), mock_prompter.clone())
+//             .await;
+//
+//         // First time, should create migration files and db records
+//         let joined_migration_files = assert_with_db_instance(AssertionArg {
+//             db: cli_db.clone(),
+//             expected_mig_files_count: 4,
+//             expected_db_mig_count: 2,
+//             migration_files_dir: temp_test_migration_dir.clone(),
+//             expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+//             code_origin_line: std::line!(),
+//         })
+//         .await;
+//         insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//     }
+//
+//     // Run 3 generate
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Run 3 generate
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 6,
+//         expected_db_mig_count: 3,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_2_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen 3 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v3, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 8,
+//         expected_db_mig_count: 4,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_gen_3_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let mock_prompter = MockPrompter::builder()
+//         // disallow empty migration generation on no diffs
+//         .allow_empty_migrations_gen(false)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Delete)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//     set_snapshot_suffix!("{}", conf.clone().snapshot_name_str());
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init no diff test".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 1,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init_no_diff_test".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate  1st
+//
+//     // Set the db connection from the init migrator so that
+//     // the generator can use the same db connection.
+//     // generator.set_db_connection_from_migrator(&init);
+//
+//     if !joined_migration_files.is_empty() {
+//         conf.set_file_basename("migration gen 1 after init no diff".to_string())
+//             .generator_cmd()
+//             .await
+//             .run_fn(resources.clone(), mock_prompter.clone())
+//             .await;
+//
+//         // First time, should create migration files and db records
+//         let joined_migration_files = assert_with_db_instance(AssertionArg {
+//             db: cli_db.clone(),
+//             expected_mig_files_count: 2,
+//             expected_db_mig_count: 1,
+//             migration_files_dir: temp_test_migration_dir.clone(),
+//             // The latest should stll remain the first generated at
+//             // initialization becauase we set in the cli prompter
+//             // to now allow empty migrations on no diffs.
+//             // we are still using resources v1 here which is same
+//             // as used at initialization.
+//             expected_latest_migration_basename_normalized: "migration_init_no_diff_test".into(),
+//             code_origin_line: std::line!(),
+//         })
+//         .await;
+//         insta::assert_display_snapshot!(joined_migration_files);
+//     }
+//
+//     // Run 3 generate
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // Run 3 generate
+//
+//     // Second time, should not create migration files nor db records. i.e should be idempotent/
+//     // Remain the same as the first time.
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 1,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_basename_normalized: "migration_init_no_diff_test".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//
+//     insta::assert_display_snapshot!(joined_migration_files);
+//
+//     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
+//     conf.set_file_basename("migration gen 3 after init new diff".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2, mock_prompter)
+//         .await;
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 4,
+//         expected_db_mig_count: 2,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // This should change unlike previous because we are using
+//         // resources v2 which is different from the one used at
+//         // initialization.
+//         expected_latest_migration_basename_normalized: "migration_gen_3_after_init_new_diff".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(joined_migration_files);
+// }
+//
+// #[test_case(Mode::Strict; "Strict")]
+// #[test_case(Mode::Lax; "Lax")]
+// #[tokio::test]
+// #[should_panic]
+// async fn should_panic_if_same_field_renaming_twice(mode: Mode) {
+//     let resources = Resources;
+//     let resources_v2 = ResourcesV2;
+//     let mock_prompter = MockPrompter::builder()
+//         // disallow empty migration generation on no diffs
+//         .allow_empty_migrations_gen(false)
+//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+//         .build();
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(true)
+//         .db_run(true)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir.clone())
+//         .build();
+//
+//     // #### Init Phase ####
+//     // Run 1 init
+//     conf.set_file_basename("migration init".to_string())
+//         .init_cmd()
+//         .await
+//         .run_fn(resources.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // init cmd should instantiate the database connection which is reused internally in test
+//     // config.
+//     let cli_db = conf.db().clone();
+//
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 2,
+//         expected_db_mig_count: 1,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // name is normalized to snake case
+//         expected_latest_migration_basename_normalized: "migration_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // #### Generate Phase ####
+//     // Run 2: Generate  1st
+//
+//     // Set the db connection from the init migrator so that
+//     // the generator can use the same db connection.
+//     // generator.set_db_connection_from_migrator(&init);
+//
+//     conf.set_file_basename("migration gen 1 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2.clone(), mock_prompter.clone())
+//         .await;
+//
+//     // First time, should create migration files and db records
+//     let joined_migration_files = assert_with_db_instance(AssertionArg {
+//         db: cli_db.clone(),
+//         expected_mig_files_count: 4,
+//         expected_db_mig_count: 2,
+//         migration_files_dir: temp_test_migration_dir.clone(),
+//         // The latest should stll remain the first generated at
+//         // initialization becauase we set in the cli prompter
+//         // to now allow empty migrations on no diffs.
+//         // we are still using resources v1 here which is same
+//         // as used at initialization.
+//         expected_latest_migration_basename_normalized: "migration_gen_1_after_init".into(),
+//         code_origin_line: std::line!(),
+//     })
+//     .await;
+//     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+//
+//     // Run 3 generate
+//     // Would panic because we are renaming the same field twice.
+//     // within resources v2, animal struct table has the old_name
+//     // attribute which must have already taken effect previously up here.
+//     // We need to remove it before running another migration, otherwise,
+//     // it will panic.
+//     conf.set_file_basename("migration gen 2 after init".to_string())
+//         .generator_cmd()
+//         .await
+//         .run_fn(resources_v2.clone(), mock_prompter.clone())
+//         .await;
+// }
