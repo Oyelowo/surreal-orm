@@ -556,74 +556,74 @@ async fn generate_test_migrations(
 
     // #### Init Phase ####
     // Run 1 init
-    conf.set_file_basename("migration init".to_string())
+    conf.set_file_basename("migration 1-init".to_string())
         .init_cmd()
         .await
         .run_fn(Resources, mock_prompter.clone())
         .await;
     let cli_db = conf.db().clone();
 
-    conf.set_file_basename("migration gen 1a after init".to_string())
+    conf.set_file_basename("migration 2-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(Resources, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 1b after init".to_string())
+    conf.set_file_basename("migration 3-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(Resources, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 2 after init".to_string())
+    conf.set_file_basename("migration 4-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV2, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 3 after init".to_string())
+    conf.set_file_basename("migration 5-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV3, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 4 after init".to_string())
+    conf.set_file_basename("migration 6-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV4, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 5 after init".to_string())
+    conf.set_file_basename("migration 7-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV5, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 6 after init".to_string())
+    conf.set_file_basename("migration 8-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV6, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 7 after init".to_string())
+    conf.set_file_basename("migration 9-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV7, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 8 after init".to_string())
+    conf.set_file_basename("migration 10-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV8, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 9 after init".to_string())
+    conf.set_file_basename("migration 11-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV9, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 10 after init".to_string())
+    conf.set_file_basename("migration 12-gen after init".to_string())
         .generator_cmd()
         .await
         .run_fn(ResourcesV10, mock_prompter.clone())
@@ -647,8 +647,8 @@ async fn t1(mode: Mode) {
         expected_mig_files_count: 12,
         expected_db_mig_count: 12,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_gen_10_after_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -668,15 +668,29 @@ async fn t2(mode: Mode) {
         generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
     let cli_db = conf.db().clone();
 
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(1).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_1_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
     let ref default_fwd_strategy = FastForwardDelta::builder().number(5).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 12,
-        expected_db_mig_count: 5,
+        expected_db_mig_count: 6,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_gen_3_after_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_6_gen_after_init".into(),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -687,10 +701,38 @@ async fn t2(mode: Mode) {
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 12,
-        expected_db_mig_count: 6,
+        expected_db_mig_count: 7,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_gen_4_after_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_7_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(5).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 12,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(1000).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 12,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
