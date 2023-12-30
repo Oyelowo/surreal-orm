@@ -589,10 +589,10 @@ async fn test_run_up_default_which_should_be_latest(mode: Mode) {
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
-        expected_mig_files_count: 1,
-        expected_db_mig_count: 1,
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 12,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
+        expected_latest_migration_basename_normalized: "migration_gen_10_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
