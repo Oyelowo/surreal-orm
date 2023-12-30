@@ -10,7 +10,7 @@ use std::{
     fs::{self, File},
     io::Write,
     ops::Deref,
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use chrono::{DateTime, Utc};
@@ -476,6 +476,11 @@ impl MigrationFilename {
             .parse::<u64>()
             .map_err(|e| MigrationError::InvalidTimestamp(e.to_string()))?;
         Ok(timestamp)
+    }
+
+    pub fn fullpath(&self, migration_dir: &PathBuf) -> PathBuf {
+        let file_name = self.to_string();
+        migration_dir.join(file_name)
     }
 }
 
