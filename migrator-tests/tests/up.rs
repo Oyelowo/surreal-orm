@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, DirEntry},
+    fs::{self},
     path::PathBuf,
 };
 
@@ -7,27 +7,16 @@ use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
     ResourcesV7, ResourcesV8, ResourcesV9,
 };
-use surreal_orm::{
-    migrator::{
-        config::{DatabaseConnection, UrlDb},
-        Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
-        Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
-    },
-    DbResources,
+use surreal_orm::migrator::{
+    config::{DatabaseConnection, UrlDb},
+    Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
+    Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use tempfile::tempdir;
 use test_case::test_case;
 use typed_builder::TypedBuilder;
-
-macro_rules! set_snapshot_suffix {
-    ($($expr:expr),*) => {
-        let mut settings = insta::Settings::clone_current();
-        settings.set_snapshot_suffix(format!($($expr,)*));
-        let _guard = settings.bind_to_scope();
-    }
-}
 
 fn read_migs_from_dir(path: PathBuf) -> Vec<MigrationFilename> {
     std::fs::read_dir(path)
@@ -43,13 +32,12 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<MigrationFilename> {
         .collect::<Vec<_>>()
 }
 fn assert_migration_files_presence_and_format(
-    migration_files: &Vec<MigrationFilename>,
+    migration_files: &mut Vec<MigrationFilename>,
     dir: &PathBuf,
     db_migrations: &Vec<Migration>,
     snapshot_disambiguator: String,
 ) {
-    let mut migration_files = migration_files;
-    migration_files.sort_by(|a, b| a.cmp(b));
+    migration_files.sort_by_key(|a| a.timestamp());
 
     for db_mig_record in db_migrations {
         let file_name = db_mig_record.clone().name;
@@ -62,7 +50,7 @@ fn assert_migration_files_presence_and_format(
         let found_migration_file = |db_mig_name: MigrationFilename| {
             migration_files
                 .iter()
-                .find(|&&filename| db_mig_name == filename)
+                .find(|filename| &&db_mig_name == filename)
                 .expect("Migration file not found in db")
         };
 
@@ -106,7 +94,7 @@ fn assert_migration_files_presence_and_format(
         );
     }
 
-    let mut migrations_contents = migration_files
+    let migrations_contents = migration_files
         .iter()
         .enumerate()
         .map(|(i, filename)| {
@@ -115,11 +103,10 @@ fn assert_migration_files_presence_and_format(
             let filepath = filename.fullpath(&dir);
 
             let file_content = fs::read_to_string(&filepath).expect("Failed to read file");
-            format!("{basename}.{extension}\n{file_content}\n\n",)
+            format!("Migration {i}: {basename}.{extension}\n{file_content}\n\n",)
         })
         .collect::<Vec<_>>();
 
-    migrations_contents.sort();
     let migrations_contents: FileContent = migrations_contents.join("\n\n").into();
     insta::assert_display_snapshot!(
         format!("content: {}", snapshot_disambiguator.clone()),
@@ -156,7 +143,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
         );
     }
 
-    let migration_files = read_migs_from_dir(migration_files_dir.clone());
+    let mut migration_files = read_migs_from_dir(migration_files_dir.clone());
     let latest_file_name = migration_files.iter().max();
 
     if let Some(latest_file_name) = latest_file_name {
@@ -192,7 +179,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
     );
 
     assert_migration_files_presence_and_format(
-        &migration_files,
+        &mut migration_files,
         &migration_files_dir,
         &db_migrations,
         snapshot_disambiguator,
@@ -517,7 +504,6 @@ async fn generate_test_migrations(
         .await
         .run_fn(Resources, mock_prompter.clone())
         .await;
-    let cli_db = conf.db().clone();
 
     conf.set_file_basename("migration 2-gen after init".to_string())
         .generator_cmd()
