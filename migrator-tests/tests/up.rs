@@ -163,7 +163,8 @@ struct AssertionArg {
     expected_mig_files_count: u8,
     expected_db_mig_count: u8,
     migration_files_dir: PathBuf,
-    expected_latest_migration_basename_normalized: Basename,
+    expected_latest_migration_file_basename_normalized: Basename,
+    expected_latest_db_migration_meta_basename_normalized: Basename,
     code_origin_line: u32,
 }
 
@@ -173,7 +174,8 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         expected_mig_files_count: mig_files_count,
         expected_db_mig_count: db_mig_count,
         migration_files_dir,
-        expected_latest_migration_basename_normalized: migration_basename,
+        expected_latest_migration_file_basename_normalized,
+        expected_latest_db_migration_meta_basename_normalized,
         code_origin_line,
     } = args;
 
@@ -185,7 +187,7 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
             .expect("Failed to parse file name");
         assert_eq!(
             name.basename(),
-            migration_basename,
+            expected_latest_db_migration_meta_basename_normalized,
             "Base name in file does not match the base name in the db. Line: {code_origin_line}",
         );
     }
@@ -202,7 +204,7 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     if let Some(latest_file_name) = latest_file_name {
         assert_eq!(
             latest_file_name.basename(),
-            migration_basename,
+            expected_latest_migration_file_basename_normalized,
             "Base name in file does not match the base name in the db. Line: {code_origin_line}"
         );
     }
@@ -210,14 +212,14 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
     assert_eq!(
         db_migrations.len() as u8,
         db_mig_count,
-        "No migrations should be created in the database because we set run to false. Line: {code_origin_line}",
+        "Line: {code_origin_line}",
     );
     assert_eq!(
-            migration_files.len() as u8,
-            mig_files_count,
-            "New migration files should not be created on second init. They must be reset instead if you want to change the reversible type. Line:
+        migration_files.len() as u8,
+        mig_files_count,
+        "Line:
             {code_origin_line}"
-        );
+    );
     let content = assert_migration_files_presence_and_format(&migration_files, &db_migrations);
     content
 }
@@ -367,7 +369,8 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: "".into(),
+        expected_latest_db_migration_meta_basename_normalized: "".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -411,7 +414,8 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
         expected_mig_files_count: 1,
         expected_db_mig_count: 0,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -424,7 +428,8 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
         expected_mig_files_count: 1,
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -468,7 +473,8 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
         // Init command runs newly pending generated migration against the current db
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
@@ -482,14 +488,18 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
         // Init command already ran newly pending generated migration against the current db
         expected_db_mig_count: 1,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
-async fn generate_test_migrations(temp_test_migration_dir: PathBuf, mode: Mode) -> (TestConfig, PathBuf) {
+async fn generate_test_migrations(
+    temp_test_migration_dir: PathBuf,
+    mode: Mode,
+) -> (TestConfig, PathBuf) {
     let mock_prompter = MockPrompter::builder()
         .allow_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
@@ -499,7 +509,7 @@ async fn generate_test_migrations(temp_test_migration_dir: PathBuf, mode: Mode) 
         .reversible(false)
         .db_run(false)
         .mode(mode)
-        .migration_basename("migration init".into())
+        .migration_basename("".into())
         .migration_dir(temp_test_migration_dir.clone())
         .build();
 
@@ -583,10 +593,11 @@ async fn generate_test_migrations(temp_test_migration_dir: PathBuf, mode: Mode) 
 #[test_case(Mode::Strict; "Strict")]
 #[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-async fn test_run_up_default_which_should_be_latest(mode: Mode) {
+async fn t1(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let (mut conf, temp_test_migration_dir) = generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
     let cli_db = conf.db().clone();
     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
@@ -595,10 +606,40 @@ async fn test_run_up_default_which_should_be_latest(mode: Mode) {
         expected_mig_files_count: 12,
         expected_db_mig_count: 12,
         migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_basename_normalized: "migration_gen_10_after_init".into(),
+        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_gen_10_after_init".into(),
         code_origin_line: std::line!(),
     })
     .await;
+    // insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+
+    // init cmd should instantiate the database connection which is reused internally in test
+    // config.
+}
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+async fn t2(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let cli_db = conf.db().clone();
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(5).build();
+    dbg!(&default_fwd_strategy);
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 5,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_gen_3_after_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+
     // insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // init cmd should instantiate the database connection which is reused internally in test
