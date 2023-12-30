@@ -26,12 +26,12 @@ DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 
 
 
-migration_gen_1_after_init.surql
-
-
-
-
 migration_gen_1a_after_init.surql
+
+
+
+
+migration_gen_1b_after_init.surql
 
 
 

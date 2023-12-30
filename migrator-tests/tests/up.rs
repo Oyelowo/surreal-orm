@@ -563,13 +563,13 @@ async fn generate_test_migrations(
         .await;
     let cli_db = conf.db().clone();
 
-    conf.set_file_basename("migration gen 1 after init".to_string())
+    conf.set_file_basename("migration gen 1a after init".to_string())
         .generator_cmd()
         .await
         .run_fn(Resources, mock_prompter.clone())
         .await;
 
-    conf.set_file_basename("migration gen 1a after init".to_string())
+    conf.set_file_basename("migration gen 1b after init".to_string())
         .generator_cmd()
         .await
         .run_fn(Resources, mock_prompter.clone())
@@ -667,8 +667,8 @@ async fn t2(mode: Mode) {
     let (mut conf, temp_test_migration_dir) =
         generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
     let cli_db = conf.db().clone();
+
     let ref default_fwd_strategy = FastForwardDelta::builder().number(5).build();
-    dbg!(&default_fwd_strategy);
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -677,6 +677,20 @@ async fn t2(mode: Mode) {
         migration_files_dir: temp_test_migration_dir.clone(),
         expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_gen_3_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(1).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 6,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_gen_4_after_init".into(),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })

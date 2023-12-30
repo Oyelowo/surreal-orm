@@ -2,4 +2,4 @@
 source: migrator-tests/tests/up.rs
 expression: migrations_contents.as_checksum().unwrap()
 ---
-1893d0eddc973c4be5b63ba705b2c6d821c8eb9691ed6077825e832ffe66ac03
+8a202d22d8e1b72137935673b0dcdebe4751aa5d5e8d47df964f80af8fe7009b
