@@ -489,19 +489,12 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
-#[test_case(Mode::Strict; "Strict")]
-#[test_case(Mode::Lax; "Lax")]
-#[tokio::test]
-async fn test_run_up_default_which_should_be_latest(mode: Mode) {
-    let resources = Resources;
-    let resources_v2 = ResourcesV2;
-    let resources_v3 = ResourcesV3;
+async fn generate_test_migrations(temp_test_migration_dir: PathBuf, mode: Mode) -> (TestConfig, PathBuf) {
     let mock_prompter = MockPrompter::builder()
         .allow_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
         .reversible(false)
         .db_run(false)
@@ -584,7 +577,17 @@ async fn test_run_up_default_which_should_be_latest(mode: Mode) {
         .await
         .run_fn(ResourcesV10, mock_prompter.clone())
         .await;
+    (conf, temp_test_migration_dir.clone())
+}
 
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+async fn test_run_up_default_which_should_be_latest(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) = generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let cli_db = conf.db().clone();
     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     let joined_migration_files = assert_with_db_instance(AssertionArg {
