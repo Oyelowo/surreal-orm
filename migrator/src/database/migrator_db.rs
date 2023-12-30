@@ -7,7 +7,6 @@
 
 use std::{collections::BTreeMap, ops::Deref};
 
-use chrono::Utc;
 use surreal_query_builder::{statements::info_for, *};
 use surrealdb::{
     engine::local::{Db, Mem},

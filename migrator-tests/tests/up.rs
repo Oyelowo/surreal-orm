@@ -29,47 +29,27 @@ macro_rules! set_snapshot_suffix {
     }
 }
 
-fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
+fn read_migs_from_dir(path: PathBuf) -> Vec<MigrationFilename> {
     std::fs::read_dir(path)
         .expect("Failed to read dir")
-        .map(|p| p.expect("Failed to read dir2"))
+        .filter_map(|p| {
+            p.expect("Failed to read dir")
+                .file_name()
+                .to_string_lossy()
+                .to_string()
+                .try_into()
+                .ok()
+        })
         .collect::<Vec<_>>()
 }
-// #[should_panic]
-// let result = std::panic::catch_unwind(|| {});
-//    assert!(result.is_err());
-//
-//
-//use std::panic;
-//
-// fn catch_unwind_silent<F: FnOnce() -> R + panic::UnwindSafe, R>(f: F) -> std::thread::Result<R> {
-//     let prev_hook = panic::take_hook();
-//     panic::set_hook(Box::new(|_| {}));
-//     let result = panic::catch_unwind(f);
-//     panic::set_hook(prev_hook);
-//     result
-// }
-//
-//  #[should_panic(expected = "Divide result is zero")]
-
 fn assert_migration_files_presence_and_format(
-    migration_files: &Vec<DirEntry>,
+    migration_files: &Vec<MigrationFilename>,
+    dir: &PathBuf,
     db_migrations: &Vec<Migration>,
     snapshot_disambiguator: String,
 ) {
-    let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
-    migration_files.sort_by(|a, b| {
-        a.file_name()
-            .expect("Failed to get file name")
-            .to_str()
-            .expect("Failed to get convert file name to string")
-            .cmp(
-                b.file_name()
-                    .expect("Failed to get file name")
-                    .to_str()
-                    .expect("Failed to get convert file name to string"),
-            )
-    });
+    let mut migration_files = migration_files;
+    migration_files.sort_by(|a, b| a.cmp(b));
 
     for db_mig_record in db_migrations {
         let file_name = db_mig_record.clone().name;
@@ -82,17 +62,7 @@ fn assert_migration_files_presence_and_format(
         let found_migration_file = |db_mig_name: MigrationFilename| {
             migration_files
                 .iter()
-                .map(|f| {
-                    MigrationFilename::try_from(
-                        f.file_name()
-                            .expect("Failed to get file name")
-                            .to_str()
-                            .expect("Failed to get convert file name to string")
-                            .to_string(),
-                    )
-                    .expect("Failed to parse file name")
-                })
-                .find(|filename| db_mig_name == filename.to_owned())
+                .find(|&&filename| db_mig_name == filename)
                 .expect("Migration file not found in db")
         };
 
@@ -139,20 +109,11 @@ fn assert_migration_files_presence_and_format(
     let mut migrations_contents = migration_files
         .iter()
         .enumerate()
-        .map(|(i, filepath)| {
-            let filename = MigrationFilename::try_from(
-                filepath
-                    .file_name()
-                    .expect("Failed to get file name")
-                    .to_str()
-                    .expect("Failed to get convert file name to string")
-                    .to_string(),
-            )
-            .expect("Failed to parse file name");
-
+        .map(|(i, filename)| {
             let basename = filename.basename();
             let extension = filename.extension();
-            // let timestamp = filename.timestamp();
+            let filepath = filename.fullpath(&dir);
+
             let file_content = fs::read_to_string(&filepath).expect("Failed to read file");
             format!("{basename}.{extension}\n{file_content}\n\n",)
         })
@@ -196,13 +157,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
     }
 
     let migration_files = read_migs_from_dir(migration_files_dir.clone());
-    let latest_file_name = migration_files
-        .iter()
-        .map(|f| {
-            MigrationFilename::try_from(f.file_name().to_string_lossy().to_string())
-                .expect("Failed to parse file name")
-        })
-        .max();
+    let latest_file_name = migration_files.iter().max();
 
     if let Some(latest_file_name) = latest_file_name {
         assert_eq!(
@@ -238,6 +193,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
 
     assert_migration_files_presence_and_format(
         &migration_files,
+        &migration_files_dir,
         &db_migrations,
         snapshot_disambiguator,
     );
@@ -811,6 +767,31 @@ async fn t4(mode: Mode) {
 #[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
 async fn t5_zero_delta_moves_no_needle(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let cli_db = conf.db().clone();
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(0).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        code_origin_line: std::line!() + 1,
+        config: conf.clone(),
+    })
+    .await;
+}
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+async fn t5_disallow_negative_delta(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let (mut conf, temp_test_migration_dir) =

@@ -119,5 +119,3 @@ impl Up {
         log::info!("Database: {:?}", info);
     }
 }
-
-
