@@ -34,6 +34,48 @@ impl DbResources for ResourcesV3 {
     create_table_resources!(Crop, PlanetV2, Student);
 }
 
+#[derive(Debug, Clone)]
+pub struct ResourcesV4;
+
+impl DbResources for ResourcesV4 {
+    create_table_resources!(Crop, Student);
+}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV5;
+
+impl DbResources for ResourcesV5 {
+    create_table_resources!(Student);
+}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV6;
+
+impl DbResources for ResourcesV6 {
+    create_table_resources!();
+}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV7;
+
+impl DbResources for ResourcesV7 {
+    create_table_resources!(Animal, Crop, AnimalEatsCrop, Planet);
+}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV8;
+
+impl DbResources for ResourcesV8 {
+    create_table_resources!();
+}
+
+#[derive(Debug, Clone)]
+pub struct ResourcesV9;
+
+impl DbResources for ResourcesV9 {
+    create_table_resources!();
+}
+
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "new_stuff", schemafull)]
