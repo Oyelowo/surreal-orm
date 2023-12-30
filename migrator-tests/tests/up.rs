@@ -242,7 +242,7 @@ impl TestConfig {
         }
     }
 
-    pub(crate) async fn up_cmd(&mut self, fwd_delta: FastForwardDelta) -> Migrator {
+    pub(crate) async fn up_cmd(&mut self, fwd_delta: &FastForwardDelta) -> Migrator {
         let TestConfig {
             mode,
             migration_dir,
@@ -250,7 +250,7 @@ impl TestConfig {
         } = self;
         let db_conn_config = get_db_connection_config();
 
-        let up = Up::builder().fast_forward(fwd_delta).build();
+        let up = Up::builder().fast_forward(fwd_delta.clone()).build();
 
         let mut migrator = Migrator::builder()
             .subcmd(SubCommand::Up(up))
@@ -343,7 +343,10 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
 
     // 1st fwd
-    let default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     // This should come after the first command initializes the db
     let cli_db = conf.db().clone();
