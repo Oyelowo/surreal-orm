@@ -386,7 +386,6 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
         .build();
 
     let resources = Resources;
-    let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
         .allow_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
@@ -427,6 +426,65 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
     .await;
     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+async fn test_run_up_after_init_with_run(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfig::builder()
+        .reversible(false)
+        .db_run(true)
+        .mode(mode)
+        .migration_basename("migration init".into())
+        .migration_dir(temp_test_migration_dir.clone())
+        .build();
+
+    let resources = Resources;
+    let mock_prompter = MockPrompter::builder()
+        .allow_empty_migrations_gen(true)
+        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+        .build();
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+
+    // Generating without init should not yield any migrations
+    // 1st run
+    conf.set_file_basename("migration init".to_string())
+        .init_cmd()
+        .await
+        .run_fn(resources.clone(), mock_prompter.clone())
+        .await;
+    let cli_db = conf.db().clone();
+
+    // First time, should create migration files and db records
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 1,
+        // Init command runs newly pending generated migration against the current db
+        expected_db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 1,
+        // Init command already ran newly pending generated migration against the current db
+        expected_db_mig_count: 1,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_basename_normalized: "migration_init".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+}
+
 //
 // #[test_case(Mode::Strict; "Strict")]
 // #[test_case(Mode::Lax; "Lax")]
