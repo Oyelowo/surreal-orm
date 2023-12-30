@@ -22,7 +22,7 @@ pub use shared_traits::DbConnection;
 
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
-pub use up::{Up, UpdateStrategy};
+pub use up::{FastForwardDelta, Up, UpdateStrategy};
 
 use clap::{ArgAction, Parser};
 use surreal_query_builder::DbResources;
