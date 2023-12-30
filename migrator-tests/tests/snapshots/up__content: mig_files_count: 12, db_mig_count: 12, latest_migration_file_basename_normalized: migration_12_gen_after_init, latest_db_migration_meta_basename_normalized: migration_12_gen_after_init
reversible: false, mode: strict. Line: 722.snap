@@ -2,44 +2,7 @@
 source: migrator-tests/tests/up.rs
 expression: migrations_contents
 ---
-migration_10_gen_after_init.surql
-REMOVE TABLE animal;
-REMOVE TABLE crop;
-REMOVE TABLE eats;
-REMOVE TABLE planet;
-
-
-
-migration_11_gen_after_init.surql
-
-
-
-
-migration_12_gen_after_init.surql
-DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
-DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
-DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
-DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
-DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
-DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
-DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
-DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
-DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
-DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
-DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
-DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
-
-
-
-migration_1_init.surql
+Migration 0: migration_1_init.surql
 DELETE migration;
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
@@ -81,17 +44,17 @@ DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
 
 
 
-migration_2_gen_after_init.surql
+Migration 1: migration_2_gen_after_init.surql
 
 
 
 
-migration_3_gen_after_init.surql
+Migration 2: migration_3_gen_after_init.surql
 
 
 
 
-migration_4_gen_after_init.surql
+Migration 3: migration_4_gen_after_init.surql
 REMOVE FIELD attributes ON TABLE animal;
 
 
@@ -124,7 +87,7 @@ REMOVE TABLE student;
 
 
 
-migration_5_gen_after_init.surql
+Migration 4: migration_5_gen_after_init.surql
 REMOVE TABLE animal;
 REMOVE TABLE eats;
 REMOVE TABLE new_stuff;
@@ -138,22 +101,22 @@ DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
 
 
 
-migration_6_gen_after_init.surql
+Migration 5: migration_6_gen_after_init.surql
 
 
 
 
-migration_7_gen_after_init.surql
+Migration 6: migration_7_gen_after_init.surql
 REMOVE TABLE crop;
 
 
 
-migration_8_gen_after_init.surql
+Migration 7: migration_8_gen_after_init.surql
 REMOVE TABLE student;
 
 
 
-migration_9_gen_after_init.surql
+Migration 8: migration_9_gen_after_init.surql
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
 DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
@@ -173,6 +136,43 @@ DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
 DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
 DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
 DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+
+
+
+Migration 9: migration_10_gen_after_init.surql
+REMOVE TABLE animal;
+REMOVE TABLE crop;
+REMOVE TABLE eats;
+REMOVE TABLE planet;
+
+
+
+Migration 10: migration_11_gen_after_init.surql
+
+
+
+
+Migration 11: migration_12_gen_after_init.surql
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
 DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
 DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;

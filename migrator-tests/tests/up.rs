@@ -103,6 +103,7 @@ fn assert_migration_files_presence_and_format(
             let filepath = filename.fullpath(&dir);
 
             let file_content = fs::read_to_string(&filepath).expect("Failed to read file");
+            let i = i + 1;
             format!("Migration {i}: {basename}.{extension}\n{file_content}\n\n",)
         })
         .collect::<Vec<_>>();
@@ -311,14 +312,6 @@ impl TestConfig {
             .build();
         self.setup_db_if_none(&mut migrator).await;
         migrator
-    }
-
-    pub fn snapshot_name_str(self) -> String {
-        let n = format!(
-            "migration basename: {}, reversible: {}, db_run: {}, mode: {}",
-            self.migration_basename, self.reversible, self.db_run, self.mode
-        );
-        n
     }
 }
 
