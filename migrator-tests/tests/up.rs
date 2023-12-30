@@ -6,8 +6,8 @@ use std::{
 use surreal_models::migrations::{Resources, ResourcesV2, ResourcesV3};
 use surreal_orm::migrator::{
     config::{DatabaseConnection, UrlDb},
-    Basename, FileContent, Generate, Init, Migration, MigrationFilename, Migrator, MockPrompter,
-    Mode, RenameOrDelete, SubCommand, Up,
+    Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
+    Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
 };
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
@@ -241,24 +241,19 @@ impl TestConfig {
             }
         }
     }
-    pub(crate) async fn up_cmd(&mut self) -> Migrator {
+
+    pub(crate) async fn up_cmd(&mut self, fwd_delta: FastForwardDelta) -> Migrator {
         let TestConfig {
-            db_run,
             mode,
-            migration_basename,
             migration_dir,
             ..
         } = self;
-        fs::create_dir_all(&migration_dir).expect("Failed to create dir");
         let db_conn_config = get_db_connection_config();
 
-        let gen = Up::builder()
-            .name(migration_basename.clone())
-            .run(*db_run)
-            .build();
+        let up = Up::builder().fast_forward(fwd_delta).build();
 
         let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Up(gen))
+            .subcmd(SubCommand::Up(up))
             .verbose(3)
             .migrations_dir(migration_dir.clone())
             .db_connection(db_conn_config)
@@ -276,7 +271,6 @@ impl TestConfig {
             migration_dir,
             ..
         } = self;
-        fs::create_dir_all(&migration_dir).expect("Failed to create dir");
         let db_conn_config = get_db_connection_config();
 
         let gen = Generate::builder()
@@ -304,7 +298,7 @@ impl TestConfig {
             migration_dir,
             ..
         } = self;
-        let gen = Init::builder()
+        let init_conf = Init::builder()
             .basename(migration_basename.clone())
             .reversible(*reversible)
             .run(*db_run)
@@ -312,7 +306,7 @@ impl TestConfig {
         let db_conn_config = get_db_connection_config();
 
         let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Init(gen))
+            .subcmd(SubCommand::Init(init_conf))
             .verbose(3)
             .migrations_dir(migration_dir.clone())
             .db_connection(db_conn_config)
@@ -334,6 +328,7 @@ impl TestConfig {
 #[test_case(Mode::Strict; "Strict")]
 #[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
+#[should_panic(expected = "Failed to detect migration type. Migration must be initialized first")]
 async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -346,35 +341,39 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
         .build();
 
     let resources = Resources;
-    let resources_v2 = ResourcesV2;
     let mock_prompter = MockPrompter::builder()
         .allow_empty_migrations_gen(true)
         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
         .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-
-    // 1st run
-    conf.set_file_basename("migration gen without init 1".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
     let cli_db = conf.db().clone();
 
+    // 1st fwd
     // First time, should create migration files and db records
     // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
+    let default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    conf.up_cmd(default_fwd_strategy)
         .await
         .run_fn(resources.clone(), mock_prompter.clone())
         .await;
 
+    let joined_migration_files = assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 0,
+        expected_db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_basename_normalized: "".into(),
+        code_origin_line: std::line!(),
+    })
+    .await;
+    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
+
     // Initialize the 3rd time with different codebase resources. Should not allow creation the second time.
-    conf.set_file_basename("migration gen without init 2".to_string())
-        .generator_cmd()
-        .await
-        .run_fn(resources_v2, mock_prompter)
-        .await;
+    // conf.set_file_basename("migration gen without init 2".to_string())
+    //     .generator_cmd()
+    //     .await
+    //     .run_fn(resources_v2, mock_prompter)
+    //     .await;
 }
 
 // // Cannot generate without init first

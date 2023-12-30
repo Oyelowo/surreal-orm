@@ -22,15 +22,17 @@ impl Up {
     }
 }
 
-#[derive(Args, Debug, Clone)]
+#[derive(Args, Debug, Clone, TypedBuilder)]
 #[group(required = false, multiple = false)]
 pub struct FastForwardDelta {
     /// Run forward to the latest migration
     #[arg(long, help = "Run forward to the next migration")]
+    #[builder(default)]
     pub(crate) latest: bool,
 
     /// Run forward by count/number
     #[arg(short, long, help = "Run forward by the number specified")]
+    #[builder(default, setter(strip_option))]
     pub(crate) number: Option<u32>,
 
     /// Run forward till a specific migration ID
@@ -40,6 +42,7 @@ pub struct FastForwardDelta {
         value_parser = mig_name_parser,
         help = "Run forward till a specific migration ID"
     )]
+    #[builder(default, setter(strip_option))]
     pub(crate) till: Option<MigrationFilename>,
 }
 
@@ -101,8 +104,10 @@ impl Up {
                 }
             }
             Err(e) => {
-                log::error!("Failed to detect migration type: {e}");
-                panic!();
+                log::error!("Failed to detect migration type. Make sure the migration  \
+                is first initialized or reset by running cargo run -- init -n '<migration name>'. Error: {e}");
+                panic!("Failed to detect migration type. Make sure the migration  \
+                is first initialized or reset by running cargo run -- init -n '<migration name>'. Error: {e}");
             }
         };
 
