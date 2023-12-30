@@ -55,7 +55,8 @@ fn read_migs_from_dir(path: PathBuf) -> Vec<DirEntry> {
 fn assert_migration_files_presence_and_format(
     migration_files: &Vec<DirEntry>,
     db_migrations: &Vec<Migration>,
-) -> FileContent {
+    snapshot_disambiguator: String,
+) {
     let mut migration_files = migration_files.iter().map(|f| f.path()).collect::<Vec<_>>();
     migration_files.sort_by(|a, b| {
         a.file_name()
@@ -70,72 +71,64 @@ fn assert_migration_files_presence_and_format(
             )
     });
 
-    let mut migrations_contents = vec![];
-    for filepath in migration_files.iter() {
-        let file_name = filepath
-            .file_name()
-            .expect("Failed to get file name")
-            .to_str()
-            .expect("Failed to get convert file name to string");
-
+    for db_mig_record in db_migrations {
+        let file_name = db_mig_record.name;
         let file_name =
             MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
         let timestamp = file_name.timestamp();
         let basename = file_name.basename();
         let extension = file_name.extension();
 
-        migrations_contents.push(format!(
-            "Migration file base name with extenstion: {basename}.{extension}\nMigration file content:\n{}",
-            fs::read_to_string(&filepath).expect("Failed to read file")
-        ));
+        let found_migration_file = |db_mig_name: MigrationFilename| {
+            migration_files
+                .iter()
+                .map(|f| {
+                    MigrationFilename::try_from(
+                        f.file_name()
+                            .expect("Failed to get file name")
+                            .to_str()
+                            .expect("Failed to get convert file name to string")
+                            .to_string(),
+                    )
+                    .expect("Failed to parse file name")
+                })
+                .find(|&filename| db_mig_name == filename)
+                .expect("Migration file not found in db")
+        };
 
         // we want to test that the migration file metadata is stored in the db
         // e.g:  the name, timestamp and perhaps checksum?
         // ts_basename.up.surql
         // ts_basename.down.surql
         // ts_basename.sql
-        if !db_migrations.is_empty() {
-            let found_db_mig = |file_name: MigrationFilename| {
-                db_migrations
-                    .iter()
-                    .find(|m| {
-                        let db_name: MigrationFilename = m
-                            .name
-                            .clone()
-                            .try_into()
-                            .expect("Failed to parse file name");
-                        db_name == file_name
-                    })
-                    .expect("Migration file not found in db")
-            };
+        match &file_name {
+            MigrationFilename::Up(_) | MigrationFilename::Down(_) => {
+                // select * from migration where name = up;
+                // name, timestamp and checksum_up
+                // We only store the up migration filename in the db
+                // since we can always derive the down name from it.
+                let found_mig_file = found_migration_file(file_name.clone());
+                assert_eq!(file_name.extension().to_string(), ".up.surql");
+                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
+                assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
 
-            match &file_name {
-                MigrationFilename::Up(_up) => {
-                    // select * from migration where name = up;
-                    // name, timestamp and checksum_up
-                    let found_db_mig = found_db_mig(file_name.clone());
-                    assert_eq!(found_db_mig.name, file_name.to_string());
-                    assert_eq!(found_db_mig.timestamp, timestamp);
-                }
-                MigrationFilename::Down(_down) => {
-                    // select * from migration where name = down.to_up();
-                    // name, timestamp and checksum_up
-                    let file_name = file_name.to_up();
-                    let found_db_mig = found_db_mig(file_name.clone());
-                    assert_eq!(found_db_mig.name, file_name.to_string());
-                    assert_eq!(found_db_mig.timestamp, timestamp);
-                }
-                MigrationFilename::Unidirectional(_uni) => {
-                    // select * from migration where name = down;
-                    // name, timestamp and checksum_up
-                    let found_db_mig = found_db_mig(file_name.clone());
-                    assert_eq!(found_db_mig.name, file_name.to_string());
-                    assert_eq!(found_db_mig.timestamp, timestamp);
-                }
-            };
-        }
-        // Only up migration filenames are stored in the db since
-        // we can always derive the down name from it.
+                // select * from migration where name = down.to_down();
+                // name, timestamp and checksum_up
+                let down_counterpart = found_migration_file(file_name.to_down());
+                assert_eq!(down_counterpart.extension().to_string(), ".down.surql");
+                assert_eq!(down_counterpart.to_string(), db_mig_record.name);
+                assert_eq!(down_counterpart.timestamp(), db_mig_record.timestamp);
+            }
+            MigrationFilename::Unidirectional(_uni) => {
+                // select * from migration where name = down;
+                // name, timestamp and checksum_up
+                let found_mig_file = found_migration_file(file_name.clone());
+                assert_eq!(file_name.extension().to_string(), ".surql");
+                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
+                assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
+            }
+        };
+
         assert_eq!(
             file_name.to_string(),
             format!("{timestamp}_{basename}.{extension}"),
@@ -143,32 +136,38 @@ fn assert_migration_files_presence_and_format(
         );
     }
 
+    let mut migrations_contents = migration_files
+        .iter()
+        .enumerate()
+        .map(|(i, filepath)| {
+            let filename = MigrationFilename::try_from(
+                filepath
+                    .file_name()
+                    .expect("Failed to get file name")
+                    .to_str()
+                    .expect("Failed to get convert file name to string")
+                    .to_string(),
+            )
+            .expect("Failed to parse file name");
+
+            let basename = filename.basename();
+            let extension = filename.extension();
+            // let timestamp = filename.timestamp();
+            let file_content = fs::read_to_string(&filepath).expect("Failed to read file");
+            format!("{basename}.{extension}\n{file_content}\n\n",)
+        })
+        .collect::<Vec<_>>();
+
     migrations_contents.sort();
-    migrations_contents.join("\n\n").into()
+    let migrations_contents: FileContent = migrations_contents.join("\n\n").into();
+    insta::assert_display_snapshot!(
+        snapshot_disambiguator,
+        migrations_contents.as_checksum().unwrap()
+    );
+    insta::assert_display_snapshot!(snapshot_disambiguator, migrations_contents);
 }
 
-fn get_db_connection_config() -> DatabaseConnection {
-    DatabaseConnection::builder()
-        .db("test".into())
-        .ns("test".into())
-        .user("root".into())
-        .pass("root".into())
-        .url(UrlDb::Memory)
-        .build()
-}
-
-#[derive(Clone, TypedBuilder)]
-struct AssertionArg {
-    db: Surreal<Any>,
-    expected_mig_files_count: u8,
-    expected_db_mig_count: u8,
-    migration_files_dir: PathBuf,
-    expected_latest_migration_file_basename_normalized: Basename,
-    expected_latest_db_migration_meta_basename_normalized: Basename,
-    code_origin_line: u32,
-}
-
-async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
+async fn assert_with_db_instance(args: AssertionArg) {
     let AssertionArg {
         db,
         expected_mig_files_count: mig_files_count,
@@ -177,6 +176,7 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         expected_latest_migration_file_basename_normalized,
         expected_latest_db_migration_meta_basename_normalized,
         code_origin_line,
+        config,
     } = args;
 
     let db_migrations = Migration::get_all_desc(db.clone()).await;
@@ -220,8 +220,46 @@ async fn assert_with_db_instance(args: AssertionArg) -> FileContent {
         "Line:
             {code_origin_line}"
     );
-    let content = assert_migration_files_presence_and_format(&migration_files, &db_migrations);
-    content
+
+    let snapshot_disambiguator = format!(
+        "mig_files_count: {}, db_mig_count: {}, latest_migration_file_basename_normalized: {}, latest_db_migration_meta_basename_normalized: {}\n\
+         reversible: {}, mode: {}. Line: {}",
+        mig_files_count,
+        db_mig_count,
+        expected_latest_migration_file_basename_normalized,
+        expected_latest_db_migration_meta_basename_normalized,
+          config.reversible,
+        config.mode,
+        code_origin_line,
+    );
+
+    assert_migration_files_presence_and_format(
+        &migration_files,
+        &db_migrations,
+        snapshot_disambiguator,
+    );
+}
+
+fn get_db_connection_config() -> DatabaseConnection {
+    DatabaseConnection::builder()
+        .db("test".into())
+        .ns("test".into())
+        .user("root".into())
+        .pass("root".into())
+        .url(UrlDb::Memory)
+        .build()
+}
+
+#[derive(Clone, TypedBuilder)]
+struct AssertionArg {
+    db: Surreal<Any>,
+    expected_mig_files_count: u8,
+    expected_db_mig_count: u8,
+    migration_files_dir: PathBuf,
+    expected_latest_migration_file_basename_normalized: Basename,
+    expected_latest_db_migration_meta_basename_normalized: Basename,
+    code_origin_line: u32,
+    config: TestConfig,
 }
 
 #[derive(Clone, TypedBuilder)]
@@ -372,6 +410,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "".into(),
         expected_latest_db_migration_meta_basename_normalized: "".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
     insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
