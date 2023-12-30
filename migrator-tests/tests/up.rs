@@ -72,7 +72,7 @@ fn assert_migration_files_presence_and_format(
     });
 
     for db_mig_record in db_migrations {
-        let file_name = db_mig_record.name;
+        let file_name = db_mig_record.clone().name;
         let file_name =
             MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
         let timestamp = file_name.timestamp();
@@ -92,7 +92,7 @@ fn assert_migration_files_presence_and_format(
                     )
                     .expect("Failed to parse file name")
                 })
-                .find(|&filename| db_mig_name == filename)
+                .find(|filename| db_mig_name == filename.to_owned())
                 .expect("Migration file not found in db")
         };
 
@@ -108,14 +108,14 @@ fn assert_migration_files_presence_and_format(
                 // We only store the up migration filename in the db
                 // since we can always derive the down name from it.
                 let found_mig_file = found_migration_file(file_name.clone());
-                assert_eq!(file_name.extension().to_string(), ".up.surql");
+                assert_eq!(file_name.extension().to_string(), "up.surql");
                 assert_eq!(found_mig_file.to_string(), db_mig_record.name);
                 assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
 
                 // select * from migration where name = down.to_down();
                 // name, timestamp and checksum_up
                 let down_counterpart = found_migration_file(file_name.to_down());
-                assert_eq!(down_counterpart.extension().to_string(), ".down.surql");
+                assert_eq!(down_counterpart.extension().to_string(), "down.surql");
                 assert_eq!(down_counterpart.to_string(), db_mig_record.name);
                 assert_eq!(down_counterpart.timestamp(), db_mig_record.timestamp);
             }
@@ -123,7 +123,7 @@ fn assert_migration_files_presence_and_format(
                 // select * from migration where name = down;
                 // name, timestamp and checksum_up
                 let found_mig_file = found_migration_file(file_name.clone());
-                assert_eq!(file_name.extension().to_string(), ".surql");
+                assert_eq!(file_name.extension().to_string(), "surql");
                 assert_eq!(found_mig_file.to_string(), db_mig_record.name);
                 assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
             }
@@ -161,10 +161,13 @@ fn assert_migration_files_presence_and_format(
     migrations_contents.sort();
     let migrations_contents: FileContent = migrations_contents.join("\n\n").into();
     insta::assert_display_snapshot!(
-        snapshot_disambiguator,
+        format!("content: {}", snapshot_disambiguator.clone()),
+        migrations_contents
+    );
+    insta::assert_display_snapshot!(
+        format!("Checksum: {}", snapshot_disambiguator),
         migrations_contents.as_checksum().unwrap()
     );
-    insta::assert_display_snapshot!(snapshot_disambiguator, migrations_contents);
 }
 
 async fn assert_with_db_instance(args: AssertionArg) {
@@ -402,7 +405,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
     // This should come after the first command initializes the db
     let cli_db = conf.db().clone();
 
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 0,
         expected_db_mig_count: 0,
@@ -413,7 +416,6 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
         config: conf.clone(),
     })
     .await;
-    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
 // Cannot generate without init first
@@ -448,7 +450,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
     let cli_db = conf.db().clone();
 
     // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 1,
         expected_db_mig_count: 0,
@@ -456,13 +458,13 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 1,
         expected_db_mig_count: 1,
@@ -470,9 +472,9 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
 #[test_case(Mode::Strict; "Strict")]
@@ -506,7 +508,7 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
     let cli_db = conf.db().clone();
 
     // First time, should create migration files and db records
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 1,
         // Init command runs newly pending generated migration against the current db
@@ -515,13 +517,13 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 1,
         // Init command already ran newly pending generated migration against the current db
@@ -530,9 +532,9 @@ async fn test_run_up_after_init_with_run(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-    insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 }
 
 async fn generate_test_migrations(
@@ -640,7 +642,7 @@ async fn t1(mode: Mode) {
     let cli_db = conf.db().clone();
     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 12,
         expected_db_mig_count: 12,
@@ -648,9 +650,9 @@ async fn t1(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_gen_10_after_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-    // insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
 
     // init cmd should instantiate the database connection which is reused internally in test
     // config.
@@ -668,7 +670,7 @@ async fn t2(mode: Mode) {
     let ref default_fwd_strategy = FastForwardDelta::builder().number(5).build();
     dbg!(&default_fwd_strategy);
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-    let joined_migration_files = assert_with_db_instance(AssertionArg {
+    assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
         expected_mig_files_count: 12,
         expected_db_mig_count: 5,
@@ -676,13 +678,9 @@ async fn t2(mode: Mode) {
         expected_latest_migration_file_basename_normalized: "migration_gen_10_after_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_gen_3_after_init".into(),
         code_origin_line: std::line!(),
+        config: conf.clone(),
     })
     .await;
-
-    // insta::assert_display_snapshot!(conf.clone().snapshot_name_str(), joined_migration_files);
-
-    // init cmd should instantiate the database connection which is reused internally in test
-    // config.
 }
 
 // #[test_case(Mode::Strict; "Strict")]
