@@ -328,8 +328,8 @@ impl TestConfig {
 #[test_case(Mode::Strict; "Strict")]
 #[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
-#[should_panic(expected = "Failed to detect migration type. Migration must be initialized first")]
-async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
+#[should_panic(expected = "Failed to detect migration type.")]
+async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfig::builder()
@@ -340,22 +340,13 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
         .migration_dir(temp_test_migration_dir.clone())
         .build();
 
-    let resources = Resources;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let cli_db = conf.db().clone();
 
     // 1st fwd
-    // First time, should create migration files and db records
-    // Initialize the 2nd time with same codebase resources. Should not allow creation the second time.
     let default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
-    conf.up_cmd(default_fwd_strategy)
-        .await
-        .run_fn(resources.clone(), mock_prompter.clone())
-        .await;
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    // This should come after the first command initializes the db
+    let cli_db = conf.db().clone();
 
     let joined_migration_files = assert_with_db_instance(AssertionArg {
         db: cli_db.clone(),
@@ -1284,3 +1275,5 @@ async fn test_one_way_cannot_generate_without_init_no_db_run(mode: Mode) {
 //         .run_fn(resources_v2.clone(), mock_prompter.clone())
 //         .await;
 // }
+
+

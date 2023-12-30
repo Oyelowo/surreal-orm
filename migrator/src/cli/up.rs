@@ -106,8 +106,7 @@ impl Up {
             Err(e) => {
                 log::error!("Failed to detect migration type. Make sure the migration  \
                 is first initialized or reset by running cargo run -- init -n '<migration name>'. Error: {e}");
-                panic!("Failed to detect migration type. Make sure the migration  \
-                is first initialized or reset by running cargo run -- init -n '<migration name>'. Error: {e}");
+                panic!("Failed to detect migration type.");
             }
         };
 
@@ -120,3 +119,5 @@ impl Up {
         log::info!("Database: {:?}", info);
     }
 }
+
+

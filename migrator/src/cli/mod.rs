@@ -167,6 +167,15 @@ impl Migrator {
         };
     }
 
+    pub async fn run_up_fn(&mut self) {
+        self.setup_db().await;
+
+        match self.subcmd.clone() {
+            SubCommand::Up(up) => up.run(self).await,
+            _ => panic!("Expected up subcommand"),
+        };
+    }
+
     pub(crate) fn setup_logging(&self) {
         let verbosity = self.verbose;
         let log_level = match verbosity {
