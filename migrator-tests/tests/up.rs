@@ -696,6 +696,20 @@ async fn t2(mode: Mode) {
     })
     .await;
 
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(0).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 6,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_6_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
     let ref default_fwd_strategy = FastForwardDelta::builder().number(1).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     assert_with_db_instance(AssertionArg {
@@ -762,8 +776,6 @@ async fn t3(mode: Mode) {
         migration_files_dir: temp_test_migration_dir.clone(),
         expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
-        // 1 is added to force a different snapshot name from
-        // the previous assertion
         code_origin_line: std::line!() + 1,
         config: conf.clone(),
     })
@@ -780,8 +792,6 @@ async fn t4(mode: Mode) {
         generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
     let cli_db = conf.db().clone();
 
-    let ref default_fwd_strategy = FastForwardDelta::builder().number(1).build();
-    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     let ref default_fwd_strategy = FastForwardDelta::builder().number(12).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
     assert_with_db_instance(AssertionArg {
@@ -791,13 +801,37 @@ async fn t4(mode: Mode) {
         migration_files_dir: temp_test_migration_dir.clone(),
         expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
         expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
-        // 1 is added to force a different snapshot name from
-        // the previous assertion
         code_origin_line: std::line!() + 1,
         config: conf.clone(),
     })
     .await;
 }
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+async fn t5_zero_delta_moves_no_needle(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let cli_db = conf.db().clone();
+
+    let ref default_fwd_strategy = FastForwardDelta::builder().number(0).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 0,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        code_origin_line: std::line!() + 1,
+        config: conf.clone(),
+    })
+    .await;
+}
+
 // #[test_case(Mode::Strict; "Strict")]
 // #[test_case(Mode::Lax; "Lax")]
 // #[tokio::test]
