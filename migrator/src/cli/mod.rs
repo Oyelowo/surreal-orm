@@ -12,7 +12,7 @@ mod up;
 use std::path::PathBuf;
 
 pub use arg_parser::*;
-pub use down::{Down, RollbackStrategy};
+pub use down::{Down, RollbackDelta, RollbackStrategy};
 pub use generate::Generate;
 pub use init::Init;
 pub use list::{List, Status};
@@ -66,6 +66,10 @@ impl Migrator {
     pub async fn setup(&mut self) {
         self.setup_logging();
         self.setup_db().await;
+    }
+
+    pub fn subcmd(&self) -> SubCommand {
+        self.subcmd.clone()
     }
 
     pub fn db(&self) -> Surreal<Any> {
@@ -172,6 +176,24 @@ impl Migrator {
 
         match self.subcmd.clone() {
             SubCommand::Up(up) => up.run(self).await,
+            _ => panic!("Expected up subcommand"),
+        };
+    }
+
+    pub async fn run_init_fn(&mut self) {
+        self.setup_db().await;
+
+        match self.subcmd.clone() {
+            SubCommand::Up(up) => up.run(self).await,
+            _ => panic!("Expected up subcommand"),
+        };
+    }
+
+    pub async fn run_down_fn(&mut self) {
+        self.setup_db().await;
+
+        match self.subcmd.clone() {
+            SubCommand::Down(up) => up.run(self).await,
             _ => panic!("Expected up subcommand"),
         };
     }

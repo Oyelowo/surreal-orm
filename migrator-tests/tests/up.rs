@@ -41,7 +41,6 @@ fn assert_migration_files_presence_and_format(
     migration_files: &mut Vec<MigrationFilename>,
     dir: &PathBuf,
     db_migrations: &Vec<Migration>,
-    snapshot_disambiguator: String,
 ) {
     migration_files.sort_by_key(|a| a.timestamp());
 
@@ -106,14 +105,6 @@ fn assert_migration_files_presence_and_format(
         .collect::<Vec<_>>();
 
     let migrations_contents: FileContent = migrations_contents.join("\n\n").into();
-    // insta::assert_display_snapshot!(
-    //     format!("content: {}", snapshot_disambiguator.clone()),
-    //     migrations_contents
-    // );
-    // insta::assert_display_snapshot!(
-    //     format!("Checksum: {}", snapshot_disambiguator),
-    //     migrations_contents.as_checksum().unwrap()
-    // );
 }
 
 async fn assert_with_db_instance(args: AssertionArg) {
@@ -165,23 +156,10 @@ async fn assert_with_db_instance(args: AssertionArg) {
             {code_origin_line}"
     );
 
-    let snapshot_disambiguator = format!(
-        "mig_files_count: {}, db_mig_count: {}, latest_migration_file_basename_normalized: {}, latest_db_migration_meta_basename_normalized: {}\n\
-         reversible: {}, mode: {}. Line: {}",
-        mig_files_count,
-        db_mig_count,
-        expected_latest_migration_file_basename_normalized,
-        expected_latest_db_migration_meta_basename_normalized,
-          config.reversible,
-        config.mode,
-        code_origin_line,
-    );
-
     assert_migration_files_presence_and_format(
         &mut migration_files,
         &migration_files_dir,
         &db_migrations,
-        snapshot_disambiguator,
     );
 }
 

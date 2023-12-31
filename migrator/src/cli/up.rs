@@ -46,6 +46,16 @@ pub struct FastForwardDelta {
     pub(crate) till: Option<MigrationFilename>,
 }
 
+impl Default for FastForwardDelta {
+    fn default() -> Self {
+        Self {
+            latest: true,
+            number: None,
+            till: None,
+        }
+    }
+}
+
 pub enum UpdateStrategy {
     // Default
     // cargo run -- up
