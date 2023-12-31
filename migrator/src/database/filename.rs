@@ -253,6 +253,13 @@ impl Display for Extension {
 pub struct Basename(String);
 
 impl Basename {
+    pub fn new(name: impl Into<String>) -> Self {
+        let name: String = name.into();
+        Self(name)
+    }
+}
+
+impl Basename {
     pub fn normalize_ensure(&self) -> Basename {
         let name = self
             .to_string()
