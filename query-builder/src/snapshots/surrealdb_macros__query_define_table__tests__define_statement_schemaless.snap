@@ -1,5 +1,0 @@
----
-source: surreal-macros/src/query_define_table.rs
-expression: statement
----
-DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;

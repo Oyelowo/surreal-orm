@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/test_query_builder.rs
-expression: raw
----
-RELATE student:1->writes->book:2 CONTENT $_param_8f188653 RETURN BEFORE PARALLEL ;

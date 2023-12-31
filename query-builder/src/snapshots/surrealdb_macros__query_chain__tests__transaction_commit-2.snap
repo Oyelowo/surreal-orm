@@ -1,7 +1,0 @@
----
-source: surreal-macros/src/query_chain.rs
-expression: transaction
----
-SELECT * FROM $_param_00000000 WHERE (city IS $_param_00000000) AND (city IS $_param_00000000) OR (city ~ $_param_00000000) ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;
-SELECT * FROM $_param_00000000 WHERE country IS $_param_00000000 ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;
-SELECT * FROM $_param_00000000;

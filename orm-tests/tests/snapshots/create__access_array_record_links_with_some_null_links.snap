@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/create.rs
-expression: "build.get_bindings()[0].get_raw_value()"
----
-{ age: 20, ally: NULL, created: '2020-01-01T00:00:00Z', home: (40.02, 116.34), lifeExpectancy: { nanos: 0, secs: 100 }, linePolygon: { type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }, name: 'Oyelowo', planetsToVisit: [], spaceShips: [space_ship:spaceship1, space_ship:spaceship2, space_ship:spaceship3], tags: ['tag1', 'tag'], territoryArea: { type: 'Polygon', coordinates: [[[40.02, 116.34], [40.02, 116.35], [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]]] }, weapon: NULL }

@@ -1,5 +1,0 @@
----
-source: surreal-macros/tests/test_query_builder.rs
-expression: x
----
-student[WHERE _param_00000000 < age < _param_00000000]student->writes[WHERE timeWritten > $_param_00000000]->book[WHERE id = $_param_00000000]

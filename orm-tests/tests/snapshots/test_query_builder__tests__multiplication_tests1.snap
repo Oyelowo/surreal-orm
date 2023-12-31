@@ -1,5 +1,0 @@
----
-source: surreal-macros/tests/test_query_builder.rs
-expression: query1.to_string()
----
-"SELECT * FROM book WHERE (content ~ $_param_00000000 AND $_param_00000000 >= $_param_00000000) OR (firstName = $_param_00000000) AND (lastName = $_param_00000000) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;"

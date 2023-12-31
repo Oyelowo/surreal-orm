@@ -195,14 +195,33 @@ DEFINE FIELD id ON new_stuff TYPE record<new_stuff> PERMISSIONS FULL;
 DEFINE FIELD updatedAt ON new_stuff TYPE datetime PERMISSIONS FULL;
 
 
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+
+
 DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+
+
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+
+
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+
+
+DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
+
+
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+
+
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 
 Migration file base name with extenstion: migration_gen_3_after_init.up.surql
 Migration file content:
 REMOVE TABLE animal;
 REMOVE TABLE eats;
 REMOVE TABLE new_stuff;
-REMOVE FIELD firstName ON TABLE planet;
+REMOVE TABLE planet;
 
 Migration file base name with extenstion: migration_init.down.surql
 Migration file content:

@@ -67,9 +67,7 @@ Migration file base name with extenstion: migration_gen_3_after_init.surql
 Migration file content:
 REMOVE TABLE animal;
 REMOVE TABLE eats;
-DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
-UPDATE planet SET newName = firstName;
-REMOVE FIELD firstName ON TABLE planet;
+REMOVE TABLE planet;
 
 Migration file base name with extenstion: migration_init.surql
 Migration file content:

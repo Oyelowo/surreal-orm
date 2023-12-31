@@ -1,5 +1,0 @@
----
-source: surreal-macros/src/query_define_field.rs
-expression: statement
----
-DEFINE FIELD email ON TABLE user TYPE string;

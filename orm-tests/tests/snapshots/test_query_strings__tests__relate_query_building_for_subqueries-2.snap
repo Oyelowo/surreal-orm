@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/test_query_strings.rs
-expression: "replace_params(&format!(\"{:?}\", relation.get_bindings()))"
----
-"[Binding { param: \"_param_00000001\", value: Table(Table(\"student\")), original_inline_name: \"_param_00000002\", raw_string: \"student\", description: None }, Binding { param: \"_param_00000003\", value: Table(Table(\"book\")), original_inline_name: \"_param_00000004\", raw_string: \"book\", description: None }, Binding { param: \"_param_00000005\", value: Strand(Strand(\"Oyelowo\")), original_inline_name: \"_param_00000006\", raw_string: \"'Oyelowo'\", description: None }, Binding { param: \"_param_00000007\", value: Object(Object({\"in\": Null, \"out\": Null, \"timeWritten\": Object(Object({\"nanos\": Number(Int(0)), \"secs\": Number(Int(52))}))})), original_inline_name: \"_param_00000008\", raw_string: \"{ in: NULL, out: NULL, timeWritten: { nanos: 0, secs: 52 } }\", description: None }]"

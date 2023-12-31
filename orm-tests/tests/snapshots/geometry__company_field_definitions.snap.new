@@ -1,0 +1,13 @@
+---
+source: orm-tests/tests/geometry.rs
+assertion_line: 532
+expression: company_defs
+---
+DEFINE FIELD id ON TABLE company TYPE record<company>;
+DEFINE FIELD name ON TABLE company TYPE string;
+DEFINE FIELD founded ON TABLE company TYPE datetime;
+DEFINE FIELD founders ON TABLE company TYPE array<object>;
+DEFINE FIELD foundersMultipleNesting ON TABLE company TYPE array<array<object>>;
+DEFINE FIELD founders10 ON TABLE company TYPE array<array<array<array<array<array<array<array<array<array<object>>>>>>>>>>;
+DEFINE FIELD tags ON TABLE company TYPE array<string>;
+DEFINE FIELD home ON TABLE company TYPE geometry<feature>;

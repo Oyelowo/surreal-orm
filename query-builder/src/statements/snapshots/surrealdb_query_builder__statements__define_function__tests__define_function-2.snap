@@ -1,9 +1,0 @@
----
-source: surreal-query-builder/src/statements/define_function.rs
-expression: fn_statement.fine_tune_params()
----
-DEFINE FUNCTION get_it($first: bool, $last: string, $birthday: string) {
-LET $person = $_param_00000001;
-
-RETURN $person;
-};

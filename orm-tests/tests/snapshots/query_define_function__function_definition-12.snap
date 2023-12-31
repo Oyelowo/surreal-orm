@@ -1,5 +1,0 @@
----
-source: orm-tests/tests/query_define_function.rs
-expression: person.fine_tune_params()
----
-get_person($_param_00000001, $last_name, birthday)

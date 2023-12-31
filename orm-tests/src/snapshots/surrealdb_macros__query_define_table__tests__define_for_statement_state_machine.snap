@@ -1,6 +1,0 @@
----
-source: surreal-macros/src/query_define_table.rs
-expression: for_res
----
-FOR create
-	WHERE name ~ $_param_00000000

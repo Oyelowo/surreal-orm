@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/test_query_strings.rs
-expression: "&x.to_raw()"
----
-bestFriend.bestFriend->writes[WHERE timeWritten > 3422]->book[WHERE id = book:blaze].content
