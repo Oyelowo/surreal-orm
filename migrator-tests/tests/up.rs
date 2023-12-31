@@ -882,3 +882,25 @@ async fn test_cannot_apply_already_applied(mode: Mode) {
     .await;
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
 }
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_older(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+
+    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let file5 = files.get(11).unwrap().to_owned();
+    let ref default_fwd_strategy5 = FastForwardDelta::builder().till(file5).build();
+    conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
+
+    let file12 = files.get(11).unwrap().to_owned();
+    let ref default_fwd_strategy12 = FastForwardDelta::builder().till(file12).build();
+    conf.up_cmd(default_fwd_strategy12).await.run_up_fn().await;
+
+    conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
+}
