@@ -1,5 +1,6 @@
 use std::{
     fs::{self},
+    panic::AssertUnwindSafe,
     path::PathBuf,
 };
 
@@ -851,4 +852,33 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode) {
         config: conf.clone(),
     })
     .await;
+}
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_already_applied(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let (mut conf, temp_test_migration_dir) =
+        generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let cli_db = conf.db().clone();
+
+    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let file12 = files.get(11).unwrap().to_owned();
+    let ref default_fwd_strategy = FastForwardDelta::builder().till(file12).build();
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
+    assert_with_db_instance(AssertionArg {
+        db: cli_db.clone(),
+        expected_mig_files_count: 12,
+        expected_db_mig_count: 12,
+        migration_files_dir: temp_test_migration_dir.clone(),
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+    conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
 }
