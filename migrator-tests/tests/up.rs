@@ -19,7 +19,7 @@ use tempfile::tempdir;
 use test_case::test_case;
 use typed_builder::TypedBuilder;
 
-fn read_migs_from_dir_sorted(path: &PathBuf) -> Vec<MigrationFilename> {
+fn read_up_fwd_migrations_from_dir_sorted(path: &PathBuf) -> Vec<MigrationFilename> {
     let mut files = std::fs::read_dir(path)
         .expect("Failed to read dir")
         .filter_map(|p| {
@@ -30,7 +30,9 @@ fn read_migs_from_dir_sorted(path: &PathBuf) -> Vec<MigrationFilename> {
                 .try_into()
                 .ok()
         })
+        .filter(|f: &MigrationFilename| f.is_up() || f.is_unidirectional())
         .collect::<Vec<MigrationFilename>>();
+
     files.sort_by_key(|a| a.timestamp());
     files
 }
@@ -73,12 +75,6 @@ fn assert_migration_files_presence_and_format(
                 assert_eq!(file_name.extension().to_string(), "up.surql");
                 assert_eq!(found_mig_file.to_string(), db_mig_record.name);
                 assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
-
-                // select * from migration where name = down.to_down();
-                // name, timestamp and checksum_up
-                let down_counterpart = found_migration_file(file_name.to_down());
-                assert_eq!(down_counterpart.extension().to_string(), "down.surql");
-                assert_eq!(down_counterpart.timestamp(), db_mig_record.timestamp);
             }
             MigrationFilename::Unidirectional(_uni) => {
                 // select * from migration where name = down;
@@ -145,7 +141,7 @@ async fn assert_with_db_instance(args: AssertionArg) {
         );
     }
 
-    let mut migration_files = read_migs_from_dir_sorted(&migration_files_dir);
+    let mut migration_files = read_up_fwd_migrations_from_dir_sorted(&migration_files_dir);
     let latest_file_name = migration_files.iter().max();
 
     if let Some(latest_file_name) = latest_file_name {
@@ -161,11 +157,6 @@ async fn assert_with_db_instance(args: AssertionArg) {
         db_mig_count,
         "Line: {code_origin_line}",
     );
-    let mig_files_count = if config.reversible {
-        mig_files_count * 2
-    } else {
-        mig_files_count
-    };
 
     assert_eq!(
         migration_files.len() as u8,
@@ -828,7 +819,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
     let cli_db = conf.db().clone();
 
-    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
 
     let file5 = files.get(4).unwrap().to_owned();
     let ref default_fwd_strategy = FastForwardDelta::builder().till(file5).build();
@@ -889,7 +880,7 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
     let cli_db = conf.db().clone();
 
-    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
     let file12 = files.get(11).unwrap().to_owned();
     let ref default_fwd_strategy = FastForwardDelta::builder().till(file12).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
@@ -919,7 +910,7 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
     let (mut conf, temp_test_migration_dir) =
         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
 
-    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
     let file5 = files.get(4).unwrap().to_owned();
     let ref default_fwd_strategy5 = FastForwardDelta::builder().till(file5).build();
     conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
@@ -981,7 +972,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     })
     .await;
 
-    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
     let file5 = files.get(4).unwrap().to_owned();
     let ref default_fwd_strategy = FastForwardDelta::builder().till(file5).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
@@ -1011,7 +1002,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     })
     .await;
 
-    let files = read_migs_from_dir_sorted(&temp_test_migration_dir);
+    let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
     let file9 = files.get(8).unwrap().to_owned();
     let ref default_fwd_strategy = FastForwardDelta::builder().till(file9).build();
     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;

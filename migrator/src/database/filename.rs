@@ -289,6 +289,18 @@ impl Display for Basename {
 }
 
 impl MigrationFilename {
+    pub fn is_up(&self) -> bool {
+        matches!(self, MigrationFilename::Up(_))
+    }
+
+    pub fn is_down(&self) -> bool {
+        matches!(self, MigrationFilename::Down(_))
+    }
+
+    pub fn is_unidirectional(&self) -> bool {
+        matches!(self, MigrationFilename::Unidirectional(_))
+    }
+
     pub fn filename(&self) -> Filename {
         match self {
             MigrationFilename::Up(MigrationNameBasicInfo {
