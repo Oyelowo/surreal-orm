@@ -1,6 +1,0 @@
----
-source: surreal-query-builder/src/statements/for_.rs
-expression: for_res
----
-FOR create
-	WHERE name ~ $_param_76e8f7aa

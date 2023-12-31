@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/insert.rs
-expression: build.to_raw().build()
----
-INSERT INTO alien (age, ally, created, home, id, lifeExpectancy, linePolygon, name, spaceShips, tags, territoryArea, weapon) VALUES (20, NULL, '2020-01-01T00:00:00Z', (40.02, 116.34), NONE, { nanos: 0, secs: 100 }, { type: 'LineString', coordinates: [[40.02, 116.34], [40.02, 116.35], [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]] }, 'Oyelowo', [space_ship:spaceship1, space_ship:spaceship2, space_ship:spaceship3], ['tag1', 'tag'], { type: 'Polygon', coordinates: [[[40.02, 116.34], [40.02, 116.35], [40.03, 116.35], [40.03, 116.34], [40.02, 116.34]]] }, NULL);

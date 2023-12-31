@@ -1,5 +1,0 @@
----
-source: surreal-query-builder/src/statements/define_table.rs
-expression: statement.get_bindings()
----
-[]

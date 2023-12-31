@@ -1,7 +1,0 @@
----
-source: surreal-query-builder/src/statements/chain.rs
-expression: transaction.to_raw().to_string()
----
-SELECT * FROM user:oyelowo WHERE (city IS 'Prince Edward Island') AND (city IS 'NewFoundland') OR (city ~ 'Toronto') ORDER BY age NUMERIC ASC LIMIT 153 START AT 10 PARALLEL;
-SELECT * FROM user:oyedayo WHERE country IS 'INDONESIA' ORDER BY age NUMERIC ASC LIMIT 20 START AT 5;
-SELECT * FROM user:4;

@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/test_query_strings.rs
-expression: replace_params(&query1.to_string())
----
-SELECT * FROM book WHERE (content ~ $_param_00000001 AND $_param_00000002 >= $_param_00000003) OR (firstName = $_param_00000004) AND (lastName = $_param_00000005) GROUP BY content, age ORDER BY lastName  DESC LIMIT 50 START AT 20 TIMEOUT 9s PARALLEL;

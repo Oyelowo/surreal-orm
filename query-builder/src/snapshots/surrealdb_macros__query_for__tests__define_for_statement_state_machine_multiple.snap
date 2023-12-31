@@ -1,6 +1,0 @@
----
-source: surreal-macros/src/query_for.rs
-expression: for_res
----
-FOR create, delete, select, update
-	WHERE name IS $_param_00000000

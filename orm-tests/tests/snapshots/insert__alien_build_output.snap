@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/insert.rs
-expression: "build.get_bindings()[0].get_raw_value()"
----
-20

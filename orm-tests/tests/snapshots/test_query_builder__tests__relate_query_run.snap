@@ -1,5 +1,0 @@
----
-source: surreal-macros/tests/test_query_builder.rs
-expression: "serde_json::to_string(&relation_res).unwrap()"
----
-"{\"timeWritten\":{\"secs\":343,\"nanos\":0},\"in\":\"student:1\",\"out\":\"book:2\"}"

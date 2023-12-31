@@ -1,5 +1,0 @@
----
-source: orm-tests/tests/query_define_function.rs
-expression: person.to_raw().build()
----
-get_person('Oyelowo', 'Oyedayo', birthday)

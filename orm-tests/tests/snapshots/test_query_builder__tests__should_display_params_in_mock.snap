@@ -1,5 +1,0 @@
----
-source: surreal-macros/tests/test_query_builder.rs
-expression: mock
----
-RELATE student:1->writes->book:2 CONTENT $_param_00000000 PARALLEL ;

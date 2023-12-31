@@ -1,9 +1,82 @@
 ---
-source: migrator-tests/tests/generate.rs
-expression: joined_migration_files
+source: migrator-tests/tests/up.rs
+assertion_line: 113
+expression: migrations_contents
 ---
-Migration file base name with extenstion: migration_gen_1_after_init.down.surql
-Migration file content:
+migration_1_init.up.surql
+DELETE migration;
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
+DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+
+
+migration_1_init.down.surql
+REMOVE TABLE animal;
+REMOVE TABLE crop;
+REMOVE TABLE eats;
+REMOVE TABLE migration;
+REMOVE TABLE planet;
+REMOVE TABLE student;
+
+
+
+migration_2_gen_after_init.up.surql
+
+
+
+
+migration_2_gen_after_init.down.surql
+
+
+
+
+migration_3_gen_after_init.up.surql
+
+
+
+
+migration_3_gen_after_init.down.surql
+
+
+
+
+migration_4_gen_after_init.down.surql
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
 
 
@@ -51,8 +124,9 @@ DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
 
 DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
 
-Migration file base name with extenstion: migration_gen_1_after_init.up.surql
-Migration file content:
+
+
+migration_4_gen_after_init.up.surql
 REMOVE FIELD attributes ON TABLE animal;
 
 
@@ -83,49 +157,18 @@ UPDATE planet SET newName = firstName;
 REMOVE FIELD firstName ON TABLE planet;
 REMOVE TABLE student;
 
-Migration file base name with extenstion: migration_gen_2_after_init.down.surql
-Migration file content:
-REMOVE TABLE animal;
-REMOVE TABLE crop;
-REMOVE TABLE eats;
-REMOVE TABLE migration;
-REMOVE TABLE planet;
-REMOVE TABLE student;
 
-Migration file base name with extenstion: migration_gen_2_after_init.up.surql
-Migration file content:
-DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
-DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
-DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
-DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
-DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
-DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+
+migration_5_gen_after_init.up.surql
 DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
-DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
-DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
-DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
-DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
 DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
 DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
-DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
-DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
-DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
-DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
 DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
@@ -133,8 +176,16 @@ DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
 DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
 DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
 
-Migration file base name with extenstion: migration_gen_3_after_init.down.surql
-Migration file content:
+
+
+migration_5_gen_after_init.down.surql
+REMOVE TABLE crop;
+REMOVE TABLE migration;
+REMOVE TABLE student;
+
+
+
+migration_6_gen_after_init.down.surql
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
 
@@ -216,25 +267,63 @@ DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
 
 DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 
-Migration file base name with extenstion: migration_gen_3_after_init.up.surql
-Migration file content:
+
+
+migration_6_gen_after_init.up.surql
 REMOVE TABLE animal;
 REMOVE TABLE eats;
 REMOVE TABLE new_stuff;
 REMOVE TABLE planet;
 
-Migration file base name with extenstion: migration_init.down.surql
-Migration file content:
+
+
+migration_7_gen_after_init.up.surql
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+
+
+migration_7_gen_after_init.down.surql
+REMOVE TABLE migration;
+REMOVE TABLE student;
+
+
+
+migration_8_gen_after_init.up.surql
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+
+
+migration_8_gen_after_init.down.surql
+REMOVE TABLE migration;
+
+
+
+migration_9_gen_after_init.down.surql
 REMOVE TABLE animal;
 REMOVE TABLE crop;
 REMOVE TABLE eats;
 REMOVE TABLE migration;
 REMOVE TABLE planet;
-REMOVE TABLE student;
 
-Migration file base name with extenstion: migration_init.up.surql
-Migration file content:
-DELETE migration;
+
+
+migration_9_gen_after_init.up.surql
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
 DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
@@ -267,9 +356,73 @@ DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
 DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
 DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
 DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
-DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
-DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
-DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;
+
+
+
+migration_10_gen_after_init.down.surql
+REMOVE TABLE migration;
+
+
+
+migration_10_gen_after_init.up.surql
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+
+
+migration_11_gen_after_init.down.surql
+REMOVE TABLE migration;
+
+
+
+migration_11_gen_after_init.up.surql
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+
+
+migration_12_gen_after_init.down.surql
+REMOVE TABLE animal;
+REMOVE TABLE crop;
+REMOVE TABLE migration;
+REMOVE TABLE planet;
+
+
+
+migration_12_gen_after_init.up.surql
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
+DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
+DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+
+

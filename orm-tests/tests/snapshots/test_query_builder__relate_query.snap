@@ -1,5 +1,0 @@
----
-source: surreal-orm-tests/tests/test_query_builder.rs
-expression: relate_simple_object
----
-{"timeWritten":{"secs":343,"nanos":0},"in":"student:1","out":"book:2"}

@@ -1,5 +1,0 @@
----
-source: migrator-tests/tests/up.rs
-expression: migrations_contents.as_checksum().unwrap()
----
-80e989c79bce5e0ea39b54816d1433938b07e723864809d92c547789d7cdd5bc

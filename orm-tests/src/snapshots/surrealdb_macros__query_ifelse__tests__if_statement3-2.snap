@@ -1,9 +1,0 @@
----
-source: surreal-macros/src/query_ifelse.rs
-expression: if_statement
----
-IF age >= $_param_00000000 <= $_param_00000000 THEN
-	_param_00000000
-ELSE IF name ~ $_param_00000000 THEN
-	_param_00000000
-END

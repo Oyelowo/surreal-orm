@@ -1,5 +1,0 @@
----
-source: surreal-macros/tests/test_query_builder.rs
-expression: relation.to_string()
----
-"RELATE (SELECT * FROM student)->writes->(SELECT * FROM book WHERE title ~ $_param_00000000) CONTENT $_param_00000000 ;"
