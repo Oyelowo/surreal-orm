@@ -4,6 +4,7 @@ use std::{
     path::PathBuf,
 };
 
+use chrono::Utc;
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
     ResourcesV7, ResourcesV8, ResourcesV9,
@@ -13,8 +14,8 @@ use surreal_orm::migrator::{
     Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
     Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
 };
-use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
+use surrealdb::{engine::any::Any, sql::Base};
 use tempfile::tempdir;
 use test_case::test_case;
 use typed_builder::TypedBuilder;
@@ -902,5 +903,26 @@ async fn test_cannot_apply_older(mode: Mode) {
     let ref default_fwd_strategy12 = FastForwardDelta::builder().till(file12).build();
     conf.up_cmd(default_fwd_strategy12).await.run_up_fn().await;
 
+    conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
+}
+
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_nonexisting_migration(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+
+    let (mut conf, _) = generate_test_migrations(temp_test_migration_dir.clone(), mode).await;
+    let non_existing_filename = MigrationFilename::create_oneway(
+        Utc::now(),
+        &Basename::new("nonexesint migration hahahahahah"),
+    )
+    .unwrap();
+
+    let ref default_fwd_strategy5 = FastForwardDelta::builder()
+        .till(non_existing_filename)
+        .build();
     conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
 }

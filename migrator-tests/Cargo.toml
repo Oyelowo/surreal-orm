@@ -18,6 +18,7 @@ tempfile = { workspace = true }
 insta = { workspace = true }
 pretty_env_logger = { workspace = true }
 typed-builder = { workspace = true }
+chrono = { workspace = true }
 
 
 [dev-dependencies]
