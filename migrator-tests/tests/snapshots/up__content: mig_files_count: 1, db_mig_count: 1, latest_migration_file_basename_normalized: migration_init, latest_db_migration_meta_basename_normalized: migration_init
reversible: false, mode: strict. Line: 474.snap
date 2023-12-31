@@ -2,7 +2,7 @@
 source: migrator-tests/tests/up.rs
 expression: migrations_contents
 ---
-migration_init.surql
+Migration 1: migration_init.surql
 DELETE migration;
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
