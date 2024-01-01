@@ -20,5 +20,5 @@ async fn _initialize_db() -> Surreal<Any> {
 
 #[tokio::main]
 async fn main() {
-    Migrator::run_test_main(Resources).await;
+    Migrator::run(Resources).await;
 }

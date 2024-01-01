@@ -255,7 +255,7 @@ impl TestConfigNew {
             .set_cmd(SubCommand::Init(
                 Init::builder()
                     .reversible(true)
-                    .basename("migration 1-init".into())
+                    .name("migration 1-init".into())
                     .run(false)
                     .build(),
             ))
