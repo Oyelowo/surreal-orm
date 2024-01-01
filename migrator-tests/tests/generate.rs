@@ -279,7 +279,7 @@ impl TestConfig {
             ..
         } = self;
         let gen = Init::builder()
-            .basename(migration_basename.clone())
+            .name(migration_basename.clone())
             .reversible(*reversible)
             .run(*db_run)
             .build();

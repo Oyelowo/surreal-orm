@@ -9,7 +9,7 @@ use typed_builder::TypedBuilder;
 pub struct Init {
     /// Name of the migration
     #[arg(long, help = "Name of the first migration file(s)")]
-    pub(crate) basename: Basename,
+    pub(crate) name: Basename,
 
     /// Whether or not to run the migrations after initialization.
     #[arg(long)]
@@ -32,7 +32,7 @@ impl Init {
         prompter: impl Prompter,
     ) {
         // let mut files_config = MigrationConfig::new().make_strict();
-        let migration_name = self.basename.clone();
+        let migration_name = self.name.clone();
 
         let file_manager = cli.file_manager();
         let files = file_manager.get_migrations_filenames(true);
