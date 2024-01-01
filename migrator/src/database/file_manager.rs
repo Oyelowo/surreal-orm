@@ -364,7 +364,8 @@ impl FileManagerBi {
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         // let _migrations = self.get_migrations()?;
-        MigrationRunner::rollback_migrations(db, &self.into_inner(), rollback_options).await?;
+        MigrationRunner::rollback_migrations(db.clone(), &self.into_inner(), rollback_options)
+            .await?;
 
         Ok(())
     }

@@ -15,6 +15,7 @@ use surrealdb::{
 
 use crate::*;
 
+// For the migration directory
 #[derive(Debug, Clone)]
 pub struct LeftFullDbInfo(pub FullDbInfo);
 
@@ -26,6 +27,7 @@ impl Deref for LeftFullDbInfo {
     }
 }
 
+// Represents codebase resources state
 #[derive(Debug, Clone)]
 pub struct RightFullDbInfo(pub FullDbInfo);
 
