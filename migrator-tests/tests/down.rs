@@ -135,25 +135,17 @@ struct TestConfigNew {
 }
 
 impl TestConfigNew {
-    pub(crate) async fn new(
-        mode: Mode,
-        reversible: bool,
-        db_run: bool,
-        migration_basename: Basename,
-        migration_dir: &PathBuf,
-    ) -> Self {
+    pub(crate) async fn new(migration_dir: &PathBuf) -> Self {
         let db_conn_config = get_db_connection_config();
 
         let mut migrator = Migrator::builder()
             .verbose(3)
             .migrations_dir(migration_dir.clone())
             .db_connection(db_conn_config)
-            .mode(mode)
+            .mode(Mode::Strict)
             .build();
 
-        if db_run {
-            migrator.setup_db().await;
-        }
+        migrator.setup_db().await;
 
         Self::builder().migrator(migrator).build()
     }
@@ -165,12 +157,6 @@ impl TestConfigNew {
     ) -> &mut Self {
         self.migrator.run_test(codebase_resources, prompter).await;
         self
-    }
-
-    pub(crate) async fn init_cmd(&mut self) -> &mut Self {
-        // self.migrator.run_init_fn().await;
-        // self
-        todo!()
     }
 
     pub(crate) fn set_cmd(&mut self, cmd: SubCommand) -> &mut Self {
@@ -202,22 +188,16 @@ impl TestConfigNew {
     //         .run(&mut self.migrator, codebase_resources, prompter);
     // }
 
-    async fn generate_test_migrations(
-        &mut self,
-        temp_test_migration_dir: &PathBuf,
-        mode: Mode,
-        reversible: &bool,
-    ) -> &mut Self {
+    async fn generate_test_migrations(&mut self) -> &mut Self {
         let mock_prompter = MockPrompter::builder()
             .allow_empty_migrations_gen(true)
             .rename_or_delete_single_field_change(RenameOrDelete::Rename)
             .build();
-        // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
 
         self.migrator
             .set_cmd(SubCommand::Init(
                 Init::builder()
-                    .reversible(*reversible)
+                    .reversible(true)
                     .basename("migration 1-init".into())
                     .run(false)
                     .build(),
@@ -453,16 +433,9 @@ async fn test_rollback(mode: Mode) {
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     // dbg!("namamama", &temp_test_migration_dir);
     //
-    let mut conf = TestConfigNew::new(
-        mode,
-        true,
-        true,
-        "migration init".into(),
-        &temp_test_migration_dir,
-    )
-    .await;
+    let mut conf = TestConfigNew::new(&temp_test_migration_dir).await;
+    conf.generate_test_migrations();
 
-    let mut conf = TestConfig::generate_test_migrations(temp_test_migration_dir, mode, &true).await;
     conf.run_up(&FastForwardDelta::default()).await;
     // let cli_db = conf.db().clone();
 
