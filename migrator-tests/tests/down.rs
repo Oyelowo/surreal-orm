@@ -46,6 +46,8 @@ async fn assert_with_db_instance(args: AssertionArg) {
     }
 
     let down_migration_files = config.read_down_migrations_from_dir_sorted();
+    let down_migration_files_content = config.read_down_migrations_content_from_dir_sorted();
+    println!("{}", &down_migration_files_content.join("\n\n"));
     let latest_file_name = down_migration_files.iter().max();
 
     if let Some(latest_file_name) = latest_file_name {
@@ -137,6 +139,23 @@ impl TestConfigNew {
         migrator.setup_db().await;
 
         Self::builder().migrator(migrator).build()
+    }
+
+    fn read_down_migrations_content_from_dir_sorted(&self) -> Vec<String> {
+        self.read_down_migrations_from_dir_sorted()
+            .iter()
+            .map(|f| {
+                fs::read_to_string(
+                    &self
+                        .migrator
+                        .file_manager()
+                        .get_migration_dir()
+                        .unwrap()
+                        .join(f.to_string()),
+                )
+                .expect("Failed to read file")
+            })
+            .collect::<Vec<String>>()
     }
 
     fn read_down_migrations_from_dir_sorted(&self) -> Vec<MigrationFilename> {
@@ -488,7 +507,13 @@ async fn test_rollback(mode: Mode) {
     })
     .await;
 
-    conf.run_down(&RollbackDelta::default(), false).await;
+    Down::builder()
+        .strategy(RollbackDelta::default())
+        .prune(false)
+        .build()
+        .run(&mut conf.migrator)
+        .await;
+    // conf.run_down(&RollbackDelta::default(), false).await;
     // conf.run_down(&RollbackDelta::builder().number(3).build(), false)
     //     .await;
     //
@@ -502,6 +527,7 @@ async fn test_rollback(mode: Mode) {
         config: conf.clone(),
     })
     .await;
+    assert_eq!(2, 3);
     // let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
     // conf.run_up(default_fwd_strategy).await;
     // assert_with_db_instance(AssertionArg {

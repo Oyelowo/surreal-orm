@@ -176,11 +176,12 @@ impl MigrationRunner {
                 )?
             }
         };
+        dbg!(queries_to_run.clone());
 
         begin_transaction()
             .query(queries_to_run)
             .commit_transaction()
-            .run(db)
+            .run(db.clone())
             .await?;
 
         if prune_files_after_rollback {

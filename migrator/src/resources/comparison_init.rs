@@ -45,7 +45,7 @@ define_top_level_resource!(
 
 #[derive(Debug, Clone)]
 pub struct ComparisonsInit<'a> {
-    // Migrations latest state tables
+    // Migrations directoy latest state tables
     pub left_resources: &'a LeftFullDbInfo,
     // Codebase latest state tables
     pub right_resources: &'a RightFullDbInfo,
