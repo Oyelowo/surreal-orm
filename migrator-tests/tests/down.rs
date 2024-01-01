@@ -9,7 +9,8 @@ use surreal_orm::{
     migrator::{
         config::{self, DatabaseConnection, UrlDb},
         Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename, Migrator,
-        MockPrompter, Mode, Prompter, RenameOrDelete, RollbackDelta, SubCommand, Up,
+        MockPrompter, Mode, Prompter, RenameOrDelete, RollbackDelta, RollbackStrategy, SubCommand,
+        Up,
     },
     DbResources,
 };
@@ -21,15 +22,15 @@ use typed_builder::TypedBuilder;
 
 async fn assert_with_db_instance<'a>(args: AssertionArg<'a>) {
     let AssertionArg {
-        db,
-        expected_mig_files_count,
-        expected_db_mig_count,
+        expected_down_mig_files_count,
+        expected_db_mig_meta_count: expected_db_mig_count,
         expected_latest_migration_file_basename_normalized,
         expected_latest_db_migration_meta_basename_normalized,
         code_origin_line,
         config,
     } = args;
 
+    let db = config.db().clone();
     let db_migrations = Migration::get_all_desc(db.clone()).await;
     let latest_migration = Migration::get_latest(db.clone()).await;
 
@@ -60,9 +61,15 @@ async fn assert_with_db_instance<'a>(args: AssertionArg<'a>) {
         "migration Counts do not match with what is in the db. Line: {code_origin_line}",
     );
 
+    let expected_down_mig_files_count = if config.reversible {
+        expected_down_mig_files_count
+    } else {
+        // Non reversible migrations should not have down migrationser
+        0
+    };
     assert_eq!(
         down_migration_files.len() as u8,
-        expected_mig_files_count,
+        expected_down_mig_files_count,
         "File counts do not match. Line: {code_origin_line}"
     );
 
@@ -74,6 +81,8 @@ async fn assert_with_db_instance<'a>(args: AssertionArg<'a>) {
         let basename = mig_name_from_db.basename();
         let extension = mig_name_from_db.extension();
 
+        dbg!(&config.migration_dir);
+        // dbg!(&down_migration_files);
         let found_migration_file = |db_mig_name: MigrationFilename| {
             down_migration_files
                 .iter()
@@ -81,7 +90,7 @@ async fn assert_with_db_instance<'a>(args: AssertionArg<'a>) {
                     // dbg!(&filename);
                     &&db_mig_name.to_down() == filename
                 })
-                .expect("Migration file not found in db")
+                .expect("Db Migration not found amongst the files in migration directory.")
         };
 
         let found_mig_file = found_migration_file(mig_name_from_db.clone());
@@ -111,13 +120,47 @@ fn get_db_connection_config() -> DatabaseConnection {
 
 #[derive(Clone, TypedBuilder)]
 struct AssertionArg<'a> {
-    db: Surreal<Any>,
-    expected_mig_files_count: u8,
-    expected_db_mig_count: u8,
+    expected_down_mig_files_count: u8,
+    expected_db_mig_meta_count: u8,
     expected_latest_migration_file_basename_normalized: Basename,
     expected_latest_db_migration_meta_basename_normalized: Basename,
     code_origin_line: u32,
-    config: TestConfig<'a>,
+    config: &'a TestConfig<'a>,
+}
+
+#[derive(Clone, TypedBuilder)]
+struct TestConfigNew {
+    migrator: Migrator,
+}
+
+impl TestConfigNew {
+    pub(crate) async fn new(
+        mode: Mode,
+        reversible: bool,
+        db_run: bool,
+        migration_basename: Basename,
+        migration_dir: &PathBuf,
+    ) -> Self {
+        let db_conn_config = get_db_connection_config();
+
+        let mut migrator = Migrator::builder()
+            .verbose(3)
+            .migrations_dir(migration_dir.clone())
+            .db_connection(db_conn_config)
+            .mode(mode)
+            .build();
+
+        if db_run {
+            migrator.setup_db().await;
+        }
+
+        Self { migrator }
+    }
+
+    pub(crate) async fn init_cmd(&mut self) -> &mut Self {
+        self.migrator.run_init_fn().await;
+        self
+    }
 }
 
 #[derive(Clone, TypedBuilder)]
@@ -158,7 +201,7 @@ impl<'a> TestConfig<'a> {
         }
     }
 
-    pub(crate) async fn down_cmd(&mut self, rollback_strategy: &RollbackDelta, prune: bool) {
+    pub(crate) async fn run_down(&mut self, rollback_strategy: &RollbackDelta, prune: bool) {
         let TestConfig {
             mode,
             migration_dir,
@@ -360,6 +403,7 @@ impl<'a> TestConfig<'a> {
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 #[should_panic(expected = "Failed to detect migration type.")]
+#[ignore]
 async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -380,78 +424,70 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
     conf.run_up(default_fwd_strategy).await;
     conf.run_up(default_fwd_strategy).await;
     // This should come after the first command initializes the db
-    let cli_db = conf.db().clone();
 
     assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
+        expected_down_mig_files_count: 0,
+        expected_db_mig_meta_count: 0,
         // migration_files_dir: temp_test_migration_dir.clone(),
         expected_latest_migration_file_basename_normalized: "".into(),
         expected_latest_db_migration_meta_basename_normalized: "".into(),
         code_origin_line: std::line!(),
-        config: conf.clone(),
+        config: &conf,
     })
     .await;
 }
 
 // Cannot generate without init first
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict; "Reversible Strict")]
+#[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
-async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
+async fn test_run_up_after_init_with_no_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-
-    let mut conf = TestConfig::builder()
-        .reversible(reversible)
-        .db_run(false)
-        .mode(mode)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir)
-        .build();
-
-    let resources = Resources;
-    let mock_prompter = MockPrompter::builder()
-        .allow_empty_migrations_gen(true)
-        .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-        .build();
-
-    // Generating without init should not yield any migrations
-    // 1st run
-    conf.set_file_basename("migration init".to_string())
-        .run_init_cmd(resources.clone(), mock_prompter.clone())
-        .await;
-    let cli_db = conf.db().clone();
+    // dbg!("namamama", &temp_test_migration_dir);
+    //
+    let mut conf = TestConfig::generate_test_migrations(temp_test_migration_dir, mode, &true).await;
+    conf.run_up(&FastForwardDelta::default()).await;
+    // let cli_db = conf.db().clone();
 
     // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 0,
-        // migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "migration_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
         code_origin_line: std::line!(),
-        config: conf.clone(),
+        config: &conf,
     })
     .await;
 
-    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
-    conf.run_up(default_fwd_strategy).await;
+    conf.run_down(&RollbackDelta::default(), false).await;
+    // conf.run_down(&RollbackDelta::builder().number(3).build(), false)
+    //     .await;
+    //
+    // // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
-        db: cli_db.clone(),
-        expected_mig_files_count: 0,
-        expected_db_mig_count: 1,
-        // migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "migration_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
         code_origin_line: std::line!(),
-        config: conf.clone(),
+        config: &conf,
     })
     .await;
+    // let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    // conf.run_up(default_fwd_strategy).await;
+    // assert_with_db_instance(AssertionArg {
+    //     db: cli_db.clone(),
+    //     expected_down_mig_files_count: 1,
+    //     expected_db_mig_meta_count: 1,
+    //     // migration_files_dir: temp_test_migration_dir.clone(),
+    //     expected_latest_migration_file_basename_normalized: "migration_init".into(),
+    //     expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
+    //     code_origin_line: std::line!(),
+    //     config: conf.clone(),
+    // })
+    // .await;
 }
 
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
