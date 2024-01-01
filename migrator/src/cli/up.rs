@@ -16,6 +16,14 @@ pub struct Up {
     pub(crate) fast_forward: FastForwardDelta,
 }
 
+impl Default for Up {
+    fn default() -> Self {
+        Self {
+            fast_forward: FastForwardDelta::default(),
+        }
+    }
+}
+
 impl Up {
     pub fn update_strategy(&self) -> UpdateStrategy {
         UpdateStrategy::from(self)

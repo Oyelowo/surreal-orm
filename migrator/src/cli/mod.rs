@@ -37,7 +37,8 @@ use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter, RenameO
 pub struct Migrator {
     /// Subcommand: generate, up, down, list
     #[command(subcommand)]
-    subcmd: SubCommand,
+    #[builder(default, setter(strip_option))]
+    subcmd: Option<SubCommand>,
 
     /// Optional custom migrations dir
     #[arg(global = true, short, long, help = "Optional custom migrations dir")]
@@ -68,7 +69,7 @@ impl Migrator {
         self.setup_db().await;
     }
 
-    pub fn subcmd(&self) -> SubCommand {
+    pub fn subcmd(&self) -> Option<SubCommand> {
         self.subcmd.clone()
     }
 
@@ -76,8 +77,9 @@ impl Migrator {
         self.db_connection.db().expect("Failed to get db")
     }
 
-    pub fn set_cmd(&mut self, cmd: SubCommand) {
-        self.subcmd = cmd;
+    pub fn set_cmd(&mut self, cmd: SubCommand) -> &mut Self {
+        self.subcmd = Some(cmd);
+        self
     }
 
     pub fn set_db_connection_from_migrator(&mut self, migrator: &Migrator) {
@@ -142,61 +144,113 @@ impl Migrator {
         cli.run_fn(codebase_resources, RealPrompter).await;
     }
 
-    pub async fn run_test(codebase_resources: impl DbResources) {
+    pub async fn run_test_main(codebase_resources: impl DbResources) {
         let mut cli = Self::parse();
         cli.setup_logging();
         cli.run_fn(
             codebase_resources,
             MockPrompter::builder()
-                .allow_empty_migrations_gen(false)
+                .allow_empty_migrations_gen(true)
                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
                 .build(),
         )
         .await;
     }
 
+    pub async fn run_test(
+        &mut self,
+        codebase_resources: Option<impl DbResources>,
+        prompter: MockPrompter,
+    ) {
+        self.setup_db().await;
+
+        match self.subcmd.clone() {
+            None => {
+                Up::default().run(self).await;
+            }
+            Some(subcmd) => match subcmd {
+                SubCommand::Init(init) => {
+                    init.run(
+                        self,
+                        codebase_resources.expect("resources must be provided for init command"),
+                        prompter,
+                    )
+                    .await
+                }
+                SubCommand::Generate(generate) => {
+                    generate
+                        .run(
+                            self,
+                            codebase_resources
+                                .expect("resources must be provided for generate command"),
+                            prompter,
+                        )
+                        .await
+                }
+                SubCommand::Up(up) => up.run(self).await,
+                SubCommand::Down(down) => down.run(self).await,
+                SubCommand::Prune(prune) => prune.run(self).await,
+                SubCommand::List(prune) => prune.run(self).await,
+                SubCommand::Reset(reset) => {
+                    reset
+                        .run(
+                            self,
+                            codebase_resources
+                                .expect("resources must be provided for reset command"),
+                            prompter,
+                        )
+                        .await
+                }
+            },
+        };
+    }
     pub async fn run_fn(&mut self, codebase_resources: impl DbResources, prompter: impl Prompter) {
         self.setup_db().await;
 
         match self.subcmd.clone() {
-            SubCommand::Init(init) => init.run(self, codebase_resources, prompter).await,
-            SubCommand::Generate(generate) => {
-                generate.run(self, codebase_resources, prompter).await
+            None => {
+                Up::default().run(self).await;
             }
-            SubCommand::Up(up) => up.run(self).await,
-            SubCommand::Down(down) => down.run(self).await,
-            SubCommand::Prune(prune) => prune.run(self).await,
-            SubCommand::List(prune) => prune.run(self).await,
-            SubCommand::Reset(reset) => reset.run(self, codebase_resources, prompter).await,
+            Some(subcmd) => match subcmd {
+                SubCommand::Init(init) => init.run(self, codebase_resources, prompter).await,
+                SubCommand::Generate(generate) => {
+                    generate.run(self, codebase_resources, prompter).await
+                }
+                SubCommand::Up(up) => up.run(self).await,
+                SubCommand::Down(down) => down.run(self).await,
+                SubCommand::Prune(prune) => prune.run(self).await,
+                SubCommand::List(prune) => prune.run(self).await,
+                SubCommand::Reset(reset) => reset.run(self, codebase_resources, prompter).await,
+            },
         };
     }
 
-    pub async fn run_up_fn(&mut self) {
-        self.setup_db().await;
-
-        match self.subcmd.clone() {
-            SubCommand::Up(up) => up.run(self).await,
-            _ => panic!("Expected up subcommand"),
-        };
-    }
-
-    pub async fn run_init_fn(&mut self) {
-        self.setup_db().await;
-
-        match self.subcmd.clone() {
-            SubCommand::Up(up) => up.run(self).await,
-            _ => panic!("Expected up subcommand"),
-        };
-    }
-
-    pub async fn run_down_fn(&mut self) {
-        self.setup_db().await;
-
-        match self.subcmd.clone() {
-            SubCommand::Down(up) => up.run(self).await,
-            _ => panic!("Expected up subcommand"),
-        };
-    }
+    // pub async fn run_up_fn(&mut self) {
+    //     self.setup_db().await;
+    //
+    //     match self.subcmd.clone() {
+    //         SubCommand::Up(up) => up.run(self).await,
+    //         _ => panic!("Expected up subcommand"),
+    //     };
+    // }
+    //
+    // pub async fn run_init_fn(&mut self) {
+    //     self.setup_db().await;
+    //
+    //     match self.subcmd.clone() {
+    //         SubCommand::Up(up) => up.run(self).await,
+    //         _ => panic!("Expected up subcommand"),
+    //     };
+    // }
+    //
+    // pub async fn run_down_fn(&mut self) {
+    //     self.setup_db().await;
+    //
+    //     match self.subcmd.clone() {
+    //         SubCommand::Down(up) => up.run(self).await,
+    //         _ => panic!("Expected up subcommand"),
+    //     };
+    // }
 
     pub(crate) fn setup_logging(&self) {
         let verbosity = self.verbose;
