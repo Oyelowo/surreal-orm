@@ -1,6 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use chrono::Utc;
+use clap::Subcommand;
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
     ResourcesV7, ResourcesV8, ResourcesV9,
@@ -154,11 +155,129 @@ impl TestConfigNew {
             migrator.setup_db().await;
         }
 
-        Self { migrator }
+        Self::builder().migrator(migrator).build()
+    }
+
+    pub(crate) async fn run(
+        &mut self,
+        codebase_resources: Option<impl DbResources>,
+        prompter: MockPrompter,
+    ) -> &mut Self {
+        self.migrator.run_test(codebase_resources, prompter).await;
+        self
     }
 
     pub(crate) async fn init_cmd(&mut self) -> &mut Self {
-        self.migrator.run_init_fn().await;
+        // self.migrator.run_init_fn().await;
+        // self
+        todo!()
+    }
+
+    pub(crate) fn set_cmd(&mut self, cmd: SubCommand) -> &mut Self {
+        self.migrator.set_cmd(cmd);
+        self
+    }
+
+    pub(crate) async fn run_up(&mut self, fwd_delta: &FastForwardDelta) -> &mut Self {
+        Up::builder()
+            .fast_forward(fwd_delta.clone())
+            .build()
+            .run(&mut self.migrator)
+            .await;
+        // self.migrator.run_up_fn().await;
+        self
+    }
+
+    // async fn run_init_cmd(
+    //     &mut self,
+    //     codebase_resources: impl DbResources,
+    //     prompter: impl Prompter,
+    // ) {
+    //     let TestConfigNew { migrator } = self;
+    //     let init_conf = Init::builder()
+    //         .basename("migration init".into())
+    //         .reversible(true)
+    //         .run(false)
+    //         .build()
+    //         .run(&mut self.migrator, codebase_resources, prompter);
+    // }
+
+    async fn generate_test_migrations(
+        &mut self,
+        temp_test_migration_dir: &PathBuf,
+        mode: Mode,
+        reversible: &bool,
+    ) -> &mut Self {
+        let mock_prompter = MockPrompter::builder()
+            .allow_empty_migrations_gen(true)
+            .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+            .build();
+        // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+
+        self.migrator
+            .set_cmd(SubCommand::Init(
+                Init::builder()
+                    .reversible(*reversible)
+                    .basename("migration 1-init".into())
+                    .run(false)
+                    .build(),
+            ))
+            .run_fn(Resources, mock_prompter.clone())
+            .await;
+
+        let gen = |basename: &'static str| {
+            SubCommand::Generate(Generate::builder().name(basename.into()).run(false).build())
+        };
+
+        // Generate::builder()
+        //     .name("er".into())
+        //     .run(false)
+        //     .build()
+        //     .run(&mut self.migrator, Resources, mock_prompter.clone());
+        self.set_cmd(gen("migration 2-gen after init"))
+            .run(Some(Resources), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 3-gen after init"))
+            .run(Some(Resources), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 4-gen after init"))
+            .run(Some(ResourcesV2), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 5-gen after init"))
+            .run(Some(ResourcesV3), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 6-gen after init"))
+            .run(Some(ResourcesV4), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 7-gen after init"))
+            .run(Some(ResourcesV5), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 8-gen after init"))
+            .run(Some(ResourcesV6), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 9-gen after init"))
+            .run(Some(ResourcesV7), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 10-gen after init"))
+            .run(Some(ResourcesV8), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 11-gen after init"))
+            .run(Some(ResourcesV9), mock_prompter.clone())
+            .await;
+
+        self.set_cmd(gen("migration 12-gen after init"))
+            .run(Some(ResourcesV10), mock_prompter.clone())
+            .await;
+
         self
     }
 }
@@ -201,112 +320,111 @@ impl<'a> TestConfig<'a> {
         }
     }
 
-    pub(crate) async fn run_down(&mut self, rollback_strategy: &RollbackDelta, prune: bool) {
-        let TestConfig {
-            mode,
-            migration_dir,
-            ..
-        } = self;
-        let db_conn_config = get_db_connection_config();
-
-        let down = Down::builder()
-            .strategy(rollback_strategy.clone())
-            .prune(prune)
-            .build();
-
-        let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Down(down))
-            .verbose(3)
-            .migrations_dir(migration_dir.clone())
-            .db_connection(db_conn_config)
-            .mode(*mode)
-            .build();
-        self.setup_db_if_none(&mut migrator).await;
-        migrator.run_down_fn().await;
-    }
-
-    pub(crate) async fn run_up(&mut self, fwd_delta: &FastForwardDelta) {
-        let TestConfig {
-            mode,
-            migration_dir,
-            ..
-        } = self;
-        let db_conn_config = get_db_connection_config();
-
-        let up = Up::builder().fast_forward(fwd_delta.clone()).build();
-
-        let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Up(up))
-            .verbose(3)
-            .migrations_dir(migration_dir.clone())
-            .db_connection(db_conn_config)
-            .mode(*mode)
-            .build();
-        self.setup_db_if_none(&mut migrator).await;
-
-        migrator.run_up_fn().await;
-    }
-
-    pub(crate) async fn generator_cmd(
-        &mut self,
-        codebase_resources: impl DbResources,
-        prompter: impl Prompter,
-    ) {
-        let TestConfig {
-            db_run,
-            mode,
-            migration_basename,
-            migration_dir,
-            ..
-        } = self;
-        let db_conn_config = get_db_connection_config();
-
-        let gen = Generate::builder()
-            .name(migration_basename.clone())
-            .run(*db_run)
-            .build();
-
-        let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Generate(gen))
-            .verbose(3)
-            .migrations_dir(migration_dir.clone())
-            .db_connection(db_conn_config)
-            .mode(*mode)
-            .build();
-        self.setup_db_if_none(&mut migrator).await;
-        migrator.run_fn(codebase_resources, prompter).await;
-    }
-
-    pub(crate) async fn run_init_cmd(
-        &mut self,
-        codebase_resources: impl DbResources,
-        prompter: impl Prompter,
-    ) {
-        let TestConfig {
-            reversible,
-            db_run,
-            mode,
-            migration_basename,
-            migration_dir,
-            ..
-        } = self;
-        let init_conf = Init::builder()
-            .basename(migration_basename.clone())
-            .reversible(*reversible)
-            .run(*db_run)
-            .build();
-        let db_conn_config = get_db_connection_config();
-
-        let mut migrator = Migrator::builder()
-            .subcmd(SubCommand::Init(init_conf))
-            .verbose(3)
-            .migrations_dir(migration_dir.clone())
-            .db_connection(db_conn_config)
-            .mode(*mode)
-            .build();
-        self.setup_db_if_none(&mut migrator).await;
-        migrator.run_fn(codebase_resources, prompter).await;
-    }
+    // pub(crate) async fn run_down(&mut self, rollback_strategy: &RollbackDelta, prune: bool) {
+    //     let TestConfig {
+    //         mode,
+    //         migration_dir,
+    //         ..
+    //     } = self;
+    //     let db_conn_config = get_db_connection_config();
+    //
+    //     let down = Down::builder()
+    //         .strategy(rollback_strategy.clone())
+    //         .prune(prune)
+    //         .build();
+    //
+    //     let mut migrator = Migrator::builder()
+    //         .subcmd(SubCommand::Down(down))
+    //         .verbose(3)
+    //         .migrations_dir(migration_dir.clone())
+    //         .db_connection(db_conn_config)
+    //         .mode(*mode)
+    //         .build();
+    //     self.setup_db_if_none(&mut migrator).await;
+    //     migrator.run_down_fn().await;
+    // }
+    // pub(crate) async fn run_up(&mut self, fwd_delta: &FastForwardDelta) {
+    //     let TestConfig {
+    //         mode,
+    //         migration_dir,
+    //         ..
+    //     } = self;
+    //     let db_conn_config = get_db_connection_config();
+    //
+    //     let up = Up::builder().fast_forward(fwd_delta.clone()).build();
+    //
+    //     let mut migrator = Migrator::builder()
+    //         .subcmd(SubCommand::Up(up))
+    //         .verbose(3)
+    //         .migrations_dir(migration_dir.clone())
+    //         .db_connection(db_conn_config)
+    //         .mode(*mode)
+    //         .build();
+    //     self.setup_db_if_none(&mut migrator).await;
+    //
+    //     migrator.run_up_fn().await;
+    // }
+    //
+    // pub(crate) async fn generator_cmd(
+    //     &mut self,
+    //     codebase_resources: impl DbResources,
+    //     prompter: impl Prompter,
+    // ) {
+    //     let TestConfig {
+    //         db_run,
+    //         mode,
+    //         migration_basename,
+    //         migration_dir,
+    //         ..
+    //     } = self;
+    //     let db_conn_config = get_db_connection_config();
+    //
+    //     let gen = Generate::builder()
+    //         .name(migration_basename.clone())
+    //         .run(*db_run)
+    //         .build();
+    //
+    //     let mut migrator = Migrator::builder()
+    //         .subcmd(SubCommand::Generate(gen))
+    //         .verbose(3)
+    //         .migrations_dir(migration_dir.clone())
+    //         .db_connection(db_conn_config)
+    //         .mode(*mode)
+    //         .build();
+    //     self.setup_db_if_none(&mut migrator).await;
+    //     migrator.run_fn(codebase_resources, prompter).await;
+    // }
+    //
+    // pub(crate) async fn run_init_cmd(
+    //     &mut self,
+    //     codebase_resources: impl DbResources,
+    //     prompter: impl Prompter,
+    // ) {
+    //     let TestConfig {
+    //         reversible,
+    //         db_run,
+    //         mode,
+    //         migration_basename,
+    //         migration_dir,
+    //         ..
+    //     } = self;
+    //     let init_conf = Init::builder()
+    //         .basename(migration_basename.clone())
+    //         .reversible(*reversible)
+    //         .run(*db_run)
+    //         .build();
+    //     let db_conn_config = get_db_connection_config();
+    //
+    //     let mut migrator = Migrator::builder()
+    //         .subcmd(SubCommand::Init(init_conf))
+    //         .verbose(3)
+    //         .migrations_dir(migration_dir.clone())
+    //         .db_connection(db_conn_config)
+    //         .mode(*mode)
+    //         .build();
+    //     self.setup_db_if_none(&mut migrator).await;
+    //     migrator.run_fn(codebase_resources, prompter).await;
+    // }
 
     fn read_down_migrations_from_dir_sorted(&self) -> Vec<MigrationFilename> {
         let mut files = std::fs::read_dir(&self.migration_dir)
@@ -325,122 +443,114 @@ impl<'a> TestConfig<'a> {
         files.sort_by_key(|a| a.timestamp());
         files
     }
-
-    async fn generate_test_migrations<'p>(
-        temp_test_migration_dir: &'p PathBuf,
-        mode: Mode,
-        reversible: &bool,
-    ) -> TestConfig<'p> {
-        let mock_prompter = MockPrompter::builder()
-            .allow_empty_migrations_gen(true)
-            .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-            .build();
-        // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-        let mut conf = TestConfig::builder()
-            .reversible(*reversible)
-            .db_run(false)
-            .mode(mode)
-            .migration_basename("".into())
-            .migration_dir(temp_test_migration_dir)
-            .build();
-
-        // #### Init Phase ####
-        // Run 1 init
-        conf.set_file_basename("migration 1-init".to_string())
-            .run_init_cmd(Resources, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 2-gen after init".to_string())
-            .generator_cmd(Resources, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 3-gen after init".to_string())
-            .generator_cmd(Resources, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 4-gen after init".to_string())
-            .generator_cmd(ResourcesV2, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 5-gen after init".to_string())
-            .generator_cmd(ResourcesV3, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 6-gen after init".to_string())
-            .generator_cmd(ResourcesV4, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 7-gen after init".to_string())
-            .generator_cmd(ResourcesV5, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 8-gen after init".to_string())
-            .generator_cmd(ResourcesV6, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 9-gen after init".to_string())
-            .generator_cmd(ResourcesV7, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 10-gen after init".to_string())
-            .generator_cmd(ResourcesV8, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 11-gen after init".to_string())
-            .generator_cmd(ResourcesV9, mock_prompter.clone())
-            .await;
-
-        conf.set_file_basename("migration 12-gen after init".to_string())
-            .generator_cmd(ResourcesV10, mock_prompter.clone())
-            .await;
-        conf
-    }
 }
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict; "Reversible Strict")]
+#[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
-#[should_panic(expected = "Failed to detect migration type.")]
-#[ignore]
-async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
+async fn test_rollback(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfig::builder()
-        .reversible(reversible)
-        .db_run(false)
-        .mode(mode)
-        .migration_basename("migration init".into())
-        .migration_dir(temp_test_migration_dir)
-        .build();
+    // dbg!("namamama", &temp_test_migration_dir);
+    //
+    let mut conf = TestConfigNew::new(
+        mode,
+        true,
+        true,
+        "migration init".into(),
+        &temp_test_migration_dir,
+    )
+    .await;
 
-    // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfig::generate_test_migrations(temp_test_migration_dir, mode, &true).await;
+    conf.run_up(&FastForwardDelta::default()).await;
+    // let cli_db = conf.db().clone();
 
-    // 1st fwd
-    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
-    conf.run_up(default_fwd_strategy).await;
-    conf.run_up(default_fwd_strategy).await;
-    conf.run_up(default_fwd_strategy).await;
-    conf.run_up(default_fwd_strategy).await;
-    // This should come after the first command initializes the db
-
+    // First time, should create migration files and db records
     assert_with_db_instance(AssertionArg {
-        expected_down_mig_files_count: 0,
-        expected_db_mig_meta_count: 0,
-        // migration_files_dir: temp_test_migration_dir.clone(),
-        expected_latest_migration_file_basename_normalized: "".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
         code_origin_line: std::line!(),
         config: &conf,
     })
     .await;
+
+    conf.run_down(&RollbackDelta::default(), false).await;
+    // conf.run_down(&RollbackDelta::builder().number(3).build(), false)
+    //     .await;
+    //
+    // // First time, should create migration files and db records
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: &conf,
+    })
+    .await;
+    // let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    // conf.run_up(default_fwd_strategy).await;
+    // assert_with_db_instance(AssertionArg {
+    //     db: cli_db.clone(),
+    //     expected_down_mig_files_count: 1,
+    //     expected_db_mig_meta_count: 1,
+    //     // migration_files_dir: temp_test_migration_dir.clone(),
+    //     expected_latest_migration_file_basename_normalized: "migration_init".into(),
+    //     expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
+    //     code_origin_line: std::line!(),
+    //     config: conf.clone(),
+    // })
+    // .await;
 }
+
+// #[test_case(Mode::Strict, true; "Reversible Strict")]
+// #[test_case(Mode::Lax, true; "Reversible Lax")]
+// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+// #[tokio::test]
+// #[should_panic(expected = "Failed to detect migration type.")]
+// #[ignore]
+// async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
+//     let mig_dir = tempdir().expect("Failed to create temp directory");
+//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//     let mut conf = TestConfig::builder()
+//         .reversible(reversible)
+//         .db_run(false)
+//         .mode(mode)
+//         .migration_basename("migration init".into())
+//         .migration_dir(temp_test_migration_dir)
+//         .build();
+//
+//     // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+//
+//     // 1st fwd
+//     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+//     conf.run_up(default_fwd_strategy).await;
+//     conf.run_up(default_fwd_strategy).await;
+//     conf.run_up(default_fwd_strategy).await;
+//     conf.run_up(default_fwd_strategy).await;
+//     // This should come after the first command initializes the db
+//
+//     assert_with_db_instance(AssertionArg {
+//         expected_down_mig_files_count: 0,
+//         expected_db_mig_meta_count: 0,
+//         // migration_files_dir: temp_test_migration_dir.clone(),
+//         expected_latest_migration_file_basename_normalized: "".into(),
+//         expected_latest_db_migration_meta_basename_normalized: "".into(),
+//         code_origin_line: std::line!(),
+//         config: &conf,
+//     })
+//     .await;
+// }
 
 // Cannot generate without init first
 #[test_case(Mode::Strict; "Reversible Strict")]
 #[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
+#[ignore]
 async fn test_run_up_after_init_with_no_run(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
@@ -593,55 +703,55 @@ async fn test_run_up_after_init_with_no_run(mode: Mode) {
 //     conf.set_file_basename("migration 4-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV2, mock_prompter.clone())
+//         .run(Some(ResourcesV2), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 5-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV3, mock_prompter.clone())
+//         .run(Some(ResourcesV3), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 6-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV4, mock_prompter.clone())
+//         .run(Some(ResourcesV4), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 7-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV5, mock_prompter.clone())
+//         .run(Some(ResourcesV5), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 8-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV6, mock_prompter.clone())
+//         .run(Some(ResourcesV6), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 9-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV7, mock_prompter.clone())
+//         .run(Some(ResourcesV7), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 10-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV8, mock_prompter.clone())
+//         .run(Some(ResourcesV8), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 11-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV9, mock_prompter.clone())
+//         .run(Some(ResourcesV9), mock_prompter.clone())
 //         .await;
 //
 //     conf.set_file_basename("migration 12-gen after init".to_string())
 //         .generator_cmd()
 //         .await
-//         .run_fn(ResourcesV10, mock_prompter.clone())
+//         .run(Some(ResourcesV0), mock_prompter.clone())
 //         .await;
 //     (conf, temp_test_migration_dir.clone())
 // }

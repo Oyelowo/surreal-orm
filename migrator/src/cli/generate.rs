@@ -14,6 +14,7 @@ pub struct Generate {
 
     /// Whether or not to run the migrations after generation.
     #[arg(long, help = "Whether to run the migrations after generation")]
+    #[builder(default)]
     pub(crate) run: bool,
 }
 
