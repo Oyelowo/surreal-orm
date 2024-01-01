@@ -24,15 +24,17 @@ impl Down {
     }
 }
 
-#[derive(Args, Debug, Clone)]
+#[derive(Args, Debug, Clone, TypedBuilder)]
 #[group(required = false, multiple = false)]
 pub struct RollbackDelta {
     /// Rollback to the previous migration
     #[arg(long, help = "Rollback to the previous migration")]
+    #[builder(default)]
     pub(crate) previous: bool,
 
     /// Rollback by count/number
     #[arg(short, long, help = "Rollback by the number specified")]
+    #[builder(default, setter(strip_option))]
     pub(crate) number: Option<u32>,
 
     /// Rollback till a specific migration ID
@@ -42,7 +44,18 @@ pub struct RollbackDelta {
         value_parser = mig_name_parser,
         help = "Rollback till a specific migration ID"
     )]
+    #[builder(default, setter(strip_option))]
     pub(crate) till: Option<MigrationFilename>,
+}
+
+impl Default for RollbackDelta {
+    fn default() -> Self {
+        RollbackDelta {
+            previous: true,
+            number: None,
+            till: None,
+        }
+    }
 }
 
 pub enum RollbackStrategy {
