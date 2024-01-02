@@ -1,7 +1,7 @@
 use inquire::error::InquireError;
 use typed_builder::TypedBuilder;
 
-use crate::table_fields::SingleFieldChangeType;
+use crate::*;
 
 pub trait Prompter
 where
