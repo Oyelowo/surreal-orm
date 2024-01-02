@@ -67,30 +67,34 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
         let might_be_single_field_delete_or_renaming =
             diff_left.len() == 1 && diff_right.len() == 1;
 
-        let autodetection_meta = if might_be_single_field_delete_or_renaming {
-            let field_change_meta = FieldChangeMeta {
-                table: table.to_owned(),
-                // old should now be in migration dir / live db state
-                old_name: diff_left.first().unwrap().to_string().into(),
-                // new should be in code base state
-                new_name: diff_right.first().unwrap().to_string().into(),
-            };
-            let skip_left = field_change_meta.old_name.build() == field_name.build();
-            // skip left sine we are handling the renaming on the right i.e the
-            // new field in the current codebase state.
-            if skip_left {
-                None
+        // This should only be done when the concerned field does not have
+        // explicit old_name attribute set.
+        let autodetection_meta = || {
+            if might_be_single_field_delete_or_renaming {
+                let field_change_meta = FieldChangeMeta {
+                    table: table.to_owned(),
+                    // old should now be in migration dir / live db state
+                    old_name: diff_left.first().unwrap().to_string().into(),
+                    // new should be in code base state
+                    new_name: diff_right.first().unwrap().to_string().into(),
+                };
+                let skip_left = field_change_meta.old_name.build() == field_name.build();
+                // skip left sine we are handling the renaming on the right i.e the
+                // new field in the current codebase state.
+                if skip_left {
+                    None
+                } else {
+                    let prompt = prompter
+                        .prompt_single_field_rename_or_delete(
+                            SingleFieldChangeType::Delete(field_change_meta.clone()),
+                            SingleFieldChangeType::Rename(field_change_meta),
+                        )
+                        .unwrap();
+                    Some(prompt)
+                }
             } else {
-                let prompt = prompter
-                    .prompt_single_field_rename_or_delete(
-                        SingleFieldChangeType::Delete(field_change_meta.clone()),
-                        SingleFieldChangeType::Rename(field_change_meta),
-                    )
-                    .unwrap();
-                Some(prompt)
+                None
             }
-        } else {
-            None
         };
 
         let res = match (left_def.cloned(), right_def.cloned()) {
@@ -107,7 +111,7 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
 
                 // bread -> Migration/live Db state
                 // cake -> codebase state
-                let foundfield_by_newname_auto = match autodetection_meta {
+                let foundfield_by_newname_auto = || match autodetection_meta() {
                     Some(SingleFieldChangeType::Rename(meta)) => {
                         let new_field_def = right_defs
                             .get_definition(meta.new_name.to_string().as_str())
@@ -127,7 +131,7 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                     &table,
                     By::NewName(field_name.clone()),
                 )
-                .or(foundfield_by_newname_auto)
+                .or_else(foundfield_by_newname_auto)
                 .map(FieldMetadataWrapper);
 
                 // old name should be on the left i.e local migration directory state but also
