@@ -60,6 +60,12 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
 
         let left_def = left_defs.get_definition(&field_name.build());
         let right_def = right_defs.get_definition(&field_name.build());
+        // When we detect a signle field name change in a struct,
+        // we want to give the user the option to choose to rename the field,
+        // or delete even if the old_name attribute approach of renaming field
+        // is not explicitly used.
+        let might_be_single_field_delete_or_renaming =
+            diff_left.len() == 1 && diff_right.len() == 1;
 
         let res = match (left_def.cloned(), right_def.cloned()) {
             (None, None) => unreachable!(),
@@ -71,23 +77,13 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                 }
             }
             _ => {
-                // bread -> cake
                 // bread -> Migration/live Db state
                 // cake -> codebase state
 
-                // When we detect a signle field name change in a struct,
-                // we want to give the user the option to choose to rename the field,
-                // or delete even if the old_name attribute approach of renaming field
-                // is not explicitly used.
-                let is_single_field_delete_or_renaming =
-                    diff_left.len() == 1 && diff_right.len() == 1;
-
                 // This should only be done when the concerned field does not have
                 // explicit old_name attribute set.
-                // 1st time: bread
-                // 2nd time: cake
                 let autodetection_meta = || {
-                    if is_single_field_delete_or_renaming {
+                    if might_be_single_field_delete_or_renaming {
                         let field_change_meta = FieldChangeMeta {
                             table: table.to_owned(),
                             // old should now be in migration dir / live db state
@@ -95,13 +91,20 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                             // new should be in code base state
                             new_name: diff_right.first().unwrap().to_string().into(),
                         };
-                        let prompt = prompter
-                            .prompt_single_field_rename_or_delete(
-                                SingleFieldChangeType::Delete(field_change_meta.clone()),
-                                SingleFieldChangeType::Rename(field_change_meta),
-                            )
-                            .unwrap();
-                        Some(prompt)
+                        let skip_left = field_change_meta.old_name.build() == field_name.build();
+                        // skip left sine we are handling the renaming on the right i.e the
+                        // new field in the current codebase state.
+                        if skip_left {
+                            None
+                        } else {
+                            let prompt = prompter
+                                .prompt_single_field_rename_or_delete(
+                                    SingleFieldChangeType::Delete(field_change_meta.clone()),
+                                    SingleFieldChangeType::Rename(field_change_meta),
+                                )
+                                .unwrap();
+                            Some(prompt)
+                        }
                     } else {
                         None
                     }
@@ -138,9 +141,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                     By::OldName(field_name.clone()),
                 )
                 .map(FieldMetadataWrapper);
-                log::error!("table: {:?}", table);
-                log::error!("found_field_by_oldname: {:?}", found_field_by_oldname);
-                log::error!("foundfield_by_newname: {:?}", foundfield_by_newname);
 
                 match (found_field_by_oldname, foundfield_by_newname) {
                     // mutually exclusive since we are iterating over a union of
@@ -151,32 +151,26 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                     // dayo is expected to now be in left with old name - lowo.
                     // This is a rename.
                     (Some(_l_meta), Some(r_meta)) => {
-                        r_meta.handle_fieldname_change(&table, field_name, left_defs, right_defs)?
+                        // return Err(MigrationError::FieldNameReused {
+                        //     field: field_name,
+                        //     table,
+                        // })
+                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
                     }
                     (None, Some(r_meta)) => {
                         //
-                        r_meta.handle_fieldname_change(&table, field_name, left_defs, right_defs)?
+                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
                     }
                     (Some(_), None) => {
                         // Dont make a change since that has been handled up there
                         DeltaTypeField::NoChange
                     }
                     // No explicit rename attribute used i.e old_name = "OldFieldName"
-                    (None, None) => {
-                        log::error!("left_def: {:?}", left_def);
-                        log::error!("right_def: {:?}", right_def);
-                        match (left_def, right_def) {
-                            (None, Some(r)) => {
-                                log::warn!("Create new field: {:?}", r);
-                                DeltaTypeField::Create { right: r.clone() }
-                            }
-                            (Some(l), None) => {
-                                log::warn!("Remove old field: {:?}", l);
-                                DeltaTypeField::Remove { left: l.clone() }
-                            }
-                            _ => unreachable!(),
-                        }
-                    }
+                    (None, None) => match (left_def, right_def) {
+                        (None, Some(r)) => DeltaTypeField::Create { right: r.clone() },
+                        (Some(l), None) => DeltaTypeField::Remove { left: l.clone() },
+                        _ => unreachable!(),
+                    },
                 }
             }
         };
@@ -184,7 +178,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
     }
 }
 
-#[derive(Debug, Clone)]
 struct FieldMetadataWrapper(FieldMetadata);
 impl Deref for FieldMetadataWrapper {
     type Target = FieldMetadata;
@@ -198,18 +191,10 @@ impl FieldMetadataWrapper {
     pub(crate) fn handle_fieldname_change(
         &self,
         table: &Table,
-        current_field: Field,
         left_defs: Fields,
         right_defs: Fields,
     ) -> MigrationResult<DeltaTypeField> {
-        let r_meta = &self;
-        // skip left sine we are handling the renaming on the right i.e the
-        // new field in the current codebase state.
-        // let skip_left = self.old_name.as_ref().unwrap().to_string() == current_field.build();
-        // if skip_left {
-        //     return Ok(DeltaTypeField::NoChange);
-        // }
-
+        let r_meta = &self.0;
         let old_left = left_defs
             .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
             .ok_or_else(|| MigrationError::InvalidOldFieldName {
