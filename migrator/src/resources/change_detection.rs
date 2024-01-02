@@ -7,7 +7,9 @@
 use std::{fmt::Display, ops::Deref};
 
 use crate::*;
-use surreal_query_builder::{DbResources, Field, FieldChangeMeta, FieldMetadata, Raw, Table};
+use surreal_query_builder::{
+    Buildable, DbResources, Field, FieldChangeMeta, FieldMetadata, Raw, Table,
+};
 
 pub enum DeltaTypeField {
     NoChange,
@@ -31,7 +33,7 @@ pub enum DeltaTypeField {
 
 // Change detection
 pub(crate) struct FieldChangeDetectionMeta<'a, R: DbResources> {
-    pub(crate) field_name: String,
+    pub(crate) field_name: Field,
     pub(crate) left_defs: Fields,
     pub(crate) right_defs: Fields,
     pub(crate) table: Table,
@@ -41,8 +43,10 @@ pub(crate) struct FieldChangeDetectionMeta<'a, R: DbResources> {
     pub(crate) prompter: &'a dyn Prompter,
 }
 
-impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeField {
-    fn from(value: FieldChangeDetectionMeta<R>) -> Self {
+impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeField {
+    type Error = MigrationError;
+
+    fn try_from(value: FieldChangeDetectionMeta<R>) -> MigrationResult<Self> {
         let FieldChangeDetectionMeta {
             field_name,
             left_defs,
@@ -54,8 +58,8 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
             prompter,
         } = value;
 
-        let left_def = left_defs.get_definition(&field_name);
-        let right_def = right_defs.get_definition(&field_name);
+        let left_def = left_defs.get_definition(&field_name.build());
+        let right_def = right_defs.get_definition(&field_name.build());
         // When we detect a signle field name change in a struct,
         // we want to give the user the option to choose to rename the field,
         // or delete even if the old_name attribute approach of renaming field
@@ -82,7 +86,7 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
             None
         };
 
-        match (left_def.cloned(), right_def.cloned()) {
+        let res = match (left_def.cloned(), right_def.cloned()) {
             (None, None) => unreachable!(),
             (Some(l), Some(r)) => {
                 if l.trim() != r.trim() {
@@ -124,20 +128,9 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                 let found_field_by_oldname = RightDatabase::find_field_has_old_name(
                     codebase_resources,
                     &table,
-                    By::OldName(field_name),
+                    By::OldName(field_name.clone()),
                 )
                 .map(FieldMetadataWrapper);
-                // if let Some(meta) = &field_meta_with_old_name {
-                //     let old_name = &meta.clone().old_name.expect("Should exist").to_string();
-                //     if !left.contains(old_name) {
-                //         return Err(MigrationError::InvalidOldFieldName {
-                //             new_name: name.to_string(),
-                //             table: table.to_string(),
-                //             old_name: old_name.to_string(),
-                //             renamables: left.clone().into_iter().collect::<Vec<_>>().join(", "),
-                //         });
-                //     }
-                // }
 
                 match (found_field_by_oldname, foundfield_by_newname) {
                     // mutually exclusive since we are iterating over a union of
@@ -147,15 +140,15 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                     // lowo will now be new field in right with old name -dayo,
                     // dayo is expected to now be in left with old name - lowo.
                     // This is a rename.
-                    (Some(l_meta), Some(r_meta)) => {
-                        panic!(
-                            "You are using same old field name for new field name. This is likely
-                        not intentional. Use a different name for the new field"
-                        )
+                    (Some(_l_meta), Some(_r_meta)) => {
+                        return Err(MigrationError::FieldNameReused {
+                            field: field_name,
+                            table,
+                        })
                     }
                     (None, Some(r_meta)) => {
                         //
-                        r_meta.handle_fieldname_change(left_defs, right_defs)
+                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
                     }
                     (Some(_), None) => {
                         // Dont make a change since that has been handled up there
@@ -169,7 +162,8 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                     },
                 }
             }
-        }
+        };
+        Ok(res)
     }
 }
 
@@ -185,44 +179,33 @@ impl Deref for FieldMetadataWrapper {
 impl FieldMetadataWrapper {
     pub(crate) fn handle_fieldname_change(
         &self,
+        table: &Table,
         left_defs: Fields,
         right_defs: Fields,
-    ) -> DeltaTypeField {
+    ) -> MigrationResult<DeltaTypeField> {
         let r_meta = &self.0;
-        let old_left = left_defs.get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str()).unwrap_or_else(|| {
-                            panic!(
-                                "Could not find field with name {} in migration local directory state table definition. \
-                                    Make sure you are using the correct case for the field name. \
-                                    It should be one of these :{}",
-                                r_meta.old_name.as_ref().unwrap(),
-                                left_defs.get_names().join(",")
-                            )
-                        });
-        let right_def = right_defs.get_definition(&r_meta.name.to_string().as_str()).unwrap_or_else(|| {
-                            panic!(
-                                "Could not find field with name {} in migration local directory state table definition. \
-                                    Make sure you are using the correct case for the field name. \
-                                    It should be one of these :{}",
-                                r_meta.name,
-                                right_defs.get_names().join(",")
-                            )
-                        });
+        let old_left = left_defs
+            .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
+            .ok_or_else(|| MigrationError::InvalidOldFieldName {
+                new_name: r_meta.name.to_string(),
+                table: table.to_string(),
+                old_name: r_meta.old_name.as_ref().unwrap().to_string(),
+                renamables: left_defs.get_names().join(", "),
+            })?;
+        let right_def = right_defs
+            .get_definition(&r_meta.name.to_string().as_str())
+            .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
+                field_expected: r_meta.name.to_string(),
+                table: table.to_string(),
+                valid_fields: right_defs.get_names().join(", "),
+            })?;
 
-        // up
-        // define new field
-        // Assign old to new
-        // delete old
-        //
-        // downdo
-        // define old field
-        // assign new to old
-        // delete new
-        DeltaTypeField::Rename {
+        Ok(DeltaTypeField::Rename {
             right: right_def.clone(),
             new_name: r_meta.name.clone(),
             old_left: old_left.to_owned(),
-            old_name: r_meta.old_name.unwrap(),
-        }
+            old_name: r_meta.old_name.clone().unwrap(),
+        })
     }
 }
 

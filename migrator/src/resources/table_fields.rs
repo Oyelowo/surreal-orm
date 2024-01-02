@@ -54,7 +54,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             let table = self.get_table();
 
             let change_meta = FieldChangeDetectionMeta {
-                field_name: name.to_string(),
+                field_name: name.to_string().into(),
                 table: table.to_owned(),
                 left_defs: self.get_left(),
                 right_defs: self.get_right(),
@@ -64,7 +64,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                 prompter: self.prompter,
             };
 
-            match DeltaTypeField::from(change_meta) {
+            match DeltaTypeField::try_from(change_meta)? {
                 DeltaTypeField::NoChange => {}
                 DeltaTypeField::Create { right } => {
                     acc.add_up(QueryType::Define(right.clone()));
