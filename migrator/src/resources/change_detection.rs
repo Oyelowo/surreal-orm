@@ -75,13 +75,20 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                 // new should be in code base state
                 new_name: diff_right.first().unwrap().to_string().into(),
             };
-            let prompt = prompter
-                .prompt_single_field_rename_or_delete(
-                    SingleFieldChangeType::Delete(field_change_meta.clone()),
-                    SingleFieldChangeType::Rename(field_change_meta),
-                )
-                .unwrap();
-            Some(prompt)
+            let skip_left = field_change_meta.old_name.build() == field_name.build();
+            // skip left sine we are handling the renaming on the right i.e the
+            // new field in the current codebase state.
+            if skip_left {
+                None
+            } else {
+                let prompt = prompter
+                    .prompt_single_field_rename_or_delete(
+                        SingleFieldChangeType::Delete(field_change_meta.clone()),
+                        SingleFieldChangeType::Rename(field_change_meta),
+                    )
+                    .unwrap();
+                Some(prompt)
+            }
         } else {
             None
         };
@@ -140,11 +147,12 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                     // lowo will now be new field in right with old name -dayo,
                     // dayo is expected to now be in left with old name - lowo.
                     // This is a rename.
-                    (Some(_l_meta), Some(_r_meta)) => {
-                        return Err(MigrationError::FieldNameReused {
-                            field: field_name,
-                            table,
-                        })
+                    (Some(_l_meta), Some(r_meta)) => {
+                        // return Err(MigrationError::FieldNameReused {
+                        //     field: field_name,
+                        //     table,
+                        // })
+                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
                     }
                     (None, Some(r_meta)) => {
                         //
