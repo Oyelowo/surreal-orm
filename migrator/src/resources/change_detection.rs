@@ -38,9 +38,6 @@ pub(crate) struct FieldChangeDetectionMeta<'a, R: DbResources> {
     pub(crate) right_defs: Fields,
     pub(crate) table: Table,
     pub(crate) codebase_resources: &'a R,
-    pub(crate) diff_left: Vec<&'a String>,
-    pub(crate) diff_right: Vec<&'a String>,
-    pub(crate) prompter: &'a dyn Prompter,
 }
 
 impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeField {
@@ -53,9 +50,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
             right_defs,
             table,
             codebase_resources,
-            diff_left,
-            diff_right,
-            prompter,
         } = value;
 
         let left_def = left_defs.get_definition(&field_name.build());
