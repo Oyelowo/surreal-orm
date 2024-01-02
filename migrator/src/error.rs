@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use surreal_query_builder::SurrealOrmError;
+use surreal_query_builder::{Field, SurrealOrmError, Table};
 use thiserror::Error;
 
 use crate::MigrationFilename;
@@ -114,6 +114,21 @@ pub enum MigrationError {
         old_name: String,
         renamables: String,
     },
+
+    #[error("The field - {field_expected} - on table - {table} - does not exist. \
+        It must have already been renamed previously or never existed before or wrongly spelt. \
+         Also, make sure you are using the correct case for the field name. It should be one of these: {valid_fields}", )]
+    FieldNameDoesNotExist {
+        field_expected: String,
+        table: String,
+        valid_fields: String,
+    },
+
+    #[error(
+        "You are trying to use the same old field name - {field} - for new field name - {field}. \
+        This is likely not intentional. Use a different name for the new field"
+    )]
+    FieldNameReused { field: Field, table: Table },
 
     #[error("Invalid DefineStatement: {0}")]
     InvalidDefineStatement(String),

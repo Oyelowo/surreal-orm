@@ -12,8 +12,8 @@ use surreal_query_builder::{statements::begin_transaction, *};
 use crate::*;
 
 pub enum By {
-    NewName(String),
-    OldName(String),
+    NewName(Field),
+    OldName(Field),
 }
 
 // Represents connection/db instance for the codebase
@@ -87,11 +87,11 @@ impl RightDatabase {
                     .is_some_and(|o| !o.to_string().is_empty())
             })
             .find(|f| match &by {
-                By::NewName(new_name) => f.name.to_string() == *new_name,
+                By::NewName(new_name) => f.name.build() == *new_name.build(),
                 By::OldName(old_name) => f
                     .old_name
                     .clone()
-                    .filter(|n| n.to_string() == *old_name)
+                    .filter(|n| n.build() == *old_name.build())
                     .is_some(),
             })
     }
