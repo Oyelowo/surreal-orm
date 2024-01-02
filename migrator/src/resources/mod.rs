@@ -16,7 +16,9 @@ pub mod tables;
 
 pub use comparison_init::*;
 pub use meta::*;
-use surreal_query_builder::{DbResources, Field, FieldChangeMeta, FieldMetadata, Table};
+use surreal_query_builder::{
+    CanOrder, DbResources, Field, FieldChangeMeta, FieldMetadata, Raw, Table,
+};
 pub use tables::*;
 
 use self::table_fields::SingleFieldChangeType;
@@ -47,13 +49,13 @@ struct FieldChangeDetectionMeta<'a, R: DbResources> {
     left_defs: Fields,
     right_defs: Fields,
     table: Table,
-    codebase_resources: R,
-    diff_left: Vec<&String>,
-    diff_right: Vec<&String>,
+    codebase_resources: &'a R,
+    diff_left: Vec<&'a String>,
+    diff_right: Vec<&'a String>,
     pub(crate) prompter: &'a dyn Prompter,
 }
 
-impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
+impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaType {
     fn from(value: FieldChangeDetectionMeta<R>) -> Self {
         let FieldChangeDetectionMeta {
             field_name,
@@ -79,14 +81,14 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
             let field_change_meta = FieldChangeMeta {
                 table: table.to_owned(),
                 // old should now be in migration dir / live db state
-                old_name: diff_left.swap_remove(0),
+                old_name: diff_left.first().unwrap().to_string().into(),
                 // new should be in code base state
-                new_name: diff_right.swap_remove(0),
+                new_name: diff_right.first().unwrap().to_string().into(),
             };
             let prompt = prompter
                 .prompt_single_field_rename_or_delete(
-                    SingleFieldChangeType::Delete(autodetection_meta),
-                    SingleFieldChangeType::Rename(autodetection_meta),
+                    SingleFieldChangeType::Delete(field_change_meta),
+                    SingleFieldChangeType::Rename(field_change_meta),
                 )
                 .unwrap();
             Some(prompt)
@@ -96,7 +98,7 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
 
         match (left_def, right_def) {
             (None, None) => unreachable!(),
-            (Some(l), Some(r)) => {
+            (Some(&l), Some(&r)) => {
                 if l.trim() != r.trim() {
                     DeltaType::Update { left: l, right: r }
                 } else {
@@ -110,28 +112,30 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                 // cake -> codebase state
                 let foundfield_by_newname_auto = match autodetection_meta {
                     Some(SingleFieldChangeType::Rename(meta)) => {
-                        let new_field_def = right_defs.get_definition(meta.new_name).unwrap();
+                        let new_field_def = right_defs
+                            .get_definition(meta.new_name.to_string().as_str())
+                            .unwrap();
 
                         Some(FieldMetadata {
                             name: meta.new_name,
-                            old_name: some(meta.old_name),
-                            definition: new_field_def,
+                            old_name: Some(meta.old_name),
+                            definition: vec![Raw::new(new_field_def.to_string())],
                         })
                     }
                     _ => None,
                 };
 
                 let foundfield_by_newname = RightDatabase::find_field_has_old_name(
-                    &codebase_resources,
+                    codebase_resources,
                     &table,
                     By::NewName(field_name),
-                )
-                .or(foundfield_by_newname_auto);
+                );
+                // .or(foundfield_by_newname_auto);
 
                 // old name should be on the left i.e local migration directory state but also
                 // used by user as codebase field attribute
                 let found_field_by_oldname = RightDatabase::find_field_has_old_name(
-                    &codebase_resources,
+                    codebase_resources,
                     &table,
                     By::OldName(field_name),
                 )
@@ -163,7 +167,7 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                         )
                     }
                     (None, Some(r_meta)) => {
-                        let old_left = left_defs.get_definition(&r_meta.old_name.unwrap()).unwrap_or_else(|| {
+                        let old_left = left_defs.get_definition(&r_meta.old_name.unwrap().to_string().as_str()).unwrap_or_else(|| {
                             panic!(
                                 "Could not find field with name {} in migration local directory state table definition. \
                                     Make sure you are using the correct case for the field name. \
@@ -172,7 +176,7 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                                 left_defs.get_names().join(",")
                             )
                         });
-                        let right_def = right_defs.get_definition(&r_meta.name).unwrap_or_else(|| {
+                        let right_def = right_defs.get_definition(&r_meta.name.to_string().as_str()).unwrap_or_else(|| {
                             panic!(
                                 "Could not find field with name {} in migration local directory state table definition. \
                                     Make sure you are using the correct case for the field name. \
@@ -192,7 +196,7 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                         // assign new to old
                         // delete new
                         DeltaType::Rename {
-                            right: right_def,
+                            right: right_def.clone(),
                             new_name: r_meta.name.clone(),
                             old_left: old_left.to_owned(),
                             old_name: r_meta.old_name.unwrap(),
@@ -204,8 +208,8 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                     }
                     // No explicit rename attribute used i.e old_name = "OldFieldName"
                     (None, None) => match (left_def, right_def) {
-                        (None, Some(r)) => DeltaType::Create { right: r },
-                        (Some(l), None) => DeltaType::Remove { left: l },
+                        (None, Some(r)) => DeltaType::Create { right: r.clone() },
+                        (Some(l), None) => DeltaType::Remove { left: l.clone() },
                         _ => unreachable!(),
                     },
                 }

@@ -10,7 +10,7 @@ use std::{collections::HashSet, fmt::Display};
 use crate::*;
 use surreal_query_builder::*;
 
-use super::{ChangeMeta, FieldChangeDetectionMeta};
+use super::FieldChangeDetectionMeta;
 
 #[derive(Debug)]
 pub(crate) struct ComparisonFields<'a, R: DbResources> {
@@ -61,7 +61,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             let table = self.get_table();
 
             let change_meta = FieldChangeDetectionMeta {
-                field_name: name,
+                field_name: name.to_string(),
                 table: table.to_owned(),
                 left_defs: self.get_left(),
                 right_defs: self.get_right(),
@@ -149,12 +149,12 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct FieldChangeMeta {
-    pub(crate) table: Table,
-    pub(crate) old_name: Field,
-    pub(crate) new_name: Field,
-}
+// #[derive(Debug, Clone)]
+// pub struct FieldChangeMeta {
+//     pub(crate) table: Table,
+//     pub(crate) old_name: Field,
+//     pub(crate) new_name: Field,
+// }
 
 #[derive(Debug, Clone)]
 pub enum SingleFieldChangeType {
