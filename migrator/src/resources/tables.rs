@@ -98,25 +98,25 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                 acc.extend_down(&events);
             };
 
-            match DeltaType::from((def_left, def_right)) {
-                DeltaType::NoChange => {
+            match DeltaTypeResource::from((def_left, def_right)) {
+                DeltaTypeResource::NoChange => {
                     extend_table_resources_up(&mut queries);
                     extend_table_resources_down(&mut queries);
                 }
-                DeltaType::Update { left, right } => {
+                DeltaTypeResource::Update { left, right } => {
                     queries.add_up(QueryType::Define(right));
                     extend_table_resources_up(&mut queries);
                     extend_table_resources_down(&mut queries);
 
                     queries.add_down(QueryType::Define(left));
                 }
-                DeltaType::Create { right } => {
+                DeltaTypeResource::Create { right } => {
                     queries.add_down(QueryType::Remove(right.as_remove_statement()?));
 
                     queries.add_up(QueryType::Define(right));
                     extend_table_resources_up(&mut queries);
                 }
-                DeltaType::Remove { left } => {
+                DeltaTypeResource::Remove { left } => {
                     queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                     extend_table_resources_down(&mut queries);
@@ -149,20 +149,20 @@ where
             let def_right = self.get_right().get_definition(name).cloned();
             let def_left = self.get_left().get_definition(name).cloned();
 
-            match DeltaType::from((def_left, def_right)) {
-                DeltaType::Create { right } => {
+            match DeltaTypeResource::from((def_left, def_right)) {
+                DeltaTypeResource::Create { right } => {
                     queries.add_down(QueryType::Remove(right.as_remove_statement()?));
                     queries.add_up(QueryType::Define(right));
                 }
-                DeltaType::Remove { left } => {
+                DeltaTypeResource::Remove { left } => {
                     queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                 }
-                DeltaType::Update { left, right } => {
+                DeltaTypeResource::Update { left, right } => {
                     queries.add_up(QueryType::Define(right));
                     queries.add_down(QueryType::Define(left));
                 }
-                DeltaType::NoChange => {}
+                DeltaTypeResource::NoChange => {}
             };
         }
 

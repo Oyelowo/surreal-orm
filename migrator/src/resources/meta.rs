@@ -29,20 +29,20 @@ where
             let def_right = self.get_right().get_definition(name).cloned();
             let def_left = self.get_left().get_definition(name).cloned();
 
-            match DeltaType::from((def_left, def_right)) {
-                DeltaType::Create { right } => {
+            match DeltaTypeResource::from((def_left, def_right)) {
+                DeltaTypeResource::Create { right } => {
                     queries.add_up(QueryType::Define(right.clone()));
                     queries.add_down(QueryType::Remove(right.as_remove_statement()?));
                 }
-                DeltaType::Remove { left } => {
+                DeltaTypeResource::Remove { left } => {
                     queries.add_up(QueryType::Remove(left.as_remove_statement()?));
                     queries.add_down(QueryType::Define(left));
                 }
-                DeltaType::Update { left, right } => {
+                DeltaTypeResource::Update { left, right } => {
                     queries.add_up(QueryType::Define(right));
                     queries.add_down(QueryType::Define(left));
                 }
-                DeltaType::NoChange => {}
+                DeltaTypeResource::NoChange => {}
             };
         }
         Ok(queries)
