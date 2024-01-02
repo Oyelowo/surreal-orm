@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use std::fmt::Display;
+use std::{fmt::Display, ops::Deref};
 
 use crate::*;
 use surreal_query_builder::{DbResources, Field, FieldChangeMeta, FieldMetadata, Raw, Table};
@@ -115,8 +115,9 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                     codebase_resources,
                     &table,
                     By::NewName(field_name.clone()),
-                );
-                // .or(foundfield_by_newname_auto);
+                )
+                .or(foundfield_by_newname_auto)
+                .map(FieldMetadataWrapper);
 
                 // old name should be on the left i.e local migration directory state but also
                 // used by user as codebase field attribute
@@ -125,7 +126,7 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                     &table,
                     By::OldName(field_name),
                 )
-                .or(foundfield_by_newname_auto);
+                .map(FieldMetadataWrapper);
                 // if let Some(meta) = &field_meta_with_old_name {
                 //     let old_name = &meta.clone().old_name.expect("Should exist").to_string();
                 //     if !left.contains(old_name) {
@@ -153,40 +154,8 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
                         )
                     }
                     (None, Some(r_meta)) => {
-                        let old_left = left_defs.get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str()).unwrap_or_else(|| {
-                            panic!(
-                                "Could not find field with name {} in migration local directory state table definition. \
-                                    Make sure you are using the correct case for the field name. \
-                                    It should be one of these :{}",
-                                r_meta.old_name.as_ref().unwrap(),
-                                left_defs.get_names().join(",")
-                            )
-                        });
-                        let right_def = right_defs.get_definition(&r_meta.name.to_string().as_str()).unwrap_or_else(|| {
-                            panic!(
-                                "Could not find field with name {} in migration local directory state table definition. \
-                                    Make sure you are using the correct case for the field name. \
-                                    It should be one of these :{}",
-                                r_meta.name,
-                                right_defs.get_names().join(",")
-                            )
-                        });
-
-                        // up
-                        // define new field
-                        // Assign old to new
-                        // delete old
                         //
-                        // downdo
-                        // define old field
-                        // assign new to old
-                        // delete new
-                        DeltaTypeField::Rename {
-                            right: right_def.clone(),
-                            new_name: r_meta.name.clone(),
-                            old_left: old_left.to_owned(),
-                            old_name: r_meta.old_name.unwrap(),
-                        }
+                        r_meta.handle_fieldname_change(left_defs, right_defs)
                     }
                     (Some(_), None) => {
                         // Dont make a change since that has been handled up there
@@ -204,7 +173,58 @@ impl<'a, R: DbResources> From<FieldChangeDetectionMeta<'a, R>> for DeltaTypeFiel
     }
 }
 
-struct FieldChangeMetaWrapper(FieldChangeMeta);
+struct FieldMetadataWrapper(FieldMetadata);
+impl Deref for FieldMetadataWrapper {
+    type Target = FieldMetadata;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl FieldMetadataWrapper {
+    pub(crate) fn handle_fieldname_change(
+        &self,
+        left_defs: Fields,
+        right_defs: Fields,
+    ) -> DeltaTypeField {
+        let r_meta = &self.0;
+        let old_left = left_defs.get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str()).unwrap_or_else(|| {
+                            panic!(
+                                "Could not find field with name {} in migration local directory state table definition. \
+                                    Make sure you are using the correct case for the field name. \
+                                    It should be one of these :{}",
+                                r_meta.old_name.as_ref().unwrap(),
+                                left_defs.get_names().join(",")
+                            )
+                        });
+        let right_def = right_defs.get_definition(&r_meta.name.to_string().as_str()).unwrap_or_else(|| {
+                            panic!(
+                                "Could not find field with name {} in migration local directory state table definition. \
+                                    Make sure you are using the correct case for the field name. \
+                                    It should be one of these :{}",
+                                r_meta.name,
+                                right_defs.get_names().join(",")
+                            )
+                        });
+
+        // up
+        // define new field
+        // Assign old to new
+        // delete old
+        //
+        // downdo
+        // define old field
+        // assign new to old
+        // delete new
+        DeltaTypeField::Rename {
+            right: right_def.clone(),
+            new_name: r_meta.name.clone(),
+            old_left: old_left.to_owned(),
+            old_name: r_meta.old_name.unwrap(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum SingleFieldChangeType {
