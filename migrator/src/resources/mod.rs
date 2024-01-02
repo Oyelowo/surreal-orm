@@ -16,8 +16,10 @@ pub mod tables;
 
 pub use comparison_init::*;
 pub use meta::*;
-use surreal_query_builder::{DbResources, Field, Table};
+use surreal_query_builder::{DbResources, Field, FieldChangeMeta, FieldMetadata, Table};
 pub use tables::*;
+
+use self::table_fields::SingleFieldChangeType;
 
 pub enum DeltaType {
     NoChange,
@@ -40,12 +42,15 @@ pub enum DeltaType {
 }
 
 // Change detection
-struct FieldChangeDetectionMeta<R: DbResources> {
+struct FieldChangeDetectionMeta<'a, R: DbResources> {
     field_name: String,
     left_defs: Fields,
     right_defs: Fields,
     table: Table,
     codebase_resources: R,
+    diff_left: Vec<&String>,
+    diff_right: Vec<&String>,
+    pub(crate) prompter: &'a dyn Prompter,
 }
 
 impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
@@ -56,10 +61,38 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
             right_defs,
             table,
             codebase_resources,
+            diff_left,
+            diff_right,
+            prompter,
         } = value;
 
         let left_def = left_defs.get_definition(&field_name);
         let right_def = right_defs.get_definition(&field_name);
+        // When we detect a signle field name change in a struct,
+        // we want to give the user the option to choose to rename the field,
+        // or delete even if the old_name attribute approach of renaming field
+        // is not explicitly used.
+        let might_be_single_field_delete_or_renaming =
+            diff_left.len() == 1 && diff_right.len() == 1;
+
+        let autodetection_meta = if might_be_single_field_delete_or_renaming {
+            let field_change_meta = FieldChangeMeta {
+                table: table.to_owned(),
+                // old should now be in migration dir / live db state
+                old_name: diff_left.swap_remove(0),
+                // new should be in code base state
+                new_name: diff_right.swap_remove(0),
+            };
+            let prompt = prompter
+                .prompt_single_field_rename_or_delete(
+                    SingleFieldChangeType::Delete(autodetection_meta),
+                    SingleFieldChangeType::Rename(autodetection_meta),
+                )
+                .unwrap();
+            Some(prompt)
+        } else {
+            None
+        };
 
         match (left_def, right_def) {
             (None, None) => unreachable!(),
@@ -71,19 +104,38 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                 }
             }
             _ => {
-                // new name should be on the right i.e codebase
+                // bread -> cake
+
+                // bread -> Migration/live Db state
+                // cake -> codebase state
+                let foundfield_by_newname_auto = match autodetection_meta {
+                    Some(SingleFieldChangeType::Rename(meta)) => {
+                        let new_field_def = right_defs.get_definition(meta.new_name).unwrap();
+
+                        Some(FieldMetadata {
+                            name: meta.new_name,
+                            old_name: some(meta.old_name),
+                            definition: new_field_def,
+                        })
+                    }
+                    _ => None,
+                };
+
                 let foundfield_by_newname = RightDatabase::find_field_has_old_name(
                     &codebase_resources,
                     &table,
                     By::NewName(field_name),
-                );
+                )
+                .or(foundfield_by_newname_auto);
+
                 // old name should be on the left i.e local migration directory state but also
                 // used by user as codebase field attribute
                 let found_field_by_oldname = RightDatabase::find_field_has_old_name(
                     &codebase_resources,
                     &table,
                     By::OldName(field_name),
-                );
+                )
+                .or(foundfield_by_newname_auto);
                 // if let Some(meta) = &field_meta_with_old_name {
                 //     let old_name = &meta.clone().old_name.expect("Should exist").to_string();
                 //     if !left.contains(old_name) {
@@ -150,7 +202,7 @@ impl<R: DbResources> From<FieldChangeDetectionMeta<R>> for DeltaType {
                         // Dont make a change since that has been handled up there
                         DeltaType::NoChange
                     }
-                    // No renaming
+                    // No explicit rename attribute used i.e old_name = "OldFieldName"
                     (None, None) => match (left_def, right_def) {
                         (None, Some(r)) => DeltaType::Create { right: r },
                         (Some(l), None) => DeltaType::Remove { left: l },

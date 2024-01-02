@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::fmt::Display;
+use std::{collections::HashSet, fmt::Display};
 
 use crate::*;
 use surreal_query_builder::*;
@@ -53,13 +53,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
 
         let diff_left = diff_left.into_iter().collect::<Vec<_>>();
         let diff_right = diff_right.into_iter().collect::<Vec<_>>();
-        let is_potentially_renaming = diff_left.len() == 1 && diff_right.len() == 1;
-
-        let potentially_old_name = if is_potentially_renaming {
-            diff_left.first()
-        } else {
-            None
-        };
 
         let mut acc = Queries::default();
         for name in union {
@@ -68,11 +61,14 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             let table = self.get_table();
 
             let change_meta = FieldChangeDetectionMeta {
-                field_name,
+                field_name: name,
                 table: table.to_owned(),
                 left_defs: self.get_left(),
                 right_defs: self.get_right(),
                 codebase_resources: self.codebase_resources,
+                diff_left: diff_left.clone(),
+                diff_right: diff_right.clone(),
+                prompter: self.prompter,
             };
 
             match DeltaType::from(change_meta) {
@@ -110,7 +106,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     acc.add_down(QueryType::Remove(right.as_remove_statement()?));
                 }
             }
-            //                 self.get_field_meta_from_prompt(new_name, potentially_old_name)
         }
 
         Ok(acc)
@@ -156,9 +151,9 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
 
 #[derive(Debug, Clone)]
 pub struct FieldChangeMeta {
-    table: Table,
-    old_name: Field,
-    new_name: Field,
+    pub(crate) table: Table,
+    pub(crate) old_name: Field,
+    pub(crate) new_name: Field,
 }
 
 #[derive(Debug, Clone)]
