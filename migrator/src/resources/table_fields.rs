@@ -75,7 +75,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     acc.add_down(QueryType::Define(left));
                 }
                 DeltaTypeField::Remove { left } => {
-                    acc.add_down(QueryType::Remove(left.as_remove_statement()?));
+                    acc.add_up(QueryType::Remove(left.as_remove_statement()?));
                     acc.add_down(QueryType::Define(left));
                 }
                 DeltaTypeField::Rename {
