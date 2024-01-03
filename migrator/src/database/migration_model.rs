@@ -222,7 +222,7 @@ impl Migration {
             .expect("Failed to get the latest migration")
     }
 
-    pub async fn get_by_filename(db: Surreal<Any>, filename: MigrationFilename) -> Option<Self> {
+    pub async fn get_by_filename(db: Surreal<Any>, filename: &MigrationFilename) -> Option<Self> {
         let migration::Schema { name, .. } = Self::schema();
 
         select(All)

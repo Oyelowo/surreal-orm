@@ -1,7 +1,7 @@
 use std::{collections::BTreeSet, path::PathBuf};
 
 use surreal_query_builder::{statements::*, *};
-use surrealdb::{Connection, Surreal};
+use surrealdb::{engine::any::Any, Connection, Surreal};
 
 use crate::*;
 
@@ -48,7 +48,7 @@ impl RollbackOptions {
 impl MigrationRunner {
     /// Only two way migrations support rollback
     pub async fn rollback_migrations(
-        db: Surreal<impl Connection>,
+        db: Surreal<Any>,
         fm: &MigrationConfig,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
@@ -58,26 +58,36 @@ impl MigrationRunner {
         } = rollback_options;
 
         let all_migrations_from_dir = fm.get_two_way_migrations_sorted_desc(false)?;
-        let latest_migration = Self::get_latest_migration(db.clone())
-            .await?
-            .ok_or(MigrationError::MigrationDoesNotExist)?;
 
-        let latest_migration_name: MigrationFilename = latest_migration.name.clone().try_into()?;
-        let migrations_from_dir = all_migrations_from_dir
-            .iter()
-            .find(|m| m.up.name == latest_migration_name.to_up())
-            .ok_or(MigrationError::RollbackFailed(format!(
+        let (queries_to_run, _rolledback_file_paths) = match rollback_strategy {
+            RollbackStrategy::Previous => {
+                let latest_migration = Self::get_latest_migration(db.clone()).await?;
+                match latest_migration {
+                    Some(latest_migration) => {
+                        let latest_migration_name: MigrationFilename =
+                            latest_migration.name.clone().try_into()?;
+                        let migrations_from_dir = all_migrations_from_dir
+                            .iter()
+                            .find(|m| m.up.name == latest_migration_name.to_up())
+                            .ok_or(MigrationError::RollbackFailed(format!(
                 "The latest migration - {} - does not have a corresponding down migration file",
                 latest_migration_name.to_string()
             )))?;
-
-        let (queries_to_run, _rolledback_file_paths) = match rollback_strategy {
-            RollbackStrategy::Previous => Self::generate_rollback_queries_and_filepaths(
-                fm,
-                vec![migrations_from_dir.clone()],
-                vec![latest_migration],
-                strictness,
-            )?,
+                        Self::generate_rollback_queries_and_filepaths(
+                            fm,
+                            vec![migrations_from_dir.clone()],
+                            vec![latest_migration],
+                            strictness,
+                        )?
+                    }
+                    None => Self::generate_rollback_queries_and_filepaths(
+                        fm,
+                        vec![],
+                        vec![],
+                        strictness,
+                    )?,
+                }
+            }
             RollbackStrategy::Number(count) => {
                 let migrations_from_db = select(All)
                     .from(Migration::table_name())
@@ -88,7 +98,7 @@ impl MigrationRunner {
 
                 let latest_migration = migrations_from_db
                     .first()
-                    .ok_or(MigrationError::MigrationDoesNotExist)?;
+                    .ok_or(MigrationError::NoMigrationsRegisteredYetInDb)?;
 
                 let migrations_to_rollback = all_migrations_from_dir
                     .into_iter()
@@ -108,7 +118,19 @@ impl MigrationRunner {
                     timestamp, name, ..
                 } = &Migration::schema();
 
+                // By using to_up(), we also allow using the down migration file name
+                // counterpart to the up migration filename as the cursor, giving user
+                // more flexibility to use either.
+                let ref file_cursor = file_cursor.to_up();
+                dbg!(file_cursor);
                 let timestamp_value = file_cursor.timestamp().into_inner();
+                let migration_meta = Migration::get_by_filename(db.clone(), file_cursor).await;
+                dbg!(&migration_meta);
+                if migration_meta.is_none() {
+                    return Err(MigrationError::MigrationDoesNotExist {
+                        filename: file_cursor.clone(),
+                    });
+                }
 
                 let migrations_from_db = select(All)
                     .from(Migration::table_name())
@@ -119,9 +141,12 @@ impl MigrationRunner {
                     .return_many::<Migration>(db.clone())
                     .await?;
 
-                let latest_migration = migrations_from_db
-                    .first()
-                    .ok_or(MigrationError::MigrationDoesNotExist)?;
+                let latest_migration =
+                    migrations_from_db
+                        .first()
+                        .ok_or(MigrationError::MigrationDoesNotExist {
+                            filename: file_cursor.clone(),
+                        })?;
 
                 let migrations_files_to_rollback = all_migrations_from_dir
                     .clone()
@@ -137,7 +162,7 @@ impl MigrationRunner {
                             m.up.name.timestamp() < latest_migration.timestamp;
 
                         let is_after_file_cursor = m.up.name.timestamp() > file_cursor.timestamp();
-                        let is_file_cursor = m.up.name == *file_cursor;
+                        let is_file_cursor = &m.up.name == file_cursor;
 
                         (is_before_db_latest_migration || is_latest)
                             && (is_after_file_cursor || is_file_cursor)
@@ -153,11 +178,17 @@ impl MigrationRunner {
             }
         };
 
-        begin_transaction()
-            .query(queries_to_run)
-            .commit_transaction()
-            .run(db.clone())
-            .await?;
+        if queries_to_run.build().trim().is_empty() {
+            log::info!("No migrations to rollback");
+        } else {
+            begin_transaction()
+                .query(queries_to_run)
+                .commit_transaction()
+                .run(db.clone())
+                .await?;
+
+            log::info!("Rolled back {} migrations", 1);
+        }
 
         Ok(())
     }

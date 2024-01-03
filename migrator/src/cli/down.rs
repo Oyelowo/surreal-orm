@@ -91,12 +91,12 @@ impl Down {
         let db = cli.db().clone();
 
         if let Ok(MigrationFlag::OneWay) = file_manager.detect_migration_type() {
-            log::error!(
-                "Cannot rollback one way migrations. \
+            let err = "Cannot rollback one way migrations. \
             Create a new migration to reverse the changes or run cargo run -- reset -r \
-            to use two way migrations"
-            );
-            panic!();
+            to use two way migrations";
+
+            log::error!("{err}");
+            panic!("{err}");
         }
 
         let rollback_strategy = self.rollback_strategy();
@@ -111,17 +111,19 @@ impl Down {
                 },
             )
             .await;
-        log::info!("Rollback successful");
-
-        if self.prune {
-            log::info!("Pruning all pending migration files");
-            self.prune().run(cli).await;
-            log::info!("Pruning successful");
-        }
 
         if let Err(ref e) = rollback {
             log::error!("Rollback Failed: {e}");
+            panic!("Rollback Failed: {e}");
         } else {
+            log::info!("Rollback successful");
+
+            if self.prune {
+                log::info!("Pruning all pending migration files");
+                self.prune().run(cli).await;
+                log::info!("Pruning successful");
+            }
+
             log::info!("Rollback Ddne");
         }
     }

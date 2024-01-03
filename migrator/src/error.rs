@@ -25,8 +25,11 @@ pub enum MigrationError {
     #[error("Migration already exists")]
     MigrationAlreadyExists,
 
-    #[error("Migration does not exist")]
-    MigrationDoesNotExist,
+    #[error("No migrations have yet been registered in the database")]
+    NoMigrationsRegisteredYetInDb,
+
+    #[error("Migration - {filename} does not exist")]
+    MigrationDoesNotExist { filename: MigrationFilename },
 
     #[error("Migration with name: {0} not found in pending migrations. It has either been applied or does not exist.")]
     MigrationNotFoundFromPendingMigrations(MigrationFilename),
