@@ -180,126 +180,41 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     .await;
 }
 
-// async fn generate_test_migrations(
-//     temp_test_migration_dir: PathBuf,
-//     mode: Mode,
-//     reversible: &bool,
-// ) -> (TestConfig, PathBuf) {
-//     let mock_prompter = MockPrompter::builder()
-//         .allow_empty_migrations_gen(true)
-//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-//         .build();
-//     // let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let mut conf = TestConfig::builder()
-//         .reversible(*reversible)
-//         .db_run(false)
-//         .mode(mode)
-//         .migration_basename("".into())
-//         .migration_dir(temp_test_migration_dir.clone())
-//         .build();
-//
-//     // #### Init Phase ####
-//     // Run 1 init
-//     conf.set_file_basename("migration 1-init".to_string())
-//         .init_cmd()
-//         .await
-//         .run_fn(Resources, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 2-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(Resources, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 3-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(Resources, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 4-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV2, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 5-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV3, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 6-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV4, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 7-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV5, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 8-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV6, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 9-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV7, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 10-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV8, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 11-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV9, mock_prompter.clone())
-//         .await;
-//
-//     conf.set_file_basename("migration 12-gen after init".to_string())
-//         .generator_cmd()
-//         .await
-//         .run_fn(ResourcesV10, mock_prompter.clone())
-//         .await;
-//     (conf, temp_test_migration_dir.clone())
-// }
-//
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// async fn t1(mode: Mode, ref reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let (mut conf, temp_test_migration_dir) =
-//         generate_test_migrations(temp_test_migration_dir.clone(), mode, reversible).await;
-//     let cli_db = conf.db().clone();
-//     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
-//     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-//
-//     assert_with_db_instance(AssertionArg {
-//         db: cli_db.clone(),
-//         expected_mig_files_count: 12,
-//         expected_db_mig_count: 12,
-//         migration_files_dir: temp_test_migration_dir.clone(),
-//         expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-//         expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
-//         code_origin_line: std::line!(),
-//         config: conf.clone(),
-//     })
-//     .await;
-// }
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_12_test_migrations_reversible(reversible)
+        .await;
+    conf.run_up(&FastForwardDelta::default()).await;
+    let get_mig_file_count = |num| {
+        if reversible {
+            num * 2
+        } else {
+            num
+        }
+    };
+
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(12),
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: Some(
+            "migration_12_gen_after_init".into(),
+        ),
+        expected_latest_db_migration_meta_basename_normalized: Some(
+            "migration_12_gen_after_init".into(),
+        ),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+}
 //
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
 // #[test_case(Mode::Lax, true; "Reversible Lax")]
