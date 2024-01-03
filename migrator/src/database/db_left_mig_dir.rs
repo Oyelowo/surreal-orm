@@ -39,15 +39,13 @@ impl LeftDatabase {
         create_migration_table: bool,
     ) -> MigrationResult<()> {
         let all_migrations =
-            file_manager.get_two_way_migrations_sorted_desc(create_migration_table)?;
+            file_manager.get_two_way_migrations_sorted_asc(create_migration_table)?;
 
         let queries = all_migrations
             .iter()
             .map(|m: &MigrationFileTwoWayPair| m.up.content.to_string())
             .collect::<Vec<_>>()
             .join("\n");
-
-        // println!("Left side local migration Files: {}", &queries);
 
         // Run them as a transaction against a local in-memory database
         if !queries.trim().is_empty() {
@@ -87,7 +85,7 @@ impl LeftDatabase {
         fm: &MigrationConfig,
         create_migration_table: bool,
     ) -> MigrationResult<&Self> {
-        let all_migrations = fm.get_oneway_migrations(create_migration_table)?;
+        let all_migrations = fm.get_oneway_migrations_sorted_asc(create_migration_table)?;
         let queries = all_migrations
             .into_iter()
             .map(|m| m.content().to_string())

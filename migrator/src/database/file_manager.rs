@@ -197,6 +197,17 @@ impl MigrationConfig {
     }
 
     // Validate
+    pub fn get_two_way_migrations_sorted_asc(
+        &self,
+        create_dir_if_not_exists: bool,
+    ) -> MigrationResult<Vec<MigrationFileTwoWayPair>> {
+        Ok(self
+            .get_two_way_migrations_sorted_desc(create_dir_if_not_exists)?
+            .into_iter()
+            .rev()
+            .collect::<Vec<_>>())
+    }
+
     pub fn get_two_way_migrations_sorted_desc(
         &self,
         create_dir_if_not_exists: bool,
@@ -205,7 +216,7 @@ impl MigrationConfig {
             .bidirectional_pair_meta_sorted_desc_checked(&self.resolve_migration_directory(false)?)
     }
 
-    pub fn get_oneway_migrations(
+    pub fn get_oneway_migrations_sorted_asc(
         &self,
         create_dir_if_not_exists: bool,
     ) -> MigrationResult<Vec<MigrationFileOneWay>> {
@@ -227,7 +238,7 @@ impl FileManagerUni {
     }
 
     pub fn get_migrations(&self) -> MigrationResult<Vec<MigrationFileOneWay>> {
-        self.0.get_oneway_migrations(false)
+        self.0.get_oneway_migrations_sorted_asc(false)
     }
 
     /// Generate migration directory if it does not exist
