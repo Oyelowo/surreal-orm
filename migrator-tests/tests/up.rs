@@ -53,8 +53,8 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
         migration_type: reversible.into(),
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: None,
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -71,22 +71,6 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
-
-    // Init
-    conf.run_init_cmd(
-        Init::builder()
-            .name("migration_init".into())
-            .reversible(reversible)
-            .run(false)
-            .build(),
-        Resources,
-        MockPrompter::default(),
-    )
-    .await;
-
-    conf.run_up(&FastForwardDelta::builder().latest(true).build())
-        .await;
-
     let get_mig_file_count = |num| {
         if reversible {
             num * 2
@@ -94,27 +78,54 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
             num
         }
     };
+
+    // Init
+    conf.run_init_cmd(
+        Init::builder()
+            .name("migration_init".into())
+            .reversible(reversible)
+            //  only initialize, do not run against db
+            .run(false)
+            .build(),
+        Resources,
+        MockPrompter::default(),
+    )
+    .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: get_mig_file_count(1),
-        expected_db_mig_meta_count: 1,
-        expected_latest_migration_file_basename_normalized: "migration_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
 
-    // conf.run_up(&FastForwardDelta::default()).await;
-    // assert_with_db_instance(AssertionArg {
-    //     expected_down_mig_files_count: 0,
-    //     expected_db_mig_meta_count: 0,
-    //     expected_latest_migration_file_basename_normalized: "".into(),
-    //     expected_latest_db_migration_meta_basename_normalized: "".into(),
-    //     code_origin_line: std::line!(),
-    //     config: conf.clone(),
-    // })
-    // .await;
+    conf.run_up(&FastForwardDelta::builder().latest(true).build())
+        .await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(1),
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_up(&FastForwardDelta::default()).await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(1),
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
 }
 
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
