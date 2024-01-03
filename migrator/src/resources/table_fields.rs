@@ -49,44 +49,18 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
         let diff_right = right_as_set.difference(&left_as_set);
         let union = right_as_set.union(&left_as_set).collect::<Vec<_>>();
 
-        let diff_left = diff_left.into_iter().collect::<Vec<_>>();
-        let diff_right = diff_right.into_iter().collect::<Vec<_>>();
-
         let mut acc = Queries::default();
 
-        let might_be_single_field_delete_or_renaming =
-            diff_left.len() == 1 && diff_right.len() == 1;
+        let diff_left = diff_left.into_iter().collect::<Vec<_>>();
+        let diff_right = diff_right.into_iter().collect::<Vec<_>>();
+        let is_single_field_delete_or_renaming = diff_left.len() == 1 && diff_right.len() == 1;
 
-        let old_name = diff_left.first().map(|n| Field::new(n.to_string()));
-        let new_name = diff_right.first().map(|n| Field::new(n.to_string()));
-
-        if might_be_single_field_delete_or_renaming {
-            let field_change_meta = FieldChangeMeta {
-                table: table.to_owned(),
-                old_name: old_name.clone().unwrap().to_owned(),
-                new_name: new_name.clone().unwrap().to_owned(),
-            };
-
-            let prompt = self.prompter.prompt_single_field_rename_or_delete(
-                SingleFieldChangeType::Delete(field_change_meta.clone()),
-                SingleFieldChangeType::Rename(field_change_meta.clone()),
+        if is_single_field_delete_or_renaming {
+            self.handle_prompt_field_renaming_or_deletion(
+                &mut acc,
+                diff_left[0].to_string().into(),
+                diff_right[0].to_string().into(),
             )?;
-
-            match prompt {
-                SingleFieldChangeType::Rename(meta) => {
-                    self.handle_rename(&mut acc, meta)?;
-                }
-                SingleFieldChangeType::Delete(meta) => {
-                    let new_name = meta.new_name.to_string();
-                    let old_name = meta.old_name.to_string();
-                    let right_def = left_defs.get_definition(new_name.as_str()).unwrap();
-                    let left_def = right_defs.get_definition(old_name.as_str()).unwrap();
-
-                    self.handle_create(&mut acc, right_def)?;
-                    self.handle_remove(&mut acc, left_def)?;
-                }
-            };
-
             return Ok(acc);
         }
 
@@ -106,8 +80,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                     self.handle_create(&mut acc, &right)?;
                 }
                 DeltaTypeField::Update { left, right } => {
-                    acc.add_up(QueryType::Define(right));
-                    acc.add_down(QueryType::Define(left));
+                    self.handle_update(&mut acc, &left, &right);
                 }
                 DeltaTypeField::Remove { left } => {
                     self.handle_remove(&mut acc, &left)?;
@@ -185,6 +158,53 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
     ) -> MigrationResult<&'a mut Queries> {
         acc.add_up(QueryType::Remove(left.as_remove_statement()?));
         acc.add_down(QueryType::Define(left.clone()));
+        Ok(acc)
+    }
+
+    fn handle_update(
+        &'a self,
+        acc: &'a mut Queries,
+        left: &DefineStatementRaw,
+        right: &DefineStatementRaw,
+    ) -> &'a mut Queries {
+        acc.add_up(QueryType::Define(right.clone()));
+        acc.add_down(QueryType::Define(left.clone()));
+        acc
+    }
+
+    fn handle_prompt_field_renaming_or_deletion(
+        &'a self,
+        acc: &'a mut Queries,
+        old_name: Field,
+        new_name: Field,
+    ) -> MigrationResult<&'a mut Queries> {
+        let field_change_meta = FieldChangeMeta {
+            table: self.table.to_owned(),
+            old_name,
+            new_name,
+        };
+
+        let prompt = self.prompter.prompt_single_field_rename_or_delete(
+            SingleFieldChangeType::Delete(field_change_meta.clone()),
+            SingleFieldChangeType::Rename(field_change_meta.clone()),
+        )?;
+
+        match prompt {
+            SingleFieldChangeType::Rename(meta) => {
+                self.handle_rename(acc, meta)?;
+            }
+            SingleFieldChangeType::Delete(meta) => {
+                let new_name = meta.new_name.to_string();
+                let old_name = meta.old_name.to_string();
+                let left_defs = self.get_left();
+                let right_defs = self.get_right();
+                let right_def = left_defs.get_definition(new_name.as_str()).unwrap();
+                let left_def = right_defs.get_definition(old_name.as_str()).unwrap();
+
+                self.handle_create(acc, right_def)?;
+                self.handle_remove(acc, left_def)?;
+            }
+        };
         Ok(acc)
     }
 }
