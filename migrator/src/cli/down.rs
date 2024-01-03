@@ -108,15 +108,25 @@ impl Down {
                 RollbackOptions {
                     rollback_strategy,
                     mode: cli.mode,
-                    prune_files_after_rollback: self.prune,
                 },
             )
             .await;
+        log::info!("Rollback successful");
+
+        if self.prune {
+            log::info!("Pruning all pending migration files");
+            self.prune().run(cli).await;
+            log::info!("Pruning successful");
+        }
 
         if let Err(ref e) = rollback {
             log::error!("Rollback Failed: {e}");
         } else {
-            log::info!("Rollback successful");
+            log::info!("Rollback Ddne");
         }
+    }
+
+    fn prune(&self) -> Prune {
+        Prune
     }
 }
