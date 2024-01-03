@@ -23,7 +23,7 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
         expected_latest_db_migration_meta_basename_normalized,
         code_origin_line,
         config,
-        migration_type: reversible,
+        migration_type,
     } = args;
 
     let db = config.migrator.db().clone();
@@ -76,7 +76,7 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
         let found_migration_file = |db_mig_name: MigrationFilename| {
             migration_files
                 .iter()
-                .filter(|filename| match reversible {
+                .filter(|filename| match migration_type {
                     MigrationFlag::TwoWay => {
                         //
                         db_mig_name.to_up() == filename.to_up()
@@ -86,7 +86,7 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
                 .collect::<Vec<_>>()
         };
 
-        match reversible {
+        match migration_type {
             MigrationFlag::TwoWay => {
                 let found_mig_file = found_migration_file(mig_name_from_db.clone());
                 assert_eq!(found_mig_file.len(), 2);
