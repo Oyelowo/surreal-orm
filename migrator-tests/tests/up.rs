@@ -128,68 +128,58 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     .await;
 }
 
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let mut conf = TestConfig::builder()
-//         .reversible(reversible)
-//         .db_run(true)
-//         .mode(mode)
-//         .migration_basename("migration init".into())
-//         .migration_dir(temp_test_migration_dir.clone())
-//         .build();
-//
-//     let resources = Resources;
-//     let mock_prompter = MockPrompter::builder()
-//         .allow_empty_migrations_gen(true)
-//         .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-//         .build();
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//
-//     // Generating without init should not yield any migrations
-//     // 1st run
-//     conf.set_file_basename("migration init".to_string())
-//         .init_cmd()
-//         .await
-//         .run_fn(resources.clone(), mock_prompter.clone())
-//         .await;
-//     let cli_db = conf.db().clone();
-//
-//     // First time, should create migration files and db records
-//     assert_with_db_instance(AssertionArg {
-//         db: cli_db.clone(),
-//         expected_mig_files_count: 1,
-//         // Init command runs newly pending generated migration against the current db
-//         expected_db_mig_count: 1,
-//         migration_files_dir: temp_test_migration_dir.clone(),
-//         expected_latest_migration_file_basename_normalized: "migration_init".into(),
-//         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
-//         code_origin_line: std::line!(),
-//         config: conf.clone(),
-//     })
-//     .await;
-//
-//     let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
-//     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-//     assert_with_db_instance(AssertionArg {
-//         db: cli_db.clone(),
-//         expected_mig_files_count: 1,
-//         // Init command already ran newly pending generated migration against the current db
-//         expected_db_mig_count: 1,
-//         migration_files_dir: temp_test_migration_dir.clone(),
-//         expected_latest_migration_file_basename_normalized: "migration_init".into(),
-//         expected_latest_db_migration_meta_basename_normalized: "migration_init".into(),
-//         code_origin_line: std::line!(),
-//         config: conf.clone(),
-//     })
-//     .await;
-// }
-//
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let get_mig_file_count = |num| {
+        if reversible {
+            num * 2
+        } else {
+            num
+        }
+    };
+
+    // Init
+    conf.run_init_cmd(
+        Init::builder()
+            .name("migration_init".into())
+            .reversible(reversible)
+            .run(true)
+            .build(),
+        Resources,
+        MockPrompter::default(),
+    )
+    .await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(1),
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_up(&FastForwardDelta::default()).await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(1),
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+}
+
 // async fn generate_test_migrations(
 //     temp_test_migration_dir: PathBuf,
 //     mode: Mode,
