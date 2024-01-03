@@ -7,7 +7,7 @@ use surreal_models::migrations::{
 use surreal_orm::{
     migrator::{
         config::{DatabaseConnection, UrlDb},
-        migration, Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
+        Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
         MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
         SubCommand, Up,
     },
@@ -28,30 +28,25 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
 
     let db = config.migrator.db().clone();
     let db_migrations = Migration::get_all_desc(db.clone()).await;
-    let latest_migration = Migration::get_latest(db.clone()).await;
-
-    if let Some(latest_migration_name) = latest_migration {
-        let name = MigrationFilename::try_from(latest_migration_name.name.clone())
-            .expect("Failed to parse file name");
-        assert_eq!(
-            name.basename(),
-            expected_latest_db_migration_meta_basename_normalized,
-            "Base name in file does not match the base name in the db. Line: {code_origin_line}",
-        );
-    }
+    let latest_migration_basename = Migration::get_latest(db.clone()).await.map(|m| {
+        MigrationFilename::try_from(m.name.clone())
+            .expect("Failed to parse file name")
+            .basename()
+    });
+    assert_eq!(
+        latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
+        "Base name in file does not match the base name in the db. Line: {code_origin_line}",
+    );
 
     let migration_files = config.read_migrations_from_dir_sorted_asc();
-    let down_migration_files_content = config.read_down_migrations_content_from_dir_sorted();
 
     let latest_file_name = migration_files.iter().max();
 
-    if let Some(latest_file_name) = latest_file_name {
-        assert_eq!(
-            latest_file_name.basename(),
-            expected_latest_migration_file_basename_normalized,
-            "Base name in file does not match the base name in the db. Line: {code_origin_line}"
-        );
-    }
+    assert_eq!(
+        latest_file_name.map(|lfn| lfn.basename()),
+        expected_latest_migration_file_basename_normalized,
+        "Base name in file does not match the base name in the db. Line: {code_origin_line}"
+    );
 
     assert_eq!(
         db_migrations.len() as u8,
@@ -165,8 +160,8 @@ pub struct AssertionArg {
     pub migration_type: MigrationFlag,
     pub expected_mig_files_count: u8,
     pub expected_db_mig_meta_count: u8,
-    pub expected_latest_migration_file_basename_normalized: Basename,
-    pub expected_latest_db_migration_meta_basename_normalized: Basename,
+    pub expected_latest_migration_file_basename_normalized: Option<Basename>,
+    pub expected_latest_db_migration_meta_basename_normalized: Option<Basename>,
     pub code_origin_line: u32,
     pub config: TestConfigNew,
 }

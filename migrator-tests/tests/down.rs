@@ -21,8 +21,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -37,8 +37,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 11,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_11_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_11_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -50,8 +50,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 10,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_10_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_10_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -66,8 +66,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 9,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_9_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_9_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -79,8 +79,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -96,8 +96,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 22,
         expected_db_mig_meta_count: 11,
-        expected_latest_migration_file_basename_normalized: "migration_11_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_11_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_11_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_11_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -109,8 +109,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 22,
         expected_db_mig_meta_count: 10,
-        expected_latest_migration_file_basename_normalized: "migration_11_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_10_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_11_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_10_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -125,8 +125,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 22,
         expected_db_mig_meta_count: 9,
-        expected_latest_migration_file_basename_normalized: "migration_11_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_9_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_11_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_9_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -138,8 +138,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 16,
         expected_db_mig_meta_count: 8,
-        expected_latest_migration_file_basename_normalized: "migration_8_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_8_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_8_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_8_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -152,13 +152,13 @@ async fn test_rollback_previous(mode: Mode) {
             migration_type: MigrationFlag::TwoWay,
             expected_mig_files_count: 16,
             expected_db_mig_meta_count: 7 - i,
-            expected_latest_migration_file_basename_normalized: "migration_8_gen_after_init".into(),
-            expected_latest_db_migration_meta_basename_normalized: format!(
+            expected_latest_migration_file_basename_normalized: Some("migration_8_gen_after_init".into()),
+            expected_latest_db_migration_meta_basename_normalized: Some(format!(
                 "migration_{}{}",
                 7 - i,
                 "_gen_after_init".to_string()
             )
-            .into(),
+            .into()),
             code_origin_line: std::line!(),
             config: conf.clone(),
         })
@@ -169,8 +169,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 16,
         expected_db_mig_meta_count: 3,
-        expected_latest_migration_file_basename_normalized: "migration_8_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_3_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_8_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_3_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -182,8 +182,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 4,
         expected_db_mig_meta_count: 2,
-        expected_latest_migration_file_basename_normalized: "migration_2_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_2_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_2_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_2_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -195,8 +195,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 1,
-        expected_latest_migration_file_basename_normalized: "migration_1_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_1_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_1_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_1_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -208,8 +208,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "migration_1_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_1_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_1_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -221,8 +221,8 @@ async fn test_rollback_previous(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: None,
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -245,8 +245,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -258,8 +258,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 11,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_11_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_11_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -271,8 +271,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 10,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_10_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_10_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -284,8 +284,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 9,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_9_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_9_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -297,8 +297,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -310,8 +310,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 7,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_7_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_7_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -323,8 +323,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 8,
         expected_db_mig_meta_count: 4,
-        expected_latest_migration_file_basename_normalized: "migration_4_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_4_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_4_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_4_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -336,8 +336,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 8,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "migration_4_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_4_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -348,8 +348,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 8,
         expected_db_mig_meta_count: 4,
-        expected_latest_migration_file_basename_normalized: "migration_4_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_4_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_4_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_4_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -361,8 +361,8 @@ async fn test_rollback_number_delta(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: None,
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -385,8 +385,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -403,8 +403,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 11,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_11_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_11_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -421,8 +421,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 10,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_10_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_10_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -441,14 +441,14 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
             migration_type: MigrationFlag::TwoWay,
             expected_mig_files_count: 24,
             expected_db_mig_meta_count: i as u8,
-            expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init"
-                .into(),
-            expected_latest_db_migration_meta_basename_normalized: format!(
+            expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init"
+                .into()),
+            expected_latest_db_migration_meta_basename_normalized: Some(format!(
                 "migration_{}{}",
                 i,
                 "_gen_after_init".to_string()
             )
-            .into(),
+            .into()),
             code_origin_line: std::line!(),
             config: conf.clone(),
         })
@@ -461,8 +461,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 12,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_12_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -479,8 +479,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 22,
         expected_db_mig_meta_count: 11,
-        expected_latest_migration_file_basename_normalized: "migration_11_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_11_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_11_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_11_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -497,8 +497,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 6,
         expected_db_mig_meta_count: 3,
-        expected_latest_migration_file_basename_normalized: "migration_3_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_3_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_3_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_3_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -515,8 +515,8 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: "".into(),
-        expected_latest_db_migration_meta_basename_normalized: "".into(),
+        expected_latest_migration_file_basename_normalized: None,
+        expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
@@ -574,8 +574,8 @@ async fn rollingback_to_nonexisting_filecursor_panics(mode: Mode) {
         migration_type: MigrationFlag::TwoWay,
         expected_mig_files_count: 24,
         expected_db_mig_meta_count: 10,
-        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-        expected_latest_db_migration_meta_basename_normalized: "migration_10_gen_after_init".into(),
+        expected_latest_migration_file_basename_normalized: Some("migration_12_gen_after_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_10_gen_after_init".into()),
         code_origin_line: std::line!(),
         config: conf.clone(),
     })
