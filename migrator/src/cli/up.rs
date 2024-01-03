@@ -26,7 +26,7 @@ impl Default for Up {
 
 impl Up {
     pub fn update_strategy(&self) -> UpdateStrategy {
-        UpdateStrategy::from(self)
+        UpdateStrategy::from(&self.fast_forward)
     }
 }
 
@@ -78,13 +78,13 @@ pub enum UpdateStrategy {
     Till(MigrationFilename),
 }
 
-impl From<&Up> for UpdateStrategy {
-    fn from(up: &Up) -> Self {
-        if up.fast_forward.latest {
+impl From<&FastForwardDelta> for UpdateStrategy {
+    fn from(fast_forward: &FastForwardDelta) -> Self {
+        if fast_forward.latest {
             UpdateStrategy::Latest
-        } else if let Some(by_count) = up.fast_forward.number {
+        } else if let Some(by_count) = fast_forward.number {
             UpdateStrategy::Number(by_count)
-        } else if let Some(till) = up.fast_forward.till.clone() {
+        } else if let Some(till) = fast_forward.till.clone() {
             UpdateStrategy::Till(till)
         } else {
             UpdateStrategy::Latest

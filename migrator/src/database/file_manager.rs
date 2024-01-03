@@ -350,6 +350,7 @@ impl FileManagerBi {
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         let migrations = self.get_migrations()?;
+        dbg!(&migrations);
         MigrationRunner::apply_pending_migrations(db.clone(), migrations, update_strategy).await?;
 
         Ok(())
