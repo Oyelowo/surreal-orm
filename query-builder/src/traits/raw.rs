@@ -19,6 +19,11 @@ impl Raw {
     pub fn new(query: impl Into<String>) -> Self {
         Self(query.into())
     }
+
+    /// Returns true if the query is empty.
+    pub fn is_empty(&self) -> bool {
+        self.build().is_empty()
+    }
 }
 
 impl Parametric for Raw {
