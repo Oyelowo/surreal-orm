@@ -26,6 +26,18 @@ pub enum MigrationFlag {
     OneWay,
 }
 
+type Reversible = bool;
+
+impl From<Reversible> for MigrationFlag {
+    fn from(value: Reversible) -> Self {
+        if value {
+            MigrationFlag::TwoWay
+        } else {
+            MigrationFlag::OneWay
+        }
+    }
+}
+
 impl Display for MigrationFlag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let flag = match self {
