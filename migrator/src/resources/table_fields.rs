@@ -42,8 +42,8 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
         let left_defs = self.get_left();
         let right_defs = self.get_right();
 
-        let right_as_set = left_defs.get_names_as_set();
-        let left_as_set = right_defs.get_names_as_set();
+        let left_as_set = left_defs.get_names_as_set();
+        let right_as_set = right_defs.get_names_as_set();
 
         let diff_left = left_as_set.difference(&right_as_set);
         let diff_right = right_as_set.difference(&left_as_set);
@@ -118,26 +118,32 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         let left_defs = self.get_left();
         let right_defs = self.get_right();
 
-        let right_def = left_defs
+        let err = MigrationError::FieldNameDoesNotExist {
+            field_expected: old_name.to_string(),
+            table: table.to_string(),
+            valid_fields: left_defs.get_names().join(", "),
+        };
+        let old_field_def = left_defs
+            .get_definition(old_name.to_string().as_str())
+            .expect(err.to_string().as_str());
+
+        let new_field_def = right_defs
             .get_definition(new_name.to_string().as_str())
             .unwrap();
-        let left_def = right_defs
-            .get_definition(old_name.to_string().as_str())
-            .unwrap();
 
-        acc.add_up(QueryType::Define(right_def.clone()));
+        acc.add_up(QueryType::Define(new_field_def.clone()));
         let copy_old_to_new = UpdateStatementRaw::from(
             Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}")).build(),
         );
         acc.add_up(QueryType::Update(copy_old_to_new));
-        acc.add_up(QueryType::Remove(left_def.as_remove_statement()?));
+        acc.add_up(QueryType::Remove(old_field_def.as_remove_statement()?));
 
-        acc.add_down(QueryType::Define(left_def.clone()));
+        acc.add_down(QueryType::Define(old_field_def.clone()));
         let copy_new_to_old = UpdateStatementRaw::from(
             Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",)).build(),
         );
         acc.add_down(QueryType::Update(copy_new_to_old));
-        acc.add_down(QueryType::Remove(right_def.as_remove_statement()?));
+        acc.add_down(QueryType::Remove(new_field_def.as_remove_statement()?));
         Ok(acc)
     }
 
@@ -198,8 +204,8 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
                 let old_name = meta.old_name.to_string();
                 let left_defs = self.get_left();
                 let right_defs = self.get_right();
-                let right_def = left_defs.get_definition(new_name.as_str()).unwrap();
-                let left_def = right_defs.get_definition(old_name.as_str()).unwrap();
+                let left_def = left_defs.get_definition(old_name.as_str()).unwrap();
+                let right_def = right_defs.get_definition(new_name.as_str()).unwrap();
 
                 self.handle_create(acc, right_def)?;
                 self.handle_remove(acc, left_def)?;
