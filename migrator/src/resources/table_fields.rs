@@ -56,12 +56,18 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
         let is_single_field_delete_or_renaming = diff_left.len() == 1 && diff_right.len() == 1;
 
         if is_single_field_delete_or_renaming {
-            self.handle_prompt_field_renaming_or_deletion(
-                &mut acc,
-                diff_left[0].to_string().into(),
-                diff_right[0].to_string().into(),
-            )?;
-            return Ok(acc);
+            let old_field: Field = diff_left[0].to_string().into();
+            let new_field: Field = diff_right[0].to_string().into();
+            let explicit_old_name_used = RightDatabase::find_field_has_old_name(
+                self.codebase_resources,
+                &table,
+                By::NewName(new_field.clone()),
+            );
+            if explicit_old_name_used.is_none() {
+                self.handle_prompt_field_renaming_or_deletion(&mut acc, old_field, new_field)?;
+                return Ok(acc);
+            }
+            // acc.add_new_line();
         }
 
         for field_name in union {
@@ -100,6 +106,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             }
         }
 
+        // acc.add_new_line();
         Ok(acc)
     }
 }
