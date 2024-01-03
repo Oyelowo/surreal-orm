@@ -7,9 +7,7 @@
 use std::{fmt::Display, ops::Deref};
 
 use crate::*;
-use surreal_query_builder::{
-    Buildable, DbResources, Field, FieldChangeMeta, FieldMetadata, Raw, Table,
-};
+use surreal_query_builder::{Buildable, DbResources, Field, FieldChangeMeta, FieldMetadata, Table};
 
 pub enum DeltaTypeField {
     NoChange,
