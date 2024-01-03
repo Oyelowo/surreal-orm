@@ -294,3 +294,20 @@ pub enum SubCommand {
     /// Delete Unapplied local migration files that have not been applied to the current database instance
     Prune(Prune),
 }
+
+macro_rules! impl_from {
+    ($cmd:ident) => {
+        impl From<$cmd> for SubCommand {
+            fn from(from: $cmd) -> Self {
+                SubCommand::$cmd(from)
+            }
+        }
+    };
+}
+impl_from!(Init);
+impl_from!(Generate);
+impl_from!(Up);
+impl_from!(Down);
+impl_from!(Reset);
+impl_from!(List);
+impl_from!(Prune);

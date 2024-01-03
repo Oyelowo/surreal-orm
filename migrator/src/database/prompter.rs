@@ -56,6 +56,15 @@ pub struct MockPrompter {
     pub rename_or_delete_single_field_change: RenameOrDelete,
 }
 
+impl Default for MockPrompter {
+    fn default() -> Self {
+        Self {
+            allow_empty_migrations_gen: true,
+            rename_or_delete_single_field_change: RenameOrDelete::Rename,
+        }
+    }
+}
+
 impl Prompter for MockPrompter {
     fn prompt_empty_migrations_trigger(&self) -> Result<bool, InquireError> {
         Ok(self.allow_empty_migrations_gen)
