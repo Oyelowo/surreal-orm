@@ -1,12 +1,9 @@
 use surreal_models::migrations::Resources;
+use surreal_orm::migrator::config::DatabaseConnection;
 use surreal_orm::migrator::{
     self, embed_migrations, MigrationConfig, RealPrompter, RollbackOptions, RollbackStrategy,
     UpdateStrategy,
 };
-use surrealdb::engine::remote::ws::Ws;
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
 // Embed migrations as constant
 const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
     embed_migrations!("migrations-oneway", one_way, strict);
@@ -16,7 +13,7 @@ const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
 
 #[tokio::main]
 async fn main() {
-    let db = initialize_db().await;
+    let db = DatabaseConnection::default().setup().await.db().unwrap();
 
     // ONE WAY MIGRATIONS
     let files_config = MigrationConfig::new().make_strict();
@@ -82,18 +79,4 @@ async fn main() {
         .run_up_embedded_pending_migrations(db.clone(), MIGRATIONS_TWO_WAY, UpdateStrategy::Latest)
         .await
         .unwrap();
-}
-
-async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
-    let db = Surreal::new::<Ws>("localhost:8000")
-        .await
-        .expect("Failed to connect to db");
-    db.signin(Root {
-        username: "root",
-        password: "root",
-    })
-    .await
-    .expect("Failed to signin");
-    db.use_ns("test").use_db("test").await.unwrap();
-    db
 }
