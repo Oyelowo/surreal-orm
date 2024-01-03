@@ -10,6 +10,8 @@ use surrealdb::engine::any::{connect, Any};
 use surrealdb::opt::auth::{Database, Root};
 use surrealdb::Surreal;
 
+use crate::Mode;
+
 #[derive(Clone, Debug)]
 pub enum UrlDb {
     Memory,
@@ -76,6 +78,7 @@ pub struct DatabaseConnection {
     pub(crate) db: String,
 
     #[arg(global = true, long, default_value_t = String::from("test"), help = "Namespace name")]
+    #[builder(default = "test".into())]
     pub(crate) ns: String,
 
     /// users scope
@@ -167,16 +170,14 @@ impl DatabaseConnection {
     }
 }
 
-// impl Default for RuntimeConfig {
-//     fn default() -> Self {
-//         RuntimeConfig::builder()
-//             .db("test".into())
-//             .ns("test".into())
-//             .user("root".into())
-//             .pass("root".into())
-//             .mode(Mode::Strict)
-//             .prune(false)
-//             .url(UrlDb::Memory)
-//             .build()
-//     }
-// }
+impl Default for DatabaseConnection {
+    fn default() -> Self {
+        DatabaseConnection::builder()
+            .db("test".into())
+            .ns("test".into())
+            .user("root".into())
+            .pass("root".into())
+            .url(UrlDb::Memory)
+            .build()
+    }
+}

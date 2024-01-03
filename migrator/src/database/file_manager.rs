@@ -4,7 +4,7 @@ use std::{
 };
 
 use surreal_query_builder::DbResources;
-use surrealdb::{Connection, Surreal};
+use surrealdb::{engine::any::Any, Connection, Surreal};
 use typed_builder::TypedBuilder;
 
 use crate::*;
@@ -371,7 +371,7 @@ impl FileManagerBi {
     /// Rollback migration using various strategies
     pub async fn run_down_migrations(
         &self,
-        db: Surreal<impl Connection>,
+        db: Surreal<Any>,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
         MigrationRunner::rollback_migrations(db.clone(), &self.into_inner(), rollback_options)
