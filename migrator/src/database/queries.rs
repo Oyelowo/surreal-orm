@@ -52,6 +52,11 @@ pub struct Queries {
 }
 
 impl Queries {
+    pub(crate) fn add_new_line(&mut self) {
+        self.add_new_line_to_up();
+        self.add_new_line_to_down();
+    }
+
     pub(crate) fn add_new_line_to_up(&mut self) {
         self.up.push(QueryType::NewLine);
     }

@@ -123,7 +123,7 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                 }
             };
         }
-        queries.add_new_line_to_up();
+        queries.add_new_line();
         Ok(queries)
     }
 }
@@ -165,6 +165,7 @@ where
                 DeltaTypeResource::NoChange => {}
             };
         }
+        queries.add_new_line();
 
         Ok(queries)
     }
