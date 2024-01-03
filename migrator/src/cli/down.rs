@@ -7,7 +7,7 @@ use crate::*;
 #[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct Down {
     #[command(flatten)]
-    strategy: RollbackDelta,
+    strategy: RollbackStrategyStruct,
 
     #[arg(
         global = true,
@@ -20,13 +20,13 @@ pub struct Down {
 
 impl Down {
     pub fn rollback_strategy(&self) -> RollbackStrategy {
-        RollbackStrategy::from(self)
+        RollbackStrategy::from(&self.strategy)
     }
 }
 
 #[derive(Args, Debug, Clone, TypedBuilder)]
 #[group(required = false, multiple = false)]
-pub struct RollbackDelta {
+pub struct RollbackStrategyStruct {
     /// Rollback to the previous migration
     #[arg(long, help = "Rollback to the previous migration")]
     #[builder(default)]
@@ -48,9 +48,9 @@ pub struct RollbackDelta {
     pub(crate) till: Option<MigrationFilename>,
 }
 
-impl Default for RollbackDelta {
+impl Default for RollbackStrategyStruct {
     fn default() -> Self {
-        RollbackDelta {
+        RollbackStrategyStruct {
             previous: true,
             number: None,
             till: None,
@@ -71,13 +71,13 @@ pub enum RollbackStrategy {
     Till(MigrationFilename),
 }
 
-impl From<&Down> for RollbackStrategy {
-    fn from(rollback: &Down) -> Self {
-        if rollback.strategy.previous {
+impl From<&RollbackStrategyStruct> for RollbackStrategy {
+    fn from(strategy: &RollbackStrategyStruct) -> Self {
+        if strategy.previous {
             RollbackStrategy::Previous
-        } else if let Some(by_count) = rollback.strategy.number {
+        } else if let Some(by_count) = strategy.number {
             RollbackStrategy::Number(by_count)
-        } else if let Some(by_name) = rollback.strategy.till.clone() {
+        } else if let Some(by_name) = strategy.till.clone() {
             RollbackStrategy::Till(by_name)
         } else {
             RollbackStrategy::Previous

@@ -57,8 +57,6 @@ impl MigrationRunner {
             mode: ref strictness,
         } = rollback_options;
 
-        log::info!("Rolling back migration");
-
         let all_migrations_from_dir = fm.get_two_way_migrations_sorted_desc(false)?;
         let latest_migration = Self::get_latest_migration(db.clone())
             .await?
