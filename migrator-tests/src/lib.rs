@@ -179,9 +179,21 @@ impl TestConfigNew {
         self
     }
 
-    pub fn set_cmd(&mut self, cmd: SubCommand) -> &mut Self {
-        self.migrator.set_cmd(cmd);
+    pub fn set_cmd(&mut self, cmd: impl Into<SubCommand>) -> &mut Self {
+        self.migrator.set_cmd(cmd.into());
         self
+    }
+
+    pub async fn run_gen(&mut self, basename: Basename, resources: impl DbResources) -> &mut Self {
+        self.set_cmd(Generate::builder().name(basename.into()).run(false).build())
+            .run(
+                Some(resources),
+                MockPrompter::builder()
+                    .allow_empty_migrations_gen(true)
+                    .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+                    .build(),
+            )
+            .await
     }
 
     pub async fn run_down(
@@ -204,6 +216,7 @@ impl TestConfigNew {
         )
         .await
     }
+
     pub async fn run_up(&mut self, fwd_delta: &FastForwardDelta) -> &mut Self {
         // Up::builder()
         //     .fast_forward(fwd_delta.clone())
@@ -238,7 +251,14 @@ impl TestConfigNew {
     //         .run(&mut self.migrator, codebase_resources, prompter);
     // }
 
-    pub async fn generate_test_migrations(&mut self) -> &mut Self {
+    pub async fn generate_test_migrations_arbitrary(
+        &mut self,
+        number_of_migs_to_gen: usize,
+    ) -> &mut Self {
+        if number_of_migs_to_gen == 0 {
+            panic!("Generating 0 migrations not allowed.");
+        }
+
         let mock_prompter = MockPrompter::builder()
             .allow_empty_migrations_gen(true)
             .rename_or_delete_single_field_change(RenameOrDelete::Rename)
@@ -255,15 +275,38 @@ impl TestConfigNew {
             .run_fn(Resources, mock_prompter.clone())
             .await;
 
-        let gen = |basename: &'static str| {
+        let gen = |basename: String| {
             SubCommand::Generate(Generate::builder().name(basename.into()).run(false).build())
         };
 
-        // Generate::builder()
-        //     .name("er".into())
-        //     .run(false)
-        //     .build()
-        //     .run(&mut self.migrator, Resources, mock_prompter.clone());
+        for i in 2..=number_of_migs_to_gen {
+            self.set_cmd(gen(format!("migration {}-gen after init", i)))
+                .run(Some(Resources), mock_prompter.clone())
+                .await;
+        }
+
+        self
+    }
+    pub async fn generate_12_test_migrations_reversible(&mut self, reversible: bool) -> &mut Self {
+        let mock_prompter = MockPrompter::builder()
+            .allow_empty_migrations_gen(true)
+            .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+            .build();
+
+        self.migrator
+            .set_cmd(SubCommand::Init(
+                Init::builder()
+                    .reversible(reversible)
+                    .name("migration 1-init".into())
+                    .run(false)
+                    .build(),
+            ))
+            .run_fn(Resources, mock_prompter.clone())
+            .await;
+
+        let gen =
+            |basename: &'static str| Generate::builder().name(basename.into()).run(false).build();
+
         self.set_cmd(gen("migration 2-gen after init"))
             .run(Some(Resources), mock_prompter.clone())
             .await;
@@ -309,6 +352,10 @@ impl TestConfigNew {
             .await;
 
         self
+    }
+
+    pub async fn generate_test_migrations(&mut self) -> &mut Self {
+        self.generate_12_test_migrations_reversible(true).await
     }
 
     // from 1st upwards. Starts from 1
