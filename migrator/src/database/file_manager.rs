@@ -374,7 +374,6 @@ impl FileManagerBi {
         db: Surreal<impl Connection>,
         rollback_options: RollbackOptions,
     ) -> MigrationResult<()> {
-        // let _migrations = self.get_migrations()?;
         MigrationRunner::rollback_migrations(db.clone(), &self.into_inner(), rollback_options)
             .await?;
 

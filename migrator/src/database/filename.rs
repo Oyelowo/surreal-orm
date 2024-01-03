@@ -249,6 +249,8 @@ impl Display for Extension {
     }
 }
 
+/// Name without extension nor timestamp
+/// e.g for 20210912121212_create_users.up.surql, the basename is create_users
 #[derive(Clone, Hash, Debug, PartialEq, Ord, PartialOrd, Eq)]
 pub struct Basename(String);
 
@@ -347,16 +349,14 @@ impl MigrationFilename {
 
     pub fn basename(&self) -> Basename {
         match self {
-            MigrationFilename::Up(MigrationNameBasicInfo { basename: name, .. }) => {
-                format!("{name}")
+            MigrationFilename::Up(MigrationNameBasicInfo { basename, .. }) => {
+                format!("{basename}")
             }
-            MigrationFilename::Down(MigrationNameBasicInfo { basename: name, .. }) => {
-                format!("{name}")
+            MigrationFilename::Down(MigrationNameBasicInfo { basename, .. }) => {
+                format!("{basename}")
             }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                basename: name, ..
-            }) => {
-                format!("{name}")
+            MigrationFilename::Unidirectional(MigrationNameBasicInfo { basename, .. }) => {
+                format!("{basename}")
             }
         }
         .into()

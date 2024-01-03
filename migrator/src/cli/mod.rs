@@ -12,7 +12,7 @@ mod up;
 use std::path::PathBuf;
 
 pub use arg_parser::*;
-pub use down::{Down, RollbackDelta, RollbackStrategy};
+pub use down::{Down, RollbackStrategy, RollbackStrategyStruct};
 pub use generate::Generate;
 pub use init::Init;
 pub use list::{List, Status};

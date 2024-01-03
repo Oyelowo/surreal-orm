@@ -631,3 +631,94 @@ async fn test_rollback_number_delta(mode: Mode) {
     })
     .await;
 }
+
+#[test_case(Mode::Strict; "Reversible Strict")]
+#[test_case(Mode::Lax; "Reversible Lax")]
+#[tokio::test]
+async fn test_rollback_till_pointer_mig_id(mode: Mode) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_test_migrations().await;
+
+    // First apply all generated migrations to the current db instance
+    conf.run_up(&FastForwardDelta::default()).await;
+
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 12,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_down(
+        &RollbackDelta::builder()
+            .till("migration_10_gen_after_init".into())
+            .build(),
+        false,
+    )
+    .await;
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 9,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_9_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_down(
+        &RollbackDelta::builder()
+            .till_pointer_mig_id("migration_9_gen_after_init".into())
+            .build(),
+        false,
+    )
+    .await;
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 8,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_8_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_down(
+        &RollbackDelta::builder()
+            .till_pointer_mig_id("migration_8_gen_after_init".into())
+            .build(),
+        false,
+    )
+    .await;
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 7,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_7_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_down(
+        &RollbackDelta::builder()
+            .till_pointer_mig_id("migration_7_gen_after_init".into())
+            .build(),
+        false,
+    )
+    .await;
+    assert_with_db_instance(AssertionArg {
+        expected_down_mig_files_count: 12,
+        expected_db_mig_meta_count: 6,
+        expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
+        expected_latest_db_migration_meta_basename_normalized: "migration_6_gen_after_init".into(),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+}
