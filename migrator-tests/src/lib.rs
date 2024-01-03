@@ -7,8 +7,9 @@ use surreal_models::migrations::{
 use surreal_orm::{
     migrator::{
         config::{DatabaseConnection, UrlDb},
-        Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename, Migrator,
-        MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct, SubCommand, Up,
+        migration, Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
+        MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
+        SubCommand, Up,
     },
     DbResources,
 };
@@ -16,12 +17,13 @@ use surreal_orm::{
 use typed_builder::TypedBuilder;
 pub async fn assert_with_db_instance(args: AssertionArg) {
     let AssertionArg {
-        expected_down_mig_files_count,
+        expected_mig_files_count,
         expected_db_mig_meta_count: expected_db_mig_count,
         expected_latest_migration_file_basename_normalized,
         expected_latest_db_migration_meta_basename_normalized,
         code_origin_line,
         config,
+        migration_type: reversible,
     } = args;
 
     let db = config.migrator.db().clone();
@@ -38,10 +40,10 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
         );
     }
 
-    let down_migration_files = config.read_down_migrations_from_dir_sorted_asc();
+    let migration_files = config.read_migrations_from_dir_sorted_asc();
     let down_migration_files_content = config.read_down_migrations_content_from_dir_sorted();
 
-    let latest_file_name = down_migration_files.iter().max();
+    let latest_file_name = migration_files.iter().max();
 
     if let Some(latest_file_name) = latest_file_name {
         assert_eq!(
@@ -58,8 +60,8 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
     );
 
     assert_eq!(
-        down_migration_files.len() as u8,
-        expected_down_mig_files_count,
+        migration_files.len() as u8,
+        expected_mig_files_count,
         "File counts do not match. Line: {code_origin_line}"
     );
 
@@ -72,18 +74,73 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
         let extension = mig_name_from_db.extension();
 
         let found_migration_file = |db_mig_name: MigrationFilename| {
-            down_migration_files
+            migration_files
                 .iter()
-                .find(|filename| &&db_mig_name.to_down() == filename)
-                .expect("Db Migration not found amongst the files in migration directory.")
+                .filter(|filename| match reversible {
+                    MigrationFlag::TwoWay => {
+                        //
+                        db_mig_name.to_up() == filename.to_up()
+                    }
+                    MigrationFlag::OneWay => &db_mig_name == *filename,
+                })
+                .collect::<Vec<_>>()
         };
 
-        let found_mig_file = found_migration_file(mig_name_from_db.clone());
-        assert_eq!(found_mig_file.to_up(), mig_name_from_db);
-        assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
-        assert_eq!(found_mig_file.extension().to_string(), "down.surql");
-        assert_eq!(found_mig_file.to_up().to_string(), db_mig_record.name);
-        assert_eq!(found_mig_file.timestamp(), db_mig_record.timestamp);
+        match reversible {
+            MigrationFlag::TwoWay => {
+                let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                assert_eq!(found_mig_file.len(), 2);
+
+                let ups = found_mig_file
+                    .iter()
+                    .filter(|m| m.is_up())
+                    .collect::<Vec<_>>();
+                assert_eq!(ups.len(), 1);
+                assert_eq!(ups.first().cloned(), Some(&&mig_name_from_db));
+                assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
+                assert_eq!(
+                    ups.first().map(|u| u.extension().to_string()),
+                    Some("up.surql".into())
+                );
+                assert_eq!(
+                    ups.first().map(|u| u.to_string()),
+                    Some(db_mig_record.clone().name)
+                );
+                assert_eq!(
+                    ups.first().map(|u| u.timestamp()),
+                    Some(db_mig_record.clone().timestamp)
+                );
+
+                let downs = found_mig_file
+                    .iter()
+                    .filter(|m| m.is_down())
+                    .collect::<Vec<_>>();
+                assert_eq!(downs.len(), 1);
+                assert_eq!(downs.first().cloned(), Some(&&mig_name_from_db.to_down()));
+                assert_eq!(
+                    downs.first().map(|u| u.extension().to_string()),
+                    Some("down.surql".into())
+                );
+                assert_eq!(
+                    // we store reversible migration meta with up extension
+                    downs.first().map(|u| u.to_up().to_string()),
+                    Some(db_mig_record.clone().name)
+                );
+                assert_eq!(
+                    downs.first().map(|u| u.timestamp()),
+                    Some(db_mig_record.clone().timestamp)
+                );
+            }
+            MigrationFlag::OneWay => {
+                let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                assert_eq!(found_mig_file.len(), 1);
+                let found_mig_file = found_mig_file.first().expect("File must exist");
+                assert_eq!(found_mig_file.basename(), basename);
+                assert_eq!(found_mig_file.extension(), extension);
+                assert_eq!(found_mig_file.timestamp(), timestamp);
+                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
+            }
+        }
 
         assert_eq!(
             mig_name_from_db.to_string(),
@@ -105,7 +162,8 @@ pub fn get_db_connection_config() -> DatabaseConnection {
 
 #[derive(Clone, TypedBuilder)]
 pub struct AssertionArg {
-    pub expected_down_mig_files_count: u8,
+    pub migration_type: MigrationFlag,
+    pub expected_mig_files_count: u8,
     pub expected_db_mig_meta_count: u8,
     pub expected_latest_migration_file_basename_normalized: Basename,
     pub expected_latest_db_migration_meta_basename_normalized: Basename,
@@ -151,6 +209,25 @@ impl TestConfigNew {
             .collect::<Vec<String>>()
     }
 
+    pub fn read_migrations_from_dir_sorted_asc(&self) -> Vec<MigrationFilename> {
+        let mut files =
+            std::fs::read_dir(&self.migrator.file_manager().get_migration_dir().unwrap())
+                .expect("Failed to read dir")
+                .filter_map(|p| {
+                    p.expect("Failed to read dir")
+                        .file_name()
+                        .to_string_lossy()
+                        .to_string()
+                        .try_into()
+                        .ok()
+                })
+                .filter(|f: &MigrationFilename| f.is_down() || f.is_up() || f.is_unidirectional())
+                .collect::<Vec<MigrationFilename>>();
+
+        files.sort_by_key(|a| a.timestamp());
+        files
+    }
+
     pub fn read_down_migrations_from_dir_sorted_asc(&self) -> Vec<MigrationFilename> {
         let mut files =
             std::fs::read_dir(&self.migrator.file_manager().get_migration_dir().unwrap())
@@ -181,6 +258,18 @@ impl TestConfigNew {
 
     pub fn set_cmd(&mut self, cmd: impl Into<SubCommand>) -> &mut Self {
         self.migrator.set_cmd(cmd.into());
+        self
+    }
+
+    pub async fn run_init_cmd(
+        &mut self,
+        init_cmd: Init,
+        codebase_resources: impl DbResources,
+        prompter: MockPrompter,
+    ) -> &mut Self {
+        self.set_cmd(init_cmd)
+            .run(Some(codebase_resources), prompter)
+            .await;
         self
     }
 
