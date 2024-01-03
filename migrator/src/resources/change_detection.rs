@@ -80,13 +80,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                 .map(FieldMetadataWrapper);
 
                 match (found_field_by_oldname, foundfield_by_newname) {
-                    // mutually exclusive since we are iterating over a union of
-                    // left and right and will only encounter a field at a time
-                    // and one field cannot be both new and old.
-                    // . e.g rename lowo to dayo.
-                    // lowo will now be new field in right with old name -dayo,
-                    // dayo is expected to now be in left with old name - lowo.
-                    // This is a rename.
                     (Some(_l_meta), Some(r_meta)) => {
                         //
                         r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
@@ -96,10 +89,10 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                         r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
                     }
                     (Some(_), None) => {
-                        // Dont make a change since that has been handled up there
+                        // Skip change since that has been handled up there on the right
                         DeltaTypeField::NoChange
                     }
-                    // No explicit rename attribute used i.e old_name = "OldFieldName"
+                    // No explicit rename attribute used e.g old_name = "OldFieldName"
                     (None, None) => match (left_def, right_def) {
                         (None, Some(r)) => DeltaTypeField::Create { right: r.clone() },
                         (Some(l), None) => DeltaTypeField::Remove { left: l.clone() },
@@ -130,6 +123,7 @@ impl FieldMetadataWrapper {
         right_defs: Fields,
     ) -> MigrationResult<DeltaTypeField> {
         let r_meta = &self.0;
+
         let old_left = left_defs
             .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
             .ok_or_else(|| MigrationError::InvalidOldFieldName {
@@ -138,6 +132,7 @@ impl FieldMetadataWrapper {
                 old_name: r_meta.old_name.as_ref().unwrap().to_string(),
                 renamables: left_defs.get_names().join(", "),
             })?;
+
         let right_def = right_defs
             .get_definition(&r_meta.name.to_string().as_str())
             .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
