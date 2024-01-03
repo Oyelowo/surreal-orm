@@ -14,7 +14,6 @@ pub struct MigrationRunner {
 pub struct RollbackOptions {
     pub rollback_strategy: RollbackStrategy,
     pub mode: Mode,
-    pub prune_files_after_rollback: bool,
 }
 
 impl Default for RollbackOptions {
@@ -22,7 +21,6 @@ impl Default for RollbackOptions {
         Self {
             rollback_strategy: RollbackStrategy::Previous,
             mode: Mode::default(),
-            prune_files_after_rollback: false,
         }
     }
 }
@@ -45,11 +43,6 @@ impl RollbackOptions {
         self.mode = mode;
         self
     }
-
-    pub fn prune_files_after_rollback(mut self, prune_files_after_rollback: bool) -> Self {
-        self.prune_files_after_rollback = prune_files_after_rollback;
-        self
-    }
 }
 
 impl MigrationRunner {
@@ -62,7 +55,6 @@ impl MigrationRunner {
         let RollbackOptions {
             ref rollback_strategy,
             mode: ref strictness,
-            prune_files_after_rollback,
         } = rollback_options;
 
         log::info!("Rolling back migration");
@@ -81,21 +73,7 @@ impl MigrationRunner {
                 latest_migration_name.to_string()
             )))?;
 
-        if rollback_options.is_strict() {
-            let pending_migrations =
-                Self::get_pending_migrations(all_migrations_from_dir.clone(), db.clone()).await?;
-
-            let is_valid_rollback_state =
-                pending_migrations.is_empty() || pending_migrations.len() % 2 == 0;
-
-            if !is_valid_rollback_state && rollback_options.prune_files_after_rollback {
-                return Err(MigrationError::UnappliedMigrationExists {
-                    migration_count: pending_migrations.len(),
-                });
-            }
-        }
-
-        let (queries_to_run, file_paths) = match rollback_strategy {
+        let (queries_to_run, _rolledback_file_paths) = match rollback_strategy {
             RollbackStrategy::Previous => Self::generate_rollback_queries_and_filepaths(
                 fm,
                 vec![migrations_from_dir.clone()],
@@ -176,32 +154,12 @@ impl MigrationRunner {
                 )?
             }
         };
-        dbg!(queries_to_run.clone());
 
         begin_transaction()
             .query(queries_to_run)
             .commit_transaction()
             .run(db.clone())
             .await?;
-
-        if prune_files_after_rollback {
-            for file_path in &file_paths {
-                let file_path_str = file_path.to_string_lossy();
-
-                log::info!("Deleting file: {}", file_path_str);
-
-                std::fs::remove_file(file_path).map_err(|e| {
-                    MigrationError::IoError(format!(
-                        "Failed to delete migration file: {}. Error: {}",
-                        file_path_str, e
-                    ))
-                })?;
-
-                log::info!("Deleted file: {}", file_path_str);
-            }
-        }
-
-        log::info!("Migration rolled back");
 
         Ok(())
     }
