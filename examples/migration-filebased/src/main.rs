@@ -1,5 +1,7 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy};
+use surreal_orm::migrator::{
+    DbConnection, MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy,
+};
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
@@ -20,7 +22,7 @@ async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
 
 #[tokio::main]
 async fn main() {
-    let db = initialize_db().await;
+    // let db = DbConnection:;
 
     // ONE WAY MIGRATIONS
     let files_config = MigrationConfig::new().make_strict();

@@ -122,10 +122,8 @@ impl MigrationRunner {
                 // counterpart to the up migration filename as the cursor, giving user
                 // more flexibility to use either.
                 let ref file_cursor = file_cursor.to_up();
-                dbg!(file_cursor);
                 let timestamp_value = file_cursor.timestamp().into_inner();
                 let migration_meta = Migration::get_by_filename(db.clone(), file_cursor).await;
-                dbg!(&migration_meta);
                 if migration_meta.is_none() {
                     return Err(MigrationError::MigrationDoesNotExist {
                         filename: file_cursor.clone(),
