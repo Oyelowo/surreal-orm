@@ -1,6 +1,5 @@
 ---
 source: migrator-tests/tests/up.rs
-assertion_line: 113
 expression: migrations_contents
 ---
 migration_1_init.down.surql
