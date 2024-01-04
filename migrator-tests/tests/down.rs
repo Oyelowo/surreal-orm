@@ -19,7 +19,7 @@ async fn test_rollback_previous(mode: Mode) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -39,7 +39,7 @@ async fn test_rollback_previous(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 11,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -56,7 +56,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 10,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -76,7 +76,7 @@ async fn test_rollback_previous(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -93,7 +93,7 @@ async fn test_rollback_previous(mode: Mode) {
     conf.run_up(default_fwd_strategy).await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -114,7 +114,7 @@ async fn test_rollback_previous(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 22,
+        expected_mig_files_count: 11,
         expected_db_mig_meta_count: 11,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_11_gen_after_init".into(),
@@ -131,7 +131,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 22,
+        expected_mig_files_count: 11,
         expected_db_mig_meta_count: 10,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_11_gen_after_init".into(),
@@ -151,7 +151,7 @@ async fn test_rollback_previous(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 22,
+        expected_mig_files_count: 11,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_11_gen_after_init".into(),
@@ -168,7 +168,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 16,
+        expected_mig_files_count: 8,
         expected_db_mig_meta_count: 8,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_8_gen_after_init".into(),
@@ -186,7 +186,7 @@ async fn test_rollback_previous(mode: Mode) {
             .await;
         assert_with_db_instance(AssertionArg {
             migration_type: MigrationFlag::TwoWay,
-            expected_mig_files_count: 16,
+            expected_mig_files_count: 8,
             expected_db_mig_meta_count: 7 - i,
             expected_latest_migration_file_basename_normalized: Some(
                 "migration_8_gen_after_init".into(),
@@ -202,7 +202,7 @@ async fn test_rollback_previous(mode: Mode) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 16,
+        expected_mig_files_count: 8,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_8_gen_after_init".into(),
@@ -219,7 +219,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 4,
+        expected_mig_files_count: 2,
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_2_gen_after_init".into(),
@@ -236,7 +236,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 2,
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_1_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_1_init".into()),
@@ -249,7 +249,7 @@ async fn test_rollback_previous(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 2,
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_1_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
@@ -286,7 +286,7 @@ async fn test_rollback_number_delta(mode: Mode) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -303,7 +303,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 11,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -320,7 +320,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 10,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -337,7 +337,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -354,7 +354,7 @@ async fn test_rollback_number_delta(mode: Mode) {
     conf.run_up(default_fwd_strategy).await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -371,7 +371,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -388,7 +388,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 8,
+        expected_mig_files_count: 4,
         expected_db_mig_meta_count: 4,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_4_gen_after_init".into(),
@@ -405,7 +405,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 8,
+        expected_mig_files_count: 4,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_4_gen_after_init".into(),
@@ -419,7 +419,7 @@ async fn test_rollback_number_delta(mode: Mode) {
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 8,
+        expected_mig_files_count: 4,
         expected_db_mig_meta_count: 4,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_4_gen_after_init".into(),
@@ -453,14 +453,14 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     let mig_dir = tempdir().expect("Failed to create temp directory");
     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
-    conf.generate_test_migrations().await;
+    conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance
     conf.run_up(&FastForwardDelta::default()).await;
 
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -482,7 +482,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 11,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -504,7 +504,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 10,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -528,7 +528,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
 
         assert_with_db_instance(AssertionArg {
             migration_type: MigrationFlag::TwoWay,
-            expected_mig_files_count: 24,
+            expected_mig_files_count: 12,
             expected_db_mig_meta_count: i as u8,
             expected_latest_migration_file_basename_normalized: Some(
                 "migration_12_gen_after_init".into(),
@@ -546,7 +546,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -568,7 +568,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 22,
+        expected_mig_files_count: 11,
         expected_db_mig_meta_count: 11,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_11_gen_after_init".into(),
@@ -590,7 +590,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 6,
+        expected_mig_files_count: 3,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_3_gen_after_init".into(),
@@ -671,7 +671,7 @@ async fn rollingback_to_nonexisting_filecursor_panics(mode: Mode) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: MigrationFlag::TwoWay,
-        expected_mig_files_count: 24,
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 10,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),

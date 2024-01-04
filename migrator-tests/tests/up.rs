@@ -39,13 +39,6 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     // Init
     conf.run_init_cmd(
@@ -61,7 +54,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(1),
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
@@ -74,7 +67,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(1),
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
@@ -86,7 +79,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(1),
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
@@ -105,13 +98,6 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     // Init
     conf.run_init_cmd(
@@ -126,7 +112,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(1),
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
@@ -138,7 +124,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(1),
+        expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
@@ -160,17 +146,10 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     conf.run_up(&FastForwardDelta::default()).await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -195,19 +174,12 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -222,7 +194,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -239,7 +211,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -256,7 +228,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -273,7 +245,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -290,7 +262,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -315,16 +287,9 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(69),
+        expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
@@ -339,7 +304,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(69),
+        expected_mig_files_count: 69,
         expected_db_mig_meta_count: 26,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
@@ -356,7 +321,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(69),
+        expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
@@ -381,16 +346,9 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(69),
+        expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
@@ -405,7 +363,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(69),
+        expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
@@ -430,16 +388,9 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
-    let get_mig_file_count = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -454,7 +405,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: get_mig_file_count(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -478,17 +429,9 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
-    let migration_position = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -501,14 +444,14 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(5)))
+            .till(conf.get_either_filename_type_at_position(5, reversible))
             .build(),
     )
     .await;
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 5,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -524,14 +467,14 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     for i in 6..=11 {
         conf.run_up(
             &FastForwardDelta::builder()
-                .till(conf.get_either_filename_type_at_position(migration_position(i)))
+                .till(conf.get_either_filename_type_at_position(i, reversible))
                 .build(),
         )
         .await;
 
         assert_with_db_instance(AssertionArg {
             migration_type: reversible.into(),
-            expected_mig_files_count: migration_position(12),
+            expected_mig_files_count: 12,
             expected_db_mig_meta_count: i as u8,
             expected_latest_migration_file_basename_normalized: Some(
                 "migration_12_gen_after_init".into(),
@@ -547,13 +490,13 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .till(conf.get_either_filename_type_at_position(12, reversible))
             .build(),
     )
     .await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -569,7 +512,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -595,23 +538,16 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
-    let migration_position = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .till(conf.get_either_filename_type_at_position(12, reversible))
             .build(),
     )
     .await;
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .till(conf.get_either_filename_type_at_position(12, reversible))
             .build(),
     )
     .await;
@@ -629,23 +565,16 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
-    let migration_position = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .till(conf.get_either_filename_type_at_position(12, reversible))
             .build(),
     )
     .await;
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(5)))
+            .till(conf.get_either_filename_type_at_position(5, reversible))
             .build(),
     )
     .await;
@@ -689,17 +618,9 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
-    let migration_position = |num| {
-        if reversible {
-            num * 2
-        } else {
-            num
-        }
-    };
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -712,14 +633,14 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(3)))
+            .till(conf.get_either_filename_type_at_position(3, reversible))
             .build(),
     )
     .await;
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -737,7 +658,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -752,14 +673,14 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
 
     conf.run_up(
         &FastForwardDelta::builder()
-            .till(conf.get_either_filename_type_at_position(migration_position(9)))
+            .till(conf.get_either_filename_type_at_position(9, reversible))
             .build(),
     )
     .await;
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
@@ -777,7 +698,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        expected_mig_files_count: migration_position(12),
+        expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
             "migration_12_gen_after_init".into(),

@@ -33,6 +33,7 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
             .expect("Failed to parse file name")
             .basename()
     });
+    dbg!(&latest_migration_basename);
     assert_eq!(
         latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
         "Base name in file does not match the base name in the db. Line: {code_origin_line}",
@@ -56,7 +57,10 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
 
     assert_eq!(
         migration_files.len() as u8,
-        expected_mig_files_count,
+        match migration_type {
+            MigrationFlag::TwoWay => expected_mig_files_count * 2,
+            MigrationFlag::OneWay => expected_mig_files_count,
+        },
         "File counts do not match. Line: {code_origin_line}"
     );
 
@@ -302,12 +306,6 @@ impl TestConfigNew {
     }
 
     pub async fn run_up(&mut self, fwd_delta: &FastForwardDelta) -> &mut Self {
-        // Up::builder()
-        //     .fast_forward(fwd_delta.clone())
-        //     .build()
-        //     .run(&mut self.migrator)
-        //     .await;
-        // self.migrator.run_up_fn().await;
         self.set_cmd(SubCommand::Up(
             Up::builder().fast_forward(fwd_delta.clone()).build(),
         ))
@@ -445,12 +443,20 @@ impl TestConfigNew {
         self.generate_12_test_migrations_reversible(true).await
     }
 
-    pub fn get_either_filename_type_at_position(&self, position: u8) -> MigrationFilename {
+    pub fn get_either_filename_type_at_position(
+        &self,
+        position: u8,
+        migration_type: impl Into<MigrationFlag>,
+    ) -> MigrationFilename {
         if position == 0 {
             panic!(
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
+        let position = match migration_type.into() {
+            MigrationFlag::TwoWay => position * 2,
+            MigrationFlag::OneWay => position,
+        };
         self.read_migrations_from_dir_sorted_asc()[position as usize - 1].clone()
     }
     // from 1st upwards. Starts from 1
@@ -460,6 +466,8 @@ impl TestConfigNew {
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
-        self.read_migrations_from_dir_sorted_asc()[position - 1].clone()
+        let xx = self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone();
+        dbg!(&xx);
+        xx
     }
 }
