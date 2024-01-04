@@ -40,15 +40,16 @@ impl Init {
         match files {
             Ok(files) => {
                 if !files.is_empty() {
-                    log::error!("Migrations already initialized. Run 'cargo run -- reset' to reset migration. \
+                    let err = "Migrations already initialized. Run 'cargo run -- reset' to reset migration. \
                     You can also specify the '-r' or '--reversible' argument to set as reversible. \
-                    Or delete the migrations directory and run 'cargo run -- init' again.");
-                    return;
+                    Or delete the migrations directory and run 'cargo run -- init' again.";
+                    log::error!("{err}");
+                    panic!("{err}");
                 }
             }
             Err(e) => {
                 log::error!("Failed to get migrations: {e}");
-                return;
+                panic!("Failed to get migrations: {e}");
             }
         };
 
@@ -59,7 +60,7 @@ impl Init {
                 .await;
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");
-                return;
+                panic!("Failed to generate migrations: {e}");
             }
         } else {
             let gen = file_manager
@@ -69,7 +70,7 @@ impl Init {
 
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");
-                return;
+                panic!("Failed to generate migrations: {e}");
             }
         };
 
