@@ -1,6 +1,6 @@
 use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
-use surreal_models::migrations::{Resources, ResourcesV2};
-use surreal_orm::migrator::{FastForwardDelta, Init, MockPrompter, Mode, RenameOrDelete};
+use surreal_models::migrations::Resources;
+use surreal_orm::migrator::{FastForwardDelta, Init, MockPrompter, Mode};
 use tempfile::tempdir;
 use test_case::test_case;
 
@@ -24,7 +24,6 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 1,
@@ -35,6 +34,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -47,6 +47,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -69,7 +70,6 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 1,
@@ -80,6 +80,8 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
@@ -91,6 +93,7 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -118,7 +121,6 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         MockPrompter::default(),
     )
     .await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 1,
@@ -129,6 +131,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
 
     conf.run_init_cmd(
         Init::builder()
@@ -140,6 +143,10 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         MockPrompter::default(),
     )
     .await;
+    assert!(
+        false,
+        "should not reach here, if it does, it means, the second init command did not panic"
+    );
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -178,6 +185,7 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
 
     conf.run_init_cmd(
         Init::builder()
@@ -189,4 +197,8 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
         MockPrompter::default(),
     )
     .await;
+    assert!(
+        false,
+        "should not reach here, if it does, it means, the second init command did not panic"
+    );
 }
