@@ -338,6 +338,7 @@ impl TestConfigNew {
     pub async fn generate_test_migrations_arbitrary(
         &mut self,
         number_of_migs_to_gen: usize,
+        migration_type: MigrationFlag,
     ) -> &mut Self {
         if number_of_migs_to_gen == 0 {
             panic!("Generating 0 migrations not allowed.");
@@ -351,7 +352,10 @@ impl TestConfigNew {
         self.migrator
             .set_cmd(SubCommand::Init(
                 Init::builder()
-                    .reversible(true)
+                    .reversible(match migration_type {
+                        MigrationFlag::TwoWay => true,
+                        MigrationFlag::OneWay => false,
+                    })
                     .name("migration 1-init".into())
                     .run(false)
                     .build(),
