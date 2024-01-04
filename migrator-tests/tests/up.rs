@@ -1,24 +1,8 @@
-use std::{
-    fs::{self},
-    path::PathBuf,
-};
-
-use chrono::Utc;
 use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
-use surreal_models::migrations::{
-    Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
-    ResourcesV7, ResourcesV8, ResourcesV9,
-};
-use surreal_orm::migrator::{
-    config::{DatabaseConnection, UrlDb},
-    Basename, FastForwardDelta, FileContent, Generate, Init, Migration, MigrationFilename,
-    MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, SubCommand, Up,
-};
-use surrealdb::engine::any::Any;
-use surrealdb::Surreal;
+use surreal_models::migrations::Resources;
+use surreal_orm::migrator::{FastForwardDelta, Init, MigrationFilename, MockPrompter, Mode};
 use tempfile::tempdir;
 use test_case::test_case;
-use typed_builder::TypedBuilder;
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
 #[test_case(Mode::Lax, true; "Reversible Lax")]
@@ -30,23 +14,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
-    let basename = "migration init";
-    // let init_cmd = Init::builder()
-    //     .name(basename.into())
-    //     .reversible(reversible)
-    //     .run(false)
-    //     .build();
-    // // let gen = SubCommand::Generate(Generate::builder().name(basename.into()).run(false).build());
-    // conf.set_cmd(init_cmd)
-    //     .run(Some(Resources), MockPrompter::default())
-    //     .await;
 
-    // conf.run_gen("migration gen 1".into(), Resources).await;
-    //
-    // conf.generate_12_test_migrations_reversible(reversible)
-    //     .await;
-
-    // 1st fwd
     conf.run_up(&FastForwardDelta::default()).await;
 
     assert_with_db_instance(AssertionArg {
@@ -202,7 +170,6 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
 
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
-        // expected_mig_files_count: get_mig_file_count(12),
         expected_mig_files_count: get_mig_file_count(12),
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -511,8 +478,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
-    // First apply all generated migrations to the current db instance
-    // conf.run_up(&FastForwardDelta::default()).await;
     let migration_position = |num| {
         if reversible {
             num * 2
