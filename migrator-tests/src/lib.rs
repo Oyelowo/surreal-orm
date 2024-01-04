@@ -445,19 +445,12 @@ impl TestConfigNew {
         self.generate_12_test_migrations_reversible(true).await
     }
 
-    pub fn get_either_filename_type_at_position(
-        &self,
-        // migration_type: MigrationFlag,
-        position: u8,
-    ) -> MigrationFilename {
+    pub fn get_either_filename_type_at_position(&self, position: u8) -> MigrationFilename {
         if position == 0 {
             panic!(
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
-        // 1,2,3,4,5
-        //
-        // 1,2,3,4,5,6,7,8,9,10
         self.read_migrations_from_dir_sorted_asc()[position as usize - 1].clone()
     }
     // from 1st upwards. Starts from 1
@@ -467,9 +460,6 @@ impl TestConfigNew {
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
-        // 1,2,3,4,5
-        //
-        // 1,2,3,4,5,6,7,8,9,10
         self.read_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
 }
