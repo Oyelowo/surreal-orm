@@ -652,30 +652,40 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
     .await;
 }
 
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
-// async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let (mut conf, temp_test_migration_dir) =
-//         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
-//
-//     let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
-//     let file5 = files.get(4).unwrap().to_owned();
-//     let ref default_fwd_strategy5 = FastForwardDelta::builder().till(file5).build();
-//     conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
-//
-//     let file12 = files.get(11).unwrap().to_owned();
-//     let ref default_fwd_strategy12 = FastForwardDelta::builder().till(file12).build();
-//     conf.up_cmd(default_fwd_strategy12).await.run_up_fn().await;
-//
-//     conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
-// }
-//
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_12_test_migrations_reversible(reversible.into())
+        .await;
+    let migration_position = |num| {
+        if reversible {
+            num * 2
+        } else {
+            num
+        }
+    };
+
+    conf.run_up(
+        &FastForwardDelta::builder()
+            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .build(),
+    )
+    .await;
+    conf.run_up(
+        &FastForwardDelta::builder()
+            .till(conf.get_either_filename_type_at_position(migration_position(5)))
+            .build(),
+    )
+    .await;
+}
+
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
 // #[test_case(Mode::Lax, true; "Reversible Lax")]
 // #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
