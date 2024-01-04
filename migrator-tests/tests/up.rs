@@ -618,37 +618,40 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     .await;
 }
 
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
-// async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let (mut conf, temp_test_migration_dir) =
-//         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
-//     let cli_db = conf.db().clone();
-//
-//     let files = read_up_fwd_migrations_from_dir_sorted(&temp_test_migration_dir);
-//     let file12 = files.get(11).unwrap().to_owned();
-//     let ref default_fwd_strategy = FastForwardDelta::builder().till(file12).build();
-//     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-//     assert_with_db_instance(AssertionArg {
-//         db: cli_db.clone(),
-//         expected_mig_files_count: 12,
-//         expected_db_mig_count: 12,
-//         migration_files_dir: temp_test_migration_dir.clone(),
-//         expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-//         expected_latest_db_migration_meta_basename_normalized: "migration_12_gen_after_init".into(),
-//         code_origin_line: std::line!(),
-//         config: conf.clone(),
-//     })
-//     .await;
-//     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-// }
-//
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_12_test_migrations_reversible(reversible.into())
+        .await;
+    let migration_position = |num| {
+        if reversible {
+            num * 2
+        } else {
+            num
+        }
+    };
+
+    conf.run_up(
+        &FastForwardDelta::builder()
+            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .build(),
+    )
+    .await;
+    conf.run_up(
+        &FastForwardDelta::builder()
+            .till(conf.get_either_filename_type_at_position(migration_position(12)))
+            .build(),
+    )
+    .await;
+}
+
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
 // #[test_case(Mode::Lax, true; "Reversible Lax")]
 // #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
