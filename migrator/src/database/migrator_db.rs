@@ -115,8 +115,6 @@ impl MigratorDatabase {
     ) -> MigrationResult<()> {
         let migration_basename = migration_basename.normalize_ensure();
 
-        log::info!("Running migrations");
-
         let mut up_queries = vec![];
         let mut down_queries = vec![];
         // Left = migration directory
