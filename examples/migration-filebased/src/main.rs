@@ -1,28 +1,10 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::{
-    DbConnection, MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy,
-};
-use surrealdb::engine::remote::ws::Ws;
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
-
-async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
-    let db = Surreal::new::<Ws>("localhost:8000")
-        .await
-        .expect("Failed to connect to db");
-    db.signin(Root {
-        username: "root",
-        password: "root",
-    })
-    .await
-    .expect("Failed to signin");
-    db.use_ns("test").use_db("test").await.unwrap();
-    db
-}
+use surreal_orm::migrator::config::DatabaseConnection;
+use surreal_orm::migrator::{MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy};
 
 #[tokio::main]
 async fn main() {
-    // let db = DbConnection:;
+    let db = DatabaseConnection::default().setup().await.db().unwrap();
 
     // ONE WAY MIGRATIONS
     let files_config = MigrationConfig::new().make_strict();
