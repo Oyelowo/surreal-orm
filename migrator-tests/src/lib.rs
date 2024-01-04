@@ -191,6 +191,72 @@ impl TestConfigNew {
         Self::builder().migrator(migrator).build()
     }
 
+    pub fn assert_migration_queries_snapshot(
+        &self,
+        migration_type: MigrationFlag,
+        mode: Mode,
+        file: &str,
+        line: u32,
+    ) {
+        let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
+        let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
+        let migration_queries_snaps = glob::glob(&migration_dir_str)
+            .unwrap()
+            .map(|x| {
+                let path = x.unwrap();
+                let input = fs::read_to_string(&path).unwrap();
+                let header = MigrationFilename::try_from(
+                    path.file_name().unwrap().to_string_lossy().to_string(),
+                )
+                .unwrap();
+                let basename = header.basename();
+                let extension = header.extension();
+                let snaps = format!(
+                "header: Basename - {basename}. Extension - {extension}\n Migration Query: {input}"
+            );
+                snaps
+            })
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        let name_differentiator =
+            format!("source_{file}___line_{line}___migration_type_{migration_type}___mode_{mode}");
+        insta::assert_snapshot!(name_differentiator, migration_queries_snaps);
+    }
+
+    pub fn assert_migration_queries_snapshot_experiment(
+        &self,
+        migration_type: MigrationFlag,
+        mode: Mode,
+        file: &str,
+        line: u32,
+    ) -> (String, String) {
+        let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
+        let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
+        let migration_queries_snaps = glob::glob(&migration_dir_str)
+            .unwrap()
+            .map(|x| {
+                let path = x.unwrap();
+                let input = fs::read_to_string(&path).unwrap();
+                let header = MigrationFilename::try_from(
+                    path.file_name().unwrap().to_string_lossy().to_string(),
+                )
+                .unwrap();
+                let basename = header.basename();
+                let extension = header.extension();
+                let snaps = format!(
+                "header: Basename - {basename}. Extension - {extension}\n Migration Query: {input}"
+            );
+                snaps
+            })
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        let name_differentiator =
+            format!("source_{file}___line_{line}___migration_type_{migration_type}___mode_{mode}");
+        (name_differentiator, migration_queries_snaps)
+    }
+
     pub fn read_down_migrations_content_from_dir_sorted(&self) -> Vec<String> {
         self.read_down_migrations_from_dir_sorted_asc()
             .iter()
