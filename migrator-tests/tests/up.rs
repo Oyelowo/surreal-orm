@@ -686,30 +686,32 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
     .await;
 }
 
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
-// async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//
-//     let (mut conf, _) =
-//         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
-//     let non_existing_filename = MigrationFilename::create_oneway(
-//         Utc::now(),
-//         &Basename::new("nonexesint migration hahahahahah"),
-//     )
-//     .unwrap();
-//
-//     let ref default_fwd_strategy5 = FastForwardDelta::builder()
-//         .till(non_existing_filename)
-//         .build();
-//     conf.up_cmd(default_fwd_strategy5).await.run_up_fn().await;
-// }
-//
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
+async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_12_test_migrations_reversible(reversible.into())
+        .await;
+    let nonexisting_filename = MigrationFilename::try_from(
+        "20231220050955_this_shit_dont_exist_hahahahahahah.up.surql".to_string(),
+    )
+    .expect("Failed to parse file name");
+    let non_existing_name = if reversible {
+        nonexisting_filename.to_up()
+    } else {
+        nonexisting_filename.to_unidirectional()
+    };
+
+    conf.run_up(&FastForwardDelta::builder().till(non_existing_name).build())
+        .await;
+}
+
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
 // #[test_case(Mode::Lax, true; "Reversible Lax")]
 // #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
