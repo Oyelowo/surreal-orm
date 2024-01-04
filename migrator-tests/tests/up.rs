@@ -452,33 +452,53 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
     .await;
 }
 
-// #[test_case(Mode::Strict, true; "Reversible Strict")]
-// #[test_case(Mode::Lax, true; "Reversible Lax")]
-// #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-// #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
-// #[tokio::test]
-// async fn t5_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
-//     let mig_dir = tempdir().expect("Failed to create temp directory");
-//     let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-//     let (mut conf, temp_test_migration_dir) =
-//         generate_test_migrations(temp_test_migration_dir.clone(), mode, &reversible).await;
-//     let cli_db = conf.db().clone();
-//
-//     let ref default_fwd_strategy = FastForwardDelta::builder().number(0).build();
-//     conf.up_cmd(default_fwd_strategy).await.run_up_fn().await;
-//     assert_with_db_instance(AssertionArg {
-//         db: cli_db.clone(),
-//         expected_mig_files_count: 12,
-//         expected_db_mig_count: 0,
-//         migration_files_dir: temp_test_migration_dir.clone(),
-//         expected_latest_migration_file_basename_normalized: "migration_12_gen_after_init".into(),
-//         expected_latest_db_migration_meta_basename_normalized: "".into(),
-//         code_origin_line: std::line!(),
-//         config: conf.clone(),
-//     })
-//     .await;
-// }
-//
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
+    let mig_dir = tempdir().expect("Failed to create temp directory");
+    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    conf.generate_12_test_migrations_reversible(reversible.into())
+        .await;
+    let get_mig_file_count = |num| {
+        if reversible {
+            num * 2
+        } else {
+            num
+        }
+    };
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(12),
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some(
+            "migration_12_gen_after_init".into(),
+        ),
+        expected_latest_db_migration_meta_basename_normalized: None,
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_up(&FastForwardDelta::builder().number(0).build())
+        .await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: get_mig_file_count(12),
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some(
+            "migration_12_gen_after_init".into(),
+        ),
+        expected_latest_db_migration_meta_basename_normalized: None,
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+}
+
 // #[test_case(Mode::Strict, true; "Reversible Strict")]
 // #[test_case(Mode::Lax, true; "Reversible Lax")]
 // #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
