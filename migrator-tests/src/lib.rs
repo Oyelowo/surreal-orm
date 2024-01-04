@@ -531,8 +531,6 @@ impl TestConfigNew {
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
-        let xx = self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone();
-        dbg!(&xx);
-        xx
+        self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
 }
