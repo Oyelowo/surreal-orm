@@ -442,7 +442,7 @@ impl MigrationRunner {
                     .take(count as usize)
                     .collect::<Vec<_>>()
             }
-            UpdateStrategy::Till(mig_filename) => {
+            UpdateStrategy::Till(filecursor) => {
                 let pending_migs = Self::get_pending_migrations(all_migrations, db.clone()).await?;
 
                 let mut migration_found = false;
@@ -450,7 +450,8 @@ impl MigrationRunner {
 
                 for mig in pending_migs {
                     filtered_migs.push(mig.clone());
-                    if *mig.name_forward() == mig_filename {
+                    // if *mig.name_forward() == filecursor {
+                    if mig.name_forward().to_up() == filecursor.to_up() {
                         migration_found = true;
                         break;
                     }
@@ -458,7 +459,7 @@ impl MigrationRunner {
 
                 if !migration_found {
                     return Err(MigrationError::MigrationNotFoundFromPendingMigrations(
-                        mig_filename,
+                        filecursor,
                     ));
                 }
 

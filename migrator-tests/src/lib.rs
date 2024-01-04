@@ -349,19 +349,18 @@ impl TestConfigNew {
             .rename_or_delete_single_field_change(RenameOrDelete::Rename)
             .build();
 
-        self.migrator
-            .set_cmd(SubCommand::Init(
-                Init::builder()
-                    .reversible(match migration_type {
-                        MigrationFlag::TwoWay => true,
-                        MigrationFlag::OneWay => false,
-                    })
-                    .name("migration 1-init".into())
-                    .run(false)
-                    .build(),
-            ))
-            .run_fn(Resources, mock_prompter.clone())
-            .await;
+        self.set_cmd(SubCommand::Init(
+            Init::builder()
+                .reversible(match migration_type {
+                    MigrationFlag::TwoWay => true,
+                    MigrationFlag::OneWay => false,
+                })
+                .name("migration 1-init".into())
+                .run(false)
+                .build(),
+        ))
+        .run(Some(Resources), mock_prompter.clone())
+        .await;
 
         let gen = |basename: String| {
             SubCommand::Generate(Generate::builder().name(basename.into()).run(false).build())
@@ -446,13 +445,31 @@ impl TestConfigNew {
         self.generate_12_test_migrations_reversible(true).await
     }
 
-    // from 1st upwards. Starts from 1
-    pub fn get_filename_at_position(&self, position: usize) -> MigrationFilename {
+    pub fn get_either_filename_type_at_position(
+        &self,
+        // migration_type: MigrationFlag,
+        position: u8,
+    ) -> MigrationFilename {
         if position == 0 {
             panic!(
                 "Position cannot be 0. Must start from 1. This uses position rather than index."
             );
         }
-        self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone()
+        // 1,2,3,4,5
+        //
+        // 1,2,3,4,5,6,7,8,9,10
+        self.read_migrations_from_dir_sorted_asc()[position as usize - 1].clone()
+    }
+    // from 1st upwards. Starts from 1
+    pub fn get_down_filename_at_position(&self, position: usize) -> MigrationFilename {
+        if position == 0 {
+            panic!(
+                "Position cannot be 0. Must start from 1. This uses position rather than index."
+            );
+        }
+        // 1,2,3,4,5
+        //
+        // 1,2,3,4,5,6,7,8,9,10
+        self.read_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
 }
