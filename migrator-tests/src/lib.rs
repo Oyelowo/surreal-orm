@@ -224,39 +224,6 @@ impl TestConfigNew {
         insta::assert_snapshot!(name_differentiator, migration_queries_snaps);
     }
 
-    pub fn assert_migration_queries_snapshot_experiment(
-        &self,
-        migration_type: MigrationFlag,
-        mode: Mode,
-        file: &str,
-        line: u32,
-    ) -> (String, String) {
-        let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
-        let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
-        let migration_queries_snaps = glob::glob(&migration_dir_str)
-            .unwrap()
-            .map(|x| {
-                let path = x.unwrap();
-                let input = fs::read_to_string(&path).unwrap();
-                let header = MigrationFilename::try_from(
-                    path.file_name().unwrap().to_string_lossy().to_string(),
-                )
-                .unwrap();
-                let basename = header.basename();
-                let extension = header.extension();
-                let snaps = format!(
-                "header: Basename - {basename}. Extension - {extension}\n Migration Query: {input}"
-            );
-                snaps
-            })
-            .collect::<Vec<_>>()
-            .join("\n\n");
-
-        let name_differentiator =
-            format!("source_{file}___line_{line}___migration_type_{migration_type}___mode_{mode}");
-        (name_differentiator, migration_queries_snaps)
-    }
-
     pub fn read_down_migrations_content_from_dir_sorted(&self) -> Vec<String> {
         self.read_down_migrations_from_dir_sorted_asc()
             .iter()
@@ -275,9 +242,10 @@ impl TestConfigNew {
     }
 
     pub fn read_migrations_from_dir_sorted_asc(&self) -> Vec<MigrationFilename> {
-        let mut files =
-            std::fs::read_dir(&self.migrator.file_manager().get_migration_dir().unwrap())
-                .expect("Failed to read dir")
+        let dir = &self.migrator.file_manager().get_migration_dir();
+        let mut files = match dir {
+            Ok(dir) => std::fs::read_dir(dir)
+                .unwrap()
                 .filter_map(|p| {
                     p.expect("Failed to read dir")
                         .file_name()
@@ -287,7 +255,26 @@ impl TestConfigNew {
                         .ok()
                 })
                 .filter(|f: &MigrationFilename| f.is_down() || f.is_up() || f.is_unidirectional())
-                .collect::<Vec<MigrationFilename>>();
+                .collect::<Vec<MigrationFilename>>(),
+            Err(_) => vec![],
+        };
+        // let mut files = std::fs::read_dir(dir);
+        // let mut files = match files {
+        //     Ok(files) => files
+        //         .filter_map(|p| {
+        //             p.expect("Failed to read dir")
+        //                 .file_name()
+        //                 .to_string_lossy()
+        //                 .to_string()
+        //                 .try_into()
+        //                 .ok()
+        //         })
+        //         .filter(|f: &MigrationFilename| f.is_down() || f.is_up() || f.is_unidirectional())
+        //         .collect::<Vec<MigrationFilename>>(),
+        //     Err(e) => {
+        //         vec![]
+        //     }
+        // };
 
         files.sort_by_key(|a| a.timestamp());
         files
@@ -338,18 +325,30 @@ impl TestConfigNew {
         self
     }
 
-    pub async fn run_gen(&mut self, basename: Basename, resources: impl DbResources) -> &mut Self {
-        self.set_cmd(Generate::builder().name(basename.into()).run(false).build())
-            .run(
-                Some(resources),
-                MockPrompter::builder()
-                    .allow_empty_migrations_gen(true)
-                    .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-                    .build(),
-            )
-            .await
+    pub async fn run_gen_cmd(
+        &mut self,
+        gen_cmd: Generate,
+        codebase_resources: impl DbResources,
+        prompter: MockPrompter,
+    ) -> &mut Self {
+        self.set_cmd(gen_cmd)
+            .run(Some(codebase_resources), prompter)
+            .await;
+        self
     }
 
+    // pub async fn run_gen(&mut self, basename: Basename, resources: impl DbResources) -> &mut Self {
+    //     self.set_cmd(Generate::builder().name(basename.into()).run(false).build())
+    //         .run(
+    //             Some(resources),
+    //             MockPrompter::builder()
+    //                 .allow_empty_migrations_gen(true)
+    //                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
+    //                 .build(),
+    //         )
+    //         .await
+    // }
+    //
     pub async fn run_down(
         &mut self,
         rollback_strategy: &RollbackStrategyStruct,

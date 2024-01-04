@@ -54,7 +54,7 @@ impl Generate {
             }
             Err(e) => {
                 log::error!("Failed to detect migration type: {e}");
-                return;
+                panic!("Failed to detect migration type");
             }
         };
 
