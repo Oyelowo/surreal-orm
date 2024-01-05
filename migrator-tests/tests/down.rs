@@ -1,3 +1,9 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
 use surreal_orm::migrator::{
     FastForwardDelta, MigrationFilename, MigrationFlag, Mode, RollbackStrategyStruct,

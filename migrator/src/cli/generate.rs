@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use super::up::{FastForwardDelta, Up};
 
 use crate::*;
@@ -54,7 +61,8 @@ impl Generate {
             }
             Err(e) => {
                 log::error!("Failed to detect migration type: {e}");
-                panic!("Failed to detect migration type");
+                return;
+                // panic!("Failed to detect migration type");
             }
         };
 
