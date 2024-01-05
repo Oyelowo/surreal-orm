@@ -1,3 +1,9 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
 mod arg_parser;
 pub mod config;
 mod down;
