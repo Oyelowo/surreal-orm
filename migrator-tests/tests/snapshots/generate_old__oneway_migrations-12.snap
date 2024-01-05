@@ -1,0 +1,16 @@
+---
+source: migrator-tests/tests/generate_old.rs
+expression: fields_info.unwrap()
+---
+{
+    "events": {},
+    "fields": {
+        "checksum_up": "DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL",
+        "id": "DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL",
+        "name": "DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL",
+        "timestamp": "DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL",
+    },
+    "indexes": {},
+    "lives": {},
+    "tables": {},
+}

@@ -1,0 +1,23 @@
+---
+source: migrator-tests/tests/generate_old.rs
+expression: fields_info.unwrap()
+---
+{
+    "events": {
+        "event1": "DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop)",
+        "event2": "DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats)",
+    },
+    "fields": {
+        "attributes": "DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL",
+        "createdAt": "DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL",
+        "id": "DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL",
+        "species": "DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL",
+        "updatedAt": "DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL",
+        "velocity": "DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL",
+    },
+    "indexes": {
+        "species_speed_idx": "DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE",
+    },
+    "lives": {},
+    "tables": {},
+}

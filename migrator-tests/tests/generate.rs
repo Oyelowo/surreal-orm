@@ -7,7 +7,7 @@
 
 use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::{Resources, ResourcesV2};
-use surreal_orm::migrator::{FastForwardDelta, Generate, Init, MockPrompter, Mode, RenameOrDelete};
+use surreal_orm::migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete};
 use tempfile::tempdir;
 use test_case::test_case;
 
@@ -320,6 +320,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -343,6 +344,8 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
+
     // Redo and make sure
     conf.run_gen_cmd(
         Generate::builder()
@@ -366,6 +369,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -390,6 +394,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -423,6 +428,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
