@@ -45,7 +45,7 @@ impl Generate {
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
-                    panic!("Failed to generate migrations: {e}");
+                    panic!("Failed to generate migrations");
                 }
             }
             Ok(MigrationFlag::OneWay) => {
@@ -56,13 +56,12 @@ impl Generate {
 
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");
-                    panic!("Failed to generate migrations: {e}");
+                    panic!("Failed to generate migrations");
                 }
             }
             Err(e) => {
                 log::error!("Failed to detect migration type: {e}");
-                return;
-                // panic!("Failed to detect migration type");
+                panic!("Failed to detect migration type");
             }
         };
 

@@ -166,7 +166,7 @@ pub struct AssertionArg {
     pub expected_db_mig_meta_count: u8,
     pub expected_latest_migration_file_basename_normalized: Option<Basename>,
     pub expected_latest_db_migration_meta_basename_normalized: Option<Basename>,
-    pub code_origin_line: u32,
+    pub code_origin_line: &'static str,
     pub config: TestConfigNew,
 }
 
@@ -195,8 +195,7 @@ impl TestConfigNew {
         &self,
         migration_type: MigrationFlag,
         mode: Mode,
-        file: &str,
-        line: u32,
+        current_function_name: &str,
     ) {
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
         let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
@@ -219,8 +218,9 @@ impl TestConfigNew {
             .collect::<Vec<_>>()
             .join("\n\n");
 
-        let name_differentiator =
-            format!("source_{file}___line_{line}___migration_type_{migration_type}___mode_{mode}");
+        let name_differentiator = format!(
+            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}"
+        );
         insta::assert_snapshot!(name_differentiator, migration_queries_snaps);
     }
 
@@ -533,4 +533,17 @@ impl TestConfigNew {
         }
         self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
+}
+
+#[macro_export]
+macro_rules! current_function {
+    () => {{
+        fn f() {}
+        fn type_name_of<T>(_: T) -> &'static str {
+            std::any::type_name::<T>()
+        }
+
+        let name = type_name_of(f);
+        &name[..name.len() - 3] // Trim off "::f" from the end
+    }};
 }

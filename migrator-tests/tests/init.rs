@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
+use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MockPrompter, Mode};
 use tempfile::tempdir;
@@ -36,11 +36,11 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -49,11 +49,11 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -82,11 +82,11 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -95,11 +95,11 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -133,11 +133,11 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 
     conf.run_init_cmd(
         Init::builder()
@@ -187,11 +187,11 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
+    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
 
     conf.run_init_cmd(
         Init::builder()
