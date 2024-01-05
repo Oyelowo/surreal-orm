@@ -127,6 +127,10 @@ pub enum MigrationError {
         valid_fields: String,
     },
 
+    #[error("You are trying to rename the field - {field} - on table - {table} - to the same old field name - {field}. \
+        This is likely not intentional. Use a different name for the new field")]
+    RenamingToSameOldFieldDisallowed { field: Field, table: Table },
+
     #[error(
         "You are trying to use the same old field name - {field} - for new field name - {field}. \
         This is likely not intentional. Use a different name for the new field"
