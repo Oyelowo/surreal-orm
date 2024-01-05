@@ -36,6 +36,10 @@ pub struct Reset {
 }
 
 impl Reset {
+    pub fn reversible(&self) -> bool {
+        self.reversible
+    }
+
     pub async fn run(
         &self,
         cli: &mut Migrator,

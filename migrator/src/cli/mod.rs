@@ -70,6 +70,10 @@ pub struct Migrator {
 }
 
 impl Migrator {
+    pub fn mode(&self) -> Mode {
+        self.mode
+    }
+
     pub async fn setup(&mut self) {
         self.setup_logging();
         self.setup_db().await;

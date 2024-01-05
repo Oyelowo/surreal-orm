@@ -33,7 +33,6 @@ pub async fn assert_with_db_instance(args: AssertionArg) {
             .expect("Failed to parse file name")
             .basename()
     });
-    dbg!(&latest_migration_basename);
     assert_eq!(
         latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
         "Base name in file does not match the base name in the db. Line: {code_origin_line}",
@@ -166,13 +165,19 @@ pub struct AssertionArg {
     pub expected_db_mig_meta_count: u8,
     pub expected_latest_migration_file_basename_normalized: Option<Basename>,
     pub expected_latest_db_migration_meta_basename_normalized: Option<Basename>,
-    pub code_origin_line: &'static str,
+    pub code_origin_line: u32,
     pub config: TestConfigNew,
 }
 
 #[derive(Clone, TypedBuilder)]
 pub struct TestConfigNew {
     migrator: Migrator,
+    
+    #[builder(default)]
+    reversible: Option<bool>,
+    
+    #[builder(default)]
+    assertion_counter: u8,
 }
 
 impl TestConfigNew {
@@ -192,36 +197,44 @@ impl TestConfigNew {
     }
 
     pub fn assert_migration_queries_snapshot(
-        &self,
-        migration_type: MigrationFlag,
-        mode: Mode,
-        current_function_name: &str,
+        &mut self,
+        current_function_name: impl Into<String>,
     ) {
+        let mode = self.migrator.mode();
+        let reversible = self.reversible.unwrap_or_default();
+        let migration_type = MigrationFlag::from(reversible);
+        let current_function_name = current_function_name.into(); 
+        self.assertion_counter += 1;
+        let assertion_counter = self.assertion_counter;
+        let name_differentiator = format!(
+            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}\
+        _assertion_number {assertion_counter}"
+        );
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
-        let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
-        let migration_queries_snaps = glob::glob(&migration_dir_str)
-            .unwrap()
-            .map(|x| {
-                let path = x.unwrap();
+        // let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
+        let migration_queries_snaps = self
+            .read_migrations_from_dir_sorted_asc()
+            .iter()
+            .map(|filename| {
+                let path = migration_dir.join(filename.to_string());
                 let input = fs::read_to_string(&path).unwrap();
-                let header = MigrationFilename::try_from(
-                    path.file_name().unwrap().to_string_lossy().to_string(),
-                )
-                .unwrap();
-                let basename = header.basename();
-                let extension = header.extension();
+                let basename = filename.basename();
+                let extension = filename.extension();
+                let input = if input.is_empty() {
+                    "Empty migration".into()
+                } else {
+                    input
+                };
+                
                 let snaps = format!(
-                "header: Basename - {basename}. Extension - {extension}\n Migration Query: {input}"
+                "header: Basename - {basename}. Extension - {extension}\n Migration Query: \n{input}"
             );
                 snaps
             })
             .collect::<Vec<_>>()
             .join("\n\n");
 
-        let name_differentiator = format!(
-            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}"
-        );
-        insta::assert_snapshot!(name_differentiator, migration_queries_snaps);
+        insta::assert_snapshot!(name_differentiator,migration_queries_snaps);
     }
 
     pub fn read_down_migrations_content_from_dir_sorted(&self) -> Vec<String> {
@@ -258,25 +271,8 @@ impl TestConfigNew {
                 .collect::<Vec<MigrationFilename>>(),
             Err(_) => vec![],
         };
-        // let mut files = std::fs::read_dir(dir);
-        // let mut files = match files {
-        //     Ok(files) => files
-        //         .filter_map(|p| {
-        //             p.expect("Failed to read dir")
-        //                 .file_name()
-        //                 .to_string_lossy()
-        //                 .to_string()
-        //                 .try_into()
-        //                 .ok()
-        //         })
-        //         .filter(|f: &MigrationFilename| f.is_down() || f.is_up() || f.is_unidirectional())
-        //         .collect::<Vec<MigrationFilename>>(),
-        //     Err(e) => {
-        //         vec![]
-        //     }
-        // };
 
-        files.sort_by_key(|a| a.timestamp());
+        files.sort();
         files
     }
 
@@ -295,7 +291,7 @@ impl TestConfigNew {
                 .filter(|f: &MigrationFilename| f.is_down())
                 .collect::<Vec<MigrationFilename>>();
 
-        files.sort_by_key(|a| a.timestamp());
+        files.sort();
         files
     }
 
@@ -309,7 +305,17 @@ impl TestConfigNew {
     }
 
     pub fn set_cmd(&mut self, cmd: impl Into<SubCommand>) -> &mut Self {
-        self.migrator.set_cmd(cmd.into());
+        let cmd = cmd.into();
+        match &cmd {
+            SubCommand::Init(i) => {
+                self.reversible = Some(i.reversible());
+            } 
+             SubCommand::Reset(r)  => {
+                self.reversible = Some(r.reversible());
+            } 
+            _ => {}
+        };
+        self.migrator.set_cmd(cmd);
         self
     }
 
@@ -544,6 +550,7 @@ macro_rules! current_function {
         }
 
         let name = type_name_of(f);
-        &name[..name.len() - 3] // Trim off "::f" from the end
+        let name = &name[..name.len() - 3]; // Trim off "::f" from the end
+        name
     }};
 }

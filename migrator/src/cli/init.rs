@@ -32,6 +32,10 @@ pub struct Init {
 }
 
 impl Init {
+    pub fn reversible(&self) -> bool {
+        self.reversible
+    }
+
     pub async fn run(
         &self,
         cli: &mut Migrator,
