@@ -59,10 +59,9 @@ impl FullDbInfo {
         table_name: Table,
         field_name: Field,
     ) -> Option<DefineStatementRaw> {
-        self.table_resources.get(&table_name).and_then(|t| {
-            let x = t.fields();
-            x.get_definition(&field_name.to_string()).cloned()
-        })
+        self.table_resources
+            .get(&table_name)
+            .and_then(|t| t.fields().get_definition(&field_name).cloned())
     }
 
     pub fn get_table_indexes(&self, table_name: &Table) -> Option<Indexes> {

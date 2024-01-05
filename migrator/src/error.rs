@@ -131,6 +131,17 @@ pub enum MigrationError {
         This is likely not intentional. Use a different name for the new field")]
     RenamingToSameOldFieldDisallowed { field: Field, table: Table },
 
+    #[error("You are trying to rename the field-'{new_field}' - on table-'{table}' from a field-'{old_field}' \
+        currently still in use in the table. \
+        This is likely not intentional. Use a different name for the new field. \
+        You can rename only from one of {renamables}")]
+    CannotRenameFromOldFieldInUSeInTable {
+        new_field: Field,
+        old_field: Field,
+        table: Table,
+        renamables: String,
+    },
+
     #[error(
         "You are trying to use the same old field name - {field} - for new field name - {field}. \
         This is likely not intentional. Use a different name for the new field"

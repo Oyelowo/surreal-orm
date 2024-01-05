@@ -66,7 +66,8 @@ pub trait Informational {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: &str) -> Option<&DefineStatementRaw>;
+    // fn get_definition(&self, name: &str) -> Option<&DefineStatementRaw>;
+    fn get_definition<T: AsRef<str>>(&self, name: T) -> Option<&DefineStatementRaw>;
 }
 
 impl Informational for Info {
@@ -87,8 +88,9 @@ impl Informational for Info {
     // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
     // Above can be achieved just doing array<string> on the top level field - skills
     // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-    fn get_definition(&self, name: &str) -> Option<&DefineStatementRaw> {
-        self.0.get(name)
+    // fn get_definition(&self, name: &str) -> Option<&DefineStatementRaw> {
+    fn get_definition<T: AsRef<str>>(&self, name: T) -> Option<&DefineStatementRaw> {
+        self.0.get(name.as_ref())
     }
 }
 
@@ -125,8 +127,9 @@ macro_rules! define_object_info {
                 // "skills[*]": "DEFINE FIELD skills[*] ON person TYPE string"
                 // Above can be achieved just doing array<string> on the top level field - skills
                 // "skills": "DEFINE FIELD skills ON person TYPE option<array>",
-                fn get_definition(&self, name: &str) -> Option<&DefineStatementRaw> {
-                    self.0.0.get(name)
+                fn get_definition<T: AsRef<str>>(&self, name: T) -> Option<&DefineStatementRaw> {
+                    // let name: ::std::string::String = name.to_owned().into();
+                    self.0.0.get(name.as_ref())
                 }
             }
 

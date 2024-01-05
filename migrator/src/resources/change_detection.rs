@@ -72,22 +72,32 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                 });
             }
             (None, Some(r_meta)) => {
-                let old_left = left_defs
-                    .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
-                    .ok_or_else(|| MigrationError::InvalidOldFieldName {
+                let old_name = r_meta.old_name.clone().unwrap();
+                if let Some(_) = right_defs.get_definition(&old_name) {
+                    return Err(MigrationError::CannotRenameFromOldFieldInUSeInTable {
+                        new_field: field_name,
+                        old_field: old_name,
+                        table,
+                        renamables: left_defs.get_names().join(", "),
+                    });
+                }
+
+                let old_left = left_defs.get_definition(&old_name).ok_or_else(|| {
+                    MigrationError::InvalidOldFieldName {
                         new_name: r_meta.name.clone(),
                         table: table.clone(),
-                        old_name: r_meta.old_name.clone().unwrap(),
+                        old_name,
                         renamables: left_defs.get_names().join(", "),
-                    })?;
+                    }
+                })?;
 
-                let right_def = right_defs
-                    .get_definition(&r_meta.name.to_string().as_str())
-                    .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
+                let right_def = right_defs.get_definition(&r_meta.name).ok_or_else(|| {
+                    MigrationError::FieldNameDoesNotExist {
                         field_expected: r_meta.name.clone(),
                         table: table.clone(),
                         valid_fields: right_defs.get_names().join(", "),
-                    })?;
+                    }
+                })?;
 
                 DeltaTypeField::Rename {
                     right: right_def.clone(),
@@ -131,41 +141,6 @@ impl Deref for FieldMetadataWrapper {
 
     fn deref(&self) -> &Self::Target {
         &self.0
-    }
-}
-
-impl FieldMetadataWrapper {
-    pub(crate) fn handle_fieldname_change(
-        &self,
-        table: &Table,
-        left_defs: Fields,
-        right_defs: Fields,
-    ) -> MigrationResult<DeltaTypeField> {
-        let r_meta = &self.0;
-
-        let old_left = left_defs
-            .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
-            .ok_or_else(|| MigrationError::InvalidOldFieldName {
-                new_name: r_meta.name.clone(),
-                table: table.clone(),
-                old_name: r_meta.old_name.clone().unwrap(),
-                renamables: left_defs.get_names().join(", "),
-            })?;
-
-        let right_def = right_defs
-            .get_definition(&r_meta.name.to_string().as_str())
-            .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
-                field_expected: r_meta.name.clone(),
-                table: table.clone(),
-                valid_fields: right_defs.get_names().join(", "),
-            })?;
-
-        Ok(DeltaTypeField::Rename {
-            right: right_def.clone(),
-            new_name: r_meta.name.clone(),
-            old_left: old_left.to_owned(),
-            old_name: r_meta.old_name.clone().unwrap(),
-        })
     }
 }
 
