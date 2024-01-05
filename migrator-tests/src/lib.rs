@@ -449,15 +449,14 @@ impl TestConfigNew {
             .rename_or_delete_single_field_change(RenameOrDelete::Rename)
             .build();
 
-        self.migrator
-            .set_cmd(SubCommand::Init(
-                Init::builder()
-                    .reversible(reversible)
-                    .name("migration 1-init".into())
-                    .run(false)
-                    .build(),
-            ))
-            .run_fn(Resources, mock_prompter.clone())
+        self.set_cmd(
+            Init::builder()
+                .reversible(reversible)
+                .name("migration 1-init".into())
+                .run(false)
+                .build(),
+            )
+            .run(Some( Resources ), mock_prompter.clone())
             .await;
 
         let gen =
