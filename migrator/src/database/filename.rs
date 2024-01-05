@@ -214,7 +214,13 @@ impl PartialEq for MigrationFilename {
 
 impl Ord for MigrationFilename {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.timestamp().cmp(&other.timestamp())
+        match self.timestamp().cmp(&other.timestamp()) {
+            std::cmp::Ordering::Equal => match self.basename().cmp(&other.basename()) {
+                std::cmp::Ordering::Equal => self.type_priority().cmp(&other.type_priority()),
+                other => other,
+            },
+            other => other,
+        }
     }
 }
 
@@ -226,15 +232,7 @@ impl PartialOrd for MigrationFilename {
 
 impl Eq for MigrationFilename {}
 
-pub struct Filename(String);
-
-impl From<String> for Filename {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Extension(String);
 
 impl From<String> for Extension {
@@ -253,13 +251,6 @@ impl Display for Extension {
 /// e.g for 20210912121212_create_users.up.surql, the basename is create_users
 #[derive(Clone, Hash, Debug, PartialEq, Ord, PartialOrd, Eq)]
 pub struct Basename(String);
-
-impl Basename {
-    pub fn new(name: impl Into<String>) -> Self {
-        let name: String = name.into();
-        Self(name)
-    }
-}
 
 impl Basename {
     pub fn normalize_ensure(&self) -> Basename {
@@ -291,6 +282,14 @@ impl Display for Basename {
 }
 
 impl MigrationFilename {
+    pub fn type_priority(&self) -> u8 {
+        match self {
+            MigrationFilename::Up(_) => 1,
+            MigrationFilename::Down(_) => 2,
+            MigrationFilename::Unidirectional(_) => 3,
+        }
+    }
+
     pub fn is_up(&self) -> bool {
         matches!(self, MigrationFilename::Up(_))
     }
@@ -301,30 +300,6 @@ impl MigrationFilename {
 
     pub fn is_unidirectional(&self) -> bool {
         matches!(self, MigrationFilename::Unidirectional(_))
-    }
-
-    pub fn filename(&self) -> Filename {
-        match self {
-            MigrationFilename::Up(MigrationNameBasicInfo {
-                timestamp,
-                basename: name,
-            }) => {
-                format!("{timestamp}_{name}.up.surql")
-            }
-            MigrationFilename::Down(MigrationNameBasicInfo {
-                timestamp,
-                basename: name,
-            }) => {
-                format!("{timestamp}_{name}.down.surql")
-            }
-            MigrationFilename::Unidirectional(MigrationNameBasicInfo {
-                timestamp,
-                basename: name,
-            }) => {
-                format!("{timestamp}_{name}.surql")
-            }
-        }
-        .into()
     }
 
     pub fn timestamp(&self) -> Timestamp {
