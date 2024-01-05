@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
+use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MigrationFilename, MockPrompter, Mode};
 use tempfile::tempdir;
@@ -29,7 +29,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -64,7 +64,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -77,7 +77,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -89,7 +89,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -122,7 +122,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -134,7 +134,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -163,7 +163,7 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -191,7 +191,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_1_init".into()),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -208,7 +208,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_6_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -225,7 +225,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_6_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -242,7 +242,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_7_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -259,7 +259,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -276,7 +276,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -301,7 +301,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
             "migration_69_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -318,7 +318,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_26_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -335,7 +335,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -360,7 +360,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
             "migration_69_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -377,7 +377,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_69_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -402,7 +402,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -417,7 +417,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -443,7 +443,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -465,7 +465,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_5_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -488,7 +488,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             expected_latest_db_migration_meta_basename_normalized: Some(
                 format!("migration_{}{}", i, "_gen_after_init".to_string()).into(),
             ),
-            code_origin_line: std::line!(),
+            code_origin_line: current_function!(),
             config: conf.clone(),
         })
         .await;
@@ -510,7 +510,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -526,7 +526,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -632,7 +632,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -654,7 +654,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_3_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -672,7 +672,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_7_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -694,7 +694,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_9_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
@@ -712,7 +712,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         expected_latest_db_migration_meta_basename_normalized: Some(
             "migration_12_gen_after_init".into(),
         ),
-        code_origin_line: std::line!(),
+        code_origin_line: current_function!(),
         config: conf.clone(),
     })
     .await;
