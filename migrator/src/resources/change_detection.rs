@@ -50,8 +50,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
             codebase_resources,
         } = value;
 
-        let left_def = left_defs.get_definition(&field_name.build());
-        let right_def = right_defs.get_definition(&field_name.build());
         let foundfield_by_newname = RightDatabase::find_field_has_old_name(
             codebase_resources,
             &table,
@@ -59,62 +57,69 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
         )
         .map(FieldMetadataWrapper);
 
-        let old_name_opt = foundfield_by_newname
-            .as_ref()
-            .map(|field_meta| field_meta.old_name.as_ref())
-            .flatten();
-        dbg!(&old_name_opt);
-        if let Some(old_name) = old_name_opt {
-            let old_name_def = left_defs.get_definition(&old_name.build());
-            if old_name_def.is_none() {
-                return Err(MigrationError::InvalidOldFieldName {
-                    new_name: field_name,
+        let found_field_by_oldname = RightDatabase::find_field_has_old_name(
+            codebase_resources,
+            &table,
+            By::OldName(field_name.clone()),
+        )
+        .map(FieldMetadataWrapper);
+
+        let res = match (found_field_by_oldname, foundfield_by_newname) {
+            (Some(_l_meta), Some(_r_meta)) => {
+                return Err(MigrationError::RenamingToSameOldFieldDisallowed {
+                    field: field_name,
                     table,
-                    old_name: old_name.clone(),
-                    renamables: left_defs.get_names().join(", "),
                 });
             }
-        }
+            (None, Some(r_meta)) => {
+                let old_left = left_defs
+                    .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
+                    .ok_or_else(|| MigrationError::InvalidOldFieldName {
+                        new_name: r_meta.name.clone(),
+                        table: table.clone(),
+                        old_name: r_meta.old_name.clone().unwrap(),
+                        renamables: left_defs.get_names().join(", "),
+                    })?;
 
-        let res = match (left_def.cloned(), right_def.cloned()) {
-            (None, None) => unreachable!(),
-            (Some(l), Some(r)) => {
-                if l.trim() != r.trim() {
-                    DeltaTypeField::Update { left: l, right: r }
-                } else {
-                    DeltaTypeField::NoChange
+                let right_def = right_defs
+                    .get_definition(&r_meta.name.to_string().as_str())
+                    .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
+                        field_expected: r_meta.name.clone(),
+                        table: table.clone(),
+                        valid_fields: right_defs.get_names().join(", "),
+                    })?;
+
+                DeltaTypeField::Rename {
+                    right: right_def.clone(),
+                    new_name: r_meta.name.clone(),
+                    old_left: old_left.to_owned(),
+                    old_name: r_meta.old_name.clone().unwrap(),
                 }
             }
-            _ => {
-                let found_field_by_oldname = RightDatabase::find_field_has_old_name(
-                    codebase_resources,
-                    &table,
-                    By::OldName(field_name.clone()),
-                )
-                .map(FieldMetadataWrapper);
+            (Some(_), None) => {
+                // Skip change since Renaming has already been handled up there on the right
+                DeltaTypeField::NoChange
+            }
+            // No explicit rename attribute used on the field e.g old_name = "OldFieldName"
+            (None, None) => {
+                let left_def = left_defs.get_definition(&field_name.build()).cloned();
+                let right_def = right_defs.get_definition(&field_name.build()).cloned();
 
-                match (found_field_by_oldname, foundfield_by_newname) {
-                    (Some(_l_meta), Some(r_meta)) => {
-                        //
-                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
+                match (left_def, right_def) {
+                    (None, Some(r)) => DeltaTypeField::Create { right: r },
+                    (Some(l), None) => DeltaTypeField::Remove { left: l },
+                    (Some(l), Some(r)) => {
+                        if l.trim() != r.trim() {
+                            DeltaTypeField::Update { left: l, right: r }
+                        } else {
+                            DeltaTypeField::NoChange
+                        }
                     }
-                    (None, Some(r_meta)) => {
-                        //
-                        r_meta.handle_fieldname_change(&table, left_defs, right_defs)?
-                    }
-                    (Some(_), None) => {
-                        // Skip change since that has been handled up there on the right
-                        DeltaTypeField::NoChange
-                    }
-                    // No explicit rename attribute used e.g old_name = "OldFieldName"
-                    (None, None) => match (left_def, right_def) {
-                        (None, Some(r)) => DeltaTypeField::Create { right: r.clone() },
-                        (Some(l), None) => DeltaTypeField::Remove { left: l.clone() },
-                        _ => unreachable!(),
-                    },
+                    _ => unreachable!(),
                 }
             }
         };
+
         Ok(res)
     }
 }
