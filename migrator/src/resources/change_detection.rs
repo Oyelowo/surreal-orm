@@ -52,6 +52,29 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
 
         let left_def = left_defs.get_definition(&field_name.build());
         let right_def = right_defs.get_definition(&field_name.build());
+        let foundfield_by_newname = RightDatabase::find_field_has_old_name(
+            codebase_resources,
+            &table,
+            By::NewName(field_name.clone()),
+        )
+        .map(FieldMetadataWrapper);
+
+        let old_name_opt = foundfield_by_newname
+            .as_ref()
+            .map(|field_meta| field_meta.old_name.as_ref())
+            .flatten();
+        dbg!(&old_name_opt);
+        if let Some(old_name) = old_name_opt {
+            let old_name_def = left_defs.get_definition(&old_name.build());
+            if old_name_def.is_none() {
+                return Err(MigrationError::InvalidOldFieldName {
+                    new_name: field_name,
+                    table,
+                    old_name: old_name.clone(),
+                    renamables: left_defs.get_names().join(", "),
+                });
+            }
+        }
 
         let res = match (left_def.cloned(), right_def.cloned()) {
             (None, None) => unreachable!(),
@@ -63,13 +86,6 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                 }
             }
             _ => {
-                let foundfield_by_newname = RightDatabase::find_field_has_old_name(
-                    codebase_resources,
-                    &table,
-                    By::NewName(field_name.clone()),
-                )
-                .map(FieldMetadataWrapper);
-
                 let found_field_by_oldname = RightDatabase::find_field_has_old_name(
                     codebase_resources,
                     &table,
@@ -125,17 +141,17 @@ impl FieldMetadataWrapper {
         let old_left = left_defs
             .get_definition(&r_meta.old_name.as_ref().unwrap().to_string().as_str())
             .ok_or_else(|| MigrationError::InvalidOldFieldName {
-                new_name: r_meta.name.to_string(),
-                table: table.to_string(),
-                old_name: r_meta.old_name.as_ref().unwrap().to_string(),
+                new_name: r_meta.name.clone(),
+                table: table.clone(),
+                old_name: r_meta.old_name.clone().unwrap(),
                 renamables: left_defs.get_names().join(", "),
             })?;
 
         let right_def = right_defs
             .get_definition(&r_meta.name.to_string().as_str())
             .ok_or_else(|| MigrationError::FieldNameDoesNotExist {
-                field_expected: r_meta.name.to_string(),
-                table: table.to_string(),
+                field_expected: r_meta.name.clone(),
+                table: table.clone(),
                 valid_fields: right_defs.get_names().join(", "),
             })?;
 

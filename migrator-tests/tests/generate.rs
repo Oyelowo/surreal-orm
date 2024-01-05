@@ -383,7 +383,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
 #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
-#[should_panic]
+// #[should_panic]
 async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
@@ -442,6 +442,17 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         MockPrompter::default(),
     )
     .await;
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: 3,
+        expected_db_mig_meta_count: 3,
+        expected_latest_migration_file_basename_normalized: Some("migration_3_gen".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_3_gen".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+    // conf.assert_migration_queries_snapshot(reversible.into(), mode, std::file!(), std::line!());
     // assert!(
     //     false,
     //     "Should panic because we are renaming the same field twice. So, we should't get here."

@@ -112,9 +112,9 @@ pub enum MigrationError {
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {renamables}", )]
     InvalidOldFieldName {
-        new_name: String,
-        table: String,
-        old_name: String,
+        new_name: Field,
+        table: Table,
+        old_name: Field,
         renamables: String,
     },
 
@@ -122,8 +122,8 @@ pub enum MigrationError {
         It must have already been renamed previously or never existed before or wrongly spelt. \
          Also, make sure you are using the correct case for the field name. It should be one of these: {valid_fields}", )]
     FieldNameDoesNotExist {
-        field_expected: String,
-        table: String,
+        field_expected: Field,
+        table: Table,
         valid_fields: String,
     },
 

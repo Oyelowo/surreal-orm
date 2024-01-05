@@ -126,12 +126,12 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         let right_defs = self.get_right();
 
         let err = MigrationError::FieldNameDoesNotExist {
-            field_expected: old_name.to_string(),
-            table: table.to_string(),
+            field_expected: old_name.clone(),
+            table: table.clone(),
             valid_fields: left_defs.get_names().join(", "),
         };
         let old_field_def = left_defs
-            .get_definition(old_name.to_string().as_str())
+            .get_definition(&old_name.build())
             .expect(err.to_string().as_str());
 
         let new_field_def = right_defs
