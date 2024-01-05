@@ -37,11 +37,12 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
+
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
     assert!(
         false,
@@ -75,11 +76,11 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: b
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
 }
 
@@ -109,11 +110,11 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -130,11 +131,11 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
     assert!(migration_dir.exists());
 }
 
@@ -164,11 +165,11 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -187,11 +188,11 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         // we didnt run after genreate, so the latest db migration meta should remain the same
         // as the one created at initialization.
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
     assert!(migration_dir.exists());
 }
 
@@ -224,11 +225,11 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -245,11 +246,11 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_gen_1".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
     assert!(migration_dir.exists());
 }
 
@@ -273,12 +274,12 @@ async fn test_multiple_generation(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
 
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -315,7 +316,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
@@ -338,7 +339,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
@@ -361,7 +362,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
@@ -385,7 +386,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1_this_time_we_allow_mock_prompter_to_generate_empty_migration_on_no_diff".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_gen_1_this_time_we_allow_mock_prompter_to_generate_empty_migration_on_no_diff".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
@@ -418,7 +419,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
@@ -438,11 +439,11 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_2_gen".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_2_gen".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(reversible.into(), mode, current_function!());
+    conf.assert_migration_queries_snapshot(current_function!());
     assert!(migration_dir.exists());
 
     conf.run_gen_cmd(
@@ -460,7 +461,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some("migration_3_gen".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_3_gen".into()),
-        code_origin_line: current_function!(),
+        code_origin_line: std::line!(),
         config: conf.clone(),
     })
     .await;
