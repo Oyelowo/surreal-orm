@@ -149,17 +149,6 @@ impl DatabaseConnection {
 
         self.db_connection = Some(db_instance);
 
-        // Self {
-        //     url: cli_db_url.clone(),
-        //     db: database.into(),
-        //     ns: namespace.into(),
-        //     sc: self.sc.clone(),
-        //     user: username.into(),
-        //     pass: password.into(),
-        //     mode: self.mode.clone(),
-        //     prune: self.prune,
-        //     db_connection: self.db_connection.clone(),
-        // }
         self
     }
 
