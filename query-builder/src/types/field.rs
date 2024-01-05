@@ -276,6 +276,12 @@ impl From<Field> for String {
     }
 }
 
+impl AsRef<str> for Field {
+    fn as_ref(&self) -> &str {
+        self.graph_string.as_str()
+    }
+}
+
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build())
