@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, ops::Deref};
 
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
@@ -15,6 +15,7 @@ use surreal_orm::{
 };
 
 use typed_builder::TypedBuilder;
+
 pub async fn assert_with_db_instance(args: AssertionArg) {
     let AssertionArg {
         expected_mig_files_count,
@@ -169,6 +170,34 @@ pub struct AssertionArg {
     pub config: TestConfigNew,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SnapShot(String);
+impl Deref for SnapShot {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl  SnapShot {
+    pub fn new(s: String) -> Self {
+        Self(s)
+    }
+}
+
+impl From<String> for SnapShot {
+    fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
+impl From<&str> for SnapShot {
+    fn from(s: &str) -> Self {
+        Self(s.into())
+    }
+}
+
 #[derive(Clone, TypedBuilder)]
 pub struct TestConfigNew {
     migrator: Migrator,
@@ -199,7 +228,7 @@ impl TestConfigNew {
     pub fn assert_migration_queries_snapshot(
         &mut self,
         current_function_name: impl Into<String>,
-    ) {
+    ) -> SnapShot {
         let mode = self.migrator.mode();
         let reversible = self.reversible.unwrap_or_default();
         let migration_type = MigrationFlag::from(reversible);
@@ -234,7 +263,8 @@ impl TestConfigNew {
             .collect::<Vec<_>>()
             .join("\n\n");
 
-        insta::assert_snapshot!(name_differentiator,migration_queries_snaps);
+        insta::assert_snapshot!(name_differentiator, migration_queries_snaps);
+        migration_queries_snaps.into()
     }
 
     pub fn read_down_migrations_content_from_dir_sorted(&self) -> Vec<String> {
