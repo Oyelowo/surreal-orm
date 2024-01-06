@@ -26,7 +26,7 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(false)
@@ -60,7 +60,7 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(true)
@@ -114,7 +114,7 @@ async fn test_successfully_handles_renaming(
         .rename_or_delete_single_field_change(single_field_name_change_diff_strategy)
         .build();
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -211,7 +211,7 @@ async fn test_successfully_handles_renaming(
         assert_forward_up_migrations_snaps_v1();
     }
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(false)
@@ -359,7 +359,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -491,7 +491,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         assert_forward_up_migrations_snaps();
     }
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(false)
@@ -521,7 +521,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -541,7 +541,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(false)
@@ -576,7 +576,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -596,7 +596,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1".into())
             .run(true)
@@ -658,7 +658,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -678,7 +678,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1 but we are not accept empty generation on no diff in mock prompter".into())
             .run(true)
@@ -700,7 +700,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     .await;
 
     // Redo and make sure
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen again but we are not accept empty generation on no diff in mock prompter".into())
             .run(true)
@@ -721,7 +721,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration gen 1 this time we allow mock prompter to generate empty migration on no diff".into())
             .run(true)
@@ -756,7 +756,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -776,7 +776,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration 2 gen".into())
             .run(true)
@@ -796,7 +796,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
 
     assert!(migration_dir.exists());
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration 3 gen".into())
             .run(true)
@@ -832,7 +832,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -852,7 +852,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration 2 gen".into())
             .run(true)
@@ -877,7 +877,7 @@ async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, rev
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -897,7 +897,7 @@ async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, rev
     })
     .await;
 
-    conf.run_gen_cmd(
+    conf.run_gen(
         Generate::builder()
             .name("migration 2 gen".into())
             .run(true)
@@ -925,7 +925,7 @@ async fn test_should_panic_if_renaming_from_non_existing_field_in_migration_dire
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
