@@ -307,7 +307,7 @@ impl TestConfigNew {
             migration_meta: stream_lined_migrations,
         };
         self.db_resources_state_assertion_counter += 1;
-        let name_differentiator = self.snapshots_name_differentiator(current_function!(), self.db_resources_state_assertion_counter);
+        let name_differentiator = self.snapshots_name_differentiator("db_state", self.db_resources_state_assertion_counter);
         insta::assert_debug_snapshot!(name_differentiator, db_miration_schema_state);
         db_miration_schema_state
     }
@@ -324,9 +324,8 @@ impl TestConfigNew {
             RenameOrDelete::Delete => "single field name change strategy: delete",
         };
         let name_differentiator = format!(
-            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}{mock_prompter}\
-        function{implementor_fn_name}\
-        _assertion_number {assertion_counter}"
+            "source_{current_function_name}__{migration_type}___{mode}{mock_prompter}\
+        {implementor_fn_name}_{assertion_counter}"
         );
 
         name_differentiator
@@ -337,7 +336,7 @@ impl TestConfigNew {
     ) -> SnapShot {
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
         self.migration_dir_state_assertion_counter += 1;
-        let name_differentiator = self.snapshots_name_differentiator(current_function!(), self.migration_dir_state_assertion_counter);
+        let name_differentiator = self.snapshots_name_differentiator("migdir_state", self.migration_dir_state_assertion_counter);
         let migration_queries_snaps = self
             .read_migrations_from_dir_sorted_asc()
             .iter()
