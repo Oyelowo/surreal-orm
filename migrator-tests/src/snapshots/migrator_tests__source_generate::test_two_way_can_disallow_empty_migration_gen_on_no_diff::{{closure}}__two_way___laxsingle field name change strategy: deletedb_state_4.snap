@@ -1,0 +1,102 @@
+---
+source: migrator-tests/src/lib.rs
+expression: db_miration_schema_state
+---
+DbMigrationSchemaState {
+    resources: DbInfo {
+        analyzers: Analyzers(
+            Info(
+                {},
+            ),
+        ),
+        functions: Functions(
+            Info(
+                {},
+            ),
+        ),
+        params: Params(
+            Info(
+                {},
+            ),
+        ),
+        scopes: Scopes(
+            Info(
+                {},
+            ),
+        ),
+        tables: Tables(
+            Info(
+                {
+                    "animal": DefineStatementRaw(
+                        "DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "animal_snake_case": DefineStatementRaw(
+                        "DEFINE TABLE animal_snake_case SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "crop": DefineStatementRaw(
+                        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "eats": DefineStatementRaw(
+                        "DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "eats_snake_case": DefineStatementRaw(
+                        "DEFINE TABLE eats_snake_case SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "migration": DefineStatementRaw(
+                        "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "planet": DefineStatementRaw(
+                        "DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "student": DefineStatementRaw(
+                        "DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                },
+            ),
+        ),
+        tokens: Tokens(
+            Info(
+                {},
+            ),
+        ),
+        users: Users(
+            Info(
+                {},
+            ),
+        ),
+    },
+    migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_gen_1_this_time_we_allow_mock_prompter_to_generate_empty_migration_on_no_diff",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "5698c6869203e93a5548120e5cb133b5addac80deb19e0775856757272258f4f",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "d2bdf89ec731af7695337f33284cb5af78977b0610bba1464a005cdcb8394272",
+                ),
+            ),
+        },
+    ],
+}

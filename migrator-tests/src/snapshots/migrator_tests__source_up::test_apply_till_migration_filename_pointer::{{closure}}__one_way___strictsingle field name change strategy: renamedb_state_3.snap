@@ -53,6 +53,18 @@ DbMigrationSchemaState {
     migration_meta: [
         StreamLinedMigration {
             basename: Basename(
+                "migration_6_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
                 "migration_5_gen_after_init",
             ),
             extension: Extension(

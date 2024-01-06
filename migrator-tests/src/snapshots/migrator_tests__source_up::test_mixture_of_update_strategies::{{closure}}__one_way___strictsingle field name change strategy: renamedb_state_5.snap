@@ -33,9 +33,6 @@ DbMigrationSchemaState {
                     "crop": DefineStatementRaw(
                         "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
                     ),
-                    "eats": DefineStatementRaw(
-                        "DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE",
-                    ),
                     "migration": DefineStatementRaw(
                         "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
                     ),
@@ -57,6 +54,42 @@ DbMigrationSchemaState {
         ),
     },
     migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_12_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "691ff1604b14125738016c86e23837a4accb54dae63f504adc9c4bebf6186c21",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_11_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_10_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "5b697bf69196dc4bb23404b8b8cd1cbcf1f0f4011d5d842a137a7d9b0da2516c",
+            ),
+            checksum_down: None,
+        },
         StreamLinedMigration {
             basename: Basename(
                 "migration_9_gen_after_init",
