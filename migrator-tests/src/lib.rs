@@ -9,9 +9,9 @@ use surreal_orm::{
         config::{DatabaseConnection, UrlDb},
         Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
         MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
-        SubCommand, Up,
+        SubCommand, Up, DbInfo,
     },
-    DbResources,
+    DbResources, statements::info_for, Runnable,
 };
 
 use typed_builder::TypedBuilder;
@@ -217,10 +217,29 @@ pub struct TestConfigNew {
     
     #[builder(default)]
     assertion_counter: u8,
+    
+    #[builder(default)]
+    current_function_name: CurrentFunctionName,
+}
+
+#[derive(Clone, Default)]
+struct CurrentFunctionName(String);
+
+impl From<&str> for CurrentFunctionName {
+    fn from(s: &str) -> Self {
+        Self(s.into())
+    }
+}
+
+impl Display for CurrentFunctionName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let CurrentFunctionName(s) = self;
+        write!(f, "{s}" )
+    }
 }
 
 impl TestConfigNew {
-    pub async fn new(mode: Mode, migration_dir: &PathBuf) -> Self {
+    pub async fn new(mode: Mode, migration_dir: &PathBuf, current_function_name: impl Into< CurrentFunctionName >) -> Self {
         let db_conn_config = get_db_connection_config();
 
         let mut migrator = Migrator::builder()
@@ -232,17 +251,26 @@ impl TestConfigNew {
 
         migrator.setup_db().await;
 
-        Self::builder().migrator(migrator).build()
+        Self::builder().migrator(migrator).current_function_name(current_function_name.into()).build()
     }
 
-    pub fn assert_migration_queries_snapshot(
-        &mut self,
-        current_function_name: impl Into<String>,
-    ) -> SnapShot {
+    pub async fn get_db_info(&mut self) -> Option<DbInfo> {
+        let db_info = info_for()
+            .database()
+            .get_data::<DbInfo>(self.migrator.db().clone())
+            .await
+            .unwrap();
+        insta::assert_debug_snapshot!(self.snapshots_name_differentiator(), db_info);
+        db_info
+    }
+
+
+
+    fn snapshots_name_differentiator(&mut self) -> String {
         let mode = self.migrator.mode();
         let reversible = self.reversible.unwrap_or_default();
         let migration_type = MigrationFlag::from(reversible);
-        let current_function_name = current_function_name.into(); 
+        let current_function_name = &self.current_function_name; 
         self.assertion_counter += 1;
         let assertion_counter = self.assertion_counter;
         let mock_prompter = match self.mock_prompter.unwrap_or_default().rename_or_delete_single_field_change {
@@ -253,8 +281,15 @@ impl TestConfigNew {
             "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}{mock_prompter}\
         _assertion_number {assertion_counter}"
         );
+
+        name_differentiator
+    }
+
+    pub fn assert_migration_queries_snapshot(
+        &mut self,
+    ) -> SnapShot {
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
-        // let migration_dir_str = migration_dir.join("*.surql").to_string_lossy().to_string();
+        let name_differentiator = self.snapshots_name_differentiator();
         let migration_queries_snaps = self
             .read_migrations_from_dir_sorted_asc()
             .iter()
