@@ -19,6 +19,17 @@ DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 54
 DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
 
 
+DEFINE TABLE animal_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal_snake_case TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD created_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal_snake_case TYPE record<animal_snake_case> PERMISSIONS FULL;
+DEFINE FIELD species ON animal_snake_case TYPE string PERMISSIONS FULL;
+DEFINE FIELD updated_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal_snake_case TYPE int PERMISSIONS FULL;
+
+
+
+
 DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
@@ -32,6 +43,16 @@ DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
 DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
 DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
 DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE eats_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD created_at ON eats_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats_snake_case TYPE record<eats_snake_case> PERMISSIONS FULL;
+DEFINE FIELD in ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats_snake_case TYPE string PERMISSIONS FULL;
 
 
 
@@ -77,6 +98,7 @@ DEFINE EVENT event1 ON animal WHEN species = 'Homo Habillis' AND velocity > 545 
 REMOVE EVENT event2 ON TABLE animal;
 
 
+REMOVE TABLE animal_snake_case;
 
 
 
@@ -88,6 +110,7 @@ DEFINE FIELD updatedAt ON eats TYPE datetime PERMISSIONS FULL;
 
 
 
+REMOVE TABLE eats_snake_case;
 
 
 

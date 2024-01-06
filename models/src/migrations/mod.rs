@@ -16,8 +16,18 @@ use surreal_orm::{
 #[derive(Debug, Clone)]
 pub struct Resources;
 
+use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
+
 impl DbResources for Resources {
-    create_table_resources!(Animal, Crop, AnimalEatsCrop, Student, Planet);
+    create_table_resources!(
+        Animal,
+        AnimalSnakeCase,
+        Crop,
+        AnimalEatsCrop,
+        AnimalSnakeCaseEatsCrop,
+        Student,
+        Planet
+    );
 }
 
 #[derive(Debug, Clone)]
@@ -179,6 +189,49 @@ pub struct Student {
 }
 
 impl TableResources for Student {}
+
+pub mod snake_cases {
+    use super::*;
+
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[surreal_orm(table_name = "animal_snake_case", schemafull)]
+    pub struct AnimalSnakeCase {
+        pub id: SurrealSimpleId<Self>,
+        pub species: String,
+        // Improve error message for old_nmae using word similarity algo
+        pub attributes: Vec<String>,
+        pub created_at: chrono::DateTime<Utc>,
+        pub updated_at: chrono::DateTime<Utc>,
+        pub velocity: u64,
+    }
+
+    impl TableResources for AnimalSnakeCase {}
+
+    // We are relaxing table name, so that this serves as second version of AnimalSnakeCase
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[surreal_orm(table_name = "animal_snake_case", schemafull, relax_table_name)]
+    pub struct AnimalSnakeCaseV2 {
+        pub id: SurrealSimpleId<Self>,
+        pub species: String,
+        #[surreal_orm(old_name = "attributes")]
+        pub characteristics: Vec<String>,
+        pub velocity: u64,
+    }
+    impl TableResources for AnimalSnakeCaseV2 {}
+    #[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+    #[surreal_orm(table_name = "eats_snake_case", schemafull)]
+    pub struct EatsSnakeCase<In: Node, Out: Node> {
+        pub id: SurrealSimpleId<Self>,
+        #[serde(rename = "in")]
+        pub in_: In,
+        pub out: Out,
+        pub place: String,
+        pub created_at: chrono::DateTime<Utc>,
+    }
+
+    pub type AnimalSnakeCaseEatsCrop = EatsSnakeCase<AnimalSnakeCase, Crop>;
+    impl TableResources for AnimalSnakeCaseEatsCrop {}
+}
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
