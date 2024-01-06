@@ -6,6 +6,7 @@
  */
 
 use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
+use pretty_assertions::assert_eq;
 use surreal_models::migrations::{invalid_cases, Resources, ResourcesV2};
 use surreal_orm::migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete};
 use tempfile::tempdir;
@@ -114,7 +115,99 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    let snapshot = conf.assert_migration_queries_snapshot(current_function!());
+
+    let assert_forward_up_migrations_snaps = || {
+        assert!(snapshot.contains("DELETE migration;"));
+        assert!(snapshot.contains("DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(snapshot
+            .contains("DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;")
+        );
+        assert!(
+            snapshot.contains("DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;")
+        );
+        assert!(snapshot.contains("DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;")
+        );
+        assert!(snapshot.contains("DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;"));
+        assert!(snapshot
+            .contains("DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;"));
+        assert!(snapshot.contains("DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);"));
+        assert!(snapshot.contains("DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);"));
+
+        assert!(snapshot.contains("DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(snapshot.contains("DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;"));
+
+        assert!(snapshot.contains("DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(snapshot.contains("DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;"));
+
+        assert!(snapshot.contains("DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(snapshot
+            .contains("DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;"));
+        assert!(snapshot.contains("DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;"));
+
+        assert!(snapshot.contains("DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;")
+        );
+
+        assert!(snapshot.contains("DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;")
+        );
+        assert!(
+            snapshot.contains("DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;")
+        );
+        assert!(snapshot.contains("DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;")
+        );
+
+        assert!(snapshot.contains("DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;"));
+        assert!(snapshot.contains("DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;"));
+        assert!(
+            snapshot.contains("DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;")
+        );
+
+        assert!(
+            snapshot.contains("DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;")
+        );
+        assert!(
+            snapshot.contains("DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;")
+        );
+        assert!(
+            snapshot.contains("DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;")
+        );
+    };
+
+    if reversible {
+        assert!(snapshot.contains("header: Basename - migration_init. Extension - down.surql"));
+        assert!(snapshot.contains("REMOVE TABLE animal;"));
+        assert!(snapshot.contains("REMOVE TABLE crop;"));
+        assert!(snapshot.contains("REMOVE TABLE eats;"));
+        assert!(snapshot.contains("REMOVE TABLE migration;"));
+        assert!(snapshot.contains("REMOVE TABLE planet;"));
+        assert!(snapshot.contains("REMOVE TABLE student;"));
+
+        assert!(snapshot.contains("header: Basename - migration_init. Extension - up.surql"));
+        assert_forward_up_migrations_snaps();
+        assert!(snapshot
+            .contains("DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;"));
+    } else {
+        assert!(snapshot.contains("header: Basename - migration_init. Extension - surql"));
+        assert!(!snapshot
+            .contains("DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;"));
+        assert_forward_up_migrations_snaps();
+    }
 
     conf.run_gen_cmd(
         Generate::builder()

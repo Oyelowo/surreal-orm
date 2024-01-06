@@ -20,6 +20,7 @@ pretty_env_logger = { workspace = true }
 typed-builder = { workspace = true }
 chrono = { workspace = true }
 glob = { workspace = true }
+pretty_assertions = "1.4.0"
 
 
 [dev-dependencies]
