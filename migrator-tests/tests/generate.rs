@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::{
     invalid_cases, Animal, AnimalV2, Planet, PlanetV2, Resources, ResourcesV2,
 };
@@ -17,13 +17,11 @@ use surreal_orm::{
 use tempfile::tempdir;
 use test_case::test_case;
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
 #[should_panic(expected = "Failed to detect migration type")]
-async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible: bool) {
+async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
@@ -37,14 +35,12 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -56,13 +52,11 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible
     );
 }
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
 #[should_panic(expected = "Failed to detect migration type")]
-async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: bool) {
+async fn test_cannot_generate_with_db_run_without_init(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
@@ -76,14 +70,12 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: b
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -134,14 +126,12 @@ async fn test_successfully_handles_renaming(
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     let snapshot = conf.assert_migration_queries_snapshot();
@@ -231,14 +221,12 @@ async fn test_successfully_handles_renaming(
         mock_prompter.clone(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
 
@@ -383,14 +371,12 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     let snapshot = conf.assert_migration_queries_snapshot();
@@ -515,14 +501,12 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -549,14 +533,12 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -570,8 +552,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
@@ -579,7 +560,6 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         // as the one created at initialization.
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -609,14 +589,12 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -630,14 +608,12 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_gen_1".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -656,8 +632,7 @@ async fn test_multiple_generation(mode: Mode, reversible: bool) {
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -665,7 +640,6 @@ async fn test_multiple_generation(mode: Mode, reversible: bool) {
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
 
@@ -700,14 +674,12 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -724,14 +696,12 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     assert!(migration_dir.exists());
     // New files wont be generated because there is no diff (Resources -> Resources), and we disallowed empty migrations
     // in mock prompter above
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -749,14 +719,12 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     assert!(migration_dir.exists());
     // New files wont be generated because there is no diff (Resources -> Resources), and we disallowed empty migrations
     // in mock prompter above
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -774,14 +742,14 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
+
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_gen_1_this_time_we_allow_mock_prompter_to_generate_empty_migration_on_no_diff".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_gen_1_this_time_we_allow_mock_prompter_to_generate_empty_migration_on_no_diff".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
+
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -808,14 +776,12 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -829,14 +795,12 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 2,
         expected_db_mig_meta_count: 2,
         expected_latest_migration_file_basename_normalized: Some("migration_2_gen".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_2_gen".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -851,14 +815,12 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 3,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some("migration_3_gen".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_3_gen".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     assert!(
@@ -891,14 +853,12 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_migration_queries_snapshot();
@@ -939,14 +899,12 @@ async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, rev
     )
     .await;
     assert!(migration_dir.exists());
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
 

@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MockPrompter, Mode};
 use tempfile::tempdir;
