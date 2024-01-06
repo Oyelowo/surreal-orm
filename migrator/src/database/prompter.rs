@@ -59,6 +59,15 @@ pub struct MockPrompter {
     // If false, the program will exit/abort.
     pub allow_empty_migrations_gen: bool,
 
+    // triggered when a single field is changed/renamed without using
+    // the explicit `old_name` attribute to indicate that youre
+    // are performing a renaming operation. In that case, we
+    // anticipate that the user might actually want to perform
+    // a rename operation rather than deleting the old field
+    // competely without transferring the data to the new field.
+    // So, we prompt the user to confirm the operation if they want
+    // to rename - which would transfer the data to the new field,
+    // or delete the old field completely without transferring the data.
     pub rename_or_delete_single_field_change: RenameOrDelete,
 }
 
