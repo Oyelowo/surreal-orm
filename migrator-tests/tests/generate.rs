@@ -6,7 +6,7 @@
  */
 
 use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
-use surreal_models::migrations::{Resources, ResourcesV2};
+use surreal_models::migrations::{invalid_cases, Resources, ResourcesV2};
 use surreal_orm::migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete};
 use tempfile::tempdir;
 use test_case::test_case;
@@ -474,5 +474,103 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
     assert!(
         false,
         "Should panic because we are renaming the same field twice. So, we should't get here."
+    );
+}
+
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to generate migrations")]
+async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_not_allowed(
+    mode: Mode,
+    reversible: bool,
+) {
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    conf.run_init_cmd(
+        Init::builder()
+            .reversible(reversible)
+            .name("migration init".into())
+            .run(true)
+            .build(),
+        Resources,
+        MockPrompter::default(),
+    )
+    .await;
+    assert!(migration_dir.exists());
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: 1,
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+    conf.assert_migration_queries_snapshot(current_function!());
+
+    conf.run_gen_cmd(
+        Generate::builder()
+            .name("migration 2 gen".into())
+            .run(true)
+            .build(),
+        invalid_cases::ResourcesVRenamingWithSameOldFieldNameDisallowed,
+        MockPrompter::default(),
+    )
+    .await;
+    assert!(
+        false,
+        "Should panic because we are renaming using same old field name. So, we should't get here."
+    );
+}
+
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to generate migrations")]
+async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, reversible: bool) {
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    conf.run_init_cmd(
+        Init::builder()
+            .reversible(reversible)
+            .name("migration init".into())
+            .run(true)
+            .build(),
+        Resources,
+        MockPrompter::default(),
+    )
+    .await;
+    assert!(migration_dir.exists());
+    assert_with_db_instance(AssertionArg {
+        migration_type: reversible.into(),
+        expected_mig_files_count: 1,
+        expected_db_mig_meta_count: 1,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
+        code_origin_line: std::line!(),
+        config: conf.clone(),
+    })
+    .await;
+
+    conf.run_gen_cmd(
+        Generate::builder()
+            .name("migration 2 gen".into())
+            .run(true)
+            .build(),
+        invalid_cases::ResourcesVRenamingFromCurrentlyUsedFieldNameDisallowed,
+        MockPrompter::default(),
+    )
+    .await;
+    assert!(
+        false,
+        "Should panic because we are renaming using same old field name. So, we should't get here."
     );
 }
