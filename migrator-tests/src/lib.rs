@@ -315,7 +315,7 @@ impl TestConfigNew {
         self
     }
 
-    pub async fn run_init_cmd(
+    pub async fn run_init(
         &mut self,
         init_cmd: Init,
         codebase_resources: impl DbResources,
@@ -327,19 +327,19 @@ impl TestConfigNew {
         self
     }
 
-    pub async fn run_cmd(
+    pub async fn run_reset(
         &mut self,
-        cmd: impl Into<SubCommand>,
+        reset_cmd: Reset,
         codebase_resources: impl DbResources,
         prompter: MockPrompter,
     ) -> &mut Self {
-        self.set_cmd(cmd.into())
+        self.set_cmd(reset_cmd)
             .run(Some(codebase_resources), prompter)
             .await;
         self
     }
     
-    pub async fn run_gen_cmd(
+    pub async fn run_gen(
         &mut self,
         gen_cmd: Generate,
         codebase_resources: impl DbResources,
@@ -351,18 +351,6 @@ impl TestConfigNew {
         self
     }
 
-    // pub async fn run_gen(&mut self, basename: Basename, resources: impl DbResources) -> &mut Self {
-    //     self.set_cmd(Generate::builder().name(basename.into()).run(false).build())
-    //         .run(
-    //             Some(resources),
-    //             MockPrompter::builder()
-    //                 .allow_empty_migrations_gen(true)
-    //                 .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-    //                 .build(),
-    //         )
-    //         .await
-    // }
-    //
     pub async fn run_down(
         &mut self,
         rollback_strategy: &RollbackStrategyStruct,
@@ -398,19 +386,6 @@ impl TestConfigNew {
         .await
     }
 
-    // async fn run_init_cmd(
-    //     &mut self,
-    //     codebase_resources: impl DbResources,
-    //     prompter: impl Prompter,
-    // ) {
-    //     let TestConfigNew { migrator } = self;
-    //     let init_conf = Init::builder()
-    //         .basename("migration init".into())
-    //         .reversible(true)
-    //         .run(false)
-    //         .build()
-    //         .run(&mut self.migrator, codebase_resources, prompter);
-    // }
 
     pub async fn generate_test_migrations_arbitrary(
         &mut self,

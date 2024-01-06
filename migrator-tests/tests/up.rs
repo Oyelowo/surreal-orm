@@ -44,7 +44,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     // Init
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .name("migration_init".into())
             .reversible(reversible)
@@ -99,7 +99,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     // Init
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .name("migration_init".into())
             .reversible(reversible)

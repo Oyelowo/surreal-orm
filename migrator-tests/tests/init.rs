@@ -20,7 +20,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -60,7 +60,7 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -105,7 +105,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -124,7 +124,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
     })
     .await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -155,7 +155,7 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
@@ -175,7 +175,7 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
     })
     .await;
 
-    conf.run_init_cmd(
+    conf.run_init(
         Init::builder()
             .reversible(reversible)
             .name("another name".into())

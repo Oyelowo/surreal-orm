@@ -14,7 +14,7 @@ use test_case::test_case;
 #[test_case(true,Mode::Strict,  true; "Reversible Strict Run")]
 #[test_case(true,Mode::Lax,  false; "Reversible Lax No Run")]
 #[test_case(false,Mode::Strict,  true; "Non-Reversible Strict Run")]
-#[test_case(false,Mode::Lax,  false; "Non-Reversible Lax No Run")]
+#[test_case(false, Mode::Lax,  false; "Non-Reversible Lax No Run")]
 #[tokio::test]
 async fn test_can_reset_before_init(reversible: bool, mode: Mode, run: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
@@ -31,7 +31,7 @@ async fn test_can_reset_before_init(reversible: bool, mode: Mode, run: bool) {
     })
     .await;
 
-    conf.run_cmd(
+    conf.run_reset(
         Reset::builder()
             .name("migration reset".into())
             .reversible(reversible)
