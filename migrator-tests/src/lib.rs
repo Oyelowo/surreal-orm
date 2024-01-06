@@ -1,3 +1,10 @@
+/*
+ * Author: Oyelowo Oyedayo
+ * Email: oyelowo.oss@gmail.com
+ * Copyright (c) 2023 Oyelowo Oyedayo
+ * Licensed under the MIT license
+ */
+
 use std::{fs, path::PathBuf, ops::Deref, fmt::Display};
 
 use surreal_models::migrations::{
@@ -106,17 +113,33 @@ impl Display for CurrentFunctionName {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
-struct StreamLinedMigration {
+pub struct StreamLinedMigration {
     basename: Basename,
     extension: Extension,
     checksum_up: Checksum,
     checksum_down: Option<Checksum>,
 }
 
-impl StreamLinedMigration {
-    pub fn from_db_migrations(migrations: Vec<Migration>) -> Vec<Self> {
-        migrations
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+pub struct DbMigrationSchemaState {
+    resources: DbInfo,
+    migration_meta: Vec<StreamLinedMigration>,
+}
+
+impl DbMigrationSchemaState {
+    pub fn new(db_info: DbInfo, migrations: Vec<Migration>) -> Self {
+        let migration_meta = Self::stream_lined_migrations(migrations);
+        Self {
+            resources: db_info,
+            migration_meta,
+        }
+    }
+    
+    pub fn stream_lined_migrations(db_migrations: Vec<Migration>) -> Vec<StreamLinedMigration> {
+        db_migrations
             .into_iter()
             .map(|m| {
                 let filename = MigrationFilename::try_from(m.name.clone())
@@ -125,7 +148,7 @@ impl StreamLinedMigration {
                 let checksum_down = m.checksum_down;
                 let basename = filename.basename();
                 let extension = filename.extension();
-                Self {
+                StreamLinedMigration {
                     basename,
                     extension,
                     checksum_up,
@@ -134,12 +157,7 @@ impl StreamLinedMigration {
             })
             .collect::<Vec<_>>()
     }
-}
-
-#[derive(Clone, Debug)]
-pub struct DbMigrationSchemaState {
-    resources: DbInfo,
-    migration_meta: Vec<StreamLinedMigration>,
+    
 }
 
 
@@ -166,11 +184,7 @@ impl TestConfigNew {
             .await
             .unwrap().expect("Failed to get db info");
         let migrations = Migration::get_all_desc(self.migrator.db().clone()).await;
-        let stream_lined_migrations = StreamLinedMigration::from_db_migrations(migrations);
-        let db_miration_schema_state = DbMigrationSchemaState {
-            resources: db_info.clone(),
-            migration_meta: stream_lined_migrations,
-        };
+        let db_miration_schema_state = DbMigrationSchemaState::new(db_info.clone(), migrations);
         self.db_resources_state_assertion_counter += 1;
         let name_differentiator = self.snapshots_name_differentiator("db_state", self.db_resources_state_assertion_counter);
         insta::assert_debug_snapshot!(name_differentiator, db_miration_schema_state);
@@ -528,7 +542,7 @@ impl TestConfigNew {
     }
 
 
-    pub async fn assert_with_db_instance(&mut self, args: AssertionArg) -> SnapShot {
+    pub async fn assert_with_db_instance(&mut self, args: AssertionArg) -> DbMigrationSchemaState {
     let AssertionArg {
         expected_mig_files_count,
         expected_db_mig_meta_count: expected_db_mig_count,
@@ -658,7 +672,7 @@ impl TestConfigNew {
             "File name should be in the format of {timestamp}_{basename}.{extension}"
         );
     }
-        self.assert_migration_queries_snapshot()
+        self.assert_db_resources_state().await
 }
 
 

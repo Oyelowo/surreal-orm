@@ -125,16 +125,16 @@ async fn test_successfully_handles_renaming(
     )
     .await;
     assert!(migration_dir.exists());
-    let snapshot = conf
-        .assert_with_db_instance(AssertionArg {
-            expected_mig_files_count: 1,
-            expected_db_mig_meta_count: 0,
-            expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
-            expected_latest_db_migration_meta_basename_normalized: None,
-            code_origin_line: std::line!(),
-        })
-        .await;
+    conf.assert_with_db_instance(AssertionArg {
+        expected_mig_files_count: 1,
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
+        code_origin_line: std::line!(),
+    })
+    .await;
 
+    let snapshot = conf.assert_migration_queries_snapshot();
     let assert_forward_up_migrations_snaps_v1 = || {
         assert!(snapshot.contains("DELETE migration;"));
         assert!(snapshot.contains("DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;"));
@@ -221,16 +221,17 @@ async fn test_successfully_handles_renaming(
     )
     .await;
     // The implicit renaming strategy is set in mock prompter above
-    let snapshot_v2_with_animal_explicit_planet_implicit_renaming = conf
-        .assert_with_db_instance(AssertionArg {
-            expected_mig_files_count: 2,
-            expected_db_mig_meta_count: 0,
-            expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
-            expected_latest_db_migration_meta_basename_normalized: None,
-            code_origin_line: std::line!(),
-        })
-        .await;
+    conf.assert_with_db_instance(AssertionArg {
+        expected_mig_files_count: 2,
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
+        code_origin_line: std::line!(),
+    })
+    .await;
 
+    let snapshot_v2_with_animal_explicit_planet_implicit_renaming =
+        conf.assert_migration_queries_snapshot();
     let assert_up_forward_v2_with_renaming = || {
         assert!(
             snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
@@ -369,16 +370,16 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
     )
     .await;
     assert!(migration_dir.exists());
-    let snapshot = conf
-        .assert_with_db_instance(AssertionArg {
-            expected_mig_files_count: 1,
-            expected_db_mig_meta_count: 0,
-            expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
-            expected_latest_db_migration_meta_basename_normalized: None,
-            code_origin_line: std::line!(),
-        })
-        .await;
+    conf.assert_with_db_instance(AssertionArg {
+        expected_mig_files_count: 1,
+        expected_db_mig_meta_count: 0,
+        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+        expected_latest_db_migration_meta_basename_normalized: None,
+        code_origin_line: std::line!(),
+    })
+    .await;
 
+    let snapshot = conf.assert_migration_queries_snapshot();
     let assert_forward_up_migrations_snaps = || {
         assert!(snapshot.contains("DELETE migration;"));
         assert!(snapshot.contains("DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;"));
