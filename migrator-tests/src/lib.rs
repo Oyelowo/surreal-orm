@@ -69,7 +69,7 @@ impl From<&str> for SnapShot {
 
 #[derive(Clone, TypedBuilder)]
 pub struct TestConfigNew {
-    migrator: Migrator,
+    pub migrator: Migrator,
     
     #[builder(default)]
     reversible: Option<bool>,
