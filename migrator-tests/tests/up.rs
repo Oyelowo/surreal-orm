@@ -4,7 +4,7 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{assert_with_db_instance, AssertionArg, TestConfigNew};
+use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MigrationFilename, MockPrompter, Mode};
 use tempfile::tempdir;
@@ -33,6 +33,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 // Cannot generate without init first
@@ -93,6 +94,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -138,6 +140,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -167,6 +170,7 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -280,6 +284,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -339,6 +344,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -421,6 +427,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_migration_queries_snapshot(current_function!());
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]

@@ -12,7 +12,7 @@ use surreal_models::migrations::{
 use surreal_orm::{
     create_table_resources,
     migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete},
-    DbResources, TableResources,
+    DbResources,
 };
 use tempfile::tempdir;
 use test_case::test_case;
