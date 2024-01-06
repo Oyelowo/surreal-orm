@@ -21,7 +21,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
@@ -57,7 +57,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
@@ -69,7 +69,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
@@ -80,7 +80,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
@@ -114,7 +114,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
@@ -125,7 +125,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
@@ -153,7 +153,7 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -186,7 +186,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some(
@@ -200,7 +200,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
@@ -216,7 +216,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
@@ -232,7 +232,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
@@ -248,7 +248,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -264,7 +264,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(1000).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -295,7 +295,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         .await;
     conf.assert_db_resources_state().await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -309,7 +309,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
 
     conf.run_up(&FastForwardDelta::builder().number(26).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 26,
         expected_latest_migration_file_basename_normalized: Some(
@@ -325,7 +325,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
@@ -354,7 +354,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
 
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -368,7 +368,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
 
     conf.run_up(&FastForwardDelta::builder().number(69).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
@@ -396,7 +396,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
 
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -410,7 +410,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -437,7 +437,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -455,7 +455,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             .build(),
     )
     .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 5,
         expected_latest_migration_file_basename_normalized: Some(
@@ -477,7 +477,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         )
         .await;
 
-        conf.assert_with_db_instance(AssertionArg {
+        conf.conf.conf.assert_with_db_instance(AssertionArg {
             expected_mig_files_count: 12,
             expected_db_mig_meta_count: i as u8,
             expected_latest_migration_file_basename_normalized: Some(
@@ -498,7 +498,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             .build(),
     )
     .await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -513,7 +513,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -631,7 +631,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -650,7 +650,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     )
     .await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some(
@@ -667,7 +667,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::builder().number(4).build())
         .await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
@@ -688,7 +688,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     )
     .await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
@@ -705,7 +705,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
 
-    conf.assert_with_db_instance(AssertionArg {
+    conf.conf.conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
