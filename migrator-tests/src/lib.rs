@@ -528,7 +528,7 @@ impl TestConfigNew {
     }
 
 
-    pub async fn assert_with_db_instance(&self, args: AssertionArg) {
+    pub async fn assert_with_db_instance(&mut self, args: AssertionArg) -> SnapShot {
     let AssertionArg {
         expected_mig_files_count,
         expected_db_mig_meta_count: expected_db_mig_count,
@@ -658,6 +658,7 @@ impl TestConfigNew {
             "File name should be in the format of {timestamp}_{basename}.{extension}"
         );
     }
+        self.assert_migration_queries_snapshot()
 }
 
 

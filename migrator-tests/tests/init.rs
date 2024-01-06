@@ -30,30 +30,24 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -76,30 +70,24 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -127,17 +115,14 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_init_cmd(
         Init::builder()
@@ -181,17 +166,14 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
     )
     .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_init_cmd(
         Init::builder()

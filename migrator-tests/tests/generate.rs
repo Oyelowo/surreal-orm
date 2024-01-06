@@ -43,7 +43,6 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
     assert!(
@@ -78,7 +77,7 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode) {
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
+
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
 }
 
@@ -126,15 +125,15 @@ async fn test_successfully_handles_renaming(
     )
     .await;
     assert!(migration_dir.exists());
-    conf.assert_with_db_instance(AssertionArg {
-        expected_mig_files_count: 1,
-        expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
-        expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
-    })
-    .await;
-    let snapshot = conf.assert_migration_queries_snapshot();
+    let snapshot = conf
+        .assert_with_db_instance(AssertionArg {
+            expected_mig_files_count: 1,
+            expected_db_mig_meta_count: 0,
+            expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+            expected_latest_db_migration_meta_basename_normalized: None,
+            code_origin_line: std::line!(),
+        })
+        .await;
 
     let assert_forward_up_migrations_snaps_v1 = || {
         assert!(snapshot.contains("DELETE migration;"));
@@ -221,18 +220,17 @@ async fn test_successfully_handles_renaming(
         mock_prompter.clone(),
     )
     .await;
-    conf.assert_with_db_instance(AssertionArg {
-        expected_mig_files_count: 2,
-        expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
-        expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
-    })
-    .await;
-
     // The implicit renaming strategy is set in mock prompter above
-    let snapshot_v2_with_animal_explicit_planet_implicit_renaming =
-        conf.assert_migration_queries_snapshot();
+    let snapshot_v2_with_animal_explicit_planet_implicit_renaming = conf
+        .assert_with_db_instance(AssertionArg {
+            expected_mig_files_count: 2,
+            expected_db_mig_meta_count: 0,
+            expected_latest_migration_file_basename_normalized: Some("migration_gen_1".into()),
+            expected_latest_db_migration_meta_basename_normalized: None,
+            code_origin_line: std::line!(),
+        })
+        .await;
+
     let assert_up_forward_v2_with_renaming = || {
         assert!(
             snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
@@ -371,15 +369,15 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
     )
     .await;
     assert!(migration_dir.exists());
-    conf.assert_with_db_instance(AssertionArg {
-        expected_mig_files_count: 1,
-        expected_db_mig_meta_count: 0,
-        expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
-        expected_latest_db_migration_meta_basename_normalized: None,
-        code_origin_line: std::line!(),
-    })
-    .await;
-    let snapshot = conf.assert_migration_queries_snapshot();
+    let snapshot = conf
+        .assert_with_db_instance(AssertionArg {
+            expected_mig_files_count: 1,
+            expected_db_mig_meta_count: 0,
+            expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
+            expected_latest_db_migration_meta_basename_normalized: None,
+            code_origin_line: std::line!(),
+        })
+        .await;
 
     let assert_forward_up_migrations_snaps = || {
         assert!(snapshot.contains("DELETE migration;"));
@@ -509,7 +507,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
+
     assert!(migration_dir.exists());
 }
 
@@ -541,7 +539,6 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -562,7 +559,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
+
     assert!(migration_dir.exists());
 }
 
@@ -597,7 +594,6 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -616,7 +612,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
+
     assert!(migration_dir.exists());
 }
 
@@ -642,8 +638,6 @@ async fn test_multiple_generation(mode: Mode, reversible: bool) {
         code_origin_line: std::line!(),
     })
     .await;
-
-    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -682,7 +676,6 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -704,7 +697,6 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     // Redo and make sure
     conf.run_gen_cmd(
@@ -727,7 +719,6 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -752,7 +743,6 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
 
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -784,7 +774,6 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -803,7 +792,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
+
     assert!(migration_dir.exists());
 
     conf.run_gen_cmd(
@@ -861,7 +850,6 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
         code_origin_line: std::line!(),
     })
     .await;
-    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
