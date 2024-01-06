@@ -1,0 +1,209 @@
+---
+source: migrator-tests/src/lib.rs
+expression: db_miration_schema_state
+---
+DbMigrationSchemaState {
+    resources: DbInfo {
+        analyzers: Analyzers(
+            Info(
+                {},
+            ),
+        ),
+        functions: Functions(
+            Info(
+                {},
+            ),
+        ),
+        params: Params(
+            Info(
+                {},
+            ),
+        ),
+        scopes: Scopes(
+            Info(
+                {},
+            ),
+        ),
+        tables: Tables(
+            Info(
+                {
+                    "migration": DefineStatementRaw(
+                        "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                },
+            ),
+        ),
+        tokens: Tokens(
+            Info(
+                {},
+            ),
+        ),
+        users: Users(
+            Info(
+                {},
+            ),
+        ),
+    },
+    migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_10_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "5b697bf69196dc4bb23404b8b8cd1cbcf1f0f4011d5d842a137a7d9b0da2516c",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "318fd33536172fe1b7bab276db4de0578921631b8c8a60ef28ba89d76b8fbbc8",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_9_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "318fd33536172fe1b7bab276db4de0578921631b8c8a60ef28ba89d76b8fbbc8",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "5b697bf69196dc4bb23404b8b8cd1cbcf1f0f4011d5d842a137a7d9b0da2516c",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_8_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "812b038accb8e6f4faf1ca5785dcd52eafe04253276a78562066c54e6a90da90",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "5cddc4807eb22b201f0570ac3f59b12fe10a3e7999df90f44c1d79bf4012cde9",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_7_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "11d98c740871216b4097896e37d3dab602107d97b8af27684afca245659689d8",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e0c02e4b902fba690ba0afa9e4178ddfdf9183fb282b4a37e352c936dabb2134",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_6_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_5_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "133740ff4da5b59a7ec414bbe3186768589ae870ecf9e6dfe4ac59730b92e20b",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "4c6da97f98c388dccf45784da10dbe459d807b41c15eab9e9f88c25cb3d4f069",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_4_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "562d97870bebc0f0f363225f72305099627d0aff821a021ebc03405068cdf85d",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "ba2891a4c21aae920a0fb03ab6353cfe3b3acecf306feddfa2a5954acb249d7c",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_3_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_2_gen_after_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                ),
+            ),
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_1_init",
+            ),
+            extension: Extension(
+                "up.surql",
+            ),
+            checksum_up: Checksum(
+                "5698c6869203e93a5548120e5cb133b5addac80deb19e0775856757272258f4f",
+            ),
+            checksum_down: Some(
+                Checksum(
+                    "d2bdf89ec731af7695337f33284cb5af78977b0610bba1464a005cdcb8394272",
+                ),
+            ),
+        },
+    ],
+}

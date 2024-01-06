@@ -27,9 +27,6 @@ DbMigrationSchemaState {
         tables: Tables(
             Info(
                 {
-                    "crop": DefineStatementRaw(
-                        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
-                    ),
                     "migration": DefineStatementRaw(
                         "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
                     ),
@@ -51,6 +48,18 @@ DbMigrationSchemaState {
         ),
     },
     migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_7_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "11d98c740871216b4097896e37d3dab602107d97b8af27684afca245659689d8",
+            ),
+            checksum_down: None,
+        },
         StreamLinedMigration {
             basename: Basename(
                 "migration_6_gen_after_init",
