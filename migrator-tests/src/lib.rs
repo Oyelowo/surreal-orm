@@ -528,6 +528,7 @@ impl TestConfigNew {
         code_origin_line,
     } = args;
         let migration_type = MigrationFlag::from(self.reversible.unwrap_or_default());
+    let ref current_file_name = self.current_function_name.clone();
 
     let db = self.migrator.db().clone();
     let db_migrations = Migration::get_all_desc(db.clone()).await;
@@ -538,7 +539,7 @@ impl TestConfigNew {
     });
     assert_eq!(
         latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
-        "Base name in file does not match the base name in the db. Line: {code_origin_line}",
+        "Base name in file does not match the base name in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
     let migration_files = self.read_migrations_from_dir_sorted_asc();
@@ -548,13 +549,13 @@ impl TestConfigNew {
     assert_eq!(
         latest_file_name.map(|lfn| lfn.basename()),
         expected_latest_migration_file_basename_normalized,
-        "Base name in file does not match the base name in the db. Line: {code_origin_line}"
+        "Base name in file does not match the base name in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
     assert_eq!(
         db_migrations.len() as u8,
         expected_db_mig_count,
-        "migration Counts do not match with what is in the db. Line: {code_origin_line}",
+        "migration Counts do not match with what is in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
     assert_eq!(
@@ -563,7 +564,7 @@ impl TestConfigNew {
             MigrationFlag::TwoWay => expected_mig_files_count * 2,
             MigrationFlag::OneWay => expected_mig_files_count,
         },
-        "File counts do not match. Line: {code_origin_line}"
+        "File counts do not match. Line: {code_origin_line} in {current_file_name}"
     );
 
     for db_mig_record in db_migrations {
