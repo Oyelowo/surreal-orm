@@ -6,7 +6,6 @@
  */
 
 use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
-use pretty_assertions::assert_eq;
 use surreal_models::migrations::{invalid_cases, Resources, ResourcesV2};
 use surreal_orm::migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete};
 use tempfile::tempdir;
@@ -190,7 +189,15 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
     };
 
     if reversible {
-        assert!(snapshot.contains("header: Basename - migration_init. Extension - down.surql"));
+        assert!(
+            snapshot.contains("header: Basename - migration_init. Extension - down.surql"),
+            "is reversible and has down"
+        );
+        assert!(
+            !snapshot.contains("header: Basename - migration_init. Extension - surql",),
+            "not one way"
+        );
+
         assert!(snapshot.contains("REMOVE TABLE animal;"));
         assert!(snapshot.contains("REMOVE TABLE crop;"));
         assert!(snapshot.contains("REMOVE TABLE eats;"));
@@ -203,7 +210,18 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         assert!(snapshot
             .contains("DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;"));
     } else {
-        assert!(snapshot.contains("header: Basename - migration_init. Extension - surql"));
+        assert!(
+            snapshot.contains("header: Basename - migration_init. Extension - surql"),
+            "should be one way"
+        );
+        assert!(
+            !snapshot.contains("header: Basename - migration_init. Extension - down.surql"),
+            "should not have down cos its one way"
+        );
+        assert!(
+            !snapshot.contains("header: Basename - migration_init. Extension - up.surql"),
+            "should not have up cos its one way"
+        );
         assert!(!snapshot
             .contains("DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;"));
         assert_forward_up_migrations_snaps();
