@@ -574,3 +574,35 @@ async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, rev
         "Should panic because we are renaming using same old field name. So, we should't get here."
     );
 }
+
+#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[test_case(Mode::Lax, true; "Reversible Lax")]
+#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
+#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[tokio::test]
+#[should_panic(expected = "Failed to generate migrations")]
+async fn test_should_panic_if_renaming_from_non_existing_field_in_migration_directory_state(
+    mode: Mode,
+    reversible: bool,
+) {
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    conf.run_init_cmd(
+        Init::builder()
+            .reversible(reversible)
+            .name("migration init".into())
+            .run(true)
+            .build(),
+        // Oyelowo January 5, 2023: we are using V2 here because AnimalV2 tries to rename but since we are not
+        // initing from V1, we dont have the field to rename from, so this should panic
+        ResourcesV2,
+        MockPrompter::default(),
+    )
+    .await;
+    assert!(migration_dir.exists());
+    assert!(
+        false,
+        "Should panic because we are renaming using same old field name. So, we should't get here."
+    );
+}
