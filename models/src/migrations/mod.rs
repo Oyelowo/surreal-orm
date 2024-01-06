@@ -77,6 +77,52 @@ impl DbResources for ResourcesV10 {
     create_table_resources!(Animal, Crop, Planet);
 }
 
+pub mod invalid_cases {
+    use super::*;
+
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[serde(rename_all = "camelCase")]
+    #[surreal_orm(
+        table_name = "user_renaming_from_currently_used_field_name_disallowed",
+        schemafull
+    )]
+    pub struct UserRenamingFromCurrentlyUsedFieldNameDisallowed {
+        pub id: SurrealSimpleId<Self>,
+        #[surreal_orm(old_name = "firstName")]
+        pub username: String,
+        pub first_name: String,
+        pub created_at: chrono::DateTime<Utc>,
+    }
+    impl TableResources for UserRenamingFromCurrentlyUsedFieldNameDisallowed {}
+
+    pub struct ResourcesVRenamingFromCurrentlyUsedFieldNameDisallowed;
+    impl DbResources for ResourcesVRenamingFromCurrentlyUsedFieldNameDisallowed {
+        create_table_resources!(UserRenamingFromCurrentlyUsedFieldNameDisallowed);
+    }
+
+    #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+    #[serde(rename_all = "camelCase")]
+    #[surreal_orm(
+        table_name = "user_renaming_with_same_old_field_name_disallowed",
+        schemafull
+    )]
+    pub struct UserRenamingWithSameOldFieldNameDisallowed {
+        pub id: SurrealSimpleId<Self>,
+        #[surreal_orm(old_name = "firstName")]
+        pub first_name: String,
+        pub another_stuff: String,
+        pub created_at: chrono::DateTime<Utc>,
+    }
+    impl TableResources for UserRenamingWithSameOldFieldNameDisallowed {}
+
+    #[derive(Debug, Clone)]
+    pub struct ResourcesVRenamingWithSameOldFieldNameDisallowed;
+
+    impl DbResources for ResourcesVRenamingWithSameOldFieldNameDisallowed {
+        create_table_resources!(UserRenamingWithSameOldFieldNameDisallowed);
+    }
+}
+
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "new_stuff", schemafull)]
@@ -111,7 +157,7 @@ impl TableResources for Planet {}
 pub struct PlanetV2 {
     // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
-    #[surreal_orm(old_name = "firstName")]
+    // #[surreal_orm(old_name = "firstName")]
     pub new_name: String,
     pub population: u64,
     pub created_at: chrono::DateTime<Utc>,
