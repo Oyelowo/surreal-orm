@@ -19,7 +19,7 @@ use test_case::test_case;
 async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     conf.run_up(&FastForwardDelta::default()).await;
 
@@ -45,7 +45,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
 async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     // Init
     conf.run_init_cmd(
@@ -105,7 +105,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
 async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     // Init
     conf.run_init_cmd(
@@ -149,9 +149,9 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     conf.run_up(&FastForwardDelta::default()).await;
@@ -179,9 +179,9 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
@@ -293,9 +293,9 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
     assert_with_db_instance(AssertionArg {
@@ -353,9 +353,9 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
     assert_with_db_instance(AssertionArg {
@@ -395,9 +395,9 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
     assert_with_db_instance(AssertionArg {
@@ -436,9 +436,9 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
@@ -546,9 +546,9 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 #[tokio::test]
 #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
 async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
 
@@ -573,9 +573,9 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
 #[tokio::test]
 #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
 async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
 
@@ -600,9 +600,9 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
 #[tokio::test]
 #[should_panic(expected = "Failed to run migrations. Migration already run or not found")]
 async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
     let nonexisting_filename = MigrationFilename::try_from(
@@ -625,9 +625,9 @@ async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
 #[tokio::test]
 async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 

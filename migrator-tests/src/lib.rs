@@ -223,7 +223,7 @@ pub struct TestConfigNew {
 }
 
 #[derive(Clone, Default)]
-struct CurrentFunctionName(String);
+pub struct CurrentFunctionName(String);
 
 impl From<&str> for CurrentFunctionName {
     fn from(s: &str) -> Self {
