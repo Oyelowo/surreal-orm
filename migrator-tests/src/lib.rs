@@ -13,7 +13,7 @@ use surreal_models::migrations::{
 };
 use surreal_orm::{
     migrator::{
-        config::{DatabaseConnection, UrlDb},
+        config::DatabaseConnection,
         Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
         MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
         SubCommand, Up, DbInfo, Extension, Checksum,
@@ -22,16 +22,6 @@ use surreal_orm::{
 };
 
 use typed_builder::TypedBuilder;
-
-pub fn get_db_connection_config() -> DatabaseConnection {
-    DatabaseConnection::builder()
-        .db("test".into())
-        .ns("test".into())
-        .user("root".into())
-        .pass("root".into())
-        .url(UrlDb::Memory)
-        .build()
-}
 
 #[derive(Clone, TypedBuilder)]
 pub struct AssertionArg {
@@ -163,7 +153,7 @@ impl DbMigrationSchemaState {
 
 impl TestConfigNew {
     pub async fn new(mode: Mode, migration_dir: &PathBuf, current_function_name: impl Into< CurrentFunctionName >) -> Self {
-        let db_conn_config = get_db_connection_config();
+        let db_conn_config = DatabaseConnection::default();
 
         let mut migrator = Migrator::builder()
             .verbose(3)
