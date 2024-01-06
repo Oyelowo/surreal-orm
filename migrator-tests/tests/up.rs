@@ -20,9 +20,9 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 0,
@@ -33,6 +33,7 @@ async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -46,6 +47,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
 
     // Init
     conf.run_init_cmd(
@@ -69,6 +71,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
@@ -82,6 +85,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -94,6 +98,7 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -106,6 +111,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
 
     // Init
     conf.run_init_cmd(
@@ -128,6 +134,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -140,6 +147,7 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -152,10 +160,13 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
-    conf.run_up(&FastForwardDelta::default()).await;
+    conf.assert_db_resources_state().await;
 
+    conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 12,
@@ -170,6 +181,7 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -182,8 +194,11 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
@@ -199,6 +214,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
@@ -216,6 +232,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
@@ -233,6 +250,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
@@ -250,6 +268,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
@@ -267,6 +286,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(1000).build())
         .await;
@@ -284,6 +304,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -296,8 +317,12 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
+    conf.assert_db_resources_state().await;
+
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 69,
@@ -310,6 +335,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(26).build())
         .await;
@@ -327,6 +353,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
@@ -344,6 +371,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -356,6 +384,8 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
     assert_with_db_instance(AssertionArg {
@@ -370,6 +400,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(69).build())
         .await;
@@ -387,6 +418,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -398,6 +430,8 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
     assert_with_db_instance(AssertionArg {
@@ -412,6 +446,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
@@ -427,6 +462,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
     conf.assert_migration_queries_snapshot();
 }
 
@@ -439,9 +475,10 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 12,
@@ -454,6 +491,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -461,7 +499,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             .build(),
     )
     .await;
-
     assert_with_db_instance(AssertionArg {
         migration_type: reversible.into(),
         expected_mig_files_count: 12,
@@ -476,6 +513,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     for i in 6..=11 {
         conf.run_up(
@@ -500,6 +538,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         })
         .await;
     }
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -521,6 +560,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -537,6 +577,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -549,8 +590,11 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -564,6 +608,7 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
             .build(),
     )
     .await;
+    conf.assert_db_resources_state().await;
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -576,8 +621,11 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
+
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -591,6 +639,7 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
             .build(),
     )
     .await;
+    conf.assert_db_resources_state().await;
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -605,6 +654,7 @@ async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
+    conf.assert_db_resources_state().await;
     let nonexisting_filename = MigrationFilename::try_from(
         "20231220050955_this_shit_dont_exist_hahahahahahah.up.surql".to_string(),
     )
@@ -617,6 +667,7 @@ async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
 
     conf.run_up(&FastForwardDelta::builder().till(non_existing_name).build())
         .await;
+    conf.assert_db_resources_state().await;
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -628,6 +679,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
+    conf.assert_db_resources_state().await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
@@ -643,6 +695,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -665,6 +718,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(4).build())
         .await;
@@ -683,6 +737,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(
         &FastForwardDelta::builder()
@@ -705,6 +760,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
@@ -723,4 +779,5 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
+    conf.assert_db_resources_state().await;
 }

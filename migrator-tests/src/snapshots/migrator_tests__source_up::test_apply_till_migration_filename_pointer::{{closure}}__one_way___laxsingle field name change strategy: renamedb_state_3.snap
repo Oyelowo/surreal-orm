@@ -1,0 +1,115 @@
+---
+source: migrator-tests/src/lib.rs
+expression: db_miration_schema_state
+---
+DbMigrationSchemaState {
+    resources: DbInfo {
+        analyzers: Analyzers(
+            Info(
+                {},
+            ),
+        ),
+        functions: Functions(
+            Info(
+                {},
+            ),
+        ),
+        params: Params(
+            Info(
+                {},
+            ),
+        ),
+        scopes: Scopes(
+            Info(
+                {},
+            ),
+        ),
+        tables: Tables(
+            Info(
+                {
+                    "crop": DefineStatementRaw(
+                        "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "migration": DefineStatementRaw(
+                        "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "student": DefineStatementRaw(
+                        "DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                },
+            ),
+        ),
+        tokens: Tokens(
+            Info(
+                {},
+            ),
+        ),
+        users: Users(
+            Info(
+                {},
+            ),
+        ),
+    },
+    migration_meta: [
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_5_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "133740ff4da5b59a7ec414bbe3186768589ae870ecf9e6dfe4ac59730b92e20b",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_4_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "562d97870bebc0f0f363225f72305099627d0aff821a021ebc03405068cdf85d",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_3_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_2_gen_after_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            ),
+            checksum_down: None,
+        },
+        StreamLinedMigration {
+            basename: Basename(
+                "migration_1_init",
+            ),
+            extension: Extension(
+                "surql",
+            ),
+            checksum_up: Checksum(
+                "0581c30713a306fba4e65cf40c06c81bed66786cf2b2aef60e4fc144495ff657",
+            ),
+            checksum_down: None,
+        },
+    ],
+}

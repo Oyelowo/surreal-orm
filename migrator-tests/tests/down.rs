@@ -20,9 +20,6 @@ async fn test_rollback_previous(mode: Mode) {
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations().await;
 
-    // let mut conf = TestConfigNew::new\(mode, &temp_test_migration_dir\).await;
-    // let mut conf = TestConfigNew::new\(mode, &temp_test_migration_dir, current_function!\(\)).await;
-
     // First apply all generated migrations to the current db instance
     conf.run_up(&FastForwardDelta::default()).await;
 
