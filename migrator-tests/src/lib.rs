@@ -9,7 +9,7 @@ use surreal_orm::{
         config::{DatabaseConnection, UrlDb},
         Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
         MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
-        SubCommand, Up, DbInfo,
+        SubCommand, Up, DbInfo, Extension, Checksum,
     },
     DbResources, statements::info_for, Runnable,
 };
@@ -216,7 +216,10 @@ pub struct TestConfigNew {
     mock_prompter: Option<MockPrompter>,
     
     #[builder(default)]
-    assertion_counter: u8,
+    migration_dir_state_assertion_counter: u8,
+    
+    #[builder(default)]
+    db_resources_state_assertion_counter: u8,
     
     #[builder(default)]
     current_function_name: CurrentFunctionName,
@@ -238,6 +241,43 @@ impl Display for CurrentFunctionName {
     }
 }
 
+#[derive(Clone, Debug)]
+struct StreamLinedMigration {
+    basename: Basename,
+    extension: Extension,
+    checksum_up: Checksum,
+    checksum_down: Option<Checksum>,
+}
+
+impl StreamLinedMigration {
+    pub fn from_db_migrations(migrations: Vec<Migration>) -> Vec<Self> {
+        migrations
+            .into_iter()
+            .map(|m| {
+                let filename = MigrationFilename::try_from(m.name.clone())
+                    .expect("Failed to parse file name");
+                let checksum_up = m.checksum_up;
+                let checksum_down = m.checksum_down;
+                let basename = filename.basename();
+                let extension = filename.extension();
+                Self {
+                    basename,
+                    extension,
+                    checksum_up,
+                    checksum_down,
+                }
+            })
+            .collect::<Vec<_>>()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct DbMigrationSchemaState {
+    resources: DbInfo,
+    migration_meta: Vec<StreamLinedMigration>,
+}
+
+
 impl TestConfigNew {
     pub async fn new(mode: Mode, migration_dir: &PathBuf, current_function_name: impl Into< CurrentFunctionName >) -> Self {
         let db_conn_config = get_db_connection_config();
@@ -254,31 +294,38 @@ impl TestConfigNew {
         Self::builder().migrator(migrator).current_function_name(current_function_name.into()).build()
     }
 
-    pub async fn get_db_info(&mut self) -> Option<DbInfo> {
+    pub async fn assert_db_resources_state(&mut self) -> DbMigrationSchemaState {
         let db_info = info_for()
             .database()
             .get_data::<DbInfo>(self.migrator.db().clone())
             .await
-            .unwrap();
-        insta::assert_debug_snapshot!(self.snapshots_name_differentiator(), db_info);
-        db_info
+            .unwrap().expect("Failed to get db info");
+        let migrations = Migration::get_all_desc(self.migrator.db().clone()).await;
+        let stream_lined_migrations = StreamLinedMigration::from_db_migrations(migrations);
+        let db_miration_schema_state = DbMigrationSchemaState {
+            resources: db_info.clone(),
+            migration_meta: stream_lined_migrations,
+        };
+        self.db_resources_state_assertion_counter += 1;
+        let name_differentiator = self.snapshots_name_differentiator(current_function!(), self.db_resources_state_assertion_counter);
+        insta::assert_debug_snapshot!(name_differentiator, db_miration_schema_state);
+        db_miration_schema_state
     }
 
 
 
-    fn snapshots_name_differentiator(&mut self) -> String {
+    fn snapshots_name_differentiator(&mut self, implementor_fn_name: &str, assertion_counter: u8) -> String {
         let mode = self.migrator.mode();
         let reversible = self.reversible.unwrap_or_default();
         let migration_type = MigrationFlag::from(reversible);
         let current_function_name = &self.current_function_name; 
-        self.assertion_counter += 1;
-        let assertion_counter = self.assertion_counter;
         let mock_prompter = match self.mock_prompter.unwrap_or_default().rename_or_delete_single_field_change {
             RenameOrDelete::Rename => "single field name change strategy: rename",
             RenameOrDelete::Delete => "single field name change strategy: delete",
         };
         let name_differentiator = format!(
             "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}{mock_prompter}\
+        function{implementor_fn_name}\
         _assertion_number {assertion_counter}"
         );
 
@@ -289,7 +336,8 @@ impl TestConfigNew {
         &mut self,
     ) -> SnapShot {
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
-        let name_differentiator = self.snapshots_name_differentiator();
+        self.migration_dir_state_assertion_counter += 1;
+        let name_differentiator = self.snapshots_name_differentiator(current_function!(), self.migration_dir_state_assertion_counter);
         let migration_queries_snaps = self
             .read_migrations_from_dir_sorted_asc()
             .iter()
