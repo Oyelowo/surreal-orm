@@ -15,9 +15,9 @@ use test_case::test_case;
 #[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
 async fn test_rollback_previous(mode: Mode) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations().await;
 
     // let mut conf = TestConfigNew::new\(mode, &temp_test_migration_dir\).await;
@@ -286,9 +286,9 @@ async fn test_rollback_previous(mode: Mode) {
 #[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
 async fn test_rollback_number_delta(mode: Mode) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations().await;
 
     // First apply all generated migrations to the current db instance
@@ -461,9 +461,9 @@ async fn test_rollback_number_delta(mode: Mode) {
 #[test_case(Mode::Lax; "Reversible Lax")]
 #[tokio::test]
 async fn test_rollback_till_pointer_mig_id(mode: Mode) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(true).await;
 
     // First apply all generated migrations to the current db instance
@@ -639,9 +639,9 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
 #[should_panic]
 #[tokio::test]
 async fn cannot_rollback_twice_to_same_cursor_cos_it_does_not_exist_the_second_time(mode: Mode) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations().await;
 
     // First apply all generated migrations to the current db instance
@@ -666,9 +666,9 @@ async fn cannot_rollback_twice_to_same_cursor_cos_it_does_not_exist_the_second_t
 #[should_panic]
 #[tokio::test]
 async fn rollingback_to_nonexisting_filecursor_panics(mode: Mode) {
-    let mig_dir = tempdir().expect("Failed to create temp directory");
-    let temp_test_migration_dir = &mig_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
+    let migration_dir = tempdir().expect("Failed to create temp directory");
+    let migration_dir = &migration_dir.path().join("migrations-tests");
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_test_migrations().await;
 
     // First apply all generated migrations to the current db instance
