@@ -62,6 +62,7 @@ REMOVE EVENT event2 ON TABLE animal;
 
 
 DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
+UPDATE planet SET newName = firstName;
 REMOVE FIELD firstName ON TABLE planet;
 
 header: Basename - migration_gen_1. Extension - down.surql
@@ -82,5 +83,6 @@ DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10)
 
 
 
-REMOVE FIELD newName ON TABLE planet;
 DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+UPDATE planet SET firstName = newName;
+REMOVE FIELD newName ON TABLE planet;

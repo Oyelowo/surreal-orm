@@ -90,12 +90,20 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: b
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
 }
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict, true, RenameOrDelete::Rename; "Strict Reversible and single field name change diff strategy is implicit renaming")]
+#[test_case(Mode::Strict, true, RenameOrDelete::Delete; "Strict Reversible and single field name change diff strategy is implicit deletion")]
+#[test_case(Mode::Lax, true, RenameOrDelete::Rename; "Lax Reversible and single field name change diff strategy is implicit renaming")]
+#[test_case(Mode::Lax, true, RenameOrDelete::Delete; "Lax Reversible and single field name change diff strategy is implicit deletion")]
+#[test_case(Mode::Strict, false, RenameOrDelete::Rename; "Strict Non-Reversible and single field name change diff strategy is implicit renaming")]
+#[test_case(Mode::Strict, false, RenameOrDelete::Delete; "Strict Non-Reversible and single field name change diff strategy is implicit deletion")]
+#[test_case(Mode::Lax, false, RenameOrDelete::Rename; "Lax Non-Reversible and single field name change diff strategy is implicit renaming")]
+#[test_case(Mode::Lax, false, RenameOrDelete::Delete; "Lax Non-Reversible and single field name change diff strategy is implicit deletion")]
 #[tokio::test]
-async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
+async fn test_successfully_handles_renaming(
+    mode: Mode,
+    reversible: bool,
+    single_field_name_change_diff_strategy: RenameOrDelete,
+) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
@@ -110,6 +118,11 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
         create_table_resources!(AnimalV2, PlanetV2);
     }
 
+    let mock_prompter = MockPrompter::builder()
+        .allow_empty_migrations_gen(true)
+        .rename_or_delete_single_field_change(single_field_name_change_diff_strategy)
+        .build();
+
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -117,10 +130,7 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
             .run(false)
             .build(),
         ResourcesV1,
-        MockPrompter::builder()
-            .allow_empty_migrations_gen(true)
-            .rename_or_delete_single_field_change(RenameOrDelete::Rename)
-            .build(),
+        mock_prompter.clone(),
     )
     .await;
     assert!(migration_dir.exists());
@@ -218,7 +228,7 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
             .run(false)
             .build(),
         ResourcesV2,
-        MockPrompter::default(),
+        mock_prompter.clone(),
     )
     .await;
     assert_with_db_instance(AssertionArg {
@@ -250,14 +260,27 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
             .contains("REMOVE FIELD updatedAt ON TABLE animal;"));
 
-        assert!(
-            snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
-                "DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;\
+        match single_field_name_change_diff_strategy {
+            RenameOrDelete::Rename => {
+                assert!(
+                    snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
+                        "DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;\
         \nUPDATE planet SET newName = firstName;\
         \nREMOVE FIELD firstName ON TABLE planet;"
-            ),
-            "Successfully handles implicit renaming when single field changed"
-        );
+                    ),
+                    "Successfully handles implicit renaming when single field changed"
+                );
+            }
+            RenameOrDelete::Delete => {
+                assert!(
+                    snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
+                        "DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;\
+                \nREMOVE FIELD firstName ON TABLE planet;"
+                    ),
+                    "Successfully handles implicit deletion when single field changed"
+                );
+            }
+        }
     };
     if reversible {
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
@@ -288,14 +311,34 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
             .contains("DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;"));
 
-        assert!(
-            snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
-                "DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;\
+        match single_field_name_change_diff_strategy {
+            RenameOrDelete::Rename => {
+                assert!(
+                    snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
+                        "DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;\
         \nUPDATE planet SET firstName = newName;\
         \nREMOVE FIELD newName ON TABLE planet;"
-            ),
-            "Successfully handles implicit renaming reversal"
-        );
+                    ),
+                    "Successfully handles implicit renaming reversal"
+                );
+            }
+            RenameOrDelete::Delete => {
+                assert!(
+                    snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
+                        "REMOVE FIELD newName ON TABLE planet;\
+        \nDEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;"
+                    ),
+                    "Successfully handles implicit renaming reversal"
+                );
+                assert!(
+                    snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
+                        "REMOVE FIELD newName ON TABLE planet;\
+                \nDEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;"
+                    ),
+                    "Successfully handles implicit deletion reversal"
+                );
+            }
+        }
     } else {
         assert_forward_up_migrations_snaps_v1();
         assert_up_forward_v2_with_renaming();
