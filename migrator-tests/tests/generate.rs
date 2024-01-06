@@ -26,7 +26,7 @@ use test_case::test_case;
 async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -47,7 +47,7 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
     assert!(
@@ -65,7 +65,7 @@ async fn test_cannot_generate_without_db_run_without_init(mode: Mode, reversible
 async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -86,7 +86,7 @@ async fn test_cannot_generate_with_db_run_without_init(mode: Mode, reversible: b
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
     assert!(!migration_dir.exists(), "Migration directory cannot be created with generate if not migration not already initialized");
 }
 
@@ -106,7 +106,7 @@ async fn test_successfully_handles_renaming(
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     #[derive(Debug, Clone)]
     pub struct ResourcesV1;
     impl DbResources for ResourcesV1 {
@@ -144,7 +144,7 @@ async fn test_successfully_handles_renaming(
         config: conf.clone(),
     })
     .await;
-    let snapshot = conf.assert_migration_queries_snapshot(current_function!());
+    let snapshot = conf.assert_migration_queries_snapshot();
 
     let assert_forward_up_migrations_snaps_v1 = || {
         assert!(snapshot.contains("DELETE migration;"));
@@ -244,7 +244,7 @@ async fn test_successfully_handles_renaming(
 
     // The implicit renaming strategy is set in mock prompter above
     let snapshot_v2_with_animal_explicit_planet_implicit_renaming =
-        conf.assert_migration_queries_snapshot(current_function!());
+        conf.assert_migration_queries_snapshot();
     let assert_up_forward_v2_with_renaming = || {
         assert!(
             snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
@@ -371,7 +371,7 @@ async fn test_successfully_handles_renaming(
 async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -393,7 +393,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         config: conf.clone(),
     })
     .await;
-    let snapshot = conf.assert_migration_queries_snapshot(current_function!());
+    let snapshot = conf.assert_migration_queries_snapshot();
 
     let assert_forward_up_migrations_snaps = || {
         assert!(snapshot.contains("DELETE migration;"));
@@ -525,7 +525,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
     assert!(migration_dir.exists());
 }
 
@@ -537,7 +537,7 @@ async fn test_can_generate_after_first_initializing_no_db_run(mode: Mode, revers
 async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -559,7 +559,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -582,7 +582,7 @@ async fn test_can_generate_after_first_initializing_with_run(mode: Mode, reversi
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
     assert!(migration_dir.exists());
 }
 
@@ -597,7 +597,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -619,7 +619,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -640,7 +640,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
     assert!(migration_dir.exists());
 }
 
@@ -652,7 +652,7 @@ async fn test_can_generate_with_run_after_first_initializing_with_run(
 async fn test_multiple_generation(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
     assert!(migration_dir.exists());
@@ -669,7 +669,7 @@ async fn test_multiple_generation(mode: Mode, reversible: bool) {
     })
     .await;
 
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -688,7 +688,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
     };
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -710,7 +710,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -734,7 +734,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     // Redo and make sure
     conf.run_gen_cmd(
@@ -759,7 +759,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -784,7 +784,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -796,7 +796,7 @@ async fn test_two_way_can_disallow_empty_migration_gen_on_no_diff(mode: Mode, re
 async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -818,7 +818,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -839,7 +839,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
     assert!(migration_dir.exists());
 
     conf.run_gen_cmd(
@@ -879,7 +879,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -901,7 +901,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_gen_cmd(
         Generate::builder()
@@ -927,7 +927,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
 async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
@@ -977,7 +977,7 @@ async fn test_should_panic_if_renaming_from_non_existing_field_in_migration_dire
 ) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)

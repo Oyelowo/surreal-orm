@@ -20,6 +20,9 @@ async fn test_rollback_previous(mode: Mode) {
     let mut conf = TestConfigNew::new(mode, &temp_test_migration_dir).await;
     conf.generate_test_migrations().await;
 
+    // let mut conf = TestConfigNew::new\(mode, &temp_test_migration_dir\).await;
+    // let mut conf = TestConfigNew::new\(mode, &temp_test_migration_dir, current_function!\(\)).await;
+
     // First apply all generated migrations to the current db instance
     conf.run_up(&FastForwardDelta::default()).await;
 
@@ -276,7 +279,7 @@ async fn test_rollback_previous(mode: Mode) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict; "Reversible Strict")]
@@ -451,7 +454,7 @@ async fn test_rollback_number_delta(mode: Mode) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict; "Reversible Strict")]
@@ -628,7 +631,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict; "Reversible Strict")]
@@ -655,7 +658,7 @@ async fn cannot_rollback_twice_to_same_cursor_cos_it_does_not_exist_the_second_t
         false,
     )
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict; "Reversible Strict")]
@@ -702,5 +705,5 @@ async fn rollingback_to_nonexisting_filecursor_panics(mode: Mode) {
         false,
     )
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }

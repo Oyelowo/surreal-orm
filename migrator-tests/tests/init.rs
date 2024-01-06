@@ -18,7 +18,7 @@ use test_case::test_case;
 async fn test_init_without_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function()).await;
 
     conf.run_init_cmd(
         Init::builder()
@@ -40,7 +40,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -53,7 +53,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -64,7 +64,7 @@ async fn test_init_without_run(mode: Mode, reversible: bool) {
 async fn test_init_with_run(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function()).await;
 
     conf.run_init_cmd(
         Init::builder()
@@ -86,7 +86,7 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_up(&FastForwardDelta::default()).await;
     assert_with_db_instance(AssertionArg {
@@ -99,10 +99,10 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 }
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
+#[tet_case(Mode::Strict, true; "Reversible Strict")]
 #[test_case(Mode::Lax, true; "Reversible Lax")]
 #[test_case(Mode::Strict, false; "Non-Reversible Strict")]
 #[test_case(Mode::Lax, false; "Non-Reversible Lax")]
@@ -115,7 +115,7 @@ async fn test_init_with_run(mode: Mode, reversible: bool) {
 async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function()).await;
 
     conf.run_init_cmd(
         Init::builder()
@@ -137,7 +137,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_init_cmd(
         Init::builder()
@@ -168,7 +168,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
 async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
-    let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    let mut conf = TestConfigNew::new(mode, migration_dir, current_function()).await;
 
     conf.run_init_cmd(
         Init::builder()
@@ -191,7 +191,7 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
         config: conf.clone(),
     })
     .await;
-    conf.assert_migration_queries_snapshot(current_function!());
+    conf.assert_migration_queries_snapshot();
 
     conf.run_init_cmd(
         Init::builder()
