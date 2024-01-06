@@ -44,13 +44,13 @@ pub struct RealPrompter;
 
 impl Prompter for RealPrompter {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum RenameOrDelete {
     Rename,
     Delete,
 }
 
-#[derive(Debug, Clone, TypedBuilder)]
+#[derive(Debug, Clone, Copy, TypedBuilder)]
 pub struct MockPrompter {
     // triggered when empty migration(s) are about to be generated.
     // This is good if you want to write out some queries manually.

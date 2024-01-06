@@ -2,7 +2,7 @@
 source: migrator-tests/src/lib.rs
 expression: migration_queries_snaps
 ---
-header: Basename - migration_init. Extension - up.surql
+header: Basename - migration_init. Extension - surql
  Migration Query: 
 DELETE migration;
 DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
@@ -20,7 +20,6 @@ DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10)
 
 
 DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
 DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
 DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
@@ -37,13 +36,7 @@ DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
 DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
 DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
 
-header: Basename - migration_init. Extension - down.surql
- Migration Query: 
-REMOVE TABLE animal;
-REMOVE TABLE migration;
-REMOVE TABLE planet;
-
-header: Basename - migration_gen_1. Extension - up.surql
+header: Basename - migration_gen_1. Extension - surql
  Migration Query: 
 DEFINE FIELD characteristics ON animal TYPE array<string> PERMISSIONS FULL;
 UPDATE animal SET characteristics = attributes;
@@ -63,24 +56,3 @@ REMOVE EVENT event2 ON TABLE animal;
 
 DEFINE FIELD newName ON planet TYPE string PERMISSIONS FULL;
 REMOVE FIELD firstName ON TABLE planet;
-
-header: Basename - migration_gen_1. Extension - down.surql
- Migration Query: 
-DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
-UPDATE animal SET attributes = characteristics;
-REMOVE FIELD characteristics ON TABLE animal;
-DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
-DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
-
-
-DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
-DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
-
-
-
-
-
-
-REMOVE FIELD newName ON TABLE planet;
-DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;

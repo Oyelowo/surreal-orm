@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf, ops::Deref};
+use std::{fs, path::PathBuf, ops::Deref, fmt::Display};
 
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
@@ -172,6 +172,13 @@ pub struct AssertionArg {
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SnapShot(String);
+impl Display for SnapShot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let SnapShot(s) = self;
+        write!(f, "{s}" )
+    }
+}
+
 impl Deref for SnapShot {
     type Target = String;
 
@@ -206,6 +213,9 @@ pub struct TestConfigNew {
     reversible: Option<bool>,
     
     #[builder(default)]
+    mock_prompter: Option<MockPrompter>,
+    
+    #[builder(default)]
     assertion_counter: u8,
 }
 
@@ -235,8 +245,12 @@ impl TestConfigNew {
         let current_function_name = current_function_name.into(); 
         self.assertion_counter += 1;
         let assertion_counter = self.assertion_counter;
+        let mock_prompter = match self.mock_prompter.unwrap_or_default().rename_or_delete_single_field_change {
+            RenameOrDelete::Rename => "single field name change strategy: rename",
+            RenameOrDelete::Delete => "single field name change strategy: delete",
+        };
         let name_differentiator = format!(
-            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}\
+            "source_{current_function_name}___migration_type_{migration_type}___mode_{mode}{mock_prompter}\
         _assertion_number {assertion_counter}"
         );
         let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
@@ -330,6 +344,7 @@ impl TestConfigNew {
         codebase_resources: Option<impl DbResources>,
         prompter: MockPrompter,
     ) -> &mut Self {
+        self.mock_prompter = Some(prompter);
         self.migrator.run_test(codebase_resources, prompter).await;
         self
     }
