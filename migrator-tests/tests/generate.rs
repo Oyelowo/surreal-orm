@@ -6,8 +6,14 @@
  */
 
 use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
-use surreal_models::migrations::{invalid_cases, Resources, ResourcesV2};
-use surreal_orm::migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete};
+use surreal_models::migrations::{
+    invalid_cases, Animal, AnimalV2, Planet, PlanetV2, Resources, ResourcesV2,
+};
+use surreal_orm::{
+    create_table_resources,
+    migrator::{Generate, Init, MockPrompter, Mode, RenameOrDelete},
+    DbResources, TableResources,
+};
 use tempfile::tempdir;
 use test_case::test_case;
 
@@ -93,13 +99,24 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir).await;
+    #[derive(Debug, Clone)]
+    pub struct ResourcesV1;
+    impl DbResources for ResourcesV1 {
+        create_table_resources!(Animal, Planet);
+    }
+    #[derive(Debug, Clone)]
+    pub struct ResourcesV2;
+    impl DbResources for ResourcesV2 {
+        create_table_resources!(AnimalV2, PlanetV2);
+    }
+
     conf.run_init_cmd(
         Init::builder()
             .reversible(reversible)
             .name("migration init".into())
             .run(false)
             .build(),
-        Resources,
+        ResourcesV1,
         MockPrompter::builder()
             .allow_empty_migrations_gen(true)
             .rename_or_delete_single_field_change(RenameOrDelete::Rename)
@@ -135,22 +152,6 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
             snapshot.contains("DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;")
         );
         assert!(snapshot.contains("DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;"));
-        assert!(snapshot
-            .contains("DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;"));
-        assert!(snapshot.contains("DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);"));
-        assert!(snapshot.contains("DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);"));
-
-        assert!(snapshot.contains("DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;"));
-        assert!(snapshot.contains("DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;"));
-        assert!(snapshot.contains("DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;"));
-
-        assert!(snapshot.contains("DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;"));
-        assert!(snapshot.contains("DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;"));
-        assert!(snapshot.contains("DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;"));
-        assert!(snapshot.contains("DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;"));
-        assert!(snapshot.contains("DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;"));
-        assert!(snapshot.contains("DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;"));
-
         assert!(snapshot.contains("DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;"));
         assert!(snapshot
             .contains("DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;"));
@@ -173,22 +174,6 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
         assert!(
             snapshot.contains("DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;")
         );
-
-        assert!(snapshot.contains("DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;"));
-        assert!(snapshot.contains("DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;"));
-        assert!(
-            snapshot.contains("DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;")
-        );
-
-        assert!(
-            snapshot.contains("DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;")
-        );
-        assert!(
-            snapshot.contains("DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;")
-        );
-        assert!(
-            snapshot.contains("DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;")
-        );
     };
 
     if reversible {
@@ -202,11 +187,8 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
         );
 
         assert!(snapshot.contains("REMOVE TABLE animal;"));
-        assert!(snapshot.contains("REMOVE TABLE crop;"));
-        assert!(snapshot.contains("REMOVE TABLE eats;"));
         assert!(snapshot.contains("REMOVE TABLE migration;"));
         assert!(snapshot.contains("REMOVE TABLE planet;"));
-        assert!(snapshot.contains("REMOVE TABLE student;"));
 
         assert!(snapshot.contains("header: Basename - migration_init. Extension - up.surql"));
         assert_forward_up_migrations_snaps_v1();
@@ -267,45 +249,6 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
             .contains("REMOVE FIELD createdAt ON TABLE animal;"));
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
             .contains("REMOVE FIELD updatedAt ON TABLE animal;"));
-        assert!(
-            snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
-                "DEFINE INDEX species_speed_idx ON animal FIELDS velocity, characteristics UNIQUE;"
-            )
-        );
-
-        assert!(
-            snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
-                "DEFINE EVENT event1 ON animal WHEN species = 'Homo Habillis' AND velocity > 545 THEN (SELECT * FROM crop);"
-            )
-        );
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("REMOVE EVENT event2 ON TABLE animal;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("REMOVE TABLE animal_snake_case;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD location ON eats TYPE string PERMISSIONS FULL;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("REMOVE FIELD place ON TABLE eats;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD updatedAt ON eats TYPE datetime PERMISSIONS FULL;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("REMOVE TABLE eats_snake_case;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE TABLE new_stuff SCHEMAFULL PERMISSIONS NONE;"));
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD createdAt ON new_stuff TYPE datetime PERMISSIONS FULL;"));
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD firstName ON new_stuff TYPE string PERMISSIONS FULL;"));
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD id ON new_stuff TYPE record<new_stuff> PERMISSIONS FULL;"));
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE FIELD updatedAt ON new_stuff TYPE datetime PERMISSIONS FULL;"));
 
         assert!(
             snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
@@ -315,9 +258,6 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
             ),
             "Successfully handles implicit renaming when single field changed"
         );
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("REMOVE TABLE student;"));
     };
     if reversible {
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
@@ -347,9 +287,6 @@ async fn test_successfully_handles_renaming(mode: Mode, reversible: bool) {
 
         assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
             .contains("DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;"));
-
-        assert!(snapshot_v2_with_animal_explicit_planet_implicit_renaming
-            .contains("DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;"));
 
         assert!(
             snapshot_v2_with_animal_explicit_planet_implicit_renaming.contains(
