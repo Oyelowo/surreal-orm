@@ -16,139 +16,6 @@ use surreal_orm::{
 
 use typed_builder::TypedBuilder;
 
-pub async fn assert_with_db_instance(args: AssertionArg) {
-    let AssertionArg {
-        expected_mig_files_count,
-        expected_db_mig_meta_count: expected_db_mig_count,
-        expected_latest_migration_file_basename_normalized,
-        expected_latest_db_migration_meta_basename_normalized,
-        code_origin_line,
-        config,
-        migration_type,
-    } = args;
-
-    let db = config.migrator.db().clone();
-    let db_migrations = Migration::get_all_desc(db.clone()).await;
-    let latest_migration_basename = Migration::get_latest(db.clone()).await.map(|m| {
-        MigrationFilename::try_from(m.name.clone())
-            .expect("Failed to parse file name")
-            .basename()
-    });
-    assert_eq!(
-        latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
-        "Base name in file does not match the base name in the db. Line: {code_origin_line}",
-    );
-
-    let migration_files = config.read_migrations_from_dir_sorted_asc();
-
-    let latest_file_name = migration_files.iter().max();
-
-    assert_eq!(
-        latest_file_name.map(|lfn| lfn.basename()),
-        expected_latest_migration_file_basename_normalized,
-        "Base name in file does not match the base name in the db. Line: {code_origin_line}"
-    );
-
-    assert_eq!(
-        db_migrations.len() as u8,
-        expected_db_mig_count,
-        "migration Counts do not match with what is in the db. Line: {code_origin_line}",
-    );
-
-    assert_eq!(
-        migration_files.len() as u8,
-        match migration_type {
-            MigrationFlag::TwoWay => expected_mig_files_count * 2,
-            MigrationFlag::OneWay => expected_mig_files_count,
-        },
-        "File counts do not match. Line: {code_origin_line}"
-    );
-
-    for db_mig_record in db_migrations {
-        let file_name = db_mig_record.clone().name;
-        let mig_name_from_db =
-            MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
-        let timestamp = mig_name_from_db.timestamp();
-        let basename = mig_name_from_db.basename();
-        let extension = mig_name_from_db.extension();
-
-        let found_migration_file = |db_mig_name: MigrationFilename| {
-            migration_files
-                .iter()
-                .filter(|filename| match migration_type {
-                    MigrationFlag::TwoWay => {
-                        //
-                        db_mig_name.to_up() == filename.to_up()
-                    }
-                    MigrationFlag::OneWay => &db_mig_name == *filename,
-                })
-                .collect::<Vec<_>>()
-        };
-
-        match migration_type {
-            MigrationFlag::TwoWay => {
-                let found_mig_file = found_migration_file(mig_name_from_db.clone());
-                assert_eq!(found_mig_file.len(), 2);
-
-                let ups = found_mig_file
-                    .iter()
-                    .filter(|m| m.is_up())
-                    .collect::<Vec<_>>();
-                assert_eq!(ups.len(), 1);
-                assert_eq!(ups.first().cloned(), Some(&&mig_name_from_db));
-                assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
-                assert_eq!(
-                    ups.first().map(|u| u.extension().to_string()),
-                    Some("up.surql".into())
-                );
-                assert_eq!(
-                    ups.first().map(|u| u.to_string()),
-                    Some(db_mig_record.clone().name)
-                );
-                assert_eq!(
-                    ups.first().map(|u| u.timestamp()),
-                    Some(db_mig_record.clone().timestamp)
-                );
-
-                let downs = found_mig_file
-                    .iter()
-                    .filter(|m| m.is_down())
-                    .collect::<Vec<_>>();
-                assert_eq!(downs.len(), 1);
-                assert_eq!(downs.first().cloned(), Some(&&mig_name_from_db.to_down()));
-                assert_eq!(
-                    downs.first().map(|u| u.extension().to_string()),
-                    Some("down.surql".into())
-                );
-                assert_eq!(
-                    // we store reversible migration meta with up extension
-                    downs.first().map(|u| u.to_up().to_string()),
-                    Some(db_mig_record.clone().name)
-                );
-                assert_eq!(
-                    downs.first().map(|u| u.timestamp()),
-                    Some(db_mig_record.clone().timestamp)
-                );
-            }
-            MigrationFlag::OneWay => {
-                let found_mig_file = found_migration_file(mig_name_from_db.clone());
-                assert_eq!(found_mig_file.len(), 1);
-                let found_mig_file = found_mig_file.first().expect("File must exist");
-                assert_eq!(found_mig_file.basename(), basename);
-                assert_eq!(found_mig_file.extension(), extension);
-                assert_eq!(found_mig_file.timestamp(), timestamp);
-                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
-            }
-        }
-
-        assert_eq!(
-            mig_name_from_db.to_string(),
-            format!("{timestamp}_{basename}.{extension}"),
-            "File name should be in the format of {timestamp}_{basename}.{extension}"
-        );
-    }
-}
-
 pub fn get_db_connection_config() -> DatabaseConnection {
     DatabaseConnection::builder()
         .db("test".into())
@@ -161,13 +28,11 @@ pub fn get_db_connection_config() -> DatabaseConnection {
 
 #[derive(Clone, TypedBuilder)]
 pub struct AssertionArg {
-    pub migration_type: MigrationFlag,
     pub expected_mig_files_count: u8,
     pub expected_db_mig_meta_count: u8,
     pub expected_latest_migration_file_basename_normalized: Option<Basename>,
     pub expected_latest_db_migration_meta_basename_normalized: Option<Basename>,
     pub code_origin_line: u32,
-    pub config: TestConfigNew,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -636,10 +501,6 @@ impl TestConfigNew {
         self
     }
 
-    pub async fn generate_test_migrations(&mut self) -> &mut Self {
-        self.generate_12_test_migrations_reversible(true).await
-    }
-
     pub fn get_either_filename_type_at_position(
         &self,
         position: u8,
@@ -665,6 +526,141 @@ impl TestConfigNew {
         }
         self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
+
+
+    pub async fn assert_with_db_instance(&self, args: AssertionArg) {
+    let AssertionArg {
+        expected_mig_files_count,
+        expected_db_mig_meta_count: expected_db_mig_count,
+        expected_latest_migration_file_basename_normalized,
+        expected_latest_db_migration_meta_basename_normalized,
+        code_origin_line,
+    } = args;
+        let migration_type = MigrationFlag::from(self.reversible.unwrap_or_default());
+
+    let db = self.migrator.db().clone();
+    let db_migrations = Migration::get_all_desc(db.clone()).await;
+    let latest_migration_basename = Migration::get_latest(db.clone()).await.map(|m| {
+        MigrationFilename::try_from(m.name.clone())
+            .expect("Failed to parse file name")
+            .basename()
+    });
+    assert_eq!(
+        latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
+        "Base name in file does not match the base name in the db. Line: {code_origin_line}",
+    );
+
+    let migration_files = self.read_migrations_from_dir_sorted_asc();
+
+    let latest_file_name = migration_files.iter().max();
+
+    assert_eq!(
+        latest_file_name.map(|lfn| lfn.basename()),
+        expected_latest_migration_file_basename_normalized,
+        "Base name in file does not match the base name in the db. Line: {code_origin_line}"
+    );
+
+    assert_eq!(
+        db_migrations.len() as u8,
+        expected_db_mig_count,
+        "migration Counts do not match with what is in the db. Line: {code_origin_line}",
+    );
+
+    assert_eq!(
+        migration_files.len() as u8,
+        match migration_type {
+            MigrationFlag::TwoWay => expected_mig_files_count * 2,
+            MigrationFlag::OneWay => expected_mig_files_count,
+        },
+        "File counts do not match. Line: {code_origin_line}"
+    );
+
+    for db_mig_record in db_migrations {
+        let file_name = db_mig_record.clone().name;
+        let mig_name_from_db =
+            MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
+        let timestamp = mig_name_from_db.timestamp();
+        let basename = mig_name_from_db.basename();
+        let extension = mig_name_from_db.extension();
+
+        let found_migration_file = |db_mig_name: MigrationFilename| {
+            migration_files
+                .iter()
+                .filter(|filename| match migration_type {
+                    MigrationFlag::TwoWay => {
+                        //
+                        db_mig_name.to_up() == filename.to_up()
+                    }
+                    MigrationFlag::OneWay => &db_mig_name == *filename,
+                })
+                .collect::<Vec<_>>()
+        };
+
+        match migration_type {
+            MigrationFlag::TwoWay => {
+                let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                assert_eq!(found_mig_file.len(), 2);
+
+                let ups = found_mig_file
+                    .iter()
+                    .filter(|m| m.is_up())
+                    .collect::<Vec<_>>();
+                assert_eq!(ups.len(), 1);
+                assert_eq!(ups.first().cloned(), Some(&&mig_name_from_db));
+                assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
+                assert_eq!(
+                    ups.first().map(|u| u.extension().to_string()),
+                    Some("up.surql".into())
+                );
+                assert_eq!(
+                    ups.first().map(|u| u.to_string()),
+                    Some(db_mig_record.clone().name)
+                );
+                assert_eq!(
+                    ups.first().map(|u| u.timestamp()),
+                    Some(db_mig_record.clone().timestamp)
+                );
+
+                let downs = found_mig_file
+                    .iter()
+                    .filter(|m| m.is_down())
+                    .collect::<Vec<_>>();
+                assert_eq!(downs.len(), 1);
+                assert_eq!(downs.first().cloned(), Some(&&mig_name_from_db.to_down()));
+                assert_eq!(
+                    downs.first().map(|u| u.extension().to_string()),
+                    Some("down.surql".into())
+                );
+                assert_eq!(
+                    // we store reversible migration meta with up extension
+                    downs.first().map(|u| u.to_up().to_string()),
+                    Some(db_mig_record.clone().name)
+                );
+                assert_eq!(
+                    downs.first().map(|u| u.timestamp()),
+                    Some(db_mig_record.clone().timestamp)
+                );
+            }
+            MigrationFlag::OneWay => {
+                let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                assert_eq!(found_mig_file.len(), 1);
+                let found_mig_file = found_mig_file.first().expect("File must exist");
+                assert_eq!(found_mig_file.basename(), basename);
+                assert_eq!(found_mig_file.extension(), extension);
+                assert_eq!(found_mig_file.timestamp(), timestamp);
+                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
+            }
+        }
+
+        assert_eq!(
+            mig_name_from_db.to_string(),
+            format!("{timestamp}_{basename}.{extension}"),
+            "File name should be in the format of {timestamp}_{basename}.{extension}"
+        );
+    }
+}
+
+
 }
 
 #[macro_export]

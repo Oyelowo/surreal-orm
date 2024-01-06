@@ -4,33 +4,29 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use migrator_tests::{assert_with_db_instance, current_function, AssertionArg, TestConfigNew};
+use migrator_tests::{ current_function, AssertionArg, TestConfigNew};
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::{FastForwardDelta, Init, MigrationFilename, MockPrompter, Mode};
 use tempfile::tempdir;
 use test_case::test_case;
 
-#[test_case(Mode::Strict, true; "Reversible Strict")]
-#[test_case(Mode::Lax, true; "Reversible Lax")]
-#[test_case(Mode::Strict, false; "Non-Reversible Strict")]
-#[test_case(Mode::Lax, false; "Non-Reversible Lax")]
+#[test_case(Mode::Strict; "Strict")]
+#[test_case(Mode::Lax; "Lax")]
 #[tokio::test]
 #[should_panic(expected = "Failed to detect migration type.")]
-async fn test_one_way_cannot_run_up_without_init(mode: Mode, reversible: bool) {
+async fn test_one_way_cannot_run_up_without_init(mode: Mode) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 0,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: None,
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -61,41 +57,35 @@ async fn test_run_up_after_init_with_no_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -124,27 +114,23 @@ async fn test_run_up_after_init_with_run(mode: Mode, reversible: bool) {
         MockPrompter::default(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 1,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some("migration_init".into()),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -167,8 +153,7 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -178,7 +163,6 @@ async fn test_run_up_default_which_is_latest(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -202,8 +186,7 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 1,
         expected_latest_migration_file_basename_normalized: Some(
@@ -211,15 +194,13 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
         ),
         expected_latest_db_migration_meta_basename_normalized: Some("migration_1_init".into()),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
@@ -229,15 +210,13 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_6_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 6,
         expected_latest_migration_file_basename_normalized: Some(
@@ -247,15 +226,13 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_6_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(1).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
@@ -265,15 +242,13 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_7_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(5).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -283,15 +258,13 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(1000).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -301,7 +274,6 @@ async fn test_run_up_with_explicit_number_delta_fwd_strategy(mode: Mode, reversi
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -323,8 +295,7 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         .await;
     conf.assert_db_resources_state().await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -332,15 +303,13 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(26).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 26,
         expected_latest_migration_file_basename_normalized: Some(
@@ -350,15 +319,13 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
             "migration_26_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
@@ -368,7 +335,6 @@ async fn text_mixed_run_up_strategies_with_larger_runs(mode: Mode, reversible: b
             "migration_69_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -388,8 +354,7 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
 
     conf.generate_test_migrations_arbitrary(69, reversible.into())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -397,15 +362,13 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(69).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 69,
         expected_db_mig_meta_count: 69,
         expected_latest_migration_file_basename_normalized: Some(
@@ -415,7 +378,6 @@ async fn test_run_up_to_latest_with_number_delta_strategy(mode: Mode, reversible
             "migration_69_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -434,8 +396,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
 
     conf.generate_12_test_migrations_reversible(reversible.into())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -443,15 +404,13 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::builder().number(0).build())
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -459,7 +418,6 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -479,8 +437,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -488,7 +445,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -499,8 +455,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             .build(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 5,
         expected_latest_migration_file_basename_normalized: Some(
@@ -510,7 +465,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             "migration_5_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -523,8 +477,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
         )
         .await;
 
-        assert_with_db_instance(AssertionArg {
-            migration_type: reversible.into(),
+        conf.assert_with_db_instance(AssertionArg {
             expected_mig_files_count: 12,
             expected_db_mig_meta_count: i as u8,
             expected_latest_migration_file_basename_normalized: Some(
@@ -534,7 +487,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
                 format!("migration_{}{}", i, "_gen_after_init".to_string()).into(),
             ),
             code_origin_line: std::line!(),
-            config: conf.clone(),
         })
         .await;
     }
@@ -546,8 +498,7 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             .build(),
     )
     .await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -557,14 +508,12 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
 
     conf.run_up(&FastForwardDelta::default()).await;
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -574,7 +523,6 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -683,8 +631,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 0,
         expected_latest_migration_file_basename_normalized: Some(
@@ -692,7 +639,6 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
         ),
         expected_latest_db_migration_meta_basename_normalized: None,
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -704,8 +650,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     )
     .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 3,
         expected_latest_migration_file_basename_normalized: Some(
@@ -715,7 +660,6 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
             "migration_3_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -723,8 +667,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::builder().number(4).build())
         .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 7,
         expected_latest_migration_file_basename_normalized: Some(
@@ -734,7 +677,6 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
             "migration_7_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -746,8 +688,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     )
     .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 9,
         expected_latest_migration_file_basename_normalized: Some(
@@ -757,7 +698,6 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
             "migration_9_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
@@ -765,8 +705,7 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
     conf.run_up(&FastForwardDelta::builder().latest(true).build())
         .await;
 
-    assert_with_db_instance(AssertionArg {
-        migration_type: reversible.into(),
+    conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
         expected_db_mig_meta_count: 12,
         expected_latest_migration_file_basename_normalized: Some(
@@ -776,7 +715,6 @@ async fn test_mixture_of_update_strategies(mode: Mode, reversible: bool) {
             "migration_12_gen_after_init".into(),
         ),
         code_origin_line: std::line!(),
-        config: conf.clone(),
     })
     .await;
     conf.assert_db_resources_state().await;
