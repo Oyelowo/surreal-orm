@@ -198,7 +198,7 @@ impl MigrationConfig {
             filenames.push(filename);
         }
 
-        filenames.sort_by(|a, b| a.cmp(b));
+        filenames.sort();
         Ok(filenames.into())
     }
 
