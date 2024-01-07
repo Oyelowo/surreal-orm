@@ -27,7 +27,7 @@ impl Display for Status {
     }
 }
 
-/// Run migrations
+/// List migrations according to status
 #[derive(Args, Debug, TypedBuilder, Clone)]
 pub struct List {
     /// Status of migrations to list
