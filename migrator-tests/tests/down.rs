@@ -467,7 +467,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     })
     .await;
 
-    for i in 10..0 {
+    for i in (0..10).rev() {
         conf.run_down(
             &RollbackStrategyStruct::builder()
                 .till(conf.get_down_filename_at_position(i))
