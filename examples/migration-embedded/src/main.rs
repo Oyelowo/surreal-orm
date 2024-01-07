@@ -1,7 +1,7 @@
 use surreal_models::migrations::Resources;
 use surreal_orm::migrator::config::DatabaseConnection;
 use surreal_orm::migrator::{
-    self, embed_migrations, MigrationConfig, RealPrompter, RollbackOptions, RollbackStrategy,
+    self, embed_migrations, MigrationConfig, Mode, RealPrompter, RollbackOptions, RollbackStrategy,
     UpdateStrategy,
 };
 // Embed migrations as constant
@@ -35,6 +35,12 @@ async fn main() {
         .await
         .unwrap();
 
+    // Ist approach to run embedded migrations
+    MIGRATIONS_ONE_WAY
+        .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+        .await
+        .unwrap();
+    // 2nd approach to run embedded migrations
     one_way
         .run_embedded_pending_migrations(
             db.clone(),
@@ -70,8 +76,15 @@ async fn main() {
         .unwrap();
 
     // Run normal non-embedded pending migrations in migration directory
+    // 1st approach to run_embedded_pending_migrations
+    MIGRATIONS_TWO_WAY
+        .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+        .await
+        .unwrap();
+
+    // 2nd approach to run embedded migrations
     two_way
-        .run_up_pending_migrations(db.clone(), migrator::UpdateStrategy::Latest)
+        .run_up_pending_migrations(db.clone(), UpdateStrategy::Latest)
         .await
         .unwrap();
 

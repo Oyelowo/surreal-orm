@@ -1,36 +1,80 @@
-DEFINE TABLE crop SCHEMAFULL;
-DEFINE FIELD color ON crop TYPE string;
-DEFINE FIELD id ON crop TYPE record<crop>;
-DEFINE TABLE migration SCHEMAFULL;
-DEFINE FIELD timestamp ON migration TYPE int;
-DEFINE FIELD name ON migration TYPE string;
-DEFINE FIELD id ON migration TYPE record<migration>;
-DEFINE TABLE animal SCHEMAFULL;
-DEFINE FIELD createdAt ON animal TYPE datetime;
-DEFINE FIELD id ON animal TYPE record<animal>;
-DEFINE FIELD velocity ON animal TYPE int;
-DEFINE FIELD updatedAt ON animal TYPE datetime;
-DEFINE FIELD attributes ON animal TYPE array;
-DEFINE FIELD species ON animal TYPE string;
+DELETE migration;
+DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD createdAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal TYPE record<animal> PERMISSIONS FULL;
+DEFINE FIELD species ON animal TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON animal TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal TYPE int PERMISSIONS FULL;
 DEFINE INDEX species_speed_idx ON animal FIELDS species, velocity UNIQUE;
-DEFINE EVENT event1 ON animal WHEN species = 'Homo Erectus' AND velocity > 545 THEN (SELECT * FROM crop);
+
+
+DEFINE EVENT event1 ON animal WHEN (species = 'Homo Erectus') AND (velocity > 545) THEN (SELECT * FROM crop);
 DEFINE EVENT event2 ON animal WHEN (species = 'Homo Sapien') AND (velocity < 10) THEN (SELECT * FROM eats);
-DEFINE TABLE planet SCHEMAFULL;
-DEFINE FIELD population ON planet TYPE int;
-DEFINE FIELD firstName ON planet TYPE string;
-DEFINE FIELD createdAt ON planet TYPE datetime;
-DEFINE FIELD labels ON planet TYPE array;
-DEFINE FIELD updatedAt ON planet TYPE datetime;
-DEFINE FIELD id ON planet TYPE record<planet>;
-DEFINE TABLE student SCHEMAFULL;
-DEFINE FIELD id ON student TYPE record<student>;
-DEFINE FIELD createdAt ON student TYPE datetime;
-DEFINE FIELD updatedAt ON student TYPE datetime;
-DEFINE FIELD age ON student TYPE int;
-DEFINE FIELD university ON student TYPE string;
-DEFINE TABLE eats SCHEMAFULL;
-DEFINE FIELD createdAt ON eats TYPE datetime;
-DEFINE FIELD place ON eats TYPE string;
-DEFINE FIELD in ON eats TYPE record;
-DEFINE FIELD out ON eats TYPE record;
-DEFINE FIELD id ON eats TYPE record<eats>;
+
+
+DEFINE TABLE animal_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD attributes ON animal_snake_case TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD created_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON animal_snake_case TYPE record<animal_snake_case> PERMISSIONS FULL;
+DEFINE FIELD species ON animal_snake_case TYPE string PERMISSIONS FULL;
+DEFINE FIELD updated_at ON animal_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD velocity ON animal_snake_case TYPE int PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD color ON crop TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON crop TYPE record<crop> PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON eats TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats TYPE record<eats> PERMISSIONS FULL;
+DEFINE FIELD in ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats TYPE string PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE eats_snake_case SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD created_at ON eats_snake_case TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON eats_snake_case TYPE record<eats_snake_case> PERMISSIONS FULL;
+DEFINE FIELD in ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD out ON eats_snake_case TYPE record<any> PERMISSIONS FULL;
+DEFINE FIELD place ON eats_snake_case TYPE string PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD checksum_down ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD checksum_up ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON migration TYPE record<migration> PERMISSIONS FULL;
+DEFINE FIELD name ON migration TYPE string PERMISSIONS FULL;
+DEFINE FIELD timestamp ON migration TYPE int PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD createdAt ON planet TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD firstName ON planet TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON planet TYPE record<planet> PERMISSIONS FULL;
+DEFINE FIELD labels ON planet TYPE array<string> PERMISSIONS FULL;
+DEFINE FIELD population ON planet TYPE int PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON planet TYPE datetime PERMISSIONS FULL;
+
+
+
+
+DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD age ON student TYPE int PERMISSIONS FULL;
+DEFINE FIELD createdAt ON student TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD id ON student TYPE record<student> PERMISSIONS FULL;
+DEFINE FIELD university ON student TYPE string PERMISSIONS FULL;
+DEFINE FIELD updatedAt ON student TYPE datetime PERMISSIONS FULL;

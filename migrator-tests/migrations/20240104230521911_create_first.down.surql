@@ -1,5 +1,0 @@
-DEFINE TABLE new_stuff SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD createdAt ON new_stuff TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD firstName ON new_stuff TYPE string PERMISSIONS FULL;
-DEFINE FIELD id ON new_stuff TYPE record<new_stuff> PERMISSIONS FULL;
-DEFINE FIELD updatedAt ON new_stuff TYPE datetime PERMISSIONS FULL;

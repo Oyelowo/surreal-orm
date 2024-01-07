@@ -416,11 +416,13 @@ impl MigrationRunner {
         if all.trim().is_empty() {
             log::info!("No new migrations to apply");
         } else {
-            begin_transaction()
+            println!("{}", &all);
+            let response = begin_transaction()
                 .query(Raw::new(all))
                 .commit_transaction()
                 .run(db.clone())
                 .await?;
+            dbg!(&response);
 
             log::info!("Applied {} migrations", migration_queries.len());
         }
@@ -430,7 +432,7 @@ impl MigrationRunner {
 
     pub async fn apply_pending_migrations(
         db: Surreal<impl Connection>,
-        all_migrations: Vec<impl Into<MigrationFile>>,
+        all_migrations: Vec<impl Into<MigrationFile> + ::std::fmt::Debug>,
         update_strategy: UpdateStrategy,
     ) -> MigrationResult<()> {
         log::info!("Running pending migrations");

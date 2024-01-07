@@ -5,7 +5,12 @@
  * Licensed under the MIT license
  */
 
-use crate::{FileMetadata, MigrationFileOneWay, MigrationFileTwoWayPair, MigrationResult};
+use surrealdb::{engine::any::Any, Surreal};
+
+use crate::{
+    FileMetadata, MigrationConfig, MigrationFileOneWay, MigrationFileTwoWayPair, MigrationResult,
+    Mode, UpdateStrategy,
+};
 
 #[derive(Clone, Debug)]
 pub struct EmbeddedMigrationTwoWay {
@@ -22,6 +27,21 @@ pub struct EmbeddedMigrationsTwoWay {
 impl EmbeddedMigrationsTwoWay {
     pub const fn new(migrations: &'static [EmbeddedMigrationTwoWay]) -> Self {
         Self { migrations }
+    }
+
+    pub async fn run(
+        self,
+        db: Surreal<Any>,
+        update_strategy: UpdateStrategy,
+        mode: Mode,
+    ) -> MigrationResult<()> {
+        let files_config = MigrationConfig::new().set_mode(mode);
+
+        let two_way = files_config.two_way();
+        two_way
+            .run_up_embedded_pending_migrations(db.clone(), self, update_strategy)
+            .await?;
+        Ok(())
     }
 
     pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationTwoWay] {
@@ -67,6 +87,20 @@ pub struct EmbeddedMigrationsOneWay {
 impl EmbeddedMigrationsOneWay {
     pub const fn get_migrations(&self) -> &'static [EmbeddedMigrationOneWay] {
         self.migrations
+    }
+
+    pub async fn run(
+        self,
+        db: Surreal<Any>,
+        update_strategy: UpdateStrategy,
+        mode: Mode,
+    ) -> MigrationResult<()> {
+        let files_config = MigrationConfig::new().set_mode(mode);
+        files_config
+            .one_way()
+            .run_embedded_pending_migrations(db.clone(), self, update_strategy)
+            .await?;
+        Ok(())
     }
 
     pub fn to_migrations_one_way(&self) -> MigrationResult<Vec<MigrationFileOneWay>> {

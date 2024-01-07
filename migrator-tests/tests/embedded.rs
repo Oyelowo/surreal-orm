@@ -4,7 +4,9 @@
  * Copyright (c) 2023 Oyelowo Oyedayo
  * Licensed under the MIT license
  */
-use surreal_orm::migrator::{self, embed_migrations};
+use surreal_orm::migrator::{
+    self, config::DatabaseConnection, embed_migrations, Migration, Mode, UpdateStrategy,
+};
 
 // Embed migrations as constant
 const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
@@ -53,4 +55,17 @@ fn test_embedded() {
     assert_eq!(migs[0].up.name.basename(), "migration_name_example".into());
     insta::assert_display_snapshot!(migs[0].up.content);
     insta::assert_display_snapshot!(migs[0].down.content);
+}
+
+#[tokio::test]
+async fn test_embedded_run_one_way() {
+    let db = DatabaseConnection::default().setup().await.db().unwrap();
+
+    MIGRATIONS_ONE_WAY
+        .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+        .await
+        .unwrap();
+
+    let db_migrations_meta = Migration::get_all_desc(db.clone()).await;
+    assert_eq!(db_migrations_meta.len(), 1);
 }
