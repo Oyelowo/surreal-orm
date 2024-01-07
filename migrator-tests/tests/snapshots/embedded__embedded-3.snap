@@ -1,0 +1,10 @@
+---
+source: migrator-tests/tests/embedded.rs
+expression: "migs[0].down.content"
+---
+REMOVE TABLE crop;
+REMOVE TABLE migration;
+REMOVE TABLE animal;
+REMOVE TABLE planet;
+REMOVE TABLE student;
+REMOVE TABLE eats;
