@@ -16,7 +16,7 @@ use surreal_orm::{
         config::DatabaseConnection,
         Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
         MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
-        SubCommand, Up, DbInfo, Extension, Checksum, Reset,
+        SubCommand, Up, DbInfo, Extension, Checksum, Reset, Prune,
     },
     DbResources, statements::info_for, Runnable,
 };
@@ -335,6 +335,15 @@ impl TestConfigNew {
     ) -> &mut Self {
         self.set_cmd(reset_cmd)
             .run(Some(codebase_resources), prompter)
+            .await;
+        self
+    }
+    
+    pub async fn run_prune(
+        &mut self,
+    ) -> &mut Self {
+        self.set_cmd(Prune)
+            .run(None::<Resources>, MockPrompter::default())
             .await;
         self
     }
