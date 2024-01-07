@@ -5,7 +5,9 @@
  * Licensed under the MIT license
  */
 use migrator_tests::{current_function, AssertionArg, TestConfigNew};
-use surreal_orm::migrator::{FastForwardDelta, MigrationFilename, Mode, RollbackStrategyStruct};
+use surreal_orm::migrator::{
+    FastForwardDelta, Migration, MigrationFilename, Mode, RollbackStrategyStruct,
+};
 use tempfile::tempdir;
 use test_case::test_case;
 
@@ -467,7 +469,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
     })
     .await;
 
-    for i in (0..10).rev() {
+    for i in (1..=10).rev() {
         conf.run_down(
             &RollbackStrategyStruct::builder()
                 .till(conf.get_down_filename_at_position(i))
@@ -478,13 +480,17 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
 
         conf.assert_with_db_instance(AssertionArg {
             expected_mig_files_count: 12,
-            expected_db_mig_meta_count: i as u8,
+            expected_db_mig_meta_count: i as u8 - 1,
             expected_latest_migration_file_basename_normalized: Some(
                 "migration_12_gen_after_init".into(),
             ),
-            expected_latest_db_migration_meta_basename_normalized: Some(
-                format!("migration_{}{}", i, "_gen_after_init").into(),
-            ),
+            expected_latest_db_migration_meta_basename_normalized: if i == 1 {
+                None
+            } else if i == 2 {
+                Some("migration_1_init".into())
+            } else {
+                Some(format!("migration_{}{}", i - 1, "_gen_after_init").into())
+            },
             code_origin_line: std::line!(),
         })
         .await;
