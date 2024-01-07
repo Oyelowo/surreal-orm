@@ -157,7 +157,7 @@ impl TestConfigNew {
 
         let mut migrator = Migrator::builder()
             .verbose(3)
-            .migrations_dir(migration_dir.clone())
+            .dir(migration_dir.clone())
             .db_connection(db_conn_config)
             .mode(mode)
             .build();
@@ -203,7 +203,7 @@ impl TestConfigNew {
     pub fn assert_migration_queries_snapshot(
         &mut self,
     ) -> SnapShot {
-        let migration_dir = self.migrator.migrations_dir.as_ref().unwrap().clone();
+        let migration_dir = self.migrator.dir.as_ref().unwrap().clone();
         self.migration_dir_state_assertion_counter += 1;
         let name_differentiator = self.snapshots_name_differentiator("migdir_state", self.migration_dir_state_assertion_counter);
         let migration_queries_snaps = self
