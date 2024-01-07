@@ -47,9 +47,14 @@ pub struct Migrator {
     subcmd: Option<SubCommand>,
 
     /// Optional custom migrations dir
-    #[arg(global = true, short, long, help = "Optional custom migrations dir")]
+    #[arg(
+        global = true,
+        short,
+        long,
+        help = "Optional custom migrations directory"
+    )]
     #[builder(default, setter(strip_option))]
-    pub migrations_dir: Option<PathBuf>,
+    pub dir: Option<PathBuf>,
 
     /// Sets the level of verbosity e.g -v, -vv, -vvv, -vvvv
     #[arg(global = true, short, long, action = ArgAction::Count, default_value_t=3)]
@@ -102,14 +107,9 @@ impl Migrator {
 
     pub fn file_manager(&self) -> MigrationConfig {
         let fm_init = MigrationConfig::builder()
-            .custom_path(self.migrations_dir.clone())
+            .custom_path(self.dir.clone())
             .mode(self.mode);
 
-        // let fm = fm_init.build().detect_migration_type().ok();
-
-        // fm_init
-        //     .migration_flag(fm_init.build().detect_migration_type().ok())
-        //     .build()
         fm_init.build()
     }
 
@@ -117,35 +117,12 @@ impl Migrator {
     /// # Example
     /// ```rust, ignore
     /// use surreal_models::migrations::Resources;
-    /// use surreal_orm::migrator::{self, MigrationConfig, RollbackStrategy};
-    /// use surrealdb::engine::remote::ws::Ws;
-    /// use surrealdb::opt::auth::Root;
-    /// use surrealdb::{Connection, Surreal};
-    ///
-    /// async fn initialize_db() -> Surreal<surrealdb::engine::remote::ws::Client> {
-    ///     let db = Surreal::new::<Ws>("localhost:8000")
-    ///    .await
-    ///    .expect("Failed to connect to db");
-    ///     
-    ///     db.signin(Root {
-    ///         username: "root",
-    ///         password: "root",
-    ///     })
-    ///     .await
-    ///     .expect("Failed to signin");
-    ///
-    ///     db.use_ns("test").use_db("test").await.unwrap();
-    ///     db
-    /// }
+    /// use surreal_orm::migrator::{self, Migrator, MigrationConfig, RollbackStrategy};
     ///
     /// #[tokio::main]
     /// async fn main() {
     ///    // include example usage as rust doc
-    ///     Cli::run(Resources).await;
-    ///
-    ///
-    ///    // Interact programmatically
-    ///    
+    ///     Migrator::run(Resources).await;
     /// }
     /// ```
     pub async fn run(codebase_resources: impl DbResources) {
@@ -234,33 +211,6 @@ impl Migrator {
             },
         };
     }
-
-    // pub async fn run_up_fn(&mut self) {
-    //     self.setup_db().await;
-    //
-    //     match self.subcmd.clone() {
-    //         SubCommand::Up(up) => up.run(self).await,
-    //         _ => panic!("Expected up subcommand"),
-    //     };
-    // }
-    //
-    // pub async fn run_init_fn(&mut self) {
-    //     self.setup_db().await;
-    //
-    //     match self.subcmd.clone() {
-    //         SubCommand::Up(up) => up.run(self).await,
-    //         _ => panic!("Expected up subcommand"),
-    //     };
-    // }
-    //
-    // pub async fn run_down_fn(&mut self) {
-    //     self.setup_db().await;
-    //
-    //     match self.subcmd.clone() {
-    //         SubCommand::Down(up) => up.run(self).await,
-    //         _ => panic!("Expected up subcommand"),
-    //     };
-    // }
 
     pub(crate) fn setup_logging(&self) {
         let verbosity = self.verbose;
