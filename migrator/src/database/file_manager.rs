@@ -116,12 +116,10 @@ impl MigrationConfig {
         match (oneway.is_empty(), twoway.is_empty()) {
             (false, true) => Ok(MigrationFlag::OneWay),
             (true, false) => Ok(MigrationFlag::TwoWay),
-            (false, false) | (true, true) => {
-                Err(MigrationError::AmbiguousMigrationDirection {
-                    one_way_filecount: oneway.len(),
-                    two_way_filecount: twoway.len(),
-                })
-            }
+            (false, false) | (true, true) => Err(MigrationError::AmbiguousMigrationDirection {
+                one_way_filecount: oneway.len(),
+                two_way_filecount: twoway.len(),
+            }),
         }
     }
 
