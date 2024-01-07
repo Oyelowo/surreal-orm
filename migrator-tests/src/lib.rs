@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::{fs, path::PathBuf, ops::Deref, fmt::Display};
+use std::{fmt::Display, fs, ops::Deref, path::PathBuf};
 
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
@@ -13,12 +13,12 @@ use surreal_models::migrations::{
 };
 use surreal_orm::{
     migrator::{
-        config::DatabaseConnection,
-        Basename, Down, FastForwardDelta, Generate, Init, Migration, MigrationFilename,
-        MigrationFlag, Migrator, MockPrompter, Mode, RenameOrDelete, RollbackStrategyStruct,
-        SubCommand, Up, DbInfo, Extension, Checksum, Reset, Prune, List, Status,
+        config::DatabaseConnection, Basename, Checksum, DbInfo, Down, Extension, FastForwardDelta,
+        Generate, Init, List, Migration, MigrationFilename, MigrationFlag, Migrator, MockPrompter,
+        Mode, Prune, RenameOrDelete, Reset, RollbackStrategyStruct, Status, SubCommand, Up,
     },
-    DbResources, statements::info_for, Runnable,
+    statements::info_for,
+    DbResources, Runnable,
 };
 
 use typed_builder::TypedBuilder;
@@ -37,7 +37,7 @@ pub struct SnapShot(String);
 impl Display for SnapShot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let SnapShot(s) = self;
-        write!(f, "{s}" )
+        write!(f, "{s}")
     }
 }
 
@@ -49,7 +49,7 @@ impl Deref for SnapShot {
     }
 }
 
-impl  SnapShot {
+impl SnapShot {
     pub fn new(s: String) -> Self {
         Self(s)
     }
@@ -70,19 +70,19 @@ impl From<&str> for SnapShot {
 #[derive(Clone, TypedBuilder)]
 pub struct TestConfigNew {
     pub migrator: Migrator,
-    
+
     #[builder(default)]
     reversible: Option<bool>,
-    
+
     #[builder(default)]
     mock_prompter: Option<MockPrompter>,
-    
+
     #[builder(default)]
     migration_dir_state_assertion_counter: u8,
-    
+
     #[builder(default)]
     db_resources_state_assertion_counter: u8,
-    
+
     #[builder(default)]
     current_function_name: CurrentFunctionName,
 }
@@ -99,7 +99,7 @@ impl From<&str> for CurrentFunctionName {
 impl Display for CurrentFunctionName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let CurrentFunctionName(s) = self;
-        write!(f, "{s}" )
+        write!(f, "{s}")
     }
 }
 
@@ -127,13 +127,13 @@ impl DbMigrationSchemaState {
             migration_meta,
         }
     }
-    
+
     pub fn stream_lined_migrations(db_migrations: Vec<Migration>) -> Vec<StreamLinedMigration> {
         db_migrations
             .into_iter()
             .map(|m| {
-                let filename = MigrationFilename::try_from(m.name.clone())
-                    .expect("Failed to parse file name");
+                let filename =
+                    MigrationFilename::try_from(m.name.clone()).expect("Failed to parse file name");
                 let checksum_up = m.checksum_up;
                 let checksum_down = m.checksum_down;
                 let basename = filename.basename();
@@ -147,12 +147,14 @@ impl DbMigrationSchemaState {
             })
             .collect::<Vec<_>>()
     }
-    
 }
 
-
 impl TestConfigNew {
-    pub async fn new(mode: Mode, migration_dir: &PathBuf, current_function_name: impl Into< CurrentFunctionName >) -> Self {
+    pub async fn new(
+        mode: Mode,
+        migration_dir: &PathBuf,
+        current_function_name: impl Into<CurrentFunctionName>,
+    ) -> Self {
         let db_conn_config = DatabaseConnection::default();
 
         let mut migrator = Migrator::builder()
@@ -164,7 +166,10 @@ impl TestConfigNew {
 
         migrator.setup_db().await;
 
-        Self::builder().migrator(migrator).current_function_name(current_function_name.into()).build()
+        Self::builder()
+            .migrator(migrator)
+            .current_function_name(current_function_name.into())
+            .build()
     }
 
     pub async fn assert_db_resources_state(&mut self) -> DbMigrationSchemaState {
@@ -172,23 +177,31 @@ impl TestConfigNew {
             .database()
             .get_data::<DbInfo>(self.migrator.db().clone())
             .await
-            .unwrap().expect("Failed to get db info");
+            .unwrap()
+            .expect("Failed to get db info");
         let migrations = Migration::get_all_desc(self.migrator.db().clone()).await;
         let db_miration_schema_state = DbMigrationSchemaState::new(db_info.clone(), migrations);
         self.db_resources_state_assertion_counter += 1;
-        let name_differentiator = self.snapshots_name_differentiator("db_state", self.db_resources_state_assertion_counter);
+        let name_differentiator = self
+            .snapshots_name_differentiator("db_state", self.db_resources_state_assertion_counter);
         insta::assert_debug_snapshot!(name_differentiator, db_miration_schema_state);
         db_miration_schema_state
     }
 
-
-
-    fn snapshots_name_differentiator(&mut self, implementor_fn_name: &str, assertion_counter: u8) -> String {
+    fn snapshots_name_differentiator(
+        &mut self,
+        implementor_fn_name: &str,
+        assertion_counter: u8,
+    ) -> String {
         let mode = self.migrator.mode();
         let reversible = self.reversible.unwrap_or_default();
         let migration_type = MigrationFlag::from(reversible);
-        let current_function_name = &self.current_function_name; 
-        let mock_prompter = match self.mock_prompter.unwrap_or_default().rename_or_delete_single_field_change {
+        let current_function_name = &self.current_function_name;
+        let mock_prompter = match self
+            .mock_prompter
+            .unwrap_or_default()
+            .rename_or_delete_single_field_change
+        {
             RenameOrDelete::Rename => "single field name change strategy: rename",
             RenameOrDelete::Delete => "single field name change strategy: delete",
         };
@@ -200,12 +213,13 @@ impl TestConfigNew {
         name_differentiator
     }
 
-    pub fn assert_migration_queries_snapshot(
-        &mut self,
-    ) -> SnapShot {
+    pub fn assert_migration_queries_snapshot(&mut self) -> SnapShot {
         let migration_dir = self.migrator.dir.as_ref().unwrap().clone();
         self.migration_dir_state_assertion_counter += 1;
-        let name_differentiator = self.snapshots_name_differentiator("migdir_state", self.migration_dir_state_assertion_counter);
+        let name_differentiator = self.snapshots_name_differentiator(
+            "migdir_state",
+            self.migration_dir_state_assertion_counter,
+        );
         let migration_queries_snaps = self
             .read_migrations_from_dir_sorted_asc()
             .iter()
@@ -218,12 +232,8 @@ impl TestConfigNew {
                     "Empty migration".into()
                 } else {
                     input
-                };
-                
-                let snaps = format!(
-                "header: Basename - {basename}. Extension - {extension}\n Migration Query: \n{input}"
-            );
-                snaps
+                }; 
+                format!("header: Basename - {basename}. Extension - {extension}\n Migration Query: \n{input}")
             })
             .collect::<Vec<_>>()
             .join("\n\n");
@@ -305,10 +315,10 @@ impl TestConfigNew {
         match &cmd {
             SubCommand::Init(i) => {
                 self.reversible = Some(i.reversible());
-            } 
-             SubCommand::Reset(r)  => {
+            }
+            SubCommand::Reset(r) => {
                 self.reversible = Some(r.reversible());
-            } 
+            }
             _ => {}
         };
         self.migrator.set_cmd(cmd);
@@ -338,26 +348,21 @@ impl TestConfigNew {
             .await;
         self
     }
-    
-    pub async fn run_list(
-        &mut self,
-        status: Status,
-    ) -> &mut Self {
+
+    pub async fn run_list(&mut self, status: Status) -> &mut Self {
         self.set_cmd(List::builder().status(status).build())
             .run(None::<Resources>, MockPrompter::default())
             .await;
         self
     }
-    
-    pub async fn run_prune(
-        &mut self,
-    ) -> &mut Self {
+
+    pub async fn run_prune(&mut self) -> &mut Self {
         self.set_cmd(Prune)
             .run(None::<Resources>, MockPrompter::default())
             .await;
         self
     }
-    
+
     pub async fn run_gen(
         &mut self,
         gen_cmd: Generate,
@@ -404,7 +409,6 @@ impl TestConfigNew {
         )
         .await
     }
-
 
     pub async fn generate_test_migrations_arbitrary(
         &mut self,
@@ -457,9 +461,9 @@ impl TestConfigNew {
                 .name("migration 1-init".into())
                 .run(false)
                 .build(),
-            )
-            .run(Some( Resources ), mock_prompter.clone())
-            .await;
+        )
+        .run(Some(Resources), mock_prompter.clone())
+        .await;
 
         let gen =
             |basename: &'static str| Generate::builder().name(basename.into()).run(false).build();
@@ -537,142 +541,139 @@ impl TestConfigNew {
         self.read_down_migrations_from_dir_sorted_asc()[position - 1].clone()
     }
 
-
     pub async fn assert_with_db_instance(&mut self, args: AssertionArg) -> DbMigrationSchemaState {
-    let AssertionArg {
-        expected_mig_files_count,
-        expected_db_mig_meta_count: expected_db_mig_count,
-        expected_latest_migration_file_basename_normalized,
-        expected_latest_db_migration_meta_basename_normalized,
-        code_origin_line,
-    } = args;
+        let AssertionArg {
+            expected_mig_files_count,
+            expected_db_mig_meta_count: expected_db_mig_count,
+            expected_latest_migration_file_basename_normalized,
+            expected_latest_db_migration_meta_basename_normalized,
+            code_origin_line,
+        } = args;
         let migration_type = MigrationFlag::from(self.reversible.unwrap_or_default());
-    let ref current_file_name = self.current_function_name.clone();
+        let ref current_file_name = self.current_function_name.clone();
 
-    let db = self.migrator.db().clone();
-    let db_migrations = Migration::get_all_desc(db.clone()).await;
-    let latest_migration_basename = Migration::get_latest(db.clone()).await.map(|m| {
-        MigrationFilename::try_from(m.name.clone())
-            .expect("Failed to parse file name")
-            .basename()
-    });
-    assert_eq!(
+        let db = self.migrator.db().clone();
+        let db_migrations = Migration::get_all_desc(db.clone()).await;
+        let latest_migration_basename = Migration::get_latest(db.clone()).await.map(|m| {
+            MigrationFilename::try_from(m.name.clone())
+                .expect("Failed to parse file name")
+                .basename()
+        });
+        assert_eq!(
         latest_migration_basename, expected_latest_db_migration_meta_basename_normalized,
         "Base name in file does not match the base name in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
-    let migration_files = self.read_migrations_from_dir_sorted_asc();
+        let migration_files = self.read_migrations_from_dir_sorted_asc();
 
-    let latest_file_name = migration_files.iter().max();
+        let latest_file_name = migration_files.iter().max();
 
-    assert_eq!(
+        assert_eq!(
         latest_file_name.map(|lfn| lfn.basename()),
         expected_latest_migration_file_basename_normalized,
         "Base name in file does not match the base name in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
-    assert_eq!(
+        assert_eq!(
         db_migrations.len() as u8,
         expected_db_mig_count,
         "migration Counts do not match with what is in the db. Line: {code_origin_line} in {current_file_name}",
     );
 
-    assert_eq!(
-        migration_files.len() as u8,
-        match migration_type {
-            MigrationFlag::TwoWay => expected_mig_files_count * 2,
-            MigrationFlag::OneWay => expected_mig_files_count,
-        },
-        "File counts do not match. Line: {code_origin_line} in {current_file_name}"
-    );
-
-    for db_mig_record in db_migrations {
-        let file_name = db_mig_record.clone().name;
-        let mig_name_from_db =
-            MigrationFilename::try_from(file_name.to_string()).expect("Failed to parse file name");
-        let timestamp = mig_name_from_db.timestamp();
-        let basename = mig_name_from_db.basename();
-        let extension = mig_name_from_db.extension();
-
-        let found_migration_file = |db_mig_name: MigrationFilename| {
-            migration_files
-                .iter()
-                .filter(|filename| match migration_type {
-                    MigrationFlag::TwoWay => {
-                        //
-                        db_mig_name.to_up() == filename.to_up()
-                    }
-                    MigrationFlag::OneWay => &db_mig_name == *filename,
-                })
-                .collect::<Vec<_>>()
-        };
-
-        match migration_type {
-            MigrationFlag::TwoWay => {
-                let found_mig_file = found_migration_file(mig_name_from_db.clone());
-                assert_eq!(found_mig_file.len(), 2);
-
-                let ups = found_mig_file
-                    .iter()
-                    .filter(|m| m.is_up())
-                    .collect::<Vec<_>>();
-                assert_eq!(ups.len(), 1);
-                assert_eq!(ups.first().cloned(), Some(&&mig_name_from_db));
-                assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
-                assert_eq!(
-                    ups.first().map(|u| u.extension().to_string()),
-                    Some("up.surql".into())
-                );
-                assert_eq!(
-                    ups.first().map(|u| u.to_string()),
-                    Some(db_mig_record.clone().name)
-                );
-                assert_eq!(
-                    ups.first().map(|u| u.timestamp()),
-                    Some(db_mig_record.clone().timestamp)
-                );
-
-                let downs = found_mig_file
-                    .iter()
-                    .filter(|m| m.is_down())
-                    .collect::<Vec<_>>();
-                assert_eq!(downs.len(), 1);
-                assert_eq!(downs.first().cloned(), Some(&&mig_name_from_db.to_down()));
-                assert_eq!(
-                    downs.first().map(|u| u.extension().to_string()),
-                    Some("down.surql".into())
-                );
-                assert_eq!(
-                    // we store reversible migration meta with up extension
-                    downs.first().map(|u| u.to_up().to_string()),
-                    Some(db_mig_record.clone().name)
-                );
-                assert_eq!(
-                    downs.first().map(|u| u.timestamp()),
-                    Some(db_mig_record.clone().timestamp)
-                );
-            }
-            MigrationFlag::OneWay => {
-                let found_mig_file = found_migration_file(mig_name_from_db.clone());
-                assert_eq!(found_mig_file.len(), 1);
-                let found_mig_file = found_mig_file.first().expect("File must exist");
-                assert_eq!(found_mig_file.basename(), basename);
-                assert_eq!(found_mig_file.extension(), extension);
-                assert_eq!(found_mig_file.timestamp(), timestamp);
-                assert_eq!(found_mig_file.to_string(), db_mig_record.name);
-            }
-        }
-
         assert_eq!(
-            mig_name_from_db.to_string(),
-            format!("{timestamp}_{basename}.{extension}"),
-            "File name should be in the format of {timestamp}_{basename}.{extension}"
+            migration_files.len() as u8,
+            match migration_type {
+                MigrationFlag::TwoWay => expected_mig_files_count * 2,
+                MigrationFlag::OneWay => expected_mig_files_count,
+            },
+            "File counts do not match. Line: {code_origin_line} in {current_file_name}"
         );
-    }
+
+        for db_mig_record in db_migrations {
+            let file_name = db_mig_record.clone().name;
+            let mig_name_from_db = MigrationFilename::try_from(file_name.to_string())
+                .expect("Failed to parse file name");
+            let timestamp = mig_name_from_db.timestamp();
+            let basename = mig_name_from_db.basename();
+            let extension = mig_name_from_db.extension();
+
+            let found_migration_file = |db_mig_name: MigrationFilename| {
+                migration_files
+                    .iter()
+                    .filter(|filename| match migration_type {
+                        MigrationFlag::TwoWay => {
+                            //
+                            db_mig_name.to_up() == filename.to_up()
+                        }
+                        MigrationFlag::OneWay => &db_mig_name == *filename,
+                    })
+                    .collect::<Vec<_>>()
+            };
+
+            match migration_type {
+                MigrationFlag::TwoWay => {
+                    let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                    assert_eq!(found_mig_file.len(), 2);
+
+                    let ups = found_mig_file
+                        .iter()
+                        .filter(|m| m.is_up())
+                        .collect::<Vec<_>>();
+                    assert_eq!(ups.len(), 1);
+                    assert_eq!(ups.first().cloned(), Some(&&mig_name_from_db));
+                    assert_eq!(mig_name_from_db.extension().to_string(), "up.surql");
+                    assert_eq!(
+                        ups.first().map(|u| u.extension().to_string()),
+                        Some("up.surql".into())
+                    );
+                    assert_eq!(
+                        ups.first().map(|u| u.to_string()),
+                        Some(db_mig_record.clone().name)
+                    );
+                    assert_eq!(
+                        ups.first().map(|u| u.timestamp()),
+                        Some(db_mig_record.clone().timestamp)
+                    );
+
+                    let downs = found_mig_file
+                        .iter()
+                        .filter(|m| m.is_down())
+                        .collect::<Vec<_>>();
+                    assert_eq!(downs.len(), 1);
+                    assert_eq!(downs.first().cloned(), Some(&&mig_name_from_db.to_down()));
+                    assert_eq!(
+                        downs.first().map(|u| u.extension().to_string()),
+                        Some("down.surql".into())
+                    );
+                    assert_eq!(
+                        // we store reversible migration meta with up extension
+                        downs.first().map(|u| u.to_up().to_string()),
+                        Some(db_mig_record.clone().name)
+                    );
+                    assert_eq!(
+                        downs.first().map(|u| u.timestamp()),
+                        Some(db_mig_record.clone().timestamp)
+                    );
+                }
+                MigrationFlag::OneWay => {
+                    let found_mig_file = found_migration_file(mig_name_from_db.clone());
+                    assert_eq!(found_mig_file.len(), 1);
+                    let found_mig_file = found_mig_file.first().expect("File must exist");
+                    assert_eq!(found_mig_file.basename(), basename);
+                    assert_eq!(found_mig_file.extension(), extension);
+                    assert_eq!(found_mig_file.timestamp(), timestamp);
+                    assert_eq!(found_mig_file.to_string(), db_mig_record.name);
+                }
+            }
+
+            assert_eq!(
+                mig_name_from_db.to_string(),
+                format!("{timestamp}_{basename}.{extension}"),
+                "File name should be in the format of {timestamp}_{basename}.{extension}"
+            );
+        }
         self.assert_db_resources_state().await
-}
-
-
+    }
 }
 
 #[macro_export]
