@@ -121,22 +121,26 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
             table,
             old_name,
             new_name,
-        } = field_change_meta;
+        } = &field_change_meta;
         let left_defs = self.get_left();
         let right_defs = self.get_right();
 
-        let err = MigrationError::FieldNameDoesNotExist {
-            field_expected: old_name.clone(),
-            table: table.clone(),
-            valid_fields: left_defs.get_names().join(", "),
-        };
-        let old_field_def = left_defs
-            .get_definition(&old_name.build())
-            .unwrap_or_else(|| panic!("{}", err.to_string()));
+        let old_field_def = left_defs.get_definition(&old_name).ok_or_else(|| {
+            MigrationError::InvalidOldFieldName {
+                new_name: old_name.to_owned(),
+                table: table.to_owned(),
+                old_name: old_name.to_owned(),
+                renamables: left_defs.get_names().join(", "),
+            }
+        })?;
 
-        let new_field_def = right_defs
-            .get_definition(new_name.to_string().as_str())
-            .unwrap();
+        let new_field_def = right_defs.get_definition(&new_name).ok_or_else(|| {
+            MigrationError::FieldNameDoesNotExist {
+                field_expected: new_name.to_owned(),
+                table: table.to_owned(),
+                valid_fields: right_defs.get_names().join(", "),
+            }
+        })?;
 
         acc.add_up(QueryType::Define(new_field_def.clone()));
         let copy_old_to_new = UpdateStatementRaw::from(
@@ -147,7 +151,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
 
         acc.add_down(QueryType::Define(old_field_def.clone()));
         let copy_new_to_old = UpdateStatementRaw::from(
-            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}",)).build(),
+            Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}")).build(),
         );
         acc.add_down(QueryType::Update(copy_new_to_old));
         acc.add_down(QueryType::Remove(new_field_def.as_remove_statement()?));
