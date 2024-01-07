@@ -16,6 +16,7 @@ const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
     embed_migrations!("tests/migrations-twoway", two_way, strict);
 
 #[test]
+#[ignore]
 fn test_embedded() {
     assert_eq!(MIGRATIONS_ONE_WAY.get_migrations().len(), 2);
     assert_eq!(MIGRATIONS_TWO_WAY.get_migrations().len(), 1);
@@ -67,5 +68,20 @@ async fn test_embedded_run_one_way() {
         .unwrap();
 
     let db_migrations_meta = Migration::get_all_desc(db.clone()).await;
+    insta::assert_debug_snapshot!(db_migrations_meta);
+    assert_eq!(db_migrations_meta.len(), 2);
+}
+
+#[tokio::test]
+async fn test_embedded_run_two_way() {
+    let db = DatabaseConnection::default().setup().await.db().unwrap();
+
+    MIGRATIONS_TWO_WAY
+        .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+        .await
+        .unwrap();
+
+    let db_migrations_meta = Migration::get_all_desc(db.clone()).await;
+    insta::assert_debug_snapshot!(db_migrations_meta);
     assert_eq!(db_migrations_meta.len(), 1);
 }

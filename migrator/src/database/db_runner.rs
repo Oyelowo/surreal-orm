@@ -417,12 +417,11 @@ impl MigrationRunner {
             log::info!("No new migrations to apply");
         } else {
             println!("{}", &all);
-            let response = begin_transaction()
+            begin_transaction()
                 .query(Raw::new(all))
                 .commit_transaction()
                 .run(db.clone())
                 .await?;
-            dbg!(&response);
 
             log::info!("Applied {} migrations", migration_queries.len());
         }

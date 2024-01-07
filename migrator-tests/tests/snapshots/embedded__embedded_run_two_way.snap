@@ -1,0 +1,26 @@
+---
+source: migrator-tests/tests/embedded.rs
+expression: db_migrations_meta
+---
+[
+    Migration {
+        id: Thing {
+            tb: "migration",
+            id: String(
+                "20231030025711_migration_name_example.up.surql",
+            ),
+        },
+        name: "20231030025711_migration_name_example.up.surql",
+        timestamp: Timestamp(
+            20231030025711,
+        ),
+        checksum_up: Checksum(
+            "21df19cdd013d9e8d40619a714685d9795eba3b63eada80da71a021e2d9f1d25",
+        ),
+        checksum_down: Some(
+            Checksum(
+                "6456b9b50bd038330e0da0f683908709098f7543463adec0bb4659986ff2b13c",
+            ),
+        ),
+    },
+]
