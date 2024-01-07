@@ -121,7 +121,7 @@ async fn test_successfully_handles_renaming(
             .run(false)
             .build(),
         ResourcesV1,
-        mock_prompter.clone(),
+        mock_prompter,
     )
     .await;
     assert!(migration_dir.exists());
@@ -217,7 +217,7 @@ async fn test_successfully_handles_renaming(
             .run(false)
             .build(),
         ResourcesV2,
-        mock_prompter.clone(),
+        mock_prompter,
     )
     .await;
     // The implicit renaming strategy is set in mock prompter above
@@ -813,10 +813,7 @@ async fn should_panic_if_same_field_renaming_twice(mode: Mode, reversible: bool)
         code_origin_line: std::line!(),
     })
     .await;
-    assert!(
-        false,
-        "Should panic because we are renaming the same field twice. So, we should't get here."
-    );
+    panic!("Should panic because we are renaming the same field twice. So, we should't get here.");
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -861,8 +858,7 @@ async fn test_should_panic_if_same_field_renaming_using_same_old_field_cos_its_n
         MockPrompter::default(),
     )
     .await;
-    assert!(
-        false,
+    panic!(
         "Should panic because we are renaming using same old field name. So, we should't get here."
     );
 }
@@ -906,8 +902,7 @@ async fn test_should_panic_if_renaming_from_currently_used_field(mode: Mode, rev
         MockPrompter::default(),
     )
     .await;
-    assert!(
-        false,
+    panic!(
         "Should panic because we are renaming using same old field name. So, we should't get here."
     );
 }
@@ -938,8 +933,7 @@ async fn test_should_panic_if_renaming_from_non_existing_field_in_migration_dire
     )
     .await;
     assert!(migration_dir.exists());
-    assert!(
-        false,
+    panic!(
         "Should panic because we are renaming using same old field name. So, we should't get here."
     );
 }

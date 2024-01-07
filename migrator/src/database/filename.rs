@@ -434,7 +434,7 @@ impl MigrationFilename {
     }
 
     pub fn create_up(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
+        let timestamp = Self::format_timestamp(timestamp)?;
         let basename = basename.clone();
 
         Ok(Self::Up(MigrationNameBasicInfo {
@@ -444,7 +444,7 @@ impl MigrationFilename {
     }
 
     pub fn create_down(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
+        let timestamp = Self::format_timestamp(timestamp)?;
 
         let basename = basename.clone();
         Ok(Self::Down(MigrationNameBasicInfo {
@@ -454,7 +454,7 @@ impl MigrationFilename {
     }
 
     pub fn create_oneway(timestamp: DateTime<Utc>, basename: &Basename) -> MigrationResult<Self> {
-        let timestamp = Self::format_timestamp(timestamp.into())?;
+        let timestamp = Self::format_timestamp(timestamp)?;
         let basename = basename.clone();
 
         Ok(Self::Unidirectional(MigrationNameBasicInfo {

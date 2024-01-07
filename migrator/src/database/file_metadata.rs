@@ -76,7 +76,7 @@ impl TryFrom<MigrationFileOneWay> for Migration {
             id: Migration::create_id(&migration.name),
             name: migration.name.to_string(),
             timestamp: migration.name.timestamp(),
-            checksum_up: Checksum::generate_from_content(&migration.content)?.into(),
+            checksum_up: Checksum::generate_from_content(&migration.content)?,
             checksum_down: None,
         })
     }
@@ -106,11 +106,11 @@ impl MigrationFile {
             MigrationFlag::TwoWay => {
                 let file = MigrationFileTwoWayPair {
                     up: FileMetadata {
-                        name: MigrationFilename::create_up(timestamp, &migration_basename)?,
+                        name: MigrationFilename::create_up(timestamp, migration_basename)?,
                         content: up_queries.clone(),
                     },
                     down: FileMetadata {
-                        name: MigrationFilename::create_down(timestamp, &migration_basename)?,
+                        name: MigrationFilename::create_down(timestamp, migration_basename)?,
                         content: down_queries.clone(),
                     },
                 };
@@ -118,8 +118,8 @@ impl MigrationFile {
             }
             MigrationFlag::OneWay => {
                 let file = MigrationFileOneWay::new(FileMetadata {
-                    name: MigrationFilename::create_oneway(timestamp, &migration_basename)?,
-                    content: up_queries.clone().into(),
+                    name: MigrationFilename::create_oneway(timestamp, migration_basename)?,
+                    content: up_queries.clone(),
                 });
                 MigrationFile::OneWay(file)
             }
@@ -167,14 +167,14 @@ impl From<MigrationFile> for PendingMigrationFile {
 impl MigrationFile {
     pub fn name_forward(&self) -> &MigrationFilename {
         match self {
-            Self::OneWay(m) => &m.name(),
+            Self::OneWay(m) => m.name(),
             Self::TwoWay(m) => &m.up.name,
         }
     }
 
     pub fn up_content(&self) -> &FileContent {
         match self {
-            Self::OneWay(m) => &m.content(),
+            Self::OneWay(m) => m.content(),
             Self::TwoWay(m) => &m.up.content,
         }
     }

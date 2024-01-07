@@ -111,7 +111,7 @@ impl Migration {
             tx = tx.query(def);
         }
 
-        tx.query(Self::create_raw(&filename, checksum_up, checksum_down))
+        tx.query(Self::create_raw(filename, checksum_up, checksum_down))
             .commit_transaction()
             .to_raw()
     }
@@ -129,7 +129,7 @@ impl Migration {
             checksum_down: checksum_down_field,
         } = Self::schema();
 
-        let record_id = Self::create_id(&filename);
+        let record_id = Self::create_id(filename);
         let name = filename.to_string();
         let timestamp = filename.timestamp().into_inner();
         let checksum_up = checksum_up.to_string();
