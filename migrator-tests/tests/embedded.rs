@@ -16,7 +16,6 @@ const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
     embed_migrations!("tests/migrations-twoway", two_way, strict);
 
 #[test]
-#[ignore]
 fn test_embedded() {
     assert_eq!(MIGRATIONS_ONE_WAY.get_migrations().len(), 2);
     assert_eq!(MIGRATIONS_TWO_WAY.get_migrations().len(), 1);
@@ -36,14 +35,11 @@ fn test_embedded() {
     insta::assert_display_snapshot!(migs[0].content());
     assert_eq!(
         migs[1].name().to_string(),
-        "20231029224601_create_new_stuff.surql"
+        "20231029224601_create_another.surql"
     );
-    assert_eq!(migs[1].name().basename(), "create_new_stuff".into());
+    assert_eq!(migs[1].name().basename(), "create_another".into());
     assert_eq!(migs.len(), 2);
-    assert_eq!(
-        migs[1].content().to_string(),
-        "DEFINE FIELD labels ON planet TYPE array;\nUPDATE planet SET labels = tags;\nREMOVE FIELD tags ON TABLE planet;".to_string()
-    );
+    insta::assert_display_snapshot!(migs[1].content());
 
     let migs = MIGRATIONS_TWO_WAY.to_migrations_two_way().unwrap();
     assert_eq!(migs.len(), 1);
