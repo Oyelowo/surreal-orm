@@ -16,14 +16,11 @@ use typed_builder::TypedBuilder;
 /// cargo run -- up -l
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
-#[derive(Args, Debug, TypedBuilder, Clone)]
-#[derive(Default)]
+#[derive(Args, Debug, TypedBuilder, Clone, Default)]
 pub struct Up {
     #[command(flatten)]
     pub(crate) fast_forward: FastForwardDelta,
 }
-
-
 
 impl Up {
     pub fn update_strategy(&self) -> UpdateStrategy {

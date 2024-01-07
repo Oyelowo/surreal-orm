@@ -5,9 +5,7 @@
  * Licensed under the MIT license
  */
 use migrator_tests::{current_function, AssertionArg, TestConfigNew};
-use surreal_orm::migrator::{
-    FastForwardDelta, Migration, MigrationFilename, Mode, RollbackStrategyStruct,
-};
+use surreal_orm::migrator::{FastForwardDelta, MigrationFilename, Mode, RollbackStrategyStruct};
 use tempfile::tempdir;
 use test_case::test_case;
 

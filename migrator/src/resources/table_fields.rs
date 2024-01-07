@@ -132,7 +132,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         };
         let old_field_def = left_defs
             .get_definition(&old_name.build())
-            .unwrap_or_else(|| { panic!("{}", err.to_string()) });
+            .unwrap_or_else(|| panic!("{}", err.to_string()));
 
         let new_field_def = right_defs
             .get_definition(new_name.to_string().as_str())

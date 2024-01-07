@@ -232,7 +232,7 @@ impl TestConfigNew {
                     "Empty migration".into()
                 } else {
                     input
-                }; 
+                };
                 format!("header: Basename - {basename}. Extension - {extension}\n Migration Query: \n{input}")
             })
             .collect::<Vec<_>>()
@@ -247,8 +247,7 @@ impl TestConfigNew {
             .iter()
             .map(|f| {
                 fs::read_to_string(
-                    self
-                        .migrator
+                    self.migrator
                         .file_manager()
                         .get_migration_dir()
                         .unwrap()
