@@ -41,7 +41,7 @@ impl Generate {
                 log::info!("Generating two-way migration");
                 let gen = file_manager
                     .two_way()
-                    .generate_migrations(&migration_basename, codebase_resources, prompter)
+                    .generate_migrations(migration_basename, codebase_resources, prompter)
                     .await;
                 if let Err(e) = gen {
                     log::error!("Failed to generate migrations: {e}");

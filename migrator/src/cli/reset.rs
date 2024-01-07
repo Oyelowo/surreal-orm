@@ -82,7 +82,7 @@ impl Reset {
         Init {
             name: self.name.clone(),
             run: self.run,
-            reversible: self.reversible.clone(),
+            reversible: self.reversible,
         }
     }
 }

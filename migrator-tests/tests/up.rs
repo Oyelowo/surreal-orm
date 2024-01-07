@@ -371,7 +371,7 @@ async fn test_zero_delta_moves_no_needle(mode: Mode, reversible: bool) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.generate_12_test_migrations_reversible(reversible.into())
+    conf.generate_12_test_migrations_reversible(reversible)
         .await;
     conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
@@ -452,12 +452,12 @@ async fn test_apply_till_migration_filename_pointer(mode: Mode, reversible: bool
 
         conf.assert_with_db_instance(AssertionArg {
             expected_mig_files_count: 12,
-            expected_db_mig_meta_count: i as u8,
+            expected_db_mig_meta_count: i,
             expected_latest_migration_file_basename_normalized: Some(
                 "migration_12_gen_after_init".into(),
             ),
             expected_latest_db_migration_meta_basename_normalized: Some(
-                format!("migration_{}{}", i, "_gen_after_init".to_string()).into(),
+                format!("migration_{}{}", i, "_gen_after_init").into(),
             ),
             code_origin_line: std::line!(),
         })
@@ -509,7 +509,7 @@ async fn test_cannot_apply_already_applied(mode: Mode, reversible: bool) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.generate_12_test_migrations_reversible(reversible.into())
+    conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
     conf.run_up(
@@ -537,7 +537,7 @@ async fn test_cannot_apply_older(mode: Mode, reversible: bool) {
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
 
-    conf.generate_12_test_migrations_reversible(reversible.into())
+    conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
     conf.run_up(
@@ -564,7 +564,7 @@ async fn test_cannot_apply_nonexisting_migration(mode: Mode, reversible: bool) {
     let migration_dir = tempdir().expect("Failed to create temp directory");
     let migration_dir = &migration_dir.path().join("migrations-tests");
     let mut conf = TestConfigNew::new(mode, migration_dir, current_function!()).await;
-    conf.generate_12_test_migrations_reversible(reversible.into())
+    conf.generate_12_test_migrations_reversible(reversible)
         .await;
 
     let nonexisting_filename = MigrationFilename::try_from(

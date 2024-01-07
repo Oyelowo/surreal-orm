@@ -60,7 +60,7 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             let new_field: Field = diff_right[0].to_string().into();
             let explicit_old_name_used = RightDatabase::find_field_has_old_name(
                 self.codebase_resources,
-                &table,
+                table,
                 By::NewName(new_field.clone()),
             );
             if explicit_old_name_used.is_none() {
@@ -132,7 +132,7 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
         };
         let old_field_def = left_defs
             .get_definition(&old_name.build())
-            .expect(err.to_string().as_str());
+            .unwrap_or_else(|| { panic!("{}", err.to_string()) });
 
         let new_field_def = right_defs
             .get_definition(new_name.to_string().as_str())

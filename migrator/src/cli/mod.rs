@@ -227,7 +227,7 @@ impl Migrator {
     }
 
     pub async fn setup_db(&mut self) {
-        if let None = self.db_connection.db_connection {
+        if self.db_connection.db_connection.is_none() {
             self.db_connection.setup().await;
         }
     }

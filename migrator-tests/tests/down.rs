@@ -85,7 +85,7 @@ async fn test_rollback_previous(mode: Mode) {
     })
     .await;
 
-    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    let default_fwd_strategy = &FastForwardDelta::builder().latest(true).build();
     conf.run_up(default_fwd_strategy).await;
     conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
@@ -177,7 +177,7 @@ async fn test_rollback_previous(mode: Mode) {
                 "migration_8_gen_after_init".into(),
             ),
             expected_latest_db_migration_meta_basename_normalized: Some(
-                format!("migration_{}{}", 7 - i, "_gen_after_init".to_string()).into(),
+                format!("migration_{}{}", 7 - i, "_gen_after_init").into(),
             ),
             code_origin_line: std::line!(),
         })
@@ -317,7 +317,7 @@ async fn test_rollback_number_delta(mode: Mode) {
     })
     .await;
 
-    let ref default_fwd_strategy = FastForwardDelta::builder().latest(true).build();
+    let default_fwd_strategy = &FastForwardDelta::builder().latest(true).build();
     conf.run_up(default_fwd_strategy).await;
     conf.assert_with_db_instance(AssertionArg {
         expected_mig_files_count: 12,
@@ -483,7 +483,7 @@ async fn test_rollback_till_pointer_mig_id(mode: Mode) {
                 "migration_12_gen_after_init".into(),
             ),
             expected_latest_db_migration_meta_basename_normalized: Some(
-                format!("migration_{}{}", i, "_gen_after_init".to_string()).into(),
+                format!("migration_{}{}", i, "_gen_after_init").into(),
             ),
             code_origin_line: std::line!(),
         })

@@ -73,7 +73,7 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
             }
             (None, Some(r_meta)) => {
                 let old_name = r_meta.old_name.clone().unwrap();
-                if let Some(_) = right_defs.get_definition(&old_name) {
+                if right_defs.get_definition(&old_name).is_some() {
                     return Err(MigrationError::CannotRenameFromOldFieldInUSeInTable {
                         new_field: field_name,
                         old_field: old_name,

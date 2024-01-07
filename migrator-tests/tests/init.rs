@@ -134,10 +134,7 @@ async fn test_cannot_init_twice_consecutively_with_same_names(mode: Mode, revers
         MockPrompter::default(),
     )
     .await;
-    assert!(
-        false,
-        "should not reach here, if it does, it means, the second init command did not panic"
-    );
+    panic!("should not reach here, if it does, it means, the second init command did not panic");
 }
 
 #[test_case(Mode::Strict, true; "Reversible Strict")]
@@ -185,8 +182,5 @@ async fn test_cannot_init_twice_consecutively_with_different_names(mode: Mode, r
         MockPrompter::default(),
     )
     .await;
-    assert!(
-        false,
-        "should not reach here, if it does, it means, the second init command did not panic"
-    );
+    panic!("should not reach here, if it does, it means, the second init command did not panic");
 }

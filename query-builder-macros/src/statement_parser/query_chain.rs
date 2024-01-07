@@ -158,7 +158,7 @@ impl QueriesChainParser {
    });
 
         let code = lines
-            .filter_map(|line| line)
+            .flatten()
             .enumerate()
             .map(|(i, line)| {
                 let QueryLine {

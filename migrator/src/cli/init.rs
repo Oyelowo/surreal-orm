@@ -67,7 +67,7 @@ impl Init {
         if self.reversible {
             let gen = file_manager
                 .two_way()
-                .generate_migrations(&migration_name.into(), codebase_resources, prompter)
+                .generate_migrations(&migration_name, codebase_resources, prompter)
                 .await;
             if let Err(e) = gen {
                 log::error!("Failed to generate migrations: {e}");

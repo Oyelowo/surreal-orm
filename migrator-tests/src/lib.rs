@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 
-use std::{fmt::Display, fs, ops::Deref, path::PathBuf};
+use std::{fmt::Display, fs, ops::Deref, path::Path};
 
 use surreal_models::migrations::{
     Resources, ResourcesV10, ResourcesV2, ResourcesV3, ResourcesV4, ResourcesV5, ResourcesV6,
@@ -152,14 +152,14 @@ impl DbMigrationSchemaState {
 impl TestConfigNew {
     pub async fn new(
         mode: Mode,
-        migration_dir: &PathBuf,
+        migration_dir: &Path,
         current_function_name: impl Into<CurrentFunctionName>,
     ) -> Self {
         let db_conn_config = DatabaseConnection::default();
 
         let mut migrator = Migrator::builder()
             .verbose(3)
-            .dir(migration_dir.clone())
+            .dir(migration_dir.to_path_buf())
             .db_connection(db_conn_config)
             .mode(mode)
             .build();
@@ -225,7 +225,7 @@ impl TestConfigNew {
             .iter()
             .map(|filename| {
                 let path = migration_dir.join(filename.to_string());
-                let input = fs::read_to_string(&path).unwrap();
+                let input = fs::read_to_string(path).unwrap();
                 let basename = filename.basename();
                 let extension = filename.extension();
                 let input = if input.is_empty() {
@@ -247,7 +247,7 @@ impl TestConfigNew {
             .iter()
             .map(|f| {
                 fs::read_to_string(
-                    &self
+                    self
                         .migrator
                         .file_manager()
                         .get_migration_dir()
@@ -283,7 +283,7 @@ impl TestConfigNew {
 
     pub fn read_down_migrations_from_dir_sorted_asc(&self) -> Vec<MigrationFilename> {
         let mut files =
-            std::fs::read_dir(&self.migrator.file_manager().get_migration_dir().unwrap())
+            std::fs::read_dir(self.migrator.file_manager().get_migration_dir().unwrap())
                 .expect("Failed to read dir")
                 .filter_map(|p| {
                     p.expect("Failed to read dir")
@@ -434,7 +434,7 @@ impl TestConfigNew {
                 .run(false)
                 .build(),
         ))
-        .run(Some(Resources), mock_prompter.clone())
+        .run(Some(Resources), mock_prompter)
         .await;
 
         let gen = |basename: String| {
@@ -443,7 +443,7 @@ impl TestConfigNew {
 
         for i in 2..=number_of_migs_to_gen {
             self.set_cmd(gen(format!("migration {}-gen after init", i)))
-                .run(Some(Resources), mock_prompter.clone())
+                .run(Some(Resources), mock_prompter)
                 .await;
         }
 
@@ -462,54 +462,54 @@ impl TestConfigNew {
                 .run(false)
                 .build(),
         )
-        .run(Some(Resources), mock_prompter.clone())
+        .run(Some(Resources), mock_prompter)
         .await;
 
         let gen =
             |basename: &'static str| Generate::builder().name(basename.into()).run(false).build();
 
         self.set_cmd(gen("migration 2-gen after init"))
-            .run(Some(Resources), mock_prompter.clone())
+            .run(Some(Resources), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 3-gen after init"))
-            .run(Some(Resources), mock_prompter.clone())
+            .run(Some(Resources), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 4-gen after init"))
-            .run(Some(ResourcesV2), mock_prompter.clone())
+            .run(Some(ResourcesV2), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 5-gen after init"))
-            .run(Some(ResourcesV3), mock_prompter.clone())
+            .run(Some(ResourcesV3), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 6-gen after init"))
-            .run(Some(ResourcesV4), mock_prompter.clone())
+            .run(Some(ResourcesV4), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 7-gen after init"))
-            .run(Some(ResourcesV5), mock_prompter.clone())
+            .run(Some(ResourcesV5), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 8-gen after init"))
-            .run(Some(ResourcesV6), mock_prompter.clone())
+            .run(Some(ResourcesV6), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 9-gen after init"))
-            .run(Some(ResourcesV7), mock_prompter.clone())
+            .run(Some(ResourcesV7), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 10-gen after init"))
-            .run(Some(ResourcesV8), mock_prompter.clone())
+            .run(Some(ResourcesV8), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 11-gen after init"))
-            .run(Some(ResourcesV9), mock_prompter.clone())
+            .run(Some(ResourcesV9), mock_prompter)
             .await;
 
         self.set_cmd(gen("migration 12-gen after init"))
-            .run(Some(ResourcesV10), mock_prompter.clone())
+            .run(Some(ResourcesV10), mock_prompter)
             .await;
 
         self
@@ -550,7 +550,7 @@ impl TestConfigNew {
             code_origin_line,
         } = args;
         let migration_type = MigrationFlag::from(self.reversible.unwrap_or_default());
-        let ref current_file_name = self.current_function_name.clone();
+        let current_file_name = &self.current_function_name.clone();
 
         let db = self.migrator.db().clone();
         let db_migrations = Migration::get_all_desc(db.clone()).await;

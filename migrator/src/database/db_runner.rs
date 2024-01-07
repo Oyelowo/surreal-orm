@@ -77,7 +77,7 @@ impl MigrationRunner {
                             .find(|m| m.up.name == latest_migration_name.to_up())
                             .ok_or(MigrationError::RollbackFailed(format!(
                 "The latest migration - {} - does not have a corresponding down migration file",
-                latest_migration_name.to_string()
+                latest_migration_name
             )))?;
                         Self::generate_rollback_queries_and_filepaths(
                             fm,
@@ -127,7 +127,7 @@ impl MigrationRunner {
                 // By using to_up(), we also allow using the down migration file name
                 // counterpart to the up migration filename as the cursor, giving user
                 // more flexibility to use either.
-                let ref file_cursor = file_cursor.to_up();
+                let file_cursor = &file_cursor.to_up();
                 let timestamp_value = file_cursor.timestamp().into_inner();
                 let migration_meta = Migration::get_by_filename(db.clone(), file_cursor).await;
                 if migration_meta.is_none() {
@@ -370,7 +370,7 @@ impl MigrationRunner {
             match mf.into() {
                 MigrationFile::OneWay(m) => {
                     let created_registered_mig =
-                        Migration::create_raw(&m.name(), &m.content().as_checksum()?, None);
+                        Migration::create_raw(m.name(), &m.content().as_checksum()?, None);
 
                     migration_queries.push(m.content().to_owned());
                     mark_queries_registered_queries.push(created_registered_mig);
@@ -485,7 +485,7 @@ impl MigrationRunner {
             Status::All => {
                 let mut migrations = migrations_local_dir;
                 migrations.sort_by_key(|name| name.timestamp());
-                migrations.into_iter().map(|name| name).collect::<Vec<_>>()
+                migrations.into_iter().collect::<Vec<_>>()
             }
             Status::Pending => {
                 let latest_applied_migration = select(All)
@@ -532,17 +532,15 @@ impl MigrationRunner {
 
         let filtered_local_migrations = local_migrations
             .into_iter()
-            .filter(|name| db_migs.contains(&name))
+            .filter(|name| db_migs.contains(name))
             .collect::<Vec<_>>();
 
         // TODO:: Check that the files are contiguous?
-        if mode.is_strict() {
-            if filtered_local_migrations.len() != db_migs.len() {
-                return Err(MigrationError::InvalidMigrationState {
-                    db_migration_count: db_migs.len(),
-                    local_dir_migration_count: filtered_local_migrations.len(),
-                });
-            }
+        if mode.is_strict() && filtered_local_migrations.len() != db_migs.len() {
+            return Err(MigrationError::InvalidMigrationState {
+                db_migration_count: db_migs.len(),
+                local_dir_migration_count: filtered_local_migrations.len(),
+            });
         }
 
         Ok(filtered_local_migrations)

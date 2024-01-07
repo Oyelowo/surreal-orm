@@ -36,7 +36,7 @@ impl FileContent {
 
     pub fn from_file(file_path: impl Into<PathBuf>) -> MigrationResult<Self> {
         let file_path = file_path.into();
-        let content = fs::read_to_string(&file_path)
+        let content = fs::read_to_string(file_path)
             .map_err(|e| MigrationError::IoError(format!("Error: {}", e)))?;
         Ok(Self(content))
     }

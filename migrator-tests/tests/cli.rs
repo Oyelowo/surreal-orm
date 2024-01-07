@@ -18,7 +18,7 @@ async fn test_generate_command_success() {
         .arg("--reversible")
         .arg("--run")
         .arg("--url")
-        .arg(&db_url)
+        .arg(db_url)
         .stdin(Stdio::piped())
         .spawn()
         .expect("Failed to run command");
@@ -40,7 +40,7 @@ async fn test_generate_command_success() {
         .arg("--pass")
         .arg("root")
         .arg("--url")
-        .arg(&db_url)
+        .arg(db_url)
         .spawn()
         .expect("Failed to run command");
 

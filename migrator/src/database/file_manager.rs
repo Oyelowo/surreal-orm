@@ -61,7 +61,6 @@ impl MigrationConfig {
 
     pub fn migration_flag_checked(&self) -> MigrationResult<MigrationFlag> {
         self.migration_flag
-            .clone()
             .ok_or(MigrationError::MigrationFlagNotSet)
     }
 
@@ -118,10 +117,10 @@ impl MigrationConfig {
             (false, true) => Ok(MigrationFlag::OneWay),
             (true, false) => Ok(MigrationFlag::TwoWay),
             (false, false) | (true, true) => {
-                return Err(MigrationError::AmbiguousMigrationDirection {
+                Err(MigrationError::AmbiguousMigrationDirection {
                     one_way_filecount: oneway.len(),
                     two_way_filecount: twoway.len(),
-                });
+                })
             }
         }
     }
@@ -257,7 +256,7 @@ impl FileManagerUni {
         let file_manager = self.into_inner();
 
         MigratorDatabase::generate_migrations(
-            &migration_basename,
+            migration_basename,
             &file_manager,
             codebase_resources,
             prompter,
@@ -341,7 +340,7 @@ impl FileManagerBi {
     ) -> MigrationResult<()> {
         let file_manager = self.0.clone();
         MigratorDatabase::generate_migrations(
-            &migration_basename,
+            migration_basename,
             &file_manager,
             codebase_resources,
             prompter,

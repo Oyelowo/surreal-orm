@@ -41,7 +41,7 @@ impl Checksum {
         let file = File::open(&file_path).map_err(|e| {
             MigrationError::IoError(format!(
                 "Failed to open migration file: {}. Error: {}",
-                file_path.to_string_lossy().to_string(),
+                file_path.to_string_lossy(),
                 e
             ))
         })?;
@@ -52,7 +52,7 @@ impl Checksum {
         std::io::copy(&mut reader, &mut hasher).map_err(|e| {
             MigrationError::IoError(format!(
                 "Failed to read migration file: {}. Error: {}",
-                file_path.to_string_lossy().to_string(),
+                file_path.to_string_lossy(),
                 e
             ))
         })?;

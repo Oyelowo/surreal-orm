@@ -17,18 +17,13 @@ use typed_builder::TypedBuilder;
 /// cargo run -- up -n 2
 /// cargo run -- up -t 2021-09-09-xxxxx
 #[derive(Args, Debug, TypedBuilder, Clone)]
+#[derive(Default)]
 pub struct Up {
     #[command(flatten)]
     pub(crate) fast_forward: FastForwardDelta,
 }
 
-impl Default for Up {
-    fn default() -> Self {
-        Self {
-            fast_forward: FastForwardDelta::default(),
-        }
-    }
-}
+
 
 impl Up {
     pub fn update_strategy(&self) -> UpdateStrategy {
