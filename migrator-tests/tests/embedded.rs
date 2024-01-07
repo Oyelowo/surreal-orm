@@ -22,20 +22,20 @@ fn test_embedded() {
     assert_eq!(migs.len(), 2);
     // check the meta data
     assert_eq!(
+        migs[0].name().to_string(),
+        "20231029202315_create_new_stuff.surql"
+    );
+
+    assert_eq!(
         migs[0].name().basename(),
-        "20231029202315_create_new_stuff"
-            .to_string()
-            .try_into()
-            .unwrap()
+        "create_new_stuff".to_string().try_into().unwrap()
     );
     insta::assert_display_snapshot!(migs[0].content());
     assert_eq!(
-        migs[1].name().basename(),
-        "20231029224601_create_new_stuff"
-            .to_string()
-            .try_into()
-            .unwrap()
+        migs[1].name().to_string(),
+        "20231029224601_create_new_stuff.surql"
     );
+    assert_eq!(migs[1].name().basename(), "create_new_stuff".into());
     assert_eq!(migs.len(), 2);
     assert_eq!(
         migs[1].content().to_string(),
@@ -47,12 +47,10 @@ fn test_embedded() {
 
     // check the meta data
     assert_eq!(
-        migs[0].up.name.basename(),
-        "20231030025711_migration_name_example"
-            .to_string()
-            .try_into()
-            .unwrap()
+        migs[0].up.name.to_string(),
+        "20231030025711_migration_name_example.up.surql"
     );
+    assert_eq!(migs[0].up.name.basename(), "migration_name_example".into());
     insta::assert_display_snapshot!(migs[0].up.content);
     insta::assert_display_snapshot!(migs[0].down.content);
 }
