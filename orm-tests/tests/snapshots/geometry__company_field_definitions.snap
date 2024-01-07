@@ -9,4 +9,4 @@ DEFINE FIELD founders ON TABLE company TYPE array<object>;
 DEFINE FIELD foundersMultipleNesting ON TABLE company TYPE array<array<object>>;
 DEFINE FIELD founders10 ON TABLE company TYPE array<array<array<array<array<array<array<array<array<array<object>>>>>>>>>>;
 DEFINE FIELD tags ON TABLE company TYPE array<string>;
-DEFINE FIELD home ON TABLE company TYPE geometry;
+DEFINE FIELD home ON TABLE company TYPE geometry<feature>;
