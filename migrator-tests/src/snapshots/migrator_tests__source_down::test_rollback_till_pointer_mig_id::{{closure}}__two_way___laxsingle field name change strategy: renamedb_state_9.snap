@@ -27,14 +27,23 @@ DbMigrationSchemaState {
         tables: Tables(
             Info(
                 {
+                    "animal": DefineStatementRaw(
+                        "DEFINE TABLE animal SCHEMAFULL PERMISSIONS NONE",
+                    ),
                     "crop": DefineStatementRaw(
                         "DEFINE TABLE crop SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "eats": DefineStatementRaw(
+                        "DEFINE TABLE eats SCHEMAFULL PERMISSIONS NONE",
                     ),
                     "migration": DefineStatementRaw(
                         "DEFINE TABLE migration SCHEMAFULL PERMISSIONS NONE",
                     ),
-                    "student": DefineStatementRaw(
-                        "DEFINE TABLE student SCHEMAFULL PERMISSIONS NONE",
+                    "new_stuff": DefineStatementRaw(
+                        "DEFINE TABLE new_stuff SCHEMAFULL PERMISSIONS NONE",
+                    ),
+                    "planet": DefineStatementRaw(
+                        "DEFINE TABLE planet SCHEMAFULL PERMISSIONS NONE",
                     ),
                 },
             ),
@@ -51,38 +60,6 @@ DbMigrationSchemaState {
         ),
     },
     migration_meta: [
-        StreamLinedMigration {
-            basename: Basename(
-                "migration_6_gen_after_init",
-            ),
-            extension: Extension(
-                "up.surql",
-            ),
-            checksum_up: Checksum(
-                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-            ),
-            checksum_down: Some(
-                Checksum(
-                    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                ),
-            ),
-        },
-        StreamLinedMigration {
-            basename: Basename(
-                "migration_5_gen_after_init",
-            ),
-            extension: Extension(
-                "up.surql",
-            ),
-            checksum_up: Checksum(
-                "133740ff4da5b59a7ec414bbe3186768589ae870ecf9e6dfe4ac59730b92e20b",
-            ),
-            checksum_down: Some(
-                Checksum(
-                    "4c6da97f98c388dccf45784da10dbe459d807b41c15eab9e9f88c25cb3d4f069",
-                ),
-            ),
-        },
         StreamLinedMigration {
             basename: Basename(
                 "migration_4_gen_after_init",
