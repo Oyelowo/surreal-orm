@@ -492,7 +492,7 @@ macro_rules! cond {
 /// can be of type `Filter`.
 ///
 /// Methods on a `Filter` instance are used to combine filters with logical operators or to
-/// modify the filter using methods like `bracketed`.
+/// modify the filter using methods like `parenthesized`.
 /// ```
 #[derive(Debug, Clone, Default)]
 pub struct Filter {
@@ -526,7 +526,7 @@ impl Filter {
     ///     .or(title.equal("Professor"));
     /// ```
     pub fn or(self, filter: impl Buildable + Parametric) -> Self {
-        let precendence = self.bracket_if_not_already();
+        let precendence = self.parenthesize_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
         let filter = &filter.build();
@@ -555,7 +555,7 @@ impl Filter {
     ///     .and(title.equal("Professor"));
     /// ```
     pub fn and(self, filter: impl Buildable + Parametric) -> Self {
-        let precendence = self.bracket_if_not_already();
+        let precendence = self.parenthesize_if_not_already();
         let new_params = self.___update_bindings(&filter);
 
         let filter = &filter.build();
@@ -567,7 +567,7 @@ impl Filter {
         }
     }
 
-    /// Wraps this `Filter` instance in a set of brackets.
+    /// Wraps this `Filter` instance in parenthesis.
     ///
     /// # Example
     ///
@@ -579,8 +579,8 @@ impl Filter {
     ///
     /// let filter = cond(age.greater_than(18))
     ///     .or(title.equal("Professor"));
-    /// let bracketed_filter = filter.bracketed();
-    /// assert_eq!(bracketed_filter.to_raw().build(), "((age > 18) OR (title = 'Professor'))");
+    /// let filter = filter.parenthesized();
+    /// assert_eq!(filter.to_raw().build(), "((age > 18) OR (title = 'Professor'))");
     /// ```
     pub fn parenthesized(&self) -> Self {
         Filter {
@@ -589,8 +589,8 @@ impl Filter {
         }
     }
 
-    /// Wraps this `Filter` instance in a set of brackets if it isn't already wrapped.
-    fn bracket_if_not_already(&self) -> impl Display {
+    /// Wraps this `Filter` instance in a set of parenthesizes if it isn't already wrapped.
+    fn parenthesize_if_not_already(&self) -> impl Display {
         let filter = self.to_string();
         match (filter.starts_with('('), filter.ends_with(')')) {
             (true, true) => format!("{self}"),
@@ -732,7 +732,7 @@ mod tests {
     }
 
     #[test]
-    fn test_filter_bracketed() {
+    fn test_filter_parenthesized() {
         let age = Field::new("age");
         let title = Field::new("title");
 
@@ -740,59 +740,59 @@ mod tests {
             .or(title.equal("Professor"))
             .and(age.less_than(100));
 
-        let bracketed_filter = filter.parenthesized();
+        let parenthesized_filter = filter.parenthesized();
         assert_eq!(
-            bracketed_filter.to_raw().build(),
+            parenthesized_filter.to_raw().build(),
             "((age > 18) OR (title = 'Professor') AND (age < 100))"
         );
     }
 
     #[test]
-    fn test_filter_bracketed_with_cond_macro() {
+    fn test_filter_parenthesized_with_cond_macro() {
         let age = Field::new("age");
         let title = Field::new("title");
 
         let filter = cond!((age > 18) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.parenthesized();
+        let parenthesized_filter = filter.parenthesized();
         assert_eq!(
-            bracketed_filter.fine_tune_params(),
+            parenthesized_filter.fine_tune_params(),
             "((age > $_param_00000001) OR (title = $_param_00000002) AND (age < $_param_00000003))"
         );
         assert_eq!(
-            bracketed_filter.to_raw().build(),
+            parenthesized_filter.to_raw().build(),
             "((age > 18) OR (title = 'Professor') AND (age < 100))"
         );
     }
     #[test]
-    fn test_filter_bracketed_with_cond_macro_nested() {
+    fn test_filter_parenthesized_with_cond_macro_nested() {
         let age = Field::new("age");
         let title = Field::new("title");
 
         let filter = cond!((age OR cond!(age >= 18)) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.parenthesized();
+        let parenthesized_filter = filter.parenthesized();
         assert_eq!(
-            bracketed_filter.to_raw().build(),
+            parenthesized_filter.to_raw().build(),
             "((age OR age >= 18) OR (title = 'Professor') AND (age < 100))"
         );
     }
 
     #[test]
-    fn test_filter_bracketed_with_cond_macro_mixed() {
+    fn test_filter_parenthesized_with_cond_macro_mixed() {
         let age = Field::new("age");
         let title = Field::new("title");
 
         let filter = cond!((age.or(4).or(545).or(232)) OR (title = "Professor") AND (age < 100));
 
-        let bracketed_filter = filter.parenthesized();
+        let parenthesized_filter = filter.parenthesized();
         assert_eq!(
-            bracketed_filter.fine_tune_params(),
+            parenthesized_filter.fine_tune_params(),
             "((age OR $_param_00000001 OR $_param_00000002 OR $_param_00000003) OR (title = $_param_00000004) AND (age < $_param_00000005))"
         );
 
         assert_eq!(
-            bracketed_filter.to_raw().build(),
+            parenthesized_filter.to_raw().build(),
             "((age OR 4 OR 545 OR 232) OR (title = 'Professor') AND (age < 100))"
         );
     }
