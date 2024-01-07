@@ -22,9 +22,7 @@ pub enum DeltaTypeField {
         right: DefineStatementRaw,
     },
     Rename {
-        right: DefineStatementRaw,
         new_name: Field,
-        old_left: DefineStatementRaw,
         old_name: Field,
     },
 }
@@ -82,28 +80,9 @@ impl<'a, R: DbResources> TryFrom<FieldChangeDetectionMeta<'a, R>> for DeltaTypeF
                     });
                 }
 
-                let old_left = left_defs.get_definition(&old_name).ok_or_else(|| {
-                    MigrationError::InvalidOldFieldName {
-                        new_name: r_meta.name.clone(),
-                        table: table.clone(),
-                        old_name,
-                        renamables: left_defs.get_names().join(", "),
-                    }
-                })?;
-
-                let right_def = right_defs.get_definition(&r_meta.name).ok_or_else(|| {
-                    MigrationError::FieldNameDoesNotExist {
-                        field_expected: r_meta.name.clone(),
-                        table: table.clone(),
-                        valid_fields: right_defs.get_names().join(", "),
-                    }
-                })?;
-
                 DeltaTypeField::Rename {
-                    right: right_def.clone(),
-                    new_name: r_meta.name.clone(),
-                    old_left: old_left.to_owned(),
-                    old_name: r_meta.old_name.clone().unwrap(),
+                    new_name: r_meta.name.to_owned(),
+                    old_name: r_meta.old_name.to_owned().unwrap(),
                 }
             }
             (Some(_), None) => {
