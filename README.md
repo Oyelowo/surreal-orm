@@ -544,6 +544,14 @@ async fn main() {
 #### Step 2: Running the CLI and/or Embedding Migrations 
 
 The CLI tool offers a range of commands, each with specific options and flags. Here's a quick overview:
+**Help**
+```bash
+# Check information about all commands
+cargo run -- help
+
+# Check information about specific commands
+cargo run -- init --help
+```
 
 1. **Initialize Migrations:**
    ```bash
