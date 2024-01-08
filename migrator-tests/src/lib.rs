@@ -23,6 +23,9 @@ use surreal_orm::{
 
 use typed_builder::TypedBuilder;
 
+struct MockEmptyResource;
+impl DbResources for MockEmptyResource {}
+
 #[derive(Clone, TypedBuilder)]
 pub struct AssertionArg {
     pub expected_mig_files_count: u8,
@@ -350,14 +353,14 @@ impl TestConfigNew {
 
     pub async fn run_list(&mut self, status: Status) -> &mut Self {
         self.set_cmd(List::builder().status(status).build())
-            .run(None::<Resources>, MockPrompter::default())
+            .run(None::<MockEmptyResource>, MockPrompter::default())
             .await;
         self
     }
 
     pub async fn run_prune(&mut self) -> &mut Self {
         self.set_cmd(Prune)
-            .run(None::<Resources>, MockPrompter::default())
+            .run(None::<MockEmptyResource>, MockPrompter::default())
             .await;
         self
     }
