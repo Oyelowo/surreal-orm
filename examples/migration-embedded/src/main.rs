@@ -75,19 +75,18 @@ async fn main() {
         .await
         .unwrap();
 
+    two_way
+        .run_up_pending_migrations(db.clone(), UpdateStrategy::Latest)
+        .await
+        .unwrap();
+
     // Run normal non-embedded pending migrations in migration directory
     // 1st approach to run_embedded_pending_migrations
     MIGRATIONS_TWO_WAY
         .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
         .await
         .unwrap();
-
     // 2nd approach to run embedded migrations
-    two_way
-        .run_up_pending_migrations(db.clone(), UpdateStrategy::Latest)
-        .await
-        .unwrap();
-
     two_way
         .run_up_embedded_pending_migrations(db.clone(), MIGRATIONS_TWO_WAY, UpdateStrategy::Latest)
         .await
