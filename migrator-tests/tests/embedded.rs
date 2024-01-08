@@ -10,10 +10,10 @@ use surreal_orm::migrator::{
 
 // Embed migrations as constant
 const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
-    embed_migrations!("tests/migrations-oneway", one_way, strict);
+    embed_migrations!("tests/migrations-oneway", strict);
 
 const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
-    embed_migrations!("tests/migrations-twoway", two_way, strict);
+    embed_migrations!("tests/migrations-twoway", strict);
 
 #[test]
 fn test_embedded() {

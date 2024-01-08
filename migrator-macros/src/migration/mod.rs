@@ -15,17 +15,16 @@ use syn::{
     Token,
 };
 
-fn generate_migration_code(
-    flag: MigrationFlag,
-    custom_path: Option<String>,
-    mode: Mode,
-) -> proc_macro2::TokenStream {
+fn generate_migration_code(custom_path: Option<String>, mode: Mode) -> proc_macro2::TokenStream {
     let mut files_config = MigrationConfig::new().set_mode(mode);
     if let Some(custom_path) = custom_path {
         files_config = files_config.set_custom_path(custom_path);
     }
 
     let crate_name = get_crate_name(false);
+    let flag = files_config
+        .detect_migration_type()
+        .expect("Failed to detect migration type");
     let file_metadata = match flag {
         MigrationFlag::OneWay => {
             let config = files_config
@@ -135,20 +134,12 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Args);
 
     if input.args.len() > 3 {
-        panic!("Too many arguments. Expected 3 or less");
+        panic!("Too many arguments. Expected 2 or less");
     }
 
     let mut args = parse_args(input).into_iter();
 
     let custom_path = args.next().flatten().clone();
-    let flag = args
-        .next()
-        .flatten()
-        .map_or(MigrationFlag::default(), |fl| {
-            fl.try_into()
-                .map_err(|e: MigrationError| e.to_string())
-                .expect("Invalid flag")
-        });
 
     let mode = args.next().flatten().map_or(Mode::default(), |md| {
         md.parse()
@@ -156,7 +147,7 @@ pub fn generate_embedded_migrations(input: TokenStream) -> TokenStream {
             .expect("Invalid mode")
     });
 
-    generate_migration_code(flag, custom_path, mode).into()
+    generate_migration_code(custom_path, mode).into()
 }
 
 #[cfg(test)]
