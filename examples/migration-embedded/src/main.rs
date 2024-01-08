@@ -6,7 +6,7 @@ use surreal_orm::migrator::{
 };
 // Embed migrations as constant
 const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
-    embed_migrations!("migrations-oneway", one_way, strict);
+    embed_migrations!("migrations-oneway", strict);
 
 const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
     embed_migrations!("migrations-twoway");
