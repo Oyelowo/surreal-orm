@@ -205,7 +205,7 @@ pub fn for_loop_without_for_keyword(input: TokenStream) -> TokenStream {
 }
 ///
 /// A helper function to create a for loop
-/// ```
+/// ```rust, ignore
 /// use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, statements::{for_, select, select_value}};
 ///
