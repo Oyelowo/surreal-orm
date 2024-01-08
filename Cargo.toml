@@ -39,6 +39,7 @@ surreal-models = { path = "models" }
 migration-filebased = { path = "examples/migration-filebased" }
 migration-embedded = { path = "examples/migration-embedded" }
 migration-cli = { path = "examples/migration-cli" }
+migration-simple = { path = "examples/migration-simple" }
 
 surrealdb = { version = "1.0.2", features = [
   "protocol-ws",

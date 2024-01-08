@@ -13,10 +13,10 @@ use surreal_orm::{
     *,
 };
 
+use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
+
 #[derive(Debug, Clone)]
 pub struct Resources;
-
-use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
 
 impl DbResources for Resources {
     create_table_resources!(
@@ -239,7 +239,6 @@ pub mod snake_cases {
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // Improve error message for old_nmae using word similarity algo
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,

@@ -423,6 +423,237 @@ The `query!` macro offers several benefits, including:
 - **Error Reduction**: Minimize the potential for runtime errors and SQL
   injection vulnerabilities.
 
+---
+
+#### Surreal ORM Migrations CLI
+### Fully Automated Database Schema Migration
+
+Surreal ORM provides a powerful command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool offers functionalities ranging from initializing migrations, generating migration files, applying migrations up or down, and various other tasks to manage your database schema effectively.
+
+#### Installation
+
+Gather and prepare codebase resources. These include 
+To install and use the CLI tool, ensure you have Rust and Cargo installed, then follow these steps:
+
+#### Setting Up And Gathering Codebase Resources
+
+```rust
+use surreal_orm::*;
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "animal", schemafull)]
+pub struct Animal {
+    pub id: SurrealSimpleId<Self>,
+    pub species: String,
+    // #[surreal_orm(old_name = "field_old_name")] // Comment this line out to carry out a renaming operation
+    pub attributes: Vec<String>,
+    pub created_at: chrono::DateTime<Utc>,
+    pub updated_at: chrono::DateTime<Utc>,
+    pub velocity: u64,
+}
+
+impl TableResources for Animal {
+    fn events_definitions() -> Vec<Raw> {
+        let animal::Schema { species, velocity, .. } = Self::schema();
+
+        let event1 = define_event("event1".to_string())
+            .on_table("animal".to_string())
+            .when(cond(species.eq("Homo Erectus")).and(velocity.gt(545)))
+            .then(select(All).from(Crop::table_name()))
+            .to_raw();
+
+        vec![event1]
+    }
+
+    fn indexes_definitions() -> Vec<Raw> {
+        let animal::Schema { species, velocity, .. } = Self::schema();
+
+        let idx1 = define_index("species_speed_idx".to_string())
+            .on_table(Self::table_name())
+            .fields(arr![species, velocity])
+            .unique()
+            .to_raw();
+
+        vec![idx1]
+    }
+}
+
+#[derive(Edge, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "eats", schemafull)]
+pub struct Eats<In: Node, Out: Node> {
+    pub id: SurrealSimpleId<Self>,
+    #[serde(rename = "in")]
+    pub in_: In,
+    pub out: Out,
+    pub place: String,
+    pub created_at: chrono::DateTime<Utc>,
+}
+
+pub type AnimalEatsCrop = Eats<Animal, Crop>;
+impl TableResources for AnimalEatsCrop {}
+
+#[derive(Debug, Clone)]
+pub struct Resources;
+
+impl DbResources for Resources {
+    create_table_resources!(
+        Animal,
+        Crop,
+        AnimalEatsCrop,
+    );
+
+    // Define other database resources here. They default to empty vecs
+    fn analyzers(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn functions(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn params(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn scopes(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn tokens(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn users(&self) -> Vec<Raw> {
+        vec![]
+    }
+}
+
+
+use surreal_orm::migrator::Migrator;
+
+#[tokio::main]
+async fn main() {
+    Migrator::run(Resources).await;
+}
+```
+
+#### Basic Usage
+
+The CLI tool offers a range of commands, each with specific options and flags. Here's a quick overview:
+
+1. **Initialize Migrations:**
+   ```bash
+   cargo run -- init --name "initial_migration" -r
+   ```
+   This initializes the migrations directory with a reversible migration named "initial_migration".
+   Omit the `-r` flag if you want up only migrations.
+
+2. **Generate Migrations:**
+   ```bash
+   cargo run -- gen --name "add_users_table"
+   ```
+   Generates a new migration file named "add_users_table".
+   Notice that we do not need to include the `-r` or `--reversiable` flag. 
+   Because we specified whether we want a reversible or non-reversible migration when we initialized, 
+   the migration type is automatically detected subsequently.
+
+3. **Apply Migrations Up:**
+   ```bash
+   # Applies all pending till latest by default
+   cargo run -- up
+   
+   # Applies all pending till latest
+   cargo run -- up -l
+   
+   # Applies by the number specified
+   cargo run -- up -n 5
+   cargo run -- up --number 5
+   
+   # Applies till specified migration
+   cargo run -- up -t "20240107015727114_create_first.up.surql"
+   cargo run -- up --till "20240107015727114_create_first.up.surql"
+   ```
+   Applies pending migrations forward using various strategies: till latest, by number count and till a specified migration.
+
+4. **Rollback Migrations:**
+   ```bash
+   # Rollback migration to previous by default
+   cargo run -- down
+   
+   # Rollback all pending till previous
+   cargo run -- down --previous
+   
+   # Rollback by the number specified
+   cargo run -- down -n 5
+   cargo run -- down --number 5
+   
+   # Rollback till specified migration
+   cargo run -- down -t "20240107015727114_create_first.up.surql"
+   cargo run -- down --till "20240107015727114_create_first.up.surql"
+
+   # In addition, you can use the --prune flag to delete local migration 
+   # files after rolling back. This can be useful in development for rapid changes.
+   cargo run -- down -n 5 --prune
+   ```
+   Rolls back the last applied migration.
+
+5. **Reset Migrations:**
+   ```bash
+   cargo run -- reset --name "initial_migration" -r
+   ```
+   Resets all migrations and initializes a new reversible migration named "initial_migration".
+   Skip the `-r` or `--reversible` flag if you want up only migrations,
+
+6. **List Migrations:**
+   ```bash
+   cargo run -- ls
+   cargo run -- list
+   ```
+   Lists all applied migrations.
+
+#### Advanced Usage
+
+Advanced usage involves specifying additional flags and options to tailor the migration process to your specific needs. Here's how you can use these advanced features:
+
+1. **Custom Migration Directory:**
+   ```bash
+   cargo run -- init --name "initial_migration" --dir "custom_migrations" -r
+   ```
+   Initializes migrations in a custom directory named "custom_migrations".
+
+2. **Verbose Output:**
+   ```bash
+   cargo run -- up -v
+   ```
+   Runs migrations with verbose output.
+
+3. **Database Connection Configuration:**
+   - URL: `ws://localhost:8000`
+   - Database Name: `test`
+   - Namespace: `test`
+   - User: `root`
+   - Password: `root`
+
+   ```bash
+   cargo run -- up --url "ws://localhost:8000" --db "mydb" --ns "myns" --user "username" --pass "password"
+   ```
+   Connects to the specified SurrealDB instance with custom credentials and applies migrations.
+
+#### Database Connection Configuration
+
+The `DatabaseConnection` struct allows you to specify various parameters for connecting to the database:
+
+```rust
+#[derive(Args, Debug, Clone, TypedBuilder)]
+pub struct DatabaseConnection {
+    // URL, Database, Namespace, User, Password configurations
+}
+```
+
+This configuration enables the CLI to connect to different database backends including WebSocket, HTTP(S), In-Memory, File-Backend, and more.
+
 ## Conclusion
 
 This concludes the basic usage and features of the Surreal ORM library. You can
