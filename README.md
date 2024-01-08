@@ -608,12 +608,22 @@ The CLI tool offers a range of commands, each with specific options and flags. H
 
 6. **List Migrations:**
    ```bash
+   # List pending migrations by default
    cargo run -- ls
    cargo run -- list
-   ```
-   Lists all applied migrations.
 
-#### Advanced Usage
+   # List all migrations
+   cargo run -- list --status all
+
+   # List pending migrations
+   cargo run -- list --status pending
+   
+   # List applied migrations
+   cargo run -- list --status applied
+   ```
+   Lists migrations by their statuses i.e, `all`, `pending` and `applied`.
+
+#### Advanced Migration CLI Usage
 
 Advanced usage involves specifying additional flags and options to tailor the migration process to your specific needs. Here's how you can use these advanced features:
 
@@ -625,9 +635,9 @@ Advanced usage involves specifying additional flags and options to tailor the mi
 
 2. **Verbose Output:**
    ```bash
-   cargo run -- up -v
+   cargo run -- up -vvv
    ```
-   Runs migrations with verbose output.
+   Runs migrations with 3 levels verbose output.
 
 3. **Database Connection Configuration:**
    - URL: `ws://localhost:8000`
@@ -640,6 +650,21 @@ Advanced usage involves specifying additional flags and options to tailor the mi
    cargo run -- up --url "ws://localhost:8000" --db "mydb" --ns "myns" --user "username" --pass "password"
    ```
    Connects to the specified SurrealDB instance with custom credentials and applies migrations.
+
+   Other supported urls types include:
+    ```bash
+    - ws://localhost:8000
+    - wss://cloud.example.com
+    - http://localhost:8000
+    - https://cloud.example.com
+    - mem:// 
+    # or simply
+    - memory
+    - file://temp.db
+    - indxdb://MyDatabase
+    - tikv://localhost:2379
+    - fdb://fdb.cluster
+    ```
 
 #### Database Connection Configuration
 

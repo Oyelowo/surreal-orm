@@ -27,7 +27,7 @@ impl Display for UrlDb {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             UrlDb::Memory => write!(f, "mem://"),
-            UrlDb::Others(s) => write!(f, "{}", s),
+            UrlDb::Others(s) => write!(f, "{s}"),
         }
     }
 }
@@ -42,7 +42,6 @@ impl FromStr for UrlDb {
             Ok(UrlDb::Memory)
         } else {
             Ok(UrlDb::Others(s))
-            // Err("Invalid path".to_string())
         }
     }
 }
@@ -52,9 +51,9 @@ pub struct DatabaseConnection {
     /// URL or path to connect to a database instance. Supports various backends.
     /// Examples:
     /// - Local WebSocket: `ws://localhost:8000`
-    /// - Remote WebSocket: `wss://cloud.surrealdb.com`
+    /// - Remote WebSocket: `wss://cloud.example.com`
     /// - HTTP: `http://localhost:8000`
-    /// - HTTPS: `https://cloud.surrealdb.com`
+    /// - HTTPS: `https://cloud.example.com`
     /// - In-Memory: `mem://`
     /// - File-Backend: `file://temp.db`
     /// - IndxDB-Backend: `indxdb://MyDatabase`
@@ -67,9 +66,9 @@ pub struct DatabaseConnection {
             default_value = "ws://localhost:8000",
             help = "Example:\n\
                     - ws://localhost:8000\n\
-                    - wss://cloud.surrealdb.com\n\
+                    - wss://cloud.example.com\n\
                     - http://localhost:8000\n\
-                    - https://cloud.surrealdb.com\n\
+                    - https://cloud.example.com\n\
                     - mem://\n\
                     - file://temp.db\n\
                     - indxdb://MyDatabase\n\
