@@ -665,25 +665,40 @@ Advanced usage involves specifying additional flags and options to tailor the mi
     - tikv://localhost:2379
     - fdb://fdb.cluster
     ```
-
-#### Database Connection Configuration
-
-The `DatabaseConnection` struct allows you to specify various parameters for connecting to the database:
-
-```rust
-#[derive(Args, Debug, Clone, TypedBuilder)]
-pub struct DatabaseConnection {
-    // URL, Database, Namespace, User, Password configurations
-}
-```
-
 This configuration enables the CLI to connect to different database backends including WebSocket, HTTP(S), In-Memory, File-Backend, and more.
+
+
+### Embedded Migrations
+```rust
+use surreal_orm::migrator::{
+    self, config::DatabaseConnection, embed_migrations, Mode, UpdateStrategy,
+};
+
+// Embed migrations as constant
+const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
+    embed_migrations!("tests/migrations-oneway", one_way, strict);
+
+let db = DatabaseConnection::default().setup().await.db().unwrap();
+MIGRATIONS_ONE_WAY
+    .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+    .await
+    .unwrap();
+
+const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
+    embed_migrations!("tests/migrations-twoway", two_way, strict);
+
+MIGRATIONS_TWO_WAY
+    .run(db.clone(), UpdateStrategy::Latest, Mode::Strict)
+    .await
+    .unwrap();
+
+```
 
 ## Conclusion
 
 This concludes the basic usage and features of the Surreal ORM library. You can
-explore more advanced features and methods in the API documentation. If you have
-any further questions or need assistance, feel free to reach out.
+explore more advanced features and methods in the API documentation and official book. If you have
+any further questions or need assistance, feel free to reach out at oyelowo.oss@gmail.com or discord.
 
 ## Development: Convention
 
