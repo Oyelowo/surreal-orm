@@ -425,17 +425,19 @@ The `query!` macro offers several benefits, including:
 
 ---
 
-#### Surreal ORM Migrations CLI
-### Fully Automated Database Schema Migration
+#### Migration: Fully Automated Database Schema Migrations
+Surreal ORM provides a powerful command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool offers functionalities ranging from initializing migrations, generating migration files, applying migrations up or down, 
+resetting migrations, listing migrations, pruning pending migration files and various other tasks to manage your database schema effectively.
 
-Surreal ORM provides a powerful command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool offers functionalities ranging from initializing migrations, generating migration files, applying migrations up or down, and various other tasks to manage your database schema effectively.
+It supports both CLI and Embedded-migrations. Embedded migration includes the migration files
+data into your binary at compile time and is accessible to your binary at runtime.
 
-#### Installation
 
-Gather and prepare codebase resources. These include 
-To install and use the CLI tool, ensure you have Rust and Cargo installed, then follow these steps:
+#### Usage
+It involves several processes including gathering codebase resources,
+then setting those up for initializing and generating new migrations.
 
-#### Setting Up And Gathering Codebase Resources
+#### Step 1: Setting Up And Gathering Codebase Resources
 
 ```rust
 use surreal_orm::*;
@@ -446,7 +448,7 @@ use surreal_orm::*;
 pub struct Animal {
     pub id: SurrealSimpleId<Self>,
     pub species: String,
-    // #[surreal_orm(old_name = "field_old_name")] // Comment this line out to carry out a renaming operation
+    // #[surreal_orm(old_name = "oldField")] // Comment this line out to carry out a renaming operation
     pub attributes: Vec<String>,
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
@@ -539,7 +541,7 @@ async fn main() {
 }
 ```
 
-#### Basic Usage
+#### Step 2: Running the CLI and/or Embedding Migrations 
 
 The CLI tool offers a range of commands, each with specific options and flags. Here's a quick overview:
 
@@ -606,7 +608,14 @@ The CLI tool offers a range of commands, each with specific options and flags. H
    Resets all migrations and initializes a new reversible migration named "initial_migration".
    Skip the `-r` or `--reversible` flag if you want up only migrations,
 
-6. **List Migrations:**
+6. **Prune Migrations:**
+   ```bash
+   # List pending migrations by default
+   cargo run -- prune
+   ```
+   Prune all pending unapplied migrations.
+
+7. **List Migrations:**
    ```bash
    # List pending migrations by default
    cargo run -- ls
