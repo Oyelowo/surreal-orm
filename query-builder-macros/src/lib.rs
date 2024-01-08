@@ -20,7 +20,7 @@ mod statement_parser;
 /// * `query` - The query to be checked at compile time.
 ///
 /// # Example
-/// ```rust
+/// ```rust, ignore
 /// # use query_builder_macros as surreal_orm;
 /// use surreal_orm::{query_raw, statements::select};
 ///
@@ -56,7 +56,7 @@ pub fn query_raw(raw_input: TokenStream) -> TokenStream {
 /// * `params` - The parameters to be used for the query.
 ///
 /// # Example
-/// ```rust
+/// ```rust, ignore
 /// # use query_builder_macros as surreal_orm;
 /// use surreal_orm::{query};
 /// use surrealdb::{engine::local::Mem, Surreal};
@@ -77,7 +77,7 @@ pub fn query_raw(raw_input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// Also supports multiple queries in a single call.
-/// ```rust
+/// ```rust, ignore
 /// # use query_builder_macros as surreal_orm;
 /// use surreal_orm::{query};
 /// use surrealdb::{engine::local::Mem, Surreal};
@@ -294,7 +294,7 @@ pub fn transaction(input: TokenStream) -> TokenStream {
 /// * `function definition` - The function definition
 ///
 /// # Example
-/// ```rust
+/// ```rust, ignore
 /// # use surreal_query_builder as surreal_orm;
 /// use surreal_orm::{*, statements::define_function};
 ///

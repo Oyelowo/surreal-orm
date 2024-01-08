@@ -1,5 +1,7 @@
 use surreal_orm::migrator::{self, embed_migrations};
 
+const _IGRATIONS_ONEWAY: migrator::EmbeddedMigrationsOneWay =
+    embed_migrations!("../migrator/oneway", strict);
 const _MIGRATIONS_ONEWAY: migrator::EmbeddedMigrationsOneWay =
     embed_migrations!("../migrator/oneway", strict);
 
