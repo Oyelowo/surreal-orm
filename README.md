@@ -426,16 +426,13 @@ The `query!` macro offers several benefits, including:
 ---
 
 #### Migration: Fully Automated Database Schema Migrations
-Surreal ORM provides a powerful command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool offers functionalities ranging from initializing migrations, generating migration files, applying migrations up or down, 
-resetting migrations, listing migrations, pruning pending migration files and various other tasks to manage your database schema effectively.
+Surreal ORM offers a robust command-line interface (CLI) for automatically diffing and managing database migrations in a SurrealDB environment. This tool supports a variety of tasks including initializing migrations, generating migration files, applying migrations up or down, resetting migrations, listing migrations, pruning unapplied migration files, and more, to efficiently manage your database schema.
 
-It supports both CLI and Embedded-migrations. Embedded migration includes the migration files
-data into your binary at compile time and is accessible to your binary at runtime.
+It supports both CLI-based and Embedded migrations. Embedded migrations incorporate migration file data into your binary at compile time, making it accessible at runtime.
 
 
 #### Usage
-It involves several processes including gathering codebase resources,
-then setting those up for initializing and generating new migrations.
+The process involves gathering codebase resources and setting them up for initializing and generating new migrations.
 
 #### Step 1: Setting Up And Gathering Codebase Resources
 
@@ -543,7 +540,8 @@ async fn main() {
 
 #### Step 2: Running the CLI and/or Embedding Migrations 
 
-The CLI tool offers a range of commands, each with specific options and flags. Here's a quick overview:
+The CLI tool offers a range of commands, each with specific options and flags:
+
 **Help**
 ```bash
 # Check information about all commands
@@ -557,19 +555,19 @@ cargo run -- init --help
    ```bash
    cargo run -- init --name "initial_migration" -r
    ```
-   This initializes the migrations directory with a reversible migration named "initial_migration".
-   Omit the `-r` flag if you want up only migrations.
+   Initializes the migrations directory with a reversible migration named "initial_migration". 
+   Omit the -r flag for unidirectional migrations.
 
 2. **Generate Migrations:**
    ```bash
    cargo run -- gen --name "add_users_table"
    ```
    Generates a new migration file named "add_users_table".
-   Notice that we do not need to include the `-r` or `--reversiable` flag. 
-   Because we specified whether we want a reversible or non-reversible migration when we initialized, 
-   the migration type is automatically detected subsequently.
+   The migration type (reversible or non-reversible) is automatically detected based on the initial setup.
 
 3. **Apply Migrations Up:**
+   Various strategies for applying migrations, including applying till latest, by number, or till a specified migration.
+   
    ```bash
    # Applies all pending till latest by default
    cargo run -- up
@@ -585,9 +583,10 @@ cargo run -- init --help
    cargo run -- up -t "20240107015727114_create_first.up.surql"
    cargo run -- up --till "20240107015727114_create_first.up.surql"
    ```
-   Applies pending migrations forward using various strategies: till latest, by number count and till a specified migration.
 
 4. **Rollback Migrations:**
+    Options to rollback migrations to a previous state, by number, till a specified migration, and an optional prune flag.
+
    ```bash
    # Rollback migration to previous by default
    cargo run -- down
@@ -610,13 +609,15 @@ cargo run -- init --help
    Rolls back the last applied migration.
 
 5. **Reset Migrations:**
+    Resets and initializes a new reversible migration named "initial_migration". Omit -r for unidirectional migrations.
+   
    ```bash
    cargo run -- reset --name "initial_migration" -r
    ```
-   Resets all migrations and initializes a new reversible migration named "initial_migration".
-   Skip the `-r` or `--reversible` flag if you want up only migrations,
 
 6. **Prune Migrations:**
+    Removes unapplied migration files.
+
    ```bash
    # List pending migrations by default
    cargo run -- prune
@@ -624,6 +625,7 @@ cargo run -- init --help
    Prune all pending unapplied migrations.
 
 7. **List Migrations:**
+    Lists migrations based on their status (all, pending, applied).
    ```bash
    # List pending migrations by default
    cargo run -- ls
@@ -638,11 +640,10 @@ cargo run -- init --help
    # List applied migrations
    cargo run -- list --status applied
    ```
-   Lists migrations by their statuses i.e, `all`, `pending` and `applied`.
 
 #### Advanced Migration CLI Usage
 
-Advanced usage involves specifying additional flags and options to tailor the migration process to your specific needs. Here's how you can use these advanced features:
+Detailed instructions for customizing migration processes, including specifying a custom migration directory, enabling verbose output, and configuring database connections.
 
 1. **Custom Migration Directory:**
    ```bash
@@ -686,13 +687,16 @@ This configuration enables the CLI to connect to different database backends inc
 
 
 ### Embedded Migrations
+Embedding migrations within the binary for runtime access.
+
 ```rust
 use surreal_orm::migrator::{
-    self, config::DatabaseConnection, embed_migrations, Mode, UpdateStrategy,
+    self, config::DatabaseConnection, EmbeddedMigrationsOneWay, EmbeddedMigrationsTwoWay,
+    embed_migrations, Mode, UpdateStrategy,
 };
 
 // Embed migrations as constant
-const MIGRATIONS_ONE_WAY: migrator::EmbeddedMigrationsOneWay =
+const MIGRATIONS_ONE_WAY: EmbeddedMigrationsOneWay =
     embed_migrations!("tests/migrations-oneway", one_way, strict);
 
 let db = DatabaseConnection::default().setup().await.db().unwrap();
@@ -701,7 +705,7 @@ MIGRATIONS_ONE_WAY
     .await
     .unwrap();
 
-const MIGRATIONS_TWO_WAY: migrator::EmbeddedMigrationsTwoWay =
+const MIGRATIONS_TWO_WAY: EmbeddedMigrationsTwoWay =
     embed_migrations!("tests/migrations-twoway", two_way, strict);
 
 MIGRATIONS_TWO_WAY
