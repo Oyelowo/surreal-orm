@@ -42,18 +42,6 @@ impl MigrationConfig {
         Self::default()
     }
 
-    // pub fn from_cli(cli: Cli) -> MigrationResult<Self> {
-    //     let rc = cli.runtime_config;
-    //     let conf_init = Self::builder()
-    //         .mode(rc.mode)
-    //         .custom_path(cli.migrations_dir);
-    //     let conf = conf_init.build();
-    //     let res = conf_init
-    //         .migration_flag(conf.detect_migration_type()?)
-    //         .build();
-    //     Ok(res)
-    // }
-
     pub fn set_flag(mut self, flag: MigrationFlag) -> Self {
         self.migration_flag = Some(flag);
         self
