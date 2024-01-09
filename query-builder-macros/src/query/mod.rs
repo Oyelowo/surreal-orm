@@ -192,14 +192,9 @@ fn validate_and_parse_sql_query(query: &str, bindings: &[Binding]) -> syn::Resul
         }
     }
 
-    // Ensure that every placeholder in the query has a binding
     let mut placeholders = query.match_indices('$').peekable();
 
-    while let Some((start, _)) = placeholders.peek().cloned() {
-        // Peek the next placeholder without advancing the iterator to check if it's consecutive.
-        placeholders.next(); // Consume the current placeholder since we've now processed it.
-
-        // Find the end of the placeholder name by looking for the next non-alphanumeric character.
+    while let Some((start, _)) = placeholders.next() {
         let end = query[start + 1..]
             .find(|c: char| !c.is_alphanumeric() && c != '_')
             .map_or(query.len(), |i| start + i + 1);

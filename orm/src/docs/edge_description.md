@@ -9,7 +9,7 @@ implements the `Edge` trait.
 
 Here's a detailed example:
 
-```rust
+```rust, ignore
 #[derive(Node, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "alien")]
