@@ -1,6 +1,7 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::DatabaseConnection;
-use surreal_orm::migrator::{MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy};
+use surreal_orm::migrator::{
+    DatabaseConnection, MigrationConfig, RealPrompter, RollbackOptions, UpdateStrategy,
+};
 
 #[tokio::main]
 async fn main() {
