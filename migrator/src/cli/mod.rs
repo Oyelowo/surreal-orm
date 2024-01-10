@@ -12,7 +12,6 @@ mod init;
 mod list;
 mod prune;
 mod reset;
-mod shared_traits;
 mod up;
 
 use std::path::PathBuf;
@@ -24,7 +23,6 @@ pub use init::Init;
 pub use list::{List, Status};
 pub use prune::Prune;
 pub use reset::Reset;
-pub use shared_traits::DbConnection;
 
 use surrealdb::{engine::any::Any, Surreal};
 use typed_builder::TypedBuilder;
@@ -33,7 +31,7 @@ pub use up::{FastForwardDelta, Up, UpdateStrategy};
 use clap::{ArgAction, Parser};
 use surreal_query_builder::DbResources;
 
-use self::config::DatabaseConnection;
+pub use self::config::DatabaseConnection;
 use crate::{MigrationConfig, MockPrompter, Mode, Prompter, RealPrompter, RenameOrDelete};
 
 /// Surreal ORM CLI
