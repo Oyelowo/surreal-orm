@@ -1,5 +1,5 @@
 use surreal_models::migrations::Resources;
-use surreal_orm::migrator::config::DatabaseConnection;
+use surreal_orm::migrator::DatabaseConnection;
 use surreal_orm::migrator::{
     self, embed_migrations, MigrationConfig, Mode, RealPrompter, RollbackOptions, RollbackStrategy,
     UpdateStrategy,
