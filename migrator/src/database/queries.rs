@@ -25,6 +25,7 @@ pub enum QueryType {
     Remove(RemoveStatementRaw),
     Update(UpdateStatementRaw),
     NewLine,
+    Comment(String),
 }
 
 impl Display for QueryType {
@@ -35,6 +36,7 @@ impl Display for QueryType {
             QueryType::Update(upd) => upd.to_string(),
             // TODO: Rethink new line handling
             QueryType::NewLine => "\n".to_string(),
+            QueryType::Comment(comment) => format!("-- {}", comment),
         };
         let end = if let QueryType::NewLine = self {
             ""
@@ -80,6 +82,14 @@ impl Queries {
     pub(crate) fn extend_down(&mut self, queries: &Self) {
         self.down.extend(queries.down.to_vec());
     }
+
+    pub(crate) fn add_comment_to_up(&mut self, comment: impl Into<String>) {
+        self.up.push(QueryType::Comment(comment.into()));
+    }
+
+    pub(crate) fn add_comment_to_down(&mut self, comment: impl Into<String>) {
+        self.down.push(QueryType::Comment(comment.into()));
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -123,8 +133,7 @@ impl Display for DefineStmtName {
 
 impl<T: Into<String>> From<T> for DefineStmtName {
     fn from(value: T) -> Self {
-        let str: String = value.into();
-        Self(str)
+        Self(value.into())
     }
 }
 
@@ -132,8 +141,7 @@ pub struct RemoveStmtName(String);
 
 impl<T: Into<String>> From<T> for RemoveStmtName {
     fn from(value: T) -> Self {
-        let str: String = value.into();
-        Self(str)
+        Self(value.into())
     }
 }
 
