@@ -123,7 +123,7 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                 }
             };
         }
-        queries.add_new_line();
+        queries.add_new_line_if_not_empty();
         Ok(queries)
     }
 }

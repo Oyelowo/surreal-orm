@@ -54,6 +54,27 @@ pub struct Queries {
 }
 
 impl Queries {
+    pub(crate) fn up_is_empty(&self) -> bool {
+        self.up.is_empty()
+    }
+
+    pub(crate) fn down_is_empty(&self) -> bool {
+        self.down.is_empty()
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.up_is_empty() && self.down_is_empty()
+    }
+
+    pub(crate) fn add_new_line_if_not_empty(&mut self) {
+        if !self.up_is_empty() {
+            self.add_new_line_to_up();
+        }
+        if !self.down_is_empty() {
+            self.add_new_line_to_down();
+        }
+    }
+
     pub(crate) fn add_new_line(&mut self) {
         self.add_new_line_to_up();
         self.add_new_line_to_down();
