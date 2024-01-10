@@ -13,7 +13,7 @@ use surreal_models::migrations::{
 };
 use surreal_orm::{
     migrator::{
-        config::DatabaseConnection, Basename, Checksum, DbInfo, Down, Extension, FastForwardDelta,
+        Basename, Checksum, DatabaseConnection, DbInfo, Down, Extension, FastForwardDelta,
         Generate, Init, List, Migration, MigrationFilename, MigrationFlag, Migrator, MockPrompter,
         Mode, Prune, RenameOrDelete, Reset, RollbackStrategyStruct, Status, SubCommand, Up,
     },

@@ -5,7 +5,7 @@
  * Licensed under the MIT license
  */
 use surreal_orm::migrator::{
-    self, config::DatabaseConnection, embed_migrations, Migration, Mode, UpdateStrategy,
+    self, embed_migrations, DatabaseConnection, Migration, Mode, UpdateStrategy,
 };
 
 // Embed migrations as constant
