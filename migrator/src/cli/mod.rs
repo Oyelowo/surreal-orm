@@ -77,15 +77,6 @@ impl Migrator {
         self.mode
     }
 
-    pub async fn setup(&mut self) {
-        self.setup_logging();
-        self.setup_db().await;
-    }
-
-    pub fn subcmd(&self) -> Option<SubCommand> {
-        self.subcmd.clone()
-    }
-
     pub fn db(&self) -> Surreal<Any> {
         self.db_connection.db().expect("Failed to get db")
     }
@@ -93,14 +84,6 @@ impl Migrator {
     pub fn set_cmd(&mut self, cmd: SubCommand) -> &mut Self {
         self.subcmd = Some(cmd);
         self
-    }
-
-    pub fn set_db_connection_from_migrator(&mut self, migrator: &Migrator) {
-        self.db_connection = migrator.db_connection.clone();
-    }
-
-    pub fn set_db(&mut self, db: Surreal<Any>) {
-        self.db_connection.db_connection = Some(db);
     }
 
     pub fn file_manager(&self) -> MigrationConfig {
@@ -115,11 +98,10 @@ impl Migrator {
     /// # Example
     /// ```rust, ignore
     /// use surreal_models::migrations::Resources;
-    /// use surreal_orm::migrator::{self, Migrator, MigrationConfig, RollbackStrategy};
+    /// use surreal_orm::migrator::{Migrator};
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///    // include example usage as rust doc
     ///     Migrator::run(Resources).await;
     /// }
     /// ```
@@ -147,8 +129,6 @@ impl Migrator {
         codebase_resources: Option<impl DbResources>,
         prompter: MockPrompter,
     ) {
-        self.setup_db().await;
-
         match self.subcmd.clone() {
             None => {
                 Up::default().run(self).await;
@@ -227,14 +207,6 @@ impl Migrator {
             self.db_connection.setup().await;
         }
     }
-
-    // pub async fn override_with_user_db_config(&mut self) {
-    //     self.db_connection.setup().await;
-    // }
-    //
-    // pub fn override_db_connection(&mut self, db_connection: Surreal<Any>) {
-    //     self.db_connection.db_connection = Some(db_connection);
-    // }
 }
 
 /// Subcommands
