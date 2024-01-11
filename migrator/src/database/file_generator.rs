@@ -5,6 +5,7 @@
  * Licensed under the MIT license
  */
 
+use itertools::{intersperse, intersperse_with};
 use std::{collections::BTreeMap, ops::Deref};
 
 use surreal_query_builder::{statements::info_for, *};
@@ -117,8 +118,6 @@ impl MigratorDatabase {
     ) -> MigrationResult<()> {
         let migration_basename = migration_basename.normalize_ensure();
 
-        let mut up_queries = vec![];
-        let mut down_queries = vec![];
         // Left = migration directory
         // Right = codebase
         // ### TABLES
@@ -145,14 +144,15 @@ impl MigratorDatabase {
             prompter: &prompter,
         };
 
-        let tables = init.new_tables(&codebase_resources).queries();
-        let analyzers = init.new_analyzers().queries();
-        let params = init.new_params().queries();
-        let functions = init.new_functions().queries();
-        let scopes = init.new_scopes().queries();
-        let tokens = init.new_tokens().queries();
-        let users = init.new_users().queries();
-        let migration_reset = Self::get_migration_reset_queries(&file_manager);
+        let tables = init.new_tables(&codebase_resources).queries()?;
+        let analyzers = init.new_analyzers().queries()?.intersperse_new_lines();
+        let params = init.new_params().queries()?.intersperse_new_lines();
+        let functions = init.new_functions().queries()?.intersperse_new_lines();
+        let scopes = init.new_scopes().queries()?.intersperse_new_lines();
+        let tokens = init.new_tokens().queries()?.intersperse_new_lines();
+        let users = init.new_users().queries()?.intersperse_new_lines();
+        let migration_reset =
+            Self::get_migration_reset_queries(&file_manager)?.intersperse_new_lines();
 
         let resources = vec![
             migration_reset,
@@ -164,34 +164,34 @@ impl MigratorDatabase {
             tokens,
             users,
         ];
+        dbg!(&resources);
 
+        let mut up_queries = vec![];
+        let mut down_queries = vec![];
         for resource in resources {
-            let resource = resource?;
+            // let resource = resource?;
             let up_is_empty = resource.up_is_empty();
             let down_is_empty = resource.down_is_empty();
 
             if !up_is_empty {
-                up_queries.extend(
-                    resource
-                        .up
-                        .into_iter()
-                        .map(|r_up| vec![r_up, QueryType::NewLine])
-                        .flatten(),
-                );
+                up_queries.extend(resource.up);
+                up_queries.push(QueryType::NewLine);
+                up_queries.push(QueryType::NewLine);
                 up_queries.push(QueryType::NewLine);
             }
 
             if !down_is_empty {
-                down_queries.extend(
-                    resource
-                        .down
-                        .into_iter()
-                        .map(|r_down| vec![r_down, QueryType::NewLine])
-                        .flatten(),
-                );
+                down_queries.extend(resource.down);
+                down_queries.push(QueryType::NewLine);
+                down_queries.push(QueryType::NewLine);
                 down_queries.push(QueryType::NewLine);
             }
         }
+        // dbg!(&up_queries);
+        // dbg!(&down_queries);
+        // let up_queries = intersperse_with(up_queries, vec![QueryType::NewLine, QueryType::NewLine])
+        //     .collect::<Vec<_>>();
+        // let down_queries = intersperse(down_queries, QueryType::NewLine).collect::<Vec<_>>();
 
         let up_queries_str = up_queries
             .iter()
