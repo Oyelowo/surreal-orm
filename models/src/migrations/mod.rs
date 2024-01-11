@@ -9,7 +9,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
     arr, cond, create_table_resources,
-    statements::{define_event, define_index, select},
+    statements::{define_event, define_index, define_param, select},
     *,
 };
 
@@ -18,6 +18,9 @@ use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
 #[derive(Debug, Clone)]
 pub struct Resources;
 define_function!(get_animal_by_id(id: int){ return 6} );
+create_param_name_fn!(__some_test_param1);
+create_param_name_fn!(__some_test_param2);
+create_param_name_fn!(__some_test_param3);
 
 impl DbResources for Resources {
     create_table_resources!(
@@ -40,9 +43,9 @@ impl DbResources for Resources {
 
     fn params(&self) -> Vec<Raw> {
         vec![
-            Param::new("__some_test_param1").to_raw(),
-            Param::new("__some_test_param2").to_raw(),
-            Param::new("__some_test_param3").to_raw(),
+            define_param(__some_test_param1()).to_raw(),
+            define_param(__some_test_param2()).to_raw(),
+            define_param(__some_test_param3()).to_raw(),
         ]
     }
 
