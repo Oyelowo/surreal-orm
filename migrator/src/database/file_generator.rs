@@ -15,6 +15,8 @@ use surrealdb::{
 
 use crate::*;
 
+use super::file_manager;
+
 // For the migration directory
 #[derive(Debug, Clone)]
 pub struct LeftFullDbInfo(pub FullDbInfo);
@@ -150,24 +152,7 @@ impl MigratorDatabase {
         let scopes = init.new_scopes().queries();
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
-        let migration_reset = if file_manager.is_first_migration()? {
-            // Defining before removing is important because
-            // removing a table that doesn't exist will throw an error
-            // and the transaction will be rolled back
-            // so we define the table first, then remove it
-            // then define the table again, to be sure it exists
-            Ok(Queries {
-                up: vec![
-                    QueryType::Comment(
-                        "Resetting migrations metadata table at initialization".into(),
-                    ),
-                    QueryType::DeleteAll(Migration::delete_all()),
-                ],
-                down: vec![],
-            })
-        } else {
-            Ok(Queries::default())
-        };
+        let migration_reset = Self::get_migration_reset_queries(&file_manager);
 
         let resources = vec![
             migration_reset,
@@ -251,5 +236,29 @@ impl MigratorDatabase {
         };
 
         Ok(())
+    }
+
+    fn get_migration_reset_queries(file_manager: &MigrationConfig) -> MigrationResult<Queries> {
+        if file_manager.is_first_migration()? {
+            // Defining before removing is important because
+            // removing a table that doesn't exist will throw an error
+            // and the transaction will be rolled back
+            // so we define the table first, then remove it
+            // then define the table again, to be sure it exists
+            Ok(Queries {
+                up: vec![
+                    QueryType::Comment(
+                        "Resetting migrations metadata table at initialization".into(),
+                    ),
+                    QueryType::DeleteAll(Migration::delete_all()),
+                    QueryType::Comment(
+                        "Resetting migrations metadata table at initialization ending".into(),
+                    ),
+                ],
+                down: vec![],
+            })
+        } else {
+            Ok(Queries::default())
+        }
     }
 }
