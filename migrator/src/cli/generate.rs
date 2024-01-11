@@ -66,6 +66,7 @@ impl Generate {
         };
 
         if self.run {
+            cli.setup_db().await;
             log::info!("Running generated migrations");
 
             self.up().run(cli).await;

@@ -64,6 +64,7 @@ pub struct DatabaseConnection {
             long,
             // value_name = "URL",
             default_value = "ws://localhost:8000",
+            // default_value = "memory",
             help = "Example:\n\
                     - ws://localhost:8000\n\
                     - wss://cloud.example.com\n\
@@ -111,6 +112,7 @@ pub struct DatabaseConnection {
 
 impl DatabaseConnection {
     pub async fn setup(&mut self) -> &mut Self {
+        dbg!(&self);
         let cli_db_url = &self.url;
         let database = self.db.clone();
         let database = database.as_str();

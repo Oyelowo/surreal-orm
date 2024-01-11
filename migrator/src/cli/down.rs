@@ -94,6 +94,7 @@ impl From<&RollbackStrategyStruct> for RollbackStrategy {
 
 impl Down {
     pub async fn run(&self, cli: &mut Migrator) {
+        cli.setup_db().await;
         let file_manager = cli.file_manager();
         let db = cli.db().clone();
 
