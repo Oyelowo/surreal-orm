@@ -17,7 +17,9 @@ use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
 
 #[derive(Debug, Clone)]
 pub struct Resources;
-define_function!(get_animal_by_id(id: int){ return 6} );
+
+// #[allow(unused_macros)]
+define_function!(get_animal_by_id(id: int){ return id;} );
 create_param_name_fn!(__some_test_param1);
 create_param_name_fn!(__some_test_param2);
 create_param_name_fn!(__some_test_param3);

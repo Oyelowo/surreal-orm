@@ -59,9 +59,12 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
         let left = self.get_left().get_names_as_set();
         let right = self.get_right().get_names_as_set();
         let tables = left.union(&right);
+        let tables_vec = tables.clone().collect::<Vec<_>>();
+        let last_table_index = tables_vec.len() - 1;
 
         let mut queries = Queries::default();
-        for table_name in tables {
+        for (i, table_name) in tables_vec.into_iter().enumerate() {
+            let is_last = i == last_table_index;
             let initial_queries_len_state = queries.len();
             let def_left = self.get_left().get_definition(table_name).cloned();
             let def_right = self.get_right().get_definition(table_name).cloned();
@@ -124,7 +127,7 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                 }
             };
 
-            if initial_queries_len_state.has_changed(&mut queries) {
+            if !is_last && initial_queries_len_state.has_changed(&mut queries) {
                 queries.add_new_line();
             }
         }
