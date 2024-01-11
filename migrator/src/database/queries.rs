@@ -64,6 +64,14 @@ impl Queries {
         QueriesLength(self.up.len(), self.down.len())
     }
 
+    pub(crate) fn up_is_empty(&self) -> bool {
+        self.up.is_empty()
+    }
+
+    pub(crate) fn down_is_empty(&self) -> bool {
+        self.down.is_empty()
+    }
+
     pub(crate) fn add_new_line(&mut self) {
         self.add_new_line_to_up();
         self.add_new_line_to_down();
