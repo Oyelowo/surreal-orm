@@ -65,9 +65,9 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             );
             if explicit_old_name_used.is_none() {
                 self.handle_prompt_field_renaming_or_deletion(&mut acc, old_field, new_field)?;
+                acc.add_new_line();
                 return Ok(acc);
             }
-            // acc.add_new_line();
         }
 
         for field_name in union {
@@ -79,7 +79,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                 codebase_resources: self.codebase_resources,
             };
 
-            //
             match DeltaTypeField::try_from(change_meta)? {
                 DeltaTypeField::NoChange => {}
                 DeltaTypeField::Create { right } => {
@@ -94,13 +93,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                 DeltaTypeField::Rename {
                     new_name, old_name, ..
                 } => {
-                    acc.add_comment_to_up(format!("Rename field {old_name} to {new_name}"));
-                    acc.add_comment_to_down(format!(
-                        "Revert field name change. Change field {new_name} back to {old_name}"
-                    ));
-                    let done_up_comment = format!("Rename field ending",);
-                    let done_down_comment = format!("Revert field name change ending");
-
                     self.handle_rename(
                         &mut acc,
                         FieldChangeMeta {
@@ -109,8 +101,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                             new_name,
                         },
                     )?;
-                    acc.add_comment_to_up(done_up_comment);
-                    acc.add_comment_to_down(done_down_comment);
                 }
             }
         }
@@ -150,19 +140,27 @@ impl<'a, R: DbResources> ComparisonFields<'a, R> {
             }
         })?;
 
+        // Field name change defs
+        acc.add_comment_to_up(format!("Rename field {old_name} to {new_name}"));
         acc.add_up(QueryType::Define(new_field_def.clone()));
         let copy_old_to_new = UpdateStatementRaw::from(
             Raw::new(format!("UPDATE {table} SET {new_name} = {old_name}")).build(),
         );
         acc.add_up(QueryType::Update(copy_old_to_new));
         acc.add_up(QueryType::Remove(old_field_def.as_remove_statement()?));
+        acc.add_comment_to_up("Rename field ending");
 
+        // Field name change reversal defs
+        acc.add_comment_to_down(format!(
+            "Revert field name change. Change field {new_name} back to {old_name}"
+        ));
         acc.add_down(QueryType::Define(old_field_def.clone()));
         let copy_new_to_old = UpdateStatementRaw::from(
             Raw::new(format!("UPDATE {table} SET {old_name} = {new_name}")).build(),
         );
         acc.add_down(QueryType::Update(copy_new_to_old));
         acc.add_down(QueryType::Remove(new_field_def.as_remove_statement()?));
+        acc.add_comment_to_down("Revert field name change ending");
         Ok(acc)
     }
 

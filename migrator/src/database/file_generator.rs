@@ -155,8 +155,20 @@ impl MigratorDatabase {
 
         for resource in resources {
             let resource = resource?;
-            up_queries.extend(resource.up);
-            down_queries.extend(resource.down);
+            let up_is_empty = resource.up_is_empty();
+            let down_is_empty = resource.down_is_empty();
+
+            if !up_is_empty {
+                up_queries.extend(resource.up);
+                up_queries.push(QueryType::NewLine);
+                up_queries.push(QueryType::NewLine);
+            }
+
+            if !down_is_empty {
+                down_queries.extend(resource.down);
+                down_queries.push(QueryType::NewLine);
+                down_queries.push(QueryType::NewLine);
+            }
         }
 
         let up_queries_str = up_queries
