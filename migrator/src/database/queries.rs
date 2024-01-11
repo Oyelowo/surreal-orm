@@ -34,7 +34,6 @@ impl Display for QueryType {
             QueryType::Define(def) => def.to_string(),
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
-            // TODO: Rethink new line handling
             QueryType::NewLine => "\n".to_string(),
             QueryType::Comment(comment) => format!("-- {}", comment),
         };
@@ -53,26 +52,16 @@ pub struct Queries {
     pub(crate) down: Vec<QueryType>,
 }
 
+pub struct QueriesLength(usize, usize);
+impl QueriesLength {
+    pub(crate) fn has_changed(&self, latter_state: &mut Queries) -> bool {
+        self.0 != latter_state.up.len() || self.1 != latter_state.down.len()
+    }
+}
+
 impl Queries {
-    pub(crate) fn up_is_empty(&self) -> bool {
-        self.up.is_empty()
-    }
-
-    pub(crate) fn down_is_empty(&self) -> bool {
-        self.down.is_empty()
-    }
-
-    pub(crate) fn is_empty(&self) -> bool {
-        self.up_is_empty() && self.down_is_empty()
-    }
-
-    pub(crate) fn add_new_line_if_not_empty(&mut self) {
-        if !self.up_is_empty() {
-            self.add_new_line_to_up();
-        }
-        if !self.down_is_empty() {
-            self.add_new_line_to_down();
-        }
+    pub(crate) fn len(&self) -> QueriesLength {
+        QueriesLength(self.up.len(), self.down.len())
     }
 
     pub(crate) fn add_new_line(&mut self) {

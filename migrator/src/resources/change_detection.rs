@@ -146,6 +146,7 @@ impl Display for SingleFieldChangeType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum DeltaTypeResource {
     NoChange,
     Create {

@@ -62,6 +62,7 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
 
         let mut queries = Queries::default();
         for table_name in tables {
+            let initial_queries_len_state = queries.len();
             let def_left = self.get_left().get_definition(table_name).cloned();
             let def_right = self.get_right().get_definition(table_name).cloned();
 
@@ -122,8 +123,12 @@ impl<R: DbResources> DbResourcesMeta<Tables> for ComparisonTables<'_, R> {
                     extend_table_resources_down(&mut queries);
                 }
             };
+
+            if initial_queries_len_state.has_changed(&mut queries) {
+                queries.add_new_line();
+            }
         }
-        queries.add_new_line_if_not_empty();
+
         Ok(queries)
     }
 }
@@ -165,7 +170,6 @@ where
                 DeltaTypeResource::NoChange => {}
             };
         }
-        queries.add_new_line();
 
         Ok(queries)
     }
