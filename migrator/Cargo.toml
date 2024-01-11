@@ -19,6 +19,7 @@ sha2 = { workspace = true }
 chrono = { workspace = true }
 tokio = { workspace = true }
 nom = { workspace = true }
+itertools = { workspace = true }
 regex = { workspace = true }
 thiserror = { workspace = true }
 inquire = { workspace = true }

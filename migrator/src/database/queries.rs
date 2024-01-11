@@ -7,6 +7,7 @@
 
 use std::{fmt::Display, ops::Deref};
 
+use itertools::intersperse;
 use serde::{Deserialize, Serialize};
 use surreal_query_builder::{
     statements::{
@@ -62,6 +63,12 @@ impl QueriesLength {
 }
 
 impl Queries {
+    pub(crate) fn intersperse_new_lines(self) -> Self {
+        let up = intersperse(self.up, QueryType::NewLine).collect();
+        let down = intersperse(self.down, QueryType::NewLine).collect();
+        Queries { up, down }
+    }
+
     pub(crate) fn len(&self) -> QueriesLength {
         QueriesLength(self.up.len(), self.down.len())
     }
