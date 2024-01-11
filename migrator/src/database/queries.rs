@@ -24,6 +24,7 @@ pub enum QueryType {
     Define(DefineStatementRaw),
     Remove(RemoveStatementRaw),
     Update(UpdateStatementRaw),
+    DeleteAll(Raw),
     NewLine,
     Comment(String),
 }
@@ -34,6 +35,7 @@ impl Display for QueryType {
             QueryType::Define(def) => def.to_string(),
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
+            QueryType::DeleteAll(del) => del.build(),
             QueryType::NewLine => "\n".to_string(),
             QueryType::Comment(comment) => format!("-- {comment}"),
         };

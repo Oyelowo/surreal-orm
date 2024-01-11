@@ -144,17 +144,41 @@ impl MigratorDatabase {
         };
 
         let tables = init.new_tables(&codebase_resources).queries();
-        dbg!(&tables);
         let analyzers = init.new_analyzers().queries();
         let params = init.new_params().queries();
-        dbg!(&params);
         let functions = init.new_functions().queries();
         let scopes = init.new_scopes().queries();
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
+        let migration_reset = if file_manager.is_first_migration()? {
+            // Defining before removing is important because
+            // removing a table that doesn't exist will throw an error
+            // and the transaction will be rolled back
+            // so we define the table first, then remove it
+            // then define the table again, to be sure it exists
+            Ok(Queries {
+                up: vec![
+                    QueryType::Comment(
+                        "Resetting migrations metadata table at initialization".into(),
+                    ),
+                    QueryType::DeleteAll(Migration::delete_all()),
+                ],
+                down: vec![],
+            })
+        } else {
+            Ok(Queries::default())
+        };
 
-        let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
-        dbg!(&resources);
+        let resources = vec![
+            migration_reset,
+            tables,
+            analyzers,
+            params,
+            functions,
+            scopes,
+            tokens,
+            users,
+        ];
 
         for resource in resources {
             let resource = resource?;
@@ -170,7 +194,6 @@ impl MigratorDatabase {
                         .flatten(),
                 );
                 up_queries.push(QueryType::NewLine);
-                up_queries.push(QueryType::NewLine);
             }
 
             if !down_is_empty {
@@ -181,7 +204,6 @@ impl MigratorDatabase {
                         .map(|r_down| vec![r_down, QueryType::NewLine])
                         .flatten(),
                 );
-                down_queries.push(QueryType::NewLine);
                 down_queries.push(QueryType::NewLine);
             }
         }
@@ -194,21 +216,11 @@ impl MigratorDatabase {
             .trim()
             .to_string();
 
-        let up_queries_str = if file_manager.is_first_migration()? {
-            // Defining before removing is important because
-            // removing a table that doesn't exist will throw an error
-            // and the transaction will be rolled back
-            // so we define the table first, then remove it
-            // then define the table again, to be sure it exists
-            format!("{}\n\n\n{}", Migration::delete_all(), up_queries_str,)
-        } else {
-            up_queries_str
-        };
         let down_queries_str = down_queries
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("")
             .trim()
             .to_string();
 
