@@ -17,6 +17,7 @@ use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
 
 #[derive(Debug, Clone)]
 pub struct Resources;
+define_function!(get_animal_by_id(id: int){ return 6} );
 
 impl DbResources for Resources {
     create_table_resources!(
@@ -28,6 +29,34 @@ impl DbResources for Resources {
         Student,
         Planet
     );
+
+    fn analyzers(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn functions(&self) -> Vec<Raw> {
+        vec![get_animal_by_id_statement().to_raw()]
+    }
+
+    fn params(&self) -> Vec<Raw> {
+        vec![
+            Param::new("__some_test_param1").to_raw(),
+            Param::new("__some_test_param2").to_raw(),
+            Param::new("__some_test_param3").to_raw(),
+        ]
+    }
+
+    fn scopes(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn tokens(&self) -> Vec<Raw> {
+        vec![]
+    }
+
+    fn users(&self) -> Vec<Raw> {
+        vec![]
+    }
 }
 
 #[derive(Debug, Clone)]
