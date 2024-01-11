@@ -67,8 +67,8 @@ impl<'a> ComparisonsInit<'a> {
         ComparisonAnalyzers { resources: self }
     }
 
-    pub fn new_params(&self) -> ComparisonAnalyzers {
-        ComparisonAnalyzers { resources: self }
+    pub fn new_params(&self) -> ComparisonParams {
+        ComparisonParams { resources: self }
     }
 
     pub fn new_scopes(&self) -> ComparisonScopes {
