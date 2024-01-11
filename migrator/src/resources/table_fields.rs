@@ -65,7 +65,6 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
             );
             if explicit_old_name_used.is_none() {
                 self.handle_prompt_field_renaming_or_deletion(&mut acc, old_field, new_field)?;
-                acc.add_new_line();
                 return Ok(acc);
             }
         }

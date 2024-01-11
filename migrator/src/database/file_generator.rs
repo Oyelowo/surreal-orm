@@ -144,14 +144,17 @@ impl MigratorDatabase {
         };
 
         let tables = init.new_tables(&codebase_resources).queries();
+        dbg!(&tables);
         let analyzers = init.new_analyzers().queries();
         let params = init.new_params().queries();
+        dbg!(&params);
         let functions = init.new_functions().queries();
         let scopes = init.new_scopes().queries();
         let tokens = init.new_tokens().queries();
         let users = init.new_users().queries();
 
         let resources = vec![tables, analyzers, params, functions, scopes, tokens, users];
+        dbg!(&resources);
 
         for resource in resources {
             let resource = resource?;
@@ -159,13 +162,25 @@ impl MigratorDatabase {
             let down_is_empty = resource.down_is_empty();
 
             if !up_is_empty {
-                up_queries.extend(resource.up);
+                up_queries.extend(
+                    resource
+                        .up
+                        .into_iter()
+                        .map(|r_up| vec![r_up, QueryType::NewLine])
+                        .flatten(),
+                );
                 up_queries.push(QueryType::NewLine);
                 up_queries.push(QueryType::NewLine);
             }
 
             if !down_is_empty {
-                down_queries.extend(resource.down);
+                down_queries.extend(
+                    resource
+                        .down
+                        .into_iter()
+                        .map(|r_down| vec![r_down, QueryType::NewLine])
+                        .flatten(),
+                );
                 down_queries.push(QueryType::NewLine);
                 down_queries.push(QueryType::NewLine);
             }
@@ -175,7 +190,7 @@ impl MigratorDatabase {
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("")
             .trim()
             .to_string();
 
