@@ -173,7 +173,7 @@ impl MigratorDatabase {
             // and the transaction will be rolled back
             // so we define the table first, then remove it
             // then define the table again, to be sure it exists
-            format!("{}\n{}", Migration::delete_all(), up_queries_str,)
+            format!("{}\n\n\n{}", Migration::delete_all(), up_queries_str,)
         } else {
             up_queries_str
         };
