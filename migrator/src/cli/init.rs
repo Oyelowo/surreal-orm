@@ -42,9 +42,7 @@ impl Init {
         codebase_resources: impl DbResources,
         prompter: impl Prompter,
     ) {
-        // let mut files_config = MigrationConfig::new().make_strict();
         let migration_name = self.name.clone();
-
         let file_manager = cli.file_manager();
         let files = file_manager.get_migrations_filenames(true);
 
@@ -86,6 +84,7 @@ impl Init {
         };
 
         if self.run {
+            cli.setup_db().await;
             log::info!("Running initial migrations");
 
             self.up().run(cli).await;

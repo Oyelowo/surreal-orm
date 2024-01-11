@@ -190,8 +190,6 @@ impl Migrator {
         };
     }
     pub async fn run_fn(&mut self, codebase_resources: impl DbResources, prompter: impl Prompter) {
-        self.setup_db().await;
-
         match self.subcmd.clone() {
             None => {
                 Up::default().run(self).await;
@@ -229,6 +227,14 @@ impl Migrator {
             self.db_connection.setup().await;
         }
     }
+
+    // pub async fn override_with_user_db_config(&mut self) {
+    //     self.db_connection.setup().await;
+    // }
+    //
+    // pub fn override_db_connection(&mut self, db_connection: Surreal<Any>) {
+    //     self.db_connection.db_connection = Some(db_connection);
+    // }
 }
 
 /// Subcommands
