@@ -35,9 +35,9 @@ impl Display for QueryType {
             QueryType::Remove(rem) => rem.to_string(),
             QueryType::Update(upd) => upd.to_string(),
             QueryType::NewLine => "\n".to_string(),
-            QueryType::Comment(comment) => format!("-- {}", comment),
+            QueryType::Comment(comment) => format!("-- {comment}"),
         };
-        let end = if let QueryType::NewLine = self {
+        let end = if let QueryType::NewLine | QueryType::Comment(_) = self {
             ""
         } else {
             ";"

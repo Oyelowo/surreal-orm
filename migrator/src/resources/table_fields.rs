@@ -94,8 +94,12 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                 DeltaTypeField::Rename {
                     new_name, old_name, ..
                 } => {
-                    acc.add_comment_to_up(format!("Rename field {old_name} to {new_name}",));
-                    let done_comment = format!("Rename field {old_name} to {new_name} done",);
+                    acc.add_comment_to_up(format!("Rename field {old_name} to {new_name}"));
+                    acc.add_comment_to_down(format!(
+                        "Revert field name change. Change field {new_name} back to {old_name}"
+                    ));
+                    let done_up_comment = format!("Rename field ending",);
+                    let done_down_comment = format!("Revert field name change ending");
 
                     self.handle_rename(
                         &mut acc,
@@ -105,7 +109,8 @@ impl<'a, R: DbResources> TableResourcesMeta<Fields> for ComparisonFields<'a, R> 
                             new_name,
                         },
                     )?;
-                    acc.add_comment_to_up(done_comment);
+                    acc.add_comment_to_up(done_up_comment);
+                    acc.add_comment_to_down(done_down_comment);
                 }
             }
         }
