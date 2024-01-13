@@ -1,5 +1,6 @@
 ---
 source: migrator-tests/src/lib.rs
+assertion_line: 190
 expression: db_miration_schema_state
 ---
 DbMigrationSchemaState {
@@ -194,7 +195,7 @@ DbMigrationSchemaState {
             ),
             checksum_down: Some(
                 Checksum(
-                    "851d4f7ba3661ff54dffa74ffcd073f1a0aa62d3dbbff36c56dc13e6ffbf0b3e",
+                    "4b0f79b6cbae4ff80841732960244ce6115307f81bb11936f6392059c9517c62",
                 ),
             ),
         },
@@ -206,11 +207,11 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "5e036933771f39230a849b2534c8634c9bbc3c941c65d467429c588b0e409f4c",
+                "86bdc34f0d49f8fa52a46f893c1d808b2c5f097a462bbb61bcdde75fe7d3c871",
             ),
             checksum_down: Some(
                 Checksum(
-                    "b927ba90c92c72dc111a15012336e8320c8cf3e3527f848346cb70c8335fbac5",
+                    "28a885e098efed7b8c743a61d5e65477fcda1d7ee6405f276c167459f98d2607",
                 ),
             ),
         },
@@ -222,11 +223,11 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "b927ba90c92c72dc111a15012336e8320c8cf3e3527f848346cb70c8335fbac5",
+                "28a885e098efed7b8c743a61d5e65477fcda1d7ee6405f276c167459f98d2607",
             ),
             checksum_down: Some(
                 Checksum(
-                    "894534662ed2c0abc00036da2f96dd4533b9f7f821809a538930e95f2d879264",
+                    "4ae3b16b0fd2c12c4fcbbe9918e5ebac4640ea1b6ba50aa91c8adeec8da6719b",
                 ),
             ),
         },
@@ -238,7 +239,7 @@ DbMigrationSchemaState {
                 "up.surql",
             ),
             checksum_up: Checksum(
-                "2c766dd0adc54f8fa58a325a2ea4d790a9d7ef4bf95166c23b418fe3a01bfa80",
+                "9630acc95966ab19b1e3fe744ba7d20ad102e6562825bd2480a4c48cfa530460",
             ),
             checksum_down: Some(
                 Checksum(

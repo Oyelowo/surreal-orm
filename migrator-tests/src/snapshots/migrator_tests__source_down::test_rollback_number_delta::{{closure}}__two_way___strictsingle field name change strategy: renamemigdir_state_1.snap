@@ -1,5 +1,0 @@
----
-source: migrator-tests/src/lib.rs
-expression: migration_queries_snaps
----
-
