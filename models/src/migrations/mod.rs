@@ -5,11 +5,17 @@
  * Licensed under the MIT license
  */
 
+use std::ops::Deref;
+
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use surreal_orm::{
     arr, cond, create_table_resources,
-    statements::{define_event, define_index, define_param, select},
+    functions::crypto,
+    statements::{
+        define_analyzer, define_event, define_index, define_login, define_param, define_scope,
+        define_token, select, AnalyzerFilter, SnowballLanguage, Tokenizer,
+    },
     *,
 };
 
@@ -20,6 +26,8 @@ pub struct Resources;
 
 // #[allow(unused_macros)]
 define_function!(get_animal_by_id(id: int){ return id;} );
+define_function!(get_animal_by_id2(id: int){ return id;} );
+
 create_param_name_fn!(__some_test_param1);
 create_param_name_fn!(__some_test_param2);
 create_param_name_fn!(__some_test_param3);
@@ -36,11 +44,23 @@ impl DbResources for Resources {
     );
 
     fn analyzers(&self) -> Vec<Raw> {
-        vec![]
+        let analyzer1 = define_analyzer("ascii")
+            .tokenizers([Tokenizer::Class])
+            .filters([
+                AnalyzerFilter::Lowercase,
+                AnalyzerFilter::Ascii,
+                AnalyzerFilter::Edgengram(2, 15),
+                AnalyzerFilter::Snowball(SnowballLanguage::English),
+            ])
+            .to_raw();
+        vec![analyzer1]
     }
 
     fn functions(&self) -> Vec<Raw> {
-        vec![get_animal_by_id_statement().to_raw()]
+        vec![
+            get_animal_by_id_statement().to_raw(),
+            get_animal_by_id2_statement().to_raw(),
+        ]
     }
 
     fn params(&self) -> Vec<Raw> {
@@ -52,14 +72,61 @@ impl DbResources for Resources {
     }
 
     fn scopes(&self) -> Vec<Raw> {
-        vec![]
+        let user_credentials::Schema {
+            email,
+            passwordHash,
+            ..
+        } = &UserCredentials::schema();
+        let pass_input = "1234";
+        let scope = |scope| {
+            define_scope(scope)
+                .session(std::time::Duration::from_secs(60 * 60 * 24 * 30))
+                .signup(
+                    UserCredentials {
+                        email: "oyelowo.oss@gmail.com".into(),
+                        password_hash: "****".into(),
+                        ..Default::default()
+                    }
+                    .create(),
+                )
+                .signin(
+                    select(All).from(UserCredentials::table_name()).where_(
+                        cond(email.equal("oyelowo@codebreather.com"))
+                            .and(crypto::argon2::compare!(pass_input, passwordHash.deref())),
+                    ),
+                )
+                .to_raw()
+        };
+        vec![scope("scope1"), scope("scope2")]
     }
 
     fn tokens(&self) -> Vec<Raw> {
-        vec![]
+        let token1 = define_token("oyelowo_token")
+            .on_namespace()
+            .type_(TokenType::PS512)
+            .value("abrakradabra");
+
+        let token2 = define_token("token2")
+            .on_database()
+            .type_(TokenType::EDDSA)
+            .value("abrakradabra");
+
+        let token3 = define_token("oyedayo_token")
+            .on_scope("regional")
+            .type_(TokenType::HS256)
+            .value("abrakradabra");
+
+        vec![token1.to_raw(), token2.to_raw(), token3.to_raw()]
     }
 
     fn users(&self) -> Vec<Raw> {
+        // define_login("")
+        let statement = define_login("username").on_database().password("oyelowo");
+
+        let statement = define_login("username")
+            .on_namespace()
+            .passhash("reiiereroyedayo");
+
         vec![]
     }
 }
@@ -169,9 +236,17 @@ pub mod invalid_cases {
 
 #[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
+#[surreal_orm(table_name = "user_credentials", schemafull)]
+pub struct UserCredentials {
+    pub id: SurrealSimpleId<Self>,
+    pub email: String,
+    pub password_hash: String,
+}
+
+#[derive(Node, Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "new_stuff", schemafull)]
 pub struct NewStuff {
-    // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
     pub created_at: chrono::DateTime<Utc>,
@@ -184,7 +259,6 @@ impl TableResources for NewStuff {}
 #[serde(rename_all = "camelCase")]
 #[surreal_orm(table_name = "planet", schemafull)]
 pub struct Planet {
-    // Test renaming tomorrow
     pub id: SurrealSimpleId<Self>,
     pub first_name: String,
     pub population: u64,
