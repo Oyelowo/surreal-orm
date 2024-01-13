@@ -112,7 +112,6 @@ pub struct DatabaseConnection {
 
 impl DatabaseConnection {
     pub async fn setup(&mut self) -> &mut Self {
-        dbg!(&self);
         let cli_db_url = &self.url;
         let database = self.db.clone();
         let database = database.as_str();
