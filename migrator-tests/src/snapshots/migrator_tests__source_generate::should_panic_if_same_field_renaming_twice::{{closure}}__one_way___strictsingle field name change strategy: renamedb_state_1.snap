@@ -47,10 +47,10 @@ DbMigrationSchemaState {
                         "DEFINE SCOPE regional",
                     ),
                     "scope1": DefineStatementRaw(
-                        "DEFINE SCOPE scope1 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:nrnkic8qrg6ba6058a60, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
+                        "DEFINE SCOPE scope1 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:oyelowo, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
                     ),
                     "scope2": DefineStatementRaw(
-                        "DEFINE SCOPE scope2 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:ba2w8lz46q2ro43ia73y, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
+                        "DEFINE SCOPE scope2 SESSION 4w2d SIGNUP (CREATE user_credentials CONTENT { email: 'oyelowo.oss@gmail.com', id: user_credentials:oyelowo, passwordHash: '1234' }) SIGNIN (SELECT * FROM user_credentials WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare('1234', passwordHash)))",
                     ),
                 },
             ),
@@ -98,7 +98,7 @@ DbMigrationSchemaState {
             Info(
                 {
                     "oyelowo": DefineStatementRaw(
-                        "DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$0a1xUTRVSXF+fjYnnNcVxQ$HS2hm5lFwXLX0R89ggenxA9X0gLynQTYvNPbFbQea/s' ROLES OWNER",
+                        "DEFINE USER oyelowo ON DATABASE PASSHASH '$argon2id$v=19$m=19456,t=2,p=1$G7hYOaMnF409Ovkhk58ayA$0pVWVkKZXHv5FhkSjHsA4YWwbEMInx6BVPTKu+/WTsw' ROLES OWNER",
                     ),
                 },
             ),
@@ -113,7 +113,7 @@ DbMigrationSchemaState {
                 "surql",
             ),
             checksum_up: Checksum(
-                "b7029810a473e94a63fa2b71fcb6d08f4aac3fc5a50965518f778e02c09d0490",
+                "e932d40bb34fdd49ca6dda8f2f5847bd73a7f5f9b4e85bfbbbeb6af6ac3003d5",
             ),
             checksum_down: None,
         },
