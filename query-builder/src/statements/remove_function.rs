@@ -12,6 +12,33 @@ use crate::{
     Binding,
 };
 
+pub struct FunctionName(String);
+
+impl FunctionName {
+    #[allow(dead_code)]
+    fn new(name: impl Display) -> Self {
+        Self(name.to_string())
+    }
+}
+
+impl From<&str> for FunctionName {
+    fn from(name: &str) -> Self {
+        Self(name.to_string())
+    }
+}
+
+impl From<String> for FunctionName {
+    fn from(name: String) -> Self {
+        Self(name)
+    }
+}
+
+impl Display for FunctionName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fn::{}", self.0.trim_start_matches("fn::"))
+    }
+}
+
 /// Creates a REMOVE FUNCTION statement builder.
 ///
 /// Examples
@@ -20,7 +47,8 @@ use crate::{
 /// use surreal_orm::{*, statements::remove_function};
 /// remove_function("fn::update_author").build();
 /// ```
-pub fn remove_function(name: impl Display) -> RemoveFunctionStatement {
+pub fn remove_function(name: impl Into<FunctionName>) -> RemoveFunctionStatement {
+    let name: FunctionName = name.into();
     let name: String = name.to_string();
     let name = Binding::new(name).as_raw();
     RemoveFunctionStatement {
@@ -53,10 +81,7 @@ impl Parametric for RemoveFunctionStatement {
 
 impl Buildable for RemoveFunctionStatement {
     fn build(&self) -> String {
-        format!(
-            "REMOVE FUNCTION fn::{};",
-            self.name.trim_start_matches("fn::")
-        )
+        format!("REMOVE FUNCTION {};", self.name)
     }
 }
 
@@ -69,11 +94,11 @@ impl fmt::Display for RemoveFunctionStatement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{traits::Buildable, Param, ToRaw};
+    use crate::{traits::Buildable, ToRaw};
 
     #[test]
-    fn test_remove_function_build() {
-        let statement = remove_function("fn::update_author");
+    fn test_remove_function_build_without_prefix() {
+        let statement = remove_function("update_author");
         assert_eq!(
             statement.to_raw().build(),
             "REMOVE FUNCTION fn::update_author;"
@@ -86,12 +111,11 @@ mod tests {
     }
 
     #[test]
-    fn test_remove_function_build_error() {
-        let param_function_to_remove = Param::new("param_function_to_remove");
-        let statement = remove_function(param_function_to_remove);
+    fn test_remove_function_build() {
+        let statement = remove_function("fn::update_author");
         assert_eq!(
             statement.to_raw().build(),
-            "REMOVE FUNCTION $param_function_to_remove;"
+            "REMOVE FUNCTION fn::update_author;"
         );
         assert_eq!(
             statement.fine_tune_params(),
