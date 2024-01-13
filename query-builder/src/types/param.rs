@@ -42,7 +42,7 @@ impl Erroneous for Param {
 
 impl Buildable for Param {
     fn build(&self) -> String {
-        self.param.to_string()
+        format!("${}", self.param.to_raw().trim_start_matches('$'))
     }
 }
 
