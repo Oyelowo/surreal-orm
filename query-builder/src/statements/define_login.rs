@@ -77,7 +77,14 @@ impl Display for Passhash {
     }
 }
 
-pub struct Password(String);
+pub struct Password(pub(crate) String);
+
+impl Password {
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+}
+
 impl From<String> for Password {
     fn from(value: String) -> Self {
         Self(value)

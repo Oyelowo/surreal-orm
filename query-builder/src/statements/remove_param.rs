@@ -65,17 +65,14 @@ impl fmt::Display for RemoveParamStatement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{traits::Buildable, Field, Param, ToRaw};
+    use crate::{traits::Buildable, Param, ToRaw};
 
     #[test]
     fn test_remove_param_build() {
         let statement = remove_param("website_name");
-        assert_eq!(statement.to_raw().build(), "REMOVE PARAM website_name;");
-        assert_eq!(
-            statement.fine_tune_params(),
-            "REMOVE PARAM $_param_00000001;"
-        );
-        assert_eq!(statement.get_bindings().len(), 1);
+        assert_eq!(statement.to_raw().build(), "REMOVE PARAM $website_name;");
+        assert_eq!(statement.fine_tune_params(), "REMOVE PARAM $website_name;");
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 
     #[test]
@@ -85,21 +82,8 @@ mod tests {
         assert_eq!(statement.to_raw().build(), "REMOVE PARAM $param_variable;");
         assert_eq!(
             statement.fine_tune_params(),
-            "REMOVE PARAM $_param_00000001;"
+            "REMOVE PARAM $param_variable;"
         );
-        assert_eq!(statement.get_bindings().len(), 1);
-    }
-
-    #[test]
-    fn test_remove_param_build_with_field() {
-        let field = Field::new("field");
-        let statement = remove_param(field);
-
-        assert_eq!(statement.to_raw().build(), "REMOVE PARAM field;");
-        assert_eq!(
-            statement.fine_tune_params(),
-            "REMOVE PARAM $_param_00000001;"
-        );
-        assert_eq!(statement.get_bindings().len(), 1);
+        assert_eq!(statement.get_bindings().len(), 0);
     }
 }
