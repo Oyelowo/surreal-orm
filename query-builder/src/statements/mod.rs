@@ -17,7 +17,7 @@ pub(crate) mod define_event;
 pub(crate) mod define_field;
 pub(crate) mod define_function;
 pub(crate) mod define_index;
-// pub(crate) mod define_login;
+pub(crate) mod define_login;
 pub(crate) mod define_model;
 pub(crate) mod define_namespace;
 pub(crate) mod define_param;

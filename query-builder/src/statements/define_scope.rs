@@ -22,6 +22,8 @@ use crate::{
     types::{DurationLike, Scope},
 };
 
+use super::{subquery, Subquery};
+
 /// Define a new scope.
 /// Setting scope access allows SurrealDB to operate as a web database.
 /// With scopes you can set authentication and access rules which enable
@@ -87,18 +89,18 @@ impl DefineScopeStatement {
     }
 
     /// Set the signup expression
-    pub fn signup(mut self, expression: impl Queryable) -> Self {
-        let bindings = expression.get_bindings();
-        self.bindings.extend(bindings);
-        self.signup_expression = Some(expression.build());
+    pub fn signup(mut self, subquery: impl Into<Subquery>) -> Self {
+        let subquery: Subquery = subquery.into();
+        self.bindings.extend(subquery.get_bindings());
+        self.signup_expression = Some(subquery.build());
         self
     }
 
     /// Set the signin expression
-    pub fn signin(mut self, expression: impl Queryable) -> Self {
-        let bindings = expression.get_bindings();
-        self.bindings.extend(bindings);
-        self.signin_expression = Some(expression.build());
+    pub fn signin(mut self, subquery: impl Into<Subquery>) -> Self {
+        let subquery: Subquery = subquery.into();
+        self.bindings.extend(subquery.get_bindings());
+        self.signin_expression = Some(subquery.build());
         self
     }
 }
@@ -112,11 +114,11 @@ impl Buildable for DefineScopeStatement {
         }
 
         if let Some(signup) = &self.signup_expression {
-            query = format!("{query} \n\tSIGNUP ( {signup} )");
+            query = format!("{query} \n\tSIGNUP {signup}");
         }
 
         if let Some(signin) = &self.signin_expression {
-            query = format!("{query} \n\tSIGNIN ( {signin} )");
+            query = format!("{query} \n\tSIGNIN {signin}");
         }
 
         query += ";";
@@ -171,16 +173,16 @@ mod tests {
         assert_eq!(
             token_def.fine_tune_params(),
             "DEFINE SCOPE $_param_00000001 SESSION $_param_00000002 \
-                \n\tSIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
-                \n\tSIGNIN ( SELECT * FROM user WHERE (email = $_param_00000003) AND (crypto::argon2::compare(pass, $pass_param)); );"
+                \n\tSIGNUP $_param_00000003 \
+                \n\tSIGNIN $_param_00000004;"
         );
         assert_eq!(
             token_def.to_raw().build(),
             "DEFINE SCOPE oyelowo_scope SESSION 45s \
-                \n\tSIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) \
-                \n\tSIGNIN ( SELECT * FROM user WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare(pass, $pass_param)); );"
+                \n\tSIGNUP (CREATE user SET email = $email, pass = crypto::argon2::generate($pass)) \
+                \n\tSIGNIN (SELECT * FROM user WHERE (email = 'oyelowo@codebreather.com') AND (crypto::argon2::compare(pass, $pass_param)));"
         );
 
-        assert_eq!(token_def.get_bindings().len(), 3);
+        assert_eq!(token_def.get_bindings().len(), 4);
     }
 }
