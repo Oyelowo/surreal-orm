@@ -16,7 +16,7 @@ use surreal_orm::{
         define_analyzer, define_event, define_index, define_param, define_scope, define_token,
         define_user, select, AnalyzerFilter, SnowballLanguage, Tokenizer, UserRole,
     },
-    *,
+    SurrealCrudNode, *,
 };
 
 use snake_cases::{AnimalSnakeCase, AnimalSnakeCaseEatsCrop};
