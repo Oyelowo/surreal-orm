@@ -319,11 +319,11 @@ where
         }
 
         if let Some(ref return_type) = statement.return_type {
-            query = format!("{query} {}", return_type);
+            query = format!("{query} {return_type}");
         }
 
         if let Some(ref timeout) = statement.timeout {
-            query = format!("{query} TIMEOUT {}", &timeout);
+            query = format!("{query} TIMEOUT {timeout}");
         }
 
         if statement.parallel {
